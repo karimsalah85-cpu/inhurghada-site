@@ -1,0 +1,366 @@
+"use client";
+
+import Link from "next/link";
+import { Menu, X } from "lucide-react";
+import { useState } from "react";
+import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
+
+
+export default function Navbar() {
+
+  const [open, setOpen] = useState(false);
+  const { currency, language, setCurrency, setLanguage } = useSiteSettings();
+
+
+  function closeMenu() {
+    setOpen(false);
+  }
+
+
+  return (
+
+    <nav
+      className="
+      fixed
+      top-0
+      left-0
+      z-50
+      w-full
+      border-b border-slate-200/80
+      bg-white/85
+      backdrop-blur-xl
+      shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]
+      "
+    >
+
+
+      <div
+        className="
+        mx-auto
+        flex
+        max-w-7xl
+        items-center
+        justify-between
+        px-5
+        py-3
+        md:px-8
+        "
+      >
+
+
+        {/* Logo */}
+
+        <Link
+          href="/"
+          onClick={closeMenu}
+          className="flex items-center gap-3 rounded-full bg-slate-950/5 px-3 py-2 transition hover:bg-slate-950/10"
+        >
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/20">
+            <span className="text-lg font-black text-white">DR</span>
+          </div>
+          <div className="leading-tight">
+            <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-900">Daily Red Sea</p>
+            <p className="text-xs text-slate-500">Tours & transfers</p>
+          </div>
+        </Link>
+
+
+
+
+        {/* Desktop Menu */}
+
+        <div
+          className="
+          hidden
+          items-center
+          gap-8
+          md:flex
+          "
+        >
+
+          <NavLink href="/">
+            Home
+          </NavLink>
+
+
+          <NavLink href="/#tours">
+            Tours
+          </NavLink>
+
+
+          <NavLink href="/transfers">
+            Transfers
+          </NavLink>
+
+          <NavLink href="/booking">
+            Booking
+          </NavLink>
+
+          <NavLink href="/checkout">
+            Checkout
+          </NavLink>
+
+          <NavLink href="/#about">
+            About
+          </NavLink>
+
+
+
+          <Link
+            href="/#tours"
+            className="
+            rounded-full
+            bg-gradient-to-r from-cyan-600 to-blue-700
+            px-6
+            py-3
+            font-semibold
+            text-white
+            shadow-lg shadow-cyan-500/20
+            transition
+            hover:scale-[1.02]
+            hover:from-cyan-500
+            hover:to-blue-800
+            "
+          >
+            Book Now
+          </Link>
+
+          <SettingsSelectors
+            currency={currency}
+            language={language}
+            setCurrency={setCurrency}
+            setLanguage={setLanguage}
+          />
+
+
+        </div>
+
+
+
+
+
+        {/* Mobile Button */}
+
+
+        <button
+          onClick={() => setOpen(!open)}
+          className="
+          rounded-lg
+          p-2
+          md:hidden
+          "
+          aria-label="Toggle menu"
+        >
+
+          {open ? (
+            <X size={30}/>
+          ) : (
+            <Menu size={30}/>
+          )}
+
+        </button>
+
+
+      </div>
+
+
+
+
+
+      {/* Mobile Menu */}
+
+
+      {open && (
+
+        <div
+          className="
+          flex
+          flex-col
+          gap-4
+          border-t
+          bg-white
+          px-6
+          py-6
+          md:hidden
+          "
+        >
+
+
+          <MobileLink
+            href="/"
+            close={closeMenu}
+          >
+            Home
+          </MobileLink>
+
+
+          <MobileLink
+            href="/#tours"
+            close={closeMenu}
+          >
+            Tours
+          </MobileLink>
+
+
+          <MobileLink
+            href="/transfers"
+            close={closeMenu}
+          >
+            Transfers
+          </MobileLink>
+
+          <MobileLink
+            href="/booking"
+            close={closeMenu}
+          >
+            Booking
+          </MobileLink>
+
+          <MobileLink
+            href="/checkout"
+            close={closeMenu}
+          >
+            Checkout
+          </MobileLink>
+
+          <MobileLink
+            href="/#about"
+            close={closeMenu}
+          >
+            About
+          </MobileLink>
+
+
+
+          <a
+            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150"}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+            mt-2
+            rounded-xl
+            bg-green-600
+            px-5
+            py-4
+            text-center
+            font-semibold
+            text-white
+            "
+          >
+            WhatsApp Booking
+          </a>
+
+          <SettingsSelectors
+            currency={currency}
+            language={language}
+            setCurrency={setCurrency}
+            setLanguage={setLanguage}
+            mobile
+          />
+
+
+        </div>
+
+      )}
+
+
+    </nav>
+
+  );
+
+}
+
+function SettingsSelectors({
+  currency,
+  language,
+  setCurrency,
+  setLanguage,
+  mobile = false,
+}: {
+  currency: (typeof currencies)[number];
+  language: (typeof languages)[number]["code"];
+  setCurrency: (currency: (typeof currencies)[number]) => void;
+  setLanguage: (language: (typeof languages)[number]["code"]) => void;
+  mobile?: boolean;
+}) {
+  const selectClass = mobile
+    ? "w-full rounded-lg border border-gray-200 bg-white px-3 py-3 text-left text-sm"
+    : "rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm";
+
+  return (
+    <div className={mobile ? "grid gap-3" : "flex items-center gap-2"}>
+      <label className="sr-only" htmlFor={mobile ? "mobile-language" : "language"}>Language</label>
+      <select id={mobile ? "mobile-language" : "language"} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className={selectClass}>
+        {languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
+      </select>
+      <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Currency</label>
+      <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
+        {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
+      </select>
+    </div>
+  );
+}
+
+
+
+
+function NavLink({
+  href,
+  children
+}:{
+  href:string;
+  children:React.ReactNode;
+}) {
+
+  return (
+
+    <Link
+      href={href}
+      className="
+      transition
+      hover:text-blue-600
+      "
+    >
+
+      {children}
+
+    </Link>
+
+  );
+
+}
+
+
+
+
+function MobileLink({
+  href,
+  children,
+  close
+}:{
+  href:string;
+  children:React.ReactNode;
+  close:()=>void;
+}) {
+
+
+  return (
+
+    <Link
+      href={href}
+      onClick={close}
+      className="
+      rounded-lg
+      py-3
+      text-lg
+      font-medium
+      "
+    >
+
+      {children}
+
+    </Link>
+
+  );
+
+}

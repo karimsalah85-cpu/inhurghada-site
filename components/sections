@@ -1,0 +1,19 @@
+export default function Hero() {
+  return (
+    <section className="h-screen bg-sky-700 text-white flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold">
+          Discover the Red Sea
+        </h1>
+
+        <p className="mt-6 text-xl">
+          Tours, Excursions & Unforgettable Adventures
+        </p>
+
+        <button className="mt-8 rounded-lg bg-white px-8 py-3 text-sky-700 font-semibold hover:bg-gray-100">
+          Explore Tours
+        </button>
+      </div>
+    </section>
+  );
+}
