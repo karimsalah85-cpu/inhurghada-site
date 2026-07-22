@@ -6,6 +6,9 @@ export const languages = [
   { code: "en", label: "English" },
   { code: "ar", label: "العربية" },
   { code: "de", label: "Deutsch" },
+  { code: "ru", label: "Русский" },
+  { code: "pl", label: "Polski" },
+  { code: "zh", label: "简体中文" },
 ] as const;
 
 export const currencies = ["USD", "EUR", "GBP", "EGP"] as const;
@@ -47,6 +50,24 @@ const translations: Record<Language, Record<string, string>> = {
     discoverHurghada: "Entdecke Hurghada", heroTitle: "Entdecke die Magie des Roten Meeres", heroDescription: "Tägliche Ausflüge, Tauchgänge, Wüstensafaris, Bootstouren und unvergessliche Abenteuer im Herzen von Hurghada.",
     privateTransfers: "Private Transfers", boatTrips: "Bootstouren & Schnorcheln", desertAdventures: "Wüstenabenteuer", destination: "Reiseziel", travelDate: "Reisedatum", guests: "Gäste", searchTours: "Ausflüge suchen",
     chooseExperience: "Wähle dein Erlebnis", exploreAdventure: "Entdecke Hurghada als Abenteuer", viewAllTours: "Alle Ausflüge ansehen", popularTours: "Beliebte Ausflüge", popularToursDescription: "Entdecke Tauchgänge, Schnorcheln, Orange-Bay-Kreuzfahrten und Abenteuer im Roten Meer.", searchPlaceholder: "Ausflüge, Orte oder Aktivitäten suchen...", bestSeller: "Bestseller", everyDay: "Täglich", perPerson: "pro Person", bookYourTrip: "Buche deine Reise", fullName: "Vollständiger Name", whatsappNumber: "WhatsApp-Nummer", emailAddress: "E-Mail-Adresse", pickupLocation: "Hotelname / Abholort", specialRequests: "Besondere Wünsche", sendBooking: "Buchungsanfrage senden", cashOnArrival: "Barzahlung bei Ankunft",
+  },
+  ru: {
+    home: "Главная", tours: "Экскурсии", transfers: "Трансферы", booking: "Бронирование", checkout: "Оформление", about: "О нас", bookNow: "Забронировать", whatsappBooking: "Бронирование в WhatsApp",
+    discoverHurghada: "Откройте Хургаду", heroTitle: "Лучшие туры и экскурсии в Хургаде", heroDescription: "Островные поездки, сноркелинг, дайвинг, сафари в пустыне и трансферы из аэропорта - всё с простым бронированием через WhatsApp.",
+    privateTransfers: "Частные трансферы", boatTrips: "Морские прогулки и сноркелинг", desertAdventures: "Приключения в пустыне", destination: "Направление", travelDate: "Дата поездки", guests: "Гости", searchTours: "Найти туры",
+    chooseExperience: "Выберите впечатление", exploreAdventure: "Откройте Хургаду", viewAllTours: "Все туры", popularTours: "Популярные туры", popularToursDescription: "Дайвинг, сноркелинг, круизы на Orange Bay и приключения на Красном море.", searchPlaceholder: "Поиск туров, мест, занятий...", bestSeller: "Хит продаж", everyDay: "Каждый день", perPerson: "за человека", bookYourTrip: "Забронировать поездку", fullName: "Полное имя", whatsappNumber: "Номер WhatsApp", emailAddress: "Электронная почта", pickupLocation: "Отель / место встречи", specialRequests: "Особые пожелания", sendBooking: "Отправить запрос", cashOnArrival: "Оплата наличными по прибытии",
+  },
+  pl: {
+    home: "Strona główna", tours: "Wycieczki", transfers: "Transfery", booking: "Rezerwacja", checkout: "Finalizacja", about: "O nas", bookNow: "Zarezerwuj", whatsappBooking: "Rezerwacja przez WhatsApp",
+    discoverHurghada: "Odkryj Hurghadę", heroTitle: "Najlepsze wycieczki i atrakcje w Hurghadzie", heroDescription: "Wyspy, snorkeling, nurkowanie, safari na pustyni i transfery lotniskowe - z łatwą rezerwacją przez WhatsApp.",
+    privateTransfers: "Prywatne transfery", boatTrips: "Rejsy i snorkeling", desertAdventures: "Przygody na pustyni", destination: "Kierunek", travelDate: "Data podróży", guests: "Goście", searchTours: "Szukaj wycieczek",
+    chooseExperience: "Wybierz atrakcję", exploreAdventure: "Odkrywaj Hurghadę", viewAllTours: "Zobacz wszystkie wycieczki", popularTours: "Popularne wycieczki", popularToursDescription: "Odkryj nurkowanie, snorkeling, rejsy Orange Bay i przygody nad Morzem Czerwonym.", searchPlaceholder: "Szukaj wycieczek, miejsc, atrakcji...", bestSeller: "Bestseller", everyDay: "Codziennie", perPerson: "za osobę", bookYourTrip: "Zarezerwuj wycieczkę", fullName: "Imię i nazwisko", whatsappNumber: "Numer WhatsApp", emailAddress: "Adres e-mail", pickupLocation: "Hotel / miejsce odbioru", specialRequests: "Specjalne życzenia", sendBooking: "Wyślij zapytanie", cashOnArrival: "Płatność gotówką na miejscu",
+  },
+  zh: {
+    home: "首页", tours: "旅游项目", transfers: "接送服务", booking: "预订", checkout: "结算", about: "关于我们", bookNow: "立即预订", whatsappBooking: "WhatsApp 预订",
+    discoverHurghada: "探索赫尔格达", heroTitle: "探索赫尔格达最佳旅游和体验", heroDescription: "海岛游、浮潜、深潜、沙漠探险和机场接送 - 均可通过 WhatsApp 轻松预订。",
+    privateTransfers: "私人接送", boatTrips: "游船和浮潜", desertAdventures: "沙漠探险", destination: "目的地", travelDate: "出行日期", guests: "游客", searchTours: "搜索旅游项目",
+    chooseExperience: "选择您的体验", exploreAdventure: "探索赫尔格达", viewAllTours: "查看所有项目", popularTours: "热门旅游项目", popularToursDescription: "探索深潜、浮潜、Orange Bay 巡游和红海探险。", searchPlaceholder: "搜索旅游项目、地点或活动...", bestSeller: "热销", everyDay: "每天", perPerson: "每人", bookYourTrip: "预订行程", fullName: "姓名", whatsappNumber: "WhatsApp 号码", emailAddress: "电子邮箱", pickupLocation: "酒店 / 接送地点", specialRequests: "特殊要求", sendBooking: "发送预订请求", cashOnArrival: "抵达时现金支付",
   },
 };
 
