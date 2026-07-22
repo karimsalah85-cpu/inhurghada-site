@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import { createReportPdf } from "@/lib/report-service";
 import { createClient } from "@/utils/supabase/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { countDistinctCustomers } from "@/lib/customer-count";
 
 export const runtime = "nodejs";
 
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
   }
   let query = supabase
     .from("bookings")
-    .select("reference,tour_name,date,guests,status,payment_status,amount,currency,created_at")
+    .select("reference,tour_name,date,guests,status,payment_status,amount,currency,created_at,phone,customer_email")
     .gte("date", from)
     .lte("date", to)
     .order("date", { ascending: false });
@@ -65,7 +66,8 @@ export async function GET(request: NextRequest) {
     Amount: Number(item.amount || 0),
     Currency: item.currency,
   }));
-  const active = rows.filter((item) => item.Status !== "cancelled");
+  const active = rows.filter((item) => item.Status !== "cancelled" && item.Payment !== "refunded");
+  const customers = countDistinctCustomers((data || []).filter((item) => item.status !== "cancelled" && item.payment_status !== "refunded"));
   const revenueByCurrency = active.reduce<Record<string, number>>((totals, item) => {
     totals[item.Currency || "USD"] = (totals[item.Currency || "USD"] || 0) + item.Amount;
     return totals;
@@ -77,6 +79,7 @@ export async function GET(request: NextRequest) {
     ["Generated", new Date().toISOString()],
     ["Filters", `Trip: ${trip}; Status: ${status}; Payment: ${payment}`],
     ["Bookings", rows.length],
+    ["Customers (excluding cancelled)", customers],
     ["People (excluding cancelled)", active.reduce((sum, item) => sum + Number(item.People), 0)],
     ["Cancelled", rows.length - active.length],
     [
@@ -119,6 +122,7 @@ export async function GET(request: NextRequest) {
       payment,
       generatedAt: new Date().toISOString(),
       bookings: rows.length,
+      customers,
       people: active.reduce((sum, item) => sum + Number(item.People), 0),
       cancelled: rows.length - active.length,
       revenue: active.reduce((sum, item) => sum + Number(item.Amount), 0),

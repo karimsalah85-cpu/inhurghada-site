@@ -17,6 +17,7 @@ type ReportPdfData = {
   payment?: string;
   generatedAt: string;
   bookings: number;
+  customers?: number;
   people: number;
   cancelled: number;
   revenue: number;
@@ -46,9 +47,10 @@ export function createReportPdf(report: ReportPdfData): Buffer {
 
     let tableTop = 680;
     if (firstPage) {
-      writeText(commands, `Bookings: ${report.bookings}`, 52, 679, 10, true, [15, 23, 42]);
-      writeText(commands, `People: ${report.people}`, 185, 679, 10, true, [15, 23, 42]);
-      writeText(commands, `Cancelled: ${report.cancelled}`, 300, 679, 10, true, [15, 23, 42]);
+      writeText(commands, `Bookings: ${report.bookings}`, 52, 679, 9, true, [15, 23, 42]);
+      writeText(commands, `Customers: ${report.customers ?? report.bookings}`, 145, 679, 9, true, [15, 23, 42]);
+      writeText(commands, `Guests: ${report.people}`, 250, 679, 9, true, [15, 23, 42]);
+      writeText(commands, `Cancelled: ${report.cancelled}`, 325, 679, 9, true, [15, 23, 42]);
       writeText(commands, `Revenue: ${shorten(report.revenueLabel || report.revenue.toFixed(2), 23)}`, 405, 679, 9, true, [15, 23, 42]);
       writeText(commands, `Filters - Trip: ${shorten(report.trip, 45)}; Booking: ${shorten(report.status, 12)}; Payment: ${shorten(report.payment || "all", 10)}`, 52, 657, 8.5, false, [71, 85, 105]);
       tableTop = 630;

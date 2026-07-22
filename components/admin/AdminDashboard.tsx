@@ -2,8 +2,9 @@
 
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, CircleDollarSign, ClipboardList, ExternalLink, LogOut, Mail, Search, Trash2, WalletCards } from "lucide-react";
+import { CheckCircle2, CircleDollarSign, ClipboardList, ExternalLink, LogOut, Mail, Search, Trash2, UserRound, WalletCards } from "lucide-react";
 import SituationReports from "@/components/admin/SituationReports";
+import { countDistinctCustomers } from "@/lib/customer-count";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
 type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -45,7 +46,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses }: { i
     const projected = active.reduce((sum, booking) => sum + Number(booking.amount), 0);
     const collected = bookings.filter((booking) => booking.payment_status === "paid").reduce((sum, booking) => sum + Number(booking.amount), 0);
     const expenseTotal = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
-    return { projected, collected, outstanding: projected - collected, expenseTotal, profit: collected - expenseTotal, activeCount: active.length };
+    return { projected, collected, outstanding: projected - collected, expenseTotal, profit: collected - expenseTotal, activeCount: active.length, customers: countDistinctCustomers(bookings) };
   }, [bookings, expenses]);
 
   const visibleBookings = useMemo(() => {
@@ -122,7 +123,8 @@ export default function AdminDashboard({ initialBookings, initialExpenses }: { i
       <button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button>
     </div>
 
-    <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      <Metric icon={<UserRound size={19}/>} label="Customers" value={String(metrics.customers)} note="Unique phone numbers" tone="slate" />
       <Metric icon={<ClipboardList size={19}/>} label="Booked revenue" value={money(metrics.projected)} note={`${metrics.activeCount} active booking${metrics.activeCount === 1 ? "" : "s"}`} tone="blue" />
       <Metric icon={<WalletCards size={19}/>} label="Cash collected" value={money(metrics.collected)} note="Marked as paid" tone="emerald" />
       <Metric icon={<CircleDollarSign size={19}/>} label="Outstanding" value={money(metrics.outstanding)} note="Still to collect" tone="amber" />
