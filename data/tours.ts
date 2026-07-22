@@ -116,37 +116,6 @@ export const tours: Tour[] = [
 
 
   {
-    slug: "diving",
-
-    title: "Red Sea Scuba Diving",
-
-    image: "/images/scuba-diving.jpg",
-
-    price: "45",
-
-    rating: "4.8",
-
-    location: "Hurghada, Egypt",
-
-    duration: "6 Hours",
-
-    description:
-      "Explore amazing coral reefs and discover the underwater world of the Red Sea.",
-
-    highlights: [
-      "Professional instructor",
-      "Equipment included",
-      "Boat trip",
-      "Two diving sessions",
-    ],
-    category: "Diving",
-    badge: "Best Value",
-
-  },
-
-
-
-  {
     slug: "safari",
 
     title: "Desert Safari Adventure",

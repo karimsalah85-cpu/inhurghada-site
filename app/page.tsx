@@ -14,6 +14,7 @@ import { tours, type Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
+import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 
 
 
@@ -546,6 +547,7 @@ text-blue-600
       </section>
 
       <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">Why Daily Red Sea</p><h2 className="mt-4 text-4xl font-black">Local knowledge, easy booking, clear support.</h2><p className="mt-5 leading-7 text-slate-300">We help you find the right Hurghada excursion with direct local support before your day begins.</p></div>{[{icon:ShieldCheck,title:"Trusted local partners",text:"Carefully selected crews, guides and drivers."},{icon:MessageCircle,title:"Easy WhatsApp booking",text:"Fast help for pickup, changes and questions."},{icon:Headphones,title:"Helpful support",text:"Clear communication in English before your tour."}].map(({icon:Icon,title,text}) => <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6"><Icon className="text-cyan-300"/><h3 className="mt-5 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-slate-300">{text}</p></div>)}</div></section>
+      <HurghadaTravelGuide />
 
       <section id="about" className="bg-slate-50 px-8 py-20">
         <div className="mx-auto max-w-3xl text-center">
