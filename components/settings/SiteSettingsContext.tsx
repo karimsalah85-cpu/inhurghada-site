@@ -32,7 +32,7 @@ type SiteSettings = {
 const translations: Record<Language, Record<string, string>> = {
   en: {
     home: "Home", tours: "Tours", transfers: "Transfers", booking: "Booking", checkout: "Checkout", about: "About", bookNow: "Book Now", whatsappBooking: "WhatsApp Booking",
-    discoverHurghada: "Discover Hurghada", heroTitle: "Discover the Magic of the Red Sea", heroDescription: "Daily tours, diving trips, desert safaris, boat excursions and unforgettable adventures in the heart of Hurghada.",
+    discoverHurghada: "Discover Hurghada", heroTitle: "Discover the Best Tours & Excursions in Hurghada", heroDescription: "Island trips, snorkeling, scuba diving, desert safaris and airport transfers - all with easy WhatsApp booking.",
     privateTransfers: "Private transfers", boatTrips: "Boat trips & snorkeling", desertAdventures: "Desert adventures", destination: "Destination", travelDate: "Travel Date", guests: "Guests", searchTours: "Search tours",
     chooseExperience: "Choose your experience", exploreAdventure: "Explore Hurghada by adventure", viewAllTours: "View all tours", popularTours: "Popular Tours", popularToursDescription: "Explore diving trips, snorkeling, Orange Bay cruises and Red Sea adventures.", searchPlaceholder: "Search tours, locations, activities...", bestSeller: "Best Seller", everyDay: "Every day", perPerson: "per person", bookYourTrip: "Book Your Trip", fullName: "Full Name", whatsappNumber: "WhatsApp Number", emailAddress: "Email address", pickupLocation: "Hotel Name / Pickup Location", specialRequests: "Special requests", sendBooking: "Send booking request", cashOnArrival: "Pay cash on arrival",
   },

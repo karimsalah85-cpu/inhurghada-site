@@ -24,6 +24,11 @@ export type Tour = {
     infants?: number;
   };
   availableTimes?: string[];
+  category?: string;
+  badge?: "Most Popular" | "Best Value" | "New" | "Premium";
+  seoTitle?: string;
+  metaDescription?: string;
+  faqs?: { question: string; answer: string }[];
 };
 
 
@@ -109,6 +114,15 @@ export const tours: Tour[] = [
     packageLabel: "Adult",
     participantPricing: { adults: 25, youth: 15, infants: 0 },
     availableTimes: ["08:00"],
+    category: "Island Trip",
+    badge: "Most Popular",
+    seoTitle: "Orange Bay Island Boat Trip from Hurghada | Snorkeling and Lunch",
+    metaDescription: "Enjoy a full-day Orange Bay Island boat trip from Hurghada including snorkeling, lunch, hotel transfers and crystal-clear Red Sea waters.",
+    faqs: [
+      { question: "Is lunch included on the Orange Bay trip?", answer: "Yes. Lunch onboard and soft drinks are included in this full-day boat trip." },
+      { question: "Is Orange Bay suitable for families?", answer: "Yes. This relaxed island day is popular with families, couples, and groups. Infants travel free in the booking form." },
+      { question: "How will I receive my pickup time?", answer: "After you book, Daily Red Sea confirms your pickup time and hotel location by WhatsApp." },
+    ],
     itinerary: [
       "Hotel pickup in Hurghada and transfer to the marina",
       "Luxury yacht cruise across the crystal-clear Red Sea",
