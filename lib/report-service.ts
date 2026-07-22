@@ -4,6 +4,7 @@ export type ReportPdfRow = {
   serviceDate: string;
   people: number;
   status: string;
+  paymentStatus?: string;
   amount: number;
   currency: string;
 };
@@ -13,11 +14,13 @@ type ReportPdfData = {
   to: string;
   trip: string;
   status: string;
+  payment?: string;
   generatedAt: string;
   bookings: number;
   people: number;
   cancelled: number;
   revenue: number;
+  revenueLabel?: string;
   rows: ReportPdfRow[];
 };
 
@@ -46,20 +49,20 @@ export function createReportPdf(report: ReportPdfData): Buffer {
       writeText(commands, `Bookings: ${report.bookings}`, 52, 679, 10, true, [15, 23, 42]);
       writeText(commands, `People: ${report.people}`, 185, 679, 10, true, [15, 23, 42]);
       writeText(commands, `Cancelled: ${report.cancelled}`, 300, 679, 10, true, [15, 23, 42]);
-      writeText(commands, `Revenue: ${report.revenue.toFixed(2)}`, 430, 679, 10, true, [15, 23, 42]);
-      writeText(commands, `Filters - Trip: ${shorten(report.trip, 55)}; Status: ${shorten(report.status, 18)}`, 52, 657, 8.5, false, [71, 85, 105]);
+      writeText(commands, `Revenue: ${shorten(report.revenueLabel || report.revenue.toFixed(2), 23)}`, 405, 679, 9, true, [15, 23, 42]);
+      writeText(commands, `Filters - Trip: ${shorten(report.trip, 45)}; Booking: ${shorten(report.status, 12)}; Payment: ${shorten(report.payment || "all", 10)}`, 52, 657, 8.5, false, [71, 85, 105]);
       tableTop = 630;
     }
 
     commands.push("0.145 0.388 0.922 rg", `46 ${tableTop - 5} 520 22 re f`);
-    writeText(commands, "#  REFERENCE     SERVICE DATE  PPL  STATUS       AMOUNT       TRIP", 53, tableTop + 2, 7.7, true, [255, 255, 255]);
+    writeText(commands, "#  REFERENCE     SERVICE DATE  PPL  BOOKING    PAYMENT   AMOUNT       TRIP", 53, tableTop + 2, 7.1, true, [255, 255, 255]);
 
     const pageRows = report.rows.slice(rowIndex, rowIndex + rowsOnPage);
     pageRows.forEach((row, pageRowIndex) => {
       const y = tableTop - 24 - pageRowIndex * 12;
       if (pageRowIndex % 2 === 0) commands.push("0.946 0.961 0.976 rg", `46 ${y - 3} 520 12 re f`);
-      const line = `${pad(String(rowIndex + pageRowIndex + 1), 3)}${pad(shorten(row.reference, 13), 15)}${pad(shorten(row.serviceDate, 12), 14)}${pad(String(row.people), 5)}${pad(shorten(row.status, 11), 13)}${pad(`${row.amount.toFixed(2)} ${shorten(row.currency, 3)}`, 13)}${shorten(row.trip, 30)}`;
-      writeText(commands, line, 52, y, 7.2, false, [30, 41, 59]);
+      const line = `${pad(String(rowIndex + pageRowIndex + 1), 3)}${pad(shorten(row.reference, 13), 15)}${pad(shorten(row.serviceDate, 12), 14)}${pad(String(row.people), 5)}${pad(shorten(row.status, 9), 11)}${pad(shorten(row.paymentStatus || "-", 8), 10)}${pad(`${row.amount.toFixed(2)} ${shorten(row.currency, 3)}`, 13)}${shorten(row.trip, 24)}`;
+      writeText(commands, line, 52, y, 6.8, false, [30, 41, 59]);
     });
 
     if (!pageRows.length) writeText(commands, "No bookings match these filters.", 52, tableTop - 32, 10, false, [100, 116, 139]);

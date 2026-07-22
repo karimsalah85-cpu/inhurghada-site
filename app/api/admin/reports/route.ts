@@ -15,6 +15,7 @@ type ReportRow = {
   "Service date": string;
   People: number;
   Status: string;
+  Payment: string;
   Amount: number;
   Currency: string;
 };
@@ -33,15 +34,21 @@ export async function GET(request: NextRequest) {
   const to = searchParams.get("to") || "2999-12-31";
   const trip = searchParams.get("trip") || "all";
   const status = searchParams.get("status") || "all";
+  const payment = searchParams.get("payment") || "all";
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  if (!datePattern.test(from) || !datePattern.test(to) || from > to || trip.length > 200 || !["all", "new", "confirmed", "completed", "cancelled"].includes(status) || !["all", "unpaid", "paid", "refunded"].includes(payment)) {
+    return NextResponse.json({ error: "Invalid report filters." }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
+  }
   let query = supabase
     .from("bookings")
-    .select("reference,tour_name,date,guests,status,amount,currency,created_at")
+    .select("reference,tour_name,date,guests,status,payment_status,amount,currency,created_at")
     .gte("date", from)
     .lte("date", to)
     .order("date", { ascending: false });
 
   if (trip !== "all") query = query.eq("tour_name", trip);
   if (status !== "all") query = query.eq("status", status);
+  if (payment !== "all") query = query.eq("payment_status", payment);
 
   const { data, error } = await query;
   if (error) {
@@ -54,21 +61,27 @@ export async function GET(request: NextRequest) {
     "Service date": item.date || "To confirm",
     People: item.guests || 0,
     Status: item.status,
+    Payment: item.payment_status,
     Amount: Number(item.amount || 0),
     Currency: item.currency,
   }));
   const active = rows.filter((item) => item.Status !== "cancelled");
+  const revenueByCurrency = active.reduce<Record<string, number>>((totals, item) => {
+    totals[item.Currency || "USD"] = (totals[item.Currency || "USD"] || 0) + item.Amount;
+    return totals;
+  }, {});
+  const revenueLabel = Object.entries(revenueByCurrency).map(([currency, amount]) => `${amount.toFixed(2)} ${currency}`).join(" + ") || "0.00 USD";
   const summary = [
     ["Situation report"],
     ["Period", `${from} to ${to}`],
     ["Generated", new Date().toISOString()],
-    ["Filters", `Trip: ${trip}; Status: ${status}`],
+    ["Filters", `Trip: ${trip}; Status: ${status}; Payment: ${payment}`],
     ["Bookings", rows.length],
     ["People (excluding cancelled)", active.reduce((sum, item) => sum + Number(item.People), 0)],
     ["Cancelled", rows.length - active.length],
     [
       "Revenue (excluding cancelled)",
-      active.reduce((sum, item) => sum + Number(item.Amount), 0),
+      revenueLabel,
     ],
   ];
 
@@ -83,7 +96,7 @@ export async function GET(request: NextRequest) {
     summarySheet.getRow(1).font = { bold: true, size: 16 };
 
     const detailsSheet = workbook.addWorksheet("Detailed data");
-    detailsSheet.columns = Object.keys(rows[0] || { Reference: "", Trip: "", "Service date": "", People: 0, Status: "", Amount: 0, Currency: "" }).map((header) => ({ header, key: header, width: header === "Trip" ? 34 : 18 }));
+    detailsSheet.columns = Object.keys(rows[0] || { Reference: "", Trip: "", "Service date": "", People: 0, Status: "", Payment: "", Amount: 0, Currency: "" }).map((header) => ({ header, key: header, width: header === "Trip" ? 34 : 18 }));
     detailsSheet.addRows(rows);
     detailsSheet.getRow(1).font = { bold: true };
     detailsSheet.views = [{ state: "frozen", ySplit: 1 }];
@@ -103,17 +116,20 @@ export async function GET(request: NextRequest) {
       to,
       trip,
       status,
+      payment,
       generatedAt: new Date().toISOString(),
       bookings: rows.length,
       people: active.reduce((sum, item) => sum + Number(item.People), 0),
       cancelled: rows.length - active.length,
       revenue: active.reduce((sum, item) => sum + Number(item.Amount), 0),
+      revenueLabel,
       rows: rows.map((row) => ({
         reference: String(row.Reference ?? ""),
         trip: String(row.Trip ?? ""),
         serviceDate: row["Service date"],
         people: row.People,
         status: row.Status,
+        paymentStatus: row.Payment,
         amount: row.Amount,
         currency: row.Currency,
       })),

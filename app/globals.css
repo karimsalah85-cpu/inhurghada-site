@@ -46,3 +46,8 @@ body {
 .skip-link:focus {
   transform: translateY(0);
 }
+@layer components {
+  .report-input {
+    @apply mt-1 block w-full rounded-xl border border-slate-200 bg-white p-2.5 text-sm font-medium text-slate-900 outline-none focus:border-cyan-500;
+  }
+}
