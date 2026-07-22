@@ -1,9 +1,13 @@
 import BookingPortal from "@/components/booking/BookingPortal";
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "Booking Portal | Daily Red Sea",
-  description: "Manage your reservation, view booking details, and get help with your Daily Red Sea trip.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Booking Portal",
+  description: "View a Daily Red Sea reservation, booking details, and confirmation document.",
+  path: "/booking",
+  noIndex: true,
+});
 
 export default function BookingPage() {
   return <BookingPortal />;

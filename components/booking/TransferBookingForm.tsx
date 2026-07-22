@@ -2,6 +2,7 @@
 
 import { type FormEvent, type ReactNode, useState } from "react";
 import { CalendarDays, Car, Clock3, Hotel, MapPin, MessageCircle, Phone, Plane, User, Users } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 const areas = ["Hurghada Airport", "Hurghada Hotels", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay", "Other location"];
 
@@ -26,6 +27,8 @@ export default function TransferBookingForm() {
       return;
     }
 
+    trackEvent("booking_start", { booking_type: "transfer", item_name: "Private transfer" });
+
     const response = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -48,6 +51,8 @@ export default function TransferBookingForm() {
       alert(data.error || "Transfer request failed. Please try again.");
       return;
     }
+
+    trackEvent("booking_complete", { transaction_id: data.reference, booking_type: "transfer", item_name: "Private transfer", value: 0, currency: "USD" });
 
     if (!data.whatsappSent) {
       window.location.href = data.whatsappUrl;
@@ -84,7 +89,7 @@ export default function TransferBookingForm() {
 
       <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes (optional)</label>
       <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder="Add luggage, child seat, or any special request." />
-      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">ID or passport required before the transfer</p><p className="mt-1">For permit reasons, please provide a valid ID or passport to our team before your trip. We will explain how to send it during WhatsApp confirmation.</p></div>
+      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">ID or passport required before the transfer</p><p className="mt-1">A valid ID or passport is mandatory for trip permit reasons. Please make sure you have it available before your transfer.</p></div>
       <button type="submit" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700"><MessageCircle size={20} />Send transfer request</button>
     </form>
   );

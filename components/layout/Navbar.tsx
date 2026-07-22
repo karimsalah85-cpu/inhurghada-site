@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { trackEvent } from "@/lib/analytics";
 
 
 export default function Navbar() {
@@ -234,6 +235,7 @@ export default function Navbar() {
 
           <a
             href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150"}`}
+            onClick={() => trackEvent("whatsapp_click", { placement: "mobile_navigation" })}
             target="_blank"
             rel="noopener noreferrer"
             className="

@@ -1,9 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
   description: "Privacy policy for Daily Red Sea tours and transfer bookings.",
-};
+  path: "/privacy-policy",
+});
 
 export default function PrivacyPolicyPage() {
   return (

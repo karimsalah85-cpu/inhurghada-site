@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export default function WhatsAppButton() {
 
@@ -17,6 +18,7 @@ export default function WhatsAppButton() {
 
     <a
       href={url}
+      onClick={() => trackEvent("whatsapp_click", { placement: "floating_button" })}
       target="_blank"
       rel="noopener noreferrer"
       className="

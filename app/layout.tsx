@@ -4,15 +4,17 @@ import "./globals.css";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
 import Navbar from "@/components/layout/Navbar";
 import { SiteSettingsProvider } from "@/components/settings/SiteSettingsContext";
+import OrganizationSchema from "@/components/seo/OrganizationSchema";
+import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
+import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dailyredsea.com"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
-    template: "%s | Daily Red Sea",
+    template: `%s | ${siteName}`,
   },
-  description:
-    "Book private Hurghada tours, diving trips, transfers, Orange Bay cruises and desert adventures with trusted local support.",
+  description: defaultDescription,
   keywords: [
     "Hurghada tours",
     "Orange Bay",
@@ -24,17 +26,21 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
   openGraph: {
     title: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
-    description:
-      "Book private Hurghada tours, diving trips, transfers, Orange Bay cruises and desert adventures with trusted local support.",
-    url: "https://dailyredsea.com",
-    siteName: "Daily Red Sea",
+    description: defaultDescription,
+    url: siteUrl,
+    siteName,
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "/og-image.svg",
+        url: defaultSocialImage,
         width: 1200,
         height: 630,
         alt: "Daily Red Sea tours and transfers in Hurghada",
@@ -44,9 +50,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
-    description:
-      "Book private Hurghada tours, diving trips, transfers, Orange Bay cruises and desert adventures with trusted local support.",
-    images: ["/og-image.svg"],
+    description: defaultDescription,
+    images: [defaultSocialImage],
   },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
@@ -72,6 +77,8 @@ export default function RootLayout({
 
       <body>
         <SiteSettingsProvider>
+          <OrganizationSchema />
+          <AnalyticsProvider />
           <Navbar />
           {children}
           <WhatsAppButton />

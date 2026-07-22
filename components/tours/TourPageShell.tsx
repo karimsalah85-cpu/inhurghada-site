@@ -5,6 +5,8 @@ import type { Tour } from "@/data/tours";
 import Image from "next/image";
 import Link from "next/link";
 import { tours } from "@/data/tours";
+import { absoluteUrl, siteName } from "@/lib/seo";
+import TourViewTracker from "@/components/analytics/TourViewTracker";
 
 export default function TourPageShell({ tour }: { tour: Tour }) {
   const faqs = tour.faqs ?? [
@@ -13,22 +15,24 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
     { question: "What should I bring?", answer: "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
   const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.category === tour.category || item.location === tour.location)).slice(0, 3);
+  const tourUrl = absoluteUrl(`/tours/${tour.slug}`);
   const schema = { "@context": "https://schema.org", "@graph": [
-    { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://dailyredsea.com" }, { "@type": "ListItem", position: 2, name: "Tours", item: "https://dailyredsea.com/#tours" }, { "@type": "ListItem", position: 3, name: tour.title, item: `https://dailyredsea.com/tours/${tour.slug}` }] },
-    { "@type": "TouristTrip", name: tour.title, description: tour.description, image: `https://dailyredsea.com${tour.image}`, touristType: tour.category || "Hurghada excursion", offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: `https://dailyredsea.com/tours/${tour.slug}` }, provider: { "@type": "Organization", name: "Daily Red Sea", url: "https://dailyredsea.com" } },
+    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
+    { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: "en", touristType: tour.category || "Hurghada excursion", offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl }, provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } },
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
   return (
     <main className="min-h-screen bg-slate-50">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <TourViewTracker title={tour.title} price={tour.price} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href="/" className="hover:text-cyan-700">Home</Link><span className="px-2">/</span><Link href="/#tours" className="hover:text-cyan-700">Tours</Link><span className="px-2">/</span><span className="text-slate-700">{tour.title}</span></nav>
+        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href="/" className="hover:text-cyan-700">Home</Link><span className="px-2" aria-hidden="true">/</span><Link href="/#tours" className="hover:text-cyan-700">Tours</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">Hurghada experience</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600"><span>★ {tour.rating}</span><span>{tour.reviews ?? "New"} reviews</span><span>•</span><span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
         <div className="mt-8 grid h-[420px] gap-3 overflow-hidden rounded-[2rem] sm:grid-cols-2">
           <div className="relative min-h-64"><Image src={tour.image} alt={tour.title} fill className="object-cover" priority /></div>
-          <div className="grid grid-cols-2 gap-3"><div className="relative"><Image src="/images/orange-bay.jpeg" alt="Orange Bay" fill className="object-cover" /></div><div className="relative"><Image src="/images/scuba-diving.jpg" alt="Red Sea" fill className="object-cover" /></div><div className="relative"><Image src="/images/desert-safari.jpg" alt="Hurghada experience" fill className="object-cover" /></div><div className="relative overflow-hidden"><Image src="/images/hero.jpg" alt="Daily Red Sea" fill className="object-cover" /><span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900">View gallery</span></div></div>
+          <div className="grid grid-cols-2 gap-3"><div className="relative"><Image src="/images/orange-bay.jpeg" alt="" fill className="object-cover" /></div><div className="relative"><Image src="/images/scuba-diving.jpg" alt="" fill className="object-cover" /></div><div className="relative"><Image src="/images/desert-safari.jpg" alt="" fill className="object-cover" /></div><div className="relative overflow-hidden"><Image src="/images/hero.jpg" alt="" fill className="object-cover" /><span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900">Daily Red Sea experiences</span></div></div>
         </div>
       </section>
 

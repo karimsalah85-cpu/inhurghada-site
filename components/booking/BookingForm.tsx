@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { trackEvent } from "@/lib/analytics";
 
 type ParticipantPricing = { adults: number; youth?: number; infants?: number };
 
@@ -99,6 +100,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
       setCustomerEmailSent(Boolean(data.customerEmailSent));
       setBookingConfirmationPdf(String(data.bookingConfirmationPdf || ""));
       setStep("success");
+      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency: "USD", item_name: tourName, booking_type: "tour" });
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Booking submission failed.");
@@ -139,7 +141,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
         </div>
         <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50/60 px-4"><p className="pt-4 text-sm font-bold text-slate-900">Select your package</p><Counter label="Adults" description={`${formatPrice(String(adultPrice))} each`} value={adults} onChange={setAdults}/>{youthPrice !== undefined && <Counter label="Youth (4–10)" description={`${formatPrice(String(youthPrice))} each`} value={youth} onChange={setYouth}/>} {infantPrice !== undefined && <Counter label="Infants" description="Free of charge" value={infants} onChange={setInfants}/>}</div>
         <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-slate-900">Total</p><p className="text-xs text-slate-500">Cash on arrival · no online payment</p></div><p className="text-3xl font-black text-blue-700">{formatPrice(String(total))}</p></div>
-        <button type="button" onClick={() => adults ? setStep("checkout") : setError("Please select at least one adult.")} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700">Book now <Users size={18}/></button>
+        <button type="button" onClick={() => { if (!adults) return setError("Please select at least one adult."); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700">Book now <Users size={18}/></button>
         {error && <p className="mt-3 text-center text-sm text-rose-600">{error}</p>}
       </> : <form onSubmit={submit} className="mt-6 space-y-4">
         <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4"><p className="font-bold text-slate-900">{tourName}</p><p className="mt-1 text-sm text-slate-600">{date} at {time} · {travelerText}</p><p className="mt-2 font-black text-blue-700">{formatPrice(String(total))} · Cash on arrival</p></div>
@@ -148,7 +150,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
         <label className="block text-sm font-bold">Email address<input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" className="mt-1 w-full rounded-xl border p-3 font-normal" placeholder="you@example.com" /></label>
         <label className="block text-sm font-bold">WhatsApp number<input required type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" className="mt-1 w-full rounded-xl border p-3 font-normal" placeholder="+20 100 493 3150" /></label>
         <label className="block text-sm font-bold">Pickup location<div className="relative mt-1"><Hotel className="absolute left-3 top-3 text-slate-400" size={18}/><input required value={hotel} onChange={(event) => setHotel(event.target.value)} className="w-full rounded-xl border py-3 pl-10 pr-3 font-normal" placeholder="Hotel name or full pickup address" /></div><span className="mt-1 block text-xs font-normal text-slate-500">Required so we can confirm your pickup on WhatsApp.</span></label>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">ID or passport required before the trip</p><p className="mt-1">For permit reasons, please provide a valid ID or passport to our team before your experience. We will tell you how to send it during the WhatsApp confirmation.</p></div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">ID or passport required before the trip</p><p className="mt-1">A valid ID or passport is mandatory for trip permit reasons. Please make sure you have it available before your experience.</p></div>
         <label className="block text-sm font-bold">Preferred guide language<select value={guideLanguage} onChange={(event) => setGuideLanguage(event.target.value)} className="mt-1 w-full rounded-xl border p-3 font-normal"><option>English</option><option>Arabic</option><option>German</option></select></label>
         <label className="block text-sm font-bold">Special requests <span className="font-normal text-slate-500">(optional)</span><textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-20 w-full rounded-xl border p-3 font-normal" placeholder="Anything we should know?" /></label>
         {error && <p className="text-sm text-rose-600">{error}</p>}
