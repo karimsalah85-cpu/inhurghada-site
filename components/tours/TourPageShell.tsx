@@ -11,6 +11,11 @@ import TransferBookingForm from "@/components/booking/TransferBookingForm";
 
 export default function TourPageShell({ tour }: { tour: Tour }) {
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
+  const galleryImages = transferService
+    ? ["/images/hurghada-airport-transfer.jpg", "/images/senzo-transfer.jpg", "/images/transfer.jpg", "/images/hero.jpg"]
+    : tour.category === "Desert Safari"
+      ? ["/images/desert-safari.jpg", "/images/quad-safari-sunset.jpg", "/images/desert-safari.jpg", "/images/quad-safari-sunset.jpg"]
+      : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"];
   const faqs = tour.faqs ?? [
     { question: "Is hotel pickup included?", answer: "Pickup details are shown in the tour information. We confirm the exact pickup time and location with you on WhatsApp after booking." },
     { question: "When do I pay?", answer: "You can reserve online and pay cash on arrival unless a different payment option is clearly shown during booking." },
@@ -34,7 +39,7 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600"><span>★ {tour.rating}</span><span>{tour.reviews ?? "New"} reviews</span><span>•</span><span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
         <div className="mt-8 grid h-[420px] gap-3 overflow-hidden rounded-[2rem] sm:grid-cols-2">
           <div className="relative min-h-64"><Image src={tour.image} alt={tour.title} fill className="object-cover" priority /></div>
-          <div className="grid grid-cols-2 gap-3"><div className="relative"><Image src="/images/orange-bay.jpeg" alt="" fill className="object-cover" /></div><div className="relative"><Image src="/images/scuba-diving.jpg" alt="" fill className="object-cover" /></div><div className="relative"><Image src="/images/desert-safari.jpg" alt="" fill className="object-cover" /></div><div className="relative overflow-hidden"><Image src="/images/hero.jpg" alt="" fill className="object-cover" /><span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900">Daily Red Sea experiences</span></div></div>
+          <div className="grid grid-cols-2 gap-3">{galleryImages.map((image, index) => <div key={`${image}-${index}`} className="relative overflow-hidden"><Image src={image} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />{index === 3 ? <span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900">Daily Red Sea experiences</span> : null}</div>)}</div>
         </div>
       </section>
 

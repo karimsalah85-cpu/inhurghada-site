@@ -632,6 +632,7 @@ text-blue-600
             <div className="mt-4 space-y-2 text-sm">
               <Link className="block hover:text-white" href="/privacy-policy">Privacy Policy</Link>
               <Link className="block hover:text-white" href="/terms-conditions">Terms & Conditions</Link>
+              <Link className="block hover:text-white" href="/image-credits">Image Credits</Link>
             </div>
           </div>
         </div>
