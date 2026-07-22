@@ -152,7 +152,7 @@ export async function sendWhatsAppMessage(phone: string, body: string) {
   };
 }
 
-export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string) {
+export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: { filename: string; content: Buffer }) {
   const environment = process.env as Record<string, string | undefined>;
   const smtpUser = environment.GMAIL_SMTP_USER || "info@dailyredsea.com";
   const smtpAppPassword = environment.GMAIL_SMTP_APP_PASSWORD;
@@ -179,6 +179,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
         to: toEmail,
         subject,
         html,
+        attachments: attachment ? [attachment] : undefined,
       });
 
       return { success: true, data: { messageId: result.messageId } };
@@ -203,6 +204,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
       to: [toEmail],
       subject,
       html,
+      ...(attachment ? { attachments: [{ filename: attachment.filename, content: attachment.content.toString("base64") }] } : {}),
     }),
   });
 

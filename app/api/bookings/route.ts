@@ -9,6 +9,7 @@ import {
   sendWhatsAppMessage,
 } from "@/lib/booking-service";
 import { createClient } from "@/utils/supabase/server";
+import { createInvoicePdf } from "@/lib/invoice-service";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -68,6 +69,13 @@ export async function POST(request: NextRequest) {
       tourName: body.tourName,
       message: body.message,
     });
+    const confirmationPdf = await createInvoicePdf({
+      reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
+      itemName: body.tourName || (bookingType === "transfer" ? "Private transfer" : "Daily Red Sea booking"),
+      quantity: Number(body.guests || 1), amount: Number(body.amount || 0), currency: body.currency || "usd",
+      paymentMethod: "Cash on arrival", date: body.date, hotel: body.hotel,
+    });
+    const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
     const booking = addBooking({
       reference,
@@ -101,9 +109,9 @@ export async function POST(request: NextRequest) {
 
     const [whatsappResult, bookingEmailResult, customerEmailResult] = await Promise.all([
       sendWhatsAppMessage(bookingWhatsApp, message),
-      sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml),
+      sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml, confirmationAttachment),
       customerEmail
-        ? sendBookingEmail(customerEmail, `Your ${bookingType === "transfer" ? "transfer" : "tour"} request has been received`, `<p>Hello ${customerName},</p><p>Your request has been received and our team will confirm the details shortly.</p><p>Reference: ${reference}</p>`)
+        ? sendBookingEmail(customerEmail, `Your booking confirmation: ${reference}`, `<p>Hello ${customerName},</p><p>Your booking summary is attached. Payment is cash on arrival.</p><p>Reference: ${reference}</p>`, confirmationAttachment)
         : Promise.resolve({ success: false, reason: "no-customer-email" }),
     ]);
 
