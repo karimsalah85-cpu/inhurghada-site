@@ -318,7 +318,11 @@ function SettingsSelectors({
       <select id={mobile ? "mobile-language" : "language"} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className={selectClass}>
         {languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
       </select>
-      {currencies.length > 1 ? <><label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Currency</label><select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select></> : null}
+      <div>
+        <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Display currency</label>
+        <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" className="mt-1 block text-center text-[9px] text-slate-400 hover:text-slate-600">Rates by Exchange Rate API</a>
+      </div>
     </div>
   );
 }

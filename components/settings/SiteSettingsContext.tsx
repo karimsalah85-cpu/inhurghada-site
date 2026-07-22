@@ -12,13 +12,16 @@ export const languages = [
   { code: "zh", label: "简体中文" },
 ] as const;
 
-export const currencies = ["USD"] as const;
+export const currencies = ["USD", "EUR", "GBP", "EGP"] as const;
 
 type Language = (typeof languages)[number]["code"];
 type Currency = (typeof currencies)[number];
 
 const exchangeRates: Record<Currency, number> = {
   USD: 1,
+  EUR: 0.876691,
+  GBP: 0.747063,
+  EGP: 51.008475,
 };
 
 type SiteSettings = {
@@ -86,6 +89,21 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
     return () => window.clearTimeout(update);
   }, []);
   const [currency, setCurrency] = useState<Currency>("USD");
+  const [rates, setRates] = useState<Record<Currency, number>>(exchangeRates);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/exchange-rates", { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Rate request failed")))
+      .then((data: { rates?: Partial<Record<Currency, number>> }) => {
+        if (data.rates) setRates((current) => ({ ...current, ...data.rates }));
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        console.warn("Using cached currency rates", error);
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -111,8 +129,8 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
       style: "currency",
       currency,
       maximumFractionDigits: 2,
-    }).format(Number(usdPrice) * exchangeRates[currency]),
-  }), [currency, language]);
+    }).format(Number(usdPrice) * rates[currency]),
+  }), [currency, language, rates]);
 
   return <SiteSettingsContext.Provider value={value}>{children}</SiteSettingsContext.Provider>;
 }
