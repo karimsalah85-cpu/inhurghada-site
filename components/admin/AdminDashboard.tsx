@@ -4,6 +4,7 @@ import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, CircleDollarSign, ClipboardList, Trash2, WalletCards } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import SituationReports from "@/components/admin/SituationReports";
 
 type Booking = {
   id: string; reference: string; customer_name: string; customer_email: string | null; phone: string;
@@ -81,6 +82,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses }: { i
 
       <aside className="h-fit rounded-3xl bg-white p-6 shadow-sm"><h2 className="text-2xl font-bold">Add expense</h2><p className="mt-1 text-sm leading-6 text-slate-500">Record fuel, boat costs, guide fees, advertising, or any business cost.</p><form className="mt-6 space-y-4" onSubmit={addExpense}><label className="block text-sm font-semibold">Description<input required value={expense.description} onChange={(event) => setExpense({ ...expense, description: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal" placeholder="e.g. Boat fuel" /></label><label className="block text-sm font-semibold">Amount (USD)<input required inputMode="decimal" min="0.01" step="0.01" value={expense.amount} onChange={(event) => setExpense({ ...expense, amount: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal" placeholder="0.00" /></label><label className="block text-sm font-semibold">Category <span className="font-normal text-slate-400">optional</span><input value={expense.category} onChange={(event) => setExpense({ ...expense, category: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal" placeholder="Fuel, guide, marketing..." /></label><label className="block text-sm font-semibold">Date<input required type="date" value={expense.date} onChange={(event) => setExpense({ ...expense, date: event.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal" /></label><button disabled={busyId === "expense"} className="w-full rounded-xl bg-slate-900 py-3 font-bold text-white hover:bg-slate-700 disabled:opacity-60">{busyId === "expense" ? "Saving…" : "Save expense"}</button></form>{expenses.length ? <div className="mt-7 border-t pt-5"><p className="text-sm font-bold text-slate-900">Recent expenses</p><div className="mt-3 space-y-3">{expenses.slice(0, 5).map((item) => <div key={item.id} className="flex justify-between gap-3 text-sm"><div><p className="font-medium">{item.description}</p><p className="text-xs text-slate-500">{item.category || "Other"} · {item.expense_date}</p></div><p className="font-semibold">{money(Number(item.amount), item.currency)}</p></div>)}</div></div> : null}</aside>
     </div>
+    <SituationReports bookings={bookings} />
   </>;
 }
 
