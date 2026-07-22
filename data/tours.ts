@@ -36,25 +36,6 @@ export type Tour = {
 export const tours: Tour[] = [
 
   {
-    slug: "transfer-to-and-from-senzo-mall",
-    title: "Private Transfer To and From Senzo Mall Hurghada",
-    image: "/images/transfer.jpg",
-    price: "15",
-    rating: "New",
-    location: "Hurghada, Egypt",
-    duration: "1 Hour",
-    description: "Private door-to-door transfer between Senzo Mall and your hotel, resort, apartment, or preferred pickup point in Hurghada.",
-    highlights: ["Private air-conditioned vehicle", "Professional local driver", "Flexible pickup time", "Cash payment on arrival"],
-    included: ["Private vehicle", "Driver", "Fuel, parking and taxes"],
-    notIncluded: ["Personal shopping expenses", "Food and drinks", "Additional stops"],
-    notes: ["Confirm your hotel or pickup address when booking.", "We confirm pickup time by WhatsApp before the transfer."],
-    packageName: "Hurghada hotel / Senzo Mall transfer",
-    packageDescription: "Fixed-price private transfer for your group.",
-    packagePrice: "15",
-    packageLabel: "Per vehicle",
-  },
-
-  {
     slug: "orange-bay",
 
     title: "Orange Bay Island Snorkeling Boat Trip",
@@ -286,9 +267,9 @@ export const tours: Tour[] = [
     description: "Private airport transfers between Hurghada International Airport and your hotel with comfortable vehicles, fixed pricing, and reliable local drivers.", highlights: ["Private vehicle", "Meet and greet", "Hotel pickup", "Flight monitoring", "Air-conditioned car"], included: ["Private vehicle", "Driver", "Fuel and parking"], notIncluded: ["Additional stops"], notes: ["Send your flight number and hotel name when booking.", "We confirm your meeting point by WhatsApp."], packageName: "Airport to hotel private transfer", packageDescription: "Reliable door-to-door airport transfer for your group.", packagePrice: "15", packageLabel: "From price",
   },
   {
-    slug: "senzo-transfer", title: "Senzo Mall Transfer from Hurghada Hotels", image: "/images/senzo-transfer.jpg", price: "10", rating: "New", location: "Hurghada, Egypt", duration: "Flexible", category: "Shopping Transfer", badge: "New",
+    slug: "senzo-transfer", title: "Private Transfer To and From Senzo Mall Hurghada", image: "/images/senzo-transfer.jpg", price: "15", rating: "New", location: "Hurghada, Egypt", duration: "Flexible", category: "Shopping Transfer", badge: "New",
     seoTitle: "Senzo Mall Transfer from Hurghada Hotels", metaDescription: "Convenient private transfer from your Hurghada hotel to Senzo Mall for shopping, dining and entertainment.",
-    description: "Convenient private transfers from your hotel to Senzo Mall for shopping, dining, and entertainment, with flexible return times.", highlights: ["Private vehicle", "Hotel pickup", "Flexible return time", "Air-conditioned car"], included: ["Private transfer", "Driver", "Fuel and parking"], notIncluded: ["Shopping and meals"], notes: ["Confirm your preferred return time when booking."], packageName: "Senzo Mall private transfer", packageDescription: "Simple door-to-door transport for shopping and dining.", packagePrice: "10", packageLabel: "From price",
+    description: "Private door-to-door transport between your Hurghada hotel and Senzo Mall for shopping, dining, and entertainment, with flexible return times.", highlights: ["Private vehicle", "Hotel pickup", "Flexible return time", "Air-conditioned car"], included: ["Private transfer", "Driver", "Fuel and parking"], notIncluded: ["Shopping and meals"], notes: ["Confirm your preferred return time when booking."], packageName: "Senzo Mall private transfer", packageDescription: "Simple door-to-door transport for shopping and dining.", packagePrice: "15", packageLabel: "From price",
   },
 
 
