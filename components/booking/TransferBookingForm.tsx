@@ -159,7 +159,6 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
       <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes (optional)</label>
       <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder="Add luggage, child seat, or any special request." />
-      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">ID or passport required before the transfer</p><p className="mt-1">A valid ID or passport is mandatory for trip permit reasons. Please make sure you have it available before your transfer.</p></div>
       <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"><MessageCircle size={20} />{submitting ? "Sending transfer request…" : `Book one way · $${total.toFixed(2)}`}</button>
     </form>
   );
