@@ -7,8 +7,10 @@ import Link from "next/link";
 import { tours } from "@/data/tours";
 import { absoluteUrl, siteName } from "@/lib/seo";
 import TourViewTracker from "@/components/analytics/TourViewTracker";
+import TransferBookingForm from "@/components/booking/TransferBookingForm";
 
 export default function TourPageShell({ tour }: { tour: Tour }) {
+  const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
   const faqs = tour.faqs ?? [
     { question: "Is hotel pickup included?", answer: "Pickup details are shown in the tour information. We confirm the exact pickup time and location with you on WhatsApp after booking." },
     { question: "When do I pay?", answer: "You can reserve online and pay cash on arrival unless a different payment option is clearly shown during booking." },
@@ -42,15 +44,15 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
 
           <div className="lg:sticky lg:top-24 lg:self-start">
             <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">Reserve now, pay cash on arrival</p><p className="mt-1">We confirm pickup details by WhatsApp after your request.</p></div>
-            <Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}> 
-              <BookingForm
-                tourName={tour.title}
-                price={tour.price}
-                duration={tour.duration}
-                location={tour.location}
-                participantPricing={tour.participantPricing}
-                availableTimes={tour.availableTimes}
-              />
+            <Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
+              {transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
+                  tourName={tour.title}
+                  price={tour.price}
+                  duration={tour.duration}
+                  location={tour.location}
+                  participantPricing={tour.participantPricing}
+                  availableTimes={tour.availableTimes}
+                />}
             </Suspense>
           </div>
         </div>
