@@ -36,11 +36,12 @@ export async function POST(request: NextRequest) {
     const customerName = String(body.customerName || "").trim();
     const phone = String(body.phone || "").trim();
     const customerEmail = String(body.customerEmail || "").trim();
+    const hotel = String(body.hotel || "").trim();
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150";
 
-    if (!customerName || !phone) {
-      return NextResponse.json({ success: false, error: "A name and phone number are required." }, { status: 400 });
+    if (!customerName || !phone || !hotel) {
+      return NextResponse.json({ success: false, error: "A name, phone number, and pickup location are required." }, { status: 400 });
     }
 
     const reference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${Date.now().toString().slice(-6)}`;
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       price: body.price,
       date: body.date,
       guests: body.guests,
-      hotel: body.hotel,
+      hotel,
       message: body.message,
     });
     const emailHtml = buildBookingEmailHtml({
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
       itemName: body.tourName || (bookingType === "transfer" ? "Private transfer" : "Daily Red Sea booking"),
       quantity: Number.parseInt(String(body.guests || "1"), 10) || 1, travelerSummary: String(body.guests || "1 traveler"), amount: Number(body.amount || 0), currency: body.currency || "usd",
-      paymentMethod: "Cash on arrival", date: body.date, time: extractBookingValue(String(body.message || ""), "Time"), hotel: body.hotel,
+      paymentMethod: "Cash on arrival", date: body.date, time: extractBookingValue(String(body.message || ""), "Time"), hotel,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       price: body.price,
       date: body.date,
       guests: body.guests,
-      hotel: body.hotel,
+      hotel,
       message: body.message,
     });
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
       const { error: bookingError } = await supabase.from("bookings").insert({
         reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
         tour_name: body.tourName || null, date: body.date || null, guests: Number(body.guests || 0) || null,
-        hotel: body.hotel || null, notes: body.message || null, amount: Number(body.amount || 0),
+        hotel: hotel || null, notes: body.message || null, amount: Number(body.amount || 0),
         currency: String(body.currency || "USD").toUpperCase(),
       });
       if (bookingError) {

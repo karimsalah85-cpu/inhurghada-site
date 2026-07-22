@@ -10,6 +10,7 @@ export default function TransferBookingForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [pickup, setPickup] = useState("Hurghada Airport");
+  const [pickupDetails, setPickupDetails] = useState("");
   const [dropoff, setDropoff] = useState("Hurghada Hotels");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -34,7 +35,7 @@ export default function TransferBookingForm() {
         phone: phone.trim(),
         customerEmail: email.trim(),
         date,
-        hotel: `${pickup} → ${dropoff}`,
+        hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
         message: `${notes.trim() || "None"}\n\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nPickup time: ${time}`,
         amount: 0,
         currency: "usd",
@@ -70,6 +71,7 @@ export default function TransferBookingForm() {
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
         <Field icon={<MapPin />} label="Pickup location"><select value={pickup} onChange={(event) => setPickup(event.target.value)} required>{areas.map((area) => <option key={area}>{area}</option>)}</select></Field>
+        <Field icon={<Hotel />} label="Pickup hotel / full address"><input type="text" value={pickupDetails} onChange={(event) => setPickupDetails(event.target.value)} placeholder="Required pickup details" required /></Field>
         <Field icon={<Hotel />} label="Drop-off location"><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{areas.map((area) => <option key={area}>{area}</option>)}</select></Field>
         <Field icon={<CalendarDays />} label="Transfer date"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={new Date().toISOString().split("T")[0]} required /></Field>
         <Field icon={<Clock3 />} label="Pickup time"><input type="time" value={time} onChange={(event) => setTime(event.target.value)} required /></Field>
@@ -80,8 +82,8 @@ export default function TransferBookingForm() {
         <Field icon={<MessageCircle />} label="Email address"><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
       </div>
 
-      <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes or hotel name (optional)</label>
-      <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder="Add luggage, child seat, hotel name, or any special request." />
+      <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes (optional)</label>
+      <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder="Add luggage, child seat, or any special request." />
       <button type="submit" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700"><MessageCircle size={20} />Send transfer request</button>
     </form>
   );
