@@ -36,16 +36,20 @@ export async function GET(request: NextRequest) {
   const trip = searchParams.get("trip") || "all";
   const status = searchParams.get("status") || "all";
   const payment = searchParams.get("payment") || "all";
+  const idsValue = searchParams.get("ids") || "";
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const ids = idsValue ? [...new Set(idsValue.split(","))] : [];
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-  if (!datePattern.test(from) || !datePattern.test(to) || from > to || trip.length > 200 || !["all", "new", "confirmed", "completed", "cancelled"].includes(status) || !["all", "unpaid", "paid", "refunded"].includes(payment)) {
+  if (!datePattern.test(from) || !datePattern.test(to) || from > to || trip.length > 200 || ids.length > 100 || ids.some((id) => !uuidPattern.test(id)) || !["all", "new", "confirmed", "completed", "cancelled"].includes(status) || !["all", "unpaid", "paid", "refunded"].includes(payment)) {
     return NextResponse.json({ error: "Invalid report filters." }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
   }
   let query = supabase
     .from("bookings")
     .select("reference,tour_name,date,guests,status,payment_status,amount,currency,created_at,phone,customer_email")
-    .gte("date", from)
-    .lte("date", to)
     .order("date", { ascending: false });
+
+  if (ids.length) query = query.in("id", ids);
+  else query = query.gte("date", from).lte("date", to);
 
   if (trip !== "all") query = query.eq("tour_name", trip);
   if (status !== "all") query = query.eq("status", status);
