@@ -75,6 +75,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const [bookingConfirmationPdf, setBookingConfirmationPdf] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [website, setWebsite] = useState("");
 
   const total = useMemo(() => adults * adultPrice + youth * (youthPrice ?? adultPrice) + infants * (infantPrice ?? 0), [adults, youth, infants, adultPrice, youthPrice, infantPrice]);
   const travelerText = `${adults} adult${adults === 1 ? "" : "s"}${youthPrice !== undefined ? ` · ${youth} youth` : ""}${infantPrice !== undefined ? ` · ${infants} infant${infants === 1 ? "" : "s"}` : ""}`;
@@ -92,6 +93,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
           price: `${formatPrice(String(total))} total`, date, guests: travelerText, hotel,
           message: `Time: ${time}\nGuide language: ${guideLanguage}${message ? `\nCustomer note: ${message}` : ""}`,
           amount: total, currency: "usd",
+          website,
         }),
       });
       const data = await response.json();
@@ -144,6 +146,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
         <button type="button" onClick={() => { if (!adults) return setError("Please select at least one adult."); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700">Book now <Users size={18}/></button>
         {error && <p role="alert" className="mt-3 text-center text-sm text-rose-600">{error}</p>}
       </> : <form onSubmit={submit} aria-busy={submitting} className="mt-6 space-y-4">
+        <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
         <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4"><p className="font-bold text-slate-900">{tourName}</p><p className="mt-1 text-sm text-slate-600">{date} at {time} · {travelerText}</p><p className="mt-2 font-black text-blue-700">{formatPrice(String(total))} · Cash on arrival</p></div>
         <p className="border-b pb-2 text-lg font-black text-slate-950">Tell us about yourself</p>
         <label className="block text-sm font-bold">Full name<input required value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" className="mt-1 w-full rounded-xl border p-3 font-normal" placeholder="Enter your full name" /></label>

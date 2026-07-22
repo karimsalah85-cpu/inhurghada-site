@@ -10,6 +10,8 @@ import {
 } from "@/lib/booking-service";
 import { createClient } from "@/utils/supabase/server";
 import { createInvoicePdf } from "@/lib/invoice-service";
+import { rateLimit } from "@/lib/rate-limit";
+import { validateBookingInput } from "@/lib/booking-validation";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -31,18 +33,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const bookingType = body.type === "transfer" ? "transfer" : "tour";
-    const customerName = String(body.customerName || "").trim();
-    const phone = String(body.phone || "").trim();
-    const customerEmail = String(body.customerEmail || "").trim();
-    const hotel = String(body.hotel || "").trim();
+    const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const limit = rateLimit(`booking:${clientAddress}`);
+    if (!limit.allowed) return NextResponse.json({ success: false, error: "Too many booking attempts. Please try again shortly." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
+
+    const validation = validateBookingInput(await request.json());
+    if (validation.spam) return NextResponse.json({ success: true });
+    if (!validation.data) return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
+    const body = validation.data;
+    const bookingType = body.type;
+    const { customerName, phone, customerEmail, hotel } = body;
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150";
-
-    if (!customerName || !phone || !hotel) {
-      return NextResponse.json({ success: false, error: "A name, phone number, and pickup location are required." }, { status: 400 });
-    }
 
     const reference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${Date.now().toString().slice(-6)}`;
     const message = buildBookingMessage({
@@ -73,7 +75,7 @@ export async function POST(request: NextRequest) {
     const confirmationPdf = await createInvoicePdf({
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
       itemName: body.tourName || (bookingType === "transfer" ? "Private transfer" : "Daily Red Sea booking"),
-      quantity: Number.parseInt(String(body.guests || "1"), 10) || 1, travelerSummary: String(body.guests || "1 traveler"), amount: Number(body.amount || 0), currency: body.currency || "usd",
+      quantity: Number.parseInt(String(body.guests || "1"), 10) || 1, travelerSummary: String(body.guests || "1 traveler"), amount: body.amount, currency: body.currency,
       paymentMethod: "Cash on arrival", date: body.date, time: extractBookingValue(String(body.message || ""), "Time"), hotel,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
@@ -86,8 +88,8 @@ export async function POST(request: NextRequest) {
       customerEmail: customerEmail || undefined,
       status: "submitted",
       createdAt: new Date().toISOString(),
-      amount: Number(body.amount || 0),
-      currency: body.currency || "usd",
+      amount: body.amount,
+      currency: body.currency,
       tourName: body.tourName,
       location: body.location,
       duration: body.duration,
@@ -103,8 +105,8 @@ export async function POST(request: NextRequest) {
       const { error: bookingError } = await supabase.from("bookings").insert({
         reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
         tour_name: body.tourName || null, date: body.date || null, guests: Number(body.guests || 0) || null,
-        hotel: hotel || null, notes: body.message || null, amount: Number(body.amount || 0),
-        currency: String(body.currency || "USD").toUpperCase(),
+        hotel: hotel || null, notes: body.message || null, amount: body.amount,
+        currency: body.currency.toUpperCase(),
       });
       if (bookingError) {
         console.error("Booking database save failed", bookingError);
