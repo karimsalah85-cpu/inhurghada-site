@@ -2,30 +2,18 @@ import { Suspense } from "react";
 import BookingForm from "@/components/booking/BookingForm";
 import TourDetails from "@/components/tours/TourDetails";
 import type { Tour } from "@/data/tours";
+import Image from "next/image";
 
 export default function TourPageShell({ tour }: { tour: Tour }) {
   return (
     <main className="min-h-screen bg-slate-50">
-      <section
-        className="relative h-[520px] bg-cover bg-center"
-        style={{ backgroundImage: `url(${tour.image})` }}
-      >
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 flex h-full items-center justify-center px-6 text-center text-white">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">Hurghada experience</p>
-            <h1 className="mt-4 text-4xl font-black sm:text-5xl">{tour.title}</h1>
-            <p className="mt-6 text-lg leading-8 text-slate-200">{tour.location}</p>
-            <p className="mt-4 text-base leading-7 text-slate-300">Reserve your place online, receive instant confirmation details, and get ready for a premium beach and snorkeling day in the Red Sea.</p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm backdrop-blur">
-                {tour.duration}
-              </div>
-              <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm backdrop-blur">
-                {tour.rating} / 5 from {tour.reviews ?? "30"} reviews
-              </div>
-            </div>
-          </div>
+      <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">Hurghada experience</p>
+        <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
+        <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600"><span>★ {tour.rating}</span><span>{tour.reviews ?? "New"} reviews</span><span>•</span><span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
+        <div className="mt-8 grid h-[420px] gap-3 overflow-hidden rounded-[2rem] sm:grid-cols-2">
+          <div className="relative min-h-64"><Image src={tour.image} alt={tour.title} fill className="object-cover" priority /></div>
+          <div className="grid grid-cols-2 gap-3"><div className="relative"><Image src="/images/orange-bay.jpeg" alt="Orange Bay" fill className="object-cover" /></div><div className="relative"><Image src="/images/scuba-diving.jpg" alt="Red Sea" fill className="object-cover" /></div><div className="relative"><Image src="/images/desert-safari.jpg" alt="Hurghada experience" fill className="object-cover" /></div><div className="relative overflow-hidden"><Image src="/images/hero.jpg" alt="Daily Red Sea" fill className="object-cover" /><span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900">View gallery</span></div></div>
         </div>
       </section>
 
@@ -33,7 +21,8 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
         <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <TourDetails tour={tour} />
 
-          <div>
+          <div className="lg:sticky lg:top-24 lg:self-start">
+            <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">Reserve now, pay cash on arrival</p><p className="mt-1">We confirm pickup details by WhatsApp after your request.</p></div>
             <Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}> 
               <BookingForm
                 tourName={tour.title}

@@ -25,6 +25,25 @@ export type Tour = {
 export const tours: Tour[] = [
 
   {
+    slug: "transfer-to-and-from-senzo-mall",
+    title: "Private Transfer To and From Senzo Mall Hurghada",
+    image: "/images/transfer.jpg",
+    price: "15",
+    rating: "New",
+    location: "Hurghada, Egypt",
+    duration: "1 Hour",
+    description: "Private door-to-door transfer between Senzo Mall and your hotel, resort, apartment, or preferred pickup point in Hurghada.",
+    highlights: ["Private air-conditioned vehicle", "Professional local driver", "Flexible pickup time", "Cash payment on arrival"],
+    included: ["Private vehicle", "Driver", "Fuel, parking and taxes"],
+    notIncluded: ["Personal shopping expenses", "Food and drinks", "Additional stops"],
+    notes: ["Confirm your hotel or pickup address when booking.", "We confirm pickup time by WhatsApp before the transfer."],
+    packageName: "Hurghada hotel / Senzo Mall transfer",
+    packageDescription: "Fixed-price private transfer for your group.",
+    packagePrice: "15",
+    packageLabel: "Per vehicle",
+  },
+
+  {
     slug: "orange-bay",
 
     title: "Orange Bay Island Snorkeling Boat Trip",
