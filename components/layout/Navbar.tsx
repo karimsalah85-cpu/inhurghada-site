@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
+import { localePath } from "@/lib/i18n";
 
 
 export default function Navbar() {
@@ -68,7 +69,7 @@ export default function Navbar() {
         {/* Logo */}
 
         <Link
-          href="/"
+          href={localePath(language)}
           onClick={closeMenu}
           className="flex items-center gap-3 rounded-full bg-slate-950/5 px-3 py-2 transition hover:bg-slate-950/10"
         >
@@ -95,36 +96,36 @@ export default function Navbar() {
           "
         >
 
-          <NavLink href="/">
+          <NavLink href={localePath(language)}>
             {t("home")}
           </NavLink>
 
 
-          <NavLink href="/#tours">
+          <NavLink href={`${localePath(language)}#tours`}>
             {t("tours")}
           </NavLink>
 
 
-          <NavLink href="/transfers">
+          <NavLink href={localePath(language, "/transfers")}>
             {t("transfers")}
           </NavLink>
 
-          <NavLink href="/booking">
+          <NavLink href={localePath(language, "/booking")}>
             {t("booking")}
           </NavLink>
 
-          <NavLink href="/checkout">
+          <NavLink href={localePath(language, "/checkout")}>
             {t("checkout")}
           </NavLink>
 
-          <NavLink href="/#about">
+          <NavLink href={`${localePath(language)}#about`}>
             {t("about")}
           </NavLink>
 
 
 
           <Link
-            href="/#tours"
+            href={`${localePath(language)}#tours`}
             className="
             rounded-full
             bg-gradient-to-r from-cyan-600 to-blue-700
@@ -209,7 +210,7 @@ export default function Navbar() {
 
 
           <MobileLink
-            href="/"
+            href={localePath(language)}
             close={closeMenu}
             linkRef={firstMobileLinkRef}
           >
@@ -218,7 +219,7 @@ export default function Navbar() {
 
 
           <MobileLink
-            href="/#tours"
+            href={`${localePath(language)}#tours`}
             close={closeMenu}
           >
             {t("tours")}
@@ -226,28 +227,28 @@ export default function Navbar() {
 
 
           <MobileLink
-            href="/transfers"
+            href={localePath(language, "/transfers")}
             close={closeMenu}
           >
             {t("transfers")}
           </MobileLink>
 
           <MobileLink
-            href="/booking"
+            href={localePath(language, "/booking")}
             close={closeMenu}
           >
             {t("booking")}
           </MobileLink>
 
           <MobileLink
-            href="/checkout"
+            href={localePath(language, "/checkout")}
             close={closeMenu}
           >
             {t("checkout")}
           </MobileLink>
 
           <MobileLink
-            href="/#about"
+            href={`${localePath(language)}#about`}
             close={closeMenu}
           >
             {t("about")}

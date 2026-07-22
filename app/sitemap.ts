@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { tours } from "@/data/tours";
 import { siteUrl } from "@/lib/seo";
+import { languageAlternates, localePath, locales } from "@/lib/i18n";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const contentUpdatedAt = new Date("2026-07-22T00:00:00.000Z");
@@ -12,6 +13,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
     images: [`${siteUrl}${tour.image}`],
   }));
+
+  const localizedPaths = [
+    "",
+    "/booking",
+    "/checkout",
+    "/transfers",
+    "/privacy-policy",
+    "/terms-conditions",
+    ...tours.map((tour) => `/tours/${tour.slug}`),
+  ];
+  const localizedRoutes = locales.flatMap((locale) => localizedPaths.map((path) => ({
+    url: `${siteUrl}${localePath(locale, path)}`,
+    lastModified: contentUpdatedAt,
+    changeFrequency: path ? "weekly" as const : "daily" as const,
+    priority: path ? 0.75 : 0.9,
+    alternates: {
+      languages: Object.fromEntries([
+        ...Object.entries(languageAlternates(path)).map(([language, route]) => [language, `${siteUrl}${route}`]),
+        ["x-default", `${siteUrl}${localePath("en", path)}`],
+      ]),
+    },
+  })));
 
   return [
     {
@@ -39,5 +62,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.3,
     },
     ...tourRoutes,
+    ...localizedRoutes,
   ];
 }

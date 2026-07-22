@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { isLocale } from "@/lib/i18n";
 
 export const languages = [
   { code: "en", label: "English" },
@@ -11,16 +12,13 @@ export const languages = [
   { code: "zh", label: "简体中文" },
 ] as const;
 
-export const currencies = ["USD", "EUR", "GBP", "EGP"] as const;
+export const currencies = ["USD"] as const;
 
 type Language = (typeof languages)[number]["code"];
 type Currency = (typeof currencies)[number];
 
 const exchangeRates: Record<Currency, number> = {
   USD: 1,
-  EUR: 0.875778,
-  GBP: 0.744372,
-  EGP: 51.091837,
 };
 
 type SiteSettings = {
@@ -74,11 +72,19 @@ const translations: Record<Language, Record<string, string>> = {
 const SiteSettingsContext = createContext<SiteSettings | null>(null);
 
 export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === "undefined") return "en";
+  const [language, setLanguage] = useState<Language>("en");
+
+  useEffect(() => {
+    const routeLocale = window.location.pathname.split("/")[1];
     const savedLanguage = window.localStorage.getItem("daily-red-sea-language") as Language | null;
-    return savedLanguage && languages.some((item) => item.code === savedLanguage) ? savedLanguage : "en";
-  });
+    const preferredLanguage = isLocale(routeLocale)
+      ? routeLocale
+      : savedLanguage && languages.some((item) => item.code === savedLanguage)
+        ? savedLanguage
+        : "en";
+    const update = window.setTimeout(() => setLanguage(preferredLanguage), 0);
+    return () => window.clearTimeout(update);
+  }, []);
   const [currency, setCurrency] = useState<Currency>("USD");
 
   useEffect(() => {
@@ -87,16 +93,24 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
     window.localStorage.setItem("daily-red-sea-language", language);
   }, [language]);
 
+  function changeLanguage(nextLanguage: Language) {
+    setLanguage(nextLanguage);
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    if (parts[0] && isLocale(parts[0])) parts.shift();
+    const supportedLocalizedPath = !parts.length || ["booking", "checkout", "transfers", "privacy-policy", "terms-conditions", "tours"].includes(parts[0]);
+    window.location.assign(supportedLocalizedPath ? `/${nextLanguage}${parts.length ? `/${parts.join("/")}` : ""}${window.location.search}${window.location.hash}` : `/${nextLanguage}`);
+  }
+
   const value = useMemo<SiteSettings>(() => ({
     language,
     currency,
-    setLanguage,
+    setLanguage: changeLanguage,
     setCurrency,
     t: (key, fallback) => translations[language][key] || fallback || key,
     formatPrice: (usdPrice) => new Intl.NumberFormat(language, {
       style: "currency",
       currency,
-      maximumFractionDigits: currency === "EGP" ? 0 : 2,
+      maximumFractionDigits: 2,
     }).format(Number(usdPrice) * exchangeRates[currency]),
   }), [currency, language]);
 

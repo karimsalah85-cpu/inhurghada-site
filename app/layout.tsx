@@ -7,6 +7,7 @@ import { SiteSettingsProvider } from "@/components/settings/SiteSettingsContext"
 import OrganizationSchema from "@/components/seo/OrganizationSchema";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
+import { languageAlternates, localePath } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "/",
+    languages: { ...languageAlternates(), "x-default": localePath("en") },
   },
   robots: {
     index: true,
