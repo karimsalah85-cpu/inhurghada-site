@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
       whatsappUrl: buildWhatsAppLink(bookingWhatsApp, message),
       emailSent: bookingEmailResult.success,
       customerEmailSent: customerEmailResult.success,
+      bookingConfirmationPdf: confirmationPdf.toString("base64"),
       paymentUrl: null,
       paymentStatus: "cash-on-arrival",
     });

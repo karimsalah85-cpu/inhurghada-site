@@ -9,6 +9,7 @@ import {
   CircleMinus,
   CirclePlus,
   Clock3,
+  Download,
   Hotel,
   MessageCircle,
   ShieldCheck,
@@ -70,6 +71,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const [message, setMessage] = useState("");
   const [reference, setReference] = useState("");
   const [customerEmailSent, setCustomerEmailSent] = useState(false);
+  const [bookingConfirmationPdf, setBookingConfirmationPdf] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -95,11 +97,25 @@ export default function BookingForm({ tourName, price, duration, location, parti
       if (!response.ok || !data.success) throw new Error(data.error || "Booking submission failed.");
       setReference(data.reference);
       setCustomerEmailSent(Boolean(data.customerEmailSent));
+      setBookingConfirmationPdf(String(data.bookingConfirmationPdf || ""));
       setStep("success");
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Booking submission failed.");
     } finally { setSubmitting(false); }
+  }
+
+  function downloadConfirmation() {
+    if (!bookingConfirmationPdf) return;
+    const bytes = Uint8Array.from(atob(bookingConfirmationPdf), (character) => character.charCodeAt(0));
+    const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `daily-red-sea-booking-${reference}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   if (step === "success") return (
@@ -109,6 +125,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
       <h2 className="mt-2 text-2xl font-black text-slate-950">Thank you, {name.split(" ")[0]}.</h2>
       <p className="mt-3 leading-6 text-slate-600">Your reservation is confirmed as a cash-on-arrival request. {customerEmailSent ? "Your booking summary and PDF confirmation have been sent to your email." : "We will confirm the details on WhatsApp."}</p>
       <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm"><p className="text-slate-500">Booking reference</p><p className="mt-1 font-mono font-bold text-slate-950">{reference}</p><p className="mt-3 text-slate-600">{date} at {time} · {travelerText}</p><p className="font-bold text-blue-700">{formatPrice(String(total))} cash on arrival</p></div>
+      {bookingConfirmationPdf ? <button type="button" onClick={downloadConfirmation} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 font-bold text-white hover:bg-blue-700"><Download size={18} /> Download booking confirmation PDF</button> : null}
     </div>
   );
 
