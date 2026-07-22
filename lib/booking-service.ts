@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import nodemailer from "nodemailer";
 
 type BookingType = "tour" | "transfer";
 type BookingStatus = "submitted" | "paid" | "cancelled";
@@ -152,11 +153,43 @@ export async function sendWhatsAppMessage(phone: string, body: string) {
 }
 
 export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string) {
+  const environment = process.env as Record<string, string | undefined>;
+  const smtpUser = environment.GMAIL_SMTP_USER || "info@dailyredsea.com";
+  const smtpAppPassword = environment.GMAIL_SMTP_APP_PASSWORD;
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || "Daily Red Sea <onboarding@resend.dev>";
 
-  if (!apiKey || !toEmail) {
-    return { success: false, reason: "missing-resend-config" };
+  if (!toEmail) {
+    return { success: false, reason: "missing-recipient" };
+  }
+
+  if (smtpAppPassword) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: smtpUser,
+          pass: smtpAppPassword,
+        },
+      });
+      const result = await transporter.sendMail({
+        from: `Daily Red Sea <${smtpUser}>`,
+        to: toEmail,
+        subject,
+        html,
+      });
+
+      return { success: true, data: { messageId: result.messageId } };
+    } catch (error) {
+      console.error("Google Workspace email failed", error);
+      return { success: false, reason: "gmail-smtp-failed" };
+    }
+  }
+
+  if (!apiKey) {
+    return { success: false, reason: "missing-email-config" };
   }
 
   const response = await fetch("https://api.resend.com/emails", {
