@@ -1,5 +1,3 @@
-import PDFDocument from "pdfkit";
-
 export type InvoiceData = {
   reference: string;
   issuedAt: Date;
@@ -16,75 +14,80 @@ export type InvoiceData = {
   hotel?: string;
 };
 
-const pageWidth = 612;
-const margin = 55;
-const blue = "#2563eb";
-const slate = "#0f172a";
-const muted = "#64748b";
-const panel = "#e2e8f0";
-
+/**
+ * Creates a small, standards-compliant one-page PDF without depending on
+ * runtime font files. This is important on serverless hosts where PDFKit's
+ * built-in Helvetica AFM file is not always bundled with the function.
+ */
 export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const document = new PDFDocument({ size: "LETTER", margin, info: { Title: `Invoice ${invoice.reference}`, Author: "Daily Red Sea" } });
-    const chunks: Buffer[] = [];
+  const money = formatMoney(invoice.amount, invoice.currency);
+  const quantity = Math.max(Number(invoice.quantity) || 1, 1);
+  const unitMoney = formatMoney(invoice.amount / quantity, invoice.currency);
+  const issuedDate = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(invoice.issuedAt);
+  const lines = [
+    ["DAILY RED SEA", 26, true],
+    ["Tours, transfers and Red Sea experiences · Hurghada, Egypt", 10, false],
+    ["", 12, false],
+    ["BOOKING CONFIRMATION", 19, true],
+    [`Reference: ${invoice.reference}`, 11, true],
+    [`Issued: ${issuedDate}`, 10, false],
+    [`Payment: ${invoice.paymentMethod || "Cash on arrival"}`, 10, false],
+    ["", 10, false],
+    ["Guest details", 13, true],
+    [`Name: ${invoice.customerName || "Guest"}`, 10, false],
+    invoice.customerEmail ? `Email: ${invoice.customerEmail}` : "",
+    invoice.customerPhone ? `WhatsApp: ${invoice.customerPhone}` : "",
+    ["", 10, false],
+    ["Booking summary", 13, true],
+    [`Experience: ${invoice.itemName}`, 10, false],
+    invoice.date ? `Date: ${invoice.date}` : "",
+    invoice.hotel ? `Pickup: ${invoice.hotel}` : "",
+    [`Travelers: ${quantity}`, 10, false],
+    [`Unit price: ${unitMoney}`, 10, false],
+    [`TOTAL: ${money}`, 15, true],
+    ["", 10, false],
+    ["No tax has been charged. Daily Red Sea is not currently VAT registered.", 9, false],
+    ["Please keep this confirmation and show your reference if requested.", 9, false],
+    ["We will confirm your pickup details on WhatsApp before the experience.", 9, false],
+  ]
+    .filter(Boolean)
+    .map((line) => Array.isArray(line) ? line : [line, 10, false]) as Array<[string, number, boolean]>;
 
-    document.on("data", (chunk: Buffer) => chunks.push(chunk));
-    document.on("end", () => resolve(Buffer.concat(chunks)));
-    document.on("error", reject);
+  const commands: string[] = ["BT", "50 790 Td"];
+  for (const [value, size, bold] of lines) {
+    commands.push(`/${bold ? "F2" : "F1"} ${size} Tf`, `(${escapePdf(value)}) Tj`, `0 -${Math.max(size + 7, 16)} Td`);
+  }
+  commands.push("ET");
 
-    const money = formatMoney(invoice.amount, invoice.currency);
-    const unitMoney = formatMoney(invoice.amount / Math.max(invoice.quantity, 1), invoice.currency);
-    const issuedDate = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(invoice.issuedAt);
-    const contentWidth = pageWidth - margin * 2;
+  const stream = commands.join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
+    `<< /Length ${Buffer.byteLength(stream, "utf8")} >>\nstream\n${stream}\nendstream`,
+  ];
 
-    document.font("Helvetica-Bold").fontSize(38).fillColor(blue).text("DAILY", margin, 58, { continued: true }).text(" RED SEA", { fill: true });
-    document.font("Helvetica").fontSize(12).fillColor(slate).text("Hurghada, Egypt", margin, 108);
-    document.fontSize(10).fillColor(muted).text("Tours, transfers and Red Sea experiences", margin, 126);
-
-    document.font("Helvetica-Bold").fontSize(24).fillColor(blue).text("Invoice", 390, 64, { width: 167, align: "right" });
-    document.rect(340, 104, 217, 110).fill(panel);
-    writeLabelValue(document, "Invoice number", invoice.reference, 352, 118);
-    writeLabelValue(document, "Total", money, 352, 142);
-    writeLabelValue(document, "Date", issuedDate, 352, 166);
-    writeLabelValue(document, "Payment", invoice.paymentMethod || "Stripe", 352, 190);
-
-    document.rect(margin, 238, contentWidth, 30).fill(panel);
-    document.font("Helvetica-Bold").fontSize(12).fillColor(slate).text("Bill to", margin + 12, 247);
-    document.font("Helvetica").fontSize(12).fillColor(slate).text(invoice.customerName || "Guest", margin + 12, 279);
-    if (invoice.customerEmail) document.fillColor(slate).text(invoice.customerEmail, margin + 12, 298);
-    if (invoice.customerPhone) document.fillColor(slate).text(invoice.customerPhone, margin + 12, invoice.customerEmail ? 317 : 298);
-
-    document.font("Helvetica-Bold").fontSize(14).fillColor(blue).text("Payment details", margin + 12, 365);
-    document.rect(margin, 390, contentWidth, 30).fill(panel);
-    document.font("Helvetica-Bold").fontSize(11).fillColor(slate).text("Item", margin + 12, 399);
-    document.text("Qty", 360, 399, { width: 45, align: "right" });
-    document.text("Unit price", 410, 399, { width: 80, align: "right" });
-    document.text("Amount", 490, 399, { width: 67, align: "right" });
-
-    document.font("Helvetica-Bold").fontSize(12).fillColor(slate).text(invoice.itemName, margin + 12, 433, { width: 315 });
-    document.font("Helvetica").fontSize(11).fillColor(muted).text(invoice.date ? `Experience date: ${invoice.date}` : "Daily Red Sea booking", margin + 12, 454, { width: 315 });
-    if (invoice.hotel) document.text(`Pickup: ${invoice.hotel}`, margin + 12, 471, { width: 315 });
-    document.fontSize(12).fillColor(slate).text(String(invoice.quantity), 360, 433, { width: 45, align: "right" });
-    document.text(unitMoney, 410, 433, { width: 80, align: "right" });
-    document.text(money, 490, 433, { width: 67, align: "right" });
-
-    document.rect(margin, 515, contentWidth, 38).fill(panel);
-    document.font("Helvetica-Bold").fontSize(13).fillColor(slate).text("Total invoice:", margin + 12, 527);
-    document.text(money, 430, 527, { width: 127, align: "right" });
-
-    document.font("Helvetica-Bold").fontSize(14).fillColor(blue).text("Invoice information", margin + 12, 604);
-    document.font("Helvetica").fontSize(11).fillColor(slate).text("Daily Red Sea is not currently VAT registered. No tax has been charged.", margin + 12, 630, { width: contentWidth - 24 });
-    document.fillColor(muted).text("Thank you for booking with Daily Red Sea.", margin + 12, 658);
-    if (invoice.paymentId) document.fontSize(9).text(`Stripe payment ID: ${invoice.paymentId}`, margin + 12, 684);
-
-    document.fontSize(9).fillColor(muted).text(`1 / 1  |  ${invoice.reference}`, margin, 748, { width: contentWidth, align: "center" });
-    document.end();
+  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets.push(Buffer.byteLength(pdf, "binary"));
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
   });
+  const xrefOffset = Buffer.byteLength(pdf, "binary");
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  pdf += offsets.slice(1).map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`).join("");
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  return Promise.resolve(Buffer.from(pdf, "binary"));
 }
 
-function writeLabelValue(document: PDFKit.PDFDocument, label: string, value: string, x: number, y: number) {
-  document.font("Helvetica-Bold").fontSize(11).fillColor(slate).text(`${label}:`, x, y, { continued: true });
-  document.font("Helvetica").text(` ${value}`);
+function escapePdf(value: string) {
+  return value
+    .replace(/[^\x20-\x7E]/g, "?")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
 }
 
 function formatMoney(amount: number, currency: string) {
