@@ -27,7 +27,7 @@ export default function TourCard({
   duration,
   description,
 }: TourCardProps) {
-  const { formatPrice } = useSiteSettings();
+  const { formatPrice, t } = useSiteSettings();
 
 
   return (
@@ -171,7 +171,7 @@ export default function TourCard({
           "
         >
 
-          Best Seller
+          {t("bestSeller")}
 
         </div>
 
@@ -258,7 +258,7 @@ export default function TourCard({
 
           <Clock size={18}/>
 
-          <span>Every day · {duration}</span>
+          <span>{t("everyDay")} · {duration}</span>
 
         </div>
 

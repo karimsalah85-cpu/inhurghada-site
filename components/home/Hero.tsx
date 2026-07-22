@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { MapPin, Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 
 
 export default function Hero() {
 
   const router = useRouter();
+  const { t } = useSiteSettings();
 
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
@@ -20,7 +22,7 @@ export default function Hero() {
 
 
     if (!search) {
-      alert("Please enter a destination");
+      alert(t("destination"));
       return;
     }
 
@@ -92,27 +94,27 @@ export default function Hero() {
           <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
             <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
             <span className="text-sm font-semibold uppercase tracking-[0.35em] text-cyan-200">
-              Discover Hurghada
+              {t("discoverHurghada")}
             </span>
           </div>
 
           <h1 className="text-4xl font-black leading-tight md:text-6xl">
-            Discover the Magic of the Red Sea
+            {t("heroTitle")}
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-200 md:text-xl">
-            Daily tours, diving trips, desert safaris, boat excursions and unforgettable adventures in the heart of Hurghada.
+            {t("heroDescription")}
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur">
-              ✨ Private transfers
+              ✨ {t("privateTransfers")}
             </div>
             <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur">
-              🌊 Boat trips & snorkeling
+              🌊 {t("boatTrips")}
             </div>
             <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur">
-              🏜 Desert adventures
+              🏜 {t("desertAdventures")}
             </div>
           </div>
         </div>
@@ -179,7 +181,7 @@ export default function Hero() {
                 text-gray-500
                 "
               >
-                Destination
+                {t("destination")}
               </label>
 
 
@@ -205,7 +207,7 @@ export default function Hero() {
 
                   }}
 
-                  placeholder="Orange Bay, Diving, Hurghada"
+                  placeholder={t("searchPlaceholder")}
 
                   className="
                   w-full
@@ -246,7 +248,7 @@ export default function Hero() {
                 text-gray-500
                 "
               >
-                Travel Date
+                {t("travelDate")}
               </label>
 
 
@@ -305,7 +307,7 @@ export default function Hero() {
                 text-gray-500
                 "
               >
-                Guests
+                {t("guests")}
               </label>
 
 
@@ -367,7 +369,7 @@ export default function Hero() {
 
             >
 
-              Search Tours
+              {t("searchTours")}
 
             </button>
 

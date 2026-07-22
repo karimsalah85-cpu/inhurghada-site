@@ -11,6 +11,7 @@ import TourCard from "@/components/cards/TourCard";
 import { Car, Search } from "lucide-react";
 
 import { tours, type Tour } from "@/data/tours";
+import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 
 
 
@@ -23,6 +24,7 @@ export default function Home() {
 }
 
 function HomeContent() {
+  const { t } = useSiteSettings();
   const searchParams = useSearchParams();
   const router = useRouter();
   const search = searchParams.get("search") ?? "";
@@ -123,10 +125,10 @@ function HomeContent() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Choose your experience</p>
-              <h2 className="mt-3 text-4xl font-bold text-slate-900">Explore Hurghada by adventure</h2>
+              <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{t("chooseExperience")}</p>
+              <h2 className="mt-3 text-4xl font-bold text-slate-900">{t("exploreAdventure")}</h2>
             </div>
-            <Link href="/#tours" className="font-semibold text-blue-700 hover:text-blue-900">View all tours →</Link>
+            <Link href="/#tours" className="font-semibold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -166,7 +168,7 @@ function HomeContent() {
               text-5xl
               font-bold
             ">
-              Popular Tours
+              {t("popularTours")}
             </h2>
 
 
@@ -178,8 +180,7 @@ function HomeContent() {
               text-lg
               text-gray-600
             ">
-              Explore diving trips, snorkeling,
-              Orange Bay cruises and Red Sea adventures.
+              {t("popularToursDescription")}
             </p>
 
 
@@ -232,7 +233,7 @@ function HomeContent() {
 
   }}
 
-  placeholder="Search tours, locations, activities..."
+  placeholder={t("searchPlaceholder")}
 
   className="
     w-full

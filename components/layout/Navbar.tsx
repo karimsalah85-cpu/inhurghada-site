@@ -9,7 +9,7 @@ import { currencies, languages, useSiteSettings } from "@/components/settings/Si
 export default function Navbar() {
 
   const [open, setOpen] = useState(false);
-  const { currency, language, setCurrency, setLanguage } = useSiteSettings();
+  const { currency, language, setCurrency, setLanguage, t } = useSiteSettings();
 
 
   function closeMenu() {
@@ -79,29 +79,29 @@ export default function Navbar() {
         >
 
           <NavLink href="/">
-            Home
+            {t("home")}
           </NavLink>
 
 
           <NavLink href="/#tours">
-            Tours
+            {t("tours")}
           </NavLink>
 
 
           <NavLink href="/transfers">
-            Transfers
+            {t("transfers")}
           </NavLink>
 
           <NavLink href="/booking">
-            Booking
+            {t("booking")}
           </NavLink>
 
           <NavLink href="/checkout">
-            Checkout
+            {t("checkout")}
           </NavLink>
 
           <NavLink href="/#about">
-            About
+            {t("about")}
           </NavLink>
 
 
@@ -122,7 +122,7 @@ export default function Navbar() {
             hover:to-blue-800
             "
           >
-            Book Now
+            {t("bookNow")}
           </Link>
 
           <SettingsSelectors
@@ -190,7 +190,7 @@ export default function Navbar() {
             href="/"
             close={closeMenu}
           >
-            Home
+            {t("home")}
           </MobileLink>
 
 
@@ -198,7 +198,7 @@ export default function Navbar() {
             href="/#tours"
             close={closeMenu}
           >
-            Tours
+            {t("tours")}
           </MobileLink>
 
 
@@ -206,28 +206,28 @@ export default function Navbar() {
             href="/transfers"
             close={closeMenu}
           >
-            Transfers
+            {t("transfers")}
           </MobileLink>
 
           <MobileLink
             href="/booking"
             close={closeMenu}
           >
-            Booking
+            {t("booking")}
           </MobileLink>
 
           <MobileLink
             href="/checkout"
             close={closeMenu}
           >
-            Checkout
+            {t("checkout")}
           </MobileLink>
 
           <MobileLink
             href="/#about"
             close={closeMenu}
           >
-            About
+            {t("about")}
           </MobileLink>
 
 
@@ -247,7 +247,7 @@ export default function Navbar() {
             text-white
             "
           >
-            WhatsApp Booking
+            {t("whatsappBooking")}
           </a>
 
           <SettingsSelectors
