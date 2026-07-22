@@ -69,6 +69,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const [guideLanguage, setGuideLanguage] = useState("English");
   const [message, setMessage] = useState("");
   const [reference, setReference] = useState("");
+  const [customerEmailSent, setCustomerEmailSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -93,6 +94,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Booking submission failed.");
       setReference(data.reference);
+      setCustomerEmailSent(Boolean(data.customerEmailSent));
       setStep("success");
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
     } catch (reason) {
@@ -105,7 +107,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
       <CheckCircle2 className="text-emerald-600" size={42} />
       <p className="mt-5 text-sm font-bold uppercase tracking-wider text-emerald-700">Booking received</p>
       <h2 className="mt-2 text-2xl font-black text-slate-950">Thank you, {name.split(" ")[0]}.</h2>
-      <p className="mt-3 leading-6 text-slate-600">Your reservation is confirmed as a cash-on-arrival request. We sent your booking summary and PDF confirmation to your email.</p>
+      <p className="mt-3 leading-6 text-slate-600">Your reservation is confirmed as a cash-on-arrival request. {customerEmailSent ? "Your booking summary and PDF confirmation have been sent to your email." : "We will confirm the details on WhatsApp."}</p>
       <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm"><p className="text-slate-500">Booking reference</p><p className="mt-1 font-mono font-bold text-slate-950">{reference}</p><p className="mt-3 text-slate-600">{date} at {time} · {travelerText}</p><p className="font-bold text-blue-700">{formatPrice(String(total))} cash on arrival</p></div>
     </div>
   );
