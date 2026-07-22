@@ -318,10 +318,7 @@ function SettingsSelectors({
       <select id={mobile ? "mobile-language" : "language"} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className={selectClass}>
         {languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
       </select>
-      <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Currency</label>
-      <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
-        {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
-      </select>
+      {currencies.length > 1 ? <><label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Currency</label><select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select></> : null}
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/terms-conditions",
     ...tours.map((tour) => `/tours/${tour.slug}`),
   ];
-  const localizedRoutes = locales.flatMap((locale) => localizedPaths.map((path) => ({
+  const localizedRoutes = locales.filter((locale) => locale !== "en").flatMap((locale) => localizedPaths.map((path) => ({
     url: `${siteUrl}${localePath(locale, path)}`,
     lastModified: contentUpdatedAt,
     changeFrequency: path ? "weekly" as const : "daily" as const,
@@ -48,6 +48,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: contentUpdatedAt,
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/booking`,
+      lastModified: contentUpdatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
+      url: `${siteUrl}/checkout`,
+      lastModified: contentUpdatedAt,
+      changeFrequency: "weekly",
+      priority: 0.6,
     },
     {
       url: `${siteUrl}/privacy-policy`,

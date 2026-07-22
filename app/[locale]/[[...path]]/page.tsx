@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { tours } from "@/data/tours";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
 import { defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
@@ -65,6 +65,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const { locale: rawLocale, path = [] } = await params;
   if (!isLocale(rawLocale)) notFound();
   const locale = rawLocale;
+  if (locale === "en") redirect(path.length ? `/${path.join("/")}` : "/");
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   if (!kind) notFound();

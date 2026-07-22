@@ -104,7 +104,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
 
 export function localePath(locale: Locale, path = "") {
   const normalized = path === "/" ? "" : path.startsWith("/") ? path : `/${path}`;
-  return `/${locale}${normalized}`;
+  return locale === "en" ? normalized || "/" : `/${locale}${normalized}`;
 }
 
 export function languageAlternates(path = "") {
