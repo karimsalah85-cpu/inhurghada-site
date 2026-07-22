@@ -38,6 +38,7 @@ export default function BookingForm({
   const [name, setName] = useState("");
 
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
 
   const [date, setDate] = useState(
     () => searchParams.get("date") ?? ""
@@ -72,6 +73,7 @@ export default function BookingForm({
         type: "tour",
         customerName: name.trim(),
         phone: cleanPhone,
+        customerEmail: email.trim(),
         tourName,
         location: location || "Hurghada",
         duration: duration || "Please confirm",
@@ -92,12 +94,17 @@ export default function BookingForm({
       return;
     }
 
-    if (data.paymentUrl) {
-      window.location.href = data.paymentUrl;
+    if (!data.whatsappSent) {
+      window.location.href = data.whatsappUrl;
       return;
     }
 
-    alert(`Booking request received. Your reference is ${data.reference}. We will confirm shortly.`);
+    if (!data.emailSent) {
+      alert(`Booking request received. Your reference is ${data.reference}. We sent it on WhatsApp; email notification is not configured yet. Payment is cash on arrival.`);
+      return;
+    }
+
+    alert(`Booking request received. Your reference is ${data.reference}. Payment is cash on arrival. We will confirm shortly.`);
   }
 
 
@@ -147,7 +154,7 @@ export default function BookingForm({
           {duration} • {location}
         </p>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Secure your place with a fast booking request, instant confirmation updates, and optional payment checkout.
+          Secure your place with a fast booking request and pay cash on arrival after we confirm availability.
         </p>
 
       </div>
@@ -218,6 +225,28 @@ export default function BookingForm({
 
 
 
+
+        <div className="relative">
+
+          <Phone
+            className="absolute left-4 top-4 text-gray-400"
+            size={20}
+          />
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Email address"
+            className="w-full rounded-xl border p-4 pl-12"
+            value={email}
+            onChange={(e)=>
+              setEmail(e.target.value)
+            }
+            autoComplete="email"
+          />
+
+        </div>
 
         <div className="relative">
 

@@ -2,10 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   addBooking,
   buildBookingMessage,
-  createStripeCheckoutSession,
+  buildWhatsAppLink,
+  findBooking,
+  findBookingByEmail,
   sendBookingEmail,
   sendWhatsAppMessage,
 } from "@/lib/booking-service";
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const reference = searchParams.get("reference")?.trim();
+  const email = searchParams.get("email")?.trim();
+
+  if (!reference && !email) {
+    return NextResponse.json({ success: false, error: "A booking reference or email is required." }, { status: 400 });
+  }
+
+  const booking = reference ? findBooking(reference) : findBookingByEmail(email || "");
+
+  if (!booking) {
+    return NextResponse.json({ success: false, error: "Booking not found." }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true, booking });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +34,8 @@ export async function POST(request: NextRequest) {
     const customerName = String(body.customerName || "").trim();
     const phone = String(body.phone || "").trim();
     const customerEmail = String(body.customerEmail || "").trim();
+    const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "karimsalah85@hotmail.com";
+    const bookingWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150";
 
     if (!customerName || !phone) {
       return NextResponse.json({ success: false, error: "A name and phone number are required." }, { status: 400 });
@@ -33,28 +55,45 @@ export async function POST(request: NextRequest) {
       hotel: body.hotel,
       message: body.message,
     });
+    const emailHtml = buildBookingEmailHtml({
+      bookingType,
+      reference,
+      customerName,
+      phone,
+      customerEmail,
+      date: body.date,
+      guests: body.guests,
+      hotel: body.hotel,
+      tourName: body.tourName,
+      message: body.message,
+    });
 
     const booking = addBooking({
       reference,
       type: bookingType,
       customerName,
       phone,
+      customerEmail: customerEmail || undefined,
       status: "submitted",
       createdAt: new Date().toISOString(),
       amount: Number(body.amount || 0),
       currency: body.currency || "usd",
+      tourName: body.tourName,
+      location: body.location,
+      duration: body.duration,
+      price: body.price,
+      date: body.date,
+      guests: body.guests,
+      hotel: body.hotel,
+      message: body.message,
     });
 
-    const [whatsappResult, emailResult, paymentResult] = await Promise.all([
-      sendWhatsAppMessage(phone, message),
-      sendBookingEmail(customerEmail || process.env.CONTACT_EMAIL, `Your ${bookingType === "transfer" ? "transfer" : "tour"} request has been received`, `<p>Hello ${customerName},</p><p>Your request has been received and our team will confirm the details shortly.</p><p>Reference: ${reference}</p>`),
-      createStripeCheckoutSession({
-        bookingReference: reference,
-        amount: Number(body.amount || 0),
-        currency: body.currency || "usd",
-        customerEmail: customerEmail || undefined,
-        bookingType,
-      }),
+    const [whatsappResult, bookingEmailResult, customerEmailResult] = await Promise.all([
+      sendWhatsAppMessage(bookingWhatsApp, message),
+      sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml),
+      customerEmail
+        ? sendBookingEmail(customerEmail, `Your ${bookingType === "transfer" ? "transfer" : "tour"} request has been received`, `<p>Hello ${customerName},</p><p>Your request has been received and our team will confirm the details shortly.</p><p>Reference: ${reference}</p>`)
+        : Promise.resolve({ success: false, reason: "no-customer-email" }),
     ]);
 
     return NextResponse.json({
@@ -62,12 +101,56 @@ export async function POST(request: NextRequest) {
       booking,
       reference,
       whatsappSent: whatsappResult.success,
-      emailSent: emailResult.success,
-      paymentUrl: paymentResult.success ? paymentResult.url : null,
-      paymentStatus: paymentResult.success ? "ready" : paymentResult.reason,
+      whatsappUrl: buildWhatsAppLink(bookingWhatsApp, message),
+      emailSent: bookingEmailResult.success,
+      customerEmailSent: customerEmailResult.success,
+      paymentUrl: null,
+      paymentStatus: "cash-on-arrival",
     });
   } catch (error) {
     console.error("Booking submission failed", error);
     return NextResponse.json({ success: false, error: "Booking submission failed" }, { status: 500 });
   }
+}
+
+function buildBookingEmailHtml({
+  bookingType,
+  reference,
+  customerName,
+  phone,
+  customerEmail,
+  date,
+  guests,
+  hotel,
+  tourName,
+  message,
+}: Record<string, string | undefined>) {
+  const details = [
+    ["Reference", reference],
+    ["Type", bookingType],
+    ["Customer", customerName],
+    ["WhatsApp", phone],
+    ["Email", customerEmail],
+    ["Tour", tourName],
+    ["Date", date],
+    ["Guests", guests],
+    ["Pickup / hotel", hotel],
+    ["Notes", message],
+  ].filter(([, value]) => value);
+
+  const rows = details
+    .map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label || "")}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value || "")}</td></tr>`)
+    .join("");
+
+  return `<h2>New Daily Red Sea booking</h2><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table>`;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "'": "&#39;",
+    '"': "&quot;",
+  })[character] || character);
 }

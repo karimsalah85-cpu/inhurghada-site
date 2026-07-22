@@ -8,10 +8,19 @@ export type BookingRecord = {
   type: BookingType;
   customerName: string;
   phone: string;
+  customerEmail?: string;
   status: BookingStatus;
   createdAt: string;
   amount?: number;
   currency?: string;
+  tourName?: string;
+  location?: string;
+  duration?: string;
+  price?: string;
+  date?: string;
+  guests?: string;
+  hotel?: string;
+  message?: string;
 };
 
 type GlobalWithBookings = typeof globalThis & {
@@ -36,6 +45,16 @@ export function addBooking(booking: BookingRecord) {
 
 export function findBooking(reference: string) {
   return getBookingStore().find((item) => item.reference === reference);
+}
+
+export function findBookingByEmail(email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    return undefined;
+  }
+
+  return getBookingStore().find((item) => item.customerEmail?.trim().toLowerCase() === normalizedEmail);
 }
 
 export function markBookingStatus(reference: string, status: BookingStatus) {
@@ -89,9 +108,14 @@ export function buildBookingMessage(payload: Record<string, unknown>) {
     lines.push(`📝 Notes: ${payload.message}`);
   }
 
-  lines.push("", "We will confirm availability and payment details shortly.");
+  lines.push("", "Payment: cash on arrival.", "We will confirm availability shortly.");
 
   return lines.join("\n");
+}
+
+export function buildWhatsAppLink(phone: string, message: string) {
+  const recipient = phone.replace(/\D/g, "");
+  return `https://wa.me/${recipient}?text=${encodeURIComponent(message)}`;
 }
 
 export async function sendWhatsAppMessage(phone: string, body: string) {
@@ -164,6 +188,14 @@ export async function createStripeCheckoutSession(payload: {
   currency?: string;
   customerEmail?: string;
   bookingType: BookingType;
+  invoiceDetails?: {
+    customerName?: string;
+    customerPhone?: string;
+    date?: string;
+    guests?: string;
+    hotel?: string;
+    tourName?: string;
+  };
 }) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "http://localhost:3000";
@@ -178,23 +210,41 @@ export async function createStripeCheckoutSession(payload: {
     return { success: false, reason: "invalid-amount" };
   }
 
+  const metadata = {
+    bookingReference: payload.bookingReference,
+    bookingType: payload.bookingType,
+    customerName: payload.invoiceDetails?.customerName,
+    customerPhone: payload.invoiceDetails?.customerPhone,
+    bookingDate: payload.invoiceDetails?.date,
+    guests: payload.invoiceDetails?.guests,
+    hotel: payload.invoiceDetails?.hotel,
+    tourName: payload.invoiceDetails?.tourName,
+  };
+
+  const formData = new URLSearchParams({
+    mode: "payment",
+    success_url: `${siteUrl}/checkout?status=success&booking=${encodeURIComponent(payload.bookingReference)}&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl}/checkout?status=cancelled&booking=${encodeURIComponent(payload.bookingReference)}`,
+    "line_items[0][price_data][currency]": (payload.currency || "usd").toLowerCase(),
+    "line_items[0][price_data][product_data][name]": payload.invoiceDetails?.tourName || `Daily Red Sea ${payload.bookingType === "transfer" ? "Transfer" : "Tour"}`,
+    "line_items[0][price_data][unit_amount]": String(amountInCents),
+    "line_items[0][quantity]": "1",
+    ...(payload.customerEmail ? { customer_email: payload.customerEmail } : {}),
+  });
+
+  for (const [key, value] of Object.entries(metadata)) {
+    if (value) {
+      formData.set(`metadata[${key}]`, value);
+    }
+  }
+
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${secretKey}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: new URLSearchParams({
-      mode: "payment",
-      success_url: `${siteUrl}/checkout?status=success&booking=${encodeURIComponent(payload.bookingReference)}`,
-      cancel_url: `${siteUrl}/checkout?status=cancelled&booking=${encodeURIComponent(payload.bookingReference)}`,
-      metadata: JSON.stringify({ bookingReference: payload.bookingReference }),
-      "line_items[0][price_data][currency]": (payload.currency || "usd").toLowerCase(),
-      "line_items[0][price_data][product_data][name]": `Daily Red Sea ${payload.bookingType === "transfer" ? "Transfer" : "Tour"}`,
-      "line_items[0][price_data][unit_amount]": String(amountInCents),
-      "line_items[0][quantity]": "1",
-      ...(payload.customerEmail ? { customer_email: payload.customerEmail } : {}),
-    }).toString(),
+    body: formData.toString(),
   });
 
   const data = await response.json().catch(() => ({}));
@@ -208,6 +258,27 @@ export async function createStripeCheckoutSession(payload: {
     url: data.url,
     id: data.id,
   };
+}
+
+export async function getStripeCheckoutSession(sessionId: string) {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+
+  if (!secretKey) {
+    return { success: false, reason: "missing-stripe-config" } as const;
+  }
+
+  const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}?expand[]=line_items&expand[]=payment_intent.payment_method`, {
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+    },
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    return { success: false, reason: data.error?.message || "stripe-session-not-found" } as const;
+  }
+
+  return { success: true, session: data } as const;
 }
 
 export function verifyStripeSignature(payload: string, signature: string | null, secret: string | null) {

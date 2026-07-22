@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, BadgeCheck, CalendarRange, CreditCard, MessageCircle, ShieldCheck, Sparkles, Ticket } from "lucide-react";
+import type { BookingRecord } from "@/lib/booking-service";
 
 const steps = [
   "Choose a tour and pick your date",
@@ -22,6 +24,54 @@ export default function CheckoutExperience() {
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
   const booking = searchParams.get("booking");
+  const sessionId = searchParams.get("session_id");
+
+  return <CheckoutContent key={booking} status={status} booking={booking} sessionId={sessionId} />;
+}
+
+function CheckoutContent({ status, booking, sessionId }: { status: string | null; booking: string | null; sessionId: string | null }) {
+  const [bookingDetails, setBookingDetails] = useState<BookingRecord | null>(null);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!booking) {
+      return;
+    }
+
+    const bookingReference = booking;
+    let isMounted = true;
+
+    async function loadBooking() {
+      try {
+        const response = await fetch(`/api/bookings?reference=${encodeURIComponent(bookingReference)}`);
+        const data = await response.json();
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (!response.ok || !data.success) {
+          setBookingError(data.error || "We could not load this booking.");
+          setBookingDetails(null);
+          return;
+        }
+
+        setBookingDetails(data.booking);
+        setBookingError(null);
+      } catch {
+        if (isMounted) {
+          setBookingError("We could not reach the booking service.");
+          setBookingDetails(null);
+        }
+      }
+    }
+
+    loadBooking();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [booking]);
 
   const confirmationMessage = status === "success"
     ? `Payment confirmed for booking ${booking || "your request"}. We will send your voucher shortly.`
@@ -54,8 +104,8 @@ export default function CheckoutExperience() {
                 <Ticket size={22} />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">No booking in progress</p>
-                <h2 className="text-3xl font-bold text-slate-900">Choose a tour and press Book now to start</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{bookingDetails ? "Booking ready" : "No booking in progress"}</p>
+                <h2 className="text-3xl font-bold text-slate-900">{bookingDetails ? `Booking ${bookingDetails.reference}` : "Choose a tour and press Book now to start"}</h2>
               </div>
             </div>
 
@@ -64,26 +114,49 @@ export default function CheckoutExperience() {
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">Booking status</p>
                 <h3 className="mt-2 text-xl font-bold text-slate-900">{status === "success" ? "Payment confirmed" : "Payment cancelled"}</h3>
                 <p className="mt-3 text-sm leading-7 text-slate-700">{confirmationMessage}</p>
+                {status === "success" && booking && sessionId ? (
+                  <a
+                    href={`/api/invoices/${encodeURIComponent(booking)}?session_id=${encodeURIComponent(sessionId)}`}
+                    className="mt-5 inline-flex items-center rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
+                  >
+                    Download invoice (PDF)
+                  </a>
+                ) : null}
               </div>
             ) : null}
 
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700">
-                <Sparkles size={28} />
+            {bookingDetails ? (
+              <div className="mt-8 rounded-3xl border border-cyan-200 bg-cyan-50 p-8 text-left">
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Reservation snapshot</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div><p className="text-sm text-slate-500">Guest</p><p className="font-semibold text-slate-900">{bookingDetails.customerName}</p></div>
+                  <div><p className="text-sm text-slate-500">Phone</p><p className="font-semibold text-slate-900">{bookingDetails.phone}</p></div>
+                  <div><p className="text-sm text-slate-500">Status</p><p className="font-semibold text-slate-900">{bookingDetails.status}</p></div>
+                  <div><p className="text-sm text-slate-500">Amount</p><p className="font-semibold text-slate-900">{bookingDetails.amount ? `${bookingDetails.amount} ${bookingDetails.currency?.toUpperCase() || "USD"}` : "To be confirmed"}</p></div>
+                </div>
+                {bookingDetails.date ? <p className="mt-4 text-sm text-slate-700"><span className="font-semibold">Date:</span> {bookingDetails.date}</p> : null}
+                {bookingDetails.hotel ? <p className="mt-2 text-sm text-slate-700"><span className="font-semibold">Pickup:</span> {bookingDetails.hotel}</p> : null}
               </div>
-              <h3 className="mt-6 text-2xl font-bold text-slate-900">Your reservation will appear here</h3>
-              <p className="mt-4 text-lg leading-8 text-slate-600">
-                Start with a tour from our collection and we will guide you through the checkout flow with pickup details, traveler information and a clear confirmation.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4">
-                <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-700">
-                  Browse tours <ArrowRight size={16} />
-                </Link>
-                <Link href="/booking" className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-cyan-700">
-                  Manage booking <MessageCircle size={16} />
-                </Link>
+            ) : (
+              <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700">
+                  <Sparkles size={28} />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold text-slate-900">Your reservation will appear here</h3>
+                <p className="mt-4 text-lg leading-8 text-slate-600">
+                  Start with a tour from our collection and we will guide you through the checkout flow with pickup details, traveler information and a clear confirmation.
+                </p>
+                {bookingError ? <p className="mt-4 text-sm text-rose-600">{bookingError}</p> : null}
+                <div className="mt-8 flex flex-wrap justify-center gap-4">
+                  <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-700">
+                    Browse tours <ArrowRight size={16} />
+                  </Link>
+                  <Link href="/booking" className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-cyan-700">
+                    Manage booking <MessageCircle size={16} />
+                  </Link>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="space-y-8">

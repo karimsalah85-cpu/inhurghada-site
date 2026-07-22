@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { CalendarRange, CheckCircle2, Clock3, MessageCircle, ShieldCheck, Smartphone, Ticket } from "lucide-react";
+import type { BookingRecord } from "@/lib/booking-service";
 
 const actions = [
   {
@@ -41,17 +42,41 @@ export default function BookingPortal() {
   const [reference, setReference] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+  const [booking, setBooking] = useState<BookingRecord | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!reference.trim() && !email.trim()) {
       setStatus("Please enter your booking reference or email address so we can look it up.");
+      setBooking(null);
       return;
     }
 
-    const lookupValue = reference.trim() || email.trim();
-    setStatus(`We’re preparing your booking details for ${lookupValue}. Our team will confirm everything over WhatsApp if anything needs attention.`);
+    setIsLoading(true);
+    setStatus(null);
+    setBooking(null);
+
+    try {
+      const query = reference.trim()
+        ? `reference=${encodeURIComponent(reference.trim())}`
+        : `email=${encodeURIComponent(email.trim())}`;
+      const response = await fetch(`/api/bookings?${query}`);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setStatus(data.error || "We could not find that booking.");
+        return;
+      }
+
+      setBooking(data.booking);
+      setStatus(`Booking ${data.booking.reference} is ready to review.`);
+    } catch {
+      setStatus("We could not reach the booking service right now. Please try again shortly.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -104,14 +129,28 @@ export default function BookingPortal() {
                     className="mt-2 w-full rounded-xl border border-white/20 bg-slate-950/50 px-4 py-3 text-white outline-none focus:border-cyan-400"
                   />
                 </label>
-                <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400">
-                  <Ticket size={18} /> Find my booking
+                <button type="submit" disabled={isLoading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70">
+                  <Ticket size={18} /> {isLoading ? "Searching..." : "Find my booking"}
                 </button>
                 <p className="text-sm text-slate-300">Enter just one value — your reference or your email address.</p>
               </form>
               {status ? (
                 <div className="mt-5 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
                   {status}
+                </div>
+              ) : null}
+
+              {booking ? (
+                <div className="mt-5 rounded-2xl border border-white/20 bg-slate-950/40 p-4 text-sm text-slate-100">
+                  <p className="font-semibold text-white">Booking details</p>
+                  <div className="mt-3 space-y-2">
+                    <p><span className="text-slate-400">Reference:</span> {booking.reference}</p>
+                    <p><span className="text-slate-400">Guest:</span> {booking.customerName}</p>
+                    <p><span className="text-slate-400">Phone:</span> {booking.phone}</p>
+                    <p><span className="text-slate-400">Status:</span> {booking.status}</p>
+                    {booking.date ? <p><span className="text-slate-400">Date:</span> {booking.date}</p> : null}
+                    {booking.hotel ? <p><span className="text-slate-400">Pickup:</span> {booking.hotel}</p> : null}
+                  </div>
                 </div>
               ) : null}
             </div>

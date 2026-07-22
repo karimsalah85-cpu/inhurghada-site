@@ -8,6 +8,7 @@ const areas = ["Hurghada Airport", "Hurghada Hotels", "Makadi Bay", "Sahl Hashee
 export default function TransferBookingForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [pickup, setPickup] = useState("Hurghada Airport");
   const [dropoff, setDropoff] = useState("Hurghada Hotels");
   const [date, setDate] = useState("");
@@ -31,6 +32,7 @@ export default function TransferBookingForm() {
         type: "transfer",
         customerName: name.trim(),
         phone: phone.trim(),
+        customerEmail: email.trim(),
         date,
         hotel: `${pickup} → ${dropoff}`,
         message: `${notes.trim() || "None"}\n\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nPickup time: ${time}`,
@@ -46,12 +48,17 @@ export default function TransferBookingForm() {
       return;
     }
 
-    if (data.paymentUrl) {
-      window.location.href = data.paymentUrl;
+    if (!data.whatsappSent) {
+      window.location.href = data.whatsappUrl;
       return;
     }
 
-    alert(`Transfer request received. Your reference is ${data.reference}. We will confirm shortly.`);
+    if (!data.emailSent) {
+      alert(`Transfer request received. Your reference is ${data.reference}. We sent it on WhatsApp; email notification is not configured yet. Payment is cash on arrival.`);
+      return;
+    }
+
+    alert(`Transfer request received. Your reference is ${data.reference}. Payment is cash on arrival. We will confirm shortly.`);
   }
 
   return (
@@ -70,6 +77,7 @@ export default function TransferBookingForm() {
         <Field icon={<Plane />} label="Flight number (optional)"><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="e.g. MS 045" /></Field>
         <Field icon={<User />} label="Your name"><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
         <Field icon={<Phone />} label="WhatsApp number"><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /></Field>
+        <Field icon={<MessageCircle />} label="Email address (optional)"><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" /></Field>
       </div>
 
       <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes or hotel name (optional)</label>
