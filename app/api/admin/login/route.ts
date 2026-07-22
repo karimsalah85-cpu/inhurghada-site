@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/utils/supabase/server";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
@@ -40,12 +41,20 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       return NextResponse.json(
         { error: "The email or password is incorrect." },
         { status: 401, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
+    if (!isAuthorizedAdmin(data.user)) {
+      await supabase.auth.signOut();
+      return NextResponse.json(
+        { error: "This account is not authorized for the admin area." },
+        { status: 403, headers: { "Cache-Control": "no-store" } },
       );
     }
 

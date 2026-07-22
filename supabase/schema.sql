@@ -34,8 +34,21 @@ create table public.expenses (
 alter table public.bookings enable row level security;
 alter table public.expenses enable row level security;
 
-create policy "Authenticated admins manage bookings" on public.bookings for all to authenticated using (true) with check (true);
-create policy "Authenticated admins manage expenses" on public.expenses for all to authenticated using (true) with check (true);
+create or replace function public.is_daily_red_sea_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select lower(coalesce(auth.jwt() ->> 'email', '')) = 'info@dailyredsea.com';
+$$;
+
+revoke all on function public.is_daily_red_sea_admin() from public;
+grant execute on function public.is_daily_red_sea_admin() to authenticated;
+
+create policy "Authorized admin manages bookings" on public.bookings for all to authenticated using (public.is_daily_red_sea_admin()) with check (public.is_daily_red_sea_admin());
+create policy "Authorized admin manages expenses" on public.expenses for all to authenticated using (public.is_daily_red_sea_admin()) with check (public.is_daily_red_sea_admin());
 
 -- Public booking forms can create requests, but only authenticated admins can view or edit them.
 create policy "Visitors can create bookings" on public.bookings for insert to anon with check (true);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { createReportPdf } from "@/lib/report-service";
 import { createClient } from "@/utils/supabase/server";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
 
   const { searchParams } = request.nextUrl;
   const format = searchParams.get("format");

@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { createClient } from "@/utils/supabase/server";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
 
 export default async function AdminPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
+  if (!isAuthorizedAdmin(user)) redirect("/admin/login");
 
   const [{ data: bookings, error: bookingsError }, { data: expenses, error: expensesError }] = await Promise.all([
     supabase.from("bookings").select("*").order("created_at", { ascending: false }),
