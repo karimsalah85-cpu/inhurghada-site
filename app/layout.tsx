@@ -79,8 +79,9 @@ export default function RootLayout({
         <SiteSettingsProvider>
           <OrganizationSchema />
           <AnalyticsProvider />
+          <a href="#main-content" className="skip-link">Skip to main content</a>
           <Navbar />
-          {children}
+          <div id="main-content" tabIndex={-1}>{children}</div>
           <WhatsAppButton />
         </SiteSettingsProvider>
       </body>

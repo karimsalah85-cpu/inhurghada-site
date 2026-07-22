@@ -2,16 +2,14 @@
 
 import { MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { whatsappUrl } from "@/lib/contact";
 
 export default function WhatsAppButton() {
-
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150";
 
   const message =
     "Hello Daily Red Sea 🌊 I would like information about your tours.";
 
-  const url =
-    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  const url = whatsappUrl(message);
 
 
   return (

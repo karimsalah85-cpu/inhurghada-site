@@ -18,6 +18,7 @@ export default function TransferBookingForm() {
   const [passengers, setPassengers] = useState("1");
   const [flight, setFlight] = useState("");
   const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   async function submitTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,6 +30,7 @@ export default function TransferBookingForm() {
 
     trackEvent("booking_start", { booking_type: "transfer", item_name: "Private transfer" });
 
+    setSubmitting(true);
     const response = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -46,6 +48,7 @@ export default function TransferBookingForm() {
     });
 
     const data = await response.json();
+    setSubmitting(false);
 
     if (!response.ok || !data.success) {
       alert(data.error || "Transfer request failed. Please try again.");
@@ -68,7 +71,7 @@ export default function TransferBookingForm() {
   }
 
   return (
-    <form onSubmit={submitTransfer} className="rounded-3xl bg-white p-6 shadow-2xl md:p-8">
+    <form onSubmit={submitTransfer} aria-busy={submitting} className="rounded-3xl bg-white p-6 shadow-2xl md:p-8">
       <div className="flex items-start gap-4">
         <div className="rounded-xl bg-blue-100 p-3 text-blue-700"><Car /></div>
         <div><h2 className="text-2xl font-bold text-slate-900">Book a private transfer</h2><p className="mt-1 text-sm text-slate-600">We’ll confirm availability and the final price on WhatsApp.</p></div>
@@ -90,7 +93,7 @@ export default function TransferBookingForm() {
       <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes (optional)</label>
       <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder="Add luggage, child seat, or any special request." />
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">ID or passport required before the transfer</p><p className="mt-1">A valid ID or passport is mandatory for trip permit reasons. Please make sure you have it available before your transfer.</p></div>
-      <button type="submit" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700"><MessageCircle size={20} />Send transfer request</button>
+      <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"><MessageCircle size={20} />{submitting ? "Sending transfer request…" : "Send transfer request"}</button>
     </form>
   );
 }

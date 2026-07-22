@@ -130,9 +130,8 @@ export default function TourCard({
 
         {/* FAVORITE */}
 
-        <button
-          type="button"
-          aria-label={`Add ${title} to favorites`}
+        <span
+          aria-hidden="true"
           className="
           absolute
           right-4
@@ -151,7 +150,7 @@ export default function TourCard({
             className="text-red-500"
           />
 
-        </button>
+        </span>
 
 
 

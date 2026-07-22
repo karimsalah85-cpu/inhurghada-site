@@ -13,6 +13,7 @@ import { Car, Search, BadgeCheck, ShipWheel, Waves, TentTree, Plane, ShoppingBag
 import { tours, type Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
+import { whatsappUrl } from "@/lib/contact";
 
 
 
@@ -579,7 +580,7 @@ text-blue-600
           <p className="font-semibold uppercase tracking-[0.24em] text-blue-100">Start planning</p>
           <h2 className="mt-4 text-4xl font-bold">Ready for your Red Sea adventure?</h2>
           <p className="mt-5 text-lg text-blue-100">Message our local team and we’ll help you find the right tour for your stay.</p>
-          <a href="https://wa.me/201004933150?text=Hello%20Daily%20Red%20Sea%2C%20I%20would%20like%20help%20planning%20my%20trip." onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-blue-50">Plan on WhatsApp</a>
+          <a href={whatsappUrl("Hello Daily Red Sea, I would like help planning my trip.")} onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-blue-50">Plan on WhatsApp</a>
         </div>
       </section>
 
@@ -600,7 +601,7 @@ text-blue-600
           </div>
           <div>
             <p className="font-semibold text-white">Need help?</p>
-            <a className="mt-3 inline-block hover:text-white" href="https://wa.me/201004933150" onClick={() => trackEvent("whatsapp_click", { placement: "footer" })} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
+            <a className="mt-3 inline-block hover:text-white" href={whatsappUrl()} onClick={() => trackEvent("whatsapp_click", { placement: "footer" })} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
             <div className="mt-4 space-y-2 text-sm">
               <Link className="block hover:text-white" href="/privacy-policy">Privacy Policy</Link>
               <Link className="block hover:text-white" href="/terms-conditions">Terms & Conditions</Link>

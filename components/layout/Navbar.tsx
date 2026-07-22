@@ -2,20 +2,36 @@
 
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
+import { whatsappUrl } from "@/lib/contact";
 
 
 export default function Navbar() {
 
   const [open, setOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
   const { currency, language, setCurrency, setLanguage, t } = useSiteSettings();
 
 
   function closeMenu() {
     setOpen(false);
   }
+
+  useEffect(() => {
+    if (!open) return;
+    firstMobileLinkRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
 
   return (
@@ -144,13 +160,16 @@ export default function Navbar() {
 
 
         <button
-          onClick={() => setOpen(!open)}
+          ref={menuButtonRef}
+          onClick={() => setOpen((current) => !current)}
           className="
           rounded-lg
           p-2
           md:hidden
           "
-          aria-label="Toggle menu"
+          aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={open}
+          aria-controls="mobile-navigation"
         >
 
           {open ? (
@@ -174,6 +193,8 @@ export default function Navbar() {
       {open && (
 
         <div
+          id="mobile-navigation"
+          aria-label="Mobile navigation"
           className="
           flex
           flex-col
@@ -190,6 +211,7 @@ export default function Navbar() {
           <MobileLink
             href="/"
             close={closeMenu}
+            linkRef={firstMobileLinkRef}
           >
             {t("home")}
           </MobileLink>
@@ -234,7 +256,7 @@ export default function Navbar() {
 
 
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150"}`}
+            href={whatsappUrl()}
             onClick={() => trackEvent("whatsapp_click", { placement: "mobile_navigation" })}
             target="_blank"
             rel="noopener noreferrer"
@@ -338,11 +360,13 @@ function NavLink({
 function MobileLink({
   href,
   children,
-  close
+  close,
+  linkRef,
 }:{
   href:string;
   children:React.ReactNode;
   close:()=>void;
+  linkRef?: React.Ref<HTMLAnchorElement>;
 }) {
 
 
@@ -350,6 +374,7 @@ function MobileLink({
 
     <Link
       href={href}
+      ref={linkRef}
       onClick={close}
       className="
       rounded-lg
