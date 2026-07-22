@@ -2,10 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/utils/supabase/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasValidRequestOrigin } from "@/lib/request-origin";
 
 export async function POST(request: NextRequest) {
-  const origin = request.headers.get("origin");
-  if (origin && new URL(origin).host !== request.nextUrl.host) {
+  if (!hasValidRequestOrigin(request)) {
     return NextResponse.json({ error: "Invalid sign-in origin." }, { status: 403, headers: { "Cache-Control": "no-store" } });
   }
 
