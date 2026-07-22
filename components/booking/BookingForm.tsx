@@ -58,8 +58,8 @@ export default function BookingForm({
   async function submitBooking(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!name.trim() || !phone.trim() || !date) {
-      alert("Please fill your name, WhatsApp number and date");
+    if (!name.trim() || !phone.trim() || !email.trim() || !date) {
+      alert("Please fill your name, WhatsApp number, email and date");
       return;
     }
 
@@ -244,6 +244,7 @@ export default function BookingForm({
               setEmail(e.target.value)
             }
             autoComplete="email"
+            required
           />
 
         </div>

@@ -77,7 +77,7 @@ export default function TransferBookingForm() {
         <Field icon={<Plane />} label="Flight number (optional)"><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="e.g. MS 045" /></Field>
         <Field icon={<User />} label="Your name"><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
         <Field icon={<Phone />} label="WhatsApp number"><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /></Field>
-        <Field icon={<MessageCircle />} label="Email address (optional)"><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" /></Field>
+        <Field icon={<MessageCircle />} label="Email address"><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
       </div>
 
       <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">Notes or hotel name (optional)</label>
