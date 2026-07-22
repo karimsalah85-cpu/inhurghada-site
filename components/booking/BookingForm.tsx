@@ -33,7 +33,7 @@ export default function BookingForm({
   location,
 }: BookingFormProps) {
   const searchParams = useSearchParams();
-  const { formatPrice } = useSiteSettings();
+  const { formatPrice, t } = useSiteSettings();
 
   const [name, setName] = useState("");
 
@@ -127,7 +127,7 @@ export default function BookingForm({
         text-3xl
         font-bold
       ">
-        Book Your Trip
+        {t("bookYourTrip")}
       </h2>
 
 
@@ -154,7 +154,7 @@ export default function BookingForm({
           {duration} • {location}
         </p>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Secure your place with a fast booking request and pay cash on arrival after we confirm availability.
+          {t("cashOnArrival")}
         </p>
 
       </div>
@@ -183,7 +183,7 @@ export default function BookingForm({
             id="name"
             name="name"
             type="text"
-            placeholder="Full Name"
+            placeholder={t("fullName")}
             className="w-full rounded-xl border p-4 pl-12"
             value={name}
             onChange={(e)=>
@@ -210,7 +210,7 @@ export default function BookingForm({
             id="phone"
             name="phone"
             type="tel"
-            placeholder="WhatsApp Number"
+            placeholder={t("whatsappNumber")}
             className="w-full rounded-xl border p-4 pl-12"
             value={phone}
             onChange={(e)=>
@@ -237,7 +237,7 @@ export default function BookingForm({
             id="email"
             name="email"
             type="email"
-            placeholder="Email address"
+            placeholder={t("emailAddress")}
             className="w-full rounded-xl border p-4 pl-12"
             value={email}
             onChange={(e)=>
@@ -259,7 +259,7 @@ export default function BookingForm({
             id="hotel"
             name="hotel"
             type="text"
-            placeholder="Hotel Name / Pickup Location"
+            placeholder={t("pickupLocation")}
             className="w-full rounded-xl border p-4 pl-12"
             value={hotel}
             onChange={(e)=>
@@ -330,7 +330,7 @@ export default function BookingForm({
         <textarea
           id="message"
           name="message"
-          placeholder="Special requests"
+          placeholder={t("specialRequests")}
 
           className="
           h-28
@@ -374,7 +374,7 @@ export default function BookingForm({
 
           <MessageCircle size={22}/>
 
-          Send booking request
+          {t("sendBooking")}
 
 
         </button>
