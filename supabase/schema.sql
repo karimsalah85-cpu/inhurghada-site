@@ -45,6 +45,7 @@ as $$
 $$;
 
 revoke all on function public.is_daily_red_sea_admin() from public;
+revoke all on function public.is_daily_red_sea_admin() from anon;
 grant execute on function public.is_daily_red_sea_admin() to authenticated;
 
 create policy "Authorized admin manages bookings" on public.bookings for all to authenticated using (public.is_daily_red_sea_admin()) with check (public.is_daily_red_sea_admin());

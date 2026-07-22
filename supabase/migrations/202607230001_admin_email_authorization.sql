@@ -9,6 +9,7 @@ as $$
 $$;
 
 revoke all on function public.is_daily_red_sea_admin() from public;
+revoke all on function public.is_daily_red_sea_admin() from anon;
 grant execute on function public.is_daily_red_sea_admin() to authenticated;
 
 drop policy if exists "Authenticated admins manage bookings" on public.bookings;
