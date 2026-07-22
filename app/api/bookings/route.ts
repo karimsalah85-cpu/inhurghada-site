@@ -89,21 +89,15 @@ export async function POST(request: NextRequest) {
       message: body.message,
     });
 
-    const supabase = await createClient();
-    await supabase.from("bookings").insert({
-      reference,
-      type: bookingType,
-      customer_name: customerName,
-      customer_email: customerEmail || null,
-      phone,
-      tour_name: body.tourName || null,
-      date: body.date || null,
-      guests: Number(body.guests || 0) || null,
-      hotel: body.hotel || null,
-      notes: body.message || null,
-      amount: Number(body.amount || 0),
-      currency: String(body.currency || "USD").toUpperCase(),
-    });
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+      const supabase = await createClient();
+      await supabase.from("bookings").insert({
+        reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
+        tour_name: body.tourName || null, date: body.date || null, guests: Number(body.guests || 0) || null,
+        hotel: body.hotel || null, notes: body.message || null, amount: Number(body.amount || 0),
+        currency: String(body.currency || "USD").toUpperCase(),
+      });
+    }
 
     const [whatsappResult, bookingEmailResult, customerEmailResult] = await Promise.all([
       sendWhatsAppMessage(bookingWhatsApp, message),
