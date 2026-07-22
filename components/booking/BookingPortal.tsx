@@ -170,9 +170,9 @@ export default function BookingPortal() {
                   <span className="flex items-center gap-3 font-semibold text-slate-900"><MessageCircle className="text-green-600" /> WhatsApp support</span>
                   <span className="text-sm text-slate-500">Fastest reply</span>
                 </a>
-                <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@dailyredsea.com"}`} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-400">
+                <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com"}`} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-400">
                   <span className="flex items-center gap-3 font-semibold text-slate-900"><CalendarRange className="text-cyan-700" /> Email us</span>
-                  <span className="text-sm text-slate-500">hello@dailyredsea.com</span>
+                  <span className="text-sm text-slate-500">info@dailyredsea.com</span>
                 </a>
               </div>
             </div>

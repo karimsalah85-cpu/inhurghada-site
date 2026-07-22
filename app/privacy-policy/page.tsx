@@ -25,7 +25,7 @@ export default function PrivacyPolicyPage() {
           </section>
           <section>
             <h2 className="text-xl font-bold text-slate-900">Contact</h2>
-            <p className="mt-3 leading-8">If you have questions about this policy, contact us on WhatsApp or by email at hello@dailyredsea.com.</p>
+            <p className="mt-3 leading-8">If you have questions about this policy, contact us on WhatsApp or by email at info@dailyredsea.com.</p>
           </section>
         </div>
         <Link href="/" className="mt-10 inline-flex text-sm font-semibold text-cyan-700">← Back to home</Link>

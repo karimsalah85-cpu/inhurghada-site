@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const customerName = String(body.customerName || "").trim();
     const phone = String(body.phone || "").trim();
     const customerEmail = String(body.customerEmail || "").trim();
-    const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "karimsalah85@hotmail.com";
+    const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150";
 
     if (!customerName || !phone) {
