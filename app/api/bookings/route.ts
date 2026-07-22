@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
     const confirmationPdf = await createInvoicePdf({
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
       itemName: body.tourName || (bookingType === "transfer" ? "Private transfer" : "Daily Red Sea booking"),
-      quantity: Number(body.guests || 1), amount: Number(body.amount || 0), currency: body.currency || "usd",
-      paymentMethod: "Cash on arrival", date: body.date, hotel: body.hotel,
+      quantity: Number.parseInt(String(body.guests || "1"), 10) || 1, travelerSummary: String(body.guests || "1 traveler"), amount: Number(body.amount || 0), currency: body.currency || "usd",
+      paymentMethod: "Cash on arrival", date: body.date, time: extractBookingValue(String(body.message || ""), "Time"), hotel: body.hotel,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
@@ -177,4 +177,8 @@ function escapeHtml(value: string) {
     "'": "&#39;",
     '"': "&quot;",
   })[character] || character);
+}
+
+function extractBookingValue(message: string, label: string) {
+  return message.split("\n").find((line) => line.startsWith(`${label}:`))?.slice(label.length + 1).trim();
 }
