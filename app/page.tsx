@@ -134,7 +134,32 @@ function HomeContent() {
 
       <section className="bg-white px-6 py-10 sm:px-8"><div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-3">{["Local Hurghada operator", "Best value prices", "Hotel pickup available", "Instant WhatsApp booking", "English-speaking support", "No hidden fees"].map((item) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700"><BadgeCheck className="shrink-0 text-emerald-600" size={19}/>{item}</div>)}</div></section>
 
-      <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="max-w-2xl"><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Choose your style</p><h2 className="mt-3 text-4xl font-black text-slate-900">Hurghada experiences for every plan</h2><p className="mt-4 text-slate-600">From islands and coral reefs to desert adventures and private transport, choose an experience and book in minutes.</p></div><div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[{icon: ShipWheel,label:"Island Trips",search:"island"},{icon: Waves,label:"Diving & Snorkeling",search:"diving"},{icon: TentTree,label:"Desert Safari",search:"desert"},{icon: Plane,label:"Airport Transfers",search:"airport"},{icon: ShoppingBag,label:"Shopping Transfers",search:"senzo"},{icon: Car,label:"Private Transfers",search:"transfer"}].map(({icon: Icon,label,search: categorySearch}) => <Link key={label} href={`/?search=${categorySearch}#tours`} className="group rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg"><Icon className="text-cyan-700" size={28}/><h3 className="mt-5 text-xl font-bold text-slate-900">{label}</h3><p className="mt-2 text-sm text-slate-500">Explore options and transparent local pricing.</p><span className="mt-5 inline-block text-sm font-bold text-blue-700">Explore →</span></Link>)}</div></div></section>
+      <section className="bg-slate-50 px-6 py-20 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-3xl">
+            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Choose your style</p>
+            <h2 className="mt-3 text-4xl font-black text-slate-900">Hurghada experiences for every plan</h2>
+            <p className="mt-4 text-lg leading-8 text-slate-600">Chase turquoise water, golden-hour dunes, or a smooth door-to-door ride—your best Hurghada day starts here.</p>
+          </div>
+          <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: ShipWheel, label: "Island Trips", search: "island", description: "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: "Set sail" },
+              { icon: Waves, label: "Diving & Snorkeling", search: "diving", description: "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: "Dive in" },
+              { icon: TentTree, label: "Desert Safari", search: "desert", description: "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: "Ride the dunes" },
+              { icon: Plane, label: "Airport Transfers", search: "airport", description: "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: "Plan my pickup" },
+              { icon: ShoppingBag, label: "Shopping Transfers", search: "senzo", description: "Make Senzo Mall effortless with private pickup and a return time that suits you.", cta: "Shop your way" },
+              { icon: Car, label: "Private Transfers", search: "transfer", description: "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: "Travel privately" },
+            ].map(({ icon: Icon, label, search: categorySearch, description, cta }) => (
+              <Link key={label} href={`/?search=${categorySearch}#tours`} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg">
+                <Icon className="text-cyan-700" size={28}/>
+                <h3 className="mt-5 text-xl font-bold text-slate-900">{label}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+                <span className="mt-auto pt-5 text-sm font-bold text-blue-700">{cta} →</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="bg-slate-50 px-6 py-20 sm:px-8">
         <div className="mx-auto max-w-7xl">
