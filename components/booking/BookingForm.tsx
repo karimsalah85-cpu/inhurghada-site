@@ -32,7 +32,10 @@ type BookingFormProps = {
 const tomorrow = () => {
   const value = new Date();
   value.setDate(value.getDate() + 1);
-  return value.toISOString().slice(0, 10);
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
 
 function Counter({ label, description, value, onChange }: { label: string; description: string; value: number; onChange: (value: number) => void }) {
@@ -45,7 +48,7 @@ function Counter({ label, description, value, onChange }: { label: string; descr
       <div className="flex items-center overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <button type="button" aria-label={`Remove ${label}`} onClick={() => onChange(Math.max(0, value - 1))} className="p-2.5 text-slate-700 hover:bg-slate-100"><CircleMinus size={18} /></button>
         <span className="w-9 text-center font-bold text-slate-900">{value}</span>
-        <button type="button" aria-label={`Add ${label}`} onClick={() => onChange(value + 1)} className="p-2.5 text-blue-700 hover:bg-blue-50"><CirclePlus size={18} /></button>
+        <button type="button" aria-label={`Add ${label}`} disabled={value >= 30} onClick={() => onChange(Math.min(30, value + 1))} className="p-2.5 text-blue-700 hover:bg-blue-50 disabled:opacity-40"><CirclePlus size={18} /></button>
       </div>
     </div>
   );
@@ -59,7 +62,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const infantPrice = participantPricing?.infants;
   const times = availableTimes?.length ? availableTimes : ["Time confirmed by WhatsApp"];
   const [step, setStep] = useState<"select" | "checkout" | "success">("select");
-  const [adults, setAdults] = useState(Number(searchParams.get("guests") || 1));
+  const [adults, setAdults] = useState(Math.min(30, Math.max(1, Number(searchParams.get("guests")) || 1)));
   const [youth, setYouth] = useState(0);
   const [infants, setInfants] = useState(0);
   const [date, setDate] = useState(searchParams.get("date") || tomorrow());
@@ -92,7 +95,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
           tourName, location: location || "Hurghada", duration: duration || "Please confirm",
           price: `${formatPrice(String(total))} total`, date, guests: travelerText, hotel,
           message: `Time: ${time}\nGuide language: ${guideLanguage}${message ? `\nCustomer note: ${message}` : ""}`,
-          amount: total, currency: "usd",
+          adults, youth, infants,
           website,
         }),
       });

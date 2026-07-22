@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, CircleDollarSign, ClipboardList, Trash2, WalletCards } from "lucide-react";
+import { CheckCircle2, CircleDollarSign, ClipboardList, LogOut, Trash2, WalletCards } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import SituationReports from "@/components/admin/SituationReports";
 
@@ -64,7 +64,14 @@ export default function AdminDashboard({ initialBookings, initialExpenses }: { i
     setExpenses((items) => [data as Expense, ...items]); setExpense({ description: "", amount: "", category: "", date: today() }); setBusyId(null); router.refresh();
   }
 
+  async function signOut() {
+    setBusyId("logout");
+    await fetch("/api/admin/logout", { method: "POST" });
+    window.location.assign("/admin/login");
+  }
+
   return <>
+    <div className="mt-6 flex justify-end"><button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button></div>
     <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
       <Metric icon={<ClipboardList size={19}/>} label="Booked revenue" value={money(metrics.projected)} note={`${metrics.activeCount} active booking${metrics.activeCount === 1 ? "" : "s"}`} tone="blue" />
       <Metric icon={<WalletCards size={19}/>} label="Cash collected" value={money(metrics.collected)} note="Marked as paid" tone="emerald" />

@@ -338,8 +338,14 @@ export function verifyStripeSignature(payload: string, signature: string | null,
     return false;
   }
 
+  const timestampNumber = Number(timestamp);
+  if (!Number.isFinite(timestampNumber) || Math.abs(Math.floor(Date.now() / 1000) - timestampNumber) > 300) {
+    return false;
+  }
+
   const signedPayload = `${timestamp}.${payload}`;
   const digest = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex");
-
-  return crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(digest));
+  const supplied = Buffer.from(expectedSignature, "hex");
+  const expected = Buffer.from(digest, "hex");
+  return supplied.length === expected.length && crypto.timingSafeEqual(supplied, expected);
 }

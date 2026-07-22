@@ -16,8 +16,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const localizedPaths = [
     "",
-    "/booking",
-    "/checkout",
     "/transfers",
     "/privacy-policy",
     "/terms-conditions",
@@ -48,18 +46,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: contentUpdatedAt,
       changeFrequency: "weekly",
       priority: 0.8,
-    },
-    {
-      url: `${siteUrl}/booking`,
-      lastModified: contentUpdatedAt,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${siteUrl}/checkout`,
-      lastModified: contentUpdatedAt,
-      changeFrequency: "weekly",
-      priority: 0.6,
     },
     {
       url: `${siteUrl}/privacy-policy`,

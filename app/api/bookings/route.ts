@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
 import {
   addBooking,
   buildBookingMessage,
   buildWhatsAppLink,
   findBooking,
-  findBookingByEmail,
   sendBookingEmail,
   sendWhatsAppMessage,
 } from "@/lib/booking-service";
@@ -12,51 +12,66 @@ import { createClient } from "@/utils/supabase/server";
 import { createInvoicePdf } from "@/lib/invoice-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateBookingInput } from "@/lib/booking-validation";
+import { calculateBookingPrice } from "@/lib/booking-pricing";
+
+function bookingJson(body: unknown, init: ResponseInit = {}) {
+  const headers = new Headers(init.headers);
+  headers.set("Cache-Control", "private, no-store");
+  return NextResponse.json(body, { ...init, headers });
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const reference = searchParams.get("reference")?.trim();
   const email = searchParams.get("email")?.trim();
 
-  if (!reference && !email) {
-    return NextResponse.json({ success: false, error: "A booking reference or email is required." }, { status: 400 });
+  if (!reference || !email) {
+    return bookingJson({ success: false, error: "Your booking reference and email are required." }, { status: 400 });
   }
 
-  const booking = reference ? findBooking(reference) : findBookingByEmail(email || "");
+  const booking = findBooking(reference);
 
-  if (!booking) {
-    return NextResponse.json({ success: false, error: "Booking not found." }, { status: 404 });
+  if (!booking || booking.customerEmail?.trim().toLowerCase() !== email.toLowerCase()) {
+    return bookingJson({ success: false, error: "Booking not found." }, { status: 404 });
   }
 
-  return NextResponse.json({ success: true, booking });
+  return bookingJson({ success: true, booking });
 }
 
 export async function POST(request: NextRequest) {
   try {
     const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     const limit = rateLimit(`booking:${clientAddress}`);
-    if (!limit.allowed) return NextResponse.json({ success: false, error: "Too many booking attempts. Please try again shortly." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
+    if (!limit.allowed) return bookingJson({ success: false, error: "Too many booking attempts. Please try again shortly." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
+
+    const origin = request.headers.get("origin");
+    if (origin && new URL(origin).host !== request.nextUrl.host) {
+      return bookingJson({ success: false, error: "Invalid booking origin." }, { status: 403 });
+    }
 
     const validation = validateBookingInput(await request.json());
-    if (validation.spam) return NextResponse.json({ success: true });
-    if (!validation.data) return NextResponse.json({ success: false, error: validation.error }, { status: 400 });
+    if (validation.spam) return bookingJson({ success: true });
+    if (!validation.data) return bookingJson({ success: false, error: validation.error }, { status: 400 });
     const body = validation.data;
     const bookingType = body.type;
     const { customerName, phone, customerEmail, hotel } = body;
+    const pricing = calculateBookingPrice(body);
+    if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
+    const { amount, guests: guestCount, guestSummary, tourName, price } = pricing.data;
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201004933150";
 
-    const reference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${Date.now().toString().slice(-6)}`;
+    const reference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomBytes(3).toString("hex").toUpperCase()}`;
     const message = buildBookingMessage({
       reference,
       customerName,
       phone,
-      tourName: body.tourName,
+      tourName,
       location: body.location,
       duration: body.duration,
-      price: body.price,
+      price,
       date: body.date,
-      guests: body.guests,
+      guests: guestSummary,
       hotel,
       message: body.message,
     });
@@ -67,15 +82,15 @@ export async function POST(request: NextRequest) {
       phone,
       customerEmail,
       date: body.date,
-      guests: body.guests,
+      guests: guestSummary,
       hotel: body.hotel,
-      tourName: body.tourName,
+      tourName,
       message: body.message,
     });
     const confirmationPdf = await createInvoicePdf({
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
-      itemName: body.tourName || (bookingType === "transfer" ? "Private transfer" : "Daily Red Sea booking"),
-      quantity: Number.parseInt(String(body.guests || "1"), 10) || 1, travelerSummary: String(body.guests || "1 traveler"), amount: body.amount, currency: body.currency,
+      itemName: tourName,
+      quantity: guestCount, travelerSummary: guestSummary, amount, currency: "usd",
       paymentMethod: "Cash on arrival", date: body.date, time: extractBookingValue(String(body.message || ""), "Time"), hotel,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
@@ -88,14 +103,14 @@ export async function POST(request: NextRequest) {
       customerEmail: customerEmail || undefined,
       status: "submitted",
       createdAt: new Date().toISOString(),
-      amount: body.amount,
-      currency: body.currency,
-      tourName: body.tourName,
+      amount,
+      currency: "usd",
+      tourName,
       location: body.location,
       duration: body.duration,
-      price: body.price,
+      price,
       date: body.date,
-      guests: body.guests,
+      guests: guestSummary,
       hotel,
       message: body.message,
     });
@@ -104,13 +119,13 @@ export async function POST(request: NextRequest) {
       const supabase = await createClient();
       const { error: bookingError } = await supabase.from("bookings").insert({
         reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
-        tour_name: body.tourName || null, date: body.date || null, guests: Number(body.guests || 0) || null,
-        hotel: hotel || null, notes: body.message || null, amount: body.amount,
-        currency: body.currency.toUpperCase(),
+        tour_name: tourName, date: body.date || null, guests: guestCount,
+        hotel: hotel || null, notes: body.message || null, amount,
+        currency: "USD",
       });
       if (bookingError) {
         console.error("Booking database save failed", bookingError);
-        return NextResponse.json({ success: false, error: "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: 503 });
+        return bookingJson({ success: false, error: "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: 503 });
       }
     }
 
@@ -122,7 +137,7 @@ export async function POST(request: NextRequest) {
         : Promise.resolve({ success: false, reason: "no-customer-email" }),
     ]);
 
-    return NextResponse.json({
+    return bookingJson({
       success: true,
       booking,
       reference,
@@ -136,7 +151,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Booking submission failed", error);
-    return NextResponse.json({ success: false, error: "Booking submission failed" }, { status: 500 });
+    return bookingJson({ success: false, error: "Booking submission failed" }, { status: 500 });
   }
 }
 

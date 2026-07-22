@@ -80,49 +80,56 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
     trackEvent("booking_start", { booking_type: "transfer", item_name: serviceName, value: total, currency: "USD" });
 
     setSubmitting(true);
-    const response = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "transfer",
-        customerName: name.trim(),
-        phone: phone.trim(),
-        customerEmail: email.trim(),
-        tourName: serviceName,
-        location: `${pickup} to ${dropoff}`,
-        duration: "One way",
-        price: `$${total.toFixed(2)} fixed one-way fare`,
-        guests: passengers,
-        date,
-        hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
-        message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} (${resortSupplement ? `$${baseFare} base + $7 resort supplement` : `$${baseFare} base`})\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
-        amount: total,
-        currency: "usd",
-        website,
-      }),
-    });
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "transfer",
+          customerName: name.trim(),
+          phone: phone.trim(),
+          customerEmail: email.trim(),
+          tourName: serviceName,
+          location: `${pickup} to ${dropoff}`,
+          duration: "One way",
+          price: `$${total.toFixed(2)} fixed one-way fare`,
+          guests: passengers,
+          date,
+          hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
+          message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} (${resortSupplement ? `$${baseFare} base + $7 resort supplement` : `$${baseFare} base`})\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
+          service,
+          pickup,
+          dropoff,
+          passengers: passengerCount,
+          travelBags: bagCount,
+          website,
+        }),
+      });
 
-    const data = await response.json();
-    setSubmitting(false);
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        alert(data.error || "Transfer request failed. Please try again.");
+        return;
+      }
 
-    if (!response.ok || !data.success) {
-      alert(data.error || "Transfer request failed. Please try again.");
-      return;
+      trackEvent("booking_complete", { transaction_id: data.reference, booking_type: "transfer", item_name: serviceName, value: total, currency: "USD" });
+
+      if (!data.whatsappSent) {
+        window.location.href = data.whatsappUrl;
+        return;
+      }
+
+      if (!data.emailSent) {
+        alert(`Transfer request received. Your reference is ${data.reference}. We sent it on WhatsApp; email notification is not configured yet. Payment is cash on arrival.`);
+        return;
+      }
+
+      alert(`Transfer request received. Your reference is ${data.reference}. Payment is cash on arrival. We will confirm shortly.`);
+    } catch {
+      alert("We could not reach the booking service. Check your connection and try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    trackEvent("booking_complete", { transaction_id: data.reference, booking_type: "transfer", item_name: serviceName, value: total, currency: "USD" });
-
-    if (!data.whatsappSent) {
-      window.location.href = data.whatsappUrl;
-      return;
-    }
-
-    if (!data.emailSent) {
-      alert(`Transfer request received. Your reference is ${data.reference}. We sent it on WhatsApp; email notification is not configured yet. Payment is cash on arrival.`);
-      return;
-    }
-
-    alert(`Transfer request received. Your reference is ${data.reference}. Payment is cash on arrival. We will confirm shortly.`);
   }
 
   return (

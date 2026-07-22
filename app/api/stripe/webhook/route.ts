@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!secret) {
-    return NextResponse.json({ received: true, skipped: true, reason: "missing-webhook-secret" });
+    return NextResponse.json({ error: "Webhook is not configured." }, { status: 503 });
   }
 
   if (!verifyStripeSignature(payload, signature, secret)) {

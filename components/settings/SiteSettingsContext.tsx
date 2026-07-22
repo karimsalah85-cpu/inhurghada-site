@@ -92,6 +92,17 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
   const [rates, setRates] = useState<Record<Currency, number>>(exchangeRates);
 
   useEffect(() => {
+    const savedCurrency = window.localStorage.getItem("daily-red-sea-currency") as Currency | null;
+    if (!savedCurrency || !currencies.includes(savedCurrency)) return;
+    const update = window.setTimeout(() => setCurrency(savedCurrency), 0);
+    return () => window.clearTimeout(update);
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("daily-red-sea-currency", currency);
+  }, [currency]);
+
+  useEffect(() => {
     const controller = new AbortController();
     fetch("/api/exchange-rates", { signal: controller.signal })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Rate request failed")))

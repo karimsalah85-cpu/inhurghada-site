@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { createReportPdf } from "@/lib/report-service";
 import { createClient } from "@/utils/supabase/server";
 
@@ -72,10 +72,21 @@ export async function GET(request: NextRequest) {
   ];
 
   if (format === "xlsx") {
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(summary), "Summary");
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), "Detailed data");
-    const output = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Daily Red Sea";
+    workbook.created = new Date();
+    const summarySheet = workbook.addWorksheet("Summary");
+    summarySheet.addRows(summary);
+    summarySheet.getColumn(1).width = 30;
+    summarySheet.getColumn(2).width = 48;
+    summarySheet.getRow(1).font = { bold: true, size: 16 };
+
+    const detailsSheet = workbook.addWorksheet("Detailed data");
+    detailsSheet.columns = Object.keys(rows[0] || { Reference: "", Trip: "", "Service date": "", People: 0, Status: "", Amount: 0, Currency: "" }).map((header) => ({ header, key: header, width: header === "Trip" ? 34 : 18 }));
+    detailsSheet.addRows(rows);
+    detailsSheet.getRow(1).font = { bold: true };
+    detailsSheet.views = [{ state: "frozen", ySplit: 1 }];
+    const output = await workbook.xlsx.writeBuffer();
     return new NextResponse(new Uint8Array(output), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

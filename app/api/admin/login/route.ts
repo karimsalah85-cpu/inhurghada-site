@@ -3,6 +3,11 @@ import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/utils/supabase/server";
 
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get("origin");
+  if (origin && new URL(origin).host !== request.nextUrl.host) {
+    return NextResponse.json({ error: "Invalid sign-in origin." }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  }
+
   const forwardedFor = request.headers.get("x-forwarded-for");
   const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
   const attempt = rateLimit(`admin-login:${clientIp}`, 8, 15 * 60 * 1000);

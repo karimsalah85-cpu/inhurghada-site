@@ -50,8 +50,8 @@ export default function BookingPortal() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!reference.trim() && !email.trim()) {
-      setStatus("Please enter your booking reference or email address so we can look it up.");
+    if (!reference.trim() || !email.trim()) {
+      setStatus("Enter both your booking reference and the email used for the booking.");
       setBooking(null);
       return;
     }
@@ -61,9 +61,7 @@ export default function BookingPortal() {
     setBooking(null);
 
     try {
-      const query = reference.trim()
-        ? `reference=${encodeURIComponent(reference.trim())}`
-        : `email=${encodeURIComponent(email.trim())}`;
+      const query = `reference=${encodeURIComponent(reference.trim())}&email=${encodeURIComponent(email.trim())}`;
       const response = await fetch(`/api/bookings?${query}`);
       const data = await response.json();
 
@@ -109,7 +107,7 @@ export default function BookingPortal() {
             <div className="rounded-3xl border border-white/10 bg-white/10 p-8 backdrop-blur">
               <h2 className="text-2xl font-bold">Find my booking</h2>
               <p className="mt-3 text-slate-300">
-                Enter your booking reference or email address to access your reservation.
+                Enter your booking reference and booking email. Requiring both protects your personal trip details.
               </p>
               <form onSubmit={handleSubmit} className="mt-8 space-y-4">
                 <label className="block text-sm font-medium text-slate-200">
@@ -117,7 +115,8 @@ export default function BookingPortal() {
                   <input
                     value={reference}
                     onChange={(event) => setReference(event.target.value)}
-                    placeholder="EG-2026-01425"
+                    placeholder="DRS-20260722-A1B2C3"
+                    required
                     className="mt-2 w-full rounded-xl border border-white/20 bg-slate-950/50 px-4 py-3 text-white outline-none focus:border-cyan-400"
                   />
                 </label>
@@ -128,6 +127,7 @@ export default function BookingPortal() {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
+                    required
                     className="mt-2 w-full rounded-xl border border-white/20 bg-slate-950/50 px-4 py-3 text-white outline-none focus:border-cyan-400"
                   />
                 </label>

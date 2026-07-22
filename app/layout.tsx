@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
@@ -63,17 +64,21 @@ export const metadata: Metadata = {
 
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
 
 
+  const requestedLocale = (await headers()).get("x-daily-red-sea-locale") || "en";
+  const documentLocale = ["en", "ar", "de", "ru", "pl", "zh"].includes(requestedLocale) ? requestedLocale : "en";
+
   return (
 
     <html
-      lang="en"
+      lang={documentLocale}
+      dir={documentLocale === "ar" ? "rtl" : "ltr"}
       className="h-full antialiased"
     >
 

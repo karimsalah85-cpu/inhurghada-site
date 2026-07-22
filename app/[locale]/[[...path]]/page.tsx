@@ -57,6 +57,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     title,
     description,
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
+    robots: kind === "booking" || kind === "checkout" ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: { title, description, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [defaultSocialImage] },
   };
 }
