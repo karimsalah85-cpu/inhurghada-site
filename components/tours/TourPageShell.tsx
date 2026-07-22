@@ -38,6 +38,7 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
               <BookingForm
                 tourName={tour.title}
                 price={tour.price}
+                priceUnit={tour.priceUnit}
                 duration={tour.duration}
                 location={tour.location}
               />

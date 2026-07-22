@@ -17,6 +17,7 @@ import {
 type BookingFormProps = {
   tourName: string;
   price?: string;
+  priceUnit?: string;
   duration?: string;
   location?: string;
 };
@@ -27,6 +28,7 @@ export default function BookingForm({
 
   tourName,
   price,
+  priceUnit,
   duration,
   location,
 }: BookingFormProps) {
@@ -73,7 +75,7 @@ export default function BookingForm({
         tourName,
         location: location || "Hurghada",
         duration: duration || "Please confirm",
-        price: price ? `${formatPrice(price)} per person` : "Please confirm",
+        price: price ? `${formatPrice(price)} ${priceUnit ?? "per person"}` : "Please confirm",
         date,
         guests,
         hotel,

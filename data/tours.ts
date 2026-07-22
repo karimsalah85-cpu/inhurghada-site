@@ -16,6 +16,7 @@ export type Tour = {
   packageDescription?: string;
   packagePrice?: string;
   packageLabel?: string;
+  priceUnit?: string;
   itinerary?: string[];
 };
 
@@ -146,6 +147,66 @@ export const tours: Tour[] = [
       "Sunset experience",
     ],
 
+  },
+
+  {
+    slug: "professional-underwater-photographer",
+
+    title: "Professional Underwater Photographer",
+
+    image: "/images/scuba-diving.jpg",
+
+    // Prices are stored in USD and converted by the site's currency selector.
+    // At the current EUR conversion rate, this displays as €120.00 per day.
+    price: "137.02",
+
+    rating: "5.0",
+    reviews: "12",
+
+    location: "Hurghada, Egypt",
+
+    duration: "Full day",
+
+    description:
+      "Bring your Red Sea adventure home with a dedicated professional underwater photographer. Enjoy a full day of high-quality underwater and surface photography while you dive, snorkel, or explore by boat.",
+
+    highlights: [
+      "Dedicated professional underwater photographer",
+      "Underwater and above-water photos throughout the day",
+      "Ideal for diving, snorkeling, boat trips, and private experiences",
+      "Beautiful Red Sea memories captured professionally",
+    ],
+
+    included: [
+      "Professional photographer for one full day",
+      "Underwater photography equipment",
+      "Edited digital photo selection",
+      "Coordination with your boat trip, dive, or snorkeling activity",
+    ],
+
+    notIncluded: [
+      "Boat trip, diving, or snorkeling activity fees",
+      "Hotel transfers unless arranged with your experience",
+      "Printed albums or additional edited images",
+    ],
+
+    notes: [
+      "Please book in advance to confirm photographer availability.",
+      "Share your planned activity and departure time when booking.",
+      "The service is priced per photographer, per full day.",
+    ],
+
+    packageName: "Full-Day Underwater Photography Service",
+    packageDescription: "A dedicated professional photographer to capture your Red Sea experience for a full day.",
+    packagePrice: "137.02",
+    packageLabel: "Per day",
+    priceUnit: "per day",
+    itinerary: [
+      "Confirm your activity, meeting point, and preferred photo style",
+      "Meet your photographer before departure",
+      "Capture underwater and above-water moments throughout the day",
+      "Receive your edited digital photo selection after the experience",
+    ],
   },
 
 

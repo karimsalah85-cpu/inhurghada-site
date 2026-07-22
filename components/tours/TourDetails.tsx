@@ -24,7 +24,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> Price</div>
-            <p className="mt-3 text-xl font-semibold text-slate-900">{formatPrice(tour.price)} per person</p>
+            <p className="mt-3 text-xl font-semibold text-slate-900">{formatPrice(tour.price)} {tour.priceUnit ?? "per person"}</p>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
               </div>
               <div className="text-right">
                 <p className="text-sm text-slate-500">Starting from</p>
-                <p className="text-2xl font-bold text-cyan-700">${tour.packagePrice ?? tour.price}</p>
+                <p className="text-2xl font-bold text-cyan-700">{formatPrice(tour.packagePrice ?? tour.price)}</p>
               </div>
             </div>
             <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-cyan-700">
