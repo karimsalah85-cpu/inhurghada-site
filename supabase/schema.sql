@@ -36,3 +36,6 @@ alter table public.expenses enable row level security;
 
 create policy "Authenticated admins manage bookings" on public.bookings for all to authenticated using (true) with check (true);
 create policy "Authenticated admins manage expenses" on public.expenses for all to authenticated using (true) with check (true);
+
+-- Public booking forms can create requests, but only authenticated admins can view or edit them.
+create policy "Visitors can create bookings" on public.bookings for insert to anon with check (true);

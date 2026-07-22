@@ -99,12 +99,16 @@ export async function POST(request: NextRequest) {
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
       const supabase = await createClient();
-      await supabase.from("bookings").insert({
+      const { error: bookingError } = await supabase.from("bookings").insert({
         reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
         tour_name: body.tourName || null, date: body.date || null, guests: Number(body.guests || 0) || null,
         hotel: body.hotel || null, notes: body.message || null, amount: Number(body.amount || 0),
         currency: String(body.currency || "USD").toUpperCase(),
       });
+      if (bookingError) {
+        console.error("Booking database save failed", bookingError);
+        return NextResponse.json({ success: false, error: "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: 503 });
+      }
     }
 
     const [whatsappResult, bookingEmailResult, customerEmailResult] = await Promise.all([
