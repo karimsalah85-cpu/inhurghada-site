@@ -18,6 +18,12 @@ export type Tour = {
   packageLabel?: string;
   priceUnit?: string;
   itinerary?: string[];
+  participantPricing?: {
+    adults: number;
+    youth?: number;
+    infants?: number;
+  };
+  availableTimes?: string[];
 };
 
 
@@ -101,6 +107,8 @@ export const tours: Tour[] = [
     packageDescription: "Escape to Orange Bay Island from Hurghada. Relax, swim and snorkel on a luxury yacht with lunch and hotel transfers.",
     packagePrice: "25",
     packageLabel: "Adult",
+    participantPricing: { adults: 25, youth: 15, infants: 0 },
+    availableTimes: ["08:00"],
     itinerary: [
       "Hotel pickup in Hurghada and transfer to the marina",
       "Luxury yacht cruise across the crystal-clear Red Sea",
