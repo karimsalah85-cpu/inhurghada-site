@@ -57,7 +57,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const adultPrice = participantPricing?.adults ?? Number(price || 0);
   const youthPrice = participantPricing?.youth;
   const infantPrice = participantPricing?.infants;
-  const times = availableTimes?.length ? availableTimes : ["08:00"];
+  const times = availableTimes?.length ? availableTimes : ["Time confirmed by WhatsApp"];
   const [step, setStep] = useState<"select" | "checkout" | "success">("select");
   const [adults, setAdults] = useState(Number(searchParams.get("guests") || 1));
   const [youth, setYouth] = useState(0);
