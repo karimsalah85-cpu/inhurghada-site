@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import PDFDocument from "pdfkit";
 import * as XLSX from "xlsx";
+import { createReportPdf } from "@/lib/report-service";
 import { createClient } from "@/utils/supabase/server";
 
 export const runtime = "nodejs";
@@ -17,43 +17,6 @@ type ReportRow = {
   Amount: number;
   Currency: string;
 };
-
-function createPdfStream(summary: unknown[][], rows: ReportRow[]) {
-  let document: PDFKit.PDFDocument | undefined;
-
-  return new ReadableStream<Uint8Array>({
-    start(controller) {
-      try {
-        document = new PDFDocument({ margin: 42 });
-        document.on("data", (chunk: Buffer) => controller.enqueue(new Uint8Array(chunk)));
-        document.on("end", () => controller.close());
-        document.on("error", (error: Error) => controller.error(error));
-
-        document.fontSize(18).text("Daily Red Sea - Situation Report");
-        document.moveDown();
-        summary
-          .slice(1)
-          .forEach((line) => document?.fontSize(10).text(`${line[0]}: ${line[1]}`));
-        document.moveDown();
-        rows.forEach((row, index) => {
-          if (!document) return;
-          if (document.y > 720) document.addPage();
-          document
-            .fontSize(9)
-            .text(
-              `${index + 1}. ${row.Reference} | ${row.Trip} | ${row["Service date"]} | ${row.People} people | ${row.Status} | ${row.Amount.toFixed(2)} ${row.Currency}`,
-            );
-        });
-        document.end();
-      } catch (error) {
-        controller.error(error);
-      }
-    },
-    cancel() {
-      document?.destroy();
-    },
-  });
-}
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -123,7 +86,27 @@ export async function GET(request: NextRequest) {
   }
 
   if (format === "pdf") {
-    return new Response(createPdfStream(summary, rows), {
+    const output = createReportPdf({
+      from,
+      to,
+      trip,
+      status,
+      generatedAt: new Date().toISOString(),
+      bookings: rows.length,
+      people: active.reduce((sum, item) => sum + Number(item.People), 0),
+      cancelled: rows.length - active.length,
+      revenue: active.reduce((sum, item) => sum + Number(item.Amount), 0),
+      rows: rows.map((row) => ({
+        reference: String(row.Reference ?? ""),
+        trip: String(row.Trip ?? ""),
+        serviceDate: row["Service date"],
+        people: row.People,
+        status: row.Status,
+        amount: row.Amount,
+        currency: row.Currency,
+      })),
+    });
+    return new NextResponse(new Uint8Array(output), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": "attachment; filename=\"daily-red-sea-situation-report.pdf\"",
