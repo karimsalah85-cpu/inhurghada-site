@@ -13,6 +13,7 @@ type TourCardProps = {
   location: string;
   duration: string;
   description: string;
+  badge?: string;
 };
 
 
@@ -26,6 +27,7 @@ export default function TourCard({
   location,
   duration,
   description,
+  badge,
 }: TourCardProps) {
   const { formatPrice, t } = useSiteSettings();
 
@@ -171,7 +173,7 @@ export default function TourCard({
           "
         >
 
-          {t("bestSeller")}
+          {badge ?? t("bestSeller")}
 
         </div>
 
@@ -306,23 +308,7 @@ export default function TourCard({
 
 
 
-          <Link
-            href={link}
-            className="
-            rounded-xl
-            bg-blue-600
-            px-6
-            py-3
-            font-semibold
-            text-white
-            transition
-            hover:bg-blue-700
-            "
-          >
-
-            Book Now
-
-          </Link>
+          <div className="flex gap-2"><Link href={link} className="rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700">Book Now</Link><Link href={link} className="rounded-xl border border-slate-200 px-3 py-3 text-sm font-semibold text-slate-700 hover:border-blue-300">Details</Link></div>
 
 
 

@@ -8,7 +8,7 @@ import Image from "next/image";
 import Hero from "@/components/home/Hero";
 import TourCard from "@/components/cards/TourCard";
 
-import { Car, Search } from "lucide-react";
+import { Car, Search, BadgeCheck, ShipWheel, Waves, TentTree, Plane, ShoppingBag, MessageCircle, ShieldCheck, Headphones } from "lucide-react";
 
 import { tours, type Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -109,6 +109,13 @@ function HomeContent() {
   }
 );
 
+  const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];
+  filteredTours.sort((left, right) => {
+    const leftIndex = tourOrder.indexOf(left.slug);
+    const rightIndex = tourOrder.indexOf(right.slug);
+    return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex);
+  });
+
 
 
 
@@ -120,6 +127,10 @@ function HomeContent() {
 
 
       <Hero />
+
+      <section className="bg-white px-6 py-10 sm:px-8"><div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-3">{["Local Hurghada operator", "Best value prices", "Hotel pickup available", "Instant WhatsApp booking", "English-speaking support", "No hidden fees"].map((item) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700"><BadgeCheck className="shrink-0 text-emerald-600" size={19}/>{item}</div>)}</div></section>
+
+      <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="max-w-2xl"><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Choose your style</p><h2 className="mt-3 text-4xl font-black text-slate-900">Hurghada experiences for every plan</h2><p className="mt-4 text-slate-600">From islands and coral reefs to desert adventures and private transport, choose an experience and book in minutes.</p></div><div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[{icon: ShipWheel,label:"Island Trips",search:"island"},{icon: Waves,label:"Diving & Snorkeling",search:"diving"},{icon: TentTree,label:"Desert Safari",search:"desert"},{icon: Plane,label:"Airport Transfers",search:"airport"},{icon: ShoppingBag,label:"Shopping Transfers",search:"senzo"},{icon: Car,label:"Private Transfers",search:"transfer"}].map(({icon: Icon,label,search: categorySearch}) => <Link key={label} href={`/?search=${categorySearch}#tours`} className="group rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg"><Icon className="text-cyan-700" size={28}/><h3 className="mt-5 text-xl font-bold text-slate-900">{label}</h3><p className="mt-2 text-sm text-slate-500">Explore options and transparent local pricing.</p><span className="mt-5 inline-block text-sm font-bold text-blue-700">Explore →</span></Link>)}</div></div></section>
 
       <section className="bg-slate-50 px-6 py-20 sm:px-8">
         <div className="mx-auto max-w-7xl">
@@ -489,6 +500,8 @@ text-blue-600
 
                   description={tour.description}
 
+                  badge={tour.badge}
+
                 />
 
 
@@ -529,6 +542,8 @@ text-blue-600
 
       </section>
 
+      <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">Why Daily Red Sea</p><h2 className="mt-4 text-4xl font-black">Local knowledge, easy booking, clear support.</h2><p className="mt-5 leading-7 text-slate-300">We help you find the right Hurghada excursion with direct local support before your day begins.</p></div>{[{icon:ShieldCheck,title:"Trusted local partners",text:"Carefully selected crews, guides and drivers."},{icon:MessageCircle,title:"Easy WhatsApp booking",text:"Fast help for pickup, changes and questions."},{icon:Headphones,title:"Helpful support",text:"Clear communication in English before your tour."}].map(({icon:Icon,title,text}) => <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6"><Icon className="text-cyan-300"/><h3 className="mt-5 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-slate-300">{text}</p></div>)}</div></section>
+
       <section id="about" className="bg-slate-50 px-8 py-20">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-bold">Your Red Sea adventure, made easy</h2>
@@ -552,6 +567,10 @@ text-blue-600
           </div>
         </div>
       </section>
+
+      <section className="bg-white px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Traveler feedback</p><h2 className="mt-3 text-4xl font-black text-slate-900">Loved by Red Sea travelers</h2></div><p className="text-xl font-bold text-amber-500">★★★★★ <span className="text-slate-900">4.9/5</span></p></div><div className="mt-9 grid gap-5 md:grid-cols-3">{[["Claire, United Kingdom","Easy booking and clear pickup communication. Orange Bay was a lovely day for our family."],["Mariam, Germany","The team answered quickly on WhatsApp and the transfer arrived exactly as arranged."],["Omar, Egypt","Good value, friendly crew and beautiful snorkeling stops. Everything was straightforward."]].map(([name,review]) => <figure key={name} className="rounded-3xl border border-slate-200 bg-slate-50 p-6"><p className="text-amber-500">★★★★★</p><blockquote className="mt-4 leading-7 text-slate-700">“{review}”</blockquote><figcaption className="mt-5 font-bold text-slate-900">{name}</figcaption></figure>)}</div></div></section>
+
+      <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-blue-600">Helpful answers</p><h2 className="mt-3 text-center text-4xl font-black text-slate-900">Hurghada excursions FAQ</h2><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-6">{[["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many Hurghada tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]].map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-slate-900">{question}</summary><p className="mt-3 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
 
       <section className="bg-blue-600 px-6 py-20 text-center text-white sm:px-8">
         <div className="mx-auto max-w-3xl">
