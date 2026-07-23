@@ -11,6 +11,10 @@ export default function OrganizationSchema() {
     image: absoluteUrl("/og-image.svg"),
     email: "info@dailyredsea.com",
     telephone: "+201004933150",
+    sameAs: [
+      "https://www.facebook.com/profile.php?id=61592247695069",
+      "https://www.instagram.com/dailyredsea.com7/",
+    ],
     address: {
       "@type": "PostalAddress",
       addressLocality: "Hurghada",

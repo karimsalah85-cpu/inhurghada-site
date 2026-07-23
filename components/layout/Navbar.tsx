@@ -7,6 +7,7 @@ import { currencies, languages, useSiteSettings } from "@/components/settings/Si
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath } from "@/lib/i18n";
+import SocialLinks from "@/components/layout/SocialLinks";
 
 
 export default function Navbar() {
@@ -150,6 +151,7 @@ export default function Navbar() {
             setLanguage={setLanguage}
           />
 
+          <SocialLinks />
 
         </div>
 
@@ -283,6 +285,7 @@ export default function Navbar() {
             mobile
           />
 
+          <SocialLinks className="mt-1" />
 
         </div>
 

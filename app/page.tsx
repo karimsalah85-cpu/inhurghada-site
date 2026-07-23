@@ -15,6 +15,7 @@ import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
+import SocialLinks from "@/components/layout/SocialLinks";
 
 
 
@@ -616,6 +617,7 @@ text-blue-600
           <div>
             <p className="text-xl font-bold text-white">Daily Red Sea</p>
             <p className="mt-3 max-w-sm leading-relaxed">Tours, excursions and private transfers for unforgettable days in Hurghada.</p>
+            <SocialLinks className="mt-5" dark />
           </div>
           <div>
             <p className="font-semibold text-white">Explore</p>
