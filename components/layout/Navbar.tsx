@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
@@ -16,6 +17,7 @@ export default function Navbar() {
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
   const { currency, language, setCurrency, setLanguage, t } = useSiteSettings();
+  const pathname = usePathname();
 
 
   function closeMenu() {
@@ -46,7 +48,7 @@ export default function Navbar() {
       z-50
       w-full
       border-b border-slate-200/80
-      bg-white/85
+      bg-white/95
       backdrop-blur-xl
       shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]
       "
@@ -57,12 +59,12 @@ export default function Navbar() {
         className="
         mx-auto
         flex
-        max-w-7xl
+        max-w-[1500px]
         items-center
         justify-between
         px-5
-        py-3
-        md:px-8
+        py-2.5
+        sm:px-8
         "
       >
 
@@ -72,13 +74,13 @@ export default function Navbar() {
         <Link
           href={localePath(language)}
           onClick={closeMenu}
-          className="flex items-center gap-3 rounded-full bg-slate-950/5 px-3 py-2 transition hover:bg-slate-950/10"
+          className="flex shrink-0 items-center gap-3 rounded-2xl px-2 py-1.5 transition hover:bg-slate-100"
         >
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/20">
-            <span className="text-lg font-black text-white">DR</span>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/20">
+            <span className="text-base font-black text-white">DR</span>
           </div>
-          <div className="leading-tight">
-            <p className="text-sm font-black uppercase tracking-[0.25em] text-slate-900">Daily Red Sea</p>
+          <div className="whitespace-nowrap leading-tight">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">Daily Red Sea</p>
             <p className="text-xs text-slate-500">Tours & transfers</p>
           </div>
         </Link>
@@ -92,12 +94,13 @@ export default function Navbar() {
           className="
           hidden
           items-center
-          gap-8
-          md:flex
+          gap-3
+          xl:flex
           "
         >
 
-          <NavLink href={localePath(language)}>
+          <div className="flex items-center gap-1 rounded-2xl bg-slate-100/80 p-1">
+          <NavLink href={localePath(language)} active={pathname === localePath(language)}>
             {t("home")}
           </NavLink>
 
@@ -107,21 +110,14 @@ export default function Navbar() {
           </NavLink>
 
 
-          <NavLink href={localePath(language, "/transfers")}>
+          <NavLink href={localePath(language, "/transfers")} active={pathname === localePath(language, "/transfers")}>
             {t("transfers")}
           </NavLink>
 
-          <NavLink href={localePath(language, "/booking")}>
-            {t("booking")}
-          </NavLink>
-
-          <NavLink href={localePath(language, "/checkout")}>
-            {t("checkout")}
-          </NavLink>
-
-          <NavLink href={localePath(language, "/about")}>
+          <NavLink href={localePath(language, "/about")} active={pathname === localePath(language, "/about")}>
             {t("about")}
           </NavLink>
+          </div>
 
 
 
@@ -130,8 +126,9 @@ export default function Navbar() {
             className="
             rounded-full
             bg-gradient-to-r from-cyan-600 to-blue-700
-            px-6
-            py-3
+            whitespace-nowrap
+            px-5
+            py-2.5
             font-semibold
             text-white
             shadow-lg shadow-cyan-500/20
@@ -166,9 +163,12 @@ export default function Navbar() {
           ref={menuButtonRef}
           onClick={() => setOpen((current) => !current)}
           className="
-          rounded-lg
-          p-2
-          md:hidden
+          rounded-xl
+          border border-slate-200
+          bg-slate-50
+          p-2.5
+          text-slate-800
+          xl:hidden
           "
           aria-label={open ? "Close navigation menu" : "Open navigation menu"}
           aria-expanded={open}
@@ -198,16 +198,7 @@ export default function Navbar() {
         <div
           id="mobile-navigation"
           aria-label="Mobile navigation"
-          className="
-          flex
-          flex-col
-          gap-4
-          border-t
-          bg-white
-          px-6
-          py-6
-          md:hidden
-          "
+          className="flex max-h-[calc(100vh-68px)] flex-col gap-2 overflow-y-auto border-t border-slate-200 bg-white px-6 py-5 shadow-xl xl:hidden"
         >
 
 
@@ -264,7 +255,7 @@ export default function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             className="
-            mt-2
+            mt-3
             rounded-xl
             bg-green-600
             px-5
@@ -312,19 +303,19 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "w-full rounded-lg border border-gray-200 bg-white px-3 py-3 text-left text-sm"
-    : "rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm";
+    ? "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-medium outline-none focus:border-cyan-500"
+    : "rounded-xl border-0 bg-transparent px-2 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
 
   return (
-    <div className={mobile ? "grid gap-3" : "flex items-center gap-2"}>
+    <div className={mobile ? "grid gap-3 rounded-2xl bg-slate-50 p-3" : "flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm"}>
       <label className="sr-only" htmlFor={mobile ? "mobile-language" : "language"}>Language</label>
       <select id={mobile ? "mobile-language" : "language"} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className={selectClass}>
         {languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
       </select>
-      <div>
+      <div className={mobile ? "" : "flex items-center border-l border-slate-200 pl-1"}>
         <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Display currency</label>
         <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" className="mt-1 block text-center text-[9px] text-slate-400 hover:text-slate-600">Rates by Exchange Rate API</a>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title="Currency rates by Exchange Rate API" className={mobile ? "mt-2 block text-center text-[10px] font-medium text-slate-400 hover:text-slate-600" : "rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600"}>{mobile ? "Rates by Exchange Rate API" : "Rates"}</a>
       </div>
     </div>
   );
@@ -335,20 +326,20 @@ function SettingsSelectors({
 
 function NavLink({
   href,
-  children
+  children,
+  active = false,
 }:{
   href:string;
   children:React.ReactNode;
+  active?: boolean;
 }) {
 
   return (
 
     <Link
       href={href}
-      className="
-      transition
-      hover:text-blue-600
-      "
+      aria-current={active ? "page" : undefined}
+      className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition ${active ? "bg-white text-blue-700 shadow-sm" : "text-slate-700 hover:bg-white/80 hover:text-blue-700"}`}
     >
 
       {children}
@@ -381,12 +372,7 @@ function MobileLink({
       href={href}
       ref={linkRef}
       onClick={close}
-      className="
-      rounded-lg
-      py-3
-      text-lg
-      font-medium
-      "
+      className="rounded-xl px-3 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-100 hover:text-blue-700"
     >
 
       {children}
