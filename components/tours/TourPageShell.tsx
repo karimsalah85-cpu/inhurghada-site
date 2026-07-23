@@ -13,6 +13,8 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
   const galleryImages = transferService
     ? ["/images/hurghada-airport-transfer.jpg", "/images/senzo-transfer.jpg", "/images/transfer.jpg", "/images/hero.jpg"]
+    : tour.category === "Cultural Day Trip"
+      ? ["/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg", "/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg"]
     : tour.category === "Desert Safari"
       ? ["/images/desert-safari.jpg", "/images/quad-safari-sunset.jpg", "/images/desert-safari.jpg", "/images/quad-safari-sunset.jpg"]
       : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"];

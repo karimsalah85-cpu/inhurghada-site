@@ -9,6 +9,8 @@ export const metadata: Metadata = pageMetadata({
 });
 
 const credits = [
+  { use: "Private Luxor day trip", work: "Luxor Valley of the Kings", creator: "Wouter Hagens", source: "https://commons.wikimedia.org/wiki/File:Luxor_Valley_of_the_Kings_D.jpg", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
+  { use: "Luxor tour gallery", work: "The Great Hypostyle Hall, Karnak Temple", creator: "Warren LeMay", source: "https://commons.wikimedia.org/wiki/File:The_Great_Hypostyle_Hall,_Karnak_Temple,_Luxor,_LG,_EGY_(48009455531).jpg", license: "CC0", licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/" },
   { use: "Orange Bay", work: "Hurghada Giftun Island Orange Bay", creator: "Mahmoudxx1", source: "https://commons.wikimedia.org/wiki/File:Hurghada_gifton_island_Orange_bay.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
   { use: "Mahmya Island", work: "Mahmya Island", creator: "Silar", source: "https://commons.wikimedia.org/wiki/File:02010_05712_Mahmya_Island.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
   { use: "Full-day snorkeling", work: "Hurghada snorkelling – Egypt", creator: "Fanny S Forsdik", source: "https://commons.wikimedia.org/wiki/File:Hurghada_snorkelling_-_Egypt_-_panoramio.jpg", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
