@@ -138,7 +138,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl sm:p-7">
-      <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">From <span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice))}</span> / person</p><p className="mt-1 flex items-center gap-1 text-sm text-amber-600">★ {"5.0"} <span className="text-slate-500">(verified local service)</span></p></div><ShieldCheck className="text-emerald-600" /></div>
+      <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">From <span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice))}</span> / person</p><p className="mt-1 text-sm font-medium text-emerald-700">Clear local price · pickup confirmed after booking</p></div><ShieldCheck className="text-emerald-600" /></div>
       {step === "select" ? <>
         <div className="mt-6 space-y-4">
           <label className="block text-sm font-bold text-slate-700">Date<div className="relative mt-1"><CalendarDays className="absolute left-3 top-3 text-slate-400" size={18}/><input type="date" min={tomorrow()} value={date} onChange={(event) => setDate(event.target.value)} className="w-full rounded-xl border border-slate-200 px-10 py-3 font-medium outline-none focus:border-blue-500" /></div></label>

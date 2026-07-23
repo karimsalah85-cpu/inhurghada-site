@@ -8,7 +8,7 @@ import Image from "next/image";
 import Hero from "@/components/home/Hero";
 import TourCard from "@/components/cards/TourCard";
 
-import { Car, Search, BadgeCheck, ShipWheel, Waves, TentTree, Plane, ShoppingBag, MessageCircle, ShieldCheck, Headphones } from "lucide-react";
+import { Car, Search, BadgeCheck, ShipWheel, Waves, TentTree, Plane, Landmark, MessageCircle, ShieldCheck, Headphones } from "lucide-react";
 
 import { tours, type Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -144,14 +144,14 @@ function HomeContent() {
           </div>
           <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: ShipWheel, label: "Island Trips", search: "island", description: "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: "Set sail" },
-              { icon: Waves, label: "Diving & Snorkeling", search: "diving", description: "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: "Dive in" },
-              { icon: TentTree, label: "Desert Safari", search: "desert", description: "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: "Ride the dunes" },
-              { icon: Plane, label: "Airport Transfers", search: "airport", description: "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: "Plan my pickup" },
-              { icon: ShoppingBag, label: "Shopping Transfers", search: "senzo", description: "Make Senzo Mall effortless with private pickup and a return time that suits you.", cta: "Shop your way" },
-              { icon: Car, label: "Private Transfers", search: "transfer", description: "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: "Travel privately" },
-            ].map(({ icon: Icon, label, search: categorySearch, description, cta }) => (
-              <Link key={label} href={`/?search=${categorySearch}#tours`} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg">
+              { icon: ShipWheel, label: "Island Trips", href: "/hurghada/island-trips", description: "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: "Set sail" },
+              { icon: Waves, label: "Diving & Snorkeling", href: "/hurghada/diving-snorkeling", description: "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: "Dive in" },
+              { icon: TentTree, label: "Desert Safari", href: "/hurghada/desert-safaris", description: "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: "Ride the dunes" },
+              { icon: Plane, label: "Airport Transfers", href: "/hurghada/airport-transfers", description: "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: "Plan my pickup" },
+              { icon: Landmark, label: "Historical Tours", href: "/hurghada/historical-tours", description: "Step into ancient Egypt with a private Luxor day shaped around its greatest landmarks.", cta: "Travel through history" },
+              { icon: Car, label: "Private Transfers", href: "/hurghada/private-transfers", description: "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: "Travel privately" },
+            ].map(({ icon: Icon, label, href, description, cta }) => (
+              <Link key={label} href={href} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg">
                 <Icon className="text-cyan-700" size={28}/>
                 <h3 className="mt-5 text-xl font-bold text-slate-900">{label}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
@@ -531,6 +531,10 @@ text-blue-600
                   description={tour.description}
 
                   badge={tour.badge}
+                  reviews={tour.reviews}
+                  category={tour.category}
+                  availableTime={tour.availableTimes?.[0]}
+                  priceUnit={tour.priceUnit}
 
                 />
 
@@ -626,6 +630,8 @@ text-blue-600
               <Link className="block hover:text-white" href="/transfers">Transfers</Link>
               <Link className="block hover:text-white" href="/booking">Booking</Link>
               <Link className="block hover:text-white" href="/checkout">Checkout</Link>
+              <Link className="block hover:text-white" href="/about">About us</Link>
+              <Link className="block hover:text-white" href="/faq">FAQ</Link>
             </div>
           </div>
           <div>
@@ -635,6 +641,7 @@ text-blue-600
               <Link className="block hover:text-white" href="/privacy-policy">Privacy Policy</Link>
               <Link className="block hover:text-white" href="/terms-conditions">Terms & Conditions</Link>
               <Link className="block hover:text-white" href="/image-credits">Image Credits</Link>
+              <Link className="block hover:text-white" href="/contact">Contact us</Link>
             </div>
           </div>
         </div>

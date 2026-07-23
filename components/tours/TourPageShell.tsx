@@ -10,6 +10,8 @@ import TourViewTracker from "@/components/analytics/TourViewTracker";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 
 export default function TourPageShell({ tour }: { tour: Tour }) {
+  const reviewCount = Number(tour.reviews);
+  const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
   const galleryImages = transferService
     ? ["/images/hurghada-airport-transfer.jpg", "/images/senzo-transfer.jpg", "/images/transfer.jpg", "/images/hero.jpg"]
@@ -38,7 +40,7 @@ export default function TourPageShell({ tour }: { tour: Tour }) {
         <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href="/" className="hover:text-cyan-700">Home</Link><span className="px-2" aria-hidden="true">/</span><Link href="/#tours" className="hover:text-cyan-700">Tours</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">Hurghada experience</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
-        <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600"><span>★ {tour.rating}</span><span>{tour.reviews ?? "New"} reviews</span><span>•</span><span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
+        <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} customer reviews</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
         <div className="mt-8 grid h-[420px] gap-3 overflow-hidden rounded-[2rem] sm:grid-cols-2">
           <div className="relative min-h-64"><Image src={tour.image} alt={tour.title} fill className="object-cover" priority /></div>
           <div className="grid grid-cols-2 gap-3">{galleryImages.map((image, index) => <div key={`${image}-${index}`} className="relative overflow-hidden"><Image src={image} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />{index === 3 ? <span className="absolute bottom-4 right-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900">Daily Red Sea experiences</span> : null}</div>)}</div>

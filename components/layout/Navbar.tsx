@@ -119,7 +119,7 @@ export default function Navbar() {
             {t("checkout")}
           </NavLink>
 
-          <NavLink href={`${localePath(language)}#about`}>
+          <NavLink href={localePath(language, "/about")}>
             {t("about")}
           </NavLink>
 
@@ -250,7 +250,7 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink
-            href={`${localePath(language)}#about`}
+            href={localePath(language, "/about")}
             close={closeMenu}
           >
             {t("about")}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { tours } from "@/data/tours";
 import TourPageShell from "@/components/tours/TourPageShell";
 import { siteName } from "@/lib/seo";
+import { languageAlternates, localePath } from "@/lib/i18n";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, languages: { ...languageAlternates(url), "x-default": localePath("en", url) } },
     robots: { index: true, follow: true },
     openGraph: {
       title,
