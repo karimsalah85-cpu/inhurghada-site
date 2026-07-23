@@ -4,12 +4,13 @@ import { useState } from "react";
 import { MapPin, Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { localePath } from "@/lib/i18n";
 
 
 export default function Hero() {
 
   const router = useRouter();
-  const { t } = useSiteSettings();
+  const { t, language } = useSiteSettings();
 
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
@@ -42,7 +43,7 @@ export default function Hero() {
     }
 
 
-    router.push(`/?${params.toString()}`);
+    router.push(`${localePath(language)}?${params.toString()}`);
 
   }
 

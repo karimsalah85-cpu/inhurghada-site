@@ -14,7 +14,7 @@ export const languages = [
 
 export const currencies = ["USD", "EUR", "GBP", "EGP"] as const;
 
-type Language = (typeof languages)[number]["code"];
+export type Language = (typeof languages)[number]["code"];
 type Currency = (typeof currencies)[number];
 
 const exchangeRates: Record<Currency, number> = {
@@ -74,8 +74,8 @@ const translations: Record<Language, Record<string, string>> = {
 
 const SiteSettingsContext = createContext<SiteSettings | null>(null);
 
-export function SiteSettingsProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
+export function SiteSettingsProvider({ children, initialLanguage = "en" }: { children: React.ReactNode; initialLanguage?: Language }) {
+  const [language, setLanguage] = useState<Language>(initialLanguage);
 
   useEffect(() => {
     const routeLocale = window.location.pathname.split("/")[1];
@@ -126,7 +126,7 @@ export function SiteSettingsProvider({ children }: { children: React.ReactNode }
     setLanguage(nextLanguage);
     const parts = window.location.pathname.split("/").filter(Boolean);
     if (parts[0] && isLocale(parts[0])) parts.shift();
-    const supportedLocalizedPath = !parts.length || ["booking", "checkout", "transfers", "privacy-policy", "terms-conditions", "tours"].includes(parts[0]);
+    const supportedLocalizedPath = !parts.length || ["booking", "checkout", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq", "hurghada", "tours"].includes(parts[0]);
     window.location.assign(supportedLocalizedPath ? `/${nextLanguage}${parts.length ? `/${parts.join("/")}` : ""}${window.location.search}${window.location.hash}` : `/${nextLanguage}`);
   }
 

@@ -16,6 +16,8 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
+import { localePath } from "@/lib/i18n";
+import { germanTourTitle } from "@/lib/tour-localization";
 
 
 
@@ -28,7 +30,9 @@ export default function Home() {
 }
 
 function HomeContent() {
-  const { t } = useSiteSettings();
+  const { t, language } = useSiteSettings();
+  const homePath = localePath(language);
+  const de = language === "de";
   const searchParams = useSearchParams();
   const router = useRouter();
   const search = searchParams.get("search") ?? "";
@@ -55,7 +59,7 @@ function HomeContent() {
 
     const query = params.toString();
     if (value.trim()) trackEvent("search", { search_term: value.trim().toLowerCase() });
-    router.replace(query ? `/?${query}` : "/", { scroll: false });
+    router.replace(query ? `${homePath}?${query}` : homePath, { scroll: false });
   }
 
   const bookingQuery = new URLSearchParams();
@@ -133,25 +137,25 @@ function HomeContent() {
 
       <Hero />
 
-      <section className="bg-white px-6 py-10 sm:px-8"><div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-3">{["Local Hurghada operator", "Best value prices", "Hotel pickup available", "Instant WhatsApp booking", "English-speaking support", "No hidden fees"].map((item) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700"><BadgeCheck className="shrink-0 text-emerald-600" size={19}/>{item}</div>)}</div></section>
+      <section className="bg-white px-6 py-10 sm:px-8"><div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-3">{(de ? ["Lokaler Anbieter in Hurghada", "Faire Preise", "Hotelabholung verfügbar", "Schnelle WhatsApp-Buchung", "Deutschsprachige Betreuung", "Keine versteckten Gebühren"] : ["Local Hurghada operator", "Best value prices", "Hotel pickup available", "Instant WhatsApp booking", "English-speaking support", "No hidden fees"]).map((item) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700"><BadgeCheck className="shrink-0 text-emerald-600" size={19}/>{item}</div>)}</div></section>
 
       <section className="bg-slate-50 px-6 py-20 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Choose your style</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">Hurghada experiences for every plan</h2>
-            <p className="mt-4 text-lg leading-8 text-slate-600">Chase turquoise water, golden-hour dunes, or a smooth door-to-door ride—your best Hurghada day starts here.</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Wähle deinen Stil" : "Choose your style"}</p>
+            <h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Hurghada-Erlebnisse für jeden Plan" : "Hurghada experiences for every plan"}</h2>
+            <p className="mt-4 text-lg leading-8 text-slate-600">{de ? "Türkisblaues Wasser, goldene Wüstendünen oder eine bequeme Fahrt von Tür zu Tür – dein perfekter Tag in Hurghada beginnt hier." : "Chase turquoise water, golden-hour dunes, or a smooth door-to-door ride—your best Hurghada day starts here."}</p>
           </div>
           <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: ShipWheel, label: "Island Trips", href: "/hurghada/island-trips", description: "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: "Set sail" },
-              { icon: Waves, label: "Diving & Snorkeling", href: "/hurghada/diving-snorkeling", description: "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: "Dive in" },
-              { icon: TentTree, label: "Desert Safari", href: "/hurghada/desert-safaris", description: "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: "Ride the dunes" },
-              { icon: Plane, label: "Airport Transfers", href: "/hurghada/airport-transfers", description: "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: "Plan my pickup" },
-              { icon: Landmark, label: "Historical Tours", href: "/hurghada/historical-tours", description: "Step into ancient Egypt with a private Luxor day shaped around its greatest landmarks.", cta: "Travel through history" },
-              { icon: Car, label: "Private Transfers", href: "/hurghada/private-transfers", description: "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: "Travel privately" },
+              { icon: ShipWheel, label: de ? "Inseltouren" : "Island Trips", href: "/hurghada/island-trips", description: de ? "Segle über türkisblaues Wasser zu entspannten Stränden am Roten Meer." : "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: de ? "In See stechen" : "Set sail" },
+              { icon: Waves, label: de ? "Tauchen & Schnorcheln" : "Diving & Snorkeling", href: "/hurghada/diving-snorkeling", description: de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: de ? "Abtauchen" : "Dive in" },
+              { icon: TentTree, label: de ? "Wüstensafari" : "Desert Safari", href: "/hurghada/desert-safaris", description: de ? "Erlebe Quads, Bergpanoramen und goldenen Sand im Licht des Sonnenuntergangs." : "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: de ? "Durch die Dünen" : "Ride the dunes" },
+              { icon: Plane, label: de ? "Flughafentransfers" : "Airport Transfers", href: "/hurghada/airport-transfers", description: de ? "Dein Fahrer erwartet dich und bringt dich ohne Warteschlange direkt zum Hotel." : "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: de ? "Abholung planen" : "Plan my pickup" },
+              { icon: Landmark, label: de ? "Historische Ausflüge" : "Historical Tours", href: "/hurghada/historical-tours", description: de ? "Entdecke das alte Ägypten bei einem privaten Tagesausflug nach Luxor." : "Step into ancient Egypt with a private Luxor day shaped around its greatest landmarks.", cta: de ? "Geschichte erleben" : "Travel through history" },
+              { icon: Car, label: de ? "Private Transfers" : "Private Transfers", href: "/hurghada/private-transfers", description: de ? "Deine Route, deine Gruppe, dein Zeitplan – bequem von Tür zu Tür." : "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: de ? "Privat fahren" : "Travel privately" },
             ].map(({ icon: Icon, label, href, description, cta }) => (
-              <Link key={label} href={href} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg">
+              <Link key={label} href={localePath(language, href)} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg">
                 <Icon className="text-cyan-700" size={28}/>
                 <h3 className="mt-5 text-xl font-bold text-slate-900">{label}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
@@ -169,13 +173,13 @@ function HomeContent() {
               <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{t("chooseExperience")}</p>
               <h2 className="mt-3 text-4xl font-bold text-slate-900">{t("exploreAdventure")}</h2>
             </div>
-            <Link href="/#tours" className="font-semibold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
+            <Link href={`${homePath}#tours`} className="font-semibold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <DestinationCard image="/images/orange-bay.jpeg" title="Island escapes" description="Boat trips, snorkeling and beach days on the Red Sea." href="/?search=island" />
-            <DestinationCard image="/images/scuba-diving.jpg" title="Diving & snorkeling" description="Discover coral reefs with experienced local crews." href="/?search=diving" />
-            <DestinationCard image="/images/desert-safari.jpg" title="Desert adventures" description="Quad bikes, Bedouin culture and unforgettable sunsets." href="/?search=desert" />
+            <DestinationCard image="/images/orange-bay.jpeg" title="Island escapes" description="Boat trips, snorkeling and beach days on the Red Sea." href={`${homePath}?search=island`} />
+            <DestinationCard image="/images/scuba-diving.jpg" title="Diving & snorkeling" description="Discover coral reefs with experienced local crews." href={`${homePath}?search=diving`} />
+            <DestinationCard image="/images/desert-safari.jpg" title="Desert adventures" description="Quad bikes, Bedouin culture and unforgettable sunsets." href={`${homePath}?search=desert`} />
           </div>
         </div>
       </section>
@@ -399,7 +403,7 @@ function HomeContent() {
 
 
               <Link
-                href="/transfers#book-transfer"
+                href={`${localePath(language, "/transfers")}#book-transfer`}
                 className="
                 rounded-xl
                 bg-blue-600
@@ -516,13 +520,13 @@ text-blue-600
 
                   image={tour.image}
 
-                  title={tour.title}
+                  title={de ? germanTourTitle(tour.slug, tour.title) : tour.title}
 
                   rating={tour.rating}
 
                   price={tour.price}
 
-                  link={`/tours/${tour.slug}${bookingQueryString ? `?${bookingQueryString}` : ""}`}
+                  link={`${localePath(language, `/tours/${tour.slug}`)}${bookingQueryString ? `?${bookingQueryString}` : ""}`}
 
                   location={tour.location}
 
@@ -626,22 +630,22 @@ text-blue-600
           <div>
             <p className="font-semibold text-white">Explore</p>
             <div className="mt-3 space-y-2">
-              <Link className="block hover:text-white" href="/#tours">Tours</Link>
-              <Link className="block hover:text-white" href="/transfers">Transfers</Link>
-              <Link className="block hover:text-white" href="/booking">Booking</Link>
-              <Link className="block hover:text-white" href="/checkout">Checkout</Link>
-              <Link className="block hover:text-white" href="/about">About us</Link>
-              <Link className="block hover:text-white" href="/faq">FAQ</Link>
+              <Link className="block hover:text-white" href={`${homePath}#tours`}>{t("tours")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/transfers")}>{t("transfers")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/booking")}>{t("booking")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/checkout")}>{t("checkout")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/about")}>{t("about")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/faq")}>FAQ</Link>
             </div>
           </div>
           <div>
             <p className="font-semibold text-white">Need help?</p>
             <a className="mt-3 inline-block hover:text-white" href={whatsappUrl()} onClick={() => trackEvent("whatsapp_click", { placement: "footer" })} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
             <div className="mt-4 space-y-2 text-sm">
-              <Link className="block hover:text-white" href="/privacy-policy">Privacy Policy</Link>
-              <Link className="block hover:text-white" href="/terms-conditions">Terms & Conditions</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/privacy-policy")}>{language === "de" ? "Datenschutz" : "Privacy Policy"}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/terms-conditions")}>{language === "de" ? "Allgemeine Geschäftsbedingungen" : "Terms & Conditions"}</Link>
               <Link className="block hover:text-white" href="/image-credits">Image Credits</Link>
-              <Link className="block hover:text-white" href="/contact">Contact us</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/contact")}>{language === "de" ? "Kontakt" : "Contact us"}</Link>
             </div>
           </div>
         </div>

@@ -83,7 +83,7 @@ export default async function RootLayout({
     >
 
       <body>
-        <SiteSettingsProvider>
+        <SiteSettingsProvider initialLanguage={documentLocale as "en" | "ar" | "de" | "ru" | "pl" | "zh"}>
           <OrganizationSchema />
           <AnalyticsProvider />
           <a href="#main-content" className="skip-link">Skip to main content</a>

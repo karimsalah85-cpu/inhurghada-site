@@ -34,7 +34,8 @@ export default function TourCard({
   availableTime,
   priceUnit,
 }: TourCardProps) {
-  const { formatPrice, t } = useSiteSettings();
+  const { formatPrice, t, language } = useSiteSettings();
+  const de = language === "de";
   const reviewCount = Number(reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
 
@@ -53,11 +54,11 @@ export default function TourCard({
           <div className="mt-3 flex items-center gap-2 text-slate-500"><MapPin size={18} /><span>{location}</span></div>
           <p className="mt-4 line-clamp-3 leading-relaxed text-slate-600">{description}</p>
           <div className="mt-5 flex items-center gap-2 text-slate-500"><Clock size={18} /><span>{t("everyDay")} · {duration}</span></div>
-          {availableTime ? <p className="mt-3 text-sm text-slate-500">Pickup: {availableTime}</p> : null}
-          <p className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700"><ShieldCheck size={17} />Clear price · pickup confirmed</p>
+          {availableTime ? <p className="mt-3 text-sm text-slate-500">{de ? "Abholung" : "Pickup"}: {availableTime}</p> : null}
+          <p className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700"><ShieldCheck size={17} />{de ? "Klarer Preis · Abholung bestätigt" : "Clear price · pickup confirmed"}</p>
           <div className="mt-6 flex items-end justify-between gap-4">
-            <div><p className="text-sm text-slate-500">From</p><p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || "per person"}</p></div>
-            <span className="rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition group-hover:bg-blue-800">View & book</span>
+            <div><p className="text-sm text-slate-500">{de ? "Ab" : "From"}</p><p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || (de ? "pro Person" : "per person")}</p></div>
+            <span className="rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition group-hover:bg-blue-800">{de ? "Ansehen & buchen" : "View & book"}</span>
           </div>
         </div>
       </Link>

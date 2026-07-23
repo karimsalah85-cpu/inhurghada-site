@@ -6,6 +6,17 @@ import { tours } from "@/data/tours";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
 import { absoluteUrl, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
+import HomePage from "@/app/page";
+import TransfersPage from "@/app/transfers/page";
+import BookingPage from "@/app/booking/page";
+import CheckoutPage from "@/app/checkout/page";
+import AboutPage from "@/app/about/page";
+import ContactPage from "@/app/contact/page";
+import FaqPage from "@/app/faq/page";
+import PrivacyPolicyPage from "@/app/privacy-policy/page";
+import TermsConditionsPage from "@/app/terms-conditions/page";
+import TourPageShell from "@/components/tours/TourPageShell";
+import TourCategoryPage from "@/app/hurghada/[category]/page";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -75,6 +86,24 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const kind = pageKind(path);
   if (!kind) notFound();
   const direction = locale === "ar" ? "rtl" : "ltr";
+
+  if (locale === "de") {
+    if (kind === "home") return <HomePage />;
+    if (kind === "tour") {
+      const tour = tours.find((item) => item.slug === path[1]);
+      if (!tour) notFound();
+      return <TourPageShell locale="de" tour={{ ...tour, title: localizedTourTitle(locale, tour.slug, tour.title) }} />;
+    }
+    if (kind === "category") return <TourCategoryPage locale="de" params={Promise.resolve({ category: path[1] })} />;
+    if (kind === "transfers") return <TransfersPage locale="de" />;
+    if (kind === "booking") return <BookingPage />;
+    if (kind === "checkout") return <CheckoutPage />;
+    if (kind === "about") return <AboutPage locale="de" />;
+    if (kind === "contact") return <ContactPage locale="de" />;
+    if (kind === "faq") return <FaqPage locale="de" />;
+    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="de" />;
+    if (kind === "terms-conditions") return <TermsConditionsPage locale="de" />;
+  }
 
   if (kind === "tour") {
     const tour = tours.find((item) => item.slug === path[1]);
