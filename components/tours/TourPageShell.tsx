@@ -27,6 +27,13 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
         tour.image === "/images/scuba-diving.jpg" ? "/images/full-day-diving.jpg" : "/images/scuba-diving.jpg",
         "/images/full-day-snorkeling.jpg",
       ]
+    : tour.category === "Island Trip" || tour.category === "Inselausflug"
+      ? [
+        "/images/hurghada-island-beach-loungers.jpeg",
+        "/images/hurghada-island-sunset-sandals.jpeg",
+        "/images/hurghada-island-calm-sunset.jpeg",
+        "/images/hurghada-island-family-sunset.jpeg",
+      ]
     : tour.category === "Cultural Day Trip"
       ? ["/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg", "/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg"]
     : tour.category === "Desert Safari"
