@@ -27,6 +27,13 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
         tour.image === "/images/scuba-diving.jpg" ? "/images/full-day-diving.jpg" : "/images/scuba-diving.jpg",
         "/images/full-day-snorkeling.jpg",
       ]
+    : tour.slug === "full-day-snorkeling"
+      ? [
+        "/images/hurghada-snorkeling-sandy-seabed.jpeg",
+        "/images/hurghada-snorkeling-reef-panorama.jpeg",
+        "/images/hurghada-red-sea-coral-reef.jpeg",
+        "/images/orange-bay.jpeg",
+      ]
     : tour.slug === "mahmya-island"
       ? [
         "/images/mahmya-island-boats-sunset.jpeg",
