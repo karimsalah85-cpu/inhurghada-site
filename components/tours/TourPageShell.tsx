@@ -23,7 +23,12 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
     : tour.category === "Cultural Day Trip"
       ? ["/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg", "/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg"]
     : tour.category === "Desert Safari"
-      ? ["/images/desert-safari.jpg", "/images/quad-safari-sunset.jpg", "/images/desert-safari.jpg", "/images/quad-safari-sunset.jpg"]
+      ? [
+        "/images/hurghada-desert-camel-closeup.jpeg",
+        "/images/hurghada-desert-quad-tour.jpeg",
+        "/images/hurghada-desert-camel-profile.jpeg",
+        tour.image === "/images/quad-safari-sunset.jpg" ? "/images/desert-safari.jpg" : "/images/quad-safari-sunset.jpg",
+      ]
       : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"];
   const faqs = de ? [
     { question: "Ist die Abholung vom Hotel inklusive?", answer: "Die Abholdetails stehen in den Ausflugsinformationen. Die genaue Zeit und den Ort bestätigen wir nach der Buchung per WhatsApp." },
