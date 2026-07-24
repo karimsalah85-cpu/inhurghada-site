@@ -20,6 +20,13 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
   const galleryImages = transferService
     ? ["/images/hurghada-airport-transfer.jpg", "/images/senzo-transfer.jpg", "/images/transfer.jpg", "/images/hero.jpg"]
+    : tour.slug === "full-day-diving" || tour.slug === "professional-underwater-photographer"
+      ? [
+        "/images/hurghada-red-sea-coral-reef.jpeg",
+        "/images/hurghada-red-sea-scuba-diver.jpeg",
+        tour.image === "/images/scuba-diving.jpg" ? "/images/full-day-diving.jpg" : "/images/scuba-diving.jpg",
+        "/images/full-day-snorkeling.jpg",
+      ]
     : tour.category === "Cultural Day Trip"
       ? ["/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg", "/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg"]
     : tour.category === "Desert Safari"
