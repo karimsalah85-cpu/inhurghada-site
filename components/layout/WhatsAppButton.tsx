@@ -21,16 +21,23 @@ export default function WhatsAppButton() {
       rel="noopener noreferrer"
       className="
         fixed
-        bottom-6
-        right-6
+        bottom-4
+        right-4
         z-50
         flex
         items-center
-        gap-3
+        gap-2
         rounded-full
         bg-green-600
-        px-6
-        py-4
+        h-14
+        w-14
+        justify-center
+        sm:bottom-6
+        sm:right-6
+        sm:h-auto
+        sm:w-auto
+        sm:px-5
+        sm:py-3.5
         font-semibold
         text-white
         shadow-xl
@@ -40,9 +47,9 @@ export default function WhatsAppButton() {
       "
     >
 
-      <MessageCircle size={28}/>
+      <MessageCircle size={25}/>
 
-      <span>
+      <span className="hidden sm:inline">
         WhatsApp
       </span>
 

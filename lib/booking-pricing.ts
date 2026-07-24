@@ -3,6 +3,8 @@ import { tours } from "@/data/tours";
 type PricingInput = {
   type: "tour" | "transfer";
   tourName: string;
+  tourSlug?: string;
+  extras?: string[];
   adults: number;
   youth: number;
   infants: number;
@@ -22,7 +24,7 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
 
 export function calculateBookingPrice(input: PricingInput) {
   if (input.type === "tour") {
-    const tour = tours.find((item) => item.title === input.tourName);
+    const tour = tours.find((item) => item.slug === input.tourSlug) || tours.find((item) => item.title === input.tourName);
     if (!tour) return { error: "Choose a valid tour." as const };
     if (!wholeNumber(input.adults, 1, 30) || !wholeNumber(input.youth, 0, 30) || !wholeNumber(input.infants, 0, 10)) {
       return { error: "Choose a valid number of travelers." as const };
@@ -31,7 +33,15 @@ export function calculateBookingPrice(input: PricingInput) {
     const pricing = tour.participantPricing || { adults: Number(tour.price) };
     if (input.youth && pricing.youth === undefined) return { error: "Youth pricing is not available for this tour." as const };
     if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
-    const amount = input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0);
+    const allowedExtras: Record<string, Record<string, number>> = {
+      "full-day-diving": { "diving-equipment": 30 },
+      "luxor-private-day-trip": { "tutankhamun-ticket": 30 },
+    };
+    const selectedExtras = [...new Set(input.extras || [])];
+    const extraPrices = allowedExtras[tour.slug] || {};
+    if (selectedExtras.some((extra) => extraPrices[extra] === undefined)) return { error: "Choose valid optional extras." as const };
+    const extrasTotal = selectedExtras.reduce((sum, extra) => sum + extraPrices[extra], 0);
+    const amount = input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0) + extrasTotal;
     const guests = input.adults + input.youth + input.infants;
     const guestSummary = `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
 

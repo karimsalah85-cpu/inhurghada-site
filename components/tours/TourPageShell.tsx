@@ -9,7 +9,7 @@ import { absoluteUrl, siteName } from "@/lib/seo";
 import TourViewTracker from "@/components/analytics/TourViewTracker";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { localePath, type Locale } from "@/lib/i18n";
-import { germanTourTitle } from "@/lib/tour-localization";
+import { localizeTourGerman } from "@/lib/tour-localization";
 
 export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
   const de = locale === "de";
@@ -34,11 +34,12 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
     { question: de ? "Wann bezahle ich?" : "When do I pay?", answer: de ? "Du kannst online reservieren und bei Ankunft bar bezahlen, sofern bei der Buchung keine andere Zahlungsart angezeigt wird." : "You can reserve online and pay cash on arrival unless a different payment option is clearly shown during booking." },
     { question: de ? "Was soll ich mitbringen?" : "What should I bring?", answer: de ? "Bringe deine Buchungsnummer, bequeme Kleidung und alle Dinge mit, die im Abschnitt mit den wichtigen Informationen genannt werden." : "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
-  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.category === tour.category || item.location === tour.location)).slice(0, 3);
-  const tourUrl = absoluteUrl(`/tours/${tour.slug}`);
+  const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
+  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : item);
+  const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
   const schema = { "@context": "https://schema.org", "@graph": [
     { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
-    { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: "en", touristType: tour.category || "Hurghada excursion", offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl }, provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } },
+    { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl }, provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } },
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
   return (
@@ -65,6 +66,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
             <Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
               {transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}
+                  tourSlug={tour.slug}
                   price={tour.price}
                   duration={tour.duration}
                   location={tour.location}
@@ -78,7 +80,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">{de ? "Vor der Buchung" : "Before you book"}</p><h2 className="mt-3 text-3xl font-bold text-slate-900">{de ? "Häufig gestellte Fragen" : "Frequently asked questions"}</h2><div className="mt-6 divide-y divide-slate-200">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-slate-900">{faq.question}</summary><p className="mt-3 leading-7 text-slate-600">{faq.answer}</p></details>)}</div></div>
-          <div className="rounded-3xl bg-slate-950 p-8 text-white"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">{de ? "Mehr entdecken" : "More to explore"}</p><h2 className="mt-3 text-3xl font-bold">{de ? "Ähnliche Erlebnisse in Hurghada" : "Related Hurghada experiences"}</h2><p className="mt-4 leading-7 text-slate-300">{de ? "Finde einen weiteren Ausflug ans Rote Meer, einen Tauchtag, eine Wüstensafari oder einen privaten Transfer." : "Find another Red Sea excursion, diving day, desert safari, or private transfer that fits your plans."}</p><div className="mt-6 space-y-3">{relatedTours.map((item) => <Link key={item.slug} href={localePath(locale, `/tours/${item.slug}`)} className="flex items-center justify-between rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold hover:border-cyan-300 hover:text-cyan-200"><span>{de ? germanTourTitle(item.slug, item.title) : item.title}</span><span>{de ? "Ab" : "From"} ${item.price}</span></Link>)}</div><Link href={toursHref} className="mt-7 inline-flex rounded-full bg-cyan-400 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">{de ? "Alle Ausflüge entdecken" : "Explore all tours"}</Link></div>
+          <div className="rounded-3xl bg-slate-950 p-8 text-white"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">{de ? "Mehr entdecken" : "More to explore"}</p><h2 className="mt-3 text-3xl font-bold">{de ? "Ähnliche Erlebnisse in Hurghada" : "Related Hurghada experiences"}</h2><p className="mt-4 leading-7 text-slate-300">{de ? "Finde einen weiteren Ausflug ans Rote Meer, einen Tauchtag, eine Wüstensafari oder einen privaten Transfer." : "Find another Red Sea excursion, diving day, desert safari, or private transfer that fits your plans."}</p><div className="mt-6 space-y-3">{relatedTours.map((item) => <Link key={item.slug} href={localePath(locale, `/tours/${item.slug}`)} className="flex items-center justify-between rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold hover:border-cyan-300 hover:text-cyan-200"><span>{item.title}</span><span>{de ? "Ab" : "From"} ${item.price}</span></Link>)}</div><Link href={toursHref} className="mt-7 inline-flex rounded-full bg-cyan-400 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">{de ? "Alle Ausflüge entdecken" : "Explore all tours"}</Link></div>
         </div>
       </section>
     </main>

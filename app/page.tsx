@@ -17,7 +17,7 @@ import { whatsappUrl } from "@/lib/contact";
 import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
 import { localePath } from "@/lib/i18n";
-import { germanTourTitle } from "@/lib/tour-localization";
+import { localizeTourGerman } from "@/lib/tour-localization";
 
 
 
@@ -76,7 +76,8 @@ function HomeContent() {
 
 
 
-  const filteredTours = tours.filter(
+  const displayTours = de ? tours.map(localizeTourGerman) : tours;
+  const filteredTours = displayTours.filter(
   (tour: Tour)=>{
 
 
@@ -520,7 +521,7 @@ text-blue-600
 
                   image={tour.image}
 
-                  title={de ? germanTourTitle(tour.slug, tour.title) : tour.title}
+                  title={tour.title}
 
                   rating={tour.rating}
 
@@ -607,7 +608,7 @@ text-blue-600
         </div>
       </section>
 
-      <section className="bg-white px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Traveler feedback</p><h2 className="mt-3 text-4xl font-black text-slate-900">Loved by Red Sea travelers</h2></div><p className="text-xl font-bold text-amber-500">★★★★★ <span className="text-slate-900">4.9/5</span></p></div><div className="mt-9 grid gap-5 md:grid-cols-3">{[["Claire, United Kingdom","Easy booking and clear pickup communication. Orange Bay was a lovely day for our family."],["Mariam, Germany","The team answered quickly on WhatsApp and the transfer arrived exactly as arranged."],["Omar, Egypt","Good value, friendly crew and beautiful snorkeling stops. Everything was straightforward."]].map(([name,review]) => <figure key={name} className="rounded-3xl border border-slate-200 bg-slate-50 p-6"><p className="text-amber-500">★★★★★</p><blockquote className="mt-4 leading-7 text-slate-700">“{review}”</blockquote><figcaption className="mt-5 font-bold text-slate-900">{name}</figcaption></figure>)}</div></div></section>
+      <section className="bg-white px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Feedback von Reisenden" : "Traveler feedback"}</p><h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Von Gästen am Roten Meer empfohlen" : "Loved by Red Sea travelers"}</h2></div><div className="flex flex-wrap items-center gap-4"><p className="text-xl font-bold text-amber-500">★★★★★ <span className="text-slate-900">4.9/5</span></p><a href={process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || "https://www.google.com/maps/search/?api=1&query=Daily+Red+Sea+Hurghada"} target="_blank" rel="noopener noreferrer" className="rounded-full border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-800 hover:bg-blue-100">{de ? "Google-Bewertung abgeben" : "Review us on Google"}</a></div></div><div className="mt-9 grid gap-5 md:grid-cols-3">{[["Claire, United Kingdom","Easy booking and clear pickup communication. Orange Bay was a lovely day for our family."],["Mariam, Germany","The team answered quickly on WhatsApp and the transfer arrived exactly as arranged."],["Omar, Egypt","Good value, friendly crew and beautiful snorkeling stops. Everything was straightforward."]].map(([name,review]) => <figure key={name} className="rounded-3xl border border-slate-200 bg-slate-50 p-6"><p className="text-amber-500">★★★★★</p><blockquote className="mt-4 leading-7 text-slate-700">“{review}”</blockquote><figcaption className="mt-5 font-bold text-slate-900">{name}</figcaption></figure>)}</div></div></section>
 
       <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-blue-600">Helpful answers</p><h2 className="mt-3 text-center text-4xl font-black text-slate-900">Hurghada excursions FAQ</h2><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-6">{[["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many Hurghada tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]].map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-slate-900">{question}</summary><p className="mt-3 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
 

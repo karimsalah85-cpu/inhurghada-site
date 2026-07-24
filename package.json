@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:smoke": "node scripts/smoke-test.mjs"
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "backup": "bash scripts/backup-supabase.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",

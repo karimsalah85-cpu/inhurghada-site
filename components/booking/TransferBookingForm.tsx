@@ -89,6 +89,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "transfer",
+          locale: de ? "de" : "en",
           customerName: name.trim(),
           phone: phone.trim(),
           customerEmail: email.trim(),

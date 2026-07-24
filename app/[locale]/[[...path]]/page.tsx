@@ -17,6 +17,7 @@ import PrivacyPolicyPage from "@/app/privacy-policy/page";
 import TermsConditionsPage from "@/app/terms-conditions/page";
 import TourPageShell from "@/components/tours/TourPageShell";
 import TourCategoryPage from "@/app/hurghada/[category]/page";
+import { localizeTourGerman } from "@/lib/tour-localization";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -65,7 +66,15 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, checkout: dictionary.checkoutTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, booking: dictionary.bookingText, checkout: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
   const title = tour ? localizedTourTitle(locale, tour.slug, tour.title) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
-  const description = tour ? `${title}. ${dictionary.siteDescription}` : category ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}` : descriptions[kind || "home"];
+  const germanSeoDescriptions: Record<string, string> = {
+    home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
+    "orange-bay": "Orange Bay Hurghada Tickets für eine ganztägige Hurghada Bootstour mit Schnorcheln, Mittagessen, Inselaufenthalt und Hoteltransfer buchen.",
+    "full-day-snorkeling": "Hurghada Bootstour zu den Korallenriffen mit zwei Schnorchelstopps, Mittagessen, Getränken und Hotelabholung.",
+    "quad-safari-morning": "Quad Tour Hurghada am Morgen mit Wüstenfahrt, Bergpanorama, Beduinencamp, Tee und Hotelabholung.",
+    "quad-safari-sunset": "Quad Tour Hurghada bei Sonnenuntergang mit Beduinencamp, Wüstenpanorama und Hotelabholung.",
+    "hurghada-airport-transfer": "Flughafentransfer Hurghada im Privatfahrzeug zum klaren Festpreis – passend zur Personenzahl und mit Flugüberwachung.",
+  };
+  const description = locale === "de" && tour ? (germanSeoDescriptions[tour.slug] || `${title}. Ausflüge Hurghada mit klaren Preisen und direkter Bestätigung.`) : locale === "de" && kind === "home" ? germanSeoDescriptions.home : tour ? `${title}. ${dictionary.siteDescription}` : category ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}` : descriptions[kind || "home"];
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
   const canonical = localePath(locale, pathname);
   return {
@@ -92,7 +101,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "tour") {
       const tour = tours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
-      return <TourPageShell locale="de" tour={{ ...tour, title: localizedTourTitle(locale, tour.slug, tour.title) }} />;
+      return <TourPageShell locale="de" tour={localizeTourGerman(tour)} />;
     }
     if (kind === "category") return <TourCategoryPage locale="de" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "transfers") return <TransfersPage locale="de" />;

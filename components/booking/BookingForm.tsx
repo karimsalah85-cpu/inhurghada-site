@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   CalendarDays,
@@ -22,6 +22,7 @@ type ParticipantPricing = { adults: number; youth?: number; infants?: number };
 
 type BookingFormProps = {
   tourName: string;
+  tourSlug: string;
   price?: string;
   duration?: string;
   location?: string;
@@ -54,7 +55,12 @@ function Counter({ label, description, value, onChange }: { label: string; descr
   );
 }
 
-export default function BookingForm({ tourName, price, duration, location, participantPricing, availableTimes }: BookingFormProps) {
+const upsells: Record<string, { id: string; price: number; en: string; de: string }[]> = {
+  "full-day-diving": [{ id: "diving-equipment", price: 30, en: "Complete diving equipment rental", de: "Komplette Tauchausrüstung mieten" }],
+  "luxor-private-day-trip": [{ id: "tutankhamun-ticket", price: 30, en: "Entry to Tutankhamun's tomb", de: "Eintritt zum Grab Tutanchamuns" }],
+};
+
+export default function BookingForm({ tourName, tourSlug, price, duration, location, participantPricing, availableTimes }: BookingFormProps) {
   const searchParams = useSearchParams();
   const { formatPrice, language } = useSiteSettings();
   const de = language === "de";
@@ -74,6 +80,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const [hotel, setHotel] = useState("");
   const [guideLanguage, setGuideLanguage] = useState("English");
   const [message, setMessage] = useState("");
+  const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   const [reference, setReference] = useState("");
   const [customerEmailSent, setCustomerEmailSent] = useState(false);
   const [bookingConfirmationPdf, setBookingConfirmationPdf] = useState("");
@@ -81,7 +88,9 @@ export default function BookingForm({ tourName, price, duration, location, parti
   const [error, setError] = useState("");
   const [website, setWebsite] = useState("");
 
-  const total = useMemo(() => adults * adultPrice + youth * (youthPrice ?? adultPrice) + infants * (infantPrice ?? 0), [adults, youth, infants, adultPrice, youthPrice, infantPrice]);
+  const extraOptions = upsells[tourSlug] || [];
+  const extrasTotal = extraOptions.filter((option) => selectedExtras.includes(option.id)).reduce((sum, option) => sum + option.price, 0);
+  const total = adults * adultPrice + youth * (youthPrice ?? adultPrice) + infants * (infantPrice ?? 0) + extrasTotal;
   const travelerText = de
     ? `${adults} Erwachsene${youthPrice !== undefined ? ` · ${youth} Kinder` : ""}${infantPrice !== undefined ? ` · ${infants} Kleinkinder` : ""}`
     : `${adults} adult${adults === 1 ? "" : "s"}${youthPrice !== undefined ? ` · ${youth} youth` : ""}${infantPrice !== undefined ? ` · ${infants} infant${infants === 1 ? "" : "s"}` : ""}`;
@@ -94,10 +103,10 @@ export default function BookingForm({ tourName, price, duration, location, parti
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "tour", customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
-          tourName, location: location || "Hurghada", duration: duration || "Please confirm",
+          type: "tour", locale: de ? "de" : "en", customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
+          tourName, tourSlug, extras: selectedExtras, location: location || "Hurghada", duration: duration || "Please confirm",
           price: `${formatPrice(String(total))} total`, date, guests: travelerText, hotel,
-          message: `Time: ${time}\nGuide language: ${guideLanguage}${message ? `\nCustomer note: ${message}` : ""}`,
+          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
           adults, youth, infants,
           website,
         }),
@@ -136,6 +145,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
       <p className="mt-3 leading-6 text-slate-600">{de ? "Deine Reservierung mit Barzahlung bei Ankunft wurde erfasst. " : "Your reservation is confirmed as a cash-on-arrival request. "}{customerEmailSent ? (de ? "Die Buchungsübersicht und PDF-Bestätigung wurden per E-Mail versendet." : "Your booking summary and PDF confirmation have been sent to your email.") : (de ? "Wir bestätigen die Details per WhatsApp." : "We will confirm the details on WhatsApp.")}</p>
       <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-sm"><p className="text-slate-500">{de ? "Buchungsnummer" : "Booking reference"}</p><p className="mt-1 font-mono font-bold text-slate-950">{reference}</p><p className="mt-3 text-slate-600">{date} {de ? "um" : "at"} {time} · {travelerText}</p><p className="font-bold text-blue-700">{formatPrice(String(total))} {de ? "Barzahlung bei Ankunft" : "cash on arrival"}</p></div>
       {bookingConfirmationPdf ? <button type="button" onClick={downloadConfirmation} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 font-bold text-white hover:bg-blue-700"><Download size={18} /> {de ? "PDF-Buchungsbestätigung herunterladen" : "Download booking confirmation PDF"}</button> : null}
+      <a href={process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || "https://www.google.com/maps/search/?api=1&query=Daily+Red+Sea+Hurghada"} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">{de ? "Nach deinem Ausflug: Google-Bewertung abgeben" : "After your trip: review us on Google"}</a>
     </div>
   );
 
@@ -148,6 +158,7 @@ export default function BookingForm({ tourName, price, duration, location, parti
           <label className="block text-sm font-bold text-slate-700">{de ? "Uhrzeit" : "Time"}<div className="relative mt-1"><Clock3 className="absolute left-3 top-3 text-slate-400" size={18}/><select value={time} onChange={(event) => setTime(event.target.value)} className="w-full appearance-none rounded-xl border border-slate-200 px-10 py-3 font-medium outline-none focus:border-blue-500">{times.map((option) => <option key={option}>{option}</option>)}</select><ChevronDown className="absolute right-3 top-3 text-slate-400" size={18}/></div></label>
         </div>
         <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50/60 px-4"><p className="pt-4 text-sm font-bold text-slate-900">{de ? "Paket auswählen" : "Select your package"}</p><Counter label={de ? "Erwachsene" : "Adults"} description={`${formatPrice(String(adultPrice))} ${de ? "pro Person" : "each"}`} value={adults} onChange={setAdults}/>{youthPrice !== undefined && <Counter label={de ? "Kinder (4–10)" : "Youth (4–10)"} description={`${formatPrice(String(youthPrice))} ${de ? "pro Kind" : "each"}`} value={youth} onChange={setYouth}/>} {infantPrice !== undefined && <Counter label={de ? "Kleinkinder" : "Infants"} description={de ? "Kostenlos" : "Free of charge"} value={infants} onChange={setInfants}/>}</div>
+        {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-slate-900">{de ? "Optionale Extras" : "Optional extras"}</legend>{extraOptions.map((option) => <label key={option.id} className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedExtras.includes(option.id)} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-4 w-4 accent-blue-600" />{de ? option.de : option.en}</span><strong>+{formatPrice(String(option.price))}</strong></label>)}</fieldset> : null}
         <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-slate-900">{de ? "Gesamtpreis" : "Total"}</p><p className="text-xs text-slate-500">{de ? "Barzahlung bei Ankunft · keine Online-Zahlung" : "Cash on arrival · no online payment"}</p></div><p className="text-3xl font-black text-blue-700">{formatPrice(String(total))}</p></div>
         <button type="button" onClick={() => { if (!adults) return setError(de ? "Bitte wähle mindestens einen Erwachsenen." : "Please select at least one adult."); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700">{de ? "Jetzt buchen" : "Book now"} <Users size={18}/></button>
         {error && <p role="alert" className="mt-3 text-center text-sm text-rose-600">{error}</p>}

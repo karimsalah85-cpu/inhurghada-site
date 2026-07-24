@@ -13,6 +13,7 @@ import { createInvoicePdf } from "@/lib/invoice-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateBookingInput } from "@/lib/booking-validation";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -27,6 +28,16 @@ export async function GET(request: NextRequest) {
 
   if (!reference || !email) {
     return bookingJson({ success: false, error: "Your booking reference and email are required." }, { status: 400 });
+  }
+
+  const database = createAdminClient();
+  if (database) {
+    const { data } = await database.from("bookings").select("reference, customer_name, customer_email, phone, tour_name, date, guests, hotel, notes, amount, currency, status, created_at").eq("reference", reference).eq("customer_email", email.toLowerCase()).maybeSingle();
+    if (data) return bookingJson({ success: true, booking: {
+      reference: data.reference, type: "tour", customerName: data.customer_name, customerEmail: data.customer_email,
+      phone: data.phone, tourName: data.tour_name, date: data.date, guests: String(data.guests || 0), hotel: data.hotel,
+      message: data.notes, amount: Number(data.amount || 0), currency: data.currency, status: data.status, createdAt: data.created_at,
+    } });
   }
 
   const booking = findBooking(reference);
@@ -133,7 +144,14 @@ export async function POST(request: NextRequest) {
       sendWhatsAppMessage(bookingWhatsApp, message),
       sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml, confirmationAttachment),
       customerEmail
-        ? sendBookingEmail(customerEmail, `Your booking confirmation: ${reference}`, `<p>Hello ${customerName},</p><p>Your booking summary is attached. Payment is cash on arrival.</p><p>Reference: ${reference}</p>`, confirmationAttachment)
+        ? sendBookingEmail(
+          customerEmail,
+          body.locale === "de" ? `Deine Buchungsbestätigung: ${reference}` : `Your booking confirmation: ${reference}`,
+          body.locale === "de"
+            ? `<p>Hallo ${escapeHtml(customerName)},</p><p>deine Buchungsübersicht ist als PDF angehängt. Die Zahlung erfolgt bar bei Ankunft.</p><p>Buchungsnummer: ${escapeHtml(reference)}</p><p>Wir bestätigen die Abholdetails per WhatsApp.</p>`
+            : `<p>Hello ${escapeHtml(customerName)},</p><p>Your booking summary is attached. Payment is cash on arrival.</p><p>Reference: ${escapeHtml(reference)}</p><p>We confirm pickup details by WhatsApp.</p>`,
+          confirmationAttachment,
+        )
         : Promise.resolve({ success: false, reason: "no-customer-email" }),
     ]);
 

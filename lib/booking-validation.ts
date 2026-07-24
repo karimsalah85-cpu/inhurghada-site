@@ -11,6 +11,10 @@ function number(value: unknown) {
   return Number(value ?? 0);
 }
 
+function extras(value: unknown) {
+  return Array.isArray(value) ? value.slice(0, 10).map((item) => text(item, 60)).filter(Boolean) : [];
+}
+
 export function validateBookingInput(input: unknown) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return { error: "Invalid booking request." as const };
   const body = input as BookingInput;
@@ -35,6 +39,7 @@ export function validateBookingInput(input: unknown) {
   return {
     data: {
       type,
+      locale: body.locale === "de" ? "de" : "en",
       customerName,
       phone,
       customerEmail,
@@ -42,6 +47,8 @@ export function validateBookingInput(input: unknown) {
       currency: "usd",
       date,
       tourName: text(body.tourName, 160),
+      tourSlug: text(body.tourSlug, 80),
+      extras: extras(body.extras),
       location: text(body.location, 100),
       duration: text(body.duration, 80),
       price: text(body.price, 60),

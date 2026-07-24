@@ -54,7 +54,8 @@ export default function Hero() {
     <section
       className="
       relative
-      min-h-screen
+      min-h-[940px]
+      sm:min-h-screen
       bg-cover
       bg-center
       "
@@ -81,7 +82,14 @@ export default function Hero() {
         relative
         z-10
         flex
-        min-h-screen
+        min-h-[940px]
+        justify-start
+        pb-[32rem]
+        pt-40
+        sm:min-h-screen
+        sm:justify-center
+        sm:pb-48
+        sm:pt-32
         flex-col
         items-center
         justify-center
@@ -92,22 +100,22 @@ export default function Hero() {
 
 
         <div className="max-w-4xl text-white">
-          <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
+          <div className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 backdrop-blur-md sm:mb-8 sm:gap-3 sm:px-4">
             <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
-            <span className="text-sm font-semibold uppercase tracking-[0.35em] text-cyan-200">
+            <span className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200 sm:text-sm sm:tracking-[0.35em]">
               {t("discoverHurghada")}
             </span>
           </div>
 
-          <h1 className="text-4xl font-black leading-tight md:text-6xl">
+          <h1 className="text-4xl font-black leading-[1.08] sm:text-5xl md:text-6xl">
             {t("heroTitle")}
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-200 md:text-xl">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:mt-6 sm:text-lg md:text-xl">
             {t("heroDescription")}
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-6 hidden flex-wrap justify-center gap-3 sm:flex">
             <div className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur">
               ✨ {t("privateTransfers")}
             </div>
@@ -131,13 +139,15 @@ export default function Hero() {
       <div
         className="
         absolute
-        bottom-16
+        bottom-8
         left-1/2
         z-20
         w-full
         max-w-6xl
         -translate-x-1/2
-        px-6
+        px-4
+        sm:bottom-12
+        sm:px-6
         "
       >
 
@@ -147,7 +157,8 @@ export default function Hero() {
           rounded-[1.75rem]
           border border-slate-200/80
           bg-white
-          p-6
+          p-4
+          sm:p-6
           shadow-[0_25px_80px_-20px_rgba(15,23,42,0.35)]
           "
         >

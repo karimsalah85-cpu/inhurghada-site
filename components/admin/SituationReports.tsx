@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarRange, Download, RotateCcw, TrendingUp, Users } from "lucide-react";
+import { CalendarRange, Download, Megaphone, RotateCcw, TrendingUp, Users } from "lucide-react";
 import { countDistinctCustomers } from "@/lib/customer-count";
 
 type BookingStatus = "new" | "confirmed" | "completed" | "cancelled";
@@ -55,6 +55,31 @@ export default function SituationReports({ bookings }: { bookings: ReportBooking
     current.bookings += 1; current.people += Number(item.guests || 0); current.revenue[currency] = (current.revenue[currency] || 0) + Number(item.amount || 0); all[name] = current; return all;
   }, {})).sort((a, b) => b[1].bookings - a[1].bookings), [statistics.active]);
 
+  const adPlan = useMemo(() => {
+    const keywordFor = (name: string) => {
+      const value = name.toLowerCase();
+      if (value.includes("orange bay")) return "orange bay hurghada tickets";
+      if (value.includes("quad") || value.includes("safari")) return "quad tour hurghada";
+      if (value.includes("airport")) return "flughafentransfer hurghada";
+      if (value.includes("snorkel") || value.includes("island") || value.includes("boat")) return "hurghada bootstour";
+      if (value.includes("luxor")) return "luxor ausflug ab hurghada";
+      return "ausflüge hurghada";
+    };
+    const totalBookings = Math.max(1, serviceRows.reduce((sum, [, values]) => sum + values.bookings, 0));
+    return serviceRows.slice(0, 8).map(([name, values]) => {
+      const usdRevenue = values.revenue.USD || 0;
+      const averageValue = values.bookings ? usdRevenue / values.bookings : 0;
+      return {
+        name,
+        keyword: keywordFor(name),
+        share: Math.round(values.bookings / totalBookings * 100),
+        averageValue,
+        targetCpa: averageValue ? averageValue * 0.18 : 0,
+        status: values.bookings >= 3 ? "Scale" : values.bookings ? "Test" : "Hold",
+      };
+    });
+  }, [serviceRows]);
+
   const dailyRows = useMemo(() => Object.entries(statistics.active.reduce<Record<string, { bookings: number; people: number }>>((all, item) => {
     const date = item.date!; const current = all[date] || { bookings: 0, people: 0 }; current.bookings += 1; current.people += Number(item.guests || 0); all[date] = current; return all;
   }, {})).sort(([a], [b]) => a.localeCompare(b)), [statistics.active]);
@@ -87,6 +112,12 @@ export default function SituationReports({ bookings }: { bookings: ReportBooking
       <div className="rounded-2xl border border-slate-200 p-5"><h3 className="font-black">Booking health</h3><p className="mt-1 text-xs text-slate-500">Status mix in the selected period</p><div className="mt-5 space-y-4">{(["new", "confirmed", "completed", "cancelled"] as BookingStatus[]).map((item) => { const count = filtered.filter((booking) => booking.status === item).length; return <div key={item}><div className="mb-1.5 flex justify-between text-xs"><span className="font-bold capitalize">{item}</span><span>{count} · {filtered.length ? Math.round(count / filtered.length * 100) : 0}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${statusBar[item]}`} style={{ width: `${filtered.length ? count / filtered.length * 100 : 0}%` }}/></div></div>; })}</div></div></div>
 
     <div className="mt-7"><div className="flex items-end justify-between"><div><h3 className="font-black">Top services</h3><p className="mt-1 text-xs text-slate-500">Ranked by active booking volume</p></div></div><div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{serviceRows.slice(0, 6).map(([name, values], index) => <div key={name} className="rounded-2xl bg-slate-50 p-4"><div className="flex items-start gap-3"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white text-xs font-black text-blue-700 shadow-sm">{index + 1}</span><div className="min-w-0"><p className="truncate font-bold" title={name}>{name}</p><p className="mt-1 text-xs text-slate-500">{values.bookings} booking{values.bookings === 1 ? "" : "s"} · {values.people} guests</p><p className="mt-2 text-sm font-black text-slate-800">{formatTotals(values.revenue)}</p></div></div></div>)}{!serviceRows.length ? <Empty text="No service statistics for this period."/> : null}</div></div>
+
+    <div className="mt-8 rounded-2xl border border-blue-200 bg-blue-50/60 p-5">
+      <div className="flex items-start gap-3"><Megaphone className="mt-0.5 shrink-0 text-blue-700" size={22}/><div><h3 className="font-black text-slate-950">Google Ads opportunity planner</h3><p className="mt-1 max-w-3xl text-xs leading-5 text-slate-600">Recommendations use actual active bookings and USD booking value in the selected period. Budget share follows demand; target CPA is capped at 18% of average booking value. Traffic, click cost and conversion tracking must be connected before automated bidding decisions.</p></div></div>
+      <div className="mt-5 overflow-x-auto rounded-xl border border-blue-100 bg-white"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-blue-50 text-xs uppercase tracking-wide text-blue-800"><tr><th className="p-3">Campaign</th><th className="p-3">Suggested keyword</th><th className="p-3">Action</th><th className="p-3 text-right">Budget share</th><th className="p-3 text-right">Max target CPA</th></tr></thead><tbody>{adPlan.map((item) => <tr key={item.name} className="border-t border-blue-50"><td className="p-3 font-bold">{item.name}</td><td className="p-3"><code className="rounded bg-slate-100 px-2 py-1 text-xs">[{item.keyword}]</code></td><td className="p-3"><span className={`rounded-full px-2 py-1 text-xs font-bold ${item.status === "Scale" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{item.status}</span></td><td className="p-3 text-right font-bold">{item.share}%</td><td className="p-3 text-right font-bold">{item.targetCpa ? money(item.targetCpa, "USD") : "Collect data"}</td></tr>)}</tbody></table>{!adPlan.length ? <Empty text="Bookings in the selected period will generate campaign suggestions here."/> : null}</div>
+      <p className="mt-3 text-xs text-slate-500">Safety rule: do not increase spend from this panel alone. Confirm Google Ads conversion events, search terms, location targeting and profitability first.</p>
+    </div>
 
     <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200"><table className="w-full min-w-[820px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="p-3">Reference</th><th className="p-3">Service</th><th className="p-3">Date</th><th className="p-3">Guests</th><th className="p-3">Booking</th><th className="p-3">Payment</th><th className="p-3 text-right">Amount</th></tr></thead><tbody>{rows.map((item) => <tr key={item.id} className="border-t border-slate-100"><td className="p-3 font-mono font-bold text-blue-700">{item.reference}</td><td className="max-w-64 truncate p-3" title={item.tour_name || "Private transfer"}>{item.tour_name || "Private transfer"}</td><td className="p-3 whitespace-nowrap">{item.date ? labelDate(item.date) : "To confirm"}</td><td className="p-3">{item.guests || 0}</td><td className="p-3"><Badge value={item.status}/></td><td className="p-3"><Badge value={item.payment_status}/></td><td className="p-3 text-right font-bold whitespace-nowrap">{money(Number(item.amount || 0), item.currency || "USD")}</td></tr>)}</tbody></table>{!rows.length ? <Empty text="No bookings match these report filters."/> : null}</div>
     <div className="mt-4 flex items-center justify-between text-sm"><span className="text-slate-500">Page {currentPage} of {totalPages}</span><div className="flex gap-2"><button type="button" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} className="rounded-lg border px-3 py-2 font-bold disabled:opacity-40">Previous</button><button type="button" disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} className="rounded-lg border px-3 py-2 font-bold disabled:opacity-40">Next</button></div></div>
