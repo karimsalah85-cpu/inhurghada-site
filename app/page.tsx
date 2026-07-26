@@ -143,7 +143,7 @@ function HomeContent() {
       <section className="bg-slate-50 px-6 py-20 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Wähle deinen Stil" : "Choose your style"}</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Die besten Aktivitäten in Hurghada" : "Best things to do in Hurghada"}</p>
             <h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Hurghada-Erlebnisse für jeden Plan" : "Hurghada experiences for every plan"}</h2>
             <p className="mt-4 text-lg leading-8 text-slate-600">{de ? "Türkisblaues Wasser, goldene Wüstendünen oder eine bequeme Fahrt von Tür zu Tür – dein perfekter Tag in Hurghada beginnt hier." : "Chase turquoise water, golden-hour dunes, or a smooth door-to-door ride—your best Hurghada day starts here."}</p>
           </div>
