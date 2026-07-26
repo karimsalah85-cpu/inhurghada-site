@@ -57,10 +57,11 @@ export default function Hero() {
       min-h-[940px]
       sm:min-h-screen
       bg-cover
-      bg-center
+      bg-[position:28%_center]
+      sm:bg-center
       "
       style={{
-        backgroundImage:"url('/images/hero.jpg')"
+        backgroundImage:"url('/images/hero-egypt-red-sea.jpg')"
       }}
     >
 
