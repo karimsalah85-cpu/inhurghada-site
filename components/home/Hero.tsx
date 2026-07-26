@@ -5,7 +5,26 @@ import { MapPin, Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath } from "@/lib/i18n";
+import { getImageProps } from "next/image";
 
+const heroImageCommon = {
+  alt: "Hurghada experiences including desert, ancient Egyptian temples, Red Sea boat trips, and scuba diving",
+  sizes: "100vw",
+};
+const { props: { srcSet: desktopHeroSrcSet } } = getImageProps({
+  ...heroImageCommon,
+  src: "/images/hero-egypt-red-sea.jpg",
+  width: 1672,
+  height: 941,
+  quality: 75,
+});
+const { props: { srcSet: mobileHeroSrcSet, ...mobileHeroProps } } = getImageProps({
+  ...heroImageCommon,
+  src: "/images/hero-egypt-red-sea-mobile.jpg",
+  width: 941,
+  height: 1672,
+  quality: 75,
+});
 
 export default function Hero() {
 
@@ -56,15 +75,14 @@ export default function Hero() {
       relative
       min-h-[940px]
       sm:min-h-screen
-      bg-cover
-      bg-[position:28%_center]
-      sm:bg-center
       "
-      style={{
-        backgroundImage:"url('/images/hero-egypt-red-sea.jpg')"
-      }}
     >
 
+      <picture className="absolute inset-0 block">
+        <source media="(min-width: 640px)" srcSet={desktopHeroSrcSet} />
+        <source media="(max-width: 639px)" srcSet={mobileHeroSrcSet} />
+        <img {...mobileHeroProps} alt={heroImageCommon.alt} fetchPriority="high" className="h-full w-full object-cover" />
+      </picture>
 
       <div
         className="
