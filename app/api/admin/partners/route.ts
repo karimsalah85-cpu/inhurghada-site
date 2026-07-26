@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { data, error } = await supabase.from(tables[type]).insert(record).select().single();
+  if (error && error.code === "PGRST205") return json({ error: "The admin database migration must be applied before suppliers and sales people can be created." }, 503);
   if (error) return json({ error: `Could not create the ${type === "supplier" ? "supplier" : "sales person"}.` }, 500);
   return json({ partner: data, type }, 201);
 }

@@ -43,7 +43,7 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function AdminDashboard({ initialBookings, initialExpenses, initialSuppliers, initialSalesPeople }: { initialBookings: Booking[]; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[] }) {
+export default function AdminDashboard({ initialBookings, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false }: { initialBookings: Booking[]; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
   const [expenses, setExpenses] = useState(initialExpenses);
@@ -144,10 +144,10 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
   async function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusyId("expense"); setError("");
     try {
-      const result = await api<{ expense: Expense }>("/api/admin/expenses", { method: "POST", body: JSON.stringify(expense) });
+      const result = await api<{ expense: Expense; warning?: string }>("/api/admin/expenses", { method: "POST", body: JSON.stringify(expense) });
       setExpenses((items) => [result.expense, ...items]);
       setExpense({ description: "", amount: "", category: "", date: today(), expense_type: "other", supplier_id: "", sales_person_id: "", booking_id: "" });
-      feedback("Expense saved.");
+      feedback(result.warning || "Expense saved.");
       router.refresh();
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not save the expense."); }
     finally { setBusyId(null); }
@@ -215,6 +215,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
 
     {error ? <div role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800">{error}</div> : null}
     {notice ? <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">{notice}</div> : null}
+    {migrationPending ? <div role="alert" className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"><p className="font-black">Admin database upgrade pending</p><p className="mt-1 leading-6">Basic expenses can still be saved. Supplier expenses, sales commissions, supplier records, and sales people will work after migration <code className="font-mono">202607260001_admin_partners_and_expenses.sql</code> is applied in Supabase.</p></div> : null}
 
     <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
       <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">

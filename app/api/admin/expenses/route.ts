@@ -35,6 +35,30 @@ export async function POST(request: NextRequest) {
     description, amount, currency: "USD", expense_date: date, category: category || null,
     expense_type: expenseType, supplier_id: supplierId, sales_person_id: salesPersonId, booking_id: bookingId,
   }).select().single();
-  if (error) return json({ error: "Could not save the expense." }, 500);
+  if (error && ["42703", "PGRST204"].includes(error.code) && !["supplier_per_trip", "sales_commission"].includes(expenseType)) {
+    const legacy = await supabase.from("expenses").insert({
+      description, amount, currency: "USD", expense_date: date,
+      category: category || expenseOptionsLabel(expenseType),
+    }).select().single();
+    if (!legacy.error) return json({ expense: legacy.data, warning: "Saved without the new expense classification because the admin database migration is pending." }, 201);
+  }
+  if (error && ["42703", "PGRST204", "PGRST205"].includes(error.code)) {
+    return json({ error: "The admin database migration is required before this expense type can be saved." }, 503);
+  }
+  if (error) {
+    console.error("Admin expense save failed", { code: error.code, message: error.message });
+    return json({ error: "Could not save the expense. Please check the amount, date, and selected contact." }, 500);
+  }
   return json({ expense: data }, 201);
+}
+
+function expenseOptionsLabel(type: string) {
+  return ({
+    google_ads: "Google Ads",
+    subscriptions: "Subscriptions",
+    fuel: "Fuel",
+    guide_fees: "Guide fees",
+    boat_costs: "Boat costs",
+    other: "Other",
+  } as Record<string, string>)[type] || "Other";
 }
