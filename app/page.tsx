@@ -178,9 +178,9 @@ function HomeContent() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <DestinationCard image="/images/orange-bay.jpeg" title="Island escapes" description="Boat trips, snorkeling and beach days on the Red Sea." href={`${homePath}?search=island`} />
-            <DestinationCard image="/images/scuba-diving.jpg" title="Diving & snorkeling" description="Discover coral reefs with experienced local crews." href={`${homePath}?search=diving`} />
-            <DestinationCard image="/images/desert-safari.jpg" title="Desert adventures" description="Quad bikes, Bedouin culture and unforgettable sunsets." href={`${homePath}?search=desert`} />
+            <DestinationCard image="/images/hurghada-island-calm-sunset.jpeg" title="Island escapes" description="Boat trips, snorkeling and beach days on the Red Sea." href={`${homePath}?search=island`} />
+            <DestinationCard image="/images/hurghada-snorkeling-reef-panorama.jpeg" title="Diving & snorkeling" description="Discover coral reefs with experienced local crews." href={`${homePath}?search=diving`} />
+            <DestinationCard image="/images/hurghada-desert-camel-closeup.jpeg" title="Desert adventures" description="Quad bikes, Bedouin culture and unforgettable sunsets." href={`${homePath}?search=desert`} />
           </div>
         </div>
       </section>

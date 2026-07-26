@@ -23,20 +23,20 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
     : tour.slug === "full-day-diving" || tour.slug === "professional-underwater-photographer"
       ? [
         "/images/hurghada-red-sea-coral-reef.jpeg",
-        "/images/hurghada-red-sea-scuba-diver.jpeg",
         tour.image === "/images/scuba-diving.jpg" ? "/images/full-day-diving.jpg" : "/images/scuba-diving.jpg",
         "/images/full-day-snorkeling.jpg",
+        "/images/hurghada-snorkeling-reef-panorama.jpeg",
       ]
     : tour.slug === "full-day-snorkeling"
       ? [
+        "/images/full-day-snorkeling.jpg",
         "/images/hurghada-snorkeling-sandy-seabed.jpeg",
-        "/images/hurghada-snorkeling-reef-panorama.jpeg",
         "/images/hurghada-red-sea-coral-reef.jpeg",
         "/images/orange-bay.jpeg",
       ]
     : tour.slug === "mahmya-island"
       ? [
-        "/images/mahmya-island-boats-sunset.jpeg",
+        "/images/mahmya-island.jpg",
         "/images/hurghada-island-beach-loungers.jpeg",
         "/images/hurghada-island-calm-sunset.jpeg",
         "/images/hurghada-island-family-sunset.jpeg",
@@ -52,10 +52,10 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
       ? ["/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg", "/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg"]
     : tour.category === "Desert Safari"
       ? [
-        "/images/hurghada-desert-camel-closeup.jpeg",
         "/images/hurghada-desert-quad-tour.jpeg",
         "/images/hurghada-desert-camel-profile.jpeg",
-        tour.image === "/images/quad-safari-sunset.jpg" ? "/images/desert-safari.jpg" : "/images/quad-safari-sunset.jpg",
+        "/images/desert-safari.jpg",
+        "/images/quad-safari-sunset.jpg",
       ]
       : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"];
   const faqs = de ? [
