@@ -1,5 +1,7 @@
 export type Tour = {
   slug: string;
+  /** Destination ownership keeps tours ready for expansion beyond Hurghada. */
+  destinationSlug?: string;
   title: string;
   image: string;
   price: string;

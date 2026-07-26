@@ -3,6 +3,7 @@ import { tours } from "@/data/tours";
 import { siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
+import { destinations } from "@/lib/destinations";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const contentUpdatedAt = new Date("2026-07-23T00:00:00.000Z");
@@ -15,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/privacy-policy",
     "/terms-conditions",
     "/image-credits",
+    ...destinations.filter((destination) => destination.active).map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
     ...tours.map((tour) => `/tours/${tour.slug}`),
   ];
