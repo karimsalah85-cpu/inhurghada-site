@@ -29,6 +29,8 @@ const paymentCopy: Record<string, { label: string; message: string }> = {
   refunded: { label: "Refunded", message: "Your payment is marked as refunded. Bank or card processing times may apply where relevant." },
 };
 
+const companyStatement = "Daily Red Sea connects travelers in Hurghada with trusted local operators for diving, snorkeling, and desert excursions — with transparent pricing and direct support every step of the way.";
+
 const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
 })[character] || character);
@@ -44,7 +46,7 @@ export async function sendBookingStatusNotification(booking: StatusBooking, stat
     ["New status", copy.label],
   ];
   const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
-  const html = `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(copy.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p>`;
+  const html = `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(copy.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p><p style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6"><strong>About Daily Red Sea</strong><br>${escapeHtml(companyStatement)}</p>`;
   return sendBookingEmail(booking.customer_email, `Booking ${booking.reference}: ${copy.label}`, html);
 }
 
@@ -66,7 +68,7 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
   const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
   return {
     subject: `Booking ${booking.reference}: ${bookingStatus.label} · Payment ${paymentStatus.label}`,
-    html: `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p>`,
+    html: `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p><p style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6"><strong>About Daily Red Sea</strong><br>${escapeHtml(companyStatement)}</p>`,
     text: [
       `Hello ${booking.customer_name},`,
       "",
@@ -76,6 +78,9 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
       ...details.map(([label, value]) => `${label}: ${value}`),
       "",
       "If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.",
+      "",
+      "About Daily Red Sea",
+      companyStatement,
     ].join("\n"),
   };
 }
