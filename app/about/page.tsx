@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about", languages: { ...languageAlternates("/about"), "x-default": localePath("en", "/about") } },
 };
 
-export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
+export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" }) {
   const de = locale === "de";
   const ru = locale === "ru";
   const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;

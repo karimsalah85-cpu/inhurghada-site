@@ -8,7 +8,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/privacy-policy",
 });
 
-export default function PrivacyPolicyPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
+export default function PrivacyPolicyPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" }) {
   const de = locale === "de";
   return (
     <main className="mx-auto max-w-5xl px-6 py-24 lg:px-8">

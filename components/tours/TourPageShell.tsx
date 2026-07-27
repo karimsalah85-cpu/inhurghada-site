@@ -9,13 +9,14 @@ import { absoluteUrl, siteName } from "@/lib/seo";
 import TourViewTracker from "@/components/analytics/TourViewTracker";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { localePath, type Locale } from "@/lib/i18n";
-import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import ImageWatermark from "@/components/media/ImageWatermark";
 
 export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
   const de = locale === "de";
   const ru = locale === "ru";
+  const ar = locale === "ar";
   const destination = getDestination(tour.destinationSlug);
   const homeHref = localePath(locale);
   const toursHref = `${homeHref}#tours`;
@@ -70,13 +71,17 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
     { question: "Включён ли трансфер из отеля?", answer: "Информация о трансфере указана в описании. Точное время и место мы подтверждаем через WhatsApp после бронирования." },
     { question: "Когда производится оплата?", answer: "Если при бронировании не указан другой способ, вы бронируете онлайн и платите наличными по прибытии." },
     { question: "Что взять с собой?", answer: "Возьмите номер бронирования, удобную одежду и всё, что перечислено в разделе важной информации." },
+  ] : ar ? [
+    { question: "هل الاستلام من الفندق مشمول؟", answer: "تظهر معلومات الاستلام في تفاصيل الرحلة، ونؤكد الوقت والمكان عبر واتساب بعد الحجز." },
+    { question: "متى يتم الدفع؟", answer: "يمكنك الحجز عبر الموقع والدفع نقداً عند الوصول ما لم تظهر طريقة دفع أخرى بوضوح." },
+    { question: "ماذا يجب أن أحضر؟", answer: "أحضر رقم الحجز وملابس مريحة وكل ما هو مذكور في قسم المعلومات المهمة." },
   ] : tour.faqs ?? [
     { question: de ? "Ist die Abholung vom Hotel inklusive?" : "Is hotel pickup included?", answer: de ? "Die Abholdetails stehen in den Ausflugsinformationen. Die genaue Zeit und den Ort bestätigen wir nach der Buchung per WhatsApp." : "Pickup details are shown in the tour information. We confirm the exact pickup time and location with you on WhatsApp after booking." },
     { question: de ? "Wann bezahle ich?" : "When do I pay?", answer: de ? "Du kannst online reservieren und bei Ankunft bar bezahlen, sofern bei der Buchung keine andere Zahlungsart angezeigt wird." : "You can reserve online and pay cash on arrival unless a different payment option is clearly shown during booking." },
     { question: de ? "Was soll ich mitbringen?" : "What should I bring?", answer: de ? "Bringe deine Buchungsnummer, bequeme Kleidung und alle Dinge mit, die im Abschnitt mit den wichtigen Informationen genannt werden." : "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
-  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : item);
+  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : item);
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
   const schema = { "@context": "https://schema.org", "@graph": [
     { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
@@ -88,7 +93,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
       <TourViewTracker title={tour.title} price={tour.price} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{de ? "Startseite" : ru ? "Главная" : "Home"}</Link><span className="px-2" aria-hidden="true">/</span><Link href={toursHref} className="hover:text-cyan-700">{de ? "Ausflüge" : ru ? "Экскурсии" : "Tours"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
+        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : "Home"}</Link><span className="px-2" aria-hidden="true">/</span><Link href={toursHref} className="hover:text-cyan-700">{de ? "Ausflüge" : ru ? "Экскурсии" : ar ? "الرحلات" : "Tours"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : `${destination?.name || "Hurghada"} experience`}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>

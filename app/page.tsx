@@ -18,7 +18,7 @@ import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
-import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 
 
@@ -36,7 +36,8 @@ function HomeContent() {
   const homePath = localePath(language);
   const de = language === "de";
   const ru = language === "ru";
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
+  const ar = language === "ar";
+  const tr = (en: string, deText: string, ruText: string, arText = en) => de ? deText : ru ? ruText : ar ? arText : en;
   const searchParams = useSearchParams();
   const router = useRouter();
   const search = searchParams.get("search") ?? "";
@@ -80,7 +81,7 @@ function HomeContent() {
 
 
 
-  const displayTours = de ? tours.map(localizeTourGerman) : ru ? tours.map(localizeTourRussian) : tours;
+  const displayTours = de ? tours.map(localizeTourGerman) : ru ? tours.map(localizeTourRussian) : ar ? tours.map(localizeTourArabic) : tours;
   const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];
@@ -409,7 +410,7 @@ text-gray-700
 "
 >
 
-{de ? "Gefunden:" : ru ? "Найдено:" : "Found"}
+{de ? "Gefunden:" : ru ? "Найдено:" : ar ? "تم العثور على:" : "Found"}
 
 <span className="
 mx-2
@@ -421,9 +422,9 @@ text-blue-600
 
 </span>
 
-{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : `tour${filteredTours.length === 1 ? "" : "s"}`}
+{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : ar ? "رحلات" : `tour${filteredTours.length === 1 ? "" : "s"}`}
 
-{de ? "für:" : ru ? "по запросу:" : "for:"}
+{de ? "für:" : ru ? "по запросу:" : ar ? "للبحث:" : "for:"}
 
 <span className="
 ml-2
@@ -500,7 +501,7 @@ text-blue-600
                 text-gray-500
               ">
 
-                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : "No tours found"}
+                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : ar ? "لم يتم العثور على رحلات مناسبة" : "No tours found"}
 
               </div>
 

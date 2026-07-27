@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
-import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 
 const slugs = (query: string, source = tours) => filterTours(source, query).map((tour) => tour.slug);
@@ -24,6 +24,13 @@ describe("multilingual tour search", () => {
     expect(slugs("дайвинг", russianTours)).toContain("full-day-diving");
     expect(slugs("аэропорт трансфер", russianTours)).toContain("hurghada-airport-transfer");
     expect(slugs("пустыня закат", russianTours)).toContain("quad-safari-sunset");
+  });
+
+  it("matches Arabic terms on localized tours", () => {
+    const arabicTours = tours.map(localizeTourArabic);
+    expect(slugs("غوص", arabicTours)).toContain("full-day-diving");
+    expect(slugs("مطار توصيل", arabicTours)).toContain("hurghada-airport-transfer");
+    expect(slugs("صحراء غروب", arabicTours)).toContain("quad-safari-sunset");
   });
 
   it("is case-insensitive, accent-insensitive, and clears to all tours", () => {

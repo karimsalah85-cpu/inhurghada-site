@@ -76,7 +76,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   return {
     data: {
       type,
-      locale: body.locale === "de" ? "de" : body.locale === "ru" ? "ru" : "en",
+      locale: body.locale === "de" ? "de" : body.locale === "ru" ? "ru" : body.locale === "ar" ? "ar" : "en",
       customerName,
       phone,
       customerEmail,

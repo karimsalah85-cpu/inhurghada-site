@@ -14,12 +14,27 @@ const areas = ["Hurghada Airport", "Hurghada Hotels", "Senzo Mall", "Makadi Bay"
 const resortZones = new Set(["Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"]);
 type TransferService = "airport" | "senzo";
 
+const arabicTransferCopy: Record<string, string> = {
+  "Small car": "سيارة صغيرة", "Larger vehicle": "سيارة أكبر", "Private car": "سيارة خاصة",
+  "Book a private transfer": "احجز توصيلاً خاصاً", "Choose your service and see the fixed one-way fare instantly.": "اختر الخدمة وشاهد سعر الاتجاه الواحد فوراً.",
+  "Airport transfer": "توصيل المطار", "Senzo Mall transfer": "توصيل سنزو مول", "one way within Hurghada": "اتجاه واحد داخل الغردقة",
+  "Required field": "حقل مطلوب", "Pickup location": "مكان الاستلام", "Pickup hotel / full address": "فندق الاستلام / العنوان الكامل",
+  "Required pickup details": "تفاصيل الاستلام المطلوبة", "Drop-off location": "مكان الوصول", "Transfer date": "تاريخ التوصيل",
+  "Pickup time": "وقت الاستلام", "Please book at least 1 hour before pickup.": "يرجى الحجز قبل موعد الاستلام بساعة واحدة على الأقل.",
+  "Passengers": "الركاب", " (maximum 4)": " (بحد أقصى 4)", "Travel bags": "حقائب السفر", "Flight number (optional)": "رقم الرحلة (اختياري)",
+  "Your name": "اسمك", "WhatsApp number": "رقم واتساب", "Email address": "البريد الإلكتروني", "Notes (optional)": "ملاحظات (اختياري)",
+  "Add luggage, child seat, or any special request.": "أضف مقعد طفل أو أي طلب خاص.", "Before booking, please review our": "قبل الحجز، راجع",
+  "cancellation policy": "سياسة الإلغاء", "By submitting, you agree to our terms and conditions.": "بإرسال الطلب، توافق على الشروط والأحكام.",
+  "Sending transfer request…": "جارٍ إرسال طلب التوصيل…", "Book one way": "احجز اتجاهاً واحداً",
+};
+
 export default function TransferBookingForm({ initialService = "airport" }: { initialService?: TransferService }) {
   const router = useRouter();
   const { language } = useSiteSettings();
   const de = language === "de";
   const ru = language === "ru";
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
+  const ar = language === "ar";
+  const tr = (en: string, deText: string, ruText: string, arText = arabicTransferCopy[en] || en) => de ? deText : ru ? ruText : ar ? arText : en;
   const [service, setService] = useState<TransferService>(initialService);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -102,7 +117,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "transfer",
-          locale: ru ? "ru" : de ? "de" : "en",
+          locale: ar ? "ar" : ru ? "ru" : de ? "de" : "en",
           customerName: name.trim(),
           phone: phone.trim(),
           customerEmail: email.trim(),

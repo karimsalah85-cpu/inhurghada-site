@@ -147,11 +147,13 @@ export async function POST(request: NextRequest) {
       customerEmail
         ? sendBookingEmail(
           customerEmail,
-          body.locale === "de" ? `Deine Buchungsbestätigung: ${reference}` : body.locale === "ru" ? `Подтверждение бронирования: ${reference}` : `Your booking confirmation: ${reference}`,
+          body.locale === "de" ? `Deine Buchungsbestätigung: ${reference}` : body.locale === "ru" ? `Подтверждение бронирования: ${reference}` : body.locale === "ar" ? `تأكيد الحجز: ${reference}` : `Your booking confirmation: ${reference}`,
           body.locale === "de"
             ? `<p>Hallo ${escapeHtml(customerName)},</p><p>deine Buchungsübersicht ist als PDF angehängt. Die Zahlung erfolgt bar bei Ankunft.</p><p>Buchungsnummer: ${escapeHtml(reference)}</p><p>Wir bestätigen die Abholdetails per WhatsApp.</p>`
             : body.locale === "ru"
               ? `<p>Здравствуйте, ${escapeHtml(customerName)}!</p><p>К письму приложена сводка вашего бронирования в формате PDF. Оплата производится наличными по прибытии.</p><p>Номер бронирования: ${escapeHtml(reference)}</p><p>Детали трансфера мы подтвердим в WhatsApp.</p>`
+            : body.locale === "ar"
+              ? `<p>مرحباً ${escapeHtml(customerName)}،</p><p>ملخص حجزك مرفق بصيغة PDF. يتم الدفع نقداً عند الوصول.</p><p>رقم الحجز: ${escapeHtml(reference)}</p><p>سنؤكد تفاصيل الاستلام عبر واتساب.</p>`
             : `<p>Hello ${escapeHtml(customerName)},</p><p>Your booking summary is attached. Payment is cash on arrival.</p><p>Reference: ${escapeHtml(reference)}</p><p>We confirm pickup details by WhatsApp.</p>`,
           confirmationAttachment,
         )

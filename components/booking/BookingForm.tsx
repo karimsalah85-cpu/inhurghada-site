@@ -61,13 +61,28 @@ const upsells: Record<string, { id: string; price: number; en: string; de: strin
   "luxor-private-day-trip": [{ id: "tutankhamun-ticket", price: 30, en: "Entry to Tutankhamun's tomb", de: "Eintritt zum Grab Tutanchamuns", ru: "Входной билет в гробницу Тутанхамона" }],
 };
 
+const arabicBookingCopy: Record<string, string> = {
+  "From": "ابتداءً من", "person": "للشخص", "Clear local price · pickup confirmed after booking": "سعر واضح · يتم تأكيد الاستلام بعد الحجز",
+  "Date": "التاريخ", "Time": "الوقت", "Select your package": "اختر الباقة", "Adults": "البالغون", "each": "لكل شخص",
+  "Youth (9–10)": "الأطفال (9–10)", "Youth (4–10)": "الأطفال (4–10)", "Infants": "الرضع", "Free of charge": "مجاناً",
+  "Book now": "احجز الآن", "Tell us about yourself": "بياناتك", "Required field": "حقل مطلوب", "Full name": "الاسم الكامل",
+  "Enter your full name": "أدخل الاسم الكامل", "Email address": "البريد الإلكتروني", "WhatsApp number": "رقم واتساب",
+  "Pickup location": "مكان الاستلام", "Hotel name or full pickup address": "اسم الفندق أو عنوان الاستلام الكامل",
+  "Required so we can confirm your pickup on WhatsApp.": "مطلوب لتأكيد الاستلام عبر واتساب.", "Special requests": "طلبات خاصة",
+  "optional": "اختياري", "Anything we should know?": "هل توجد معلومات مهمة؟", "Before booking, please review our": "قبل الحجز، راجع",
+  "cancellation policy": "سياسة الإلغاء", "By submitting, you agree to our terms and conditions.": "بإرسال الطلب، توافق على الشروط والأحكام.",
+  "Sending booking…": "جارٍ إرسال الحجز…", "Confirm booking": "تأكيد الحجز", "Change date or travelers": "تغيير التاريخ أو المسافرين",
+  "Please select at least one adult.": "اختر شخصاً بالغاً واحداً على الأقل.",
+};
+
 export default function BookingForm({ tourName, tourSlug, price, duration, location, participantPricing, availableTimes }: BookingFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { formatPrice, language } = useSiteSettings();
   const de = language === "de";
   const ru = language === "ru";
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
+  const ar = language === "ar";
+  const tr = (en: string, deText: string, ruText: string, arText = arabicBookingCopy[en] || en) => de ? deText : ru ? ruText : ar ? arText : en;
   const adultPrice = participantPricing?.adults ?? Number(price || 0);
   const youthPrice = participantPricing?.youth;
   const infantPrice = participantPricing?.infants;
@@ -118,7 +133,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: "tour", locale: ru ? "ru" : de ? "de" : "en", customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
+          type: "tour", locale: ar ? "ar" : ru ? "ru" : de ? "de" : "en", customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
           tourName, tourSlug, extras: selectedExtras, location: location || "Hurghada", duration: duration || "Please confirm",
           price: `${formatPrice(String(total))} total`, date, guests: travelerText, hotel,
           message: `Time: ${time}\nGuide language: ${guideLanguage}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,

@@ -15,6 +15,7 @@ export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: 
   const { formatPrice } = useSiteSettings();
   const de = locale === "de";
   const ru = locale === "ru";
+  const ar = locale === "ar";
   const visibleTours = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const result = tours.filter((tour) =>
@@ -30,15 +31,15 @@ export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: 
       <div className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[1fr_auto]">
         <label className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4">
           <Search size={19} className="text-cyan-700" />
-          <span className="sr-only">{de ? "Diese Erlebnisse durchsuchen" : ru ? "Поиск экскурсий" : "Search these experiences"}</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={de ? "Diese Erlebnisse durchsuchen" : ru ? "Поиск экскурсий" : "Search these experiences"} className="min-h-12 w-full bg-transparent outline-none" />
+          <span className="sr-only">{de ? "Diese Erlebnisse durchsuchen" : ru ? "Поиск экскурсий" : ar ? "ابحث في الرحلات" : "Search these experiences"}</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={de ? "Diese Erlebnisse durchsuchen" : ru ? "Поиск экскурсий" : ar ? "ابحث في الرحلات" : "Search these experiences"} className="min-h-12 w-full bg-transparent outline-none" />
         </label>
         <label>
           <span className="sr-only">{de ? "Ausflüge sortieren" : ru ? "Сортировать экскурсии" : "Sort tours"}</span>
           <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
-            <option value="featured">{de ? "Empfohlen" : ru ? "Рекомендуемые" : "Featured"}</option>
-            <option value="price-low">{de ? "Preis: niedrig nach hoch" : ru ? "Цена: по возрастанию" : "Price: low to high"}</option>
-            <option value="price-high">{de ? "Preis: hoch nach niedrig" : ru ? "Цена: по убыванию" : "Price: high to low"}</option>
+            <option value="featured">{de ? "Empfohlen" : ru ? "Рекомендуемые" : ar ? "المميزة" : "Featured"}</option>
+            <option value="price-low">{de ? "Preis: niedrig nach hoch" : ru ? "Цена: по возрастанию" : ar ? "السعر: من الأقل إلى الأعلى" : "Price: low to high"}</option>
+            <option value="price-high">{de ? "Preis: hoch nach niedrig" : ru ? "Цена: по убыванию" : ar ? "السعر: من الأعلى إلى الأقل" : "Price: high to low"}</option>
           </select>
         </label>
       </div>

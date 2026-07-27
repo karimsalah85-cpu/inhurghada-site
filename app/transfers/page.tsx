@@ -10,7 +10,7 @@ export const metadata: Metadata = pageMetadata({
   image: "/images/hurghada-airport-transfer.jpg",
 });
 
-export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
+export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" }) {
   const de = locale === "de";
 
   return (
