@@ -19,6 +19,7 @@ import SocialLinks from "@/components/layout/SocialLinks";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
 import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { filterTours } from "@/lib/tour-search";
 
 
 
@@ -79,47 +80,7 @@ function HomeContent() {
 
 
   const displayTours = de ? tours.map(localizeTourGerman) : ru ? tours.map(localizeTourRussian) : tours;
-  const filteredTours = displayTours.filter(
-  (tour: Tour)=>{
-
-
-    const searchableText = [
-
-      tour.title,
-
-      tour.description,
-
-      tour.location,
-
-      tour.duration,
-
-      ...tour.highlights,
-
-    ]
-    .join(" ")
-    .toLowerCase();
-
-
-
-    const searchWords = search
-      .toLowerCase()
-      .trim()
-      .split(" ")
-      .filter(Boolean);
-
-
-
-    return searchWords.every((word)=>
-
-
-      searchableText.includes(word)
-
-
-    );
-
-
-  }
-);
+  const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];
   filteredTours.sort((left, right) => {
@@ -308,7 +269,7 @@ function HomeContent() {
 
           {/* TRANSFERS */}
 
-
+          {!search && (
 
           <div className="
             mb-20
@@ -369,7 +330,7 @@ function HomeContent() {
                     tracking-[0.35em]
                     text-blue-600
                   ">
-                    Transfers
+                    {de ? "Transfers" : ru ? "Трансферы" : "Transfers"}
                   </p>
 
 
@@ -380,7 +341,7 @@ function HomeContent() {
                     text-4xl
                     font-bold
                   ">
-                    Airport & Hotel Transfers
+                    {de ? "Flughafen- & Hoteltransfers" : ru ? "Трансферы из аэропорта и отелей" : "Airport & Hotel Transfers"}
                   </h3>
 
 
@@ -390,8 +351,7 @@ function HomeContent() {
                     mt-4
                     text-gray-600
                   ">
-                    Private transfers between Hurghada Airport
-                    and Red Sea hotels.
+                    {de ? "Private Transfers zwischen dem Flughafen Hurghada und den Hotels am Roten Meer." : ru ? "Частные трансферы между аэропортом Хургады и отелями Красного моря." : "Private transfers between Hurghada Airport and Red Sea hotels."}
                   </p>
 
 
@@ -417,7 +377,7 @@ function HomeContent() {
                 hover:bg-blue-700
                 "
               >
-                Book Transfer
+                {de ? "Transfer buchen" : ru ? "Заказать трансфер" : "Book Transfer"}
               </Link>
 
 
@@ -426,32 +386,11 @@ function HomeContent() {
 
 
           </div>
+          )}
 
 
 
 
-
-
-{search && (
-
-<div className="
-mb-8
-rounded-xl
-bg-blue-50
-p-4
-text-center
-text-blue-700
-font-medium
-">
-
-Showing results for:
-<strong className="ml-2">
-{search}
-</strong>
-
-</div>
-
-)}
 
 
           {/* RESULTS */}
@@ -469,7 +408,7 @@ text-gray-700
 "
 >
 
-Found
+{de ? "Gefunden:" : ru ? "Найдено:" : "Found"}
 
 <span className="
 mx-2
@@ -481,10 +420,9 @@ text-blue-600
 
 </span>
 
-tour
-{filteredTours.length !== 1 && "s"}
+{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : `tour${filteredTours.length === 1 ? "" : "s"}`}
 
-for:
+{de ? "für:" : ru ? "по запросу:" : "for:"}
 
 <span className="
 ml-2
@@ -561,7 +499,7 @@ text-blue-600
                 text-gray-500
               ">
 
-                No tours found
+                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : "No tours found"}
 
               </div>
 
