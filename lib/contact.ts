@@ -1,4 +1,4 @@
-export const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "201030809150";
+export const whatsappNumber = "201030809150";
 export const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
 export const displayPhoneNumber = "+20 103 080 9150";
 export const facebookUrl = "https://www.facebook.com/profile.php?id=61592247695069";
