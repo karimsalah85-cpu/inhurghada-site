@@ -47,4 +47,10 @@ describe("booking input validation", () => {
     expect(validateBookingInput(diving).error).toMatch(/valid diving license/i);
     expect(validateBookingInput({ ...diving, divingLicenseConfirmed: true }).data?.divingLicenseConfirmed).toBe(true);
   });
+
+  it("requires every quad-tour participant to be at least 9", () => {
+    const quad = { ...valid, tourSlug: "quad-safari-morning", tourName: "Morning Quad Bike Safari" };
+    expect(validateBookingInput(quad).error).toMatch(/at least 9/i);
+    expect(validateBookingInput({ ...quad, quadMinimumAgeConfirmed: true }).data?.quadMinimumAgeConfirmed).toBe(true);
+  });
 });

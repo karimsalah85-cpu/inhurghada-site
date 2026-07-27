@@ -68,6 +68,10 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (type === "tour" && tourSlug === "full-day-diving" && !divingLicenseConfirmed) {
     return { error: "Every diver must hold a valid diving license and bring proof on the trip." as const };
   }
+  const quadMinimumAgeConfirmed = body.quadMinimumAgeConfirmed === true;
+  if (type === "tour" && ["quad-safari-morning", "quad-safari-sunset"].includes(tourSlug) && !quadMinimumAgeConfirmed) {
+    return { error: "Every quad-tour participant must be at least 9 years old." as const };
+  }
 
   return {
     data: {
@@ -83,6 +87,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       tourName: text(body.tourName, 160),
       tourSlug,
       divingLicenseConfirmed,
+      quadMinimumAgeConfirmed,
       extras: extras(body.extras),
       location: text(body.location, 100),
       duration: text(body.duration, 80),
