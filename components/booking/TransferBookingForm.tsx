@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
+import { isTransferLeadTimeValid, minimumTransferSlot } from "@/lib/booking-validation";
 
 const areas = ["Hurghada Airport", "Hurghada Hotels", "Senzo Mall", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"];
 const resortZones = new Set(["Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"]);
@@ -45,6 +46,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       ? pickup === "Hurghada Airport" || dropoff === "Hurghada Airport"
       : pickup === "Senzo Mall" || dropoff === "Senzo Mall";
   }, [dropoff, pickup, service]);
+  const minimumSlot = minimumTransferSlot();
 
   function changeService(nextService: TransferService) {
     setService(nextService);
@@ -65,6 +67,10 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
     if (!routeIsValid) {
       alert(service === "airport" ? (de ? "Flughafentransfers müssen am Flughafen Hurghada beginnen oder enden." : "Airport transfers must start or finish at Hurghada Airport.") : (de ? "Senzo-Transfers müssen an der Senzo Mall beginnen oder enden." : "Senzo transfers must start or finish at Senzo Mall."));
+      return;
+    }
+    if (!isTransferLeadTimeValid(date, time)) {
+      alert(de ? "Wir benötigen mindestens 1 Stunde, um deinen Transfer zu organisieren. Bitte wähle eine spätere Abholzeit." : "We need at least 1 hour to arrange your transfer. Please choose a later pickup time.");
       return;
     }
     if (service === "senzo" && passengerCount > 4) {
@@ -104,6 +110,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
           price: `$${total.toFixed(2)} fixed one-way fare`,
           guests: passengers,
           date,
+          time,
           hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
           message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} (${resortSupplement ? `$${baseFare} base + $7 resort supplement` : `$${baseFare} base`})\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
           service,
@@ -162,8 +169,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         <Field required icon={<MapPin />} label={de ? "Abholort" : "Pickup location"}><select value={pickup} onChange={(event) => setPickup(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
         <Field required icon={<Hotel />} label={de ? "Abholhotel / vollständige Adresse" : "Pickup hotel / full address"}><input type="text" value={pickupDetails} onChange={(event) => setPickupDetails(event.target.value)} placeholder={de ? "Erforderliche Abholdetails" : "Required pickup details"} required /></Field>
         <Field required icon={<Hotel />} label={de ? "Zielort" : "Drop-off location"}><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
-        <Field required icon={<CalendarDays />} label={de ? "Transferdatum" : "Transfer date"}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={new Date().toISOString().split("T")[0]} required /></Field>
-        <Field required icon={<Clock3 />} label={de ? "Abholzeit" : "Pickup time"}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} required /></Field>
+        <Field required icon={<CalendarDays />} label={de ? "Transferdatum" : "Transfer date"}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={minimumSlot.date} required /></Field>
+        <Field required icon={<Clock3 />} label={de ? "Abholzeit" : "Pickup time"}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} min={date === minimumSlot.date ? minimumSlot.time : undefined} required /><p className="mt-2 text-xs leading-5 text-amber-700">{de ? "Bitte mindestens 1 Stunde Vorlaufzeit einplanen." : "Please book at least 1 hour before pickup."}</p></Field>
         <Field required icon={<Users />} label={`${de ? "Fahrgäste" : "Passengers"}${service === "senzo" ? (de ? " (maximal 4)" : " (maximum 4)") : ""}`}><input type="number" min="1" max={service === "senzo" ? 4 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
         <Field required icon={<Car />} label={de ? "Reisekoffer" : "Travel bags"}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
         <Field icon={<Plane />} label={de ? "Flugnummer (optional)" : "Flight number (optional)"}><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="z. B. MS 045" /></Field>

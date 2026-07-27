@@ -34,4 +34,11 @@ describe("booking input validation", () => {
     expect(result.data?.currency).toBe("usd");
     expect(result.data).not.toHaveProperty("amount");
   });
+
+  it("requires one hour of lead time for transfer bookings", () => {
+    const now = new Date("2026-07-27T10:00:00Z");
+    const transfer = { ...valid, type: "transfer", date: "2026-07-27" };
+    expect(validateBookingInput({ ...transfer, time: "13:30" }, now).error).toMatch(/at least 1 hour/i);
+    expect(validateBookingInput({ ...transfer, time: "14:01" }, now).data?.time).toBe("14:01");
+  });
 });

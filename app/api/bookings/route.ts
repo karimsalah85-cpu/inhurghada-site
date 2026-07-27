@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
       itemName: tourName,
       quantity: guestCount, travelerSummary: guestSummary, amount, currency: "usd",
-      paymentMethod: "Cash on arrival", date: body.date, time: extractBookingValue(String(body.message || ""), "Time"), hotel,
+      paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
