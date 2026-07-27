@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath } from "@/lib/i18n";
 import { getImageProps } from "next/image";
+import ImageWatermark from "@/components/media/ImageWatermark";
 
 const heroImageCommon = {
   alt: "Hurghada experiences including desert, ancient Egyptian temples, Red Sea boat trips, and scuba diving",
@@ -83,6 +84,7 @@ export default function Hero() {
         <source media="(max-width: 639px)" srcSet={mobileHeroSrcSet} />
         <img {...mobileHeroProps} alt={heroImageCommon.alt} fetchPriority="high" className="h-full w-full object-cover" />
       </picture>
+      <ImageWatermark prominent />
 
       <div
         className="

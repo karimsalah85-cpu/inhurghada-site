@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, MapPin, ShieldCheck, Star } from "lucide-react";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import ImageWatermark from "@/components/media/ImageWatermark";
 
 type TourCardProps = {
   image: string;
@@ -45,6 +46,7 @@ export default function TourCard({
       <Link href={link} className="group block">
         <div className="relative h-60 overflow-hidden sm:h-64">
           <Image src={image} alt={title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
+          <ImageWatermark />
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
           {hasReviews ? <div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-sm shadow"><Star size={16} className="fill-yellow-400 text-yellow-400" /><span className="font-semibold">{rating} · {reviewCount}</span></div> : null}
           <span className="absolute bottom-4 left-4 rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white">{badge ?? t("bestSeller")}</span>

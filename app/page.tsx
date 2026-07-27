@@ -16,6 +16,7 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
+import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
 import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 
@@ -665,6 +666,7 @@ function DestinationCard({ image, title, description, href }: { image: string; t
   return (
     <Link href={href} className="group relative min-h-80 overflow-hidden rounded-3xl bg-slate-900 shadow-lg">
       <Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
+      <ImageWatermark />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-7 text-white"><h3 className="text-2xl font-bold">{title}</h3><p className="mt-2 text-slate-200">{description}</p><span className="mt-4 inline-block font-semibold text-blue-200">Explore →</span></div>
     </Link>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/components/media/WatermarkedImage";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { tours } from "@/data/tours";

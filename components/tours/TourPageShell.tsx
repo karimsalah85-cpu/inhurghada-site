@@ -11,6 +11,7 @@ import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { localePath, type Locale } from "@/lib/i18n";
 import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
+import ImageWatermark from "@/components/media/ImageWatermark";
 
 export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
   const de = locale === "de";
@@ -92,8 +93,8 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
         <div className="mt-8 grid gap-3 overflow-hidden rounded-[2rem] sm:h-[420px] sm:grid-cols-2">
-          <div className="relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-64"><Image src={tour.image} alt={tour.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" priority /></div>
-          <div className="grid grid-cols-2 gap-3">{galleryImages.map((image, index) => <div key={`${image}-${index}`} className="relative aspect-[4/3] overflow-hidden sm:aspect-auto"><Image src={image} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />{index === 3 ? <span className="absolute bottom-2 right-2 max-w-[calc(100%-1rem)] rounded-full bg-white/95 px-3 py-1.5 text-center text-[10px] font-bold leading-tight text-slate-900 sm:bottom-4 sm:right-4 sm:px-4 sm:py-2 sm:text-sm">{ru ? "Экскурсии Daily Red Sea" : de ? "Daily Red Sea Erlebnisse" : "Daily Red Sea experiences"}</span> : null}</div>)}</div>
+          <div className="relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-64"><Image src={tour.image} alt={tour.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" priority /><ImageWatermark prominent /></div>
+          <div className="grid grid-cols-2 gap-3">{galleryImages.map((image, index) => <div key={`${image}-${index}`} className="relative aspect-[4/3] overflow-hidden sm:aspect-auto"><Image src={image} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" /><ImageWatermark /></div>)}</div>
         </div>
       </section>
 
