@@ -18,7 +18,7 @@ import PrivacyPolicyPage from "@/app/privacy-policy/page";
 import TermsConditionsPage from "@/app/terms-conditions/page";
 import TourPageShell from "@/components/tours/TourPageShell";
 import TourCategoryPage from "@/app/hurghada/[category]/page";
-import { localizeTourGerman } from "@/lib/tour-localization";
+import { localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -121,7 +121,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "tour") {
       const tour = tours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
-      return <TourPageShell locale="ru" tour={{ ...tour, title: localizedTourTitle("ru", tour.slug, tour.title) }} />;
+      return <TourPageShell locale="ru" tour={localizeTourRussian(tour)} />;
     }
     if (kind === "category") return <TourCategoryPage locale="ru" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "transfers") return <TransfersPage locale="ru" />;

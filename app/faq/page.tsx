@@ -30,20 +30,31 @@ const germanFaqs = [
   { question: "Wie wird meine Abholzeit bestätigt?", answer: "Wähle eine angegebene Uhrzeit. Wenn die Zeit von Hotel, Flug, Wetter oder Sonnenuntergang abhängt, bestätigt unser Team sie per WhatsApp." },
   { question: "Gelten Transferpreise pro Person?", answer: "Flughafen- und Senzo-Mall-Transfers haben den auf der Buchungsseite beschriebenen Festpreis für eine einfache Fahrt. Ausflüge werden normalerweise pro Person berechnet." },
 ];
+const russianFaqs = [
+  { question: "Как забронировать?", answer: "Выберите экскурсию, дату, время и количество гостей, затем отправьте данные. Мы подтвердим наличие мест и детали трансфера по электронной почте или в WhatsApp." },
+  { question: "Когда и как оплачивать?", answer: "Большинство бронирований оформляются онлайн и оплачиваются наличными по прибытии. Способ оплаты и итоговая сумма показаны до отправки заявки." },
+  { question: "Включён ли трансфер из отеля?", answer: "Информация о трансфере указана на странице каждой экскурсии. Для некоторых курортных районов возможна доплата, которую мы показываем или подтверждаем заранее." },
+  { question: "Нужен ли паспорт?", answer: "Для экскурсий может потребоваться действующий паспорт, удостоверение личности или копия для оформления разрешений. Для обычного частного трансфера это, как правило, не требуется." },
+  { question: "Можно ли с детьми и младенцами?", answer: "Возрастные правила и детские цены зависят от экскурсии. Доступные варианты для взрослых, детей и младенцев показаны в форме бронирования." },
+  { question: "Можно отменить или изменить бронирование?", answer: "Свяжитесь с нами как можно раньше. Действуют условия конкретной экскурсии, а изменения зависят от наличия мест." },
+  { question: "Как подтверждается время трансфера?", answer: "Выберите доступное время. Если оно зависит от отеля, рейса, погоды или заката, наша команда подтвердит точное время в WhatsApp." },
+  { question: "Цена трансфера указана за человека?", answer: "Для трансферов из аэропорта и в Senzo Mall действует фиксированная цена в одну сторону, указанная на странице. Экскурсии обычно оплачиваются за человека." },
+];
 
 export default function FaqPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
   const de = locale === "de";
-  const displayedFaqs = de ? germanFaqs : faqs;
-  const schema = { "@context": "https://schema.org", "@type": "FAQPage", url: absoluteUrl(de ? "/de/faq" : "/faq"), mainEntity: displayedFaqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) };
+  const ru = locale === "ru";
+  const displayedFaqs = de ? germanFaqs : ru ? russianFaqs : faqs;
+  const schema = { "@context": "https://schema.org", "@type": "FAQPage", url: absoluteUrl(localePath(locale, "/faq")), mainEntity: displayedFaqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) };
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <div className="mx-auto max-w-4xl">
-        <p className="font-semibold uppercase tracking-[0.28em] text-cyan-700">{de ? "Hilfreiche Antworten" : "Helpful answers"}</p>
-        <h1 className="mt-4 text-4xl font-black text-slate-950 sm:text-6xl">{de ? "FAQ zu Ausflügen und Transfers" : "Tours and transfers FAQ"}</h1>
-        <p className="mt-6 text-lg leading-8 text-slate-600">{de ? "Klare Antworten auf praktische Fragen vor der Buchung in Hurghada." : "Clear answers to the practical questions travelers ask before booking in Hurghada."}</p>
+        <p className="font-semibold uppercase tracking-[0.28em] text-cyan-700">{de ? "Hilfreiche Antworten" : ru ? "Полезные ответы" : "Helpful answers"}</p>
+        <h1 className="mt-4 text-4xl font-black text-slate-950 sm:text-6xl">{de ? "FAQ zu Ausflügen und Transfers" : ru ? "Вопросы об экскурсиях и трансферах" : "Tours and transfers FAQ"}</h1>
+        <p className="mt-6 text-lg leading-8 text-slate-600">{de ? "Klare Antworten auf praktische Fragen vor der Buchung in Hurghada." : ru ? "Понятные ответы на практические вопросы перед бронированием в Хургаде." : "Clear answers to the practical questions travelers ask before booking in Hurghada."}</p>
         <div className="mt-10 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-7 shadow-sm">{displayedFaqs.map((faq) => <details key={faq.question} className="py-6"><summary className="cursor-pointer text-lg font-bold text-slate-950">{faq.question}</summary><p className="mt-4 leading-8 text-slate-600">{faq.answer}</p></details>)}</div>
-        <div className="mt-8 flex flex-wrap gap-3"><Link href={de ? "/de#tours" : "/#tours"} className="rounded-full bg-blue-700 px-6 py-3 font-bold text-white">{de ? "Ausflüge entdecken" : "Explore tours"}</Link><Link href={de ? "/de/contact" : "/contact"} className="rounded-full border border-slate-300 px-6 py-3 font-bold text-slate-800">{de ? "Kontakt" : "Contact us"}</Link></div>
+        <div className="mt-8 flex flex-wrap gap-3"><Link href={`${localePath(locale)}#tours`} className="rounded-full bg-blue-700 px-6 py-3 font-bold text-white">{de ? "Ausflüge entdecken" : ru ? "Выбрать экскурсию" : "Explore tours"}</Link><Link href={localePath(locale, "/contact")} className="rounded-full border border-slate-300 px-6 py-3 font-bold text-slate-800">{de ? "Kontakt" : ru ? "Связаться с нами" : "Contact us"}</Link></div>
       </div>
     </main>
   );

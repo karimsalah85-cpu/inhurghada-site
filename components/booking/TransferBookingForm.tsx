@@ -18,6 +18,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const router = useRouter();
   const { language } = useSiteSettings();
   const de = language === "de";
+  const ru = language === "ru";
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
   const [service, setService] = useState<TransferService>(initialService);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -38,7 +40,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const baseFare = service === "airport" ? 20 : 10;
   const resortSupplement = resortZones.has(pickup) || resortZones.has(dropoff) ? 7 : 0;
   const total = baseFare + resortSupplement;
-  const vehicle = service === "airport" ? (passengerCount <= 2 ? (de ? "Kleinwagen" : "Small car") : (de ? "Größeres Fahrzeug" : "Larger vehicle")) : (de ? "Privatwagen" : "Private car");
+  const vehicle = service === "airport" ? (passengerCount <= 2 ? tr("Small car", "Kleinwagen", "Легковой автомобиль") : tr("Larger vehicle", "Größeres Fahrzeug", "Автомобиль повышенной вместимости")) : tr("Private car", "Privatwagen", "Частный автомобиль");
   const serviceAreas = service === "airport" ? areas.filter((area) => area !== "Senzo Mall") : areas.filter((area) => area !== "Hurghada Airport");
   const routeIsValid = useMemo(() => {
     if (pickup === dropoff) return false;
@@ -66,11 +68,11 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
     event.preventDefault();
 
     if (!routeIsValid) {
-      alert(service === "airport" ? (de ? "Flughafentransfers müssen am Flughafen Hurghada beginnen oder enden." : "Airport transfers must start or finish at Hurghada Airport.") : (de ? "Senzo-Transfers müssen an der Senzo Mall beginnen oder enden." : "Senzo transfers must start or finish at Senzo Mall."));
+      alert(service === "airport" ? tr("Airport transfers must start or finish at Hurghada Airport.", "Flughafentransfers müssen am Flughafen Hurghada beginnen oder enden.", "Трансфер должен начинаться или заканчиваться в аэропорту Хургады.") : tr("Senzo transfers must start or finish at Senzo Mall.", "Senzo-Transfers müssen an der Senzo Mall beginnen oder enden.", "Трансфер должен начинаться или заканчиваться у Senzo Mall."));
       return;
     }
     if (!isTransferLeadTimeValid(date, time)) {
-      alert(de ? "Wir benötigen mindestens 1 Stunde, um deinen Transfer zu organisieren. Bitte wähle eine spätere Abholzeit." : "We need at least 1 hour to arrange your transfer. Please choose a later pickup time.");
+      alert(tr("We need at least 1 hour to arrange your transfer. Please choose a later pickup time.", "Wir benötigen mindestens 1 Stunde, um deinen Transfer zu organisieren. Bitte wähle eine spätere Abholzeit.", "Нам требуется не менее 1 часа для организации трансфера. Выберите более позднее время."));
       return;
     }
     if (service === "senzo" && passengerCount > 4) {
@@ -100,7 +102,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "transfer",
-          locale: de ? "de" : "en",
+          locale: ru ? "ru" : de ? "de" : "en",
           customerName: name.trim(),
           phone: phone.trim(),
           customerEmail: email.trim(),
@@ -137,7 +139,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         serviceName,
         date,
         time,
-        travelers: `${passengers} ${de ? "Fahrgäste" : "passengers"}`,
+        travelers: `${passengers} ${de ? "Fahrgäste" : ru ? "пасс." : "passengers"}`,
         total: `$${total.toFixed(2)}`,
         customerEmailSent: Boolean(data.customerEmailSent),
         whatsappSent: Boolean(data.whatsappSent),
@@ -145,7 +147,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       }));
       router.push(`${localePath(language, "/booking/confirmation")}?reference=${encodeURIComponent(data.reference)}`);
     } catch {
-      alert("We could not reach the booking service. Check your connection and try again.");
+      alert(tr("We could not reach the booking service. Check your connection and try again.", "Der Buchungsservice ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.", "Не удалось связаться с сервисом бронирования. Проверьте соединение и попробуйте снова."));
     } finally {
       setSubmitting(false);
     }
@@ -156,27 +158,27 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
       <div className="flex items-start gap-4">
         <div className="rounded-xl bg-blue-100 p-3 text-blue-700"><Car /></div>
-        <div><h2 className="text-2xl font-bold text-slate-900">{de ? "Privaten Transfer buchen" : "Book a private transfer"}</h2><p className="mt-1 text-sm text-slate-600">{de ? "Wähle den Service und sieh sofort den festen Preis für eine einfache Fahrt." : "Choose your service and see the fixed one-way fare instantly."}</p></div>
+        <div><h2 className="text-2xl font-bold text-slate-900">{tr("Book a private transfer", "Privaten Transfer buchen", "Забронировать частный трансфер")}</h2><p className="mt-1 text-sm text-slate-600">{tr("Choose your service and see the fixed one-way fare instantly.", "Wähle den Service und sieh sofort den festen Preis für eine einfache Fahrt.", "Выберите услугу и сразу узнайте фиксированную цену поездки в одну сторону.")}</p></div>
       </div>
 
       <div className="mt-7 grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => changeService("airport")} className={`rounded-2xl border p-4 text-left transition ${service === "airport" ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100" : "border-slate-200 hover:border-blue-300"}`}><span className="block font-bold text-slate-900">{de ? "Flughafentransfer" : "Airport transfer"}</span><span className="mt-1 block text-sm text-slate-600">$20 {de ? "einfache Fahrt innerhalb Hurghadas" : "one way within Hurghada"}</span></button>
-        <button type="button" onClick={() => changeService("senzo")} className={`rounded-2xl border p-4 text-left transition ${service === "senzo" ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100" : "border-slate-200 hover:border-blue-300"}`}><span className="block font-bold text-slate-900">{de ? "Senzo-Mall-Transfer" : "Senzo Mall transfer"}</span><span className="mt-1 block text-sm text-slate-600">$10 {de ? "einfache Fahrt innerhalb Hurghadas" : "one way within Hurghada"}</span></button>
+        <button type="button" onClick={() => changeService("airport")} className={`rounded-2xl border p-4 text-left transition ${service === "airport" ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100" : "border-slate-200 hover:border-blue-300"}`}><span className="block font-bold text-slate-900">{tr("Airport transfer", "Flughafentransfer", "Трансфер из аэропорта")}</span><span className="mt-1 block text-sm text-slate-600">$20 {tr("one way within Hurghada", "einfache Fahrt innerhalb Hurghadas", "в одну сторону по Хургаде")}</span></button>
+        <button type="button" onClick={() => changeService("senzo")} className={`rounded-2xl border p-4 text-left transition ${service === "senzo" ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100" : "border-slate-200 hover:border-blue-300"}`}><span className="block font-bold text-slate-900">{tr("Senzo Mall transfer", "Senzo-Mall-Transfer", "Трансфер в Senzo Mall")}</span><span className="mt-1 block text-sm text-slate-600">$10 {tr("one way within Hurghada", "einfache Fahrt innerhalb Hurghadas", "в одну сторону по Хургаде")}</span></button>
       </div>
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
-        <p className="text-xs text-slate-500 sm:col-span-2"><RequiredMark/> {de ? "Pflichtfeld" : "Required field"}</p>
-        <Field required icon={<MapPin />} label={de ? "Abholort" : "Pickup location"}><select value={pickup} onChange={(event) => setPickup(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
-        <Field required icon={<Hotel />} label={de ? "Abholhotel / vollständige Adresse" : "Pickup hotel / full address"}><input type="text" value={pickupDetails} onChange={(event) => setPickupDetails(event.target.value)} placeholder={de ? "Erforderliche Abholdetails" : "Required pickup details"} required /></Field>
-        <Field required icon={<Hotel />} label={de ? "Zielort" : "Drop-off location"}><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
-        <Field required icon={<CalendarDays />} label={de ? "Transferdatum" : "Transfer date"}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={minimumSlot.date} required /></Field>
-        <Field required icon={<Clock3 />} label={de ? "Abholzeit" : "Pickup time"}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} min={date === minimumSlot.date ? minimumSlot.time : undefined} required /><p className="mt-2 text-xs leading-5 text-amber-700">{de ? "Bitte mindestens 1 Stunde Vorlaufzeit einplanen." : "Please book at least 1 hour before pickup."}</p></Field>
-        <Field required icon={<Users />} label={`${de ? "Fahrgäste" : "Passengers"}${service === "senzo" ? (de ? " (maximal 4)" : " (maximum 4)") : ""}`}><input type="number" min="1" max={service === "senzo" ? 4 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
-        <Field required icon={<Car />} label={de ? "Reisekoffer" : "Travel bags"}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
-        <Field icon={<Plane />} label={de ? "Flugnummer (optional)" : "Flight number (optional)"}><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="z. B. MS 045" /></Field>
-        <Field required icon={<User />} label={de ? "Dein Name" : "Your name"}><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
-        <Field required icon={<Phone />} label={de ? "WhatsApp-Nummer" : "WhatsApp number"}><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /></Field>
-        <Field required icon={<MessageCircle />} label={de ? "E-Mail-Adresse" : "Email address"}><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
+        <p className="text-xs text-slate-500 sm:col-span-2"><RequiredMark/> {tr("Required field", "Pflichtfeld", "Обязательное поле")}</p>
+        <Field required icon={<MapPin />} label={tr("Pickup location", "Abholort", "Место отправления")}><select value={pickup} onChange={(event) => setPickup(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
+        <Field required icon={<Hotel />} label={tr("Pickup hotel / full address", "Abholhotel / vollständige Adresse", "Отель / полный адрес подачи")}><input type="text" value={pickupDetails} onChange={(event) => setPickupDetails(event.target.value)} placeholder={tr("Required pickup details", "Erforderliche Abholdetails", "Укажите точное место подачи")} required /></Field>
+        <Field required icon={<Hotel />} label={tr("Drop-off location", "Zielort", "Место назначения")}><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
+        <Field required icon={<CalendarDays />} label={tr("Transfer date", "Transferdatum", "Дата трансфера")}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={minimumSlot.date} required /></Field>
+        <Field required icon={<Clock3 />} label={tr("Pickup time", "Abholzeit", "Время подачи")}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} min={date === minimumSlot.date ? minimumSlot.time : undefined} required /><p className="mt-2 text-xs leading-5 text-amber-700">{tr("Please book at least 1 hour before pickup.", "Bitte mindestens 1 Stunde Vorlaufzeit einplanen.", "Бронируйте минимум за 1 час до подачи.")}</p></Field>
+        <Field required icon={<Users />} label={`${tr("Passengers", "Fahrgäste", "Пассажиры")}${service === "senzo" ? tr(" (maximum 4)", " (maximal 4)", " (максимум 4)") : ""}`}><input type="number" min="1" max={service === "senzo" ? 4 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
+        <Field required icon={<Car />} label={tr("Travel bags", "Reisekoffer", "Дорожные чемоданы")}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
+        <Field icon={<Plane />} label={tr("Flight number (optional)", "Flugnummer (optional)", "Номер рейса (необязательно)")}><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="MS 045" /></Field>
+        <Field required icon={<User />} label={tr("Your name", "Dein Name", "Ваше имя")}><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
+        <Field required icon={<Phone />} label={tr("WhatsApp number", "WhatsApp-Nummer", "Номер WhatsApp")}><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /></Field>
+        <Field required icon={<MessageCircle />} label={tr("Email address", "E-Mail-Adresse", "Электронная почта")}><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
       </div>
 
       <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
@@ -184,10 +186,10 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         <div className="mt-4 border-t border-blue-200 pt-4 text-sm text-slate-700"><p><strong>{de ? "Fahrzeug:" : "Vehicle:"}</strong> {vehicle}</p>{service === "airport" ? <p className="mt-1">{de ? "1–2 Fahrgäste: Kleinwagen, maximal 2 Koffer. Mehr als 2 Fahrgäste: größeres Fahrzeug, maximal 2 Koffer pro Person." : "1–2 passengers: small car, maximum 2 bags. More than 2 passengers: larger vehicle, maximum 2 bags per person."}</p> : <p className="mt-1">{de ? "Maximal 4 Fahrgäste. Reisekoffer sind nicht erlaubt." : "Maximum 4 passengers. Travel bags are not accepted."}</p>}</div>
       </div>
 
-      <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">{de ? "Hinweise (optional)" : "Notes (optional)"}</label>
-      <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder={de ? "Kindersitz oder besondere Wünsche hinzufügen." : "Add luggage, child seat, or any special request."} />
-      <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">{de ? "Bitte lies vor der Buchung unsere" : "Before booking, please review our"} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-blue-700 underline">{de ? "Stornierungsbedingungen" : "cancellation policy"}</Link>. {de ? "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu." : "By submitting, you agree to our terms and conditions."}</p>
-      <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"><MessageCircle size={20} />{submitting ? (de ? "Transferanfrage wird gesendet…" : "Sending transfer request…") : `${de ? "Einfache Fahrt buchen" : "Book one way"} · $${total.toFixed(2)}`}</button>
+      <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">{tr("Notes (optional)", "Hinweise (optional)", "Примечания (необязательно)")}</label>
+      <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-950 outline-none placeholder:text-slate-400 focus:border-blue-500" placeholder={tr("Add luggage, child seat, or any special request.", "Kindersitz oder besondere Wünsche hinzufügen.", "Укажите детское кресло или другие пожелания.")} />
+      <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">{tr("Before booking, please review our", "Bitte lies vor der Buchung unsere", "Перед бронированием ознакомьтесь с")} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-blue-700 underline">{tr("cancellation policy", "Stornierungsbedingungen", "правилами отмены")}</Link>. {tr("By submitting, you agree to our terms and conditions.", "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu.", "Отправляя заявку, вы соглашаетесь с нашими условиями.")}</p>
+      <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"><MessageCircle size={20} />{submitting ? tr("Sending transfer request…", "Transferanfrage wird gesendet…", "Отправка заявки…") : `${tr("Book one way", "Einfache Fahrt buchen", "Забронировать поездку")} · $${total.toFixed(2)}`}</button>
     </form>
   );
 }
