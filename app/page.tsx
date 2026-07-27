@@ -36,6 +36,7 @@ function HomeContent() {
   const homePath = localePath(language);
   const de = language === "de";
   const ru = language === "ru";
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
   const searchParams = useSearchParams();
   const router = useRouter();
   const search = searchParams.get("search") ?? "";
@@ -521,14 +522,18 @@ text-blue-600
 
       </section>
 
-      <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">Why Daily Red Sea</p><h2 className="mt-4 text-4xl font-black">Local knowledge, easy booking, clear support.</h2><p className="mt-5 leading-7 text-slate-300">We help you find the right Hurghada excursion with direct local support before your day begins.</p></div>{[{icon:ShieldCheck,title:"Trusted local partners",text:"Carefully selected crews, guides and drivers."},{icon:MessageCircle,title:"Easy WhatsApp booking",text:"Fast help for pickup, changes and questions."},{icon:Headphones,title:"Helpful support",text:"Clear communication in English before your tour."}].map(({icon:Icon,title,text}) => <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6"><Icon className="text-cyan-300"/><h3 className="mt-5 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-slate-300">{text}</p></div>)}</div></section>
+      <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">{tr("Why Daily Red Sea", "Warum Daily Red Sea?", "Почему Daily Red Sea")}</p><h2 className="mt-4 text-4xl font-black">{tr("Local knowledge, easy booking, clear support.", "Lokale Erfahrung, einfache Buchung, klare Unterstützung.", "Местные знания, простое бронирование и понятная поддержка.")}</h2><p className="mt-5 leading-7 text-slate-300">{tr("We help you find the right Hurghada excursion with direct local support before your day begins.", "Wir helfen dir mit direkter lokaler Betreuung, den passenden Ausflug in Hurghada zu finden.", "Мы поможем выбрать подходящую экскурсию в Хургаде и поддержим вас до начала поездки.")}</p></div>{[
+        {icon:ShieldCheck,title:tr("Trusted local partners","Vertrauenswürdige lokale Partner","Надёжные местные партнёры"),text:tr("Carefully selected crews, guides and drivers.","Sorgfältig ausgewählte Crews, Reiseführer und Fahrer.","Тщательно отобранные команды, гиды и водители.")},
+        {icon:MessageCircle,title:tr("Easy WhatsApp booking","Einfache WhatsApp-Buchung","Простое бронирование в WhatsApp"),text:tr("Fast help for pickup, changes and questions.","Schnelle Hilfe bei Abholung, Änderungen und Fragen.","Быстрая помощь с трансфером, изменениями и вопросами.")},
+        {icon:Headphones,title:tr("Helpful support","Hilfreiche Betreuung","Заботливая поддержка"),text:tr("Clear communication before your tour.","Klare Kommunikation vor deinem Ausflug.","Понятное общение перед экскурсией.")},
+      ].map(({icon:Icon,title,text}) => <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6"><Icon className="text-cyan-300"/><h3 className="mt-5 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-slate-300">{text}</p></div>)}</div></section>
       <HurghadaTravelGuide />
 
       <section id="about" className="bg-slate-50 px-8 py-20">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold">Your Red Sea adventure, made easy</h2>
+          <h2 className="text-4xl font-bold">{tr("Your Red Sea adventure, made easy", "Dein Abenteuer am Roten Meer – einfach geplant", "Ваш отдых на Красном море — легко и удобно")}</h2>
           <p className="mt-5 text-lg leading-relaxed text-gray-600">
-            Daily Red Sea connects you with memorable Hurghada experiences, from island cruises and diving to desert adventures and private transfers.
+            {tr("Daily Red Sea connects you with memorable Hurghada experiences, from island cruises and diving to desert adventures and private transfers.", "Daily Red Sea verbindet dich mit unvergesslichen Erlebnissen in Hurghada – von Insel- und Tauchausflügen bis zu Wüstenabenteuern und Privattransfers.", "Daily Red Sea предлагает яркие впечатления в Хургаде: островные прогулки, дайвинг, приключения в пустыне и частные трансферы.")}
           </p>
         </div>
       </section>
@@ -536,28 +541,28 @@ text-blue-600
       <section className="bg-slate-900 px-6 py-20 text-white sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
           <div>
-            <p className="font-semibold uppercase tracking-[0.24em] text-blue-300">Why travel with us</p>
-            <h2 className="mt-4 text-4xl font-bold">Plan with local Red Sea experts</h2>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-300">Clear prices, hotel pickup options and friendly support make it simple to choose the right day out.</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-blue-300">{tr("Why travel with us", "Warum mit uns reisen?", "Почему выбирают нас")}</p>
+            <h2 className="mt-4 text-4xl font-bold">{tr("Plan with local Red Sea experts", "Plane mit lokalen Experten am Roten Meer", "Планируйте с местными экспертами Красного моря")}</h2>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-300">{tr("Clear prices, hotel pickup options and friendly support make it simple to choose the right day out.", "Klare Preise, Hotelabholung und freundliche Betreuung erleichtern die Auswahl.", "Понятные цены, трансфер из отеля и дружелюбная поддержка помогают легко выбрать поездку.")}</p>
           </div>
           <div className="grid gap-5 sm:grid-cols-3">
-            <ValueCard title="Trusted local team" description="Helpful advice before and after you book." />
-            <ValueCard title="Handpicked adventures" description="Popular island, sea and desert experiences." />
-            <ValueCard title="Easy WhatsApp booking" description="Quick answers and practical trip support." />
+            <ValueCard title={tr("Trusted local team","Vertrauenswürdiges lokales Team","Надёжная местная команда")} description={tr("Helpful advice before and after you book.","Hilfreiche Beratung vor und nach der Buchung.","Полезные советы до и после бронирования.")} />
+            <ValueCard title={tr("Handpicked adventures","Ausgewählte Erlebnisse","Отобранные приключения")} description={tr("Popular island, sea and desert experiences.","Beliebte Insel-, Meeres- und Wüstenerlebnisse.","Популярные островные, морские и пустынные экскурсии.")} />
+            <ValueCard title={tr("Easy WhatsApp booking","Einfache WhatsApp-Buchung","Простое бронирование в WhatsApp")} description={tr("Quick answers and practical trip support.","Schnelle Antworten und praktische Unterstützung.","Быстрые ответы и помощь с поездкой.")} />
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Feedback von Reisenden" : "Traveler feedback"}</p><h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Von Gästen am Roten Meer empfohlen" : "Loved by Red Sea travelers"}</h2></div><div className="flex flex-wrap items-center gap-4"><p className="text-xl font-bold text-amber-500">★★★★★ <span className="text-slate-900">4.9/5</span></p><a href={process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || "https://www.google.com/maps/search/?api=1&query=Daily+Red+Sea+Hurghada"} target="_blank" rel="noopener noreferrer" className="rounded-full border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-800 hover:bg-blue-100">{de ? "Google-Bewertung abgeben" : "Review us on Google"}</a></div></div><div className="mt-9 grid gap-5 md:grid-cols-3">{[["Claire, United Kingdom","Easy booking and clear pickup communication. Orange Bay was a lovely day for our family."],["Mariam, Germany","The team answered quickly on WhatsApp and the transfer arrived exactly as arranged."],["Omar, Egypt","Good value, friendly crew and beautiful snorkeling stops. Everything was straightforward."]].map(([name,review]) => <figure key={name} className="rounded-3xl border border-slate-200 bg-slate-50 p-6"><p className="text-amber-500">★★★★★</p><blockquote className="mt-4 leading-7 text-slate-700">“{review}”</blockquote><figcaption className="mt-5 font-bold text-slate-900">{name}</figcaption></figure>)}</div></div></section>
+      <section className="bg-white px-6 py-20 sm:px-8"><div className="mx-auto max-w-7xl"><div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Feedback von Reisenden" : ru ? "Отзывы путешественников" : "Traveler feedback"}</p><h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Von Gästen am Roten Meer empfohlen" : ru ? "Нас рекомендуют гости Красного моря" : "Loved by Red Sea travelers"}</h2></div><div className="flex flex-wrap items-center gap-4"><p className="text-xl font-bold text-amber-500">★★★★★ <span className="text-slate-900">4.9/5</span></p><a href={process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL || "https://www.google.com/maps/search/?api=1&query=Daily+Red+Sea+Hurghada"} target="_blank" rel="noopener noreferrer" className="rounded-full border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-800 hover:bg-blue-100">{de ? "Google-Bewertung abgeben" : ru ? "Оставить отзыв в Google" : "Review us on Google"}</a></div></div><div className="mt-9 grid gap-5 md:grid-cols-3">{(de ? [["Claire, Großbritannien","Einfache Buchung und klare Abholinformationen. Orange Bay war ein wunderschöner Familientag."],["Mariam, Deutschland","Das Team antwortete schnell per WhatsApp und der Transfer kam genau wie vereinbart."],["Omar, Ägypten","Gutes Preis-Leistungs-Verhältnis, freundliche Crew und schöne Schnorchelstopps."]] : ru ? [["Клэр, Великобритания","Простое бронирование и понятная информация о трансфере. Orange Bay прекрасно подошёл нашей семье."],["Мариам, Германия","Команда быстро ответила в WhatsApp, а трансфер прибыл точно вовремя."],["Омар, Египет","Выгодная цена, дружелюбная команда и красивые места для сноркелинга."]] : [["Claire, United Kingdom","Easy booking and clear pickup communication. Orange Bay was a lovely day for our family."],["Mariam, Germany","The team answered quickly on WhatsApp and the transfer arrived exactly as arranged."],["Omar, Egypt","Good value, friendly crew and beautiful snorkeling stops. Everything was straightforward."]]).map(([name,review]) => <figure key={name} className="rounded-3xl border border-slate-200 bg-slate-50 p-6"><p className="text-amber-500">★★★★★</p><blockquote className="mt-4 leading-7 text-slate-700">“{review}”</blockquote><figcaption className="mt-5 font-bold text-slate-900">{name}</figcaption></figure>)}</div></div></section>
 
-      <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-blue-600">Helpful answers</p><h2 className="mt-3 text-center text-4xl font-black text-slate-900">Hurghada excursions FAQ</h2><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-6">{[["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many Hurghada tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]].map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-slate-900">{question}</summary><p className="mt-3 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
+      <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-blue-600">{tr("Helpful answers","Hilfreiche Antworten","Полезные ответы")}</p><h2 className="mt-3 text-center text-4xl font-black text-slate-900">{tr("Hurghada excursions FAQ","FAQ zu Ausflügen in Hurghada","Вопросы об экскурсиях в Хургаде")}</h2><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-6">{(de ? [["Wie buche ich einen Ausflug?","Wähle einen Ausflug, Datum und Reisende und sende deine Buchung. Die Details bestätigen wir per WhatsApp."],["Ist die Hotelabholung verfügbar?","Viele Ausflüge beinhalten oder bieten eine Hotelabholung. Prüfe die Ausflugsdetails und gib dein Hotel bei der Buchung an."],["Wann bezahle ich?","Barzahlung bei Ankunft wird vor der Bestätigung klar angezeigt. Gesamtpreis und Zahlungsstatus stehen auch in der PDF-Bestätigung."],["Kann ich meine Buchung ändern?","Kontaktiere uns so früh wie möglich per WhatsApp. Wir prüfen die Verfügbarkeit und helfen dir."]] : ru ? [["Как забронировать экскурсию?","Выберите экскурсию, дату и гостей, затем отправьте заявку. Детали мы подтвердим в WhatsApp."],["Есть ли трансфер из отеля?","Многие экскурсии включают или предлагают трансфер. Проверьте описание и укажите отель при бронировании."],["Когда оплачивать?","Оплата наличными по прибытии ясно указывается перед подтверждением. Сумма и статус оплаты также есть в PDF."],["Можно изменить бронирование?","Свяжитесь с нами в WhatsApp как можно раньше. Мы проверим наличие мест и поможем."]] : [["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many Hurghada tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]]).map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-slate-900">{question}</summary><p className="mt-3 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
 
       <section className="bg-blue-600 px-6 py-20 text-center text-white sm:px-8">
         <div className="mx-auto max-w-3xl">
-          <p className="font-semibold uppercase tracking-[0.24em] text-blue-100">Start planning</p>
-          <h2 className="mt-4 text-4xl font-bold">Ready for your Red Sea adventure?</h2>
-          <p className="mt-5 text-lg text-blue-100">Message our local team and we’ll help you find the right tour for your stay.</p>
-          <a href={whatsappUrl("Hello Daily Red Sea, I would like help planning my trip.")} onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-blue-50">Plan on WhatsApp</a>
+          <p className="font-semibold uppercase tracking-[0.24em] text-blue-100">{tr("Start planning","Jetzt planen","Начните планировать")}</p>
+          <h2 className="mt-4 text-4xl font-bold">{tr("Ready for your Red Sea adventure?","Bereit für dein Abenteuer am Roten Meer?","Готовы к приключению на Красном море?")}</h2>
+          <p className="mt-5 text-lg text-blue-100">{tr("Message our local team and we’ll help you find the right tour for your stay.","Schreibe unserem lokalen Team – wir helfen dir, den passenden Ausflug zu finden.","Напишите нашей местной команде, и мы поможем выбрать экскурсию.")}</p>
+          <a href={whatsappUrl(tr("Hello Daily Red Sea, I would like help planning my trip.","Hallo Daily Red Sea, ich möchte Hilfe bei der Reiseplanung.","Здравствуйте! Помогите мне спланировать поездку."))} onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-blue-50">{tr("Plan on WhatsApp","Über WhatsApp planen","Спланировать в WhatsApp")}</a>
         </div>
       </section>
 
@@ -565,11 +570,11 @@ text-blue-600
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <p className="text-xl font-bold text-white">Daily Red Sea</p>
-            <p className="mt-3 max-w-sm leading-relaxed">Tours, excursions and private transfers for unforgettable days in Hurghada.</p>
+            <p className="mt-3 max-w-sm leading-relaxed">{tr("Tours, excursions and private transfers for unforgettable days in Hurghada.","Ausflüge und Privattransfers für unvergessliche Tage in Hurghada.","Экскурсии и частные трансферы для незабываемого отдыха в Хургаде.")}</p>
             <SocialLinks className="mt-5" dark />
           </div>
           <div>
-            <p className="font-semibold text-white">Explore</p>
+            <p className="font-semibold text-white">{tr("Explore","Entdecken","Разделы")}</p>
             <div className="mt-3 space-y-2">
               <Link className="block hover:text-white" href={`${homePath}#tours`}>{t("tours")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/transfers")}>{t("transfers")}</Link>
@@ -580,17 +585,17 @@ text-blue-600
             </div>
           </div>
           <div>
-            <p className="font-semibold text-white">Need help?</p>
-            <a className="mt-3 inline-block hover:text-white" href={whatsappUrl()} onClick={() => trackEvent("whatsapp_click", { placement: "footer" })} target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
+            <p className="font-semibold text-white">{tr("Need help?","Brauchst du Hilfe?","Нужна помощь?")}</p>
+            <a className="mt-3 inline-block hover:text-white" href={whatsappUrl()} onClick={() => trackEvent("whatsapp_click", { placement: "footer" })} target="_blank" rel="noopener noreferrer">{tr("Chat on WhatsApp","Über WhatsApp schreiben","Написать в WhatsApp")}</a>
             <div className="mt-4 space-y-2 text-sm">
-              <Link className="block hover:text-white" href={localePath(language, "/privacy-policy")}>{language === "de" ? "Datenschutz" : "Privacy Policy"}</Link>
-              <Link className="block hover:text-white" href={localePath(language, "/terms-conditions")}>{language === "de" ? "Allgemeine Geschäftsbedingungen" : "Terms & Conditions"}</Link>
-              <Link className="block hover:text-white" href="/image-credits">Image Credits</Link>
-              <Link className="block hover:text-white" href={localePath(language, "/contact")}>{language === "de" ? "Kontakt" : "Contact us"}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/privacy-policy")}>{tr("Privacy Policy","Datenschutz","Политика конфиденциальности")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/terms-conditions")}>{tr("Terms & Conditions","Allgemeine Geschäftsbedingungen","Условия использования")}</Link>
+              <Link className="block hover:text-white" href="/image-credits">{tr("Image Credits","Bildnachweise","Источники изображений")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/contact")}>{tr("Contact us","Kontakt","Связаться с нами")}</Link>
             </div>
           </div>
         </div>
-        <p className="mx-auto mt-10 max-w-7xl border-t border-slate-800 pt-6 text-sm">© {new Date().getFullYear()} Daily Red Sea. All rights reserved.</p>
+        <p className="mx-auto mt-10 max-w-7xl border-t border-slate-800 pt-6 text-sm">© {new Date().getFullYear()} Daily Red Sea. {tr("All rights reserved.","Alle Rechte vorbehalten.","Все права защищены.")}</p>
       </footer>
 
 
@@ -606,7 +611,7 @@ function DestinationCard({ image, title, description, href }: { image: string; t
       <Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
       <ImageWatermark />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-7 text-white"><h3 className="text-2xl font-bold">{title}</h3><p className="mt-2 text-slate-200">{description}</p><span className="mt-4 inline-block font-semibold text-blue-200">Explore →</span></div>
+      <div className="absolute inset-x-0 bottom-0 p-7 text-white"><h3 className="text-2xl font-bold">{title}</h3><p className="mt-2 text-slate-200">{description}</p><span className="mt-4 inline-block font-semibold text-blue-200">→</span></div>
     </Link>
   );
 }
