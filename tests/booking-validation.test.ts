@@ -41,4 +41,10 @@ describe("booking input validation", () => {
     expect(validateBookingInput({ ...transfer, time: "13:30" }, now).error).toMatch(/at least 1 hour/i);
     expect(validateBookingInput({ ...transfer, time: "14:01" }, now).data?.time).toBe("14:01");
   });
+
+  it("requires a valid diving-license confirmation for diving bookings", () => {
+    const diving = { ...valid, tourSlug: "full-day-diving", tourName: "Full Day Scuba Diving Trip" };
+    expect(validateBookingInput(diving).error).toMatch(/valid diving license/i);
+    expect(validateBookingInput({ ...diving, divingLicenseConfirmed: true }).data?.divingLicenseConfirmed).toBe(true);
+  });
 });

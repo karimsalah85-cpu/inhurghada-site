@@ -63,6 +63,11 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (type === "transfer" && !isTransferLeadTimeValid(date, time, now)) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
+  const tourSlug = text(body.tourSlug, 80);
+  const divingLicenseConfirmed = body.divingLicenseConfirmed === true;
+  if (type === "tour" && tourSlug === "full-day-diving" && !divingLicenseConfirmed) {
+    return { error: "Every diver must hold a valid diving license and bring proof on the trip." as const };
+  }
 
   return {
     data: {
@@ -76,7 +81,8 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       date,
       time,
       tourName: text(body.tourName, 160),
-      tourSlug: text(body.tourSlug, 80),
+      tourSlug,
+      divingLicenseConfirmed,
       extras: extras(body.extras),
       location: text(body.location, 100),
       duration: text(body.duration, 80),

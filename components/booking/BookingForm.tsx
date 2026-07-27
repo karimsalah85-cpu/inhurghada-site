@@ -83,11 +83,13 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
   const [guideLanguage, setGuideLanguage] = useState("English");
   const [message, setMessage] = useState("");
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  const [divingLicenseConfirmed, setDivingLicenseConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [website, setWebsite] = useState("");
 
   const extraOptions = upsells[tourSlug] || [];
+  const requiresDivingLicense = tourSlug === "full-day-diving";
   const extrasTotal = extraOptions.filter((option) => selectedExtras.includes(option.id)).reduce((sum, option) => sum + option.price, 0);
   const total = adults * adultPrice + youth * (youthPrice ?? adultPrice) + infants * (infantPrice ?? 0) + extrasTotal;
   const travelerText = de
@@ -97,6 +99,10 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!adults) { setError("Please select at least one adult."); return; }
+    if (requiresDivingLicense && !divingLicenseConfirmed) {
+      setError(de ? "Für diesen Tauchausflug muss jeder Taucher einen gültigen Tauchschein besitzen." : "Every diver must hold a valid diving license for this booking.");
+      return;
+    }
     setSubmitting(true); setError("");
     try {
       const response = await fetch("/api/bookings", {
@@ -105,8 +111,9 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
           type: "tour", locale: de ? "de" : "en", customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
           tourName, tourSlug, extras: selectedExtras, location: location || "Hurghada", duration: duration || "Please confirm",
           price: `${formatPrice(String(total))} total`, date, guests: travelerText, hotel,
-          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
+          message: `Time: ${time}\nGuide language: ${guideLanguage}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
           adults, youth, infants,
+          divingLicenseConfirmed,
           website,
         }),
       });
@@ -155,6 +162,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
         <label className="block text-sm font-bold">{de ? "WhatsApp-Nummer" : "WhatsApp number"} <RequiredMark/><input required type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" className="mt-1 w-full rounded-xl border p-3 font-normal" placeholder="+20 103 080 9150" /></label>
         <label className="block text-sm font-bold">{de ? "Abholort" : "Pickup location"} <RequiredMark/><div className="relative mt-1"><Hotel className="absolute left-3 top-3 text-slate-400" size={18}/><input required value={hotel} onChange={(event) => setHotel(event.target.value)} className="w-full rounded-xl border py-3 pl-10 pr-3 font-normal" placeholder={de ? "Hotelname oder vollständige Abholadresse" : "Hotel name or full pickup address"} /></div><span className="mt-1 block text-xs font-normal text-slate-500">{de ? "Erforderlich, damit wir deine Abholung per WhatsApp bestätigen können." : "Required so we can confirm your pickup on WhatsApp."}</span></label>
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950"><p className="font-bold">{de ? "Ausweis oder Reisepass vor dem Ausflug erforderlich" : "ID or passport required before the trip"}</p><p className="mt-1">{de ? "Für die Reisegenehmigung ist ein gültiger Ausweis oder Reisepass erforderlich. Bitte halte ihn vor dem Ausflug bereit." : "A valid ID or passport is mandatory for trip permit reasons. Please make sure you have it available before your experience."}</p></div>
+        {requiresDivingLicense ? <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-cyan-300 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950"><input type="checkbox" required checked={divingLicenseConfirmed} onChange={(event) => setDivingLicenseConfirmed(event.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-cyan-700" /><span><strong>{de ? "Gültiger Tauchschein erforderlich" : "Valid diving license required"} <RequiredMark/></strong><span className="mt-1 block">{de ? "Ich bestätige, dass jeder Taucher einen gültigen Tauchschein besitzt und den Nachweis zum Ausflug mitbringt." : "I confirm that every diver holds a valid scuba diving license and will bring proof on the trip."}</span></span></label> : null}
         <label className="block text-sm font-bold">{de ? "Bevorzugte Sprache des Reiseführers" : "Preferred guide language"}<select value={guideLanguage} onChange={(event) => setGuideLanguage(event.target.value)} className="mt-1 w-full rounded-xl border p-3 font-normal"><option>English</option><option>Arabic</option><option>German</option><option>Russian</option><option>Polish</option><option>Chinese</option></select></label>
         <label className="block text-sm font-bold">{de ? "Besondere Wünsche" : "Special requests"} <span className="font-normal text-slate-500">({de ? "optional" : "optional"})</span><textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-20 w-full rounded-xl border p-3 font-normal" placeholder={de ? "Gibt es etwas, das wir wissen sollten?" : "Anything we should know?"} /></label>
         <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">{de ? "Bitte lies vor der Buchung unsere" : "Before booking, please review our"} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-blue-700 underline">{de ? "Stornierungsbedingungen" : "cancellation policy"}</Link>. {de ? "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu." : "By submitting, you agree to our terms and conditions."}</p>
