@@ -108,8 +108,13 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     if (!window.confirm(`Send ${booking.customer_email} the predefined booking and payment status email?\n\nBooking: ${booking.status}\nPayment: ${booking.payment_status}`)) return;
     setBusyId(`email-${booking.id}`); setError("");
     try {
-      await api(`/api/admin/bookings/${booking.id}/email`, { method: "POST" });
-      feedback(`Status email sent to ${booking.customer_email}.`);
+      const result = await api<{ sent: boolean; delivery: "server" | "draft"; mailtoUrl?: string }>(`/api/admin/bookings/${booking.id}/email`, { method: "POST" });
+      if (result.delivery === "draft" && result.mailtoUrl) {
+        window.location.href = result.mailtoUrl;
+        feedback(`Email draft opened for ${booking.customer_email}. Press Send in your email app.`);
+      } else {
+        feedback(`Status email sent to ${booking.customer_email}.`);
+      }
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not send the status email."); }
     finally { setBusyId(null); }
   }

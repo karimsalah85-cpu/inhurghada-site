@@ -63,6 +63,16 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
   return {
     subject: `Booking ${booking.reference}: ${bookingStatus.label} · Payment ${paymentStatus.label}`,
     html: `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p>`,
+    text: [
+      `Hello ${booking.customer_name},`,
+      "",
+      bookingStatus.message,
+      paymentStatus.message,
+      "",
+      ...details.map(([label, value]) => `${label}: ${value}`),
+      "",
+      "If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.",
+    ].join("\n"),
   };
 }
 

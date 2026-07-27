@@ -19,6 +19,8 @@ describe("predefined booking status emails", () => {
     expect(email?.html).toContain("Booking status");
     expect(email?.html).toContain("Payment status");
     expect(email?.html).toContain("$50.00");
+    expect(email?.text).toContain("Booking status: Confirmed");
+    expect(email?.text).toContain("Payment status: Paid");
   });
 
   it("escapes customer-controlled values and rejects unknown statuses", () => {
