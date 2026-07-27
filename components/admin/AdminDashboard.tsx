@@ -108,20 +108,8 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     if (!window.confirm(`Send ${booking.customer_email} the predefined booking and payment status email?\n\nBooking: ${booking.status}\nPayment: ${booking.payment_status}`)) return;
     setBusyId(`email-${booking.id}`); setError("");
     try {
-      const result = await api<{ sent: boolean; delivery: "server" | "draft"; mailtoUrl?: string; pdfBase64?: string; pdfFilename?: string }>(`/api/admin/bookings/${booking.id}/email`, { method: "POST" });
-      if (result.delivery === "draft" && result.mailtoUrl) {
-        if (result.pdfBase64 && result.pdfFilename) {
-          const bytes = Uint8Array.from(window.atob(result.pdfBase64), (character) => character.charCodeAt(0));
-          const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-          const link = document.createElement("a");
-          link.href = url; link.download = result.pdfFilename; link.click();
-          window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
-        }
-        window.location.href = result.mailtoUrl;
-        feedback(`Email draft opened and the customer PDF downloaded. Attach it, then press Send.`);
-      } else {
-        feedback(`Status email and customer PDF sent to ${booking.customer_email}.`);
-      }
+      await api<{ sent: true }>(`/api/admin/bookings/${booking.id}/email`, { method: "POST" });
+      feedback(`Status email and customer PDF sent to ${booking.customer_email} from info@dailyredsea.com.`);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not send the status email."); }
     finally { setBusyId(null); }
   }

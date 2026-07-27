@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
-import { buildBookingAndPaymentStatusEmail, sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
+import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
@@ -26,19 +26,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   const result = await sendBookingAndPaymentStatusNotification(booking);
   if (!result.success) {
     console.error("Manual customer status email failed", { reference: booking.reference, reason: "reason" in result ? result.reason : "delivery-failed" });
-    const draft = buildBookingAndPaymentStatusEmail(booking);
-    if (!draft) return json({ error: "The booking has an unsupported status." }, 400);
-    const mailtoUrl = `mailto:${encodeURIComponent(booking.customer_email)}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.text)}`;
-    const attachment = "attachment" in result ? result.attachment : null;
-    return json({
-      sent: false,
-      delivery: "draft",
-      mailtoUrl,
-      pdfFilename: attachment?.filename,
-      pdfBase64: attachment?.content.toString("base64"),
-      reference: booking.reference,
-      recipient: booking.customer_email,
-    });
+    const reason = "reason" in result ? result.reason : "delivery-failed";
+    const errorMessage = reason === "missing-email-config"
+      ? "Automatic email is not configured. Add the info@dailyredsea.com Gmail app password or a verified Resend API key."
+      : "The status email and PDF could not be delivered. Check the email service and try again.";
+    return json({ error: errorMessage, reason }, 503);
   }
-  return json({ sent: true, delivery: "server", reference: booking.reference, recipient: booking.customer_email });
+  return json({ sent: true, reference: booking.reference, recipient: booking.customer_email });
 }
