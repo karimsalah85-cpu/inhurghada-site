@@ -10,6 +10,7 @@ import HomePage from "@/app/page";
 import TransfersPage from "@/app/transfers/page";
 import BookingPage from "@/app/booking/page";
 import CheckoutPage from "@/app/checkout/page";
+import BookingConfirmationPage from "@/app/booking/confirmation/page";
 import AboutPage from "@/app/about/page";
 import ContactPage from "@/app/contact/page";
 import FaqPage from "@/app/faq/page";
@@ -47,11 +48,11 @@ function pageKind(path: string[]) {
   if (!path.length) return "home";
   if (path.length === 2 && path[0] === "tours") return "tour";
   if (path.length === 2 && path[0] === "hurghada" && getTourCategory(path[1])) return "category";
-  return ["booking", "checkout", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq"].includes(path.join("/")) ? path.join("/") : null;
+  return ["booking", "booking/confirmation", "checkout", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq"].includes(path.join("/")) ? path.join("/") : null;
 }
 
 export async function generateStaticParams() {
-  const paths = [[], ["booking"], ["checkout"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...tours.map((tour) => ["tours", tour.slug])];
+  const paths = [[], ["booking"], ["booking", "confirmation"], ["checkout"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...tours.map((tour) => ["tours", tour.slug])];
   return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
 }
 
@@ -63,8 +64,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const kind = pageKind(path);
   const tour = kind === "tour" ? tours.find((item) => item.slug === path[1]) : undefined;
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
-  const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, checkout: dictionary.checkoutTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
-  const descriptions: Record<string, string> = { home: dictionary.siteDescription, booking: dictionary.bookingText, checkout: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
+  const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
+  const descriptions: Record<string, string> = { home: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
   const title = tour ? localizedTourTitle(locale, tour.slug, tour.title) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
@@ -81,7 +82,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     title,
     description,
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
-    robots: kind === "booking" || kind === "checkout" ? { index: false, follow: false } : { index: true, follow: true },
+    robots: kind === "booking" || kind === "booking/confirmation" || kind === "checkout" ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: { title, description, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [defaultSocialImage] },
   };
 }
@@ -106,6 +107,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "category") return <TourCategoryPage locale="de" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "transfers") return <TransfersPage locale="de" />;
     if (kind === "booking") return <BookingPage />;
+    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
     if (kind === "checkout") return <CheckoutPage />;
     if (kind === "about") return <AboutPage locale="de" />;
     if (kind === "contact") return <ContactPage locale="de" />;
@@ -125,6 +127,8 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     ] };
     return <Shell locale={locale}><main dir={direction} className="bg-slate-50 pb-20"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} /><article className="mx-auto max-w-5xl px-6 py-16"><nav aria-label="Breadcrumb" className="text-sm text-slate-500"><Link href={localePath(locale)}>{dictionary.home}</Link><span className="px-2">/</span><span>{dictionary.tours}</span></nav><p className="mt-8 font-semibold text-cyan-700">{dictionary.tours} · Hurghada</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{title}</h1><div className="relative mt-8 h-80 overflow-hidden rounded-[2rem]"><Image src={tour.image} alt={title} fill sizes="(max-width: 1024px) 100vw, 900px" className="object-cover" priority /></div><p className="mt-8 text-lg leading-8 text-slate-600">{dictionary.siteDescription}</p><div className="mt-8 grid gap-4 sm:grid-cols-3"><div className="rounded-3xl bg-white p-6 shadow-sm"><p className="text-sm text-slate-500">{dictionary.from}</p><p className="mt-2 text-3xl font-black text-blue-700">${tour.price}</p><p className="text-sm text-slate-500">{dictionary.perPerson}</p></div><div className="rounded-3xl bg-white p-6 shadow-sm"><p className="text-sm text-slate-500">{dictionary.tours}</p><p className="mt-2 font-black">{tour.duration}</p></div><div className="rounded-3xl bg-white p-6 shadow-sm"><p className="text-sm text-slate-500">Hurghada</p><p className="mt-2 font-black">{tour.category || dictionary.tours}</p></div></div><div className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-6"><h2 className="text-xl font-black text-emerald-950">{dictionary.cash}</h2><p className="mt-2 text-emerald-900">{dictionary.bookingText}</p></div><Link href={`/tours/${tour.slug}`} className="mt-8 inline-block rounded-full bg-blue-700 px-7 py-4 font-bold text-white">{dictionary.bookNow}</Link></article></main></Shell>;
   }
+
+  if (kind === "booking/confirmation") return <BookingConfirmationPage />;
 
   if (kind === "home") return <Shell locale={locale}><main dir={direction}><section className="bg-slate-950 px-6 py-24 text-white"><div className="mx-auto max-w-5xl"><p className="font-bold text-cyan-300">Daily Red Sea · Hurghada</p><h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{dictionary.heroTitle}</h1><p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200">{dictionary.heroDescription}</p><Link href={`${localePath(locale)}#tours`} className="mt-8 inline-block rounded-full bg-cyan-500 px-7 py-4 font-bold text-slate-950">{dictionary.bookNow}</Link></div></section><section className="bg-slate-50 px-6 py-16"><div className="mx-auto max-w-7xl"><h2 className="text-3xl font-black">{dictionary.tours}</h2><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{tourCategories.map((category) => <Link key={category.slug} href={localePath(locale, `/hurghada/${category.slug}`)} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-cyan-400"><h3 className="text-xl font-black">{categoryLabels[locale][category.slug]}</h3><p className="mt-3 leading-7 text-slate-600">{dictionary.siteDescription}</p><span className="mt-5 inline-block font-bold text-blue-700">{dictionary.tours} →</span></Link>)}</div></div></section><section id="tours" className="mx-auto max-w-7xl px-6 py-20"><h2 className="text-3xl font-black">{dictionary.popularTours}</h2><div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{tours.map((tour) => <Link key={tour.slug} href={localePath(locale, `/tours/${tour.slug}`)} className="overflow-hidden rounded-3xl border bg-white shadow-sm"><div className="relative h-48"><Image src={tour.image} alt={localizedTourTitle(locale, tour.slug, tour.title)} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" /></div><div className="p-6"><p className="text-sm font-semibold text-cyan-700">{tour.duration}</p><h3 className="mt-2 text-xl font-bold">{localizedTourTitle(locale, tour.slug, tour.title)}</h3><p className="mt-4 font-black text-blue-700">{dictionary.from} ${tour.price} · {dictionary.perPerson}</p></div></Link>)}</div></section><section className="bg-slate-50 px-6 py-20"><div className="mx-auto max-w-5xl"><h2 className="text-3xl font-black">{dictionary.whyTitle}</h2><p className="mt-5 text-lg text-slate-600">{dictionary.whyText}</p><div className="mt-8 grid gap-4 sm:grid-cols-3">{[dictionary.cash, dictionary.support, dictionary.local].map((item) => <div key={item} className="rounded-2xl bg-white p-5 font-bold">{item}</div>)}</div><div className="mt-8 flex flex-wrap gap-3"><Link href={localePath(locale, "/about")} className="rounded-full border px-6 py-3 font-bold">{dictionary.about}</Link><Link href={localePath(locale, "/contact")} className="rounded-full bg-blue-700 px-6 py-3 font-bold text-white">{dictionary.contact}</Link></div></div></section></main></Shell>;
 

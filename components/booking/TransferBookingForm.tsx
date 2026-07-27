@@ -4,12 +4,17 @@ import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import { CalendarDays, Car, Clock3, Hotel, MapPin, MessageCircle, Phone, Plane, User, Users } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { localePath } from "@/lib/i18n";
+import { confirmationStorageKey } from "@/lib/booking-confirmation";
 
 const areas = ["Hurghada Airport", "Hurghada Hotels", "Senzo Mall", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"];
 const resortZones = new Set(["Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"]);
 type TransferService = "airport" | "senzo";
 
 export default function TransferBookingForm({ initialService = "airport" }: { initialService?: TransferService }) {
+  const router = useRouter();
   const { language } = useSiteSettings();
   const de = language === "de";
   const [service, setService] = useState<TransferService>(initialService);
@@ -118,17 +123,20 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
       trackEvent("booking_complete", { transaction_id: data.reference, booking_type: "transfer", item_name: serviceName, value: total, currency: "USD" });
 
-      if (!data.whatsappSent) {
-        window.location.href = data.whatsappUrl;
-        return;
-      }
-
-      if (!data.emailSent) {
-        alert(`Transfer request received. Your reference is ${data.reference}. We sent it on WhatsApp; email notification is not configured yet. Payment is cash on arrival.`);
-        return;
-      }
-
-      alert(`Transfer request received. Your reference is ${data.reference}. Payment is cash on arrival. We will confirm shortly.`);
+      if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
+      window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
+        reference: data.reference,
+        customerName: name.trim(),
+        serviceName,
+        date,
+        time,
+        travelers: `${passengers} ${de ? "Fahrgäste" : "passengers"}`,
+        total: `$${total.toFixed(2)}`,
+        customerEmailSent: Boolean(data.customerEmailSent),
+        whatsappSent: Boolean(data.whatsappSent),
+        bookingConfirmationPdf: String(data.bookingConfirmationPdf || ""),
+      }));
+      router.push(`${localePath(language, "/booking/confirmation")}?reference=${encodeURIComponent(data.reference)}`);
     } catch {
       alert("We could not reach the booking service. Check your connection and try again.");
     } finally {
@@ -150,17 +158,18 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       </div>
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
-        <Field icon={<MapPin />} label={de ? "Abholort" : "Pickup location"}><select value={pickup} onChange={(event) => setPickup(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
-        <Field icon={<Hotel />} label={de ? "Abholhotel / vollständige Adresse" : "Pickup hotel / full address"}><input type="text" value={pickupDetails} onChange={(event) => setPickupDetails(event.target.value)} placeholder={de ? "Erforderliche Abholdetails" : "Required pickup details"} required /></Field>
-        <Field icon={<Hotel />} label={de ? "Zielort" : "Drop-off location"}><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
-        <Field icon={<CalendarDays />} label={de ? "Transferdatum" : "Transfer date"}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={new Date().toISOString().split("T")[0]} required /></Field>
-        <Field icon={<Clock3 />} label={de ? "Abholzeit" : "Pickup time"}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} required /></Field>
-        <Field icon={<Users />} label={`${de ? "Fahrgäste" : "Passengers"}${service === "senzo" ? (de ? " (maximal 4)" : " (maximum 4)") : ""}`}><input type="number" min="1" max={service === "senzo" ? 4 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
-        <Field icon={<Car />} label={de ? "Reisekoffer" : "Travel bags"}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
+        <p className="text-xs text-slate-500 sm:col-span-2"><RequiredMark/> {de ? "Pflichtfeld" : "Required field"}</p>
+        <Field required icon={<MapPin />} label={de ? "Abholort" : "Pickup location"}><select value={pickup} onChange={(event) => setPickup(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
+        <Field required icon={<Hotel />} label={de ? "Abholhotel / vollständige Adresse" : "Pickup hotel / full address"}><input type="text" value={pickupDetails} onChange={(event) => setPickupDetails(event.target.value)} placeholder={de ? "Erforderliche Abholdetails" : "Required pickup details"} required /></Field>
+        <Field required icon={<Hotel />} label={de ? "Zielort" : "Drop-off location"}><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
+        <Field required icon={<CalendarDays />} label={de ? "Transferdatum" : "Transfer date"}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={new Date().toISOString().split("T")[0]} required /></Field>
+        <Field required icon={<Clock3 />} label={de ? "Abholzeit" : "Pickup time"}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} required /></Field>
+        <Field required icon={<Users />} label={`${de ? "Fahrgäste" : "Passengers"}${service === "senzo" ? (de ? " (maximal 4)" : " (maximum 4)") : ""}`}><input type="number" min="1" max={service === "senzo" ? 4 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
+        <Field required icon={<Car />} label={de ? "Reisekoffer" : "Travel bags"}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
         <Field icon={<Plane />} label={de ? "Flugnummer (optional)" : "Flight number (optional)"}><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="z. B. MS 045" /></Field>
-        <Field icon={<User />} label={de ? "Dein Name" : "Your name"}><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
-        <Field icon={<Phone />} label={de ? "WhatsApp-Nummer" : "WhatsApp number"}><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /></Field>
-        <Field icon={<MessageCircle />} label={de ? "E-Mail-Adresse" : "Email address"}><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
+        <Field required icon={<User />} label={de ? "Dein Name" : "Your name"}><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
+        <Field required icon={<Phone />} label={de ? "WhatsApp-Nummer" : "WhatsApp number"}><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /></Field>
+        <Field required icon={<MessageCircle />} label={de ? "E-Mail-Adresse" : "Email address"}><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
       </div>
 
       <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
@@ -170,11 +179,16 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
       <label className="mt-4 block text-sm font-medium text-slate-700" htmlFor="transfer-notes">{de ? "Hinweise (optional)" : "Notes (optional)"}</label>
       <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-slate-200 p-3 outline-none focus:border-blue-500" placeholder={de ? "Kindersitz oder besondere Wünsche hinzufügen." : "Add luggage, child seat, or any special request."} />
+      <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">{de ? "Bitte lies vor der Buchung unsere" : "Before booking, please review our"} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-blue-700 underline">{de ? "Stornierungsbedingungen" : "cancellation policy"}</Link>. {de ? "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu." : "By submitting, you agree to our terms and conditions."}</p>
       <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"><MessageCircle size={20} />{submitting ? (de ? "Transferanfrage wird gesendet…" : "Sending transfer request…") : `${de ? "Einfache Fahrt buchen" : "Book one way"} · $${total.toFixed(2)}`}</button>
     </form>
   );
 }
 
-function Field({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
-  return <label className="block text-sm font-medium text-slate-700"><span className="mb-2 flex items-center gap-2 text-slate-700"><span className="text-blue-600">{icon}</span>{label}</span><div className="[&>input]:w-full [&>input]:rounded-xl [&>input]:border [&>input]:border-slate-200 [&>input]:p-3 [&>input]:outline-none [&>input]:focus:border-blue-500 [&>select]:w-full [&>select]:rounded-xl [&>select]:border [&>select]:border-slate-200 [&>select]:bg-white [&>select]:p-3 [&>select]:outline-none [&>select]:focus:border-blue-500">{children}</div></label>;
+function Field({ icon, label, children, required = false }: { icon: ReactNode; label: string; children: ReactNode; required?: boolean }) {
+  return <label className="block text-sm font-medium text-slate-700"><span className="mb-2 flex items-center gap-2 text-slate-700"><span className="text-blue-600">{icon}</span>{label}{required ? <RequiredMark/> : null}</span><div className="[&>input]:w-full [&>input]:rounded-xl [&>input]:border [&>input]:border-slate-200 [&>input]:p-3 [&>input]:outline-none [&>input]:focus:border-blue-500 [&>select]:w-full [&>select]:rounded-xl [&>select]:border [&>select]:border-slate-200 [&>select]:bg-white [&>select]:p-3 [&>select]:outline-none [&>select]:focus:border-blue-500">{children}</div></label>;
+}
+
+function RequiredMark() {
+  return <span aria-hidden="true" className="text-rose-600">*</span>;
 }

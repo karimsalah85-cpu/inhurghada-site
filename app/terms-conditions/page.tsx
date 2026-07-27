@@ -23,7 +23,7 @@ export default function TermsConditionsPage({ locale = "en" }: { locale?: "en" |
             <h2 className="text-xl font-bold text-slate-900">{de ? "Buchungsbestätigung" : "Booking confirmation"}</h2>
             <p className="mt-3 leading-8">{de ? "Alle Buchungen werden nach Prüfung durch unser Team bestätigt. Die endgültigen Details senden wir per WhatsApp oder E-Mail." : "All bookings are confirmed after review and confirmation from our team. Final details will be shared on WhatsApp or by email."}</p>
           </section>
-          <section>
+          <section id="cancellations" className="scroll-mt-28">
             <h2 className="text-xl font-bold text-slate-900">{de ? "Stornierungen" : "Cancellations"}</h2>
             <p className="mt-3 leading-8">{de ? "Die Stornierungsbedingungen können je nach Ausflug variieren. Kontaktiere uns vor der Reise, wenn du eine Buchung ändern oder stornieren musst." : "Cancellation terms may vary by tour. Please contact us before your trip if you need to change or cancel a booking."}</p>
           </section>
