@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about", languages: { ...languageAlternates("/about"), "x-default": localePath("en", "/about") } },
 };
 
-export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" }) {
+export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
   const de = locale === "de";
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">

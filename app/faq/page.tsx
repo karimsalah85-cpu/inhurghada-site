@@ -31,7 +31,7 @@ const germanFaqs = [
   { question: "Gelten Transferpreise pro Person?", answer: "Flughafen- und Senzo-Mall-Transfers haben den auf der Buchungsseite beschriebenen Festpreis für eine einfache Fahrt. Ausflüge werden normalerweise pro Person berechnet." },
 ];
 
-export default function FaqPage({ locale = "en" }: { locale?: "en" | "de" }) {
+export default function FaqPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
   const de = locale === "de";
   const displayedFaqs = de ? germanFaqs : faqs;
   const schema = { "@context": "https://schema.org", "@type": "FAQPage", url: absoluteUrl(de ? "/de/faq" : "/faq"), mainEntity: displayedFaqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) };

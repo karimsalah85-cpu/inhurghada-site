@@ -116,6 +116,25 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "terms-conditions") return <TermsConditionsPage locale="de" />;
   }
 
+  if (locale === "ru") {
+    if (kind === "home") return <HomePage />;
+    if (kind === "tour") {
+      const tour = tours.find((item) => item.slug === path[1]);
+      if (!tour) notFound();
+      return <TourPageShell locale="ru" tour={{ ...tour, title: localizedTourTitle("ru", tour.slug, tour.title) }} />;
+    }
+    if (kind === "category") return <TourCategoryPage locale="ru" params={Promise.resolve({ category: path[1] })} />;
+    if (kind === "transfers") return <TransfersPage locale="ru" />;
+    if (kind === "booking") return <BookingPage />;
+    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
+    if (kind === "checkout") return <CheckoutPage />;
+    if (kind === "about") return <AboutPage locale="ru" />;
+    if (kind === "contact") return <ContactPage locale="ru" />;
+    if (kind === "faq") return <FaqPage locale="ru" />;
+    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="ru" />;
+    if (kind === "terms-conditions") return <TermsConditionsPage locale="ru" />;
+  }
+
   if (kind === "tour") {
     const tour = tours.find((item) => item.slug === path[1]);
     if (!tour) notFound();
@@ -129,7 +148,6 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   }
 
   if (kind === "booking/confirmation") return <BookingConfirmationPage />;
-  if (locale === "ru" && kind === "terms-conditions") return <TermsConditionsPage locale="ru" />;
 
   if (kind === "home") return <Shell locale={locale}><main dir={direction}><section className="bg-slate-950 px-6 py-24 text-white"><div className="mx-auto max-w-5xl"><p className="font-bold text-cyan-300">Daily Red Sea · Hurghada</p><h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{dictionary.heroTitle}</h1><p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200">{dictionary.heroDescription}</p><Link href={`${localePath(locale)}#tours`} className="mt-8 inline-block rounded-full bg-cyan-500 px-7 py-4 font-bold text-slate-950">{dictionary.bookNow}</Link></div></section><section className="bg-slate-50 px-6 py-16"><div className="mx-auto max-w-7xl"><h2 className="text-3xl font-black">{dictionary.tours}</h2><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{tourCategories.map((category) => <Link key={category.slug} href={localePath(locale, `/hurghada/${category.slug}`)} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-cyan-400"><h3 className="text-xl font-black">{categoryLabels[locale][category.slug]}</h3><p className="mt-3 leading-7 text-slate-600">{dictionary.siteDescription}</p><span className="mt-5 inline-block font-bold text-blue-700">{dictionary.tours} →</span></Link>)}</div></div></section><section id="tours" className="mx-auto max-w-7xl px-6 py-20"><h2 className="text-3xl font-black">{dictionary.popularTours}</h2><div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{tours.map((tour) => <Link key={tour.slug} href={localePath(locale, `/tours/${tour.slug}`)} className="overflow-hidden rounded-3xl border bg-white shadow-sm"><div className="relative h-48"><Image src={tour.image} alt={localizedTourTitle(locale, tour.slug, tour.title)} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" /></div><div className="p-6"><p className="text-sm font-semibold text-cyan-700">{tour.duration}</p><h3 className="mt-2 text-xl font-bold">{localizedTourTitle(locale, tour.slug, tour.title)}</h3><p className="mt-4 font-black text-blue-700">{dictionary.from} ${tour.price} · {dictionary.perPerson}</p></div></Link>)}</div></section><section className="bg-slate-50 px-6 py-20"><div className="mx-auto max-w-5xl"><h2 className="text-3xl font-black">{dictionary.whyTitle}</h2><p className="mt-5 text-lg text-slate-600">{dictionary.whyText}</p><div className="mt-8 grid gap-4 sm:grid-cols-3">{[dictionary.cash, dictionary.support, dictionary.local].map((item) => <div key={item} className="rounded-2xl bg-white p-5 font-bold">{item}</div>)}</div><div className="mt-8 flex flex-wrap gap-3"><Link href={localePath(locale, "/about")} className="rounded-full border px-6 py-3 font-bold">{dictionary.about}</Link><Link href={localePath(locale, "/contact")} className="rounded-full bg-blue-700 px-6 py-3 font-bold text-white">{dictionary.contact}</Link></div></div></section></main></Shell>;
 

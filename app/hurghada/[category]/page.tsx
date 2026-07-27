@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function TourCategoryPage({ params, locale = "en" }: PageProps & { locale?: "en" | "de" }) {
+export default async function TourCategoryPage({ params, locale = "en" }: PageProps & { locale?: "en" | "de" | "ru" }) {
   const category = getTourCategory((await params).category);
   if (!category) notFound();
   const de = locale === "de";

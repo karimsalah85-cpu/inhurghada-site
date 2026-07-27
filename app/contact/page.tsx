@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact", languages: { ...languageAlternates("/contact"), "x-default": localePath("en", "/contact") } },
 };
 
-export default function ContactPage({ locale = "en" }: { locale?: "en" | "de" }) {
+export default function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" }) {
   const de = locale === "de";
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
