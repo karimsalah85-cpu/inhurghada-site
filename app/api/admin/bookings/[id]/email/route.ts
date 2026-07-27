@@ -26,10 +26,13 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   const result = await sendBookingAndPaymentStatusNotification(booking);
   if (!result.success) {
     console.error("Manual customer status email failed", { reference: booking.reference, reason: "reason" in result ? result.reason : "delivery-failed" });
-    const reason = "reason" in result ? result.reason : "delivery-failed";
-    const errorMessage = reason === "missing-email-config"
-      ? "Automatic email is not configured. Add the info@dailyredsea.com Gmail app password or a verified Resend API key."
-      : "The status email and PDF could not be delivered. Check the email service and try again.";
+    const reason = ("reason" in result && result.reason) ? result.reason : "delivery-failed";
+    const errorMessage = {
+      "missing-email-config": "Automatic email is not configured. Add GMAIL_SMTP_APP_PASSWORD to the production environment and redeploy.",
+      "gmail-auth-failed": "Google rejected the email login. Create a new App Password while signed in as info@dailyredsea.com, update GMAIL_SMTP_APP_PASSWORD, and redeploy.",
+      "gmail-connection-failed": "The website could not connect to Gmail. Try again shortly or configure a verified Resend API key.",
+      "gmail-smtp-failed": "Gmail could not send the message. Check the server deployment logs for the SMTP error.",
+    }[reason] || "The status email and PDF could not be delivered. Check the email service and try again.";
     return json({ error: errorMessage, reason }, 503);
   }
   return json({ sent: true, reference: booking.reference, recipient: booking.customer_email });

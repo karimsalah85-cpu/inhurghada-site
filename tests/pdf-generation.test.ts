@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createBookingStatusPdf, createInvoicePdf } from "@/lib/invoice-service";
 import { createReportPdf } from "@/lib/report-service";
-import { customerEmailSender } from "@/lib/booking-service";
+import { customerEmailSender, normalizeGoogleAppPassword } from "@/lib/booking-service";
 
 describe("PDF generators", () => {
   it("uses the official customer email sender", () => {
@@ -9,6 +9,11 @@ describe("PDF generators", () => {
       email: "info@dailyredsea.com",
       formatted: "Daily Red Sea <info@dailyredsea.com>",
     });
+  });
+
+  it("normalizes Google's grouped app-password format", () => {
+    expect(normalizeGoogleAppPassword("abcd efgh ijkl mnop")).toBe("abcdefghijklmnop");
+    expect(normalizeGoogleAppPassword("  abcd-efgh  ")).toBe("abcd-efgh");
   });
 
   it("creates a valid booking confirmation PDF", async () => {

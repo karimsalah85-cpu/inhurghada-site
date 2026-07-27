@@ -6,6 +6,10 @@ export const customerEmailSender = {
   formatted: "Daily Red Sea <info@dailyredsea.com>",
 } as const;
 
+export function normalizeGoogleAppPassword(value: string | undefined) {
+  return value?.replace(/\s+/g, "") || "";
+}
+
 type BookingType = "tour" | "transfer";
 type BookingStatus = "submitted" | "paid" | "cancelled";
 
@@ -159,7 +163,7 @@ export async function sendWhatsAppMessage(phone: string, body: string) {
 
 export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: { filename: string; content: Buffer }) {
   const environment = process.env as Record<string, string | undefined>;
-  const smtpAppPassword = environment.GMAIL_SMTP_APP_PASSWORD;
+  const smtpAppPassword = normalizeGoogleAppPassword(environment.GMAIL_SMTP_APP_PASSWORD);
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!toEmail) {
@@ -188,7 +192,18 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
 
       return { success: true, data: { messageId: result.messageId } };
     } catch (error) {
-      console.error("Google Workspace email failed", error);
+      const smtpError = error as { code?: string; command?: string; responseCode?: number };
+      console.error("Google Workspace email failed", {
+        code: smtpError.code,
+        command: smtpError.command,
+        responseCode: smtpError.responseCode,
+      });
+      if (smtpError.code === "EAUTH" || smtpError.responseCode === 535) {
+        return { success: false, reason: "gmail-auth-failed" };
+      }
+      if (["ECONNECTION", "ETIMEDOUT", "ESOCKET"].includes(smtpError.code || "")) {
+        return { success: false, reason: "gmail-connection-failed" };
+      }
       return { success: false, reason: "gmail-smtp-failed" };
     }
   }
