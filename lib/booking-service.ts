@@ -1,6 +1,11 @@
 import crypto from "node:crypto";
 import nodemailer from "nodemailer";
 
+export const customerEmailSender = {
+  email: "info@dailyredsea.com",
+  formatted: "Daily Red Sea <info@dailyredsea.com>",
+} as const;
+
 type BookingType = "tour" | "transfer";
 type BookingStatus = "submitted" | "paid" | "cancelled";
 
@@ -154,10 +159,8 @@ export async function sendWhatsAppMessage(phone: string, body: string) {
 
 export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: { filename: string; content: Buffer }) {
   const environment = process.env as Record<string, string | undefined>;
-  const smtpUser = environment.GMAIL_SMTP_USER || "info@dailyredsea.com";
   const smtpAppPassword = environment.GMAIL_SMTP_APP_PASSWORD;
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM || "Daily Red Sea <onboarding@resend.dev>";
 
   if (!toEmail) {
     return { success: false, reason: "missing-recipient" };
@@ -170,12 +173,13 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
         port: 465,
         secure: true,
         auth: {
-          user: smtpUser,
+          user: customerEmailSender.email,
           pass: smtpAppPassword,
         },
       });
       const result = await transporter.sendMail({
-        from: `Daily Red Sea <${smtpUser}>`,
+        from: customerEmailSender.formatted,
+        replyTo: customerEmailSender.email,
         to: toEmail,
         subject,
         html,
@@ -200,7 +204,8 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from,
+      from: customerEmailSender.formatted,
+      reply_to: customerEmailSender.email,
       to: [toEmail],
       subject,
       html,

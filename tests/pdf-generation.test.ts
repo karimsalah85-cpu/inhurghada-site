@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createBookingStatusPdf, createInvoicePdf } from "@/lib/invoice-service";
 import { createReportPdf } from "@/lib/report-service";
+import { customerEmailSender } from "@/lib/booking-service";
 
 describe("PDF generators", () => {
+  it("uses the official customer email sender", () => {
+    expect(customerEmailSender).toEqual({
+      email: "info@dailyredsea.com",
+      formatted: "Daily Red Sea <info@dailyredsea.com>",
+    });
+  });
+
   it("creates a valid booking confirmation PDF", async () => {
     const output = await createInvoicePdf({
       reference: "DRS-20260722-QA1234",
