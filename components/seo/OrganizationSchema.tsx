@@ -10,7 +10,7 @@ export default function OrganizationSchema() {
     logo: absoluteUrl("/images/logo.png"),
     image: absoluteUrl("/og-image.svg"),
     email: "info@dailyredsea.com",
-    telephone: "+201004933150",
+    telephone: "+201030809150",
     sameAs: [
       "https://www.facebook.com/profile.php?id=61592247695069",
       "https://www.instagram.com/dailyredsea.com7/",
@@ -26,7 +26,7 @@ export default function OrganizationSchema() {
     },
     contactPoint: {
       "@type": "ContactPoint",
-      telephone: "+201004933150",
+      telephone: "+201030809150",
       contactType: "customer service",
       availableLanguage: ["English", "Arabic", "German", "Russian", "Polish", "Chinese"],
     },
