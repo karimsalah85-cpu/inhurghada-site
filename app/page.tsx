@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -40,11 +40,36 @@ function HomeContent() {
   const tr = (en: string, deText: string, ruText: string, arText = en) => de ? deText : ru ? ruText : ar ? arText : en;
   const searchParams = useSearchParams();
   const router = useRouter();
-  const search = searchParams.get("search") ?? "";
+  const urlSearch = searchParams.get("search") ?? "";
+  const [search, setSearch] = useState(urlSearch);
+  const lastWrittenSearch = useRef(urlSearch);
   const toursSection = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!search) return;
+    if (urlSearch === lastWrittenSearch.current) return;
+    lastWrittenSearch.current = urlSearch;
+    setSearch(urlSearch);
+  }, [urlSearch]);
+
+  useEffect(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase();
+    if (normalizedSearch === urlSearch) return;
+
+    const timeoutId = window.setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (normalizedSearch) params.set("search", normalizedSearch);
+      else params.delete("search");
+      lastWrittenSearch.current = normalizedSearch;
+      if (normalizedSearch) trackEvent("search", { search_term: normalizedSearch });
+      const query = params.toString();
+      router.replace(query ? `${homePath}?${query}` : homePath, { scroll: false });
+    }, 350);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [homePath, router, search, searchParams, urlSearch]);
+
+  useEffect(() => {
+    if (!search.trim()) return;
 
     const timeoutId = window.setTimeout(() => {
       toursSection.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -52,20 +77,6 @@ function HomeContent() {
 
     return () => window.clearTimeout(timeoutId);
   }, [search]);
-
-  function updateSearch(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (value.trim()) {
-      params.set("search", value.toLowerCase());
-    } else {
-      params.delete("search");
-    }
-
-    const query = params.toString();
-    if (value.trim()) trackEvent("search", { search_term: value.trim().toLowerCase() });
-    router.replace(query ? `${homePath}?${query}` : homePath, { scroll: false });
-  }
 
   const bookingQuery = new URLSearchParams();
   const date = searchParams.get("date");
@@ -239,7 +250,7 @@ function HomeContent() {
 
     const value = e.target.value;
 
-    updateSearch(value);
+    setSearch(value);
 
 
   }}
