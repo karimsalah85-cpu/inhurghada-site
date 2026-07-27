@@ -1,11 +1,15 @@
 import { sendBookingEmail } from "@/lib/booking-service";
+import { createBookingStatusPdf } from "@/lib/invoice-service";
 
 export type StatusBooking = {
   reference: string;
   customer_name: string;
   customer_email: string | null;
+  phone?: string | null;
   tour_name: string | null;
   date: string | null;
+  guests?: number | null;
+  hotel?: string | null;
   status?: string;
   payment_status?: string;
   amount?: number | string;
@@ -80,5 +84,27 @@ export async function sendBookingAndPaymentStatusNotification(booking: StatusBoo
   if (!booking.customer_email) return { success: false, reason: "missing-recipient" };
   const email = buildBookingAndPaymentStatusEmail(booking);
   if (!email) return { success: false, reason: "invalid-status" };
-  return sendBookingEmail(booking.customer_email, email.subject, email.html);
+  const attachment = await buildBookingStatusPdfAttachment(booking);
+  const delivery = await sendBookingEmail(booking.customer_email, email.subject, email.html, attachment);
+  return { ...delivery, attachment };
+}
+
+export async function buildBookingStatusPdfAttachment(booking: StatusBooking) {
+  const filenameReference = booking.reference.replace(/[^a-z0-9-]/gi, "-");
+  const content = await createBookingStatusPdf({
+    reference: booking.reference,
+    generatedAt: new Date(),
+    customerName: booking.customer_name,
+    customerEmail: booking.customer_email || undefined,
+    customerPhone: booking.phone || undefined,
+    itemName: booking.tour_name || "Transfer",
+    date: booking.date || undefined,
+    travelers: booking.guests ? `${booking.guests} traveler${booking.guests === 1 ? "" : "s"}` : undefined,
+    pickup: booking.hotel || undefined,
+    amount: Number(booking.amount || 0),
+    currency: booking.currency || "USD",
+    bookingStatus: booking.status || "new",
+    paymentStatus: booking.payment_status || "unpaid",
+  });
+  return { filename: `daily-red-sea-status-${filenameReference}.pdf`, content };
 }

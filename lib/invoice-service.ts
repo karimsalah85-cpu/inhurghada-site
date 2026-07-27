@@ -16,6 +16,22 @@ export type InvoiceData = {
   hotel?: string;
 };
 
+export type BookingStatusPdfData = {
+  reference: string;
+  generatedAt: Date;
+  customerName: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  itemName: string;
+  date?: string;
+  travelers?: string;
+  pickup?: string;
+  amount: number;
+  currency: string;
+  bookingStatus: string;
+  paymentStatus: string;
+};
+
 type Color = [number, number, number];
 
 const navy: Color = [15, 23, 42];
@@ -80,6 +96,81 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   text(commands, "Thank you for choosing a Red Sea experience.", 310, 43, 8.5, false, muted);
 
   return Promise.resolve(buildPdf(commands.join("\n")));
+}
+
+export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<Buffer> {
+  const generatedDate = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(booking.generatedAt);
+  const bookingState = displayStatus(booking.bookingStatus);
+  const paymentState = displayStatus(booking.paymentStatus);
+  const bookingTone = statusTone(booking.bookingStatus);
+  const paymentTone = statusTone(booking.paymentStatus);
+  const commands: string[] = [];
+
+  rect(commands, 0, 0, 612, 792, light);
+  rect(commands, 0, 644, 612, 148, navy);
+  rect(commands, 0, 638, 612, 6, cyan);
+  circle(commands, 78, 722, 27, blue);
+  text(commands, "DR", 66, 714, 15, true, white);
+  text(commands, "DAILY RED SEA", 122, 735, 22, true, white);
+  text(commands, "TOURS AND TRANSFERS - HURGHADA, EGYPT", 122, 715, 8.5, false, [203, 213, 225]);
+  text(commands, "BOOKING STATUS UPDATE", 50, 670, 17, true, white);
+  text(commands, `Updated ${generatedDate}`, 50, 654, 9, false, [203, 213, 225]);
+
+  roundedRect(commands, 50, 584, 512, 46, 8, white);
+  text(commands, "BOOKING REFERENCE", 66, 610, 8, true, muted);
+  text(commands, booking.reference, 66, 592, 14, true, navy);
+  text(commands, "Your latest booking and payment information", 320, 600, 9, false, slate);
+
+  sectionCard(commands, 50, 463, 512, 101, "CURRENT STATUS");
+  roundedRect(commands, 68, 487, 214, 44, 8, bookingTone.background);
+  text(commands, "BOOKING", 82, 514, 7.5, true, bookingTone.foreground);
+  text(commands, bookingState, 82, 495, 13, true, bookingTone.foreground);
+  roundedRect(commands, 310, 487, 234, 44, 8, paymentTone.background);
+  text(commands, "PAYMENT", 324, 514, 7.5, true, paymentTone.foreground);
+  text(commands, paymentState, 324, 495, 13, true, paymentTone.foreground);
+
+  sectionCard(commands, 50, 340, 512, 103, "GUEST DETAILS");
+  detail(commands, "Guest name", booking.customerName || "Guest", 68, 402, 215);
+  detail(commands, "WhatsApp", booking.customerPhone || "To be confirmed", 310, 402, 220);
+  detail(commands, "Email", booking.customerEmail || "To be confirmed", 68, 363, 430);
+
+  sectionCard(commands, 50, 191, 512, 129, "BOOKING DETAILS");
+  const itemLines = wrap(booking.itemName || "Daily Red Sea booking", 53);
+  text(commands, itemLines[0], 68, 278, 13, true, navy);
+  if (itemLines[1]) text(commands, itemLines[1], 68, 262, 13, true, navy);
+  detail(commands, "Experience date", booking.date || "To be confirmed", 68, 235, 205);
+  detail(commands, "Travelers", booking.travelers || "To be confirmed", 310, 235, 195);
+  detail(commands, "Pickup", booking.pickup || "We will confirm via WhatsApp", 68, 204, 430);
+
+  roundedRect(commands, 50, 103, 512, 68, 10, blue);
+  text(commands, "BOOKING TOTAL", 68, 143, 8.5, true, [219, 234, 254]);
+  text(commands, formatMoney(booking.amount, booking.currency), 68, 117, 23, true, white);
+  text(commands, paymentMessage(booking.paymentStatus), 300, 128, 8.8, false, [219, 234, 254]);
+
+  text(commands, "NEED HELP?", 50, 73, 8.5, true, blue);
+  text(commands, "Reply to the email that included this PDF or contact us on WhatsApp.", 50, 57, 8.5, false, slate);
+  text(commands, "Cancellation policy: dailyredsea.com/terms-conditions", 50, 42, 8.5, false, slate);
+  text(commands, `Daily Red Sea  |  ${booking.reference}`, 390, 42, 8, false, muted);
+
+  return Promise.resolve(buildPdf(commands.join("\n")));
+}
+
+function displayStatus(value: string) {
+  if (value === "new") return "Received";
+  return value ? `${value.charAt(0).toUpperCase()}${value.slice(1).toLowerCase()}` : "To be confirmed";
+}
+
+function statusTone(value: string): { background: Color; foreground: Color } {
+  if (["confirmed", "completed", "paid"].includes(value)) return { background: [220, 252, 231], foreground: [20, 83, 45] };
+  if (value === "cancelled") return { background: [254, 226, 226], foreground: [153, 27, 27] };
+  if (value === "unpaid") return { background: [254, 243, 199], foreground: [146, 64, 14] };
+  return { background: [219, 234, 254], foreground: [30, 64, 175] };
+}
+
+function paymentMessage(status: string) {
+  if (status === "paid") return "Payment received - thank you.";
+  if (status === "refunded") return "Payment recorded as refunded.";
+  return "Payment due in cash on arrival unless agreed otherwise.";
 }
 
 function sectionCard(commands: string[], x: number, y: number, width: number, height: number, title: string) {

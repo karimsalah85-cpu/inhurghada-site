@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
   const { data: booking, error } = await supabase
     .from("bookings")
-    .select("reference,customer_name,customer_email,tour_name,date,status,payment_status,amount,currency")
+    .select("reference,customer_name,customer_email,phone,tour_name,date,guests,hotel,status,payment_status,amount,currency")
     .eq("id", id)
     .single();
   if (error || !booking) return json({ error: "Booking not found." }, 404);
@@ -29,7 +29,16 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     const draft = buildBookingAndPaymentStatusEmail(booking);
     if (!draft) return json({ error: "The booking has an unsupported status." }, 400);
     const mailtoUrl = `mailto:${encodeURIComponent(booking.customer_email)}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.text)}`;
-    return json({ sent: false, delivery: "draft", mailtoUrl, reference: booking.reference, recipient: booking.customer_email });
+    const attachment = "attachment" in result ? result.attachment : null;
+    return json({
+      sent: false,
+      delivery: "draft",
+      mailtoUrl,
+      pdfFilename: attachment?.filename,
+      pdfBase64: attachment?.content.toString("base64"),
+      reference: booking.reference,
+      recipient: booking.customer_email,
+    });
   }
   return json({ sent: true, delivery: "server", reference: booking.reference, recipient: booking.customer_email });
 }

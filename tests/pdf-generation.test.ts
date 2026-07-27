@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInvoicePdf } from "@/lib/invoice-service";
+import { createBookingStatusPdf, createInvoicePdf } from "@/lib/invoice-service";
 import { createReportPdf } from "@/lib/report-service";
 
 describe("PDF generators", () => {
@@ -35,5 +35,25 @@ describe("PDF generators", () => {
     });
     expect(output.subarray(0, 5).toString()).toBe("%PDF-");
     expect(output.length).toBeGreaterThan(1_500);
+  });
+
+  it("creates a valid customer booking status PDF", async () => {
+    const output = await createBookingStatusPdf({
+      reference: "DRS-20260727-STATUS",
+      generatedAt: new Date("2026-07-27T12:00:00Z"),
+      customerName: "Quality Assurance Guest",
+      customerEmail: "qa@example.com",
+      customerPhone: "+20 100 000 0000",
+      itemName: "Morning Quad Bike Safari",
+      date: "2026-08-02",
+      travelers: "2 travelers",
+      pickup: "Quality Test Hotel, Hurghada",
+      amount: 65,
+      currency: "USD",
+      bookingStatus: "confirmed",
+      paymentStatus: "paid",
+    });
+    expect(output.subarray(0, 5).toString()).toBe("%PDF-");
+    expect(output.length).toBeGreaterThan(4_000);
   });
 });
