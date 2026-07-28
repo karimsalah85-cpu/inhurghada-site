@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
+  async redirects() {
+    return [
+      {
+        source: "/lander",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [{
       source: "/(.*)",
