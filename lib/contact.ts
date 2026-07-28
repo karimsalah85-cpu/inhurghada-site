@@ -3,6 +3,7 @@ export const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@daily
 export const displayPhoneNumber = "+20 103 080 9150";
 export const facebookUrl = "https://www.facebook.com/profile.php?id=61592247695069";
 export const instagramUrl = "https://www.instagram.com/dailyredsea.com7/";
+export const googleReviewUrl = "https://g.page/r/CZO2rT5pTQOXEAI/review";
 
 export function whatsappUrl(message?: string) {
   const baseUrl = `https://wa.me/${whatsappNumber}`;

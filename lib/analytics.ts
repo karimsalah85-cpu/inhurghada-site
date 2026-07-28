@@ -5,6 +5,7 @@ export type AnalyticsEventName =
   | "booking_start"
   | "booking_complete"
   | "whatsapp_click"
+  | "google_review_click"
   | "phone_click"
   | "email_click";
 
