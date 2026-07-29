@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import BookingForm from "@/components/booking/BookingForm";
 import TourDetails from "@/components/tours/TourDetails";
 import type { Tour } from "@/data/tours";
-import Image from "next/image";
 import Link from "next/link";
 import { tours } from "@/data/tours";
 import { absoluteUrl, siteName } from "@/lib/seo";
@@ -11,7 +10,7 @@ import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { localePath, type Locale } from "@/lib/i18n";
 import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
-import ImageWatermark from "@/components/media/ImageWatermark";
+import TourGallery from "@/components/tours/TourGallery";
 
 export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
   const de = locale === "de";
@@ -97,10 +96,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : `${destination?.name || "Hurghada"} experience`}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
-        <div className="mt-8 grid gap-3 overflow-hidden rounded-[2rem] sm:h-[420px] sm:grid-cols-2">
-          <div className="relative aspect-[4/3] overflow-hidden sm:aspect-auto sm:min-h-64"><Image src={tour.image} alt={tour.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" priority /><ImageWatermark prominent /></div>
-          <div className="grid grid-cols-2 gap-3">{galleryImages.map((image, index) => <div key={`${image}-${index}`} className="relative aspect-[4/3] overflow-hidden sm:aspect-auto"><Image src={image} alt="" fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" /><ImageWatermark /></div>)}</div>
-        </div>
+        <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} locale={locale} />
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
