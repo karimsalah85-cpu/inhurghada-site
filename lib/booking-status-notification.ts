@@ -1,4 +1,4 @@
-import { sendBookingEmail } from "@/lib/booking-service";
+import { companyStatement, sendBookingEmail } from "@/lib/booking-service";
 import { createBookingStatusPdf } from "@/lib/invoice-service";
 
 export type StatusBooking = {
@@ -28,8 +28,6 @@ const paymentCopy: Record<string, { label: string; message: string }> = {
   paid: { label: "Paid", message: "Your payment has been recorded as paid. Thank you." },
   refunded: { label: "Refunded", message: "Your payment is marked as refunded. Bank or card processing times may apply where relevant." },
 };
-
-const companyStatement = "Daily Red Sea connects travelers in Hurghada with trusted local operators for diving, snorkeling, and desert excursions — with transparent pricing and direct support every step of the way.";
 
 const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",

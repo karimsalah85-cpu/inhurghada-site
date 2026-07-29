@@ -6,6 +6,17 @@ export const customerEmailSender = {
   formatted: "Daily Red Sea <info@dailyredsea.com>",
 } as const;
 
+export const companyStatement = "Daily Red Sea connects travelers in Hurghada with trusted local operators for diving, snorkeling, and desert excursions — with transparent pricing and direct support every step of the way.";
+
+function customerEmailSignatureHtml() {
+  return `<div style="margin-top:28px;padding-top:18px;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6"><p style="margin:0 0 6px"><strong style="color:#0f172a">Daily Red Sea</strong><br><a href="https://dailyredsea.com" style="color:#2563eb">dailyredsea.com</a> · <a href="mailto:info@dailyredsea.com" style="color:#2563eb">info@dailyredsea.com</a></p><p style="margin:0">${companyStatement}</p></div>`;
+}
+
+export function withCustomerEmailSignature(toEmail: string, html: string) {
+  const isCustomer = toEmail.trim().toLowerCase() !== customerEmailSender.email;
+  return isCustomer && !html.includes(companyStatement) ? `${html}${customerEmailSignatureHtml()}` : html;
+}
+
 export function normalizeGoogleAppPassword(value: string | undefined) {
   return value?.replace(/\s+/g, "") || "";
 }
@@ -169,6 +180,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
   if (!toEmail) {
     return { success: false, reason: "missing-recipient" };
   }
+  const deliveredHtml = withCustomerEmailSignature(toEmail, html);
 
   if (smtpAppPassword) {
     try {
@@ -186,7 +198,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
         replyTo: customerEmailSender.email,
         to: toEmail,
         subject,
-        html,
+        html: deliveredHtml,
         attachments: attachment ? [attachment] : undefined,
       });
 
@@ -223,7 +235,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
       reply_to: customerEmailSender.email,
       to: [toEmail],
       subject,
-      html,
+      html: deliveredHtml,
       ...(attachment ? { attachments: [{ filename: attachment.filename, content: attachment.content.toString("base64") }] } : {}),
     }),
   });
