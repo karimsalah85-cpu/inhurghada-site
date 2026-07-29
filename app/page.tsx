@@ -291,7 +291,8 @@ function HomeContent() {
             bg-gradient-to-r
             from-slate-50
             to-white
-            p-12
+            p-6
+            sm:p-12
             shadow-sm
           ">
 
@@ -311,12 +312,14 @@ function HomeContent() {
 
               <div className="
                 flex
+                min-w-0
                 items-start
                 gap-5
               ">
 
 
                 <div className="
+                  shrink-0
                   rounded-2xl
                   bg-blue-100
                   p-4
@@ -334,7 +337,7 @@ function HomeContent() {
 
 
 
-                <div>
+                <div className="min-w-0">
 
 
                   <p className="
@@ -351,10 +354,13 @@ function HomeContent() {
 
                   <h3 className="
                     mt-2
-                    text-4xl
+                    break-words
+                    text-3xl
                     font-bold
+                    leading-tight
+                    sm:text-4xl
                   ">
-                    {de ? "Flughafen- & Hoteltransfers" : ru ? "Трансферы из аэропорта и отелей" : "Airport & Hotel Transfers"}
+                    {de ? "Flughafen- und Hoteltransfer" : ru ? "Трансферы из аэропорта и отелей" : "Airport & Hotel Transfers"}
                   </h3>
 
 
@@ -385,9 +391,11 @@ function HomeContent() {
                 bg-blue-600
                 px-8
                 py-4
+                text-center
                 font-semibold
                 text-white
                 hover:bg-blue-700
+                sm:w-auto
                 "
               >
                 {de ? "Transfer buchen" : ru ? "Заказать трансфер" : "Book Transfer"}
