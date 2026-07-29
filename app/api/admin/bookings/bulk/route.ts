@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
+import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
 
 const bookingStatuses = new Set(["new", "confirmed", "completed", "cancelled"]);
 const paymentStatuses = new Set(["unpaid", "paid", "refunded"]);
@@ -23,10 +24,26 @@ export async function PATCH(request: NextRequest) {
   if (typeof body?.payment_status === "string" && paymentStatuses.has(body.payment_status)) update.payment_status = body.payment_status;
   if (!Object.keys(update).length) return json({ error: "Choose a valid group action." }, 400);
 
+  const { data: existing, error: readError } = await supabase
+    .from("bookings")
+    .select("id,status,payment_status")
+    .in("id", ids);
+  if (readError) return json({ error: "Could not prepare customer notifications." }, 500);
+
   const { data, error } = await supabase.from("bookings").update(update).in("id", ids).select();
   if (error) return json({ error: "Could not update the selected bookings." }, 500);
+  const previous = new Map((existing || []).map((booking) => [booking.id, booking]));
+  const changed = (data || []).filter((booking) => {
+    const before = previous.get(booking.id);
+    return before && (
+      (update.status && update.status !== before.status)
+      || (update.payment_status && update.payment_status !== before.payment_status)
+    );
+  });
+  const notifications = await Promise.all(changed.map((booking) => sendBookingAndPaymentStatusNotification(booking)));
   return json({
     bookings: data || [],
     updated: data?.length || 0,
+    notifications: { attempted: notifications.length, sent: notifications.filter((item) => item.success).length },
   });
 }

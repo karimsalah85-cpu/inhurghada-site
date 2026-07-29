@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
+import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
 
 const bookingStatuses = new Set(["new", "confirmed", "completed", "cancelled"]);
 const paymentStatuses = new Set(["unpaid", "paid", "refunded"]);
@@ -30,9 +31,26 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   if (typeof body?.payment_status === "string" && paymentStatuses.has(body.payment_status)) update.payment_status = body.payment_status;
   if (!Object.keys(update).length) return json({ error: "Choose a valid booking or payment status." }, 400);
 
+  const { data: existing, error: readError } = await supabase
+    .from("bookings")
+    .select("status,payment_status")
+    .eq("id", id)
+    .single();
+  if (readError || !existing) return json({ error: "Booking not found." }, 404);
+
   const { data, error } = await supabase.from("bookings").update(update).eq("id", id).select().single();
   if (error) return json({ error: "Could not update the booking." }, 500);
-  return json({ booking: data });
+  const changed = (update.status && update.status !== existing.status)
+    || (update.payment_status && update.payment_status !== existing.payment_status);
+  const notification = changed
+    ? await sendBookingAndPaymentStatusNotification(data)
+    : null;
+  return json({
+    booking: data,
+    notification: notification
+      ? { attempted: true, sent: notification.success, reason: "reason" in notification ? notification.reason : undefined }
+      : { attempted: false, sent: false },
+  });
 }
 
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
