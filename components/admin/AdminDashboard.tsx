@@ -95,9 +95,9 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
   async function updateBooking(id: string, patch: Partial<Pick<Booking, "status" | "payment_status">>) {
     setBusyId(id); setError("");
     try {
-      const result = await api<{ booking: Booking; notification: { attempted: boolean; sent: boolean } }>(`/api/admin/bookings/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+      const result = await api<{ booking: Booking }>(`/api/admin/bookings/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
       setBookings((items) => items.map((item) => item.id === id ? result.booking : item));
-      feedback(result.notification.attempted ? (result.notification.sent ? "Booking updated and customer emailed." : "Booking updated, but the customer email could not be sent.") : "Booking updated.");
+      feedback("Booking updated. Click Send + PDF when you are ready to notify the customer.");
       router.refresh();
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not update the booking."); }
     finally { setBusyId(null); }
@@ -136,11 +136,10 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     setBusyId("bulk"); setError("");
     try {
       const patch = { ...(bulkStatus ? { status: bulkStatus } : {}), ...(bulkPayment ? { payment_status: bulkPayment } : {}) };
-      const result = await api<{ bookings: Booking[]; updated: number; notifications?: { attempted: number; sent: number } }>("/api/admin/bookings/bulk", { method: "PATCH", body: JSON.stringify({ ids: selectedIds, ...patch }) });
+      const result = await api<{ bookings: Booking[]; updated: number }>("/api/admin/bookings/bulk", { method: "PATCH", body: JSON.stringify({ ids: selectedIds, ...patch }) });
       const changed = new Map(result.bookings.map((booking) => [booking.id, booking]));
       setBookings((items) => items.map((booking) => changed.get(booking.id) || booking));
-      const emailNote = result.notifications?.attempted ? ` ${result.notifications.sent} of ${result.notifications.attempted} customer emails sent.` : "";
-      setSelected(new Set()); setBulkStatus(""); setBulkPayment(""); feedback(`${result.updated} booking${result.updated === 1 ? "" : "s"} updated.${emailNote}`); router.refresh();
+      setSelected(new Set()); setBulkStatus(""); setBulkPayment(""); feedback(`${result.updated} booking${result.updated === 1 ? "" : "s"} updated. Customers were not emailed.`); router.refresh();
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not update the selected bookings."); }
     finally { setBusyId(null); }
   }

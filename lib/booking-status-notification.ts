@@ -44,7 +44,7 @@ export async function sendBookingStatusNotification(booking: StatusBooking, stat
     ["New status", copy.label],
   ];
   const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
-  const html = `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(copy.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p><p style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6"><strong>About Daily Red Sea</strong><br>${escapeHtml(companyStatement)}</p>`;
+  const html = `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(copy.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p>`;
   return sendBookingEmail(booking.customer_email, `Booking ${booking.reference}: ${copy.label}`, html);
 }
 
@@ -66,7 +66,7 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
   const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
   return {
     subject: `Booking ${booking.reference}: ${bookingStatus.label} · Payment ${paymentStatus.label}`,
-    html: `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p><p style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6"><strong>About Daily Red Sea</strong><br>${escapeHtml(companyStatement)}</p>`,
+    html: `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p>`,
     text: [
       `Hello ${booking.customer_name},`,
       "",

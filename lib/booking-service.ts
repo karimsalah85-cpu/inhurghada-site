@@ -9,7 +9,7 @@ export const customerEmailSender = {
 export const companyStatement = "Daily Red Sea connects travelers in Hurghada with trusted local operators for diving, snorkeling, and desert excursions — with transparent pricing and direct support every step of the way.";
 
 function customerEmailSignatureHtml() {
-  return `<div style="margin-top:28px;padding-top:18px;border-top:1px solid #e2e8f0;color:#475569;font-size:13px;line-height:1.6"><p style="margin:0 0 6px"><strong style="color:#0f172a">Daily Red Sea</strong><br><a href="https://dailyredsea.com" style="color:#2563eb">dailyredsea.com</a> · <a href="mailto:info@dailyredsea.com" style="color:#2563eb">info@dailyredsea.com</a></p><p style="margin:0">${companyStatement}</p></div>`;
+  return `<div style="margin-top:28px;padding:18px 20px;border-top:3px solid #0284c7;background:#f0f9ff;color:#334155;font-family:Arial,sans-serif;font-size:13px;line-height:1.6"><p style="margin:0 0 8px;font-size:16px"><strong style="color:#0f172a">Daily Red Sea</strong></p><p style="margin:0 0 10px">${companyStatement}</p><p style="margin:0"><a href="https://dailyredsea.com" style="color:#0369a1;text-decoration:none;font-weight:600">dailyredsea.com</a><span style="color:#94a3b8"> &nbsp;|&nbsp; </span><a href="mailto:info@dailyredsea.com" style="color:#0369a1;text-decoration:none">info@dailyredsea.com</a></p></div>`;
 }
 
 export function withCustomerEmailSignature(toEmail: string, html: string) {
