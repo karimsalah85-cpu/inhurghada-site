@@ -11,6 +11,7 @@ import {
   Clock3,
   Hotel,
   MessageCircle,
+  ShoppingCart,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -18,6 +19,7 @@ import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
+import { useCart } from "@/components/cart/CartProvider";
 
 type ParticipantPricing = { adults: number; youth?: number; infants?: number };
 
@@ -79,6 +81,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
   const router = useRouter();
   const searchParams = useSearchParams();
   const { formatPrice, language } = useSiteSettings();
+  const { addItem } = useCart();
   const de = language === "de";
   const ru = language === "ru";
   const ar = language === "ar";
@@ -105,6 +108,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [website, setWebsite] = useState("");
+  const [cartMessage, setCartMessage] = useState("");
 
   const extraOptions = upsells[tourSlug] || [];
   const requiresDivingLicense = tourSlug === "full-day-diving";
@@ -179,6 +183,12 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
         {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-slate-900">{de ? "Optionale Extras" : "Optional extras"}</legend>{extraOptions.map((option) => <label key={option.id} className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedExtras.includes(option.id)} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-4 w-4 accent-blue-600" />{de ? option.de : option.en}</span><strong>+{formatPrice(String(option.price))}</strong></label>)}</fieldset> : null}
         <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-slate-900">{de ? "Gesamtpreis" : "Total"}</p><p className="text-xs text-slate-500">{de ? "Barzahlung bei Ankunft · keine Online-Zahlung" : "Cash on arrival · no online payment"}</p></div><p className="text-3xl font-black text-blue-700">{formatPrice(String(total))}</p></div>
         <button type="button" onClick={() => { if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700">{tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
+        <button type="button" onClick={() => {
+          if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
+          addItem({ tourSlug, tourName, date, time, adults, youth, infants, extras: selectedExtras, subtotal: total, requiresDivingLicense, requiresQuadMinimumAge });
+          setCartMessage(tr("Added to your trip cart.", "Zum Reisewarenkorb hinzugefügt.", "Добавлено в корзину поездок.", "تمت الإضافة إلى سلة الرحلات."));
+        }} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-blue-300 bg-blue-50 py-4 font-bold text-blue-800 hover:bg-blue-100">{tr("Add to trip cart", "Zum Reisewarenkorb", "Добавить в корзину", "أضف إلى سلة الرحلات")} <ShoppingCart size={18}/></button>
+        {cartMessage ? <p className="mt-3 text-center text-sm font-semibold text-emerald-700">{cartMessage} <Link href={localePath(language, "/cart")} className="underline">{tr("View cart", "Warenkorb ansehen", "Открыть корзину", "عرض السلة")}</Link></p> : null}
         {error && <p role="alert" className="mt-3 text-center text-sm text-rose-600">{error}</p>}
       </> : <form onSubmit={submit} aria-busy={submitting} className="mt-6 space-y-4">
         <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />

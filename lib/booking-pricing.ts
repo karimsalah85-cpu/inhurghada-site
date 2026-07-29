@@ -13,6 +13,15 @@ type PricingInput = {
   dropoff: string;
   passengers: number;
   travelBags: number;
+  cartItems?: {
+    tourSlug: string;
+    date: string;
+    time: string;
+    extras: string[];
+    adults: number;
+    youth: number;
+    infants: number;
+  }[];
 };
 
 const transferAreas = new Set(["Hurghada Airport", "Hurghada Hotels", "Senzo Mall", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"]);
@@ -22,30 +31,54 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
   return Number.isInteger(value) && value >= minimum && value <= maximum;
 }
 
+function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants">) {
+  const tour = tours.find((item) => item.slug === input.tourSlug) || tours.find((item) => item.title === input.tourName);
+  if (!tour) return { error: "Choose a valid tour." as const };
+  if (!wholeNumber(input.adults, 1, 30) || !wholeNumber(input.youth, 0, 30) || !wholeNumber(input.infants, 0, 10)) {
+    return { error: "Choose a valid number of travelers." as const };
+  }
+
+  const pricing = tour.participantPricing || { adults: Number(tour.price) };
+  if (input.youth && pricing.youth === undefined) return { error: "Youth pricing is not available for this tour." as const };
+  if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
+  const allowedExtras: Record<string, Record<string, number>> = {
+    "full-day-diving": { "diving-equipment": 30 },
+    "luxor-private-day-trip": { "tutankhamun-ticket": 30 },
+  };
+  const selectedExtras = [...new Set(input.extras || [])];
+  const extraPrices = allowedExtras[tour.slug] || {};
+  if (selectedExtras.some((extra) => extraPrices[extra] === undefined)) return { error: "Choose valid optional extras." as const };
+  const extrasTotal = selectedExtras.reduce((sum, extra) => sum + extraPrices[extra], 0);
+  const amount = input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0) + extrasTotal;
+  const guests = input.adults + input.youth + input.infants;
+  const guestSummary = `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
+  return { data: { amount, guests, guestSummary, tourName: tour.title } };
+}
+
 export function calculateBookingPrice(input: PricingInput) {
   if (input.type === "tour") {
-    const tour = tours.find((item) => item.slug === input.tourSlug) || tours.find((item) => item.title === input.tourName);
-    if (!tour) return { error: "Choose a valid tour." as const };
-    if (!wholeNumber(input.adults, 1, 30) || !wholeNumber(input.youth, 0, 30) || !wholeNumber(input.infants, 0, 10)) {
-      return { error: "Choose a valid number of travelers." as const };
+    if (input.tourSlug === "multi-trip") {
+      if (!input.cartItems || input.cartItems.length < 1) return { error: "Add at least one valid trip." as const };
+      const pricedItems = [];
+      for (const item of input.cartItems) {
+        const result = calculateTourItem({ ...item, tourName: "" });
+        if (!result.data) return { error: result.error };
+        pricedItems.push({ ...result.data, date: item.date, time: item.time });
+      }
+      const amount = pricedItems.reduce((sum, item) => sum + item.amount, 0);
+      const guests = pricedItems.reduce((sum, item) => sum + item.guests, 0);
+      return { data: {
+        amount,
+        guests,
+        guestSummary: `${input.cartItems.length} trips · ${guests} participant places`,
+        tourName: `Multi-trip booking: ${pricedItems.map((item) => item.tourName).join(" + ")}`,
+        price: `$${amount.toFixed(2)} combined total`,
+        items: pricedItems,
+      } };
     }
-
-    const pricing = tour.participantPricing || { adults: Number(tour.price) };
-    if (input.youth && pricing.youth === undefined) return { error: "Youth pricing is not available for this tour." as const };
-    if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
-    const allowedExtras: Record<string, Record<string, number>> = {
-      "full-day-diving": { "diving-equipment": 30 },
-      "luxor-private-day-trip": { "tutankhamun-ticket": 30 },
-    };
-    const selectedExtras = [...new Set(input.extras || [])];
-    const extraPrices = allowedExtras[tour.slug] || {};
-    if (selectedExtras.some((extra) => extraPrices[extra] === undefined)) return { error: "Choose valid optional extras." as const };
-    const extrasTotal = selectedExtras.reduce((sum, extra) => sum + extraPrices[extra], 0);
-    const amount = input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0) + extrasTotal;
-    const guests = input.adults + input.youth + input.infants;
-    const guestSummary = `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
-
-    return { data: { amount, guests, guestSummary, tourName: tour.title, price: `$${amount.toFixed(2)} total` } };
+    const result = calculateTourItem(input);
+    if (!result.data) return result;
+    return { data: { ...result.data, price: `$${result.data.amount.toFixed(2)} total` } };
   }
 
   if (!wholeNumber(input.passengers, 1, 30) || !wholeNumber(input.travelBags, 0, 60)) {

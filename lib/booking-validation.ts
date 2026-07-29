@@ -15,6 +15,24 @@ function extras(value: unknown) {
   return Array.isArray(value) ? value.slice(0, 10).map((item) => text(item, 60)).filter(Boolean) : [];
 }
 
+function cartItems(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 6).map((entry) => {
+    const item = entry && typeof entry === "object" && !Array.isArray(entry) ? entry as BookingInput : {};
+    return {
+      tourSlug: text(item.tourSlug, 80),
+      date: text(item.date, 10),
+      time: text(item.time, 80),
+      adults: number(item.adults),
+      youth: number(item.youth),
+      infants: number(item.infants),
+      extras: extras(item.extras),
+      divingLicenseConfirmed: item.divingLicenseConfirmed === true,
+      quadMinimumAgeConfirmed: item.quadMinimumAgeConfirmed === true,
+    };
+  });
+}
+
 function cairoDateTimeParts(value: Date) {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Africa/Cairo",
@@ -57,13 +75,23 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Choose a valid booking date." as const };
   if (date) {
     const selected = new Date(`${date}T00:00:00Z`);
-    const todayInCairo = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+    const todayInCairo = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
     if (Number.isNaN(selected.getTime()) || date < todayInCairo) return { error: "Choose today or a future date." as const };
   }
   if (type === "transfer" && !isTransferLeadTimeValid(date, time, now)) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
   const tourSlug = text(body.tourSlug, 80);
+  const selectedCartItems = cartItems(body.cartItems);
+  if (tourSlug === "multi-trip") {
+    if (selectedCartItems.length < 1) return { error: "Add at least one trip to your cart." as const };
+    const todayInCairo = cairoDateTimeParts(now).date;
+    for (const item of selectedCartItems) {
+      if (!item.tourSlug || !/^\d{4}-\d{2}-\d{2}$/.test(item.date) || item.date < todayInCairo) return { error: "Choose a valid future date for every trip." as const };
+      if (item.tourSlug === "full-day-diving" && !item.divingLicenseConfirmed) return { error: "Every diver must hold a valid diving license and bring proof on the trip." as const };
+      if (["quad-safari-morning", "quad-safari-sunset"].includes(item.tourSlug) && !item.quadMinimumAgeConfirmed) return { error: "Every quad-tour participant must be at least 9 years old." as const };
+    }
+  }
   const divingLicenseConfirmed = body.divingLicenseConfirmed === true;
   if (type === "tour" && tourSlug === "full-day-diving" && !divingLicenseConfirmed) {
     return { error: "Every diver must hold a valid diving license and bring proof on the trip." as const };
@@ -86,6 +114,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       time,
       tourName: text(body.tourName, 160),
       tourSlug,
+      cartItems: selectedCartItems,
       divingLicenseConfirmed,
       quadMinimumAgeConfirmed,
       extras: extras(body.extras),

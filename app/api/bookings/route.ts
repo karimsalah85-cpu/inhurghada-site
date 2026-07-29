@@ -70,6 +70,9 @@ export async function POST(request: NextRequest) {
     const pricing = calculateBookingPrice(body);
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
     const { amount, guests: guestCount, guestSummary, tourName, price } = pricing.data;
+    const tripItems = "items" in pricing.data ? pricing.data.items : undefined;
+    const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: $${item.amount.toFixed(2)}`).join("\n\n");
+    const bookingNotes = [tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
 
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
       date: body.date,
       guests: guestSummary,
       hotel,
-      message: body.message,
+      message: bookingNotes,
     });
     const emailHtml = buildBookingEmailHtml({
       bookingType,
@@ -97,13 +100,14 @@ export async function POST(request: NextRequest) {
       guests: guestSummary,
       hotel: body.hotel,
       tourName,
-      message: body.message,
+      message: bookingNotes,
     });
     const confirmationPdf = await createInvoicePdf({
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
       itemName: tourName,
       quantity: guestCount, travelerSummary: guestSummary, amount, currency: "usd",
       paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel,
+      tripLines: tripItems?.map((item, index) => `${index + 1}. ${item.tourName} - ${item.date} - $${item.amount.toFixed(2)}`),
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
@@ -124,7 +128,7 @@ export async function POST(request: NextRequest) {
       date: body.date,
       guests: guestSummary,
       hotel,
-      message: body.message,
+      message: bookingNotes,
     });
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
@@ -132,7 +136,7 @@ export async function POST(request: NextRequest) {
       const { error: bookingError } = await supabase.from("bookings").insert({
         reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
         tour_name: tourName, date: body.date || null, guests: guestCount,
-        hotel: hotel || null, notes: body.message || null, amount,
+        hotel: hotel || null, notes: bookingNotes || null, amount,
         currency: "USD",
       });
       if (bookingError) {

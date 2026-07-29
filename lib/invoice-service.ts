@@ -14,6 +14,7 @@ export type InvoiceData = {
   date?: string;
   time?: string;
   hotel?: string;
+  tripLines?: string[];
 };
 
 export type BookingStatusPdfData = {
@@ -77,11 +78,17 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   sectionCard(commands, 50, 267, 512, 163, "EXPERIENCE DETAILS");
   const itemLines = wrap(invoice.itemName || "Daily Red Sea booking", 48);
   text(commands, itemLines[0], 68, 380, 14, true, navy);
-  if (itemLines[1]) text(commands, itemLines[1], 68, 363, 14, true, navy);
-  detail(commands, "Experience date", invoice.date || "To be confirmed", 68, 334, 205);
-  detail(commands, "Departure time", invoice.time || "To be confirmed", 310, 334, 195);
-  detail(commands, "Travelers", invoice.travelerSummary || `${quantity} traveler${quantity === 1 ? "" : "s"}`, 68, 292, 205);
-  detail(commands, "Pickup", invoice.hotel || "We will confirm via WhatsApp", 310, 292, 215);
+  if (invoice.tripLines?.length) {
+    invoice.tripLines.slice(0, 4).forEach((line, index) => text(commands, wrap(line, 82)[0], 68, 355 - index * 17, 9, false, slate));
+    detail(commands, "Travelers", invoice.travelerSummary || `${quantity} traveler places`, 68, 292, 205);
+    detail(commands, "Pickup", invoice.hotel || "We will confirm via WhatsApp", 310, 292, 215);
+  } else {
+    if (itemLines[1]) text(commands, itemLines[1], 68, 363, 14, true, navy);
+    detail(commands, "Experience date", invoice.date || "To be confirmed", 68, 334, 205);
+    detail(commands, "Departure time", invoice.time || "To be confirmed", 310, 334, 195);
+    detail(commands, "Travelers", invoice.travelerSummary || `${quantity} traveler${quantity === 1 ? "" : "s"}`, 68, 292, 205);
+    detail(commands, "Pickup", invoice.hotel || "We will confirm via WhatsApp", 310, 292, 215);
+  }
 
   roundedRect(commands, 50, 180, 512, 67, 10, blue);
   text(commands, "TOTAL TO PAY", 68, 218, 9, true, [219, 234, 254]);

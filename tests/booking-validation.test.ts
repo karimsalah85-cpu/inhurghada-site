@@ -53,4 +53,19 @@ describe("booking input validation", () => {
     expect(validateBookingInput(quad).error).toMatch(/at least 9/i);
     expect(validateBookingInput({ ...quad, quadMinimumAgeConfirmed: true }).data?.quadMinimumAgeConfirmed).toBe(true);
   });
+
+  it("validates safety confirmations for trips in a cart", () => {
+    const cart = {
+      ...valid,
+      tourSlug: "multi-trip",
+      tourName: "Multi-trip booking",
+      cartItems: [
+        { tourSlug: "orange-bay", date: "2099-01-01", time: "08:00", adults: 1, youth: 0, infants: 0 },
+        { tourSlug: "full-day-diving", date: "2099-01-02", time: "08:00", adults: 1, youth: 0, infants: 0 },
+      ],
+    };
+    expect(validateBookingInput(cart).error).toMatch(/diving license/i);
+    const confirmed = { ...cart, cartItems: cart.cartItems.map((item) => ({ ...item, divingLicenseConfirmed: item.tourSlug === "full-day-diving" })) };
+    expect(validateBookingInput(confirmed).data?.cartItems).toHaveLength(2);
+  });
 });

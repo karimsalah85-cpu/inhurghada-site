@@ -49,4 +49,19 @@ describe("authoritative booking pricing", () => {
     const result = calculateBookingPrice({ ...tour, tourName: "Private Day Trip to Luxor from Hurghada", adults: 2 });
     expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total" } });
   });
+
+  it("prices multiple cart trips from the server-side catalog", () => {
+    const result = calculateBookingPrice({
+      ...tour,
+      tourName: "Multi-trip booking",
+      tourSlug: "multi-trip",
+      adults: 0,
+      cartItems: [
+        { tourSlug: "orange-bay", date: "2099-01-01", time: "08:00", adults: 2, youth: 1, infants: 0, extras: [] },
+        { tourSlug: "full-day-diving", date: "2099-01-02", time: "08:00", adults: 1, youth: 0, infants: 0, extras: [] },
+      ],
+    });
+    expect(result.data).toMatchObject({ amount: 120, guests: 4, guestSummary: "2 trips · 4 participant places" });
+    expect(result.data && "items" in result.data ? result.data.items : []).toHaveLength(2);
+  });
 });

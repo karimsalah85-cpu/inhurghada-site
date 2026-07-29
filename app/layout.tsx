@@ -9,6 +9,7 @@ import OrganizationSchema from "@/components/seo/OrganizationSchema";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
+import CartProvider from "@/components/cart/CartProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -84,12 +85,14 @@ export default async function RootLayout({
 
       <body>
         <SiteSettingsProvider initialLanguage={documentLocale as "en" | "ar" | "de" | "ru" | "pl" | "zh"}>
-          <OrganizationSchema />
-          <AnalyticsProvider />
-          <a href="#main-content" className="skip-link">Skip to main content</a>
-          <Navbar />
-          <div id="main-content" tabIndex={-1}>{children}</div>
-          <WhatsAppButton />
+          <CartProvider>
+            <OrganizationSchema />
+            <AnalyticsProvider />
+            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <Navbar />
+            <div id="main-content" tabIndex={-1}>{children}</div>
+            <WhatsAppButton />
+          </CartProvider>
         </SiteSettingsProvider>
       </body>
 

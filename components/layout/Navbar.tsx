@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, ShoppingCart, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -9,6 +9,7 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath } from "@/lib/i18n";
 import SocialLinks from "@/components/layout/SocialLinks";
+import { useCart } from "@/components/cart/CartProvider";
 
 
 export default function Navbar() {
@@ -18,6 +19,7 @@ export default function Navbar() {
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
   const { currency, language, setCurrency, setLanguage, t } = useSiteSettings();
   const pathname = usePathname();
+  const { items } = useCart();
 
 
   function closeMenu() {
@@ -141,6 +143,11 @@ export default function Navbar() {
             {t("bookNow")}
           </Link>
 
+          <Link href={localePath(language, "/cart")} aria-label={`${items.length} trips in cart`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
+            <ShoppingCart size={22} />
+            {items.length ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-xs font-bold text-white">{items.length}</span> : null}
+          </Link>
+
           <SettingsSelectors
             currency={currency}
             language={language}
@@ -238,6 +245,10 @@ export default function Navbar() {
             close={closeMenu}
           >
             {t("checkout")}
+          </MobileLink>
+
+          <MobileLink href={localePath(language, "/cart")} close={closeMenu}>
+            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
           </MobileLink>
 
           <MobileLink
