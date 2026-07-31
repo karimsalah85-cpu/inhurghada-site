@@ -14,13 +14,11 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "best-desert-safari-tours-for-adrenaline-junkies-in-hurghada",
     title: "Best Desert Safari Tours for Adrenaline Junkies in Hurghada",
-    metaDescription:
-      "Compare Hurghada's most exciting desert safari options - quad bikes, dune bashing, sunset rides - and pick the right adrenaline level for your trip.",
+    metaDescription: "Compare Hurghada's most exciting desert safari options - quad bikes, dune bashing, sunset rides - and pick the right adrenaline level for your trip.",
     publishedAt: "2026-08-01",
     heroImage: "/images/hurghada-desert-camel-closeup.jpeg",
     relatedTourSlugs: ["quad-safari-morning", "quad-safari-sunset", "safari"],
-    intro:
-      "Hurghada's Eastern Desert is one of the most underrated adrenaline playgrounds on the Red Sea coast. Beyond the beach, the mountains and open desert tracks just outside the city turn into a genuine off-road adventure the moment you throw a leg over a quad bike. If you want more than a slow camel photo-op, here is how to pick the safari that actually delivers a rush.",
+    intro: "Hurghada's Eastern Desert is one of the most underrated adrenaline playgrounds on the Red Sea coast. Beyond the beach, the mountains and open desert tracks just outside the city turn into a genuine off-road adventure the moment you throw a leg over a quad bike. If you want more than a slow camel photo-op, here is how to pick the safari that actually delivers a rush.",
     sections: [
       { heading: "Quad biking: the fastest way to get your heart rate up", body: ["Quad bike safaris are the default choice for travelers who want speed. Morning quad safaris run through open desert tracks with mountain backdrops, while sunset quad safaris add dramatic light and cooler temperatures for a more comfortable ride.", "Both versions cover similar terrain - packed sand, gentle dunes, and rocky flats - so the real difference is timing and heat. If you want the biggest adrenaline hit with the least sun exposure, the sunset option is the better pick."] },
       { heading: "How much desert riding is actually included", body: ["A typical Hurghada quad safari runs about 5 hours door to door, but the actual riding time is closer to 45-60 minutes split across two stretches. The rest of the time covers hotel pickup, a safety briefing, and a stop at a Bedouin camp for tea.", "If pure riding time matters more to you than the cultural stop, ask your operator directly before booking - some private safaris can extend the riding segment."] },
@@ -171,6 +169,66 @@ export const blogPosts: BlogPost[] = [
       { question: "How many people count as a 'group' for better pricing?", answer: "Most Hurghada operators start offering meaningfully better per-person rates from around 10 people, with private charter options becoming more cost-effective from about 15 people upward." },
       { question: "Is a private charter always better for a large group?", answer: "For groups of 15 or more, yes, it's usually more efficient and keeps everyone on one schedule. Smaller groups often do better joining a shared trip at a group rate." },
       { question: "What should be confirmed in writing before paying a deposit?", answer: "Total price, what's included, the cancellation policy, and a single point of contact for coordinating pickups on the day." },
+    ],
+  },
+  {
+    slug: "valentine-s-day-excursions-for-couples-in-hurghada",
+    title: "Valentine's Day Excursions for Couples in Hurghada",
+    metaDescription: "Planning a romantic day out in Hurghada for Valentine's? Here are the excursions that actually work best for couples, from private boats to sunset safaris.",
+    publishedAt: "2026-08-02",
+    heroImage: "/images/mahmya-island-boats-sunset.jpeg",
+    relatedTourSlugs: ["mahmya-island", "quad-safari-sunset", "professional-underwater-photographer"],
+    intro: "Valentine's Day in a beach resort can mean an overcrowded hotel restaurant, or it can mean a genuinely memorable day out on the Red Sea. Here's how to pick a Hurghada excursion that actually feels romantic rather than just another group tour with a heart-shaped napkin.",
+    sections: [
+      { heading: "Island boat trips set the mood without trying hard", body: ["A premium island trip like Mahmya naturally lends itself to a couple's day - white sand, turquoise water, and enough free time on the island to actually relax together rather than being shuttled between stops.", "For a more private feel, ask your operator whether a smaller or private boat option is available on the date you want, rather than the standard shared departure."] },
+      { heading: "A sunset desert safari as an alternative", body: ["If the beach isn't the vibe you're going for, a sunset quad safari or camel ride ending at a Bedouin camp as the sun goes down offers a completely different, equally romantic setting - mountains, golden light, and a quieter atmosphere than a beach resort.", "This works especially well as an evening activity that leads naturally into a Valentine's dinner afterward."] },
+      { heading: "Add a photographer for the day", body: ["A professional photographer booked alongside your boat trip or safari turns a nice day into something you'll actually look back on - candid shots from the boat, underwater moments if you snorkel together, or portraits at the Bedouin camp at sunset.", "Book this in advance since photographer availability is limited, especially around a date as popular as Valentine's Day."] },
+      { heading: "Book early - the date fills up fast", body: ["Valentine's Day is one of the busiest single dates for couple-friendly excursions in Hurghada. Reach out to your operator at least a week ahead to lock in your preferred trip, time slot, and any add-ons like a private boat or photographer."] },
+    ],
+    faqs: [
+      { question: "Can we book a private boat for Valentine's Day?", answer: "Private or smaller-group boat options are sometimes available on request - ask your operator when booking, and reserve early since demand is high on this date." },
+      { question: "Is a desert safari romantic, or just for adrenaline?", answer: "A sunset safari ending at a Bedouin camp offers a quiet, scenic setting that works well as a romantic evening activity, distinct from the faster-paced quad riding earlier in the trip." },
+      { question: "How far ahead should we book for Valentine's Day?", answer: "At least a week in advance is recommended, since this is one of the highest-demand dates of the year for couple-friendly excursions." },
+    ],
+  },
+  {
+    slug: "halal-friendly-excursions-in-hurghada",
+    title: "Halal-Friendly Excursions in Hurghada: What to Know",
+    metaDescription: "Traveling to Hurghada and want halal-friendly excursions? Here's what to expect around meals, prayer, and alcohol on typical Red Sea day trips.",
+    publishedAt: "2026-08-02",
+    heroImage: "/images/hurghada-snorkeling-reef-panorama.jpeg",
+    relatedTourSlugs: ["orange-bay", "full-day-snorkeling", "safari"],
+    intro: "Egypt is a majority-Muslim country, and Hurghada's tourism industry is generally well set up for halal-friendly travel - but excursion details vary, especially around meals and alcohol onboard. Here's what to check before booking so your day trip matches your expectations.",
+    sections: [
+      { heading: "Meals on boat trips are usually halal by default", body: ["Lunch served on Hurghada boat excursions is typically simple, home-style Egyptian food - grilled chicken, rice, salads, bread - and is halal as standard practice in Egypt, since almost all local catering follows halal preparation.", "If you have specific dietary requirements beyond halal (e.g. no pork products, which are already rare in Egyptian catering, or a vegetarian option), mention it when booking so the operator can flag it to the boat's kitchen."] },
+      { heading: "Alcohol policies vary by boat and trip type", body: ["Standard day trips - snorkeling, island visits, desert safaris - generally do not serve alcohol as part of the package, since the core clientele and crew reflect local norms. Evening or party-style trips, like full moon boat parties, are more likely to include alcohol service.", "If avoiding alcohol onboard entirely matters to you, ask directly before booking rather than assuming based on the trip name."] },
+      { heading: "Prayer times and quiet space", body: ["Most boats have a covered deck area that can double as a quiet space, and crew members are generally accommodating if you ask about timing around prayer during the trip. Desert safaris naturally include a stop at a Bedouin camp partway through, which works well as a natural pause point."] },
+      { heading: "What to ask before booking", body: ["Confirm whether alcohol is served onboard, what the lunch menu includes, and whether the boat has a quiet or covered area. Daily Red Sea and most reputable Hurghada operators are used to these questions and can answer them directly over WhatsApp before you book."] },
+    ],
+    faqs: [
+      { question: "Is food on Hurghada boat trips halal?", answer: "Yes, as standard practice - most catering in Egypt, including boat trip lunches, follows halal preparation by default." },
+      { question: "Do all boat trips serve alcohol?", answer: "No. Standard day trips like snorkeling and island visits usually don't include alcohol; it's more common on evening or party-style trips." },
+      { question: "Can I ask about prayer accommodations before booking?", answer: "Yes, most operators are happy to discuss quiet space onboard or natural pause points in the itinerary, such as the Bedouin camp stop on a desert safari." },
+    ],
+  },
+  {
+    slug: "eid-holiday-excursions-in-hurghada",
+    title: "Eid Holiday Excursions in Hurghada: What to Book and When",
+    metaDescription: "Visiting Hurghada during Eid? Here's what to know about booking excursions during the holiday - demand, timing, and which trips suit a family celebration.",
+    publishedAt: "2026-08-02",
+    heroImage: "/images/hurghada-desert-camel-closeup.jpeg",
+    relatedTourSlugs: ["orange-bay", "mahmya-island", "safari"],
+    intro: "Eid is one of the busiest holiday periods in Egyptian tourism, and Hurghada sees a noticeable spike in both local and international visitors booking excursions during this window. If your trip lines up with Eid, a bit of extra planning goes a long way toward avoiding a fully booked-out day.",
+    sections: [
+      { heading: "Why Eid changes the booking picture", body: ["Local Egyptian families travel heavily during Eid, alongside the usual international visitor base, which means island boat trips and desert safaris can sell out days in advance rather than the day before as usual.", "Popular family-friendly excursions like Orange Bay or Mahmya Island are typically the first to fill up given their appeal to both local and international groups celebrating together."] },
+      { heading: "Book earlier than you normally would", body: ["Where a standard trip might be confirmed a day ahead by WhatsApp, Eid week bookings are safer made 3-5 days in advance, especially for larger family groups wanting a specific date and time.", "If your travel dates are flexible, avoid the first two days of Eid specifically, when demand peaks hardest, and consider the later days of the holiday for easier availability."] },
+      { heading: "Good excursion picks for an Eid family trip", body: ["Island day trips work well for multi-generational family groups since they combine relaxed beach time with a boat cruise, suiting both older relatives and children. A desert safari with both a quad segment and a slower camel ride keeps a mixed-age group together without anyone sitting out."] },
+      { heading: "Expect a livelier atmosphere", body: ["Boats and popular sites are busier and more festive during Eid, with more families and groups celebrating together. If you're specifically looking for a quiet, low-crowd day, this may not be the best week for it - consider booking just before or after the peak holiday days instead."] },
+    ],
+    faqs: [
+      { question: "How far ahead should I book excursions during Eid?", answer: "3-5 days ahead is safer than the usual day-before booking window, especially for popular island trips and larger family groups." },
+      { question: "Are prices higher during Eid?", answer: "Pricing can vary with demand during peak holiday periods - confirm current rates directly with your operator when booking for Eid dates." },
+      { question: "Which excursion suits a multi-generational family best during Eid?", answer: "Island boat trips like Orange Bay or Mahmya tend to work well for mixed-age groups, combining relaxed beach time with a boat cruise that doesn't require everyone to be equally active." },
     ],
   },
 ];
