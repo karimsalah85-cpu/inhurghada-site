@@ -248,7 +248,7 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink href={localePath(language, "/cart")} close={closeMenu}>
-            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
+            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
           </MobileLink>
 
           <MobileLink

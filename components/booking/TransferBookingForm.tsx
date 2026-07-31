@@ -27,6 +27,9 @@ const arabicTransferCopy: Record<string, string> = {
   "cancellation policy": "سياسة الإلغاء", "By submitting, you agree to our terms and conditions.": "بإرسال الطلب، توافق على الشروط والأحكام.",
   "Sending transfer request…": "جارٍ إرسال طلب التوصيل…", "Book one way": "احجز اتجاهاً واحداً",
 };
+const chineseTransferCopy: Record<string, string> = {
+  "Small car": "小型车辆", "Larger vehicle": "大型车辆", "Private car": "私人车辆", "Book a private transfer": "预订私人接送", "Choose your service and see the fixed one-way fare instantly.": "选择服务，即刻查看单程固定价格。", "Airport transfer": "机场接送", "Senzo Mall transfer": "Senzo Mall 接送", "one way within Hurghada": "赫尔格达市内单程", "Required field": "必填项", "Pickup location": "上车地点", "Pickup hotel / full address": "上车酒店／完整地址", "Required pickup details": "请填写准确的上车信息", "Drop-off location": "下车地点", "Transfer date": "接送日期", "Pickup time": "上车时间", "Please book at least 1 hour before pickup.": "请至少提前 1 小时预订。", "Passengers": "乘客", " (maximum 4)": "（最多 4 人）", "Travel bags": "旅行行李", "Flight number (optional)": "航班号（选填）", "Your name": "您的姓名", "WhatsApp number": "WhatsApp 号码", "Email address": "电子邮箱", "Notes (optional)": "备注（选填）", "Add luggage, child seat, or any special request.": "请填写儿童座椅或其他特别要求。", "Before booking, please review our": "预订前请查看我们的", "cancellation policy": "取消政策", "By submitting, you agree to our terms and conditions.": "提交即表示您同意我们的条款与条件。", "Sending transfer request…": "正在提交接送请求…", "Book one way": "预订单程接送", "Airport transfers must start or finish at Hurghada Airport.": "机场接送必须从赫尔格达机场出发或在机场结束。", "Senzo transfers must start or finish at Senzo Mall.": "Senzo 接送必须从 Senzo Mall 出发或在商场结束。", "We need at least 1 hour to arrange your transfer. Please choose a later pickup time.": "我们至少需要 1 小时安排接送，请选择更晚的上车时间。", "We could not reach the booking service. Check your connection and try again.": "无法连接预订服务，请检查网络后重试。",
+};
 
 export default function TransferBookingForm({ initialService = "airport" }: { initialService?: TransferService }) {
   const router = useRouter();
@@ -34,7 +37,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const de = language === "de";
   const ru = language === "ru";
   const ar = language === "ar";
-  const tr = (en: string, deText: string, ruText: string, arText = arabicTransferCopy[en] || en) => de ? deText : ru ? ruText : ar ? arText : en;
+  const zh = language === "zh";
+  const tr = (en: string, deText: string, ruText: string, arText = arabicTransferCopy[en] || en) => de ? deText : ru ? ruText : ar ? arText : zh ? chineseTransferCopy[en] || en : en;
   const [service, setService] = useState<TransferService>(initialService);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -117,7 +121,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "transfer",
-          locale: ar ? "ar" : ru ? "ru" : de ? "de" : "en",
+          locale: language,
           customerName: name.trim(),
           phone: phone.trim(),
           customerEmail: email.trim(),
@@ -154,7 +158,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         serviceName,
         date,
         time,
-        travelers: `${passengers} ${de ? "Fahrgäste" : ru ? "пасс." : "passengers"}`,
+        travelers: `${passengers} ${de ? "Fahrgäste" : ru ? "пасс." : zh ? "位乘客" : "passengers"}`,
         total: `$${total.toFixed(2)}`,
         customerEmailSent: Boolean(data.customerEmailSent),
         whatsappSent: Boolean(data.whatsappSent),

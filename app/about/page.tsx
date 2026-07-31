@@ -10,10 +10,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about", languages: { ...languageAlternates("/about"), "x-default": localePath("en", "/about") } },
 };
 
-export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" }) {
+export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
+  const zh = locale === "zh";
+  const chinese: Record<string, string> = {
+    "Local help in Hurghada": "赫尔格达本地协助", "Memorable Red Sea days, made easier.": "轻松畅享难忘的红海时光。",
+    "Daily Red Sea helps travelers choose and arrange tours, boat trips, desert experiences, historical day trips, and private transfers in and around Hurghada. We focus on clear information, practical local support, and straightforward booking.": "Daily Red Sea 帮助游客选择和安排赫尔格达及周边的旅游项目、游船、沙漠体验、历史一日游和私人接送。我们提供清晰的信息、实用的本地支持和简单直接的预订流程。",
+    "Local knowledge": "本地经验", "Advice grounded in Hurghada pickup areas, trip timings, and the practical details visitors need.": "根据赫尔格达接送区域、行程时间和游客所需的实用信息提供建议。",
+    "Selected experiences": "精选体验", "A focused collection of tours and transfers with clear inclusions and starting prices.": "精选旅游和接送服务，清楚列明包含项目和起价。",
+    "Human confirmation": "人工确认", "Our team confirms availability and pickup details directly by WhatsApp.": "我们的团队会通过 WhatsApp 直接确认名额和接送详情。",
+    "Transparent booking": "透明预订", "Your date, travelers, total, payment method, and important requirements are shown before confirmation.": "确认前会清楚显示日期、人数、总价、付款方式和重要要求。",
+    "Planning something specific?": "有特别的行程需求？", "Tell us your dates, hotel, group size, and interests. We will help you choose an appropriate available experience without adding hidden costs.": "告诉我们日期、酒店、人数和兴趣，我们会帮助您选择合适且有名额的体验，不收取隐藏费用。",
+    "Hello Daily Red Sea, I would like help planning my Hurghada trip.": "您好 Daily Red Sea，我想请您帮助规划赫尔格达行程。", "Ask our local team": "咨询本地团队", "Explore tours": "探索旅游项目",
+  };
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : zh ? chinese[en] || en : en;
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
       <article className="mx-auto max-w-5xl">

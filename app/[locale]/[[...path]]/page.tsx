@@ -170,6 +170,12 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "booking/confirmation") return <BookingConfirmationPage />;
     if (kind === "checkout") return <CheckoutPage />;
     if (kind === "cart") return <CartPage />;
+    if (kind === "transfers") return <TransfersPage locale="zh" />;
+    if (kind === "about") return <AboutPage locale="zh" />;
+    if (kind === "contact") return <ContactPage locale="zh" />;
+    if (kind === "faq") return <FaqPage locale="zh" />;
+    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="zh" />;
+    if (kind === "terms-conditions") return <TermsConditionsPage locale="zh" />;
   }
 
   if (kind === "tour") {

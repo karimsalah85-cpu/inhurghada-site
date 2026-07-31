@@ -9,10 +9,15 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact", languages: { ...languageAlternates("/contact"), "x-default": localePath("en", "/contact") } },
 };
 
-export default function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" }) {
+export default function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : en;
+  const zh = locale === "zh";
+  const chinese: Record<string, string> = {
+    "We are here to help": "我们随时为您提供帮助", "Contact Daily Red Sea": "联系 Daily Red Sea", "For the fastest response, send your travel date, hotel, number of adults and children, and the tour or transfer you are considering.": "为了更快获得回复，请发送出行日期、酒店、成人和儿童人数，以及您考虑的旅游或接送服务。",
+    "Hello Daily Red Sea, I need help with a booking.": "您好 Daily Red Sea，我需要预订帮助。", "Fastest": "最快回复", "Tour advice, availability, pickup changes, and booking help.": "旅游建议、名额查询、接送变更和预订帮助。", "Useful for detailed requests and documents.": "适合详细咨询和发送文件。", "Telephone": "电话", "For urgent same-day assistance.": "适合当天紧急协助。", "Already booked?": "已经预订？", "Include your booking reference when contacting us. For pickup changes or urgent questions close to departure, use WhatsApp so the team can identify your booking quickly.": "联系我们时请提供预订编号。如需更改接送或在出发前有紧急问题，请使用 WhatsApp，以便团队快速找到您的预订。", "Find my booking": "查找我的预订",
+  };
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : zh ? chinese[en] || en : en;
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
       <div className="mx-auto max-w-5xl">
