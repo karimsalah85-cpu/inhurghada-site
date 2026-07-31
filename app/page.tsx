@@ -624,6 +624,7 @@ text-blue-600
               <Link className="block hover:text-white" href={localePath(language, "/terms-conditions")}>{tr("Terms & Conditions","Allgemeine Geschäftsbedingungen","Условия использования")}</Link>
               <Link className="block hover:text-white" href="/image-credits">{tr("Image Credits","Bildnachweise","Источники изображений")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/contact")}>{tr("Contact us","Kontakt","Связаться с нами")}</Link>
+              <Link className="block hover:text-white" href="/blog">{language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}</Link>
             </div>
           </div>
         </div>

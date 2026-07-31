@@ -4,6 +4,7 @@ import { siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
+import { blogPosts } from "@/data/blog-posts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const contentUpdatedAt = new Date("2026-07-23T00:00:00.000Z");
@@ -21,7 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...tours.map((tour) => `/tours/${tour.slug}`),
   ];
 
-  return locales.flatMap((locale) =>
+  const localizedEntries = locales.flatMap((locale) =>
     paths
       .filter((path) => locale === "en" || path !== "/image-credits")
       .map((path) => {
@@ -42,4 +43,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
         };
       })
   );
+  const blogEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${siteUrl}/blog`,
+      lastModified: new Date(Math.max(...blogPosts.map((post) => new Date(post.publishedAt).getTime()))),
+      changeFrequency: "weekly",
+      priority: 0.75,
+    },
+    ...blogPosts.map((post) => ({
+      url: `${siteUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.publishedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+  ];
+  return [...localizedEntries, ...blogEntries];
 }

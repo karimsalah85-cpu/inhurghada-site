@@ -119,6 +119,10 @@ export default function Navbar() {
           <NavLink href={localePath(language, "/about")} active={pathname === localePath(language, "/about")}>
             {t("about")}
           </NavLink>
+
+          <NavLink href="/blog" active={pathname === "/blog" || pathname.startsWith("/blog/")}>
+            {language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}
+          </NavLink>
           </div>
 
 
@@ -256,6 +260,10 @@ export default function Navbar() {
             close={closeMenu}
           >
             {t("about")}
+          </MobileLink>
+
+          <MobileLink href="/blog" close={closeMenu}>
+            {language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}
           </MobileLink>
 
 

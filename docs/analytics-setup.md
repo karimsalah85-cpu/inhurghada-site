@@ -17,6 +17,21 @@ NEXT_PUBLIC_GOOGLE_ADS_PHONE_CONVERSION_LABEL=phone_label
 NEXT_PUBLIC_GOOGLE_ADS_EMAIL_CONVERSION_LABEL=email_label
 ```
 
+## Google Ads admin reporting
+
+The protected admin dashboard can retrieve live campaign reporting separately from browser conversion tracking. Add these server-only variables in Vercel; never prefix them with `NEXT_PUBLIC_`:
+
+```bash
+GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
+GOOGLE_ADS_CUSTOMER_ID=1234567890
+GOOGLE_ADS_LOGIN_CUSTOMER_ID=1234567890
+GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL=service-account@project.iam.gserviceaccount.com
+GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+GOOGLE_ADS_API_VERSION=v23
+```
+
+Grant the service-account email access to the Google Ads account. `GOOGLE_ADS_LOGIN_CUSTOMER_ID` is the manager account ID and can be omitted when the service account accesses the client account directly. The admin endpoint remains unavailable unless all required variables are configured.
+
 Do not expose `META_CONVERSIONS_API_ACCESS_TOKEN` in any `NEXT_PUBLIC_` variable. Set `META_GRAPH_API_VERSION` to the active version shown in Meta Events Manager when the token is created.
 
 ## Provider configuration
