@@ -1,12 +1,17 @@
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { createClient } from "@/utils/supabase/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasAdminPermission, isAuthorizedAdmin } from "@/lib/admin-auth";
 
 export default async function AdminPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) redirect("/admin/login");
+  const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") redirect("/admin/mfa");
+  const canBookings = hasAdminPermission(user, "bookings") || hasAdminPermission(user, "reports");
+  const canFinance = hasAdminPermission(user, "finance");
+  const canSuppliers = hasAdminPermission(user, "suppliers");
 
   const [
     { data: bookings, error: bookingsError },
@@ -14,10 +19,10 @@ export default async function AdminPage() {
     { data: suppliers, error: suppliersError },
     { data: salesPeople, error: salesPeopleError },
   ] = await Promise.all([
-    supabase.from("bookings").select("*").order("created_at", { ascending: false }),
-    supabase.from("expenses").select("*").order("expense_date", { ascending: false }),
-    supabase.from("suppliers").select("*").order("name"),
-    supabase.from("sales_people").select("*").order("name"),
+    canBookings ? supabase.from("bookings").select("*").order("created_at", { ascending: false }) : Promise.resolve({ data: [], error: null }),
+    canFinance ? supabase.from("expenses").select("*").order("expense_date", { ascending: false }) : Promise.resolve({ data: [], error: null }),
+    canSuppliers ? supabase.from("suppliers").select("*").order("name") : Promise.resolve({ data: [], error: null }),
+    canFinance ? supabase.from("sales_people").select("*").order("name") : Promise.resolve({ data: [], error: null }),
   ]);
   const error = bookingsError?.message || expensesError?.message;
 

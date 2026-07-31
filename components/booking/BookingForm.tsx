@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -113,12 +113,23 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
   const [error, setError] = useState("");
   const [website, setWebsite] = useState("");
   const [cartMessage, setCartMessage] = useState("");
+  const [availability, setAvailability] = useState<{ managed: boolean; soldOut?: boolean; slots?: Array<{ remaining: number | null }> } | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`/api/availability?tour=${encodeURIComponent(tourSlug)}&date=${encodeURIComponent(date)}`, { signal: controller.signal })
+      .then((response) => response.ok ? response.json() : null).then((result) => setAvailability(result)).catch(() => undefined);
+    return () => controller.abort();
+  }, [date, tourSlug]);
 
   const extraOptions = upsells[tourSlug] || [];
   const requiresDivingLicense = tourSlug === "full-day-diving";
   const requiresQuadMinimumAge = ["quad-safari-morning", "quad-safari-sunset"].includes(tourSlug);
   const extrasTotal = extraOptions.filter((option) => selectedExtras.includes(option.id)).reduce((sum, option) => sum + option.price, 0);
   const total = adults * adultPrice + youth * (youthPrice ?? adultPrice) + infants * (infantPrice ?? 0) + extrasTotal;
+  const requestedPlaces = adults + youth + infants;
+  const remainingPlaces = availability?.managed ? Math.max(...(availability.slots || []).map((slot) => slot.remaining ?? 9999), 0) : null;
+  const unavailable = Boolean(availability?.soldOut || (remainingPlaces !== null && remainingPlaces < requestedPlaces));
   const travelerText = de
     ? `${adults} Erwachsene${youthPrice !== undefined ? ` · ${youth} Kinder` : ""}${infantPrice !== undefined ? ` · ${infants} Kleinkinder` : ""}`
     : ru
@@ -179,6 +190,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
       {step === "select" ? <>
         <div className="mt-6 space-y-4">
           <label className="block text-sm font-bold text-slate-700">{tr("Date", "Datum", "Дата")} <RequiredMark/><div className="relative mt-1"><CalendarDays className="absolute left-3 top-3 text-slate-400" size={18}/><input required type="date" min={tomorrow()} value={date} onChange={(event) => setDate(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></div></label>
+          {availability?.managed ? <p className={`rounded-xl p-3 text-sm font-bold ${unavailable ? "bg-rose-50 text-rose-800" : "bg-emerald-50 text-emerald-800"}`}>{unavailable ? "Sold out or not enough places for this group." : remainingPlaces === 9999 ? "Available" : `${remainingPlaces} places remaining`}</p> : null}
           <label className="block text-sm font-bold text-slate-700">{tr("Time", "Uhrzeit", "Время")} <RequiredMark/><div className="relative mt-1"><Clock3 className="absolute left-3 top-3 text-slate-400" size={18}/><select required value={time} onChange={(event) => setTime(event.target.value)} className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">{times.map((option) => <option key={option}>{ru && option === "Time confirmed by WhatsApp" ? "Время подтверждается в WhatsApp" : option}</option>)}</select><ChevronDown className="absolute right-3 top-3 text-slate-400" size={18}/></div></label>
         </div>
         {requiresDivingLicense ? <div className="mt-5 rounded-2xl border border-cyan-300 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950"><p className="font-black">{de ? "Gültiger Tauchschein erforderlich" : zh ? "需要有效潜水证" : "Valid diving license required"}</p><p className="mt-1">{de ? "Jeder Taucher muss einen gültigen Tauchschein besitzen und den Nachweis mitbringen." : zh ? "每位潜水员必须持有有效的深潜证，并在行程中携带证明。" : "Every diver must hold a valid scuba diving license and bring proof on the trip."}</p></div> : null}
@@ -186,7 +198,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
         <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50/60 px-4"><p className="pt-4 text-sm font-bold text-slate-900">{tr("Select your package", "Paket auswählen", "Выберите пакет")}</p><Counter label={tr("Adults", "Erwachsene", "Взрослые")} description={`${formatPrice(String(adultPrice))} ${tr("each", "pro Person", "за человека")}`} value={adults} onChange={setAdults}/>{youthPrice !== undefined && <Counter label={requiresQuadMinimumAge ? tr("Youth (9–10)", "Jugendliche (9–10)", "Дети (9–10)") : tr("Youth (4–10)", "Kinder (4–10)", "Дети (4–10)")} description={`${formatPrice(String(youthPrice))} ${tr("each", "pro Kind", "за ребёнка")}`} value={youth} onChange={setYouth}/>} {infantPrice !== undefined && <Counter label={tr("Infants", "Kleinkinder", "Младенцы")} description={tr("Free of charge", "Kostenlos", "Бесплатно")} value={infants} onChange={setInfants}/>}</div>
         {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-slate-900">{de ? "Optionale Extras" : zh ? "可选附加项目" : "Optional extras"}</legend>{extraOptions.map((option) => <label key={option.id} className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedExtras.includes(option.id)} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-4 w-4 accent-blue-600" />{de ? option.de : ru ? option.ru : zh ? option.zh : option.en}</span><strong>+{formatPrice(String(option.price))}</strong></label>)}</fieldset> : null}
         <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-slate-900">{de ? "Gesamtpreis" : "Total"}</p><p className="text-xs text-slate-500">{de ? "Barzahlung bei Ankunft · keine Online-Zahlung" : "Cash on arrival · no online payment"}</p></div><p className="text-3xl font-black text-blue-700">{formatPrice(String(total))}</p></div>
-        <button type="button" onClick={() => { if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700">{tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
+        <button disabled={unavailable} type="button" onClick={() => { if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400">{unavailable ? "Sold out" : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
         <button type="button" onClick={() => {
           if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
           addItem({ tourSlug, tourName, date, time, adults, youth, infants, extras: selectedExtras, subtotal: total, requiresDivingLicense, requiresQuadMinimumAge });

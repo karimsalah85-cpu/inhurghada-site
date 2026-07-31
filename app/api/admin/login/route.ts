@@ -58,6 +58,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (assurance?.nextLevel === "aal2" && assurance.currentLevel !== "aal2") {
+      return NextResponse.json({ ok: true, mfaRequired: true }, { headers: { "Cache-Control": "no-store" } });
+    }
+
     return NextResponse.json(
       { ok: true },
       { headers: { "Cache-Control": "no-store" } },

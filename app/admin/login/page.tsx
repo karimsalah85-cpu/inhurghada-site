@@ -18,14 +18,14 @@ export default function AdminLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const result = (await response.json()) as { error?: string };
+      const result = (await response.json()) as { error?: string; mfaRequired?: boolean };
 
       if (!response.ok) {
         setError(result.error || "Sign-in failed. Please try again.");
         return;
       }
 
-      window.location.assign("/admin");
+      window.location.assign(result.mfaRequired ? "/admin/mfa" : "/admin");
     } catch {
       setError("Could not connect to the sign-in service. Please try again.");
     } finally {

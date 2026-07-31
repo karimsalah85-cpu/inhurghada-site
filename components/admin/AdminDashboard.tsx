@@ -6,6 +6,7 @@ import { CheckCircle2, CircleDollarSign, ClipboardList, Download, ExternalLink, 
 import SituationReports from "@/components/admin/SituationReports";
 import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
+import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
 import { countDistinctCustomers } from "@/lib/customer-count";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
@@ -266,6 +267,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     </div>
 
     <AdminControlCenter />
+    <AdminOperationsCenter />
     <GoogleAdsPanel />
     <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3"><UsersRound className="mt-1 text-cyan-700" size={24}/><div><h2 className="text-2xl font-bold">Suppliers & sales people</h2><p className="mt-1 text-sm text-slate-500">Create reusable contacts and attach them to expenses.</p></div></div>

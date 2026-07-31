@@ -1,0 +1,21 @@
+import "server-only";
+import { createSign } from "node:crypto";
+import { createRequiredAdminClient } from "@/utils/supabase/admin";
+
+function base64Url(value: string | Buffer) { return Buffer.from(value).toString("base64url"); }
+async function searchConsoleToken() {
+  const email = process.env.GOOGLE_SEARCH_CONSOLE_SERVICE_ACCOUNT_EMAIL || process.env.GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL;
+  const key = process.env.GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY || process.env.GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY;
+  if (!email || !key) return null;
+  const now = Math.floor(Date.now() / 1000); const header=base64Url(JSON.stringify({alg:"RS256",typ:"JWT"})); const claim=base64Url(JSON.stringify({iss:email,scope:"https://www.googleapis.com/auth/webmasters.readonly",aud:"https://oauth2.googleapis.com/token",iat:now,exp:now+3600})); const unsigned=`${header}.${claim}`; const signer=createSign("RSA-SHA256");signer.update(unsigned);signer.end();const assertion=`${unsigned}.${base64Url(signer.sign(key.replace(/\\n/g,"\n")))}`;
+  const response=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({grant_type:"urn:ietf:params:oauth:grant-type:jwt-bearer",assertion})});
+  if (!response.ok) return null; return (await response.json() as {access_token?:string}).access_token||null;
+}
+
+export async function runSeoChecks() {
+  const supabase=createRequiredAdminClient(); const site=(process.env.NEXT_PUBLIC_SITE_URL||"https://dailyredsea.com").replace(/\/$/,""); const checkedAt=new Date().toISOString(); const checks:Array<Record<string,unknown>>=[];
+  try { const response=await fetch(`${site}/sitemap.xml`,{cache:"no-store"});const xml=await response.text();const urls=[...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map(match=>match[1]).slice(0,75);checks.push({check_type:"sitemap",url:`${site}/sitemap.xml`,status:response.ok&&urls.length?"ok":"failed",status_code:response.status,summary:response.ok?`Sitemap contains ${urls.length} checked URLs.`:"Sitemap request failed.",details:{url_count:urls.length},checked_at:checkedAt});const results=await Promise.all(urls.map(async url=>{try{const result=await fetch(url,{method:"GET",redirect:"manual",cache:"no-store"});return{url,status:result.status}}catch{return{url,status:0}}}));for(const result of results.filter(item=>item.status===0||item.status>=400))checks.push({check_type:"broken_link",url:result.url,status:"failed",status_code:result.status||null,summary:`URL returned ${result.status||"a network error"}.`,checked_at:checkedAt});if(!results.some(item=>item.status===0||item.status>=400))checks.push({check_type:"broken_link",url:site,status:"ok",summary:`No broken URLs found among ${results.length} sitemap pages.`,checked_at:checkedAt}); } catch(error){checks.push({check_type:"sitemap",url:`${site}/sitemap.xml`,status:"failed",summary:"Sitemap check could not run.",details:{error:error instanceof Error?error.message:"unknown"},checked_at:checkedAt});}
+  const property=process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL; const token=property?await searchConsoleToken():null;
+  if(property&&token){const end=new Date();const start=new Date();start.setUTCDate(start.getUTCDate()-28);const response=await fetch(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(property)}/searchAnalytics/query`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({startDate:start.toISOString().slice(0,10),endDate:end.toISOString().slice(0,10),dimensions:["query"],rowLimit:25})});const report=await response.json();checks.push({check_type:"search_console",url:property,status:response.ok?"ok":"failed",status_code:response.status,summary:response.ok?"Google Search Console statistics synchronized.":"Search Console request failed.",details:report,checked_at:checkedAt});}else checks.push({check_type:"search_console",url:property||site,status:"warning",summary:"Google Search Console credentials or property are not configured.",checked_at:checkedAt});
+  const {error}=await supabase.from("seo_checks").insert(checks);if(error)throw error;return{checks:checks.length,failed:checks.filter(item=>item.status==="failed").length};
+}

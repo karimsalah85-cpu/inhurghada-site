@@ -31,6 +31,7 @@ type SiteSettings = {
   setCurrency: (currency: Currency) => void;
   formatPrice: (usdPrice: string | number) => string;
   t: (key: string, fallback?: string) => string;
+  setting: <T = unknown>(key: string, fallback: T) => T;
 };
 
 const translations: Record<Language, Record<string, string>> = {
@@ -99,6 +100,13 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
   const [rates, setRates] = useState<Record<Currency, number>>(exchangeRates);
 
   useEffect(() => {
+    const configuredRates = publicSettings.currency_rates;
+    if (!configuredRates || typeof configuredRates !== "object" || Array.isArray(configuredRates)) return;
+    const timeout = window.setTimeout(() => setRates((current) => ({ ...current, ...(configuredRates as Partial<Record<Currency, number>>) })), 0);
+    return () => window.clearTimeout(timeout);
+  }, [publicSettings]);
+
+  useEffect(() => {
     const savedCurrency = window.localStorage.getItem("daily-red-sea-currency") as Currency | null;
     if (!savedCurrency || !currencies.includes(savedCurrency)) return;
     const update = window.setTimeout(() => setCurrency(savedCurrency), 0);
@@ -146,6 +154,7 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
       const override = publicSettings[`translation.${language}.${key}`] ?? publicSettings[`${language}.${key}`] ?? publicSettings[key];
       return typeof override === "string" && override.trim() ? override : translations[language][key] || fallback || key;
     },
+    setting: (key, fallback) => publicSettings[key] === undefined ? fallback : publicSettings[key] as typeof fallback,
     formatPrice: (usdPrice) => new Intl.NumberFormat(language, {
       style: "currency",
       currency,

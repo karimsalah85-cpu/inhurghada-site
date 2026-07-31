@@ -3,13 +3,16 @@
 import { MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
+import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 
 export default function WhatsAppButton() {
+  const { setting } = useSiteSettings();
 
   const message =
     "Hello Daily Red Sea 🌊 I would like information about your tours.";
 
-  const url = whatsappUrl(message);
+  const configuredNumber = setting<string>("whatsapp_number", "").replace(/\D/g, "");
+  const url = configuredNumber ? `https://wa.me/${configuredNumber}?text=${encodeURIComponent(message)}` : whatsappUrl(message);
 
 
   return (

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { blogPosts } from "@/data/blog-posts";
 import { tours } from "@/data/tours";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasAdminPermission } from "@/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 
 export async function POST() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!hasAdminPermission(user,"content")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const now = new Date().toISOString();
   const rows = [
     ...tours.map((tour) => ({ content_type: "tour", slug: tour.slug, locale: "en", status: "published", title: tour.title, excerpt: tour.description, body: tour, seo_title: tour.seoTitle || null, seo_description: tour.metaDescription || null, featured_image: tour.image, published_at: now, created_by: user!.id, updated_by: user!.id })),

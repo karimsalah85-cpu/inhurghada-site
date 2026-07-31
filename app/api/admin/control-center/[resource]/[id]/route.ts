@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasAdminPermission, isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
 
 const tables = { content: "content_items", media: "media_assets", availability: "tour_availability", staff: "staff_members", assignments: "booking_assignments", notes: "customer_notes", templates: "communication_templates", queue: "communication_queue", settings: "site_settings", redirects: "redirect_rules" } as const;
+const permissions: Record<keyof typeof tables, AdminPermission> = { content:"content",media:"content",availability:"operations",staff:"operations",assignments:"operations",notes:"operations",templates:"operations",queue:"operations",settings:"settings",redirects:"content" };
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
   const supabase = await createClient();
@@ -10,6 +11,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { resource, id } = await context.params;
   if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
+  if (!hasAdminPermission(user,permissions[resource as keyof typeof tables])) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
   const table = tables[resource as keyof typeof tables];
   const key = resource === "settings" ? "key" : "id";
   const { data: before, error: readError } = await supabase.from(table).select("*").eq(key, id).single();
@@ -38,6 +40,7 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { resource, id } = await context.params;
   if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
+  if (!hasAdminPermission(user,permissions[resource as keyof typeof tables])) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
   const table = tables[resource as keyof typeof tables];
   const key = resource === "settings" ? "key" : "id";
   const { data: before, error: readError } = await supabase.from(table).select("*").eq(key, id).single();

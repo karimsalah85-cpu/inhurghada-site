@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasAdminPermission, isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
 
 const resources = {
   content: "content_items",
@@ -24,21 +24,22 @@ async function authorized() {
   const { data: { user } } = await supabase.auth.getUser();
   return { supabase, user, allowed: isAuthorizedAdmin(user) };
 }
+const resourcePermission: Record<Resource, AdminPermission> = { content: "content", media: "content", availability: "operations", staff: "operations", assignments: "operations", notes: "operations", templates: "operations", queue: "operations", settings: "settings", redirects: "content" };
 
 export async function GET() {
-  const { supabase, allowed } = await authorized();
+  const { supabase, user, allowed } = await authorized();
   if (!allowed) return json({ error: "Unauthorized" }, 401);
   const queries = await Promise.all([
-    supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(100),
-    supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(100),
-    supabase.from("tour_availability").select("*").order("service_date").limit(100),
-    supabase.from("staff_members").select("*").order("name").limit(100),
-    supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(100),
-    supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(100),
-    supabase.from("communication_templates").select("*").order("name").limit(100),
-    supabase.from("communication_queue").select("*").order("scheduled_for", { ascending: false }).limit(100),
-    supabase.from("site_settings").select("*").order("category").limit(100),
-    supabase.from("redirect_rules").select("*").order("source_path").limit(100),
+    hasAdminPermission(user,"content") ? supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"content") ? supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"operations") ? supabase.from("tour_availability").select("*").order("service_date").limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"operations") ? supabase.from("staff_members").select("*").order("name").limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"operations") ? supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"operations") ? supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"operations") ? supabase.from("communication_templates").select("*").order("name").limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"operations") ? supabase.from("communication_queue").select("*").order("scheduled_for", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"settings") ? supabase.from("site_settings").select("*").order("category").limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"content") ? supabase.from("redirect_rules").select("*").order("source_path").limit(100) : Promise.resolve({data:[],error:null}),
     supabase.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(50),
     supabase.from("system_health_checks").select("*").order("checked_at", { ascending: false }).limit(20),
   ]);
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const resource = text(body?.resource, 30) as Resource;
   if (!Object.hasOwn(resources, resource)) return json({ error: "Unknown admin resource." }, 400);
+  if (!hasAdminPermission(user, resourcePermission[resource])) return json({ error: "Your role cannot manage this resource." }, 403);
   let record: Record<string, unknown>;
   if (resource === "content") {
     record = { content_type: text(body.content_type, 20), slug: text(body.slug, 160).toLowerCase(), locale: text(body.locale, 8) || "en", status: text(body.status, 20) || "draft", title: text(body.title, 200), excerpt: text(body.excerpt, 500) || null, seo_title: text(body.seo_title, 200) || null, seo_description: text(body.seo_description, 500) || null, canonical_path: text(body.canonical_path, 250) || null, featured_image: text(body.featured_image, 500) || null, body: typeof body.body === "object" && body.body ? body.body : { content: text(body.body, 20_000) }, publish_at: body.publish_at || null, created_by: user!.id, updated_by: user!.id };

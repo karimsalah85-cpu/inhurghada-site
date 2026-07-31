@@ -10,6 +10,7 @@ import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import CartProvider from "@/components/cart/CartProvider";
+import SiteAnnouncement from "@/components/layout/SiteAnnouncement";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -88,6 +89,7 @@ export default async function RootLayout({
           <CartProvider>
             <OrganizationSchema />
             <AnalyticsProvider />
+            <SiteAnnouncement />
             <a href="#main-content" className="skip-link">Skip to main content</a>
             <Navbar />
             <div id="main-content" tabIndex={-1}>{children}</div>

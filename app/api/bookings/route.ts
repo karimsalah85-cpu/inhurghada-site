@@ -8,13 +8,13 @@ import {
   sendBookingEmail,
   sendWhatsAppMessage,
 } from "@/lib/booking-service";
-import { createClient } from "@/utils/supabase/server";
 import { createInvoicePdf } from "@/lib/invoice-service";
 import { rateLimit } from "@/lib/rate-limit";
 import { validateBookingInput } from "@/lib/booking-validation";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { whatsappNumber } from "@/lib/contact";
+import { createRequiredAdminClient } from "@/utils/supabase/admin";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -132,16 +132,27 @@ export async function POST(request: NextRequest) {
     });
 
     if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
-      const supabase = await createClient();
-      const { error: bookingError } = await supabase.from("bookings").insert({
-        reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone,
-        tour_name: tourName, date: body.date || null, guests: guestCount,
-        hotel: hotel || null, notes: bookingNotes || null, amount,
-        currency: "USD",
-      });
+      const supabase = createRequiredAdminClient();
+      const bookingArguments = {
+        p_reference: reference, p_customer_name: customerName, p_customer_email: customerEmail, p_phone: phone,
+        p_tour_name: tourName, p_date: body.date, p_guests: guestCount, p_hotel: hotel,
+        p_notes: bookingNotes || null, p_amount: amount, p_currency: "USD", p_locale: body.locale,
+      };
+      let { error: bookingError } = body.tourSlug === "multi-trip"
+        ? await supabase.rpc("reserve_multi_trip_booking", { ...bookingArguments, p_items: body.cartItems.map((item) => ({ tour_slug: item.tourSlug, date: item.date, time: item.time, places: item.adults + item.youth + item.infants })) })
+        : await supabase.rpc("reserve_booking", {
+          ...bookingArguments, p_type: bookingType, p_tour_slug: body.tourSlug || (bookingType === "transfer" ? body.service : ""),
+          p_start_time: body.time || null, p_adults: bookingType === "tour" ? body.adults : 0,
+          p_youth: bookingType === "tour" ? body.youth : 0, p_infants: bookingType === "tour" ? body.infants : 0,
+        });
+      if (bookingError && ["PGRST202", "42883"].includes(bookingError.code || "")) {
+        const fallback = await supabase.from("bookings").insert({ reference, type: bookingType, customer_name: customerName, customer_email: customerEmail || null, phone, tour_name: tourName, date: body.date || null, guests: guestCount, hotel: hotel || null, notes: bookingNotes || null, amount, currency: "USD" });
+        bookingError = fallback.error;
+      }
       if (bookingError) {
         console.error("Booking database save failed", bookingError);
-        return bookingJson({ success: false, error: "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: 503 });
+        const capacityMessage = /sold out|places remain|capacity/i.test(bookingError.message || "") ? bookingError.message : null;
+        return bookingJson({ success: false, error: capacityMessage || "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: capacityMessage ? 409 : 503 });
       }
     }
 

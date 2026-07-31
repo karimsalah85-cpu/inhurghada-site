@@ -1,4 +1,7 @@
+"use client";
+
 import { facebookUrl, instagramUrl } from "@/lib/contact";
+import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 
 export default function SocialLinks({
   className = "",
@@ -7,6 +10,9 @@ export default function SocialLinks({
   className?: string;
   dark?: boolean;
 }) {
+  const { setting } = useSiteSettings();
+  const liveFacebookUrl = setting<string>("facebook_url", facebookUrl);
+  const liveInstagramUrl = setting<string>("instagram_url", instagramUrl);
   const linkClass = dark
     ? "border-white/15 bg-white/10 text-white hover:border-cyan-300 hover:bg-white/20"
     : "border-slate-200 bg-white text-slate-700 hover:border-cyan-500 hover:text-cyan-700";
@@ -14,7 +20,7 @@ export default function SocialLinks({
   return (
     <div aria-label="Follow Daily Red Sea" className={`flex items-center gap-2 ${className}`}>
       <a
-        href={facebookUrl}
+        href={liveFacebookUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Follow Daily Red Sea on Facebook"
@@ -26,7 +32,7 @@ export default function SocialLinks({
         </svg>
       </a>
       <a
-        href={instagramUrl}
+        href={liveInstagramUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Follow Daily Red Sea on Instagram"
