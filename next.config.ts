@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.dailyredsea.com" }],
+        destination: "https://dailyredsea.com/:path*",
+        permanent: true,
+      },
     ];
   },
   async headers() {
