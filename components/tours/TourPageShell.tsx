@@ -8,7 +8,7 @@ import { absoluteUrl, siteName } from "@/lib/seo";
 import TourViewTracker from "@/components/analytics/TourViewTracker";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { localePath, type Locale } from "@/lib/i18n";
-import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
 
@@ -16,6 +16,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
   const de = locale === "de";
   const ru = locale === "ru";
   const ar = locale === "ar";
+  const zh = locale === "zh";
   const destination = getDestination(tour.destinationSlug);
   const homeHref = localePath(locale);
   const toursHref = `${homeHref}#tours`;
@@ -74,13 +75,17 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
     { question: "هل الاستلام من الفندق مشمول؟", answer: "تظهر معلومات الاستلام في تفاصيل الرحلة، ونؤكد الوقت والمكان عبر واتساب بعد الحجز." },
     { question: "متى يتم الدفع؟", answer: "يمكنك الحجز عبر الموقع والدفع نقداً عند الوصول ما لم تظهر طريقة دفع أخرى بوضوح." },
     { question: "ماذا يجب أن أحضر؟", answer: "أحضر رقم الحجز وملابس مريحة وكل ما هو مذكور في قسم المعلومات المهمة." },
+  ] : zh ? [
+    { question: "包含酒店接送吗？", answer: "接送信息会显示在行程详情中。预订后，我们会通过 WhatsApp 确认准确时间和地点。" },
+    { question: "什么时候付款？", answer: "除非预订页面明确显示其他付款方式，否则您可在线预订并在抵达时支付现金。" },
+    { question: "需要携带什么？", answer: "请携带预订编号、舒适衣物，以及重要信息部分所列的物品。" },
   ] : tour.faqs ?? [
     { question: de ? "Ist die Abholung vom Hotel inklusive?" : "Is hotel pickup included?", answer: de ? "Die Abholdetails stehen in den Ausflugsinformationen. Die genaue Zeit und den Ort bestätigen wir nach der Buchung per WhatsApp." : "Pickup details are shown in the tour information. We confirm the exact pickup time and location with you on WhatsApp after booking." },
     { question: de ? "Wann bezahle ich?" : "When do I pay?", answer: de ? "Du kannst online reservieren und bei Ankunft bar bezahlen, sofern bei der Buchung keine andere Zahlungsart angezeigt wird." : "You can reserve online and pay cash on arrival unless a different payment option is clearly shown during booking." },
     { question: de ? "Was soll ich mitbringen?" : "What should I bring?", answer: de ? "Bringe deine Buchungsnummer, bequeme Kleidung und alle Dinge mit, die im Abschnitt mit den wichtigen Informationen genannt werden." : "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
-  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : item);
+  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : zh ? localizeTourChinese(item) : item);
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
   const schema = { "@context": "https://schema.org", "@graph": [
     { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
@@ -92,8 +97,8 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
       <TourViewTracker title={tour.title} price={tour.price} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : "Home"}</Link><span className="px-2" aria-hidden="true">/</span><Link href={toursHref} className="hover:text-cyan-700">{de ? "Ausflüge" : ru ? "Экскурсии" : ar ? "الرحلات" : "Tours"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : `${destination?.name || "Hurghada"} experience`}</p>
+        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : zh ? "首页" : "Home"}</Link><span className="px-2" aria-hidden="true">/</span><Link href={toursHref} className="hover:text-cyan-700">{de ? "Ausflüge" : ru ? "Экскурсии" : ar ? "الرحلات" : zh ? "旅游项目" : "Tours"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : zh ? "赫尔格达体验" : `${destination?.name || "Hurghada"} experience`}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
         <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} locale={locale} />
@@ -104,7 +109,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
           <TourDetails tour={tour} />
 
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{de ? "Jetzt reservieren, bei Ankunft bar bezahlen" : ru ? "Забронируйте сейчас, оплатите наличными по прибытии" : "Reserve now, pay cash on arrival"}</p><p className="mt-1">{de ? "Nach deiner Anfrage bestätigen wir die Abholdetails per WhatsApp." : ru ? "После заявки мы подтвердим детали трансфера через WhatsApp." : "We confirm pickup details by WhatsApp after your request."}</p></div>
+            <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{de ? "Jetzt reservieren, bei Ankunft bar bezahlen" : ru ? "Забронируйте сейчас, оплатите наличными по прибытии" : zh ? "立即预订，抵达后现金付款" : "Reserve now, pay cash on arrival"}</p><p className="mt-1">{de ? "Nach deiner Anfrage bestätigen wir die Abholdetails per WhatsApp." : ru ? "После заявки мы подтвердим детали трансфера через WhatsApp." : zh ? "提交请求后，我们会通过 WhatsApp 确认接送详情。" : "We confirm pickup details by WhatsApp after your request."}</p></div>
             <Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
               {transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}

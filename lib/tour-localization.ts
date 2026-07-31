@@ -260,3 +260,86 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
 export function localizeTourRussian(tour: Tour): Tour {
   return { ...tour, ...russianTourOverrides[tour.slug] };
 }
+
+const chineseTourOverrides: Record<string, Partial<Tour>> = {
+  "orange-bay": {
+    title: "橙湾浮潜游船之旅", location: "埃及赫尔格达", duration: "8 小时", category: "海岛游",
+    description: "从赫尔格达乘舒适游艇前往橙湾，体验两次珊瑚礁浮潜、船上午餐，并在洁白沙滩上悠闲度过一天。",
+    highlights: ["橙湾海岛时光", "豪华游艇巡航", "两次珊瑚礁浮潜", "清澈海水中游泳", "船上午餐和饮料", "酒店接送"],
+    included: ["酒店往返接送", "游艇行程", "橙湾门票", "两次浮潜", "浮潜装备", "午餐和软饮", "救生及安全设备"],
+    notIncluded: ["水下照片和视频", "沙滩毛巾", "泳衣和防晒用品"],
+    notes: ["接送时间将在预订后通过 WhatsApp 确认。", "请携带护照或复印件、泳衣、毛巾和防晒霜。"],
+    packageName: "橙湾浮潜游船之旅", packageDescription: "包含酒店接送、游艇、浮潜、海岛停留和午餐的橙湾一日游。", packageLabel: "成人",
+    itinerary: ["从赫尔格达酒店接您前往码头", "乘游艇巡航红海", "在珊瑚礁进行两次浮潜", "橙湾沙滩自由活动", "船上午餐并送返酒店"],
+  },
+  safari: {
+    title: "沙漠探险", location: "赫尔格达沙漠", duration: "5 小时", category: "沙漠探险",
+    description: "驾驶四轮摩托穿越沙漠，体验骑骆驼、参观贝都因村落和品尝传统茶。",
+    highlights: ["四轮摩托", "骑骆驼", "贝都因茶", "沙漠日落"], availableTimes: ["下午出发，准确接送时间通过 WhatsApp 确认"],
+  },
+  "professional-underwater-photographer": {
+    title: "专业水下摄影师", location: "埃及赫尔格达", duration: "全天", category: "摄影服务",
+    description: "由专业摄影师全天记录您的潜水、浮潜或游船体验，为您留下高质量的水下及水面影像。",
+    highlights: ["专属专业摄影师", "全天水下和水面拍摄", "适合潜水、浮潜和游船", "专业修图"],
+    included: ["全天专业摄影服务", "水下摄影设备", "精选数码修图照片", "与活动方协调"],
+    notIncluded: ["游船、潜水或浮潜活动费用", "未另行约定的酒店接送", "相册及额外修图"],
+    notes: ["请提前预订以确认摄影师档期。", "预订时请告知活动和出发时间。", "价格按每位摄影师每天计算。"],
+    packageName: "全天水下摄影服务", packageDescription: "专属摄影师全天记录您的红海体验。", packageLabel: "每天", priceUnit: "每天", availableTimes: ["开始时间通过 WhatsApp 确认"],
+  },
+  "luxor-private-day-trip": {
+    title: "赫尔格达出发的卢克索私人一日游", location: "埃及卢克索", duration: "约 1 天", category: "历史文化之旅",
+    description: "乘私人空调车辆从赫尔格达前往卢克索，由埃及学导游带您参观帝王谷、哈特谢普苏特神庙、门农巨像和卡纳克神庙，含酒店接送和午餐。",
+    highlights: ["私人车辆和专属导游", "帝王谷三座王陵", "哈特谢普苏特神庙", "门农巨像", "卡纳克神庙", "含午餐和主要门票"],
+    included: ["赫尔格达酒店私人接送", "私人空调车辆", "帝王谷及三座普通王陵门票", "主要景点门票", "英语埃及学导游", "当地餐厅午餐", "矿泉水和旅行许可"],
+    notIncluded: ["图坦卡蒙墓门票（约 30 美元）", "其他语种导游附加费", "午餐饮料", "自选帆船体验", "小费和个人消费"],
+    notes: ["办理旅行许可需有效身份证件或护照。", "120 美元为成人起价，家庭或私人团体请咨询报价。", "约 05:00 接送，准确时间通过 WhatsApp 确认。", "活动开始前 24 小时可免费取消。"],
+    packageName: "卢克索私人一日游", packageDescription: "包含私人交通、埃及学导游、主要门票、三座王陵和午餐。", packageLabel: "成人起价", availableTimes: ["05:00"],
+    itinerary: ["05:00 从赫尔格达酒店私人接送", "参观帝王谷三座王陵", "参观门农巨像和哈特谢普苏特神庙", "享用当地午餐", "导览卡纳克神庙", "乘私人空调车辆返回酒店"],
+  },
+  "mahmya-island": {
+    title: "马赫米亚岛游船之旅", location: "埃及赫尔格达", duration: "全天", category: "海岛游",
+    description: "前往吉夫顿岛国家公园内的马赫米亚岛，在白沙滩和清澈碧海间游泳、浮潜，享受高品质海岛一日游。",
+    highlights: ["高品质海岛体验", "白沙滩", "清澈海水", "浮潜", "午餐", "酒店接送"], included: ["酒店往返接送", "游船", "海岛门票", "午餐", "软饮"], notIncluded: ["个人消费", "照片和视频"],
+    notes: ["接送时间通过 WhatsApp 确认。", "请携带泳衣、防晒霜和毛巾。"], packageName: "马赫米亚岛一日游", packageDescription: "包含接送、游船和午餐的高品质海岛体验。", packageLabel: "每人",
+  },
+  "full-day-snorkeling": {
+    title: "全天浮潜之旅", location: "埃及赫尔格达", duration: "8 小时", category: "浮潜",
+    description: "乘船探索红海珊瑚礁，船长会根据天气和海况选择合适的浮潜地点。",
+    highlights: ["两次浮潜", "红海珊瑚礁", "自助午餐", "软饮", "酒店接送", "专业向导"], included: ["酒店接送", "游船", "浮潜装备", "午餐", "软饮"], notIncluded: ["海岛停留", "个人消费"],
+    notes: ["本行程不包含海岛停留。", "地点视天气和海况而定。"], packageName: "全天珊瑚礁浮潜", packageDescription: "包含两次浮潜和午餐的轻松红海游船一日行程。", packageLabel: "每人",
+  },
+  "full-day-diving": {
+    title: "全天深潜之旅", location: "埃及赫尔格达", duration: "8 小时", category: "深潜",
+    description: "在专业教练带领下完成两次红海潜水，潜点由船长根据天气和海况选择。",
+    highlights: ["两次带领潜水", "专业教练", "船上午餐", "软饮", "酒店接送", "可租装备"], included: ["酒店接送", "游船", "专业教练", "午餐", "软饮"], notIncluded: ["潜水装备租赁（30 美元）", "个人消费"],
+    notes: ["每位潜水员均须持有效潜水证并随身携带证明。", "基础价格不含装备。", "潜点视天气和海况而定。"], packageName: "红海两次带领潜水", packageDescription: "包含两次潜水的全天游船行程；须持有效潜水证。", packageLabel: "每人",
+  },
+  "quad-safari-morning": {
+    title: "清晨四轮摩托沙漠探险", location: "赫尔格达沙漠", duration: "5 小时", category: "沙漠探险",
+    description: "清晨驾驶四轮摩托穿越东部沙漠，欣赏山景并参观传统贝都因营地。",
+    highlights: ["四轮摩托驾驶", "沙漠探险", "贝都因营地", "传统茶", "山景"], included: ["酒店接送", "四轮摩托", "安全讲解", "贝都因茶"], notIncluded: ["如需使用的头巾和护目镜", "个人消费"],
+    notes: ["最低参加年龄为 9 岁。", "驾驶者须遵守安全讲解。", "请携带太阳镜并穿包头鞋。"], packageName: "清晨沙漠四轮摩托", packageDescription: "含贝都因营地参观的清晨沙漠骑行，最低年龄 9 岁。", packageLabel: "每人",
+  },
+  "quad-safari-sunset": {
+    title: "日落四轮摩托沙漠探险", location: "赫尔格达沙漠", duration: "5 小时", category: "沙漠探险",
+    description: "在日落时驾驶四轮摩托穿越赫尔格达山地沙漠，并体验传统贝都因待客之道。",
+    highlights: ["日落骑行", "四轮摩托", "贝都因营地", "传统茶", "沙漠全景"], included: ["酒店接送", "四轮摩托", "安全讲解", "贝都因茶"], notIncluded: ["个人消费"],
+    notes: ["最低参加年龄为 9 岁。", "下午接送时间随日落变化，将通过 WhatsApp 确认。", "请穿包头鞋。"], packageName: "日落沙漠四轮摩托", packageDescription: "含贝都因体验的日落沙漠骑行，最低年龄 9 岁。", packageLabel: "每人", availableTimes: ["下午出发，准确时间通过 WhatsApp 确认"],
+  },
+  "hurghada-airport-transfer": {
+    title: "赫尔格达机场私人接送", location: "赫尔格达国际机场", duration: "灵活安排", category: "机场接送",
+    description: "赫尔格达市区单程私人机场接送固定价 20 美元；马卡迪湾、索马湾、艾尔古纳和萨尔哈希什加收 7 美元。",
+    highlights: ["固定单程价格", "举牌迎接", "航班跟踪", "私人空调车辆", "按人数安排车型"], included: ["私人车辆", "司机", "燃油和停车费"], notIncluded: ["额外停靠", "返程"],
+    notes: ["1–2 位乘客使用小型车，最多 2 件行李。", "3 位及以上安排较大车辆，每人最多 2 件行李。", "预订时请提供航班号和酒店名称。"], packageName: "机场单程私人接送", packageDescription: "赫尔格达市区 20 美元；指定度假区加收 7 美元。", packageLabel: "固定单程价格", availableTimes: ["根据航班信息确认时间"],
+  },
+  "senzo-transfer": {
+    title: "Senzo Mall 私人接送", location: "埃及赫尔格达", duration: "灵活安排", category: "私人接送",
+    description: "赫尔格达市区前往或离开 Senzo Mall 的单程私人接送固定价 10 美元；指定度假区加收 7 美元。",
+    highlights: ["固定价格", "私人车辆", "酒店接送", "灵活时间", "空调车辆"], included: ["私人单程接送", "司机", "燃油和停车费"], notIncluded: ["返程", "旅行行李", "购物和餐饮"],
+    notes: ["最多 4 位乘客。", "不接受旅行行李。", "往返行程需分别预订。"], packageName: "Senzo Mall 单程接送", packageDescription: "赫尔格达市区 10 美元；指定度假区加收 7 美元。", packageLabel: "固定单程价格", availableTimes: ["希望出发时间通过 WhatsApp 确认"],
+  },
+};
+
+export function localizeTourChinese(tour: Tour): Tour {
+  return { ...tour, ...chineseTourOverrides[tour.slug] };
+}

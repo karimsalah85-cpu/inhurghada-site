@@ -9,32 +9,33 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const de = language === "de";
   const ru = language === "ru";
   const ar = language === "ar";
-  const tr = (en: string, deText: string, ruText: string, arText: string) => de ? deText : ru ? ruText : ar ? arText : en;
+  const zh = language === "zh";
+  const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : zh ? zhText : en;
 
   return (
     <div className="space-y-8">
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Description","Beschreibung","Описание","الوصف")}</p>
-        <h2 className="mt-4 text-3xl font-bold text-slate-900">{tr("About this tour","Über diesen Ausflug","Об этой экскурсии","عن هذه الرحلة")}</h2>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Description","Beschreibung","Описание","الوصف","项目介绍")}</p>
+        <h2 className="mt-4 text-3xl font-bold text-slate-900">{tr("About this tour","Über diesen Ausflug","Об этой экскурсии","عن هذه الرحلة","关于此行程")}</h2>
         <p className="mt-6 text-lg leading-8 text-slate-600">{tour.description}</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-cyan-700"><Clock3 size={16} /> {tr("Duration","Dauer","Продолжительность","المدة")}</div>
+            <div className="flex items-center gap-2 text-cyan-700"><Clock3 size={16} /> {tr("Duration","Dauer","Продолжительность","المدة","时长")}</div>
             <p className="mt-3 text-xl font-semibold text-slate-900">{tour.duration}</p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-cyan-700"><Sparkles size={16} /> {tr("Rating","Bewertung","Рейтинг","التقييم")}</div>
+            <div className="flex items-center gap-2 text-cyan-700"><Sparkles size={16} /> {tr("Rating","Bewertung","Рейтинг","التقييم","评分")}</div>
             <p className="mt-3 text-xl font-semibold text-slate-900">{tour.rating} / 5</p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر")}</div>
-            <p className="mt-3 text-xl font-semibold text-slate-900">{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص")}</p>
+            <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
+            <p className="mt-3 text-xl font-semibold text-slate-900">{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</p>
           </div>
         </div>
       </div>
 
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Highlights","Höhepunkte","Основные моменты","أهم المميزات")}</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Highlights","Höhepunkte","Основные моменты","أهم المميزات","行程亮点")}</p>
         <ul className="mt-6 space-y-4">
           {tour.highlights.map((item) => (
             <li key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -47,7 +48,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Included","Inklusive","Включено","يشمل")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Included","Inklusive","Включено","يشمل","费用包含")}</p>
           <ul className="mt-6 space-y-4">
             {(tour.included ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -59,7 +60,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Not included","Nicht inklusive","Не включено","لا يشمل")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Not included","Nicht inklusive","Не включено","لا يشمل","费用不含")}</p>
           <ul className="mt-6 space-y-4">
             {(tour.notIncluded ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -73,7 +74,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_0.95fr]">
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Know before you go","Wichtige Informationen","Важная информация","معلومات مهمة")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Know before you go","Wichtige Informationen","Важная информация","معلومات مهمة","出行须知")}</p>
           <ul className="mt-6 space-y-4">
             {(tour.notes ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -85,7 +86,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Select your package","Paket auswählen","Выберите пакет","اختر الباقة")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Select your package","Paket auswählen","Выберите пакет","اختر الباقة","选择套餐")}</p>
           <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -93,12 +94,12 @@ export default function TourDetails({ tour }: { tour: Tour }) {
                 <p className="mt-2 text-sm leading-7 text-slate-600">{tour.packageDescription ?? tour.description}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-500">{de ? "Ab" : ru ? "От" : "Starting from"}</p>
+                <p className="text-sm text-slate-500">{de ? "Ab" : ru ? "От" : zh ? "起价" : "Starting from"}</p>
                 <p className="text-2xl font-bold text-cyan-700">{formatPrice(tour.packagePrice ?? tour.price)}</p>
               </div>
             </div>
             <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-cyan-700">
-              <Compass size={16} /> {tour.packageLabel ?? (de ? "Erwachsener" : ru ? "Взрослый" : "Adult")}
+              <Compass size={16} /> {tour.packageLabel ?? (de ? "Erwachsener" : ru ? "Взрослый" : zh ? "成人" : "Adult")}
             </div>
           </div>
         </div>
@@ -106,7 +107,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
 
       {tour.itinerary ? (
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{de ? "Tagesablauf" : ru ? "Программа дня" : "Day plan"}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{de ? "Tagesablauf" : ru ? "Программа дня" : zh ? "行程安排" : "Day plan"}</p>
           <ul className="mt-6 space-y-4">
             {tour.itinerary.map((item) => (
               <li key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">{item}</li>

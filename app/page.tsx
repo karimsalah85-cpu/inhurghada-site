@@ -18,7 +18,7 @@ import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
-import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 
 
@@ -37,6 +37,7 @@ function HomeContent() {
   const de = language === "de";
   const ru = language === "ru";
   const ar = language === "ar";
+  const zh = language === "zh";
   const tr = (en: string, deText: string, ruText: string, arText = en) => de ? deText : ru ? ruText : ar ? arText : en;
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -92,7 +93,7 @@ function HomeContent() {
 
 
 
-  const displayTours = de ? tours.map(localizeTourGerman) : ru ? tours.map(localizeTourRussian) : ar ? tours.map(localizeTourArabic) : tours;
+  const displayTours = de ? tours.map(localizeTourGerman) : ru ? tours.map(localizeTourRussian) : ar ? tours.map(localizeTourArabic) : zh ? tours.map(localizeTourChinese) : tours;
   const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];

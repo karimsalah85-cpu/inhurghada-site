@@ -6,7 +6,7 @@ import { tours } from "@/data/tours";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
 import { absoluteUrl, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
-import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 
 type PageProps = { params: Promise<{ category: string }> };
 
@@ -27,13 +27,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function TourCategoryPage({ params, locale = "en" }: PageProps & { locale?: "en" | "de" | "ru" | "ar" }) {
+export default async function TourCategoryPage({ params, locale = "en" }: PageProps & { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
   const category = getTourCategory((await params).category);
   if (!category) notFound();
   const de = locale === "de";
   const ru = locale === "ru";
   const ar = locale === "ar";
-  const categoryTours = tours.filter(category.matches).map((tour) => de ? localizeTourGerman(tour) : ru ? localizeTourRussian(tour) : ar ? localizeTourArabic(tour) : tour);
+  const zh = locale === "zh";
+  const categoryTours = tours.filter(category.matches).map((tour) => de ? localizeTourGerman(tour) : ru ? localizeTourRussian(tour) : ar ? localizeTourArabic(tour) : zh ? localizeTourChinese(tour) : tour);
   const displayTitle = categoryLabels[locale][category.slug];
   const pageUrl = absoluteUrl(`/hurghada/${category.slug}`);
   const schema = {
@@ -55,17 +56,17 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="bg-slate-950 px-6 pb-20 pt-32 text-white sm:px-8">
         <div className="mx-auto max-w-6xl">
-          <nav aria-label="Breadcrumb" className="text-sm text-slate-400"><Link href={localePath(locale)} className="hover:text-white">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : "Home"}</Link><span className="px-2">/</span><span>{ru ? "Хургада" : ar ? "الغردقة" : "Hurghada"}</span><span className="px-2">/</span><span className="text-white">{displayTitle}</span></nav>
-          <p className="mt-10 font-semibold uppercase tracking-[0.28em] text-cyan-300">{ru ? "Экскурсии в Хургаде" : category.eyebrow}</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{displayTitle} {de ? "in Hurghada" : ru ? "в Хургаде" : "in Hurghada"}</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{de ? "Entdecke passende Ausflüge Hurghada mit transparenten Preisen, klaren Leistungen und direkter Bestätigung." : ru ? "Выбирайте экскурсии в Хургаде с прозрачными ценами, понятным описанием услуг и прямым подтверждением." : category.description}</p>
-          <div className="mt-8 flex flex-wrap gap-3 text-sm font-bold"><span className="rounded-full bg-white/10 px-4 py-2">{de ? "Klare lokale Preise" : ru ? "Понятные местные цены" : "Clear local prices"}</span><span className="rounded-full bg-white/10 px-4 py-2">{de ? "Bestätigung per WhatsApp" : ru ? "Подтверждение в WhatsApp" : "WhatsApp confirmation"}</span><span className="rounded-full bg-white/10 px-4 py-2">{de ? "Barzahlung bei Ankunft" : ru ? "Оплата наличными по прибытии" : "Cash on arrival"}</span></div>
+          <nav aria-label="Breadcrumb" className="text-sm text-slate-400"><Link href={localePath(locale)} className="hover:text-white">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : zh ? "首页" : "Home"}</Link><span className="px-2">/</span><span>{ru ? "Хургада" : ar ? "الغردقة" : zh ? "赫尔格达" : "Hurghada"}</span><span className="px-2">/</span><span className="text-white">{displayTitle}</span></nav>
+          <p className="mt-10 font-semibold uppercase tracking-[0.28em] text-cyan-300">{ru ? "Экскурсии в Хургаде" : zh ? "赫尔格达旅游项目" : category.eyebrow}</p>
+          <h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{zh ? `赫尔格达${displayTitle}` : <>{displayTitle} {de ? "in Hurghada" : ru ? "в Хургаде" : "in Hurghada"}</>}</h1>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{de ? "Entdecke passende Ausflüge Hurghada mit transparenten Preisen, klaren Leistungen und direkter Bestätigung." : ru ? "Выбирайте экскурсии в Хургаде с прозрачными ценами, понятным описанием услуг и прямым подтверждением." : zh ? "探索适合您的赫尔格达行程，价格透明、包含项目清晰，并可获得直接确认。" : category.description}</p>
+          <div className="mt-8 flex flex-wrap gap-3 text-sm font-bold"><span className="rounded-full bg-white/10 px-4 py-2">{de ? "Klare lokale Preise" : ru ? "Понятные местные цены" : zh ? "透明本地价格" : "Clear local prices"}</span><span className="rounded-full bg-white/10 px-4 py-2">{de ? "Bestätigung per WhatsApp" : ru ? "Подтверждение в WhatsApp" : zh ? "WhatsApp 确认" : "WhatsApp confirmation"}</span><span className="rounded-full bg-white/10 px-4 py-2">{de ? "Barzahlung bei Ankunft" : ru ? "Оплата наличными по прибытии" : zh ? "抵达后现金付款" : "Cash on arrival"}</span></div>
         </div>
       </section>
       <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8">
         <CategoryTourExplorer tours={categoryTours} locale={locale} />
       </section>
-      <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-3xl font-black text-slate-950">{de ? "Mit klaren Informationen buchen" : ru ? "Бронируйте с полной информацией" : "Book with clear information"}</h2><p className="mt-4 leading-8 text-slate-600">{de ? "Jeder Ausflug zeigt Startpreis, Dauer, Abholung, enthaltene Leistungen und wichtige Hinweise vor der Buchung. Unser Team bestätigt die endgültigen Details direkt per WhatsApp." : ru ? "Перед бронированием вы увидите начальную цену, продолжительность, информацию о трансфере, включённые услуги и важные примечания. Наша местная команда подтвердит окончательные детали в WhatsApp." : "Every Daily Red Sea experience shows its starting price, duration, pickup information, inclusions, and practical notes before you submit a booking. Our local team confirms final pickup details directly on WhatsApp."}</p></div></section>
+      <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-3xl font-black text-slate-950">{de ? "Mit klaren Informationen buchen" : ru ? "Бронируйте с полной информацией" : zh ? "信息清晰，放心预订" : "Book with clear information"}</h2><p className="mt-4 leading-8 text-slate-600">{de ? "Jeder Ausflug zeigt Startpreis, Dauer, Abholung, enthaltene Leistungen und wichtige Hinweise vor der Buchung. Unser Team bestätigt die endgültigen Details direkt per WhatsApp." : ru ? "Перед бронированием вы увидите начальную цену, продолжительность, информацию о трансфере, включённые услуги и важные примечания. Наша местная команда подтвердит окончательные детали в WhatsApp." : zh ? "每个项目都会在预订前展示起价、时长、接送信息、包含项目和重要提示。我们的本地团队会通过 WhatsApp 确认最终详情。" : "Every Daily Red Sea experience shows its starting price, duration, pickup information, inclusions, and practical notes before you submit a booking. Our local team confirms final pickup details directly on WhatsApp."}</p></div></section>
     </main>
   );
 }
