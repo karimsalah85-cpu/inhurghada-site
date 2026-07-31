@@ -1,0 +1,88 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
+
+const resources = {
+  content: "content_items",
+  availability: "tour_availability",
+  staff: "staff_members",
+  notes: "customer_notes",
+  templates: "communication_templates",
+  settings: "site_settings",
+  redirects: "redirect_rules",
+} as const;
+type Resource = keyof typeof resources;
+
+const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
+const text = (value: unknown, max: number) => String(value || "").trim().slice(0, max);
+
+async function authorized() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return { supabase, user, allowed: isAuthorizedAdmin(user) };
+}
+
+export async function GET() {
+  const { supabase, allowed } = await authorized();
+  if (!allowed) return json({ error: "Unauthorized" }, 401);
+  const queries = await Promise.all([
+    supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(100),
+    supabase.from("tour_availability").select("*").order("service_date").limit(100),
+    supabase.from("staff_members").select("*").order("name").limit(100),
+    supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(100),
+    supabase.from("communication_templates").select("*").order("name").limit(100),
+    supabase.from("site_settings").select("*").order("category").limit(100),
+    supabase.from("redirect_rules").select("*").order("source_path").limit(100),
+    supabase.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(50),
+    supabase.from("system_health_checks").select("*").order("checked_at", { ascending: false }).limit(20),
+  ]);
+  const migrationError = queries.find((result) => result.error && ["42P01", "PGRST205"].includes(result.error.code || ""))?.error;
+  if (migrationError) return json({ configured: false, migration: "202608010001_admin_control_center.sql" });
+  const otherError = queries.find((result) => result.error)?.error;
+  if (otherError) return json({ error: otherError.message }, 500);
+  const [content, availability, staff, notes, templates, settings, redirects, audit, health] = queries.map((result) => result.data || []);
+  return json({ configured: true, content, availability, staff, notes, templates, settings, redirects, audit, health });
+}
+
+export async function POST(request: NextRequest) {
+  const { supabase, user, allowed } = await authorized();
+  if (!allowed) return json({ error: "Unauthorized" }, 401);
+  const body = await request.json().catch(() => null);
+  const resource = text(body?.resource, 30) as Resource;
+  if (!Object.hasOwn(resources, resource)) return json({ error: "Unknown admin resource." }, 400);
+  let record: Record<string, unknown>;
+  if (resource === "content") {
+    record = { content_type: text(body.content_type, 20), slug: text(body.slug, 160).toLowerCase(), locale: text(body.locale, 8) || "en", status: text(body.status, 20) || "draft", title: text(body.title, 200), excerpt: text(body.excerpt, 500) || null, seo_title: text(body.seo_title, 200) || null, seo_description: text(body.seo_description, 500) || null, canonical_path: text(body.canonical_path, 250) || null, featured_image: text(body.featured_image, 500) || null, body: typeof body.body === "object" && body.body ? body.body : { content: text(body.body, 20_000) }, publish_at: body.publish_at || null, created_by: user!.id, updated_by: user!.id };
+    if (!record.title || !record.slug || !["tour", "blog", "page", "promotion"].includes(String(record.content_type))) return json({ error: "Enter a valid content type, title, and slug." }, 400);
+  } else if (resource === "availability") {
+    record = { tour_slug: text(body.tour_slug, 160), service_date: text(body.service_date, 10), start_time: text(body.start_time, 8) || null, capacity: body.capacity === "" || body.capacity == null ? null : Number(body.capacity), blocked: Boolean(body.blocked), price_override: body.price_override === "" || body.price_override == null ? null : Number(body.price_override), currency: text(body.currency, 3).toUpperCase() || "USD", notes: text(body.notes, 500) || null };
+    if (!record.tour_slug || !/^\d{4}-\d{2}-\d{2}$/.test(String(record.service_date))) return json({ error: "Choose a tour and valid service date." }, 400);
+  } else if (resource === "staff") {
+    record = { name: text(body.name, 120), staff_type: text(body.staff_type, 20), phone: text(body.phone, 40) || null, languages: text(body.languages, 200).split(",").map((item) => item.trim()).filter(Boolean), active: body.active !== false, notes: text(body.notes, 500) || null };
+    if (!record.name || !["guide", "driver", "crew", "operations"].includes(String(record.staff_type))) return json({ error: "Enter a staff name and type." }, 400);
+  } else if (resource === "notes") {
+    record = { customer_key: text(body.customer_key, 254).toLowerCase(), customer_name: text(body.customer_name, 120) || null, note: text(body.note, 2000), tags: text(body.tags, 300).split(",").map((item) => item.trim()).filter(Boolean), created_by: user!.id };
+    if (!record.customer_key || !record.note) return json({ error: "Enter a customer phone/email and note." }, 400);
+  } else if (resource === "templates") {
+    record = { name: text(body.name, 120), channel: text(body.channel, 20), event_key: text(body.event_key, 80), locale: text(body.locale, 8) || "en", subject: text(body.subject, 200) || null, body: text(body.body, 10_000), active: body.active !== false };
+    if (!record.name || !record.event_key || !record.body || !["email", "whatsapp"].includes(String(record.channel))) return json({ error: "Complete the template name, event, channel, and message." }, 400);
+  } else if (resource === "settings") {
+    const key = text(body.key, 120).toLowerCase();
+    const rawValue: unknown = body.value;
+    let value: unknown = rawValue;
+    if (typeof rawValue === "string") { try { value = JSON.parse(rawValue); } catch { value = rawValue.trim(); } }
+    record = { key, value, category: text(body.category, 80) || "general", public: Boolean(body.public), description: text(body.description, 300) || null, updated_by: user!.id, updated_at: new Date().toISOString() };
+    if (!key || value === "") return json({ error: "Enter a setting key and value." }, 400);
+  } else {
+    record = { source_path: text(body.source_path, 300), destination_path: text(body.destination_path, 500), permanent: body.permanent !== false, active: body.active !== false };
+    if (!String(record.source_path).startsWith("/") || !record.destination_path) return json({ error: "Enter a source path beginning with / and a destination." }, 400);
+  }
+  const table = resources[resource];
+  const query = resource === "settings"
+    ? supabase.from(table).upsert(record, { onConflict: "key" }).select().single()
+    : supabase.from(table).insert(record).select().single();
+  const { data, error } = await query;
+  if (error) return json({ error: error.code === "23505" ? "A record with this key already exists." : error.message }, 400);
+  await supabase.rpc("record_admin_audit", { action_name: "create", resource_name: resource, resource_identifier: String((data as { id?: string; key?: string }).id || (data as { key?: string }).key || ""), summary_text: `Created ${resource} record`, after_value: data });
+  return json({ record: data }, 201);
+}
