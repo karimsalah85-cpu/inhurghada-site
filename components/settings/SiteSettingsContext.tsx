@@ -76,6 +76,13 @@ const SiteSettingsContext = createContext<SiteSettings | null>(null);
 
 export function SiteSettingsProvider({ children, initialLanguage = "en" }: { children: React.ReactNode; initialLanguage?: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
+  const [publicSettings, setPublicSettings] = useState<Record<string, unknown>>({});
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/site-content", { signal: controller.signal }).then((response) => response.ok ? response.json() : null).then((data) => { if (data?.settings && typeof data.settings === "object") setPublicSettings(data.settings); }).catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const routeLocale = window.location.pathname.split("/")[1];
@@ -135,13 +142,16 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
     currency,
     setLanguage: changeLanguage,
     setCurrency,
-    t: (key, fallback) => translations[language][key] || fallback || key,
+    t: (key, fallback) => {
+      const override = publicSettings[`translation.${language}.${key}`] ?? publicSettings[`${language}.${key}`] ?? publicSettings[key];
+      return typeof override === "string" && override.trim() ? override : translations[language][key] || fallback || key;
+    },
     formatPrice: (usdPrice) => new Intl.NumberFormat(language, {
       style: "currency",
       currency,
       maximumFractionDigits: 2,
     }).format(Number(usdPrice) * rates[currency]),
-  }), [currency, language, rates]);
+  }), [currency, language, publicSettings, rates]);
 
   return <SiteSettingsContext.Provider value={value}>{children}</SiteSettingsContext.Provider>;
 }

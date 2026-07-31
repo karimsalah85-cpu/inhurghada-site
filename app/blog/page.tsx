@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { blogPosts } from "@/data/blog-posts";
+import { getLiveBlogPosts } from "@/lib/live-content";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -9,7 +9,8 @@ export const metadata: Metadata = pageMetadata({
   path: "/blog",
 });
 
-export default function BlogIndexPage() {
+export default async function BlogIndexPage() {
+  const blogPosts = await getLiveBlogPosts();
   const posts = [...blogPosts].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
   return (
     <main className="mx-auto max-w-5xl px-6 py-20">

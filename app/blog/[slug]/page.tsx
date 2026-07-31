@@ -3,7 +3,7 @@ import Image from "@/components/media/WatermarkedImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blogPosts } from "@/data/blog-posts";
-import { tours } from "@/data/tours";
+import { getLiveBlogPosts, getLiveTours } from "@/lib/live-content";
 import { absoluteUrl, pageMetadata, siteName } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -14,14 +14,15 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find((item) => item.slug === slug);
+  const post = (await getLiveBlogPosts()).find((item) => item.slug === slug);
   if (!post) return {};
   return pageMetadata({ title: `${post.title} | Daily Red Sea`, description: post.metaDescription, path: `/blog/${post.slug}` });
 }
 
 export default async function BlogArticlePage({ params }: PageProps) {
   const { slug } = await params;
-  const post = blogPosts.find((item) => item.slug === slug);
+  const [posts, tours] = await Promise.all([getLiveBlogPosts(), getLiveTours()]);
+  const post = posts.find((item) => item.slug === slug);
   if (!post) notFound();
 
   const relatedTours = post.relatedTourSlugs.map((tourSlug) => tours.find((tour) => tour.slug === tourSlug)).filter(Boolean) as typeof tours;

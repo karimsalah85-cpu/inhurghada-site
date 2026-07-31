@@ -93,7 +93,9 @@ function HomeContent() {
 
 
 
-  const displayTours = de ? tours.map(localizeTourGerman) : ru ? tours.map(localizeTourRussian) : ar ? tours.map(localizeTourArabic) : zh ? tours.map(localizeTourChinese) : tours;
+  const [liveTours, setLiveTours] = useState<Tour[]>(tours);
+  useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
+  const displayTours = de ? liveTours.map(localizeTourGerman) : ru ? liveTours.map(localizeTourRussian) : ar ? liveTours.map(localizeTourArabic) : zh ? liveTours.map(localizeTourChinese) : liveTours;
   const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];

@@ -4,10 +4,13 @@ import { isAuthorizedAdmin } from "@/lib/admin-auth";
 
 const resources = {
   content: "content_items",
+  media: "media_assets",
   availability: "tour_availability",
   staff: "staff_members",
+  assignments: "booking_assignments",
   notes: "customer_notes",
   templates: "communication_templates",
+  queue: "communication_queue",
   settings: "site_settings",
   redirects: "redirect_rules",
 } as const;
@@ -27,10 +30,13 @@ export async function GET() {
   if (!allowed) return json({ error: "Unauthorized" }, 401);
   const queries = await Promise.all([
     supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(100),
+    supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(100),
     supabase.from("tour_availability").select("*").order("service_date").limit(100),
     supabase.from("staff_members").select("*").order("name").limit(100),
+    supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(100),
     supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(100),
     supabase.from("communication_templates").select("*").order("name").limit(100),
+    supabase.from("communication_queue").select("*").order("scheduled_for", { ascending: false }).limit(100),
     supabase.from("site_settings").select("*").order("category").limit(100),
     supabase.from("redirect_rules").select("*").order("source_path").limit(100),
     supabase.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(50),
@@ -40,8 +46,8 @@ export async function GET() {
   if (migrationError) return json({ configured: false, migration: "202608010001_admin_control_center.sql" });
   const otherError = queries.find((result) => result.error)?.error;
   if (otherError) return json({ error: otherError.message }, 500);
-  const [content, availability, staff, notes, templates, settings, redirects, audit, health] = queries.map((result) => result.data || []);
-  return json({ configured: true, content, availability, staff, notes, templates, settings, redirects, audit, health });
+  const [content, media, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health] = queries.map((result) => result.data || []);
+  return json({ configured: true, content, media, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health });
 }
 
 export async function POST(request: NextRequest) {
@@ -54,18 +60,27 @@ export async function POST(request: NextRequest) {
   if (resource === "content") {
     record = { content_type: text(body.content_type, 20), slug: text(body.slug, 160).toLowerCase(), locale: text(body.locale, 8) || "en", status: text(body.status, 20) || "draft", title: text(body.title, 200), excerpt: text(body.excerpt, 500) || null, seo_title: text(body.seo_title, 200) || null, seo_description: text(body.seo_description, 500) || null, canonical_path: text(body.canonical_path, 250) || null, featured_image: text(body.featured_image, 500) || null, body: typeof body.body === "object" && body.body ? body.body : { content: text(body.body, 20_000) }, publish_at: body.publish_at || null, created_by: user!.id, updated_by: user!.id };
     if (!record.title || !record.slug || !["tour", "blog", "page", "promotion"].includes(String(record.content_type))) return json({ error: "Enter a valid content type, title, and slug." }, 400);
+  } else if (resource === "media") {
+    record = { storage_path: text(body.storage_path || body.public_url, 500), public_url: text(body.public_url, 500) || null, file_name: text(body.file_name, 200), mime_type: text(body.mime_type, 100) || null, alt_text: text(body.alt_text, 300) || null, credit: text(body.credit, 200) || null, created_by: user!.id };
+    if (!record.storage_path || !record.file_name) return json({ error: "Enter an image URL/path and file name." }, 400);
   } else if (resource === "availability") {
     record = { tour_slug: text(body.tour_slug, 160), service_date: text(body.service_date, 10), start_time: text(body.start_time, 8) || null, capacity: body.capacity === "" || body.capacity == null ? null : Number(body.capacity), blocked: Boolean(body.blocked), price_override: body.price_override === "" || body.price_override == null ? null : Number(body.price_override), currency: text(body.currency, 3).toUpperCase() || "USD", notes: text(body.notes, 500) || null };
     if (!record.tour_slug || !/^\d{4}-\d{2}-\d{2}$/.test(String(record.service_date))) return json({ error: "Choose a tour and valid service date." }, 400);
   } else if (resource === "staff") {
     record = { name: text(body.name, 120), staff_type: text(body.staff_type, 20), phone: text(body.phone, 40) || null, languages: text(body.languages, 200).split(",").map((item) => item.trim()).filter(Boolean), active: body.active !== false, notes: text(body.notes, 500) || null };
     if (!record.name || !["guide", "driver", "crew", "operations"].includes(String(record.staff_type))) return json({ error: "Enter a staff name and type." }, 400);
+  } else if (resource === "assignments") {
+    record = { booking_id: text(body.booking_id, 80), supplier_id: text(body.supplier_id, 80) || null, staff_member_id: text(body.staff_member_id, 80) || null, assignment_type: text(body.assignment_type, 20), pickup_time: body.pickup_time || null, internal_cost: body.internal_cost === "" || body.internal_cost == null ? null : Number(body.internal_cost), currency: text(body.currency, 3).toUpperCase() || "USD", status: text(body.status, 20) || "assigned", notes: text(body.notes, 500) || null };
+    if (!record.booking_id || !["supplier", "guide", "driver", "crew"].includes(String(record.assignment_type))) return json({ error: "Enter a booking ID and assignment type." }, 400);
   } else if (resource === "notes") {
     record = { customer_key: text(body.customer_key, 254).toLowerCase(), customer_name: text(body.customer_name, 120) || null, note: text(body.note, 2000), tags: text(body.tags, 300).split(",").map((item) => item.trim()).filter(Boolean), created_by: user!.id };
     if (!record.customer_key || !record.note) return json({ error: "Enter a customer phone/email and note." }, 400);
   } else if (resource === "templates") {
     record = { name: text(body.name, 120), channel: text(body.channel, 20), event_key: text(body.event_key, 80), locale: text(body.locale, 8) || "en", subject: text(body.subject, 200) || null, body: text(body.body, 10_000), active: body.active !== false };
     if (!record.name || !record.event_key || !record.body || !["email", "whatsapp"].includes(String(record.channel))) return json({ error: "Complete the template name, event, channel, and message." }, 400);
+  } else if (resource === "queue") {
+    record = { booking_id: text(body.booking_id, 80) || null, template_id: text(body.template_id, 80) || null, channel: text(body.channel, 20), recipient: text(body.recipient, 254), scheduled_for: body.scheduled_for || new Date().toISOString(), status: "pending" };
+    if (!record.recipient || !["email", "whatsapp"].includes(String(record.channel))) return json({ error: "Enter a recipient and channel." }, 400);
   } else if (resource === "settings") {
     const key = text(body.key, 120).toLowerCase();
     const rawValue: unknown = body.value;

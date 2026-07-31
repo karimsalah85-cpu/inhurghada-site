@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { tours } from "@/data/tours";
+import { getLiveTours } from "@/lib/live-content";
 import TourPageShell from "@/components/tours/TourPageShell";
 import { siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
@@ -15,7 +16,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tour = tours.find((item) => item.slug === slug);
+  const tour = (await getLiveTours()).find((item) => item.slug === slug);
   if (!tour) return {};
   const title = tour.seoTitle || `${tour.title} from Hurghada`;
   const description = tour.metaDescription || tour.description;
@@ -45,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TourPage({ params }: PageProps) {
   const { slug } = await params;
-  const tour = tours.find((item) => item.slug === slug);
+  const tour = (await getLiveTours()).find((item) => item.slug === slug);
 
   if (!tour) {
     notFound();

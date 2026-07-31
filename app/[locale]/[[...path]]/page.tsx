@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Image from "@/components/media/WatermarkedImage";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { tours } from "@/data/tours";
+import { tours as fallbackTours } from "@/data/tours";
+import { getLiveTours } from "@/lib/live-content";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
 import { absoluteUrl, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
@@ -53,7 +54,7 @@ function pageKind(path: string[]) {
 }
 
 export async function generateStaticParams() {
-  const paths = [[], ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...tours.map((tour) => ["tours", tour.slug])];
+  const paths = [[], ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...fallbackTours.map((tour) => ["tours", tour.slug])];
   return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
 }
 
@@ -63,6 +64,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const locale = rawLocale;
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
+  const tours = await getLiveTours();
   const tour = kind === "tour" ? tours.find((item) => item.slug === path[1]) : undefined;
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
@@ -89,6 +91,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
 }
 
 export default async function LocalizedPage({ params }: LocalizedPageProps) {
+  const tours = await getLiveTours();
   const { locale: rawLocale, path = [] } = await params;
   if (!isLocale(rawLocale)) notFound();
   const locale = rawLocale;

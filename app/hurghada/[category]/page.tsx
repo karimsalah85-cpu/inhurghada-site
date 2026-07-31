@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CategoryTourExplorer from "@/components/categories/CategoryTourExplorer";
-import { tours } from "@/data/tours";
+import { getLiveTours } from "@/lib/live-content";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
 import { absoluteUrl, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
@@ -34,6 +34,7 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
   const ru = locale === "ru";
   const ar = locale === "ar";
   const zh = locale === "zh";
+  const tours = await getLiveTours();
   const categoryTours = tours.filter(category.matches).map((tour) => de ? localizeTourGerman(tour) : ru ? localizeTourRussian(tour) : ar ? localizeTourArabic(tour) : zh ? localizeTourChinese(tour) : tour);
   const displayTitle = categoryLabels[locale][category.slug];
   const pageUrl = absoluteUrl(`/hurghada/${category.slug}`);

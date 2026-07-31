@@ -2,7 +2,35 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 
-const tables = { content: "content_items", availability: "tour_availability", staff: "staff_members", notes: "customer_notes", templates: "communication_templates", settings: "site_settings", redirects: "redirect_rules" } as const;
+const tables = { content: "content_items", media: "media_assets", availability: "tour_availability", staff: "staff_members", assignments: "booking_assignments", notes: "customer_notes", templates: "communication_templates", queue: "communication_queue", settings: "site_settings", redirects: "redirect_rules" } as const;
+
+export async function PATCH(request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { resource, id } = await context.params;
+  if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
+  const table = tables[resource as keyof typeof tables];
+  const key = resource === "settings" ? "key" : "id";
+  const { data: before, error: readError } = await supabase.from(table).select("*").eq(key, id).single();
+  if (readError) return NextResponse.json({ error: "Record not found." }, { status: 404 });
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") return NextResponse.json({ error: "Invalid update." }, { status: 400 });
+  const allowed: Record<string, string[]> = {
+    content: ["content_type", "slug", "locale", "status", "title", "excerpt", "body", "seo_title", "seo_description", "canonical_path", "featured_image", "publish_at"],
+    media: ["storage_path", "public_url", "file_name", "mime_type", "alt_text", "credit"], availability: ["tour_slug", "service_date", "start_time", "capacity", "blocked", "price_override", "currency", "notes"], staff: ["name", "staff_type", "phone", "languages", "active", "notes"], assignments: ["booking_id", "supplier_id", "staff_member_id", "assignment_type", "pickup_time", "internal_cost", "currency", "status", "notes"], notes: ["customer_key", "customer_name", "note", "tags"], templates: ["name", "channel", "event_key", "locale", "subject", "body", "active"], queue: ["booking_id", "template_id", "channel", "recipient", "scheduled_for", "status"], settings: ["value", "category", "public", "description"], redirects: ["source_path", "destination_path", "permanent", "active"],
+  };
+  const update = Object.fromEntries(allowed[resource].filter((field) => Object.hasOwn(body, field)).map((field) => [field, body[field]]));
+  if (resource === "content" && typeof update.body === "string") { try { update.body = JSON.parse(update.body); } catch { update.body = { content: update.body }; } }
+  if (resource === "staff" && typeof update.languages === "string") update.languages = update.languages.split(",").map((item: string) => item.trim()).filter(Boolean);
+  if (resource === "notes" && typeof update.tags === "string") update.tags = update.tags.split(",").map((item: string) => item.trim()).filter(Boolean);
+  if (["content", "availability", "templates", "redirects"].includes(resource)) update.updated_at = new Date().toISOString();
+  if (resource === "content") update.updated_by = user!.id;
+  const { data, error } = await supabase.from(table).update(update).eq(key, id).select().single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: resource, resource_identifier: id, summary_text: `Updated ${resource} record`, before_value: before, after_value: data });
+  return NextResponse.json({ record: data }, { headers: { "Cache-Control": "private, no-store" } });
+}
 
 export async function DELETE(_request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
   const supabase = await createClient();
