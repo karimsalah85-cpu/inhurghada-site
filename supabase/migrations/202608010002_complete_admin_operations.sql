@@ -78,6 +78,19 @@ alter table public.booking_capacity_reservations enable row level security;
 alter table public.seo_checks enable row level security;
 alter table public.backup_checks enable row level security;
 
+-- Policies below depend on this helper, so it must be created before them.
+create or replace function public.admin_has_permission(permission_name text)
+returns boolean language sql stable security definer set search_path='' as $$
+  select exists(select 1 from public.admin_profiles p where p.id=auth.uid() and p.active and (
+    p.role='owner' or p.role='manager' or
+    (p.role='operator' and permission_name in ('bookings','operations','communications')) or
+    (p.role='content_editor' and permission_name='content') or
+    (p.role='finance' and permission_name in ('finance','suppliers','reports'))
+  )) or (lower(coalesce(auth.jwt()->>'email',''))='info@dailyredsea.com');
+$$;
+revoke all on function public.admin_has_permission(text) from public,anon;
+grant execute on function public.admin_has_permission(text) to authenticated;
+
 do $$ declare table_name text; begin
   foreach table_name in array array['supplier_prices','supplier_payments','customer_profiles','communication_messages','booking_capacity_reservations','seo_checks','backup_checks'] loop
     begin
@@ -88,21 +101,29 @@ do $$ declare table_name text; begin
 end $$;
 
 drop policy if exists "Authorized admin manages admin_profiles" on public.admin_profiles;
+drop policy if exists "Owner manages admin profiles" on public.admin_profiles;
+drop policy if exists "Staff reads own profile" on public.admin_profiles;
 create policy "Owner manages admin profiles" on public.admin_profiles for all to authenticated using (public.admin_has_permission('staff')) with check (public.admin_has_permission('staff'));
 create policy "Staff reads own profile" on public.admin_profiles for select to authenticated using (id=auth.uid());
 
 drop policy if exists "Authorized admin manages site_settings" on public.site_settings;
+drop policy if exists "Manager manages site settings" on public.site_settings;
 create policy "Manager manages site settings" on public.site_settings for all to authenticated using (public.admin_has_permission('settings')) with check (public.admin_has_permission('settings'));
 
 drop policy if exists "Authorized admin manages admin_audit_log" on public.admin_audit_log;
+drop policy if exists "Admins read audit log" on public.admin_audit_log;
 create policy "Admins read audit log" on public.admin_audit_log for select to authenticated using (public.is_daily_red_sea_admin());
 
 drop policy if exists "Authorized admin manages system_health_checks" on public.system_health_checks;
+drop policy if exists "Managers read system health" on public.system_health_checks;
 create policy "Managers read system health" on public.system_health_checks for select to authenticated using (public.admin_has_permission('settings'));
 
 drop policy if exists "Authorized admin manages seo_checks" on public.seo_checks;
+drop policy if exists "Managers read SEO checks" on public.seo_checks;
 create policy "Managers read SEO checks" on public.seo_checks for select to authenticated using (public.admin_has_permission('settings'));
 drop policy if exists "Authorized admin manages backup_checks" on public.backup_checks;
+drop policy if exists "Managers read backup checks" on public.backup_checks;
+drop policy if exists "Managers record backup checks" on public.backup_checks;
 create policy "Managers read backup checks" on public.backup_checks for select to authenticated using (public.admin_has_permission('settings'));
 create policy "Managers record backup checks" on public.backup_checks for insert to authenticated with check (public.admin_has_permission('settings'));
 
@@ -224,42 +245,37 @@ insert into public.site_settings(key,value,category,public,description) values
 ('currency_rates','{"USD":1,"EUR":0.876691,"GBP":0.747063,"EGP":51.008475}'::jsonb,'currency',true,'Manual currency-rate overrides')
 on conflict(key) do nothing;
 
-create or replace function public.admin_has_permission(permission_name text)
-returns boolean language sql stable security definer set search_path='' as $$
-  select exists(select 1 from public.admin_profiles p where p.id=auth.uid() and p.active and (
-    p.role='owner' or p.role='manager' or
-    (p.role='operator' and permission_name in ('bookings','operations','communications')) or
-    (p.role='content_editor' and permission_name='content') or
-    (p.role='finance' and permission_name in ('finance','suppliers','reports'))
-  )) or (lower(coalesce(auth.jwt()->>'email',''))='info@dailyredsea.com');
-$$;
-revoke all on function public.admin_has_permission(text) from public,anon;
-grant execute on function public.admin_has_permission(text) to authenticated;
-
 do $$ declare table_name text; begin
   foreach table_name in array array['bookings'] loop
     execute format('drop policy if exists "Authorized admin manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role reports %s" on public.%I',table_name,table_name);
     execute format('create policy "Role manages %s" on public.%I for all to authenticated using (public.admin_has_permission(''bookings'')) with check (public.admin_has_permission(''bookings''))',table_name,table_name);
     execute format('create policy "Role reports %s" on public.%I for select to authenticated using (public.admin_has_permission(''reports''))',table_name,table_name);
   end loop;
   foreach table_name in array array['expenses','sales_people'] loop
     execute format('drop policy if exists "Authorized admin manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role manages %s" on public.%I',table_name,table_name);
     execute format('create policy "Role manages %s" on public.%I for all to authenticated using (public.admin_has_permission(''finance'')) with check (public.admin_has_permission(''finance''))',table_name,table_name);
   end loop;
   foreach table_name in array array['suppliers','supplier_prices','supplier_payments'] loop
     execute format('drop policy if exists "Authorized admin manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role manages %s" on public.%I',table_name,table_name);
     execute format('create policy "Role manages %s" on public.%I for all to authenticated using (public.admin_has_permission(''suppliers'')) with check (public.admin_has_permission(''suppliers''))',table_name,table_name);
   end loop;
   foreach table_name in array array['content_items','media_assets','redirect_rules'] loop
     execute format('drop policy if exists "Authorized admin manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role manages %s" on public.%I',table_name,table_name);
     execute format('create policy "Role manages %s" on public.%I for all to authenticated using (public.admin_has_permission(''content'')) with check (public.admin_has_permission(''content''))',table_name,table_name);
   end loop;
   foreach table_name in array array['tour_availability','staff_members','booking_assignments','customer_notes','customer_profiles','booking_capacity_reservations'] loop
     execute format('drop policy if exists "Authorized admin manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role manages %s" on public.%I',table_name,table_name);
     execute format('create policy "Role manages %s" on public.%I for all to authenticated using (public.admin_has_permission(''operations'')) with check (public.admin_has_permission(''operations''))',table_name,table_name);
   end loop;
   foreach table_name in array array['communication_templates','communication_queue','communication_messages'] loop
     execute format('drop policy if exists "Authorized admin manages %s" on public.%I',table_name,table_name);
+    execute format('drop policy if exists "Role manages %s" on public.%I',table_name,table_name);
     execute format('create policy "Role manages %s" on public.%I for all to authenticated using (public.admin_has_permission(''communications'')) with check (public.admin_has_permission(''communications''))',table_name,table_name);
   end loop;
 end $$;
