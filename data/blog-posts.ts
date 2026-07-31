@@ -147,4 +147,95 @@ export const blogPosts: BlogPost[] = [
       { question: "How many dives are included in a typical day trip?", answer: "Most full-day Hurghada diving trips include two guided dives at different reef sites, plus lunch and soft drinks onboard." },
     ],
   },
+  {
+    slug: "night-snorkeling-trips-for-adventurous-travelers",
+    title: "Night Snorkeling Trips for Adventurous Travelers in Hurghada",
+    metaDescription:
+      "Curious about night snorkeling in Hurghada? Here's what's actually different after dark, what to expect, and how to know if it's right for you.",
+    publishedAt: "2026-08-01",
+    heroImage: "/images/hurghada-snorkeling-reef-panorama.jpeg",
+    relatedTourSlugs: ["full-day-snorkeling", "full-day-diving"],
+    intro:
+      "Daytime snorkeling in Hurghada shows you bright coral and darting reef fish. After dark, the same reef turns into a completely different world - nocturnal creatures come out, colors shift under torchlight, and the whole experience feels more intimate. Here's what night snorkeling actually involves before you book one.",
+    sections: [
+      {
+        heading: "What actually changes after sunset",
+        body: [
+          "Many reef fish that hide in daylight become active at night, while others that swim openly during the day tuck into crevices to sleep. Torchlight picks out colors and textures on the reef that get washed out under direct sun, giving corals a different, richer look.",
+          "The water itself often feels calmer in the evening, with less boat traffic and a quieter, more focused atmosphere than a packed daytime snorkeling stop.",
+        ],
+      },
+      {
+        heading: "Who this is genuinely good for",
+        body: [
+          "Confident swimmers who already feel comfortable snorkeling in daylight get the most out of a night trip - reduced visibility means less margin for anxiety in the water. First-time snorkelers are usually better served starting with a standard daytime trip first.",
+          "Photography enthusiasts with a waterproof torch or dive light tend to enjoy night snorkeling the most, since the contrast between torch-lit color and the dark water makes for striking images.",
+        ],
+      },
+      {
+        heading: "What to expect logistically",
+        body: [
+          "Night snorkeling trips typically run shorter than full-day excursions, with a single guided stop rather than the two-stop pattern of a daytime reef trip. Groups tend to be smaller, and a guide stays close to the group throughout given reduced visibility.",
+          "A waterproof torch is essential - if one isn't included in your package, confirm whether you need to bring your own or if rental is available.",
+        ],
+      },
+      {
+        heading: "If you're not sure it's for you",
+        body: [
+          "If you've never snorkeled at all, or you get uneasy in open water without full visibility, a full-day daytime snorkeling trip is the safer and more enjoyable starting point. Night snorkeling is best treated as a second experience once you already know you're comfortable in the water.",
+        ],
+      },
+    ],
+    faqs: [
+      { question: "Is night snorkeling safe for beginners?", answer: "It's better suited to snorkelers who are already comfortable in open water during the day. First-timers should start with a standard daytime trip." },
+      { question: "Do I need my own torch for night snorkeling?", answer: "A waterproof torch is essential for the experience - confirm with your operator whether one is provided or needs to be brought or rented separately." },
+      { question: "How long does a night snorkeling trip usually last?", answer: "Night trips are typically shorter than full-day excursions, often built around a single guided stop rather than a full day on the water." },
+    ],
+  },
+  {
+    slug: "off-season-excursion-deals-in-hurghada-for-summer-travelers",
+    title: "Off-Season Excursion Deals in Hurghada for Summer Travelers",
+    metaDescription:
+      "Traveling to Hurghada in the summer heat? Here's how off-season timing affects tour prices, crowd levels, and which excursions handle the heat best.",
+    publishedAt: "2026-08-01",
+    heroImage: "/images/hurghada-desert-camel-closeup.jpeg",
+    relatedTourSlugs: ["full-day-snorkeling", "quad-safari-sunset", "orange-bay"],
+    intro:
+      "Summer in Hurghada means fewer crowds, quieter boats, and generally better availability - but it also means serious heat, especially inland. If you're traveling in the hotter months, here's how to choose excursions that work with the season instead of against it.",
+    sections: [
+      {
+        heading: "Why summer is genuinely a good time to book",
+        body: [
+          "Tour boats and desert safaris see lighter demand in peak summer heat compared to the busy winter high season, which generally means easier availability and more flexible pickup scheduling with local operators.",
+          "Water temperatures stay warm and visibility on Red Sea reefs remains excellent through summer, so snorkeling and diving quality doesn't drop off - it's the land-based activities that need more planning.",
+        ],
+      },
+      {
+        heading: "Water activities are your best summer bet",
+        body: [
+          "Boat trips like Orange Bay or a full-day snorkeling excursion are ideal for summer travel - you're on open water with a breeze, shade onboard, and constant access to the sea to cool off between stops.",
+          "Diving trips have the added benefit of the water itself providing natural cooling throughout the excursion, making them one of the most comfortable ways to spend a hot day.",
+        ],
+      },
+      {
+        heading: "How to handle a desert safari in summer heat",
+        body: [
+          "If a desert safari is on your list during summer, choose the sunset departure over the morning option - afternoon heat in the open desert can be intense, while a sunset ride starts as temperatures begin dropping.",
+          "Bring more water than you think you need, wear light long sleeves rather than exposing skin to direct sun, and reapply sunscreen before the ride starts, not just once at the hotel.",
+        ],
+      },
+      {
+        heading: "Booking smart in the off-season",
+        body: [
+          "With lower demand, operators often have more flexibility on pickup timing - ask if an earlier morning slot is available for water trips to avoid the hottest midday hours entirely.",
+          "Confirm with your operator by WhatsApp the night before regardless of season - summer schedules can shift with weather and sea conditions more than winter ones.",
+        ],
+      },
+    ],
+    faqs: [
+      { question: "Is Hurghada too hot for tours in summer?", answer: "Water-based tours like boat trips, snorkeling and diving stay comfortable since you're near or in the sea. Desert safaris need more care - a sunset departure is the better choice in summer." },
+      { question: "Are prices lower in Hurghada during summer?", answer: "Summer generally sees lighter demand than the winter high season, which often translates into easier availability and more flexible scheduling, though pricing varies by operator." },
+      { question: "Does Red Sea visibility drop in summer?", answer: "No. Water temperatures and visibility remain strong through the summer months, so snorkeling and diving quality holds up well year-round." },
+    ],
+  },
 ];
