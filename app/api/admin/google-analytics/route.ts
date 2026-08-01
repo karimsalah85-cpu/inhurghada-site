@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { getGoogleAnalyticsReport, googleAnalyticsConfiguration } from "@/lib/google-analytics";
 import { createClient } from "@/utils/supabase/server";
 
@@ -9,7 +9,7 @@ const date = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function GET(request:NextRequest){
   const supabase=await createClient();const{data:{user}}=await supabase.auth.getUser();
-  if(!hasAdminPermission(user,"reports"))return NextResponse.json({error:"Unauthorized"},{status:401});
+  if(!isAuthorizedAdmin(user))return NextResponse.json({error:"Unauthorized"},{status:401});
   const configuration=googleAnalyticsConfiguration();if(!configuration.configured)return NextResponse.json({...configuration},{headers:{"Cache-Control":"private, no-store"}});
   const now=new Date();const defaultTo=now.toISOString().slice(0,10);now.setUTCDate(now.getUTCDate()-29);const defaultFrom=now.toISOString().slice(0,10);
   const from=request.nextUrl.searchParams.get("from")||defaultFrom;const to=request.nextUrl.searchParams.get("to")||defaultTo;
