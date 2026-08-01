@@ -101,7 +101,7 @@ export async function getGoogleAdsReport(from: string, to: string): Promise<Goog
   if (!configuration.configured) throw new Error(`Google Ads is not configured: ${configuration.missing.join(", ")}`);
   const customerId = process.env.GOOGLE_ADS_CUSTOMER_ID!.replace(/\D/g, "");
   const loginCustomerId = process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID?.replace(/\D/g, "");
-  const apiVersion = process.env.GOOGLE_ADS_API_VERSION?.trim() || "v23";
+  const apiVersion = process.env.GOOGLE_ADS_API_VERSION?.trim() || "v25";
   const token = await accessToken();
   const query = `SELECT customer.currency_code, campaign.id, campaign.name, campaign.status, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value FROM campaign WHERE segments.date BETWEEN '${from}' AND '${to}' AND campaign.status != 'REMOVED' ORDER BY metrics.cost_micros DESC`;
   const response = await fetch(`https://googleads.googleapis.com/${apiVersion}/customers/${customerId}/googleAds:searchStream`, {

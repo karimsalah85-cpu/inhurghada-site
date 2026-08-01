@@ -28,7 +28,7 @@ GOOGLE_ADS_LOGIN_CUSTOMER_ID=1234567890
 GOOGLE_ADS_CLIENT_ID=oauth_client_id
 GOOGLE_ADS_CLIENT_SECRET=oauth_client_secret
 GOOGLE_ADS_REFRESH_TOKEN=oauth_refresh_token
-GOOGLE_ADS_API_VERSION=v23
+GOOGLE_ADS_API_VERSION=v25
 ```
 
 OAuth is recommended when Google Cloud organization policy disables persistent service-account keys. As an alternative, configure `GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY`, then grant that service-account email access to Google Ads. `GOOGLE_ADS_LOGIN_CUSTOMER_ID` is the manager account ID. The admin endpoint remains unavailable unless the developer token, customer ID, and one complete authentication method are configured.
