@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasAdminPermission } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
@@ -15,7 +15,7 @@ function json(body: unknown, status = 200) {
 async function authorizedClient() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  return isAuthorizedAdmin(user) ? supabase : null;
+  return hasAdminPermission(user, "bookings") ? supabase : null;
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -25,11 +25,22 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   const supabase = await authorizedClient();
   if (!supabase) return json({ error: "Unauthorized." }, 401);
 
-  const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown } | null;
-  const update: { status?: string; payment_status?: string } = {};
+  const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown; sales_person_id?: unknown } | null;
+  const update: { status?: string; payment_status?: string; sales_person_id?: string | null; sales_commission_percent?: number | null } = {};
   if (typeof body?.status === "string" && bookingStatuses.has(body.status)) update.status = body.status;
   if (typeof body?.payment_status === "string" && paymentStatuses.has(body.payment_status)) update.payment_status = body.payment_status;
-  if (!Object.keys(update).length) return json({ error: "Choose a valid booking or payment status." }, 400);
+  if (body && Object.hasOwn(body, "sales_person_id")) {
+    if (body.sales_person_id === null || body.sales_person_id === "") {
+      update.sales_person_id = null;
+      update.sales_commission_percent = null;
+    } else if (typeof body.sales_person_id === "string" && uuidPattern.test(body.sales_person_id)) {
+      const { data: salesPerson, error: salesError } = await supabase.from("sales_people").select("id,commission_percent").eq("id", body.sales_person_id).single();
+      if (salesError || !salesPerson) return json({ error: "Sales person not found." }, 404);
+      update.sales_person_id = salesPerson.id;
+      update.sales_commission_percent = salesPerson.commission_percent == null ? 0 : Number(salesPerson.commission_percent);
+    } else return json({ error: "Choose a valid sales person." }, 400);
+  }
+  if (!Object.keys(update).length) return json({ error: "Choose a valid booking update." }, 400);
 
   const { data: existing, error: readError } = await supabase
     .from("bookings")

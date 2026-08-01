@@ -57,6 +57,11 @@ alter table public.expenses
   add column sales_person_id uuid references public.sales_people(id) on delete set null,
   add column booking_id uuid references public.bookings(id) on delete set null;
 
+alter table public.bookings
+  add column sales_person_id uuid references public.sales_people(id) on delete set null,
+  add column sales_commission_percent numeric(5,2)
+    check (sales_commission_percent is null or (sales_commission_percent >= 0 and sales_commission_percent <= 100));
+
 alter table public.bookings enable row level security;
 alter table public.expenses enable row level security;
 alter table public.suppliers enable row level security;
