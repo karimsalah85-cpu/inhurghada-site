@@ -29,9 +29,12 @@ GOOGLE_ADS_CLIENT_ID=oauth_client_id
 GOOGLE_ADS_CLIENT_SECRET=oauth_client_secret
 GOOGLE_ADS_REFRESH_TOKEN=oauth_refresh_token
 GOOGLE_ADS_API_VERSION=v25
+GOOGLE_ANALYTICS_PROPERTY_ID=123456789
 ```
 
 OAuth is recommended when Google Cloud organization policy disables persistent service-account keys. As an alternative, configure `GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY`, then grant that service-account email access to Google Ads. `GOOGLE_ADS_LOGIN_CUSTOMER_ID` is the manager account ID. The admin endpoint remains unavailable unless the developer token, customer ID, and one complete authentication method are configured.
+
+The visitor dashboard uses the same OAuth client and refresh token. Enable the Google Analytics Data API, add `https://www.googleapis.com/auth/analytics.readonly` to the OAuth consent screen, regenerate the refresh token with both the Analytics and Ads scopes, and set the numeric GA4 property ID as `GOOGLE_ANALYTICS_PROPERTY_ID`.
 
 Do not expose `META_CONVERSIONS_API_ACCESS_TOKEN` in any `NEXT_PUBLIC_` variable. Set `META_GRAPH_API_VERSION` to the active version shown in Meta Events Manager when the token is created.
 
