@@ -3,6 +3,14 @@ import "server-only";
 type ApiValue = { value?: string };
 type ApiRow = { dimensionValues?: ApiValue[]; metricValues?: ApiValue[] };
 type ApiReport = { rows?: ApiRow[]; totals?: Array<{ metricValues?: ApiValue[] }>; metadata?: { timeZone?: string } };
+type GoogleApiError = {
+  error?: {
+    code?: number;
+    message?: string;
+    status?: string;
+    details?: Array<{ reason?: string; metadata?: { service?: string } }>;
+  };
+};
 
 const required = ["GOOGLE_ANALYTICS_PROPERTY_ID", "GOOGLE_ADS_CLIENT_ID", "GOOGLE_ADS_CLIENT_SECRET", "GOOGLE_ADS_REFRESH_TOKEN"] as const;
 
@@ -18,8 +26,11 @@ async function accessToken() {
     method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: process.env.GOOGLE_ADS_CLIENT_ID!, client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET!, refresh_token: process.env.GOOGLE_ADS_REFRESH_TOKEN!, grant_type: "refresh_token" }), cache: "no-store",
   });
-  const data = await response.json() as { access_token?: string; expires_in?: number; error_description?: string };
-  if (!response.ok || !data.access_token) throw new Error(data.error_description || "Google Analytics authentication failed.");
+  const data = await response.json() as { access_token?: string; expires_in?: number; error?: string; error_description?: string };
+  if (!response.ok || !data.access_token) {
+    const reason = data.error_description || data.error || `HTTP ${response.status}`;
+    throw new Error(`Google OAuth failed (${reason}). Create a new refresh token with both the Google Ads and Analytics read-only scopes, replace GOOGLE_ADS_REFRESH_TOKEN in Vercel, and redeploy.`);
+  }
   tokenCache = { token: data.access_token, expiresAt: Date.now() + (data.expires_in || 3600) * 1000 };
   return tokenCache.token;
 }
@@ -29,8 +40,21 @@ async function report(method: "runReport" | "runRealtimeReport", body: Record<st
   const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${property}:${method}`, {
     method: "POST", headers: { Authorization: `Bearer ${await accessToken()}`, "Content-Type": "application/json" }, body: JSON.stringify(body), cache: "no-store",
   });
-  const data = await response.json() as ApiReport & { error?: { message?: string } };
-  if (!response.ok) throw new Error(data.error?.message || "Google Analytics reporting request failed.");
+  const data = await response.json() as ApiReport & GoogleApiError;
+  if (!response.ok) {
+    const googleMessage = data.error?.message || `HTTP ${response.status}`;
+    const reason = data.error?.details?.find(detail => detail.reason)?.reason || data.error?.status;
+    if (response.status === 401) {
+      throw new Error(`Google Analytics rejected the OAuth token (${googleMessage}). Generate a new refresh token with analytics.readonly access, update GOOGLE_ADS_REFRESH_TOKEN in Vercel, and redeploy.`);
+    }
+    if (response.status === 403) {
+      throw new Error(`Google Analytics access denied${reason ? ` (${reason})` : ""}. Make sure the Google Analytics Data API is enabled and the Google account that created the refresh token has Viewer access to GA4 property ${property}. Google says: ${googleMessage}`);
+    }
+    if (response.status === 404) {
+      throw new Error(`GA4 property ${property} was not found. GOOGLE_ANALYTICS_PROPERTY_ID must contain the numeric Property ID from GA4 Admin, not a G- measurement ID. Google says: ${googleMessage}`);
+    }
+    throw new Error(`Google Analytics request failed (${response.status}${reason ? `, ${reason}` : ""}): ${googleMessage}`);
+  }
   return data;
 }
 
