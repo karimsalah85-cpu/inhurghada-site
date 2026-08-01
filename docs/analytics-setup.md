@@ -25,12 +25,13 @@ The protected admin dashboard can retrieve live campaign reporting separately fr
 GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
 GOOGLE_ADS_CUSTOMER_ID=1234567890
 GOOGLE_ADS_LOGIN_CUSTOMER_ID=1234567890
-GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL=service-account@project.iam.gserviceaccount.com
-GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+GOOGLE_ADS_CLIENT_ID=oauth_client_id
+GOOGLE_ADS_CLIENT_SECRET=oauth_client_secret
+GOOGLE_ADS_REFRESH_TOKEN=oauth_refresh_token
 GOOGLE_ADS_API_VERSION=v23
 ```
 
-Grant the service-account email access to the Google Ads account. `GOOGLE_ADS_LOGIN_CUSTOMER_ID` is the manager account ID and can be omitted when the service account accesses the client account directly. The admin endpoint remains unavailable unless all required variables are configured.
+OAuth is recommended when Google Cloud organization policy disables persistent service-account keys. As an alternative, configure `GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL` and `GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY`, then grant that service-account email access to Google Ads. `GOOGLE_ADS_LOGIN_CUSTOMER_ID` is the manager account ID. The admin endpoint remains unavailable unless the developer token, customer ID, and one complete authentication method are configured.
 
 Do not expose `META_CONVERSIONS_API_ACCESS_TOKEN` in any `NEXT_PUBLIC_` variable. Set `META_GRAPH_API_VERSION` to the active version shown in Meta Events Manager when the token is created.
 

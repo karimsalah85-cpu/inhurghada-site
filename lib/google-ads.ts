@@ -21,15 +21,19 @@ export type GoogleAdsReport = {
   campaigns: GoogleAdsCampaign[];
 };
 
-const requiredKeys = [
+const requiredBaseKeys = [
   "GOOGLE_ADS_DEVELOPER_TOKEN",
   "GOOGLE_ADS_CUSTOMER_ID",
-  "GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL",
-  "GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY",
 ] as const;
 
+const oauthKeys = ["GOOGLE_ADS_CLIENT_ID", "GOOGLE_ADS_CLIENT_SECRET", "GOOGLE_ADS_REFRESH_TOKEN"] as const;
+const serviceAccountKeys = ["GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL", "GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY"] as const;
+
 export function googleAdsConfiguration() {
-  const missing = requiredKeys.filter((key) => !process.env[key]?.trim());
+  const missing = requiredBaseKeys.filter((key) => !process.env[key]?.trim()) as string[];
+  const oauthConfigured = oauthKeys.every((key) => process.env[key]?.trim());
+  const serviceAccountConfigured = serviceAccountKeys.every((key) => process.env[key]?.trim());
+  if (!oauthConfigured && !serviceAccountConfigured) missing.push(...oauthKeys);
   return { configured: missing.length === 0, missing };
 }
 
@@ -41,6 +45,23 @@ function base64Url(value: string | Buffer) {
 
 async function accessToken() {
   if (tokenCache && tokenCache.expiresAt > Date.now() + 60_000) return tokenCache.token;
+  if (oauthKeys.every((key) => process.env[key]?.trim())) {
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: process.env.GOOGLE_ADS_CLIENT_ID!,
+        client_secret: process.env.GOOGLE_ADS_CLIENT_SECRET!,
+        refresh_token: process.env.GOOGLE_ADS_REFRESH_TOKEN!,
+        grant_type: "refresh_token",
+      }),
+      cache: "no-store",
+    });
+    const data = await response.json() as { access_token?: string; expires_in?: number; error_description?: string };
+    if (!response.ok || !data.access_token) throw new Error(data.error_description || "Google OAuth authentication failed.");
+    tokenCache = { token: data.access_token, expiresAt: Date.now() + (data.expires_in || 3600) * 1000 };
+    return tokenCache.token;
+  }
   const email = process.env.GOOGLE_ADS_SERVICE_ACCOUNT_EMAIL!;
   const privateKey = process.env.GOOGLE_ADS_SERVICE_ACCOUNT_PRIVATE_KEY!.replace(/\\n/g, "\n");
   const now = Math.floor(Date.now() / 1000);
