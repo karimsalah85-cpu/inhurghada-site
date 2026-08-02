@@ -24,7 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const localizedEntries = locales.flatMap((locale) =>
     paths
-      .filter((path) => locale === "en" || path !== "/image-credits")
+      .filter((path) => (locale === "en" || path !== "/image-credits") && (locale === "en" || !path.startsWith("/destinations/")))
       .map((path) => {
         const tour = path.startsWith("/tours/") ? tours.find((item) => path === `/tours/${item.slug}`) : undefined;
         const languages = path === "/image-credits"

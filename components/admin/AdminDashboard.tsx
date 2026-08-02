@@ -1,11 +1,10 @@
 "use client";
 
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, CircleDollarSign, ClipboardList, Download, ExternalLink, FileText, ListChecks, LogOut, Mail, Search, Send, Trash2, UserRound, UsersRound, WalletCards } from "lucide-react";
 import SituationReports from "@/components/admin/SituationReports";
-import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
-import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
 import { countDistinctCustomers } from "@/lib/customer-count";
@@ -220,7 +219,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
 
   return <>
     <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold"><a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a><a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a><a href="#visitor-analytics" className="rounded-lg px-3 py-2 hover:bg-slate-100">Visitors</a><a href="#google-ads" className="rounded-lg px-3 py-2 hover:bg-slate-100">Google Ads</a><a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a><a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a><a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a></nav>
+      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold"><a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a><a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a><Link href="/admin/marketing" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800 hover:bg-blue-100">Marketing analytics</Link><a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a><a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a><a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a></nav>
       <button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button>
     </div>
 
@@ -268,8 +267,6 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
       </aside>
     </div>
 
-    <GoogleAnalyticsPanel />
-    <GoogleAdsPanel />
     <AdminControlCenter />
     <AdminOperationsCenter />
     <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">

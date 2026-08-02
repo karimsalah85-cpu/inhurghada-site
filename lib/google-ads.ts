@@ -110,7 +110,7 @@ type GoogleAdsErrorPayload = {
   };
 };
 
-function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: number, requestId: string | null) {
+export function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: number, requestId: string | null) {
   const error = payload.error;
   const specific = error?.details
     ?.flatMap((detail) => detail.errors || [])
@@ -121,7 +121,10 @@ function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: number, r
     .filter(Boolean);
   const reason = specific?.length ? specific.join("; ") : error?.message;
   const label = [error?.status, error?.code || status].filter(Boolean).join(" / ");
-  return `Google Ads API error${label ? ` (${label})` : ""}: ${reason || "The request failed without an error description."}${requestId ? ` Request ID: ${requestId}` : ""}`;
+  const fallback = status === 401
+    ? "Google rejected the OAuth authorization. Generate the refresh token with the adwords scope using the same client ID and secret stored in Vercel, and ensure that Google user has access to the Ads manager and customer accounts."
+    : "The request failed without an error description.";
+  return `Google Ads API error${label ? ` (${label})` : ""}: ${reason || fallback}${requestId ? ` Request ID: ${requestId}` : ""}`;
 }
 
 export async function getGoogleAdsReport(from: string, to: string): Promise<GoogleAdsReport> {

@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 
-import WhatsAppButton from "@/components/layout/WhatsAppButton";
-import Navbar from "@/components/layout/Navbar";
 import { SiteSettingsProvider } from "@/components/settings/SiteSettingsContext";
 import OrganizationSchema from "@/components/seo/OrganizationSchema";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import CartProvider from "@/components/cart/CartProvider";
-import SiteAnnouncement from "@/components/layout/SiteAnnouncement";
+import PublicSiteChrome from "@/components/layout/PublicSiteChrome";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -89,11 +87,9 @@ export default async function RootLayout({
           <CartProvider>
             <OrganizationSchema />
             <AnalyticsProvider />
-            <SiteAnnouncement />
+            <PublicSiteChrome />
             <a href="#main-content" className="skip-link">Skip to main content</a>
-            <Navbar />
             <div id="main-content" tabIndex={-1}>{children}</div>
-            <WhatsAppButton />
           </CartProvider>
         </SiteSettingsProvider>
       </body>
