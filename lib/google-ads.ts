@@ -96,6 +96,34 @@ type GoogleAdsRow = {
   metrics?: { impressions?: string; clicks?: string; costMicros?: string; conversions?: number; conversionsValue?: number };
 };
 
+type GoogleAdsErrorPayload = {
+  error?: {
+    code?: number;
+    message?: string;
+    status?: string;
+    details?: Array<{
+      errors?: Array<{
+        message?: string;
+        errorCode?: Record<string, string>;
+      }>;
+    }>;
+  };
+};
+
+function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: number, requestId: string | null) {
+  const error = payload.error;
+  const specific = error?.details
+    ?.flatMap((detail) => detail.errors || [])
+    .map((detail) => {
+      const code = detail.errorCode ? Object.values(detail.errorCode).find(Boolean) : undefined;
+      return [code, detail.message].filter(Boolean).join(": ");
+    })
+    .filter(Boolean);
+  const reason = specific?.length ? specific.join("; ") : error?.message;
+  const label = [error?.status, error?.code || status].filter(Boolean).join(" / ");
+  return `Google Ads API error${label ? ` (${label})` : ""}: ${reason || "The request failed without an error description."}${requestId ? ` Request ID: ${requestId}` : ""}`;
+}
+
 export async function getGoogleAdsReport(from: string, to: string): Promise<GoogleAdsReport> {
   const configuration = googleAdsConfiguration();
   if (!configuration.configured) throw new Error(`Google Ads is not configured: ${configuration.missing.join(", ")}`);
@@ -115,10 +143,15 @@ export async function getGoogleAdsReport(from: string, to: string): Promise<Goog
     body: JSON.stringify({ query }),
     cache: "no-store",
   });
-  const payload = await response.json() as Array<{ results?: GoogleAdsRow[] }> | { error?: { message?: string } };
+  const responseText = await response.text();
+  let payload: Array<{ results?: GoogleAdsRow[] }> | GoogleAdsErrorPayload;
+  try {
+    payload = JSON.parse(responseText) as Array<{ results?: GoogleAdsRow[] }> | GoogleAdsErrorPayload;
+  } catch {
+    throw new Error(`Google Ads API returned an unreadable response (HTTP ${response.status}).`);
+  }
   if (!response.ok || !Array.isArray(payload)) {
-    const message = !Array.isArray(payload) ? payload.error?.message : undefined;
-    throw new Error(message || "Google Ads reporting request failed.");
+    throw new Error(googleAdsErrorMessage(Array.isArray(payload) ? {} : payload, response.status, response.headers.get("request-id")));
   }
   const rows = payload.flatMap((batch) => batch.results || []);
   const campaigns = rows.map((row): GoogleAdsCampaign => ({
