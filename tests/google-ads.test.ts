@@ -4,8 +4,8 @@ import { googleAdsErrorMessage } from "@/lib/google-ads";
 describe("Google Ads diagnostics", () => {
   it("turns an empty 401 response into actionable OAuth guidance", () => {
     const message = googleAdsErrorMessage({}, 401, "request-123");
-    expect(message).toContain("Google rejected the OAuth authorization");
-    expect(message).toContain("adwords scope");
+    expect(message).toContain("Google rejected the OAuth access token");
+    expect(message).toContain("two-step verification");
     expect(message).toContain("Request ID: request-123");
   });
 

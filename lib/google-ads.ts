@@ -110,6 +110,8 @@ type GoogleAdsErrorPayload = {
   };
 };
 
+type GoogleAdsStreamBatch = { results?: GoogleAdsRow[] } & GoogleAdsErrorPayload;
+
 export function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: number, requestId: string | null) {
   const error = payload.error;
   const specific = error?.details
@@ -122,7 +124,7 @@ export function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: nu
   const reason = specific?.length ? specific.join("; ") : error?.message;
   const label = [error?.status, error?.code || status].filter(Boolean).join(" / ");
   const fallback = status === 401
-    ? "Google rejected the OAuth authorization. Generate the refresh token with the adwords scope using the same client ID and secret stored in Vercel, and ensure that Google user has access to the Ads manager and customer accounts."
+    ? "Google rejected the OAuth access token. Verify that the OAuth user can open the Ads manager account, has two-step verification enabled, and that the client ID, client secret, and refresh token in Vercel all belong to the same OAuth client."
     : "The request failed without an error description.";
   return `Google Ads API error${label ? ` (${label})` : ""}: ${reason || fallback}${requestId ? ` Request ID: ${requestId}` : ""}`;
 }
@@ -147,14 +149,17 @@ export async function getGoogleAdsReport(from: string, to: string): Promise<Goog
     cache: "no-store",
   });
   const responseText = await response.text();
-  let payload: Array<{ results?: GoogleAdsRow[] }> | GoogleAdsErrorPayload;
+  let payload: GoogleAdsStreamBatch[] | GoogleAdsErrorPayload;
   try {
-    payload = JSON.parse(responseText) as Array<{ results?: GoogleAdsRow[] }> | GoogleAdsErrorPayload;
+    payload = JSON.parse(responseText) as GoogleAdsStreamBatch[] | GoogleAdsErrorPayload;
   } catch {
     throw new Error(`Google Ads API returned an unreadable response (HTTP ${response.status}).`);
   }
   if (!response.ok || !Array.isArray(payload)) {
-    throw new Error(googleAdsErrorMessage(Array.isArray(payload) ? {} : payload, response.status, response.headers.get("request-id")));
+    const errorPayload = Array.isArray(payload)
+      ? payload.find((batch) => batch.error) || {}
+      : payload;
+    throw new Error(googleAdsErrorMessage(errorPayload, response.status, response.headers.get("request-id")));
   }
   const rows = payload.flatMap((batch) => batch.results || []);
   const campaigns = rows.map((row): GoogleAdsCampaign => ({
