@@ -18,4 +18,10 @@ describe("Google Ads diagnostics", () => {
     expect(message).toContain("USER_PERMISSION_DENIED: User lacks access.");
     expect(message).toContain("PERMISSION_DENIED / 403");
   });
+
+  it("explains that a test-account token cannot read production accounts", () => {
+    const message = googleAdsErrorMessage({ error: { code: 403, status: "PERMISSION_DENIED", details: [{ errors: [{ errorCode: { authorizationError: "DEVELOPER_TOKEN_NOT_APPROVED" }, message: "The developer token is only approved for use with test accounts." }] }] } }, 403, null);
+    expect(message).toContain("DEVELOPER_TOKEN_NOT_APPROVED");
+    expect(message).toContain("Apply for Basic Access");
+  });
 });

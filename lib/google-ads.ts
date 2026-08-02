@@ -121,7 +121,10 @@ export function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: nu
       return [code, detail.message].filter(Boolean).join(": ");
     })
     .filter(Boolean);
-  const reason = specific?.length ? specific.join("; ") : error?.message;
+  const rawReason = specific?.length ? specific.join("; ") : error?.message;
+  const reason = rawReason?.includes("DEVELOPER_TOKEN_NOT_APPROVED")
+    ? `${rawReason} This developer token currently has Test Account access. Apply for Basic Access in the Google Ads API Center before using it with a real advertising account.`
+    : rawReason;
   const label = [error?.status, error?.code || status].filter(Boolean).join(" / ");
   const fallback = status === 401
     ? "Google rejected the OAuth access token. Verify that the OAuth user can open the Ads manager account, has two-step verification enabled, and that the client ID, client secret, and refresh token in Vercel all belong to the same OAuth client."
