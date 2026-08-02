@@ -220,7 +220,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
 
   return <>
     <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold"><a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a><a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a><a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a><a href="#visitor-analytics" className="rounded-lg px-3 py-2 hover:bg-slate-100">Visitors</a><a href="#google-ads" className="rounded-lg px-3 py-2 hover:bg-slate-100">Google Ads</a><a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a><a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a></nav>
+      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold"><a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a><a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a><a href="#visitor-analytics" className="rounded-lg px-3 py-2 hover:bg-slate-100">Visitors</a><a href="#google-ads" className="rounded-lg px-3 py-2 hover:bg-slate-100">Google Ads</a><a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a><a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a><a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a></nav>
       <button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button>
     </div>
 
@@ -268,10 +268,10 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
       </aside>
     </div>
 
-    <AdminControlCenter />
-    <AdminOperationsCenter />
     <GoogleAnalyticsPanel />
     <GoogleAdsPanel />
+    <AdminControlCenter />
+    <AdminOperationsCenter />
     <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3"><UsersRound className="mt-1 text-cyan-700" size={24}/><div><h2 className="text-2xl font-bold">Suppliers & sales people</h2><p className="mt-1 text-sm text-slate-500">Create reusable contacts and attach them to expenses.</p></div></div>
       <div className="mt-6 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
