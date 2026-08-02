@@ -36,6 +36,15 @@ function eventId() {
   return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function ensureGoogleTag() {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag() {
+    // Google Tag's loader expects the native Arguments object, not a copied array.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments);
+  };
+}
+
 function toMetaEvent(event: AnalyticsEventName) {
   if (event === "tour_view") return "ViewContent";
   if (event === "booking_start") return "InitiateCheckout";
@@ -56,8 +65,7 @@ function adsLabel(event: AnalyticsEventName) {
 
 export function updateGoogleConsent(preferences: ConsentPreferences) {
   if (typeof window === "undefined") return;
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer?.push(args));
+  ensureGoogleTag();
   window.gtag("consent", "update", {
     analytics_storage: preferences.analytics ? "granted" : "denied",
     ad_storage: preferences.marketing ? "granted" : "denied",
@@ -72,8 +80,7 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
 
   const id = eventId();
   const cleanData = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer?.push(args));
+  ensureGoogleTag();
   window.gtag("event", event, { ...cleanData, event_id: id });
 
   if (!preferences.marketing) return;
