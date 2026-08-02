@@ -74,7 +74,6 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
   const cleanData = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer?.push(args));
-  window.dataLayer.push(["event", event, { ...cleanData, event_id: id }]);
   window.gtag("event", event, { ...cleanData, event_id: id });
 
   if (!preferences.marketing) return;
