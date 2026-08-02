@@ -377,4 +377,25 @@ export const blogPosts: BlogPost[] = [
       { question: "Is it better to stay overnight in Cairo instead of a day trip?", answer: "For shorter Hurghada stays, yes - an overnight Cairo add-on before or after your Red Sea trip avoids the exhausting single-day compression of a same-day round trip." },
     ],
   },
+  {
+    slug: "private-transfer-to-senzo-mall-hurghada",
+    title: "Private Transfer to Senzo Mall Hurghada: What to Know Before You Book",
+    metaDescription: "Planning a shopping day at Senzo Mall in Hurghada? Here's how private transfer pricing, timing and zone coverage actually work in 2026.",
+    publishedAt: "2026-08-09",
+    heroImage: "/images/hurghada-island-calm-sunset.jpeg",
+    relatedTourSlugs: ["senzo-transfer", "hurghada-airport-transfer"],
+    intro: "Senzo Mall is Hurghada's go-to spot for a change of pace from the beach - air-conditioned shopping, restaurants, and a cinema, all in one place. Getting there is simple with a private transfer, but pricing and timing work a little differently from a scheduled tour. Here's what to know before you book.",
+    sections: [
+      { heading: "Why a private transfer beats a taxi for this trip", body: ["Street taxis in Hurghada don't run meters the way you'd expect from home, so the fare to Senzo Mall gets negotiated on the spot - and again for the return leg once you're ready to leave, often at a worse rate late in the evening.", "A private transfer locks in a fixed price before you leave your hotel, so there's no haggling at the mall entrance or a surprise quote when you're tired and ready to head back."] },
+      { heading: "How pricing works by zone", body: ["A private transfer from central Hurghada hotels to Senzo Mall runs a fixed $10 one-way in 2026. Staying further out - Makadi Bay, Soma Bay, El Gouna or Sahl Hasheesh - adds a $7 zone supplement to that base fare given the longer distance.", "Both legs of the trip (there and back) are usually booked as separate one-way transfers, which actually works in your favor since it lets you set your own return time instead of matching a fixed shuttle schedule."] },
+      { heading: "Setting your return pickup", body: ["Unlike a boat trip or safari with one fixed departure and return time, a mall trip doesn't run on a schedule - you might want two hours or six. Book your outbound transfer first, then arrange your return pickup for whenever you're actually done, rather than trying to guess it in advance.", "Evenings after 7 PM get busy at Senzo Mall as both locals and tourists head over once the day's heat breaks, so setting a return pickup before 9 PM tends to be the smoothest option."] },
+      { heading: "What's included", body: ["The fixed fare covers a private, air-conditioned vehicle, driver, fuel and parking - hotel pickup and mall drop-off included. It doesn't cover shopping, meals at the mall, or your return leg, which is booked as a separate transfer."] },
+    ],
+    faqs: [
+      { question: "How much does a private transfer to Senzo Mall cost from Hurghada?", answer: "A private one-way transfer from central Hurghada hotels costs a fixed $10 in 2026. Staying in Makadi Bay, Soma Bay, El Gouna or Sahl Hasheesh adds a $7 zone supplement to that base fare." },
+      { question: "Does the transfer include the return trip?", answer: "No, private Senzo Mall transfers are typically booked as separate one-way legs, which lets you set your own return pickup time rather than following a fixed schedule." },
+      { question: "Is a private transfer better than a taxi for this trip?", answer: "Yes for price certainty - the fare is fixed before you leave your hotel, while a street taxi requires negotiating a fare on the spot, often at a worse rate for the return leg." },
+      { question: "Can I book this transfer from Makadi Bay or El Gouna?", answer: "Yes, private transfers cover Makadi Bay, Soma Bay, El Gouna and Sahl Hasheesh in addition to central Hurghada, with a $7 zone supplement over the base fare." },
+    ],
+  },
 ];
