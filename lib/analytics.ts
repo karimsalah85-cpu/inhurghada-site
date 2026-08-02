@@ -36,13 +36,14 @@ function eventId() {
   return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function ensureGoogleTag() {
+function ensureGoogleTag(): NonNullable<Window["gtag"]> {
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function gtag() {
     // Google Tag's loader expects the native Arguments object, not a copied array.
     // eslint-disable-next-line prefer-rest-params
     window.dataLayer?.push(arguments);
   };
+  return window.gtag;
 }
 
 function toMetaEvent(event: AnalyticsEventName) {
@@ -65,8 +66,8 @@ function adsLabel(event: AnalyticsEventName) {
 
 export function updateGoogleConsent(preferences: ConsentPreferences) {
   if (typeof window === "undefined") return;
-  ensureGoogleTag();
-  window.gtag("consent", "update", {
+  const gtag = ensureGoogleTag();
+  gtag("consent", "update", {
     analytics_storage: preferences.analytics ? "granted" : "denied",
     ad_storage: preferences.marketing ? "granted" : "denied",
     ad_user_data: preferences.marketing ? "granted" : "denied",
@@ -80,8 +81,8 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
 
   const id = eventId();
   const cleanData = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
-  ensureGoogleTag();
-  window.gtag("event", event, { ...cleanData, event_id: id });
+  const gtag = ensureGoogleTag();
+  gtag("event", event, { ...cleanData, event_id: id });
 
   if (!preferences.marketing) return;
 
@@ -99,7 +100,7 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
   const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
   const label = adsLabel(event);
   if (googleAdsId && label) {
-    window.gtag("event", "conversion", {
+    gtag("event", "conversion", {
       send_to: `${googleAdsId}/${label}`,
       value: typeof cleanData.value === "number" ? cleanData.value : 1,
       currency: typeof cleanData.currency === "string" ? cleanData.currency : "USD",
