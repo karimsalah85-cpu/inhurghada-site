@@ -63,6 +63,44 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     description: "توصيل خاص باتجاه واحد إلى سنزو مول بسعر 10 دولارات داخل الغردقة، مع إضافة 7 دولارات لمناطق المنتجعات.",
     highlights: ["سعر ثابت", "سيارة خاصة", "استلام من الفندق", "موعد مرن"],
   },
+  "padi-open-water-course": {
+    title: "دورة PADI للغوص في المياه المفتوحة لمدة 3 أيام", location: "الغردقة، مصر", duration: "3 أيام", category: "غوص",
+    description: "تعلّم أساسيات الغوص من خلال الدروس النظرية والتدريب العملي والغطسات التدريبية تحت إشراف مدرب PADI في البحر الأحمر. تُمنح الشهادة بعد استكمال جميع المتطلبات بنجاح.",
+    highlights: ["دورة PADI دولية لمدة ثلاثة أيام", "غطستان تدريبيتان يومياً", "دروس نظرية وتدريب عملي", "مدرب معتمد من PADI", "تدريب في البحر الأحمر"],
+    included: ["الدورة لمدة 3 أيام وغطستان يومياً", "مدرب PADI معتمد", "معدات الغوص القياسية", "حزام الأثقال واسطوانات 12 لتراً", "الغداء والمشروبات يومياً", "الاستلام والتوصيل ضمن منطقة الفندق المؤكدة"],
+    notIncluded: ["الضريبة البحرية: 5 يورو يومياً للشخص", "كتاب PADI النظري والشهادة والتسجيل: 100 يورو للشخص", "الإكراميات", "الصور", "الطيران والتأشيرة والإقامة", "الفحص الطبي إذا لزم"],
+    notes: ["إلغاء مجاني حتى 24 ساعة قبل بداية الدورة.", "تبدأ الدورة الساعة 08:00 في اليوم الأول، ويُؤكد الاستلام عبر واتساب.", "يلزم ملء استبيان طبي والقدرة المناسبة على السباحة.", "يحتاج من هم دون 18 عاماً إلى موافقة ولي أمر موقعة.", "لا تسافر بالطائرة قبل انتهاء فترة منع الطيران التي يحددها مركز الغوص."],
+    packageName: "دورة PADI للمياه المفتوحة لمدة 3 أيام", packageDescription: "تدريب نظري وعملي لمدة ثلاثة أيام مع غطستين يومياً والمعدات والغداء والمشروبات والتوصيل.", packageLabel: "متدرب", ageBands: { adults: "المتدربون (10 سنوات فأكثر)", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["الأطفال دون 10 سنوات", "الحوامل", "مرضى القلب أو الظهر", "من لا يستوفي المتطلبات الطبية ومتطلبات السباحة"], whatToBring: ["جواز سفر أو بطاقة هوية", "منشفة", "ملابس سباحة", "نظارة شمسية"], seoTitle: "دورة PADI للمياه المفتوحة لمدة 3 أيام في الغردقة", metaDescription: "احجز دورة PADI للمياه المفتوحة في الغردقة لمدة ثلاثة أيام مع غطستين يومياً والمعدات والغداء والمشروبات والتوصيل."
+  },
+  "ssi-open-water-course": {
+    title: "دورة SSI للغوص في المياه المفتوحة لمدة 3 أيام", location: "الغردقة، مصر", duration: "3 أيام", category: "غوص",
+    description: "تعلّم المعارف والمهارات اللازمة لتصبح غواص SSI للمياه المفتوحة من خلال الدراسة الرقمية والتدريب في المياه والغطسات التدريبية في البحر الأحمر.",
+    highlights: ["برنامج SSI لمدة ثلاثة أيام", "تعلم رقمي وتدريب عملي", "غطستان تدريبيتان يومياً", "محترف غوص معتمد من SSI", "تدريب في البحر الأحمر"],
+    included: ["تدريب SSI لمدة 3 أيام", "محترف غوص معتمد من SSI", "التعلم الرقمي وتسجيل الشهادة", "معدات الغوص القياسية", "الغداء والمشروبات يومياً", "الاستلام والتوصيل ضمن المنطقة المؤكدة"],
+    notIncluded: ["الضريبة البحرية: 5 يورو يومياً للشخص", "الإكراميات", "الصور", "الطيران والتأشيرة والإقامة", "الفحص الطبي إذا لزم"],
+    notes: ["إلغاء مجاني حتى 24 ساعة قبل البداية.", "تبدأ الدورة الساعة 08:00 ويُؤكد الاستلام عبر واتساب.", "الحد الأدنى للعمر 10 سنوات، ويحتاج من هم دون 18 عاماً إلى موافقة ولي الأمر.", "تُمنح الشهادة بعد اجتياز متطلبات SSI النظرية والعملية.", "تطبق حدود العمق والإشراف الخاصة بالناشئين.", "لا تسافر بالطائرة قبل انتهاء فترة منع الطيران المطلوبة."],
+    packageName: "دورة SSI للمياه المفتوحة لمدة 3 أيام", packageDescription: "تعلم رقمي وتدريب عملي لمدة ثلاثة أيام مع غطستين يومياً والمعدات والغداء والمشروبات والتوصيل.", packageLabel: "متدرب", ageBands: { adults: "المتدربون (10 سنوات فأكثر)", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["الأطفال دون 10 سنوات", "الحوامل", "مرضى القلب أو الظهر", "من لا يستوفي المتطلبات الطبية ومتطلبات السباحة"], whatToBring: ["جواز سفر أو بطاقة هوية", "منشفة", "ملابس سباحة", "نظارة شمسية"], seoTitle: "دورة SSI للمياه المفتوحة لمدة 3 أيام في الغردقة", metaDescription: "احجز دورة SSI للمياه المفتوحة في الغردقة مع التعلم الرقمي وغطستين يومياً والمعدات والغداء والتوصيل."
+  },
+  "horse-riding-sea-desert": {
+    title: "ركوب الخيل في صحراء وبحر الغردقة مع سباحة اختيارية", location: "الغردقة، مصر", duration: "2–4 ساعات", category: "نشاط خارجي",
+    description: "استكشف صحراء الغردقة وساحل البحر الأحمر على ظهر حصان مدرّب برفقة مرشد محترف، مع إمكانية دخول المياه الضحلة عندما تسمح الظروف.",
+    highlights: ["ركوب الخيل في الصحراء والساحل", "سباحة اختيارية مع الخيل", "مناسب للمبتدئين وذوي الخبرة", "مرشد محترف", "توصيل من فنادق الغردقة"],
+    included: ["جولة ركوب خيل بإرشاد", "حصان مدرّب", "خوذة أمان", "مياه", "الاستلام والتوصيل داخل الغردقة"], notIncluded: ["الإكراميات", "المصاريف الشخصية", "التصوير الاحترافي", "توصيل المناطق خارج الغردقة"],
+    notes: ["إلغاء مجاني حتى 24 ساعة قبل النشاط.", "السباحة مع الخيل اختيارية وتعتمد على الطقس وحالة البحر وتقييم الإسطبل.", "يجب اتباع تعليمات المرشد وارتداء الخوذة.", "يؤكد الإسطبل ملاءمة العمر والوزن قبل الرحلة."],
+    packageName: "ركوب خيل في صحراء وبحر الغردقة", packageDescription: "جولة لمدة ساعتين في الصحراء والساحل مع التوصيل ومعدات السلامة وسباحة اختيارية.", packageLabel: "راكب", ageBands: { adults: "الركاب (5 سنوات فأكثر)", children: "", infants: "" }, availableTimes: ["موعد صباحي يؤكد عبر واتساب", "موعد الغروب يؤكد عبر واتساب"],
+    notSuitableFor: ["الأطفال دون 5 سنوات", "الحوامل", "من لديهم مشكلات خطيرة في الظهر أو الحركة", "مستخدمو الكراسي المتحركة", "من يزيد وزنهم على 110 كجم دون موافقة الإسطبل"], whatToBring: ["بنطال طويل", "حذاء مغلق", "واقي شمس", "نظارة شمسية", "ملابس سباحة ومنشفة عند اختيار السباحة"]
+  },
+  "sahl-hasheesh-horse-riding": {
+    title: "ركوب الخيل في صحراء وبحر سهل حشيش مع سباحة اختيارية", location: "سهل حشيش، مصر", duration: "نحو ساعتين", category: "نشاط خارجي",
+    description: "اركض على الرمال واستمتع بركوب الخيل بمحاذاة البحر الأحمر في سهل حشيش، مع دخول اختياري للمياه الضحلة عندما يكون ذلك آمناً.",
+    highlights: ["مسارات الصحراء والساحل", "دخول اختياري للمياه", "خيول مدرّبة", "مرشد محلي خبير", "مناسب لمستويات مختلفة"],
+    included: ["ركوب خيل في الصحراء والبحر", "حصان مدرّب", "مرشد محلي", "خوذة"], notIncluded: ["الإكراميات", "المصاريف الشخصية", "التصوير", "التوصيل ما لم يُذكر في الخيار"],
+    notes: ["إلغاء مجاني حتى 24 ساعة قبل النشاط.", "يحدد المرشد وتقييم الإسطبل إمكانية السباحة.", "يجب تأكيد حدود العمر والوزن مع الإسطبل.", "لا تُنسخ تقييمات منصات أخرى إلى الموقع."],
+    packageName: "ركوب خيل في صحراء وبحر سهل حشيش", packageDescription: "نحو ساعتين من ركوب الخيل في الصحراء والساحل مع جزء اختياري في المياه الضحلة.", packageLabel: "راكب", ageBands: { adults: "الركاب (العمر يؤكده الإسطبل)", children: "", infants: "" }, availableTimes: ["موعد صباحي يؤكد عبر واتساب", "موعد الغروب يؤكد عبر واتساب"],
+    notSuitableFor: ["الحوامل", "من لديهم مشكلات خطيرة في الظهر أو الرقبة أو الحركة", "من هم خارج حدود العمر أو الوزن التي يؤكدها الإسطبل"], whatToBring: ["بنطال طويل", "حذاء مغلق", "واقي شمس", "نظارة شمسية", "ملابس سباحة ومنشفة عند اختيار السباحة"]
+  },
 };
 
 export function localizeTourArabic(tour: Tour): Tour {
@@ -156,6 +194,44 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     included: ["Privater Transfer", "Fahrer", "Kraftstoff und Parkgebühren"], notIncluded: ["Rückfahrt", "Reisekoffer", "Einkäufe und Mahlzeiten"],
     notes: ["Maximal 4 Personen.", "Bei diesem Service sind keine Reisekoffer möglich.", "Hin- und Rückfahrt getrennt buchen."],
     packageName: "Senzo Mall Transfer pro Strecke", packageDescription: "10 $ innerhalb Hurghadas; 7 $ Zuschlag für die Ferienorte.", packageLabel: "Festpreis pro Strecke", availableTimes: ["Wunschzeit wird per WhatsApp bestätigt"],
+  },
+  "padi-open-water-course": {
+    title: "3-tägiger PADI Open Water Diver Kurs", location: "Hurghada, Ägypten", duration: "3 Tage", category: "Tauchen",
+    description: "Lerne in Theorieeinheiten und betreuten Ausbildungstauchgängen im Roten Meer die grundlegenden Tauchfertigkeiten. Die PADI-Zertifizierung erfolgt nach erfolgreichem Abschluss aller Wissens- und Wasseranforderungen.",
+    highlights: ["International anerkannter PADI-Kurs", "Zwei betreute Tauchgänge pro Tag", "Theorie und praktische Freiwasserfertigkeiten", "PADI-zertifizierter Tauchlehrer", "Ausbildung im Roten Meer"],
+    included: ["Dreitägiger Kurs mit zwei Tauchgängen täglich", "PADI-Tauchlehrer", "Standard-Tauchausrüstung", "Bleigurt und 12-Liter-Flaschen", "Mittagessen und Getränke an jedem Kurstag", "Transfer in der bestätigten Hotelzone"],
+    notIncluded: ["Marinegebühr: 5 € pro Person und Tag", "PADI-Lehrmaterial, Zertifizierung und Registrierung: 100 € pro Person", "Trinkgeld", "Fotos", "Flug, Visum und Unterkunft", "Ärztliche Untersuchung falls erforderlich"],
+    notes: ["Kostenlose Stornierung bis 24 Stunden vor Kursbeginn.", "Beginn am ersten Tag um 08:00 Uhr; Abholung per WhatsApp.", "Medizinischer Fragebogen und ausreichende Schwimmfähigkeit sind erforderlich.", "Unter 18-Jährige benötigen eine unterschriebene Zustimmung.", "Beachte nach dem letzten Tauchgang die vorgeschriebene Flugverbotszeit."],
+    packageName: "3-tägiger PADI Open Water Kurs", packageDescription: "Drei Tage Theorie und Praxis mit zwei Tauchgängen täglich, Ausrüstung, Mittagessen, Getränken und Transfer.", packageLabel: "Teilnehmer", ageBands: { adults: "Teilnehmer (ab 10 Jahren)", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["Kinder unter 10 Jahren", "Schwangere", "Personen mit schweren Rücken- oder Herzproblemen", "Personen, die medizinische oder Schwimmanforderungen nicht erfüllen"], whatToBring: ["Reisepass oder Ausweis", "Handtuch", "Badebekleidung", "Sonnenbrille"], seoTitle: "3-tägiger PADI Open Water Kurs in Hurghada", metaDescription: "Buche einen dreitägigen PADI Open Water Kurs in Hurghada mit zwei Tauchgängen täglich, Ausrüstung, Mittagessen, Getränken und Transfer."
+  },
+  "ssi-open-water-course": {
+    title: "3-tägiger SSI Open Water Diver Kurs", location: "Hurghada, Ägypten", duration: "3 Tage", category: "Tauchen",
+    description: "Erlerne mit digitaler Theorie, Übungen im begrenzten Freiwasser und betreuten Ausbildungstauchgängen die Kenntnisse und Fertigkeiten für den SSI Open Water Diver.",
+    highlights: ["Dreitägiges SSI-Programm", "Digitales Lernen und praktische Ausbildung", "Zwei betreute Tauchgänge pro Tag", "SSI-zertifizierter Tauchprofi", "Ausbildung im Roten Meer"],
+    included: ["Dreitägige SSI-Ausbildung", "SSI-zertifizierter Tauchprofi", "Digitales Lernen und Zertifizierungsregistrierung", "Standard-Tauchausrüstung", "Mittagessen und Getränke", "Transfer in der bestätigten Hotelzone"],
+    notIncluded: ["Marinegebühr: 5 € pro Person und Tag", "Trinkgeld", "Fotos", "Flug, Visum und Unterkunft", "Ärztliche Untersuchung falls erforderlich"],
+    notes: ["Kostenlose Stornierung bis 24 Stunden vor Beginn.", "Beginn um 08:00 Uhr; Abholung per WhatsApp.", "Mindestalter 10 Jahre; Minderjährige benötigen eine unterschriebene Zustimmung.", "Die Zertifizierung setzt das erfolgreiche Erfüllen aller SSI-Anforderungen voraus.", "Für Junior-Teilnehmer gelten Tiefen- und Aufsichtsgrenzen.", "Beachte nach dem letzten Tauchgang die Flugverbotszeit."],
+    packageName: "3-tägiger SSI Open Water Diver Kurs", packageDescription: "Drei Tage digitales Lernen und Praxistraining mit zwei Tauchgängen täglich, Ausrüstung, Verpflegung und Transfer.", packageLabel: "Teilnehmer", ageBands: { adults: "Teilnehmer (ab 10 Jahren)", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["Kinder unter 10 Jahren", "Schwangere", "Personen mit schweren Rücken- oder Herzproblemen", "Personen, die medizinische oder Schwimmanforderungen nicht erfüllen"], whatToBring: ["Reisepass oder Ausweis", "Handtuch", "Badebekleidung", "Sonnenbrille"], seoTitle: "3-tägiger SSI Open Water Diver Kurs in Hurghada", metaDescription: "Buche einen dreitägigen SSI Open Water Diver Kurs in Hurghada mit digitalem Lernen, zwei Tauchgängen täglich, Ausrüstung und Transfer."
+  },
+  "horse-riding-sea-desert": {
+    title: "Reiten in Hurghadas Wüste und am Meer mit optionalem Schwimmen", location: "Hurghada, Ägypten", duration: "2–4 Stunden", category: "Outdoor-Aktivität",
+    description: "Erkunde Wüstenwege und die Küste des Roten Meeres auf einem gut ausgebildeten Pferd. Bei sicheren Bedingungen ist ein optionaler Abschnitt im flachen Wasser möglich.",
+    highlights: ["Reiten in Wüste und an der Küste", "Optionales Schwimmen mit Pferden", "Für Anfänger und Erfahrene", "Professioneller Guide", "Transfer innerhalb Hurghadas"],
+    included: ["Geführtes Reiterlebnis", "Gut ausgebildetes Pferd", "Sicherheitshelm", "Wasser", "Hoteltransfer innerhalb Hurghadas"], notIncluded: ["Trinkgeld", "Persönliche Ausgaben", "Professionelle Fotos", "Transfer außerhalb Hurghadas"],
+    notes: ["Kostenlose Stornierung bis 24 Stunden vorher.", "Der Wasserabschnitt hängt von Wetter, Meer und Stallfreigabe ab.", "Helm und Anweisungen des Guides sind verpflichtend.", "Alter und Gewicht werden vom Stall bestätigt."],
+    packageName: "Wüsten- und Meer-Ausritt in Hurghada", packageDescription: "Zweistündiger geführter Ausritt mit Transfer, Sicherheitsausrüstung und optionalem Reiten im flachen Wasser.", packageLabel: "Reiter", ageBands: { adults: "Reiter (ab 5 Jahren)", children: "", infants: "" }, availableTimes: ["Morgentermin per WhatsApp", "Sonnenuntergangstermin per WhatsApp"],
+    notSuitableFor: ["Kinder unter 5 Jahren", "Schwangere", "Personen mit schweren Rücken- oder Mobilitätsproblemen", "Rollstuhlfahrer", "Personen über 110 kg ohne ausdrückliche Stallfreigabe"], whatToBring: ["Lange Hose", "Geschlossene Schuhe", "Sonnenschutz", "Sonnenbrille", "Badebekleidung und Handtuch bei Wasseroption"]
+  },
+  "sahl-hasheesh-horse-riding": {
+    title: "Wüsten- und Meer-Ausritt in Sahl Hasheesh mit optionalem Schwimmen", location: "Sahl Hasheesh, Ägypten", duration: "Etwa 2 Stunden", category: "Outdoor-Aktivität",
+    description: "Reite durch die Wüste und entlang der Küste von Sahl Hasheesh. Bei sicheren Bedingungen kann ein optionaler Abschnitt im flachen Wasser stattfinden.",
+    highlights: ["Wüsten- und Küstenwege", "Optionaler Wasserabschnitt", "Trainierte Pferde", "Erfahrener lokaler Guide", "Für verschiedene Erfahrungsstufen"],
+    included: ["Wüsten- und Meer-Ausritt", "Trainiertes Pferd", "Lokaler Guide", "Helm"], notIncluded: ["Trinkgeld", "Persönliche Ausgaben", "Fotoservice", "Transfer, sofern nicht in der Option angegeben"],
+    notes: ["Kostenlose Stornierung bis 24 Stunden vorher.", "Wasserabschnitt nur nach Freigabe durch Guide und Stall.", "Alters- und Gewichtsgrenzen müssen bestätigt werden.", "Bewertungen anderer Plattformen werden nicht übernommen."],
+    packageName: "Wüsten- und Meer-Ausritt in Sahl Hasheesh", packageDescription: "Etwa zwei Stunden geführtes Reiten in Wüste und Küste mit optionalem flachen Wasserabschnitt.", packageLabel: "Reiter", ageBands: { adults: "Reiter (Alter durch Stall bestätigt)", children: "", infants: "" }, availableTimes: ["Morgentermin per WhatsApp", "Sonnenuntergangstermin per WhatsApp"],
+    notSuitableFor: ["Schwangere", "Personen mit schweren Rücken-, Nacken- oder Mobilitätsproblemen", "Gäste außerhalb der bestätigten Alters- oder Gewichtsgrenzen"], whatToBring: ["Lange Hose", "Geschlossene Schuhe", "Sonnenschutz", "Sonnenbrille", "Badebekleidung und Handtuch bei Wasseroption"]
   },
 };
 
@@ -255,6 +331,44 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     notes: ["Максимум 4 пассажира.", "Багаж не принимается.", "Поездки туда и обратно бронируются отдельно."],
     packageName: "Трансфер в Senzo Mall", packageDescription: "10 $ в Хургаде; доплата 7 $ для курортных районов.", packageLabel: "Фиксированная цена", availableTimes: ["Желаемое время подтвердим в WhatsApp"],
   },
+  "padi-open-water-course": {
+    title: "Трёхдневный курс PADI Open Water Diver", location: "Хургада, Египет", duration: "3 дня", category: "Дайвинг",
+    description: "Освойте базовые навыки дайвинга на теоретических занятиях и учебных погружениях в Красном море под руководством инструктора PADI. Сертификат выдаётся после успешного выполнения всех требований.",
+    highlights: ["Международный курс PADI", "Два учебных погружения в день", "Теория и практика в открытой воде", "Инструктор PADI", "Обучение в Красном море"],
+    included: ["Трёхдневный курс и два погружения ежедневно", "Инструктор PADI", "Стандартное снаряжение", "Грузовой пояс и 12-литровые баллоны", "Обед и напитки", "Трансфер в подтверждённой зоне отеля"],
+    notIncluded: ["Морской сбор: 5 € с человека в день", "Учебник, сертификация и регистрация PADI: 100 € с человека", "Чаевые", "Фотографии", "Перелёт, виза и проживание", "Медосмотр при необходимости"],
+    notes: ["Бесплатная отмена не позднее чем за 24 часа.", "Начало в 08:00 в первый день; трансфер подтверждается в WhatsApp.", "Необходимы медицинская анкета и достаточные навыки плавания.", "Участникам младше 18 лет требуется подписанное согласие.", "После последнего погружения соблюдайте установленный запрет на перелёты."],
+    packageName: "Трёхдневный курс PADI Open Water", packageDescription: "Три дня теории и практики, два погружения ежедневно, снаряжение, питание и трансфер.", packageLabel: "Участник", ageBands: { adults: "Участники (от 10 лет)", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["Дети младше 10 лет", "Беременные", "Люди с серьёзными заболеваниями сердца или спины", "Гости, не отвечающие медицинским требованиям и требованиям к плаванию"], whatToBring: ["Паспорт или удостоверение личности", "Полотенце", "Купальник", "Солнцезащитные очки"]
+  },
+  "ssi-open-water-course": {
+    title: "Трёхдневный курс SSI Open Water Diver", location: "Хургада, Египет", duration: "3 дня", category: "Дайвинг",
+    description: "Изучите теорию в цифровом формате и освойте навыки в воде во время учебных погружений в Красном море. Сертификат SSI выдаётся после выполнения всех требований.",
+    highlights: ["Трёхдневная программа SSI", "Цифровая теория и практика", "Два учебных погружения в день", "Специалист SSI", "Обучение в Красном море"],
+    included: ["Трёхдневное обучение SSI", "Сертифицированный специалист SSI", "Цифровое обучение и регистрация сертификата", "Стандартное снаряжение", "Обед и напитки", "Трансфер в подтверждённой зоне"],
+    notIncluded: ["Морской сбор: 5 € с человека в день", "Чаевые", "Фотографии", "Перелёт, виза и проживание", "Медосмотр при необходимости"],
+    notes: ["Бесплатная отмена не позднее чем за 24 часа.", "Начало в 08:00; трансфер подтверждается в WhatsApp.", "Минимальный возраст 10 лет; несовершеннолетним требуется согласие родителя.", "Сертификация зависит от успешного выполнения требований SSI.", "Для юниоров действуют ограничения глубины и надзора.", "После погружений соблюдайте запрет на перелёты."],
+    packageName: "Трёхдневный курс SSI Open Water Diver", packageDescription: "Три дня цифровой теории и практики, два погружения ежедневно, снаряжение, питание и трансфер.", packageLabel: "Участник", ageBands: { adults: "Участники (от 10 лет)", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["Дети младше 10 лет", "Беременные", "Люди с серьёзными заболеваниями сердца или спины", "Гости, не отвечающие медицинским требованиям и требованиям к плаванию"], whatToBring: ["Паспорт или удостоверение личности", "Полотенце", "Купальник", "Солнцезащитные очки"]
+  },
+  "horse-riding-sea-desert": {
+    title: "Конная прогулка по пустыне и у моря в Хургаде с купанием", location: "Хургада, Египет", duration: "2–4 часа", category: "Активный отдых",
+    description: "Прокатитесь на обученной лошади по пустынным тропам и побережью Красного моря. При безопасных условиях возможен дополнительный участок на мелководье.",
+    highlights: ["Пустыня и побережье", "Дополнительное купание с лошадьми", "Для новичков и опытных", "Профессиональный гид", "Трансфер по Хургаде"],
+    included: ["Прогулка с гидом", "Обученная лошадь", "Шлем", "Вода", "Трансфер в пределах Хургады"], notIncluded: ["Чаевые", "Личные расходы", "Профессиональные фотографии", "Трансфер за пределами Хургады"],
+    notes: ["Бесплатная отмена не позднее чем за 24 часа.", "Заезд в воду зависит от погоды, моря и решения конюшни.", "Шлем и выполнение инструкций обязательны.", "Возраст и вес подтверждаются конюшней."],
+    packageName: "Конная прогулка по пустыне и у моря", packageDescription: "Двухчасовая прогулка с трансфером, экипировкой и дополнительным заездом на мелководье.", packageLabel: "Всадник", ageBands: { adults: "Всадники (от 5 лет)", children: "", infants: "" }, availableTimes: ["Утреннее время подтвердим в WhatsApp", "Время на закате подтвердим в WhatsApp"],
+    notSuitableFor: ["Дети младше 5 лет", "Беременные", "Люди с серьёзными проблемами спины или подвижности", "Пользователи инвалидных колясок", "Всадники тяжелее 110 кг без разрешения конюшни"], whatToBring: ["Длинные брюки", "Закрытая обувь", "Солнцезащитный крем", "Очки", "Купальник и полотенце для морской опции"]
+  },
+  "sahl-hasheesh-horse-riding": {
+    title: "Конная прогулка по пустыне и морю в Сахл-Хашише с купанием", location: "Сахл-Хашиш, Египет", duration: "Около 2 часов", category: "Активный отдых",
+    description: "Прокатитесь по пустыне и побережью Сахл-Хашиша. При безопасных условиях можно пройти дополнительный участок по мелководью Красного моря.",
+    highlights: ["Пустынные и прибрежные маршруты", "Дополнительный участок в воде", "Обученные лошади", "Опытный местный гид", "Для разного уровня подготовки"],
+    included: ["Прогулка по пустыне и у моря", "Обученная лошадь", "Местный гид", "Шлем"], notIncluded: ["Чаевые", "Личные расходы", "Фотосъёмка", "Трансфер, если он не указан в варианте"],
+    notes: ["Бесплатная отмена не позднее чем за 24 часа.", "Заезд в воду возможен только по решению гида и конюшни.", "Необходимо подтвердить ограничения возраста и веса.", "Отзывы с других платформ не копируются."],
+    packageName: "Конная прогулка в Сахл-Хашише", packageDescription: "Около двух часов по пустыне и побережью с дополнительным участком на мелководье.", packageLabel: "Всадник", ageBands: { adults: "Всадники (возраст подтверждает конюшня)", children: "", infants: "" }, availableTimes: ["Утреннее время подтвердим в WhatsApp", "Время на закате подтвердим в WhatsApp"],
+    notSuitableFor: ["Беременные", "Люди с серьёзными проблемами спины, шеи или подвижности", "Гости за пределами подтверждённых ограничений возраста или веса"], whatToBring: ["Длинные брюки", "Закрытая обувь", "Солнцезащитный крем", "Очки", "Купальник и полотенце для морской опции"]
+  },
 };
 
 export function localizeTourRussian(tour: Tour): Tour {
@@ -337,6 +451,44 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     description: "赫尔格达市区前往或离开 Senzo Mall 的单程私人接送固定价 10 美元；指定度假区加收 7 美元。",
     highlights: ["固定价格", "私人车辆", "酒店接送", "灵活时间", "空调车辆"], included: ["私人单程接送", "司机", "燃油和停车费"], notIncluded: ["返程", "旅行行李", "购物和餐饮"],
     notes: ["最多 4 位乘客。", "不接受旅行行李。", "往返行程需分别预订。"], packageName: "Senzo Mall 单程接送", packageDescription: "赫尔格达市区 10 美元；指定度假区加收 7 美元。", packageLabel: "固定单程价格", availableTimes: ["希望出发时间通过 WhatsApp 确认"],
+  },
+  "padi-open-water-course": {
+    title: "赫尔格达三日 PADI 开放水域潜水课程", location: "埃及赫尔格达", duration: "3 天", category: "潜水",
+    description: "通过理论课程和红海监督训练潜水学习核心潜水技能。完成全部知识和水中技能要求后方可获得 PADI 认证。",
+    highlights: ["国际认可的 PADI 三日课程", "每天两次监督潜水", "理论与开放水域技能", "PADI 认证教练", "红海训练环境"],
+    included: ["三日课程及每天两次潜水", "PADI 认证教练", "标准潜水装备", "配重带和 12 升气瓶", "每日午餐和饮料", "确认酒店区域内接送"],
+    notIncluded: ["海洋税：每人每天 5 欧元", "PADI 教材、认证和注册：每人 100 欧元", "小费", "照片", "机票、签证和住宿", "必要时的体检"],
+    notes: ["课程开始前 24 小时可免费取消。", "第一天 08:00 开始，接送时间通过 WhatsApp 确认。", "须填写健康问卷并具备足够游泳能力。", "18 岁以下须提交监护人签字同意书。", "最后一次潜水后须遵守潜水中心规定的禁飞时间。"],
+    packageName: "三日 PADI 开放水域课程", packageDescription: "三天理论与实践训练，每天两次潜水，含装备、午餐、饮料和接送。", packageLabel: "学员", ageBands: { adults: "学员（10 岁及以上）", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["10 岁以下儿童", "孕妇", "有严重心脏或背部问题者", "无法满足健康或游泳要求者"], whatToBring: ["护照或身份证", "毛巾", "泳衣", "太阳镜"]
+  },
+  "ssi-open-water-course": {
+    title: "赫尔格达三日 SSI 开放水域潜水员课程", location: "埃及赫尔格达", duration: "3 天", category: "潜水",
+    description: "通过数字理论学习、平静水域练习和红海监督训练潜水，掌握成为 SSI 开放水域潜水员所需的知识和技能。",
+    highlights: ["三日 SSI 开放水域课程", "数字学习与水中训练", "每天两次监督潜水", "SSI 认证潜水专业人士", "红海训练环境"],
+    included: ["三日 SSI 训练", "SSI 认证潜水专业人士", "数字教材及认证注册", "标准潜水装备", "每日午餐和饮料", "确认区域内接送"],
+    notIncluded: ["海洋税：每人每天 5 欧元", "小费", "照片", "机票、签证和住宿", "必要时的体检"],
+    notes: ["课程开始前 24 小时可免费取消。", "课程 08:00 开始，接送时间通过 WhatsApp 确认。", "最低年龄 10 岁；未成年人须有监护人签字同意。", "完成全部 SSI 知识和水中技能要求后方可认证。", "青少年学员适用深度和监督限制。", "潜水后须遵守规定的禁飞时间。"],
+    packageName: "三日 SSI 开放水域潜水员课程", packageDescription: "三天数字学习和实操训练，每天两次潜水，含装备、午餐、饮料和接送。", packageLabel: "学员", ageBands: { adults: "学员（10 岁及以上）", children: "", infants: "" }, availableTimes: ["08:00"],
+    notSuitableFor: ["10 岁以下儿童", "孕妇", "有严重心脏或背部问题者", "无法满足健康或游泳要求者"], whatToBring: ["护照或身份证", "毛巾", "泳衣", "太阳镜"]
+  },
+  "horse-riding-sea-desert": {
+    title: "赫尔格达沙漠与海岸骑马（可选浅水骑行）", location: "埃及赫尔格达", duration: "2–4 小时", category: "户外活动",
+    description: "在专业向导带领下骑乘训练有素的马匹探索赫尔格达沙漠与红海海岸。安全条件允许时可选择进入浅水区。",
+    highlights: ["沙漠与海岸骑马", "可选与马浅水活动", "适合初学者和有经验骑手", "专业向导", "赫尔格达市内接送"],
+    included: ["向导骑马体验", "训练有素的马匹", "安全头盔", "饮用水", "赫尔格达市内酒店接送"], notIncluded: ["小费", "个人消费", "专业摄影", "赫尔格达以外接送"],
+    notes: ["活动开始前 24 小时可免费取消。", "是否进入水中取决于天气、海况和马场评估。", "必须佩戴头盔并遵循向导指示。", "年龄和体重适宜性由马场确认。"],
+    packageName: "赫尔格达沙漠与海岸骑马", packageDescription: "两小时向导骑马，含市内接送和安全装备，条件允许时可选浅水骑行。", packageLabel: "骑手", ageBands: { adults: "骑手（5 岁及以上）", children: "", infants: "" }, availableTimes: ["上午时间通过 WhatsApp 确认", "日落时间通过 WhatsApp 确认"],
+    notSuitableFor: ["5 岁以下儿童", "孕妇", "有严重背部或行动问题者", "轮椅使用者", "体重超过 110 公斤且未获马场批准者"], whatToBring: ["长裤", "包头鞋", "防晒霜", "太阳镜", "选择海水项目时携带泳衣和毛巾"]
+  },
+  "sahl-hasheesh-horse-riding": {
+    title: "萨尔哈希什沙漠与海岸骑马（可选浅水骑行）", location: "埃及萨尔哈希什", duration: "约 2 小时", category: "户外活动",
+    description: "骑马穿越萨尔哈希什沙漠并沿红海海岸前行。安全条件允许时，可增加浅水骑行环节。",
+    highlights: ["沙漠与海岸路线", "可选浅水环节", "训练有素的马匹", "经验丰富的当地向导", "适合不同水平"],
+    included: ["沙漠和海岸骑马", "训练有素的马匹", "当地向导", "头盔"], notIncluded: ["小费", "个人消费", "摄影服务", "选项未注明的接送"],
+    notes: ["活动开始前 24 小时可免费取消。", "是否进入浅水区由向导和马场决定。", "须向马场确认年龄和体重限制。", "本站不会复制其他平台的评价。"],
+    packageName: "萨尔哈希什沙漠与海岸骑马", packageDescription: "约两小时沙漠和海岸向导骑马，安全时可增加浅水环节。", packageLabel: "骑手", ageBands: { adults: "骑手（年龄由马场确认）", children: "", infants: "" }, availableTimes: ["上午时间通过 WhatsApp 确认", "日落时间通过 WhatsApp 确认"],
+    notSuitableFor: ["孕妇", "有严重背部、颈部或行动问题者", "不符合马场确认的年龄或体重限制者"], whatToBring: ["长裤", "包头鞋", "防晒霜", "太阳镜", "选择海水项目时携带泳衣和毛巾"]
   },
 };
 

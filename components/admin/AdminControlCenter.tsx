@@ -8,7 +8,7 @@ type RecordValue = Record<string, unknown> & { id?: string; key?: string };
 type Payload = { configured: false; migration: string } | ({ configured: true; audit: RecordValue[]; health: RecordValue[] } & Record<Resource, RecordValue[]>);
 const tabs: Array<[Resource, string]> = [["content", "Live content"], ["media", "Media"], ["availability", "Calendar & capacity"], ["staff", "Staff"], ["assignments", "Assignments"], ["notes", "Customer notes"], ["templates", "Message templates"], ["queue", "Message queue"], ["settings", "Site settings"], ["redirects", "Redirects"]];
 const empty: Record<Resource, Record<string, unknown>> = {
-  content: { content_type: "blog", slug: "", locale: "en", status: "draft", title: "", excerpt: "", body: "", seo_title: "", seo_description: "", featured_image: "", publish_at: "" },
+  content: { content_type: "blog", slug: "", locale: "en", status: "draft", title: "", excerpt: "", body: "", price: "", originalPrice: "", packagePrice: "", adultPrice: "", childPrice: "", infantPrice: "", duration: "", location: "", availableTimes: "", priceUnit: "", seo_title: "", seo_description: "", featured_image: "", publish_at: "" },
   media: { storage_path: "", public_url: "", file_name: "", mime_type: "image/jpeg", alt_text: "", credit: "" },
   availability: { tour_slug: "", service_date: "", start_time: "", capacity: "", blocked: false, price_override: "", currency: "USD", notes: "" },
   staff: { name: "", staff_type: "guide", phone: "", languages: "English", active: true, notes: "" },
@@ -41,14 +41,28 @@ export default function AdminControlCenter() {
 
   async function create(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError(""); setNotice("");
-    try { const response = await fetch(editId ? `/api/admin/control-center/${tab}/${encodeURIComponent(editId)}` : "/api/admin/control-center", { method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editId ? form : { resource: tab, ...form }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Could not save record."); setForm({ ...empty[tab] }); setEditId(""); setNotice(editId ? "Updated successfully. The published site now uses this record." : "Saved successfully."); await load(); }
+    try { const prepared = tab === "content" ? prepareContent(form) : form; const response = await fetch(editId ? `/api/admin/control-center/${tab}/${encodeURIComponent(editId)}` : "/api/admin/control-center", { method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editId ? prepared : { resource: tab, ...prepared }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Could not save record."); setForm({ ...empty[tab] }); setEditId(""); setNotice(editId ? "Updated successfully. The published site now uses this record." : "Saved successfully."); await load(); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Could not save record."); }
     finally { setBusy(false); }
   }
   function edit(item: RecordValue) {
     const id = String(item.id || item.key || "");
     const next = { ...item };
-    if (tab === "content") next.body = JSON.stringify(item.body || {}, null, 2);
+    if (tab === "content") {
+      const body = item.body && typeof item.body === "object" && !Array.isArray(item.body) ? item.body as Record<string, unknown> : {};
+      next.body = JSON.stringify(body, null, 2);
+      next.price = body.price ?? "";
+      next.originalPrice = body.originalPrice ?? "";
+      next.packagePrice = body.packagePrice ?? "";
+      const participant = body.participantPricing && typeof body.participantPricing === "object" ? body.participantPricing as Record<string, unknown> : {};
+      next.adultPrice = participant.adults ?? "";
+      next.childPrice = participant.youth ?? "";
+      next.infantPrice = participant.infants ?? "";
+      next.duration = body.duration ?? "";
+      next.location = body.location ?? "";
+      next.priceUnit = body.priceUnit ?? "";
+      next.availableTimes = Array.isArray(body.availableTimes) ? body.availableTimes.join(", ") : "";
+    }
     if (["staff", "notes"].includes(tab)) {
       if (Array.isArray(item.languages)) next.languages = item.languages.join(", ");
       if (Array.isArray(item.tags)) next.tags = item.tags.join(", ");
@@ -85,12 +99,39 @@ export default function AdminControlCenter() {
   </section>;
 }
 
-function Input({ label, name, form, set, type = "text", required = false }: { label: string; name: string; form: Record<string, unknown>; set: (name: string, value: unknown) => void; type?: string; required?: boolean }) { return <label className="block text-sm font-semibold">{label}<input required={required} type={type} value={String(form[name] ?? "")} onChange={(event) => set(name, event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"/></label>; }
+function Input({ label, name, form, set, type = "text", required = false, step }: { label: string; name: string; form: Record<string, unknown>; set: (name: string, value: unknown) => void; type?: string; required?: boolean; step?: string }) { return <label className="block text-sm font-semibold">{label}<input required={required} type={type} step={step || (type === "number" ? "0.01" : undefined)} value={String(form[name] ?? "")} onChange={(event) => set(name, event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"/></label>; }
 function Select({ label, name, options, form, set }: { label: string; name: string; options: string[]; form: Record<string, unknown>; set: (name: string, value: unknown) => void }) { return <label className="block text-sm font-semibold">{label}<select value={String(form[name] ?? "")} onChange={(event) => set(name, event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal">{options.map((value) => <option key={value}>{value}</option>)}</select></label>; }
 function Area({ label, name, form, set, required = false }: { label: string; name: string; form: Record<string, unknown>; set: (name: string, value: unknown) => void; required?: boolean }) { return <label className="block text-sm font-semibold">{label}<textarea required={required} value={String(form[name] ?? "")} onChange={(event) => set(name, event.target.value)} className="mt-1 min-h-24 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"/></label>; }
 function Check({ label, name, form, set }: { label: string; name: string; form: Record<string, unknown>; set: (name: string, value: unknown) => void }) { return <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={Boolean(form[name])} onChange={(event) => set(name, event.target.checked)}/>{label}</label>; }
+function optionalNumber(value: unknown) { return value === "" || value == null ? undefined : Number(value); }
+function prepareContent(form: Record<string, unknown>) {
+  if (form.content_type !== "tour") return form;
+  let body: Record<string, unknown> = {};
+  if (typeof form.body === "string" && form.body.trim()) {
+    try { const parsed = JSON.parse(form.body); if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) body = parsed; }
+    catch { throw new Error("Advanced tour data must be valid JSON."); }
+  } else if (form.body && typeof form.body === "object") body = form.body as Record<string, unknown>;
+  const price = optionalNumber(form.price);
+  const originalPrice = optionalNumber(form.originalPrice);
+  if (price === undefined || !Number.isFinite(price) || price < 0) throw new Error("Enter a valid current tour price.");
+  if (originalPrice !== undefined && (!Number.isFinite(originalPrice) || originalPrice <= price)) throw new Error("Original price must be higher than the discounted current price, or left empty.");
+  const adultPrice = optionalNumber(form.adultPrice);
+  const childPrice = optionalNumber(form.childPrice);
+  const infantPrice = optionalNumber(form.infantPrice);
+  const participantPricing: Record<string, unknown> = { ...(body.participantPricing && typeof body.participantPricing === "object" ? body.participantPricing as Record<string, unknown> : {}), adults: adultPrice ?? price };
+  if (childPrice === undefined) delete participantPricing.youth; else participantPricing.youth = childPrice;
+  if (infantPrice === undefined) delete participantPricing.infants; else participantPricing.infants = infantPrice;
+  body = { ...body, price: String(price), packagePrice: String(optionalNumber(form.packagePrice) ?? price), participantPricing };
+  if (originalPrice === undefined) delete body.originalPrice; else body.originalPrice = String(originalPrice);
+  for (const key of ["duration", "location", "priceUnit"] as const) { const value = String(form[key] || "").trim(); if (value) body[key] = value; else delete body[key]; }
+  const times = String(form.availableTimes || "").split(",").map((value) => value.trim()).filter(Boolean);
+  if (times.length) body.availableTimes = times; else delete body.availableTimes;
+  const { price: _price, originalPrice: _originalPrice, packagePrice: _packagePrice, adultPrice: _adultPrice, childPrice: _childPrice, infantPrice: _infantPrice, duration: _duration, location: _location, priceUnit: _priceUnit, availableTimes: _availableTimes, ...record } = form;
+  void _price; void _originalPrice; void _packagePrice; void _adultPrice; void _childPrice; void _infantPrice; void _duration; void _location; void _priceUnit; void _availableTimes;
+  return { ...record, body };
+}
 function ResourceForm({ resource, form, set }: { resource: Resource; form: Record<string, unknown>; set: (name: string, value: unknown) => void }) {
-  if (resource === "content") return <><div className="grid gap-3 sm:grid-cols-3"><Select label="Type" name="content_type" options={["tour", "blog", "page", "promotion"]} form={form} set={set}/><Select label="Language" name="locale" options={["en", "de", "ru", "ar", "pl", "zh"]} form={form} set={set}/><Select label="Status" name="status" options={["draft", "scheduled", "published", "archived"]} form={form} set={set}/></div><Input label="Title" name="title" form={form} set={set} required/><Input label="URL slug" name="slug" form={form} set={set} required/><Area label="Summary" name="excerpt" form={form} set={set}/><Area label="Content" name="body" form={form} set={set}/><Input label="SEO title" name="seo_title" form={form} set={set}/><Area label="SEO description" name="seo_description" form={form} set={set}/><Input label="Featured image URL" name="featured_image" form={form} set={set}/><Input label="Publish at" name="publish_at" type="datetime-local" form={form} set={set}/></>;
+  if (resource === "content") return <><div className="grid gap-3 sm:grid-cols-3"><Select label="Type" name="content_type" options={["tour", "blog", "page", "promotion"]} form={form} set={set}/><Select label="Language" name="locale" options={["en", "de", "ru", "ar", "pl", "zh"]} form={form} set={set}/><Select label="Status" name="status" options={["draft", "scheduled", "published", "archived"]} form={form} set={set}/></div><Input label="Title" name="title" form={form} set={set} required/><Input label="URL slug" name="slug" form={form} set={set} required/><Area label="Summary / description" name="excerpt" form={form} set={set}/>{form.content_type === "tour" ? <div className="space-y-4 rounded-2xl border border-cyan-200 bg-cyan-50/50 p-4"><h4 className="font-black text-cyan-950">Tour pricing and booking</h4><div className="grid gap-3 sm:grid-cols-2"><Input label="Current price" name="price" type="number" form={form} set={set} required/><Input label="Original price (before discount)" name="originalPrice" type="number" form={form} set={set}/><Input label="Adult price" name="adultPrice" type="number" form={form} set={set}/><Input label="Child price" name="childPrice" type="number" form={form} set={set}/><Input label="Infant price" name="infantPrice" type="number" form={form} set={set}/><Input label="Package price" name="packagePrice" type="number" form={form} set={set}/><Input label="Price unit" name="priceUnit" form={form} set={set}/><Input label="Available times, comma separated" name="availableTimes" form={form} set={set}/><Input label="Duration" name="duration" form={form} set={set}/><Input label="Location" name="location" form={form} set={set}/></div><p className="text-xs leading-5 text-cyan-900">When Original price is higher than Current price, the public site shows the original price crossed out. Booking totals use the adult, child, and infant prices above.</p><Area label="Advanced tour data (JSON: itinerary, inclusions, age bands, notes and FAQs)" name="body" form={form} set={set}/></div> : <Area label="Content" name="body" form={form} set={set}/>}<Input label="SEO title" name="seo_title" form={form} set={set}/><Area label="SEO description" name="seo_description" form={form} set={set}/><Input label="Featured image URL" name="featured_image" form={form} set={set}/><Input label="Publish at" name="publish_at" type="datetime-local" form={form} set={set}/></>;
   if (resource === "media") return <><Input label="Public image URL" name="public_url" form={form} set={set} required/><Input label="Storage path (defaults to URL)" name="storage_path" form={form} set={set}/><Input label="File name" name="file_name" form={form} set={set} required/><Input label="MIME type" name="mime_type" form={form} set={set}/><Area label="Accessible alt text" name="alt_text" form={form} set={set}/><Input label="Photo credit" name="credit" form={form} set={set}/></>;
   if (resource === "availability") return <><Input label="Tour slug" name="tour_slug" form={form} set={set} required/><div className="grid gap-3 sm:grid-cols-2"><Input label="Date" name="service_date" type="date" form={form} set={set} required/><Input label="Start time" name="start_time" type="time" form={form} set={set}/><Input label="Capacity" name="capacity" type="number" form={form} set={set}/><Input label="Price override" name="price_override" type="number" form={form} set={set}/></div><Check label="Block this date" name="blocked" form={form} set={set}/><Area label="Notes" name="notes" form={form} set={set}/></>;
   if (resource === "staff") return <><Input label="Name" name="name" form={form} set={set} required/><Select label="Type" name="staff_type" options={["guide", "driver", "crew", "operations"]} form={form} set={set}/><Input label="Phone" name="phone" form={form} set={set}/><Input label="Languages, comma separated" name="languages" form={form} set={set}/><Check label="Active" name="active" form={form} set={set}/><Area label="Notes" name="notes" form={form} set={set}/></>;

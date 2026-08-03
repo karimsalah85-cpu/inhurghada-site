@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
-import { localizeTourArabic, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import {
+  localizeTourArabic,
+  localizeTourChinese,
+  localizeTourGerman,
+  localizeTourRussian,
+} from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 
 const slugs = (query: string, source = tours) => filterTours(source, query).map((tour) => tour.slug);
@@ -31,6 +36,37 @@ describe("multilingual tour search", () => {
     expect(slugs("غوص", arabicTours)).toContain("full-day-diving");
     expect(slugs("مطار توصيل", arabicTours)).toContain("hurghada-airport-transfer");
     expect(slugs("صحراء غروب", arabicTours)).toContain("quad-safari-sunset");
+  });
+
+  it("fully localizes the new courses and horse-riding tours", () => {
+    const newTourSlugs = [
+      "padi-open-water-course",
+      "ssi-open-water-course",
+      "horse-riding-sea-desert",
+      "sahl-hasheesh-horse-riding",
+    ];
+    const localizers = [
+      localizeTourArabic,
+      localizeTourGerman,
+      localizeTourRussian,
+      localizeTourChinese,
+    ];
+
+    for (const slug of newTourSlugs) {
+      const source = tours.find((tour) => tour.slug === slug);
+      expect(source).toBeDefined();
+
+      for (const localize of localizers) {
+        const localized = localize(source!);
+        expect(localized.title).not.toBe(source!.title);
+        expect(localized.description).not.toBe(source!.description);
+        expect(localized.highlights).not.toEqual(source!.highlights);
+        expect(localized.included).not.toEqual(source!.included);
+        expect(localized.notes).not.toEqual(source!.notes);
+        expect(localized.packageName).not.toBe(source!.packageName);
+        expect(localized.ageBands).not.toEqual(source!.ageBands);
+      }
+    }
   });
 
   it("is case-insensitive, accent-insensitive, and clears to all tours", () => {

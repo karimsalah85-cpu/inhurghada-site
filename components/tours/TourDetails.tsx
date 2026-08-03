@@ -3,6 +3,7 @@
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Ticket, TriangleAlert } from "lucide-react";
+import TourItinerary from "@/components/tours/TourItinerary";
 
 export default function TourDetails({ tour }: { tour: Tour }) {
   const { formatPrice, language } = useSiteSettings();
@@ -29,7 +30,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
-            <p className="mt-3 text-xl font-semibold text-slate-900">{tour.bookingMode === "inquiry" ? tr("Price on request", "Preis auf Anfrage", "Цена по запросу", "السعر عند الطلب", "价格需咨询") : <>{tour.originalPrice ? <span className="mr-2 text-base text-slate-400 line-through">{formatPrice(tour.originalPrice)}</span> : null}{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</>}</p>
+            <p className="mt-3 text-xl font-semibold text-slate-900">{tour.bookingMode === "inquiry" ? tr("Price on request", "Preis auf Anfrage", "Цена по запросу", "السعر عند الطلب", "价格需咨询") : <>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-2 text-base text-slate-400 line-through">{formatPrice(tour.originalPrice)}</span> : null}{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</>}</p>
           </div>
         </div>
       </div>
@@ -105,16 +106,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         </div>
       </div>
 
-      {tour.itinerary ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{de ? "Tagesablauf" : ru ? "Программа дня" : zh ? "行程安排" : "Day plan"}</p>
-          <ul className="mt-6 space-y-4">
-            {tour.itinerary.map((item) => (
-              <li key={item} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">{item}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      {tour.itinerary ? <TourItinerary items={tour.itinerary} /> : null}
 
       {tour.notSuitableFor?.length || tour.whatToBring?.length ? <div className="grid gap-8 lg:grid-cols-2"><div className="rounded-3xl border border-rose-200 bg-rose-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-rose-700"><TriangleAlert size={18}/>Not suitable for</p><ul className="mt-5 space-y-3">{tour.notSuitableFor?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-800">What to bring</p><ul className="mt-5 grid gap-3 sm:grid-cols-2">{tour.whatToBring?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div></div> : null}
     </div>

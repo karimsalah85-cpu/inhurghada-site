@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MessageSquareText, ShieldCheck, Star } from "lucide-react";
 import { googleReviewUrl } from "@/lib/contact";
+import GoogleReviews from "@/components/reviews/GoogleReviews";
 
 export const metadata: Metadata = {
   title: "Review Your Trip | Daily Red Sea",
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 
 export default function ReviewsPage() {
   return <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32">
+    <GoogleReviews className="mx-auto mb-10 max-w-6xl" />
     <section className="mx-auto max-w-3xl overflow-hidden rounded-3xl bg-white shadow-xl">
       <div className="bg-slate-950 p-8 text-white sm:p-12">
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Post-trip feedback</p>

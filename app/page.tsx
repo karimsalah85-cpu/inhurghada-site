@@ -13,13 +13,14 @@ import { Car, Search, BadgeCheck, ShipWheel, Waves, TentTree, Plane, Landmark, M
 import { tours, type Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
-import { googleMapsUrl, googleReviewUrl, whatsappUrl } from "@/lib/contact";
+import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
 import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
 import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
+import GoogleReviews from "@/components/reviews/GoogleReviews";
 
 
 
@@ -490,6 +491,7 @@ text-blue-600
                   rating={tour.rating}
 
                   price={tour.price}
+                  originalPrice={tour.originalPrice}
 
                   link={`${localePath(language, `/tours/${tour.slug}`)}${bookingQueryString ? `?${bookingQueryString}` : ""}`}
 
@@ -577,17 +579,7 @@ text-blue-600
         </div>
       </section>
 
-      <section className="bg-white px-6 py-20 sm:px-8">
-        <div className="mx-auto max-w-5xl rounded-[2rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-8 shadow-sm sm:p-12">
-          <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{tr("Verified traveler feedback", "Verifiziertes Feedback von Reisenden", "Проверенные отзывы путешественников", "آراء المسافرين الموثّقة")}</p>
-          <h2 className="mt-3 text-4xl font-black text-slate-900">{tr("See our real reviews on Google", "Unsere echten Google-Bewertungen ansehen", "Читайте реальные отзывы о нас в Google", "اطّلع على تقييماتنا الحقيقية على Google")}</h2>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">{tr("Ratings and customer comments are shown directly on our official Google profile, so you always see the latest verified feedback.", "Bewertungen und Kundenkommentare findest du direkt in unserem offiziellen Google-Profil – immer aktuell und verifiziert.", "Оценки и комментарии клиентов опубликованы в нашем официальном профиле Google, где всегда доступны актуальные проверенные отзывы.", "تظهر التقييمات وتعليقات العملاء مباشرةً في ملفنا الرسمي على Google لتشاهد دائمًا أحدث الآراء الموثّقة.")}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a href={googleMapsUrl} onClick={() => trackEvent("google_review_click", { placement: "home_read_reviews" })} target="_blank" rel="noopener noreferrer" className="rounded-full bg-blue-700 px-6 py-3 font-bold text-white transition hover:bg-blue-800">{tr("Read Google reviews", "Google-Bewertungen lesen", "Читать отзывы в Google", "قراءة تقييمات Google")}</a>
-            <a href={googleReviewUrl} onClick={() => trackEvent("google_review_click", { placement: "home_write_review" })} target="_blank" rel="noopener noreferrer" className="rounded-full border border-blue-200 bg-white px-6 py-3 font-bold text-blue-800 transition hover:bg-blue-50">{tr("Write a Google review", "Google-Bewertung abgeben", "Оставить отзыв в Google", "كتابة تقييم على Google")}</a>
-          </div>
-        </div>
-      </section>
+      <section className="bg-white px-6 py-20 sm:px-8"><div className="mx-auto max-w-6xl"><GoogleReviews /></div></section>
 
       <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-blue-600">{tr("Helpful answers","Hilfreiche Antworten","Полезные ответы")}</p><h2 className="mt-3 text-center text-4xl font-black text-slate-900">{tr("Hurghada excursions FAQ","FAQ zu Ausflügen in Hurghada","Вопросы об экскурсиях в Хургаде")}</h2><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-6">{(de ? [["Wie buche ich einen Ausflug?","Wähle einen Ausflug, Datum und Reisende und sende deine Buchung. Die Details bestätigen wir per WhatsApp."],["Ist die Hotelabholung verfügbar?","Viele Ausflüge beinhalten oder bieten eine Hotelabholung. Prüfe die Ausflugsdetails und gib dein Hotel bei der Buchung an."],["Wann bezahle ich?","Barzahlung bei Ankunft wird vor der Bestätigung klar angezeigt. Gesamtpreis und Zahlungsstatus stehen auch in der PDF-Bestätigung."],["Kann ich meine Buchung ändern?","Kontaktiere uns so früh wie möglich per WhatsApp. Wir prüfen die Verfügbarkeit und helfen dir."]] : ru ? [["Как забронировать экскурсию?","Выберите экскурсию, дату и гостей, затем отправьте заявку. Детали мы подтвердим в WhatsApp."],["Есть ли трансфер из отеля?","Многие экскурсии включают или предлагают трансфер. Проверьте описание и укажите отель при бронировании."],["Когда оплачивать?","Оплата наличными по прибытии ясно указывается перед подтверждением. Сумма и статус оплаты также есть в PDF."],["Можно изменить бронирование?","Свяжитесь с нами в WhatsApp как можно раньше. Мы проверим наличие мест и поможем."]] : [["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many Hurghada tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]]).map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-slate-900">{question}</summary><p className="mt-3 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
 

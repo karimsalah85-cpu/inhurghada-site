@@ -8,6 +8,7 @@ type TourCardProps = {
   image: string;
   title: string;
   price: string;
+  originalPrice?: string;
   rating: string;
   link: string;
   location: string;
@@ -25,6 +26,7 @@ export default function TourCard({
   image,
   title,
   price,
+  originalPrice,
   rating,
   link,
   location,
@@ -63,7 +65,7 @@ export default function TourCard({
           {availableTime ? <p className="mt-3 text-sm text-slate-500">{de ? "Abholung" : ru ? "Трансфер" : ar ? "الاستلام" : "Pickup"}: {availableTime}</p> : null}
           <p className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700"><ShieldCheck size={17} />{bookingMode === "inquiry" ? (de ? "Preis und Abholung auf Anfrage" : ru ? "Цена и трансфер по запросу" : ar ? "السعر والاستلام عند الطلب" : "Price and pickup on request") : de ? "Klarer Preis · Abholung bestätigt" : ru ? "Понятная цена · трансфер подтверждается" : ar ? "سعر واضح · تأكيد الاستلام" : "Clear price · pickup confirmed"}</p>
           <div className="mt-6 flex items-end justify-between gap-4">
-            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">Quotation</p><p className="text-xl font-bold text-blue-700">Request price</p></> : <><p className="text-sm text-slate-500">{de ? "Ab" : ru ? "От" : ar ? "ابتداءً من" : "From"}</p><p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || (de ? "pro Person" : ru ? "за человека" : ar ? "للشخص" : "per person")}</p></>}</div>
+            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">Quotation</p><p className="text-xl font-bold text-blue-700">Request price</p></> : <><p className="text-sm text-slate-500">{de ? "Ab" : ru ? "От" : ar ? "ابتداءً من" : "From"}</p>{originalPrice && Number(originalPrice) > Number(price) ? <p className="text-sm font-semibold text-slate-400 line-through">{formatPrice(originalPrice)}</p> : null}<p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || (de ? "pro Person" : ru ? "за человека" : ar ? "للشخص" : "per person")}</p></>}</div>
             <span className="rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition group-hover:bg-blue-800">{bookingMode === "inquiry" ? "View & inquire" : de ? "Ansehen & buchen" : ru ? "Подробнее и бронирование" : ar ? "التفاصيل والحجز" : "View & book"}</span>
           </div>
         </div>

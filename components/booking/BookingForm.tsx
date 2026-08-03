@@ -27,6 +27,7 @@ type BookingFormProps = {
   tourName: string;
   tourSlug: string;
   price?: string;
+  originalPrice?: string;
   duration?: string;
   location?: string;
   participantPricing?: ParticipantPricing;
@@ -82,7 +83,7 @@ const chineseBookingCopy: Record<string, string> = {
   "From": "起价", "person": "每人", "Clear local price · pickup confirmed after booking": "透明本地价格 · 预订后确认接送", "Date": "日期", "Time": "时间", "Select your package": "选择套餐", "Adults": "成人", "each": "每人", "Youth (9–10)": "儿童（9–10 岁）", "Youth (4–10)": "儿童（4–10 岁）", "Infants": "婴儿", "Free of charge": "免费", "Book now": "立即预订", "Added to your trip cart.": "已添加到行程购物车。", "Add to trip cart": "添加到行程购物车", "View cart": "查看购物车", "Tell us about yourself": "填写您的信息", "Required field": "必填项", "Full name": "姓名", "Enter your full name": "请输入姓名", "Email address": "电子邮箱", "WhatsApp number": "WhatsApp 号码", "Pickup location": "接送地点", "Hotel name or full pickup address": "酒店名称或完整接送地址", "Required so we can confirm your pickup on WhatsApp.": "用于通过 WhatsApp 确认接送。", "Special requests": "特别要求", "optional": "选填", "Anything we should know?": "还有什么需要我们了解？", "Before booking, please review our": "预订前请查看我们的", "cancellation policy": "取消政策", "By submitting, you agree to our terms and conditions.": "提交即表示您同意我们的条款与条件。", "Sending booking…": "正在提交预订…", "Confirm booking": "确认预订", "Change date or travelers": "更改日期或人数", "Please select at least one adult.": "请至少选择一位成人。", "Every diver must hold a valid diving license for this booking.": "本次预订中的每位潜水员都必须持有有效潜水证。", "Every quad-tour participant must be at least 9 years old.": "每位四轮摩托参与者必须年满 9 岁。", "Your booking is reserved now. You pay cash when you arrive; we confirm pickup via WhatsApp.": "您的预订已保留。抵达时以现金付款；我们会通过 WhatsApp 确认接送。",
 };
 
-export default function BookingForm({ tourName, tourSlug, price, duration, location, participantPricing, availableTimes, ageBands }: BookingFormProps) {
+export default function BookingForm({ tourName, tourSlug, price, originalPrice, duration, location, participantPricing, availableTimes, ageBands }: BookingFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { formatPrice, language } = useSiteSettings();
@@ -188,7 +189,7 @@ export default function BookingForm({ tourName, tourSlug, price, duration, locat
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl sm:p-7">
-      <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">{tr("From", "Ab", "От")} <span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice))}</span> / {tr("person", "Person", "человека")}</p><p className="mt-1 text-sm font-medium text-emerald-700">{tr("Clear local price · pickup confirmed after booking", "Klarer lokaler Preis · Abholung nach Buchung bestätigt", "Понятная местная цена · трансфер подтверждается после бронирования")}</p></div><ShieldCheck className="text-emerald-600" /></div>
+      <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">{tr("From", "Ab", "От")} {originalPrice && Number(originalPrice) > adultPrice ? <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(originalPrice)}</span> : null}<span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice))}</span> / {tr("person", "Person", "человека")}</p><p className="mt-1 text-sm font-medium text-emerald-700">{tr("Clear local price · pickup confirmed after booking", "Klarer lokaler Preis · Abholung nach Buchung bestätigt", "Понятная местная цена · трансфер подтверждается после бронирования")}</p></div><ShieldCheck className="text-emerald-600" /></div>
       {step === "select" ? <>
         <div className="mt-6 space-y-4">
           <label className="block text-sm font-bold text-slate-700">{tr("Date", "Datum", "Дата")} <RequiredMark/><div className="relative mt-1"><CalendarDays className="absolute left-3 top-3 text-slate-400" size={18}/><input required type="date" min={tomorrow()} value={date} onChange={(event) => setDate(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></div></label>

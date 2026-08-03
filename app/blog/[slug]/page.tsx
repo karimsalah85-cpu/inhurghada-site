@@ -91,7 +91,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
               {relatedTours.map((tour) => (
                 <Link key={tour.slug} href={`/tours/${tour.slug}`} className="rounded-2xl bg-white p-4 shadow-sm">
                   <p className="font-bold">{tour.title}</p>
-                  <p className="mt-1 text-sm text-slate-600">From ${tour.price} per person</p>
+                  <p className="mt-1 text-sm text-slate-600">From {tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-1 line-through text-slate-400">${tour.originalPrice}</span> : null}${tour.price} per person</p>
                   <span className="mt-2 inline-block text-sm font-bold text-blue-700">View details →</span>
                 </Link>
               ))}
