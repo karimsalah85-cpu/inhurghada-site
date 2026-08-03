@@ -54,6 +54,13 @@ describe("booking input validation", () => {
     expect(validateBookingInput({ ...quad, quadMinimumAgeConfirmed: true }).data?.quadMinimumAgeConfirmed).toBe(true);
   });
 
+  it("requires Orange Bay bookings to be at least one day in advance", () => {
+    const now = new Date("2026-08-03T08:00:00Z");
+    const orangeBay = { ...valid, tourSlug: "orange-bay" };
+    expect(validateBookingInput({ ...orangeBay, date: "2026-08-03" }, now).error).toMatch(/at least one day/i);
+    expect(validateBookingInput({ ...orangeBay, date: "2026-08-04" }, now).data?.date).toBe("2026-08-04");
+  });
+
   it("validates safety confirmations for trips in a cart", () => {
     const cart = {
       ...valid,

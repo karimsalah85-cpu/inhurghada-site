@@ -42,6 +42,7 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   if (input.youth && pricing.youth === undefined) return { error: "Youth pricing is not available for this tour." as const };
   if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
   const allowedExtras: Record<string, Record<string, number>> = {
+    "orange-bay": { "remote-pickup": 6.84 },
     "full-day-diving": { "diving-equipment": 30 },
     "luxor-private-day-trip": { "tutankhamun-ticket": 30 },
   };
@@ -49,7 +50,7 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   const extraPrices = allowedExtras[tour.slug] || {};
   if (selectedExtras.some((extra) => extraPrices[extra] === undefined)) return { error: "Choose valid optional extras." as const };
   const extrasTotal = selectedExtras.reduce((sum, extra) => sum + extraPrices[extra], 0);
-  const amount = input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0) + extrasTotal;
+  const amount = Math.round((input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0) + extrasTotal) * 100) / 100;
   const guests = input.adults + input.youth + input.infants;
   const guestSummary = `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
   return { data: { amount, guests, guestSummary, tourName: tour.title } };

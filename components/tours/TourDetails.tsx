@@ -2,7 +2,7 @@
 
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
-import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Ticket } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Ticket, TriangleAlert } from "lucide-react";
 
 export default function TourDetails({ tour }: { tour: Tour }) {
   const { formatPrice, language } = useSiteSettings();
@@ -29,10 +29,12 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
-            <p className="mt-3 text-xl font-semibold text-slate-900">{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</p>
+            <p className="mt-3 text-xl font-semibold text-slate-900">{tour.originalPrice ? <span className="mr-2 text-base text-slate-400 line-through">{formatPrice(tour.originalPrice)}</span> : null}{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</p>
           </div>
         </div>
       </div>
+
+      {tour.ageBands ? <div className="rounded-3xl border border-blue-200 bg-blue-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">Participant ages</p><div className="mt-5 grid gap-3 sm:grid-cols-3">{[tour.ageBands.adults, tour.ageBands.children, tour.ageBands.infants].map((item) => <p key={item} className="rounded-2xl bg-white p-4 font-bold text-slate-800">{item}</p>)}</div></div> : null}
 
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Highlights","Höhepunkte","Основные моменты","أهم المميزات","行程亮点")}</p>
@@ -115,6 +117,8 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </ul>
         </div>
       ) : null}
+
+      {tour.notSuitableFor?.length || tour.whatToBring?.length ? <div className="grid gap-8 lg:grid-cols-2"><div className="rounded-3xl border border-rose-200 bg-rose-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-rose-700"><TriangleAlert size={18}/>Not suitable for</p><ul className="mt-5 space-y-3">{tour.notSuitableFor?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-800">What to bring</p><ul className="mt-5 grid gap-3 sm:grid-cols-2">{tour.whatToBring?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div></div> : null}
     </div>
   );
 }

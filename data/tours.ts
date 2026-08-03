@@ -5,6 +5,7 @@ export type Tour = {
   title: string;
   image: string;
   price: string;
+  originalPrice?: string;
   rating: string;
   reviews?: string;
   location: string;
@@ -20,6 +21,9 @@ export type Tour = {
   packageLabel?: string;
   priceUnit?: string;
   itinerary?: string[];
+  ageBands?: { adults: string; children: string; infants: string };
+  notSuitableFor?: string[];
+  whatToBring?: string[];
   participantPricing?: {
     adults: number;
     youth?: number;
@@ -44,7 +48,10 @@ export const tours: Tour[] = [
 
     image: "/images/orange-bay.jpeg",
 
-    price: "25",
+    // Catalog prices use USD as the site base currency. These values display as
+    // EUR 41 / EUR 50 / EUR 22 with the configured EUR exchange rate.
+    price: "46.77",
+    originalPrice: "57.03",
 
     rating: "5.0",
     reviews: "30",
@@ -54,7 +61,7 @@ export const tours: Tour[] = [
     duration: "8 Hours",
 
     description:
-      "Escape to the Red Sea with a full-day Orange Bay boat trip from Hurghada. Cruise on a comfortable yacht, snorkel in vibrant coral gardens, enjoy lunch onboard, and relax on the pristine beaches of Orange Bay Island.",
+      "Enjoy a full-day Orange Bay trip with two-way pickup from Hurghada, a Red Sea boat cruise, snorkeling, island time, lunch, drinks, snacks and water activities.",
 
     highlights: [
       "Relax on the beautiful Orange Bay Island",
@@ -67,36 +74,37 @@ export const tours: Tour[] = [
       "Enjoy a laid-back day with lunch and drinks onboard",
     ],
     included: [
-      "Hotel pickup & drop-off",
-      "Luxury yacht cruise",
-      "Orange Bay Island visit",
-      "Two snorkeling stops",
-      "Snorkeling equipment",
-      "Lunch onboard",
-      "Soft drinks and beverages",
-      "Professional crew assistance",
-      "Life jackets and safety equipment",
+      "Hotel pickup and drop-off in Hurghada",
+      "Boat cruise",
+      "Tour guide",
+      "Snorkeling stop with use of snorkeling equipment",
+      "Stop at Orange Bay Island",
+      "Open buffet: fish, chicken, chicken nuggets, oven-roasted potatoes, rice, pasta and meat kofta",
+      "Four different kinds of salad and three different kinds of fruit",
+      "Unlimited soft drinks, hot drinks and snacks",
+      "One massage per guest",
+      "Life jackets",
+      "Tax and marine fee",
+      "Drinks on the island",
     ],
     notIncluded: [
-      "Underwater photos & videos",
-      "Beach towels",
-      "Swimwear",
-      "Sunscreen",
+      "Pickup from Makadi Bay, Soma Bay, El Gouna, Sahl Hasheesh or Safaga (€6 extra per booking)",
+      "Personal expenses",
     ],
     notes: [
-      "Provide a valid phone number and email for easy contact.",
-      "Pickup time will be confirmed via WhatsApp after your booking request is received.",
-      "Bring your passport or a copy as it may be required at the port.",
-      "Bring swimwear, towels, and sunscreen for comfort.",
-      "Wear beach shoes and a light cover-up for sun protection.",
-      "The tour is ideal for families, couples, and solo travelers looking for a relaxed day at sea.",
+      "Start time is 7:30 AM. Your exact pickup time is confirmed by WhatsApp.",
+      "Bookings must be made at least one day before the trip.",
+      "Free cancellation is available until one day before the trip.",
+      "Two-way pickup and transfer are included from Hurghada.",
+      "Pickup from Makadi Bay, Soma Bay, El Gouna, Sahl Hasheesh or Safaga costs €6 extra per booking.",
     ],
     packageName: "Orange Bay Island Snorkeling Boat Trip",
     packageDescription: "Escape to Orange Bay Island from Hurghada. Relax, swim and snorkel on a luxury yacht with lunch and hotel transfers.",
-    packagePrice: "25",
+    packagePrice: "46.77",
     packageLabel: "Adult",
-    participantPricing: { adults: 25, youth: 15, infants: 0 },
-    availableTimes: ["08:00"],
+    participantPricing: { adults: 46.77, youth: 25.09, infants: 0 },
+    ageBands: { adults: "Adults (ages 12-99)", children: "Children (ages 2-11)", infants: "Infants (age 1 and younger)" },
+    availableTimes: ["07:30"],
     category: "Island Trip",
     badge: "Most Popular",
     seoTitle: "Orange Bay Island Boat Trip from Hurghada | Snorkeling and Lunch",
@@ -105,14 +113,22 @@ export const tours: Tour[] = [
       { question: "Is lunch included on the Orange Bay trip?", answer: "Yes. Lunch onboard and soft drinks are included in this full-day boat trip." },
       { question: "Is Orange Bay suitable for families?", answer: "Yes. This relaxed island day is popular with families, couples, and groups. Infants travel free in the booking form." },
       { question: "How will I receive my pickup time?", answer: "After you book, Daily Red Sea confirms your pickup time and hotel location by WhatsApp." },
+      { question: "What is the cancellation policy?", answer: "Cancellation is free until one day before the trip. The trip must also be booked at least one day in advance." },
     ],
     itinerary: [
-      "Hotel pickup in Hurghada and transfer to the marina",
-      "Luxury yacht cruise across the crystal-clear Red Sea",
-      "Two snorkeling stops at vibrant coral reef locations",
-      "Relaxing visit to Orange Bay Island with free time on the beach",
-      "Lunch onboard and return transfer to your hotel",
+      "Pickup location options · Van transfer (30 minutes)",
+      "Red Sea · Boat cruise (45 minutes)",
+      "Orange Bay · Island visit (75 minutes)",
+      "Jazā'ir Jiftūn · Snorkeling (45 minutes, optional)",
+      "Red Sea · Lunch (45 minutes, optional)",
+      "Jazīrat Abū Rimāthī · Snorkeling (45 minutes, optional)",
+      "Red Sea · Banana boat ride (45 minutes, optional)",
+      "Red Sea · Free time (45 minutes, optional)",
+      "Red Sea Governorate · Return boat cruise (45 minutes)",
+      "Van transfer (30 minutes) · Drop-off locations",
     ],
+    notSuitableFor: ["People with mobility impairments", "Wheelchair users"],
+    whatToBring: ["Sunglasses", "Sun hat", "Swimwear", "Towel", "Sunscreen", "Cash"],
   },
 
 

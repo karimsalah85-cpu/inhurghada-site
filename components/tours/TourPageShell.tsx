@@ -11,6 +11,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
+import { googleReviewUrl } from "@/lib/contact";
 
 export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
   const de = locale === "de";
@@ -119,11 +120,13 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
                   location={tour.location}
                   participantPricing={tour.participantPricing}
                   availableTimes={tour.availableTimes}
+                  ageBands={tour.ageBands}
                 />}
             </Suspense>
           </div>
         </div>
       </section>
+      <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8"><div className="rounded-3xl bg-cyan-950 p-8 text-white sm:flex sm:items-center sm:justify-between sm:gap-8"><div><p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">Customer reviews</p><h2 className="mt-3 text-3xl font-black">Already travelled with us?</h2><p className="mt-3 max-w-2xl text-slate-300">Share a review of your trip to help future guests choose their experience.</p></div><a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex shrink-0 rounded-full bg-white px-6 py-3 font-bold text-cyan-950 sm:mt-0">Review this trip</a></div></section>
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">{de ? "Vor der Buchung" : ru ? "Перед бронированием" : "Before you book"}</p><h2 className="mt-3 text-3xl font-bold text-slate-900">{de ? "Häufig gestellte Fragen" : ru ? "Частые вопросы" : "Frequently asked questions"}</h2><div className="mt-6 divide-y divide-slate-200">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-slate-900">{faq.question}</summary><p className="mt-3 leading-7 text-slate-600">{faq.answer}</p></details>)}</div></div>

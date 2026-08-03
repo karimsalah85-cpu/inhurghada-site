@@ -82,6 +82,10 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
   const tourSlug = text(body.tourSlug, 80);
+  if (type === "tour" && tourSlug === "orange-bay") {
+    const todayInCairo = cairoDateTimeParts(now).date;
+    if (date <= todayInCairo) return { error: "Orange Bay bookings must be made at least one day before the trip." as const };
+  }
   const selectedCartItems = cartItems(body.cartItems);
   if (tourSlug === "multi-trip") {
     if (selectedCartItems.length < 1) return { error: "Add at least one trip to your cart." as const };
