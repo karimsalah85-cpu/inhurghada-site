@@ -504,6 +504,7 @@ text-blue-600
                   category={tour.category}
                   availableTime={tour.availableTimes?.[0]}
                   priceUnit={tour.priceUnit}
+                  bookingMode={tour.bookingMode}
 
                 />
 

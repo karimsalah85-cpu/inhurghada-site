@@ -29,12 +29,10 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
-            <p className="mt-3 text-xl font-semibold text-slate-900">{tour.originalPrice ? <span className="mr-2 text-base text-slate-400 line-through">{formatPrice(tour.originalPrice)}</span> : null}{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</p>
+            <p className="mt-3 text-xl font-semibold text-slate-900">{tour.bookingMode === "inquiry" ? tr("Price on request", "Preis auf Anfrage", "Цена по запросу", "السعر عند الطلب", "价格需咨询") : <>{tour.originalPrice ? <span className="mr-2 text-base text-slate-400 line-through">{formatPrice(tour.originalPrice)}</span> : null}{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</>}</p>
           </div>
         </div>
       </div>
-
-      {tour.ageBands ? <div className="rounded-3xl border border-blue-200 bg-blue-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-700">Participant ages</p><div className="mt-5 grid gap-3 sm:grid-cols-3">{[tour.ageBands.adults, tour.ageBands.children, tour.ageBands.infants].map((item) => <p key={item} className="rounded-2xl bg-white p-4 font-bold text-slate-800">{item}</p>)}</div></div> : null}
 
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Highlights","Höhepunkte","Основные моменты","أهم المميزات","行程亮点")}</p>
@@ -96,8 +94,8 @@ export default function TourDetails({ tour }: { tour: Tour }) {
                 <p className="mt-2 text-sm leading-7 text-slate-600">{tour.packageDescription ?? tour.description}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-500">{de ? "Ab" : ru ? "От" : zh ? "起价" : "Starting from"}</p>
-                <p className="text-2xl font-bold text-cyan-700">{formatPrice(tour.packagePrice ?? tour.price)}</p>
+                <p className="text-sm text-slate-500">{tour.bookingMode === "inquiry" ? tr("Quotation", "Angebot", "Предложение", "عرض سعر", "报价") : de ? "Ab" : ru ? "От" : zh ? "起价" : "Starting from"}</p>
+                <p className="text-2xl font-bold text-cyan-700">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(tour.packagePrice ?? tour.price)}</p>
               </div>
             </div>
             <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-cyan-700">

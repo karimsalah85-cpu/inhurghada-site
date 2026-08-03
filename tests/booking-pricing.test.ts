@@ -6,11 +6,11 @@ const transfer = { type: "transfer" as const, tourName: "", adults: 0, youth: 0,
 
 describe("authoritative booking pricing", () => {
   it("calculates adult, youth and infant tour pricing", () => {
-    expect(calculateBookingPrice({ ...tour, adults: 2, youth: 1, infants: 1 }).data).toMatchObject({ amount: 118.63, guests: 4 });
+    expect(calculateBookingPrice({ ...tour, adults: 2, youth: 1, infants: 1 }).data).toMatchObject({ amount: 109.01, guests: 4 });
   });
 
-  it("adds the Orange Bay remote pickup supplement once per booking", () => {
-    expect(calculateBookingPrice({ ...tour, tourSlug: "orange-bay", extras: ["remote-pickup"] }).data?.amount).toBeCloseTo(53.61);
+  it("adds the Orange Bay remote pickup supplement for each adult", () => {
+    expect(calculateBookingPrice({ ...tour, tourSlug: "orange-bay", adults: 2, extras: ["remote-pickup"] }).data?.amount).toBeCloseTo(92.46);
   });
 
   it("rejects an unknown tour", () => {
@@ -65,7 +65,7 @@ describe("authoritative booking pricing", () => {
         { tourSlug: "full-day-diving", date: "2099-01-02", time: "08:00", adults: 1, youth: 0, infants: 0, extras: [] },
       ],
     });
-    expect(result.data).toMatchObject({ amount: 173.63, guests: 4, guestSummary: "2 trips · 4 participant places" });
+    expect(result.data).toMatchObject({ amount: 164.01, guests: 4, guestSummary: "2 trips · 4 participant places" });
     expect(result.data && "items" in result.data ? result.data.items : []).toHaveLength(2);
   });
 });

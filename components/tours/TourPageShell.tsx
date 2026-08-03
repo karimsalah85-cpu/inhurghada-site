@@ -11,7 +11,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
-import { googleReviewUrl } from "@/lib/contact";
+import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
 
 export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
   const de = locale === "de";
@@ -88,9 +88,10 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
   const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : zh ? localizeTourChinese(item) : item);
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
+  const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
   const schema = { "@context": "https://schema.org", "@graph": [
     { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
-    { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl }, provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } },
+    tourSchema,
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
   return (
@@ -110,8 +111,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
           <TourDetails tour={tour} />
 
           <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{de ? "Jetzt reservieren, bei Ankunft bar bezahlen" : ru ? "Забронируйте сейчас, оплатите наличными по прибытии" : zh ? "立即预订，抵达后现金付款" : "Reserve now, pay cash on arrival"}</p><p className="mt-1">{de ? "Nach deiner Anfrage bestätigen wir die Abholdetails per WhatsApp." : ru ? "После заявки мы подтвердим детали трансфера через WhatsApp." : zh ? "提交请求后，我们会通过 WhatsApp 确认接送详情。" : "We confirm pickup details by WhatsApp after your request."}</p></div>
-            <Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
+            {tour.bookingMode === "inquiry" ? <div className="rounded-3xl border border-cyan-200 bg-white p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-700">Price and availability</p><h2 className="mt-3 text-3xl font-black text-slate-950">Request a verified quotation</h2><p className="mt-4 leading-7 text-slate-600">Daily Red Sea will confirm the supplier, departure, pickup area, participant ages and final price. No payment is taken now.</p><a href={whatsappUrl(`Hello Daily Red Sea, please send me the current price and availability for ${tour.title}.`)} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-emerald-600 px-6 py-4 font-bold text-white hover:bg-emerald-700">Request on WhatsApp</a></div> : <><div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{de ? "Jetzt reservieren, bei Ankunft bar bezahlen" : ru ? "Забронируйте сейчас, оплатите наличными по прибытии" : zh ? "立即预订，抵达后现金付款" : "Reserve now, pay cash on arrival"}</p><p className="mt-1">{de ? "Nach deiner Anfrage bestätigen wir die Abholdetails per WhatsApp." : ru ? "После заявки мы подтвердим детали трансфера через WhatsApp." : zh ? "提交请求后，我们会通过 WhatsApp 确认接送详情。" : "We confirm pickup details by WhatsApp after your request."}</p></div><Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
               {transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}
                   tourSlug={tour.slug}
@@ -122,7 +122,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
                   availableTimes={tour.availableTimes}
                   ageBands={tour.ageBands}
                 />}
-            </Suspense>
+            </Suspense></>}
           </div>
         </div>
       </section>

@@ -21,8 +21,8 @@ export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: 
     const result = tours.filter((tour) =>
       !normalized || [tour.title, tour.description, tour.location, tour.duration, ...(tour.highlights || [])].join(" ").toLowerCase().includes(normalized)
     );
-    if (sort === "price-low") return [...result].sort((a, b) => Number(a.price) - Number(b.price));
-    if (sort === "price-high") return [...result].sort((a, b) => Number(b.price) - Number(a.price));
+    if (sort === "price-low") return [...result].sort((a, b) => (a.bookingMode === "inquiry" ? 1 : b.bookingMode === "inquiry" ? -1 : Number(a.price) - Number(b.price)));
+    if (sort === "price-high") return [...result].sort((a, b) => (a.bookingMode === "inquiry" ? 1 : b.bookingMode === "inquiry" ? -1 : Number(b.price) - Number(a.price)));
     return result;
   }, [query, sort, tours]);
 
@@ -64,11 +64,11 @@ export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: 
                   <div className="mt-5 grid gap-2 text-sm text-slate-600">
                     <span className="flex items-center gap-2"><Clock size={17} className="text-cyan-700" />{tour.duration}</span>
                     <span className="flex items-center gap-2"><MapPin size={17} className="text-cyan-700" />{tour.location}</span>
-                    <span className="flex items-center gap-2"><ShieldCheck size={17} className="text-emerald-600" />{de ? "Klarer Preis · Abholung bestätigt" : ru ? "Понятная цена · трансфер подтверждается" : "Clear price · pickup confirmed"}</span>
+                    <span className="flex items-center gap-2"><ShieldCheck size={17} className="text-emerald-600" />{tour.bookingMode === "inquiry" ? "Price and pickup on request" : de ? "Klarer Preis · Abholung bestätigt" : ru ? "Понятная цена · трансфер подтверждается" : "Clear price · pickup confirmed"}</span>
                   </div>
                   <div className="mt-6 flex items-end justify-between gap-4">
-                    <div><p className="text-xs text-slate-500">{de ? "Ab" : ru ? "От" : "From"}</p><p className="text-2xl font-black text-blue-700">{formatPrice(tour.price)}</p><p className="text-xs text-slate-500">{tour.priceUnit || (de ? "pro Person" : ru ? "за человека" : "per person")}</p></div>
-                    <span className="rounded-full bg-blue-700 px-4 py-3 text-sm font-bold text-white">{de ? "Ansehen & buchen" : ru ? "Подробнее и бронирование" : "View & book"}</span>
+                    <div>{tour.bookingMode === "inquiry" ? <><p className="text-xs text-slate-500">Quotation</p><p className="text-xl font-black text-blue-700">Request price</p></> : <><p className="text-xs text-slate-500">{de ? "Ab" : ru ? "От" : "From"}</p><p className="text-2xl font-black text-blue-700">{formatPrice(tour.price)}</p><p className="text-xs text-slate-500">{tour.priceUnit || (de ? "pro Person" : ru ? "за человека" : "per person")}</p></>}</div>
+                    <span className="rounded-full bg-blue-700 px-4 py-3 text-sm font-bold text-white">{tour.bookingMode === "inquiry" ? "View & inquire" : de ? "Ansehen & buchen" : ru ? "Подробнее и бронирование" : "View & book"}</span>
                   </div>
                   {hasReviews ? <p className="mt-4 text-xs font-semibold text-amber-600">★ {tour.rating} · {reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</p> : null}
                 </div>
