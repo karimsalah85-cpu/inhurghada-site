@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/privacy-policy",
     "/terms-conditions",
     "/image-credits",
-    ...destinations.filter((destination) => destination.active).map((destination) => `/destinations/${destination.slug}`),
+    ...destinations.map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
     ...tours.map((tour) => `/tours/${tour.slug}`),
   ];

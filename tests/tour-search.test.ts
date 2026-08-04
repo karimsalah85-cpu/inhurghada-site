@@ -40,6 +40,9 @@ describe("multilingual tour search", () => {
 
   it("fully localizes the new courses and horse-riding tours", () => {
     const newTourSlugs = [
+      "dolphin-house-snorkeling",
+      "hula-hula-island-snorkeling",
+      "magawish-speedboat",
       "padi-open-water-course",
       "ssi-open-water-course",
       "horse-riding-sea-desert",

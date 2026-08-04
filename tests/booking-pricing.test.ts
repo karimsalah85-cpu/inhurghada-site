@@ -54,6 +54,16 @@ describe("authoritative booking pricing", () => {
     expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total" } });
   });
 
+  it("charges the Magawish private boat once for the whole group", () => {
+    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "magawish-speedboat", adults: 6 });
+    expect(result.data).toMatchObject({ amount: 150, guests: 6, guestSummary: "6 passengers" });
+  });
+
+  it("uses the supplied Dolphin House adult, child and infant prices", () => {
+    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "dolphin-house-snorkeling", adults: 2, youth: 1, infants: 1 });
+    expect(result.data).toMatchObject({ amount: 65, guests: 4 });
+  });
+
   it("prices multiple cart trips from the server-side catalog", () => {
     const result = calculateBookingPrice({
       ...tour,

@@ -21,6 +21,7 @@ import { localePath } from "@/lib/i18n";
 import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 import GoogleReviews from "@/components/reviews/GoogleReviews";
+import { destinations } from "@/lib/destinations";
 
 
 
@@ -96,7 +97,8 @@ function HomeContent() {
 
   const [liveTours, setLiveTours] = useState<Tour[]>(tours);
   useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
-  const displayTours = de ? liveTours.map(localizeTourGerman) : ru ? liveTours.map(localizeTourRussian) : ar ? liveTours.map(localizeTourArabic) : zh ? liveTours.map(localizeTourChinese) : liveTours;
+  const hurghadaTours = liveTours.filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada");
+  const displayTours = de ? hurghadaTours.map(localizeTourGerman) : ru ? hurghadaTours.map(localizeTourRussian) : ar ? hurghadaTours.map(localizeTourArabic) : zh ? hurghadaTours.map(localizeTourChinese) : hurghadaTours;
   const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];
@@ -117,6 +119,31 @@ function HomeContent() {
 
 
       <Hero />
+
+      <section className="bg-white px-6 py-14 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-3xl">
+            <p className="font-semibold uppercase tracking-[0.24em] text-cyan-700">Red Sea destinations</p>
+            <h2 className="mt-3 text-4xl font-black text-slate-950">Choose where you want to explore</h2>
+            <p className="mt-4 text-lg leading-8 text-slate-600">Hurghada is available now. Marsa Alam is being prepared as a separate destination with its own trips and booking conditions.</p>
+          </div>
+          <div className="mt-9 grid gap-5 md:grid-cols-2">
+            {destinations.map((destination) => (
+              <Link key={destination.slug} href={`/destinations/${destination.slug}`} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
+                <Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-7 text-white">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-3xl font-black">{destination.name}</h3>
+                    {destination.comingSoon ? <span className="rounded-full bg-amber-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-950">Coming soon</span> : <span className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-950">Available now</span>}
+                  </div>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-200">{destination.tagline}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="bg-white px-6 py-10 sm:px-8"><div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-2 lg:grid-cols-3">{(de ? ["Lokaler Anbieter in Hurghada", "Faire Preise", "Hotelabholung verfügbar", "Schnelle WhatsApp-Buchung", "Deutschsprachige Betreuung", "Keine versteckten Gebühren"] : ru ? ["Местный оператор в Хургаде", "Выгодные цены", "Трансфер из отеля", "Быстрое бронирование в WhatsApp", "Поддержка на русском языке", "Без скрытых доплат"] : ["Local Hurghada operator", "Best value prices", "Hotel pickup available", "Instant WhatsApp booking", "English-speaking support", "No hidden fees"]).map((item) => <div key={item} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700"><BadgeCheck className="shrink-0 text-emerald-600" size={19}/>{item}</div>)}</div></section>
 

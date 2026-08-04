@@ -53,9 +53,14 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     const option = extraPrices[extra];
     return sum + option.price * (option.charge === "adult" ? input.adults : 1);
   }, 0);
-  const amount = Math.round((input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0) + extrasTotal) * 100) / 100;
+  const participantTotal = tour.pricingMode === "per-booking"
+    ? pricing.adults
+    : input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0);
+  const amount = Math.round((participantTotal + extrasTotal) * 100) / 100;
   const guests = input.adults + input.youth + input.infants;
-  const guestSummary = `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
+  const guestSummary = tour.pricingMode === "per-booking"
+    ? `${guests} passenger${guests === 1 ? "" : "s"}`
+    : `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
   return { data: { amount, guests, guestSummary, tourName: tour.title } };
 }
 

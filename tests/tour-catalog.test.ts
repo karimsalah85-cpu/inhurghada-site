@@ -12,7 +12,7 @@ describe("tour catalog publication safety", () => {
   });
 
   it("gives every newly priced comparison tour usable conditions and a storefront image", () => {
-    const comparisonSlugs = ["dolphin-house-snorkeling", "paradise-island", "magawish-speedboat", "royal-seascope-submarine", "beginner-scuba-diving", "padi-open-water-course", "ssi-open-water-course", "super-safari", "desert-stargazing", "horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "cairo-giza-day-trip-bus", "cairo-day-trip-flight", "el-gouna-city-boat-tour", "turkish-bath-spa"];
+    const comparisonSlugs = ["dolphin-house-snorkeling", "hula-hula-island-snorkeling", "paradise-island", "magawish-speedboat", "royal-seascope-submarine", "beginner-scuba-diving", "padi-open-water-course", "ssi-open-water-course", "super-safari", "desert-stargazing", "horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "cairo-giza-day-trip-bus", "cairo-day-trip-flight", "el-gouna-city-boat-tour", "turkish-bath-spa"];
     const comparisonTours = tours.filter((tour) => comparisonSlugs.includes(tour.slug));
     expect(comparisonTours).toHaveLength(comparisonSlugs.length);
     for (const tour of comparisonTours) {
@@ -31,5 +31,29 @@ describe("tour catalog publication safety", () => {
     expect(ssi).toBeDefined();
     expect(ssi?.originalPrice).toBeUndefined();
     expect(ssi?.ageBands?.adults).toBe("Students (ages 10+)");
+  });
+
+  it("keeps yesterday's three new sea trips at the requested prices", () => {
+    const dolphin = tours.find((tour) => tour.slug === "dolphin-house-snorkeling");
+    const hulaHula = tours.find((tour) => tour.slug === "hula-hula-island-snorkeling");
+    const magawish = tours.find((tour) => tour.slug === "magawish-speedboat");
+
+    for (const tour of [dolphin, hulaHula]) {
+      expect(tour?.price).toBe("25");
+      expect(tour?.participantPricing).toEqual({ adults: 25, youth: 15, infants: 0 });
+      expect(tour?.ageBands?.children).toBe("Children (ages 4–10)");
+    }
+    expect(magawish?.price).toBe("150");
+    expect(magawish?.pricingMode).toBe("per-booking");
+    expect(magawish?.notIncluded).toContain("Magawish Island entrance fee ($10 per person, paid separately)");
+  });
+
+  it("prices both open-water courses at EUR 300 and excludes EUR 100 materials", () => {
+    for (const slug of ["padi-open-water-course", "ssi-open-water-course"]) {
+      const course = tours.find((tour) => tour.slug === slug);
+      expect(course?.price).toBe("342.20");
+      expect(course?.notIncluded?.some((item) => item.includes("€100"))).toBe(true);
+      expect(course?.notes?.some((item) => item.includes("€300") && item.includes("€100"))).toBe(true);
+    }
   });
 });

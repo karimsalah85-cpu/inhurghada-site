@@ -83,6 +83,21 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "دورة SSI للمياه المفتوحة لمدة 3 أيام", packageDescription: "تعلم رقمي وتدريب عملي لمدة ثلاثة أيام مع غطستين يومياً والمعدات والغداء والمشروبات والتوصيل.", packageLabel: "متدرب", ageBands: { adults: "المتدربون (10 سنوات فأكثر)", children: "", infants: "" }, availableTimes: ["08:00"],
     notSuitableFor: ["الأطفال دون 10 سنوات", "الحوامل", "مرضى القلب أو الظهر", "من لا يستوفي المتطلبات الطبية ومتطلبات السباحة"], whatToBring: ["جواز سفر أو بطاقة هوية", "منشفة", "ملابس سباحة", "نظارة شمسية"], seoTitle: "دورة SSI للمياه المفتوحة لمدة 3 أيام في الغردقة", metaDescription: "احجز دورة SSI للمياه المفتوحة في الغردقة مع التعلم الرقمي وغطستين يومياً والمعدات والغداء والتوصيل."
   },
+  "dolphin-house-snorkeling": {
+    title: "رحلة دولفين هاوس والسنوركلينج من الغردقة", description: "رحلة يخت لمدة سبع ساعات إلى منطقة دولفين هاوس مع محطتين للسنوركلينج وغداء ومشروبات وتوصيل الفندق.",
+    highlights: ["مشاهدة الدلافين البرية دون ضمان", "محطتان للسنوركلينج", "غداء ومشروبات على اليخت", "طاقم محترف ومعدات سلامة"], included: ["توصيل فنادق الغردقة", "رحلة يخت", "زيارة دولفين هاوس", "معدات السنوركلينج", "الغداء والمشروبات"],
+    notes: ["مشاهدة الدلافين أو السباحة قربها غير مضمونة.", "قد يتغير المسار حسب الطقس وحالة البحر.", "يؤكد وقت الاستلام عبر واتساب."], packageName: "رحلة دولفين هاوس والسنوركلينج", ageBands: { adults: "البالغون (11 سنة فأكثر)", children: "الأطفال (4–10 سنوات)", infants: "الرضع (0–3 سنوات)" },
+  },
+  "hula-hula-island-snorkeling": {
+    title: "رحلة جزيرة هولا هولا والسنوركلينج", description: "يوم كامل على يخت من الغردقة يشمل ساعة على جزيرة هولا هولا ومحطتين للسنوركلينج وغداء ومشروبات.",
+    highlights: ["ساعة على جزيرة هولا هولا", "محطتان للسنوركلينج", "غداء ومشروبات", "توصيل فنادق الغردقة"], included: ["توصيل الفندق", "رحلة يخت", "دخول الجزيرة", "معدات ومرشد سنوركلينج", "الغداء والمشروبات"],
+    notes: ["يؤكد وقت الاستلام عبر واتساب.", "الرحلة مناسبة للمبتدئين.", "قد تتغير مواقع الشعاب حسب حالة البحر."], packageName: "رحلة جزيرة هولا هولا", ageBands: { adults: "البالغون (11 سنة فأكثر)", children: "الأطفال (4–10 سنوات)", infants: "الرضع (0–3 سنوات)" },
+  },
+  "magawish-speedboat": {
+    title: "قارب سريع خاص إلى جزيرة مجاويش", description: "رحلة قارب سريع خاصة لمدة أربع ساعات لمجموعتك مع توصيل الغردقة وسنوركلينج ووقت حر في جزيرة مجاويش.",
+    highlights: ["قارب سريع خاص", "جزيرة مجاويش", "سنوركلينج", "توصيل الفندق"], included: ["توصيل فنادق الغردقة", "القارب والقبطان والوقود", "معدات السنوركلينج", "معدات السلامة"],
+    notes: ["رسم دخول الجزيرة 10 دولارات للشخص ويدفع منفصلاً.", "أحضر جواز السفر أو صورة منه.", "قد يتغير المسار حسب حالة البحر."], packageName: "قارب مجاويش الخاص", ageBands: { adults: "ركاب مجموعتك الخاصة", children: "", infants: "" },
+  },
   "horse-riding-sea-desert": {
     title: "ركوب الخيل في صحراء وبحر الغردقة مع سباحة اختيارية", location: "الغردقة، مصر", duration: "2–4 ساعات", category: "نشاط خارجي",
     description: "استكشف صحراء الغردقة وساحل البحر الأحمر على ظهر حصان مدرّب برفقة مرشد محترف، مع إمكانية دخول المياه الضحلة عندما تسمح الظروف.",
@@ -214,6 +229,21 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     notes: ["Kostenlose Stornierung bis 24 Stunden vor Beginn.", "Beginn um 08:00 Uhr; Abholung per WhatsApp.", "Mindestalter 10 Jahre; Minderjährige benötigen eine unterschriebene Zustimmung.", "Die Zertifizierung setzt das erfolgreiche Erfüllen aller SSI-Anforderungen voraus.", "Für Junior-Teilnehmer gelten Tiefen- und Aufsichtsgrenzen.", "Beachte nach dem letzten Tauchgang die Flugverbotszeit."],
     packageName: "3-tägiger SSI Open Water Diver Kurs", packageDescription: "Drei Tage digitales Lernen und Praxistraining mit zwei Tauchgängen täglich, Ausrüstung, Verpflegung und Transfer.", packageLabel: "Teilnehmer", ageBands: { adults: "Teilnehmer (ab 10 Jahren)", children: "", infants: "" }, availableTimes: ["08:00"],
     notSuitableFor: ["Kinder unter 10 Jahren", "Schwangere", "Personen mit schweren Rücken- oder Herzproblemen", "Personen, die medizinische oder Schwimmanforderungen nicht erfüllen"], whatToBring: ["Reisepass oder Ausweis", "Handtuch", "Badebekleidung", "Sonnenbrille"], seoTitle: "3-tägiger SSI Open Water Diver Kurs in Hurghada", metaDescription: "Buche einen dreitägigen SSI Open Water Diver Kurs in Hurghada mit digitalem Lernen, zwei Tauchgängen täglich, Ausrüstung und Transfer."
+  },
+  "dolphin-house-snorkeling": {
+    title: "Dolphin-House-Schnorcheltour ab Hurghada", description: "Siebenstündige Yachttour zum Dolphin House mit zwei Schnorchelstopps, Mittagessen, Getränken und Hoteltransfer.",
+    highlights: ["Wilde Delfine mit etwas Glück", "Zwei Schnorchelstopps", "Mittagessen und Getränke", "Professionelle Crew"], included: ["Hoteltransfer in Hurghada", "Yachtfahrt", "Dolphin House", "Schnorchelausrüstung", "Mittagessen und Getränke"],
+    notes: ["Delfinsichtungen und Schwimmen sind nicht garantiert.", "Route kann sich mit Wetter und Seegang ändern.", "Abholung wird per WhatsApp bestätigt."], packageName: "Dolphin-House-Schnorcheltour", ageBands: { adults: "Erwachsene (ab 11 Jahren)", children: "Kinder (4–10 Jahre)", infants: "Kleinkinder (0–3 Jahre)" },
+  },
+  "hula-hula-island-snorkeling": {
+    title: "Hula-Hula-Insel Bootstour und Schnorcheln", description: "Ganztägige Yachttour mit einer Stunde auf Hula Hula Island, zwei Schnorchelstopps, Mittagessen und Getränken.",
+    highlights: ["Eine Stunde auf Hula Hula Island", "Zwei Schnorchelstopps", "Mittagessen und Getränke", "Hoteltransfer"], included: ["Hoteltransfer", "Yachtfahrt", "Inselzugang", "Schnorchelausrüstung und Guide", "Mittagessen und Getränke"],
+    notes: ["Abholung wird per WhatsApp bestätigt.", "Für Anfänger geeignet.", "Riffplätze können sich je nach Seegang ändern."], packageName: "Hula-Hula-Insel Bootstour", ageBands: { adults: "Erwachsene (ab 11 Jahren)", children: "Kinder (4–10 Jahre)", infants: "Kleinkinder (0–3 Jahre)" },
+  },
+  "magawish-speedboat": {
+    title: "Privates Schnellboot zur Magawish-Insel", description: "Vierstündiges privates Schnellboot für deine Gruppe mit Hurghada-Transfer, Schnorchelstopp und Freizeit auf Magawish Island.",
+    highlights: ["Exklusives privates Schnellboot", "Magawish Island", "Schnorchelstopp", "Hoteltransfer"], included: ["Hurghada-Hoteltransfer", "Boot, Kapitän und Treibstoff", "Schnorchelausrüstung", "Sicherheitsausrüstung"],
+    notes: ["Inseleintritt 10 US-Dollar pro Person, separat zu zahlen.", "Reisepass oder Kopie mitbringen.", "Route kann sich je nach Seegang ändern."], packageName: "Privates Magawish-Schnellboot", ageBands: { adults: "Passagiere deiner privaten Gruppe", children: "", infants: "" },
   },
   "horse-riding-sea-desert": {
     title: "Reiten in Hurghadas Wüste und am Meer mit optionalem Schwimmen", location: "Hurghada, Ägypten", duration: "2–4 Stunden", category: "Outdoor-Aktivität",
@@ -351,6 +381,21 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "Трёхдневный курс SSI Open Water Diver", packageDescription: "Три дня цифровой теории и практики, два погружения ежедневно, снаряжение, питание и трансфер.", packageLabel: "Участник", ageBands: { adults: "Участники (от 10 лет)", children: "", infants: "" }, availableTimes: ["08:00"],
     notSuitableFor: ["Дети младше 10 лет", "Беременные", "Люди с серьёзными заболеваниями сердца или спины", "Гости, не отвечающие медицинским требованиям и требованиям к плаванию"], whatToBring: ["Паспорт или удостоверение личности", "Полотенце", "Купальник", "Солнцезащитные очки"]
   },
+  "dolphin-house-snorkeling": {
+    title: "Морская прогулка в Дом дельфинов из Хургады", description: "Семичасовая прогулка на яхте в район Dolphin House с двумя остановками для сноркелинга, обедом, напитками и трансфером.",
+    highlights: ["Наблюдение за дикими дельфинами", "Два сноркелинг-стопа", "Обед и напитки", "Профессиональная команда"], included: ["Трансфер из отеля", "Яхта", "Dolphin House", "Снаряжение", "Обед и напитки"],
+    notes: ["Встреча с дельфинами и плавание не гарантируются.", "Маршрут зависит от погоды и моря.", "Время трансфера подтвердим в WhatsApp."], packageName: "Прогулка в Дом дельфинов", ageBands: { adults: "Взрослые (от 11 лет)", children: "Дети (4–10 лет)", infants: "Малыши (0–3 года)" },
+  },
+  "hula-hula-island-snorkeling": {
+    title: "Остров Hula Hula: яхта и сноркелинг", description: "Полный день на яхте: час на острове Hula Hula, два сноркелинг-стопа, обед, напитки и трансфер из Хургады.",
+    highlights: ["Час на острове Hula Hula", "Два сноркелинг-стопа", "Обед и напитки", "Трансфер из отеля"], included: ["Трансфер", "Яхта", "Вход на остров", "Снаряжение и гид", "Обед и напитки"],
+    notes: ["Время трансфера подтвердим в WhatsApp.", "Подходит новичкам.", "Места у рифов зависят от состояния моря."], packageName: "Прогулка на остров Hula Hula", ageBands: { adults: "Взрослые (от 11 лет)", children: "Дети (4–10 лет)", infants: "Малыши (0–3 года)" },
+  },
+  "magawish-speedboat": {
+    title: "Частный скоростной катер на остров Магавиш", description: "Четырёхчасовой частный катер для вашей группы с трансфером, сноркелингом и свободным временем на острове Магавиш.",
+    highlights: ["Частный катер", "Остров Магавиш", "Сноркелинг", "Трансфер из отеля"], included: ["Трансфер по Хургаде", "Катер, капитан и топливо", "Снаряжение", "Спасательное оборудование"],
+    notes: ["Вход на остров — 10 долларов с человека, оплачивается отдельно.", "Возьмите паспорт или копию.", "Маршрут зависит от моря."], packageName: "Частный катер Магавиш", ageBands: { adults: "Пассажиры вашей частной группы", children: "", infants: "" },
+  },
   "horse-riding-sea-desert": {
     title: "Конная прогулка по пустыне и у моря в Хургаде с купанием", location: "Хургада, Египет", duration: "2–4 часа", category: "Активный отдых",
     description: "Прокатитесь на обученной лошади по пустынным тропам и побережью Красного моря. При безопасных условиях возможен дополнительный участок на мелководье.",
@@ -471,6 +516,21 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     notes: ["课程开始前 24 小时可免费取消。", "课程 08:00 开始，接送时间通过 WhatsApp 确认。", "最低年龄 10 岁；未成年人须有监护人签字同意。", "完成全部 SSI 知识和水中技能要求后方可认证。", "青少年学员适用深度和监督限制。", "潜水后须遵守规定的禁飞时间。"],
     packageName: "三日 SSI 开放水域潜水员课程", packageDescription: "三天数字学习和实操训练，每天两次潜水，含装备、午餐、饮料和接送。", packageLabel: "学员", ageBands: { adults: "学员（10 岁及以上）", children: "", infants: "" }, availableTimes: ["08:00"],
     notSuitableFor: ["10 岁以下儿童", "孕妇", "有严重心脏或背部问题者", "无法满足健康或游泳要求者"], whatToBring: ["护照或身份证", "毛巾", "泳衣", "太阳镜"]
+  },
+  "dolphin-house-snorkeling": {
+    title: "赫尔格达海豚屋浮潜游船", description: "七小时游艇之旅，前往海豚屋并进行两次珊瑚礁浮潜，含午餐、饮料和酒店接送。",
+    highlights: ["寻找野生海豚", "两次浮潜", "船上午餐和饮料", "专业船员"], included: ["赫尔格达酒店接送", "游艇巡航", "海豚屋", "浮潜装备", "午餐和饮料"],
+    notes: ["野生海豚出现和伴游均不保证。", "路线可能因天气和海况调整。", "接送时间通过 WhatsApp 确认。"], packageName: "海豚屋浮潜游船", ageBands: { adults: "成人（11 岁及以上）", children: "儿童（4–10 岁）", infants: "幼儿（0–3 岁）" },
+  },
+  "hula-hula-island-snorkeling": {
+    title: "Hula Hula 岛游船与浮潜", description: "全天游艇行程，含 Hula Hula 岛一小时、两次浮潜、午餐、饮料和赫尔格达酒店接送。",
+    highlights: ["Hula Hula 岛一小时", "两次浮潜", "午餐和饮料", "酒店接送"], included: ["酒店接送", "游艇巡航", "登岛", "浮潜装备和向导", "午餐和饮料"],
+    notes: ["接送时间通过 WhatsApp 确认。", "适合初学者。", "珊瑚礁地点可能随海况调整。"], packageName: "Hula Hula 岛游船", ageBands: { adults: "成人（11 岁及以上）", children: "儿童（4–10 岁）", infants: "幼儿（0–3 岁）" },
+  },
+  "magawish-speedboat": {
+    title: "马加维什岛私人快艇", description: "为您的团队提供约四小时私人快艇，含赫尔格达接送、珊瑚礁浮潜和马加维什岛自由活动。",
+    highlights: ["专属私人快艇", "马加维什岛", "珊瑚礁浮潜", "酒店接送"], included: ["赫尔格达酒店接送", "快艇、船长和燃油", "浮潜装备", "安全装备"],
+    notes: ["岛屿门票每人 10 美元，另行支付。", "请携带护照或复印件。", "路线可能因海况调整。"], packageName: "马加维什私人快艇", ageBands: { adults: "私人团队乘客", children: "", infants: "" },
   },
   "horse-riding-sea-desert": {
     title: "赫尔格达沙漠与海岸骑马（可选浅水骑行）", location: "埃及赫尔格达", duration: "2–4 小时", category: "户外活动",

@@ -8,6 +8,7 @@ import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
 import { countDistinctCustomers } from "@/lib/customer-count";
+import { adminRoles, permissionsForAdminRole, type AdminPermission, type AdminRole } from "@/lib/admin-auth";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
 type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -47,7 +48,7 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function AdminDashboard({ initialBookings, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false }: { initialBookings: Booking[]; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean }) {
+export default function AdminDashboard({ initialBookings, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner }: { initialBookings: Booking[]; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
   const [expenses, setExpenses] = useState(initialExpenses);
@@ -68,6 +69,9 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
   const [expense, setExpense] = useState({ description: "", amount: "", category: "", date: today(), expense_type: "other", supplier_id: "", sales_person_id: "", booking_id: "" });
   const [partnerType, setPartnerType] = useState<PartnerType>("supplier");
   const [partner, setPartner] = useState({ name: "", contact_name: "", phone: "", email: "", commission_percent: "", notes: "" });
+  const [previewRole, setPreviewRole] = useState<AdminRole | "">("");
+  const effectivePermissions = previewRole ? permissionsForAdminRole(previewRole) : permissions;
+  const can = (permission: AdminPermission) => effectivePermissions.includes(permission);
 
   const metrics = useMemo(() => {
     const active = bookings.filter((booking) => booking.status !== "cancelled" && booking.payment_status !== "refunded");
@@ -219,25 +223,27 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
 
   return <>
     <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold"><a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a><a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a><Link href="/admin/marketing" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800 hover:bg-blue-100">Marketing analytics</Link><a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a><a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a><a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a></nav>
-      <button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button>
+      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold">{can("bookings") ? <a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a> : null}{can("finance") ? <a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a> : null}{can("reports") ? <Link href="/admin/marketing" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800 hover:bg-blue-100">Marketing analytics</Link> : null}{can("content") || can("settings") ? <a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a> : null}{can("suppliers") || can("finance") ? <a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a> : null}{can("reports") ? <a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a> : null}</nav>
+      <div className="flex flex-wrap items-center gap-2">{isOwner ? <label className="text-xs font-bold text-slate-600">Preview staff access<select aria-label="Preview staff role access" value={previewRole} onChange={(event)=>setPreviewRole(event.target.value as AdminRole|"")} className="ml-2 rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm"><option value="">Owner (live)</option>{adminRoles.filter(role=>role!=="owner").map(role=><option key={role} value={role}>{role.replace("_"," ")}</option>)}</select></label> : <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold capitalize">{currentRole.replace("_"," ")}</span>}<button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button></div>
     </div>
 
-    <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-      <Metric icon={<UserRound size={19}/>} label="Customers" value={String(metrics.customers)} note="Unique phone numbers" tone="slate" />
-      <Metric icon={<ClipboardList size={19}/>} label="Booked revenue" value={money(metrics.projected)} note={`${metrics.activeCount} active booking${metrics.activeCount === 1 ? "" : "s"}`} tone="blue" />
-      <Metric icon={<WalletCards size={19}/>} label="Cash collected" value={money(metrics.collected)} note="Marked as paid" tone="emerald" />
-      <Metric icon={<CircleDollarSign size={19}/>} label="Outstanding" value={money(metrics.outstanding)} note="Still to collect" tone="amber" />
-      <Metric icon={<WalletCards size={19}/>} label="Expenses" value={money(metrics.expenseTotal)} note="Business costs" tone="rose" />
-      <Metric icon={<CheckCircle2 size={19}/>} label="Cash profit" value={money(metrics.profit)} note="Collected less expenses" tone="slate" />
-    </div>
+    {previewRole ? <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950"><strong>Preview only:</strong> this is what a {previewRole.replace("_"," ")} can see. Your owner session and data are unchanged.</div> : null}
+
+    {can("bookings") || can("finance") || can("reports") ? <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+      {can("bookings") || can("reports") ? <Metric icon={<UserRound size={19}/>} label="Customers" value={String(metrics.customers)} note="Unique phone numbers" tone="slate" /> : null}
+      {can("bookings") || can("reports") ? <Metric icon={<ClipboardList size={19}/>} label="Booked revenue" value={money(metrics.projected)} note={`${metrics.activeCount} active booking${metrics.activeCount === 1 ? "" : "s"}`} tone="blue" /> : null}
+      {can("bookings") || can("finance") || can("reports") ? <Metric icon={<WalletCards size={19}/>} label="Cash collected" value={money(metrics.collected)} note="Marked as paid" tone="emerald" /> : null}
+      {can("bookings") || can("finance") || can("reports") ? <Metric icon={<CircleDollarSign size={19}/>} label="Outstanding" value={money(metrics.outstanding)} note="Still to collect" tone="amber" /> : null}
+      {can("finance") || can("reports") ? <Metric icon={<WalletCards size={19}/>} label="Expenses" value={money(metrics.expenseTotal)} note="Business costs" tone="rose" /> : null}
+      {can("finance") || can("reports") ? <Metric icon={<CheckCircle2 size={19}/>} label="Cash profit" value={money(metrics.profit)} note="Collected less expenses" tone="slate" /> : null}
+    </div> : null}
 
     {error ? <div role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800">{error}</div> : null}
     {notice ? <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">{notice}</div> : null}
     {migrationPending ? <div role="alert" className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"><p className="font-black">Admin database upgrade pending</p><p className="mt-1 leading-6">Basic expenses can still be saved. Supplier expenses, sales commissions, supplier records, and sales people will work after migration <code className="font-mono">202607260001_admin_partners_and_expenses.sql</code> is applied in Supabase.</p></div> : null}
 
     <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
-      <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+      {can("bookings") ? <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-2xl font-bold">Bookings</h2><p className="mt-1 text-sm text-slate-500">Search, confirm availability, record cash, or cancel a request.</p></div><p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{visibleBookings.length} shown</p></div>
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5"><label className="relative xl:col-span-2"><span className="sr-only">Search bookings</span><Search className="absolute left-3 top-3 text-slate-400" size={18}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reference, guest, phone, trip, hotel…" className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 outline-none focus:border-cyan-500" /></label><select aria-label="Booking filter" value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All bookings</option><option value="active">Active</option><option value="unpaid">Awaiting cash</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option></select><select aria-label="Service filter" value={serviceFilter} onChange={(event) => setServiceFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All services</option>{services.map((service) => <option key={service}>{service}</option>)}</select><button type="button" onClick={clearFilters} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-bold">Clear filters</button><label className="text-xs font-bold text-slate-500">From<input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-normal text-slate-900" /></label><label className="text-xs font-bold text-slate-500">To<input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-normal text-slate-900" /></label></div>
 
@@ -247,9 +253,9 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
 
         <div className="mt-5 space-y-4 lg:hidden"><label className="flex items-center gap-2 text-sm font-bold text-slate-600"><input type="checkbox" checked={allVisibleSelected} onChange={toggleVisible}/> Select all filtered bookings</label>{visibleBookings.map((booking) => <article key={booking.id} className={`rounded-2xl border p-4 ${selected.has(booking.id) ? "border-blue-300 bg-blue-50" : "border-slate-200"}`}><div className="flex items-start justify-between gap-3"><div className="flex items-start gap-3"><input type="checkbox" aria-label={`Select ${booking.reference}`} checked={selected.has(booking.id)} onChange={() => toggleBooking(booking.id)} className="mt-1"/><div><p className="font-mono text-sm font-bold text-blue-700">{booking.reference}</p><h3 className="mt-1 font-bold">{booking.customer_name}</h3></div></div><p className="font-black">{money(Number(booking.amount), booking.currency)}</p></div><p className="mt-3 font-medium">{booking.tour_name || "Transfer"}</p><p className="mt-1 text-sm text-slate-500">{booking.date || "Date to confirm"} · {booking.guests || 0} people</p>{booking.hotel ? <p className="mt-1 text-xs text-slate-500">Pickup: {booking.hotel}</p> : null}<select aria-label={`Sales person for ${booking.reference}`} value={booking.sales_person_id || ""} disabled={busyId === booking.id} onChange={(event) => updateBooking(booking.id,{sales_person_id:event.target.value||null})} className="mt-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"><option value="">No sales person</option>{salesPeople.map(item=><option key={item.id} value={item.id}>{item.name} · {Number(item.commission_percent||0)}%</option>)}</select><ContactLinks booking={booking}/>{booking.notes ? <details className="mt-3 text-sm"><summary className="cursor-pointer font-semibold text-slate-600">Customer notes</summary><p className="mt-2 whitespace-pre-line rounded-lg bg-slate-50 p-3 text-xs text-slate-600">{booking.notes}</p></details> : null}<div className="mt-4 grid grid-cols-2 gap-3"><StatusSelect value={booking.status} disabled={busyId === booking.id} onChange={(value) => updateBooking(booking.id, { status: value as Status })} options={["new", "confirmed", "completed", "cancelled"]}/><StatusSelect value={booking.payment_status} disabled={busyId === booking.id} onChange={(value) => updateBooking(booking.id, { payment_status: value as PaymentStatus })} options={["unpaid", "paid", "refunded"]}/></div><div className="mt-4 flex flex-wrap items-center gap-4"><button type="button" onClick={() => sendStatusEmail(booking)} disabled={!booking.customer_email || busyId === `email-${booking.id}`} className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 disabled:opacity-40"><Send size={14}/> Resend email + PDF</button><a href={`/api/admin/bookings/${booking.id}/status-pdf`} className="inline-flex items-center gap-2 text-xs font-bold text-cyan-700"><FileText size={14}/> Customer PDF</a><a href={singleReport(booking.id, "pdf")} className="inline-flex items-center gap-2 text-xs font-bold text-blue-700"><Download size={14}/> Internal report</a><button type="button" onClick={() => deleteBooking(booking.id, booking.reference)} disabled={busyId === booking.id} className="inline-flex items-center gap-2 text-xs font-bold text-rose-700 disabled:opacity-40"><Trash2 size={14}/> Delete permanently</button></div></article>)}</div>
         {!visibleBookings.length ? <div className="py-12 text-center"><Search className="mx-auto text-slate-300"/><p className="mt-3 text-sm font-semibold text-slate-600">No bookings match this search and filter.</p></div> : null}
-      </section>
+      </section> : null}
 
-      <aside id="expenses" className="h-fit scroll-mt-6 rounded-3xl bg-white p-6 shadow-sm">
+      {can("finance") ? <aside id="expenses" className="h-fit scroll-mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="text-2xl font-bold">Expenses</h2>
         <p className="mt-1 text-sm leading-6 text-slate-500">Use a predefined cost type, then connect trip costs to a supplier, sales person, or booking.</p>
         <form className="mt-6 space-y-4" onSubmit={addExpense}>
@@ -264,12 +270,12 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
           <button disabled={busyId === "expense"} className="w-full rounded-xl bg-slate-900 py-3 font-bold text-white hover:bg-slate-700 disabled:opacity-60">{busyId === "expense" ? "Saving…" : "Save expense"}</button>
         </form>
         {expenses.length ? <div className="mt-7 border-t pt-5"><div className="flex items-center justify-between"><p className="text-sm font-bold">Recent expenses</p><p className="text-xs text-slate-500">{expenses.length} total</p></div><div className="mt-3 space-y-3">{expenses.slice(0, 8).map((item) => <div key={item.id} className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3 text-sm"><div><p className="font-medium">{item.description}</p><p className="text-xs text-slate-500">{expenseOptions.find(([value]) => value === item.expense_type)?.[1] || item.category || "Other"} · {item.expense_date}</p></div><div className="flex items-center gap-2"><p className="font-semibold">{money(Number(item.amount), item.currency)}</p><button type="button" aria-label={`Delete expense ${item.description}`} onClick={() => deleteExpense(item)} disabled={busyId === `expense-${item.id}`} className="rounded p-1 text-slate-400 hover:bg-rose-100 hover:text-rose-700 disabled:opacity-40"><Trash2 size={15}/></button></div></div>)}</div></div> : <p className="mt-7 border-t pt-5 text-sm text-slate-500">No expenses recorded yet.</p>}
-      </aside>
+      </aside> : null}
     </div>
 
-    <AdminControlCenter />
-    <AdminOperationsCenter />
-    <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+    {can("content") || can("settings") ? <AdminControlCenter /> : null}
+    {can("operations") || can("staff") || can("settings") ? <AdminOperationsCenter /> : null}
+    {can("suppliers") || can("finance") ? <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3"><UsersRound className="mt-1 text-cyan-700" size={24}/><div><h2 className="text-2xl font-bold">Suppliers & sales people</h2><p className="mt-1 text-sm text-slate-500">Create reusable contacts and attach them to expenses.</p></div></div>
       <div className="mt-6 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <form onSubmit={addPartner} className="space-y-4 rounded-2xl bg-slate-50 p-4">
@@ -286,8 +292,8 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
         </div>
       </div>
       <SalesPerformancePanel salesPeople={salesPeople} bookings={bookings} expenses={expenses}/>
-    </section>
-    <div id="reports" className="scroll-mt-6"><SituationReports bookings={bookings} /></div>
+    </section> : null}
+    {can("reports") ? <div id="reports" className="scroll-mt-6"><SituationReports bookings={bookings} /></div> : null}
   </>;
 }
 

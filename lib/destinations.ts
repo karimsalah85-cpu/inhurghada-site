@@ -4,6 +4,8 @@ export type Destination = {
   country: string;
   tagline: string;
   active: boolean;
+  comingSoon?: boolean;
+  image: string;
 };
 
 export const destinations: Destination[] = [
@@ -13,6 +15,16 @@ export const destinations: Destination[] = [
     country: "Egypt",
     tagline: "Red Sea tours, transfers, and local experiences",
     active: true,
+    image: "/images/hero-egypt-red-sea.jpg",
+  },
+  {
+    slug: "marsa-alam",
+    name: "Marsa Alam",
+    country: "Egypt",
+    tagline: "Untouched reefs, desert landscapes, and southern Red Sea adventures",
+    active: false,
+    comingSoon: true,
+    image: "/images/hurghada-snorkeling-reef-panorama.jpeg",
   },
 ];
 

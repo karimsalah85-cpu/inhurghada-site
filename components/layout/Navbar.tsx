@@ -111,6 +111,10 @@ export default function Navbar() {
             {t("tours")}
           </NavLink>
 
+          <NavLink href="/destinations/marsa-alam" active={pathname === "/destinations/marsa-alam"}>
+            Marsa Alam <span className="ml-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-900">Soon</span>
+          </NavLink>
+
 
           <NavLink href={localePath(language, "/transfers")} active={pathname === localePath(language, "/transfers")}>
             {t("transfers")}
@@ -227,6 +231,10 @@ export default function Navbar() {
             close={closeMenu}
           >
             {t("tours")}
+          </MobileLink>
+
+          <MobileLink href="/destinations/marsa-alam" close={closeMenu}>
+            <span className="flex items-center justify-between"><span>Marsa Alam</span><span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black uppercase text-amber-900">Coming soon</span></span>
           </MobileLink>
 
 
