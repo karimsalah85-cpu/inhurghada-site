@@ -37,6 +37,13 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
   const tours = await getLiveTours();
   const categoryTours = tours.filter(category.matches).map((tour) => de ? localizeTourGerman(tour) : ru ? localizeTourRussian(tour) : ar ? localizeTourArabic(tour) : zh ? localizeTourChinese(tour) : tour);
   const displayTitle = categoryLabels[locale][category.slug];
+  const relatedDivingCopy = {
+    en: { title: "Dive deeper into Hurghada", text: "Compare guided diving and snorkeling experiences, from first dives to full-day reef trips.", cta: "Explore diving & snorkeling" },
+    de: { title: "Tauche tiefer in Hurghada ein", text: "Entdecke geführte Tauch- und Schnorchelausflüge – vom ersten Tauchgang bis zum ganztägigen Rifftrip.", cta: "Tauchen & Schnorcheln entdecken" },
+    ru: { title: "Откройте подводный мир Хургады", text: "Сравните дайвинг и сноркелинг с гидом — от первого погружения до целого дня у рифов.", cta: "Смотреть дайвинг и сноркелинг" },
+    ar: { title: "اكتشف عالم الغردقة تحت الماء", text: "قارن بين رحلات الغوص والسنوركلينج مع مرشدين، من التجربة الأولى إلى رحلات الشعاب ليوم كامل.", cta: "استكشف الغوص والسنوركلينج" },
+    zh: { title: "探索赫尔格达的海底世界", text: "比较有导游的深潜和浮潜体验，从首次潜水到全天珊瑚礁行程。", cta: "探索深潜与浮潜" },
+  }[locale] || { title: "Discover diving & snorkeling", text: "Compare guided diving and snorkeling experiences in Hurghada.", cta: "Explore diving & snorkeling" };
   const pageUrl = absoluteUrl(`/hurghada/${category.slug}`);
   const schema = {
     "@context": "https://schema.org",
@@ -67,6 +74,7 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
       <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8">
         <CategoryTourExplorer tours={categoryTours} locale={locale} />
       </section>
+      {category.slug !== "diving-snorkeling" ? <section className="border-t border-slate-200 bg-cyan-50 px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl rounded-3xl border border-cyan-200 bg-white p-8"><h2 className="text-3xl font-black text-slate-950">{relatedDivingCopy.title}</h2><p className="mt-4 max-w-2xl leading-8 text-slate-600">{relatedDivingCopy.text}</p><Link href={localePath(locale, "/hurghada/diving-snorkeling")} className="mt-6 inline-block rounded-full bg-cyan-700 px-6 py-3 font-bold text-white">{relatedDivingCopy.cta} →</Link></div></section> : null}
       <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-3xl font-black text-slate-950">{de ? "Mit klaren Informationen buchen" : ru ? "Бронируйте с полной информацией" : zh ? "信息清晰，放心预订" : "Book with clear information"}</h2><p className="mt-4 leading-8 text-slate-600">{de ? "Jeder Ausflug zeigt Startpreis, Dauer, Abholung, enthaltene Leistungen und wichtige Hinweise vor der Buchung. Unser Team bestätigt die endgültigen Details direkt per WhatsApp." : ru ? "Перед бронированием вы увидите начальную цену, продолжительность, информацию о трансфере, включённые услуги и важные примечания. Наша местная команда подтвердит окончательные детали в WhatsApp." : zh ? "每个项目都会在预订前展示起价、时长、接送信息、包含项目和重要提示。我们的本地团队会通过 WhatsApp 确认最终详情。" : "Every Daily Red Sea experience shows its starting price, duration, pickup information, inclusions, and practical notes before you submit a booking. Our local team confirms final pickup details directly on WhatsApp."}</p></div></section>
     </main>
   );
