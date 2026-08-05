@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { consentStorageKey, trackEvent, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
+import { consentStorageKey, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
 
 const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
