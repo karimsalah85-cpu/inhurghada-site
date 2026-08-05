@@ -13,6 +13,7 @@ const adsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;
 export default function AnalyticsProvider() {
   const pathname = usePathname();
   const [preferences, setPreferences] = useState<ConsentPreferences | null>(null);
+  const isInitialPath = useRef(true);
 
   useEffect(() => {
     let stored: ConsentPreferences | null = null;
@@ -22,18 +23,20 @@ export default function AnalyticsProvider() {
   }, []);
 
   useEffect(() => {
+    if (isInitialPath.current) {
+      isInitialPath.current = false;
+      return;
+    }
+    if (gaId) window.gtag?.("config", gaId, { page_path: pathname });
+  }, [pathname]);
+
+  useEffect(() => {
     if (!preferences) return;
     updateGoogleConsent(preferences);
-    if (preferences.analytics) {
-      window.gtag?.("js", new Date());
-      if (gaId) window.gtag?.("config", gaId, { send_page_view: false });
-      if (adsId) window.gtag?.("config", adsId);
-      trackEvent("page_view", { page_path: pathname });
-    }
     if (preferences.analytics && gtmId) {
       window.dataLayer?.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
     }
-  }, [pathname, preferences]);
+  }, [preferences]);
 
   function save(next: ConsentPreferences) {
     localStorage.setItem(consentStorageKey, JSON.stringify(next));
@@ -42,7 +45,8 @@ export default function AnalyticsProvider() {
 
   const googleTagId = gaId || adsId;
   return <>
-    {preferences?.analytics && googleTagId ? <Script id="google-tag" src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`} strategy="afterInteractive" /> : null}
+    {googleTagId ? <Script id="google-consent-default" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments)};window.gtag("consent","default",{"ad_storage":"denied","ad_user_data":"denied","ad_personalization":"denied","analytics_storage":"denied","wait_for_update":500});window.gtag("js",new Date());${gaId ? `window.gtag("config","${gaId}");` : ""}${adsId ? `window.gtag("config","${adsId}");` : ""}`}</Script> : null}
+    {googleTagId ? <Script id="google-tag" src={`https://www.googletagmanager.com/gtag/js?id=${googleTagId}`} strategy="afterInteractive" /> : null}
     {preferences?.analytics && gtmId ? <Script id="google-tag-manager" src={`https://www.googletagmanager.com/gtm.js?id=${gtmId}`} strategy="afterInteractive" /> : null}
     {preferences?.marketing && pixelId ? <Script id="meta-pixel" strategy="afterInteractive">{`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');`}</Script> : null}
     {!preferences ? <CookieBanner onSave={save} /> : null}
