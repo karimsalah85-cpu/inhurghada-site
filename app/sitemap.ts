@@ -8,6 +8,7 @@ import { blogPosts } from "@/data/blog-posts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const contentUpdatedAt = new Date("2026-07-23T00:00:00.000Z");
+  const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
   const paths = [
     "",
     "/transfers",
@@ -46,13 +47,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogEntries: MetadataRoute.Sitemap = [
     {
       url: `${siteUrl}/blog`,
-      lastModified: new Date(Math.max(...blogPosts.map((post) => new Date(post.publishedAt).getTime()))),
+      lastModified: new Date(Math.min(Math.max(...blogPosts.map((post) => new Date(post.publishedAt).getTime())), Date.now())),
       changeFrequency: "weekly",
       priority: 0.75,
     },
     ...blogPosts.map((post) => ({
       url: `${siteUrl}/blog/${post.slug}`,
-      lastModified: new Date(post.publishedAt),
+      lastModified: publishedAt(post.publishedAt),
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),
