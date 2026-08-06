@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"Ryze AI": {
+			"url": "https://connector.get-ryze.ai/mcp",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}
