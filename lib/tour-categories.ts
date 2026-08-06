@@ -3,6 +3,13 @@ import type { Locale } from "@/lib/i18n";
 
 export const tourCategories = [
   {
+    slug: "excursions",
+    title: "Tours & excursions",
+    eyebrow: "Your Hurghada day out",
+    description: "Browse Hurghada tours and excursions with clear prices, hotel pickup, and booking confirmation by WhatsApp.",
+    matches: () => true,
+  },
+  {
     slug: "island-trips",
     title: "Island trips",
     eyebrow: "Turquoise escapes",
@@ -50,6 +57,7 @@ export type TourCategory = (typeof tourCategories)[number];
 
 export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>> = {
   en: {
+    excursions: "Tours & excursions",
     "island-trips": "Island trips",
     "diving-snorkeling": "Diving & snorkeling",
     "desert-safaris": "Desert safaris",
@@ -58,6 +66,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
     "private-transfers": "Private transfers",
   },
   ar: {
+    excursions: "الجولات والرحلات",
     "island-trips": "رحلات الجزر",
     "diving-snorkeling": "الغوص والسنوركلينج",
     "desert-safaris": "رحلات السفاري الصحراوية",
@@ -66,6 +75,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
     "private-transfers": "التوصيلات الخاصة",
   },
   de: {
+    excursions: "Touren & Ausflüge",
     "island-trips": "Inseltouren",
     "diving-snorkeling": "Tauchen & Schnorcheln",
     "desert-safaris": "Wüstensafaris",
@@ -74,6 +84,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
     "private-transfers": "Private Transfers",
   },
   ru: {
+    excursions: "Туры и экскурсии",
     "island-trips": "Поездки на острова",
     "diving-snorkeling": "Дайвинг и сноркелинг",
     "desert-safaris": "Сафари по пустыне",
@@ -82,6 +93,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
     "private-transfers": "Частные трансферы",
   },
   pl: {
+    excursions: "Wycieczki i atrakcje",
     "island-trips": "Wycieczki na wyspy",
     "diving-snorkeling": "Nurkowanie i snorkeling",
     "desert-safaris": "Safari na pustyni",
@@ -90,6 +102,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
     "private-transfers": "Prywatne transfery",
   },
   zh: {
+    excursions: "旅游与活动",
     "island-trips": "海岛游",
     "diving-snorkeling": "深潜与浮潜",
     "desert-safaris": "沙漠探险",
