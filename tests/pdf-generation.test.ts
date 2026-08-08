@@ -35,6 +35,52 @@ describe("PDF generators", () => {
     });
     expect(output.subarray(0, 5).toString()).toBe("%PDF-");
     expect(output.length).toBeGreaterThan(4_000);
+    expect(output.toString("binary")).toContain(
+      "(CANCELLATION & REFUND POLICY) Tj",
+    );
+  });
+
+  it("includes the configured policy in the booking PDF", async () => {
+    const previousPolicy = process.env.CANCELLATION_POLICY_TEXT;
+    process.env.CANCELLATION_POLICY_TEXT =
+      "Cancel at least 48 hours before departure.\\n\\nApproved refunds return through the agreed payment method.";
+
+    try {
+      const output = await createInvoicePdf({
+        reference: "DRS-20260722-POLICY",
+        issuedAt: new Date("2026-07-22T12:00:00Z"),
+        customerName: "Policy Test Guest",
+        itemName: "Multi-day Red Sea itinerary",
+        quantity: 2,
+        amount: 120,
+        currency: "USD",
+      });
+
+      const pdfText = output.toString("binary");
+      expect({
+        heading: pdfText.includes("(CANCELLATION & REFUND POLICY) Tj"),
+        firstParagraph: pdfText.includes(
+          "(Cancel at least 48 hours before departure.) Tj",
+        ),
+        secondParagraph: pdfText.includes(
+          "(Approved refunds return through the agreed payment method.) Tj",
+        ),
+        pages: pdfText.match(/\/Type \/Page\b/g)?.length,
+      }).toMatchInlineSnapshot(`
+        {
+          "firstParagraph": true,
+          "heading": true,
+          "pages": 2,
+          "secondParagraph": true,
+        }
+      `);
+    } finally {
+      if (previousPolicy === undefined) {
+        delete process.env.CANCELLATION_POLICY_TEXT;
+      } else {
+        process.env.CANCELLATION_POLICY_TEXT = previousPolicy;
+      }
+    }
   });
 
   it("creates a valid situation report PDF", () => {

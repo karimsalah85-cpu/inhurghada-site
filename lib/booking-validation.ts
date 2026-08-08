@@ -15,6 +15,11 @@ function extras(value: unknown) {
   return Array.isArray(value) ? value.slice(0, 10).map((item) => text(item, 60)).filter(Boolean) : [];
 }
 
+function extraQuantities(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value as Record<string, unknown>).slice(0, 12).map(([key, quantity]) => [text(key, 60), number(quantity)]).filter(([key]) => key));
+}
+
 function cartItems(value: unknown) {
   if (!Array.isArray(value)) return [];
   return value.slice(0, 6).map((entry) => {
@@ -27,6 +32,10 @@ function cartItems(value: unknown) {
       youth: number(item.youth),
       infants: number(item.infants),
       extras: extras(item.extras),
+      selectedBoatOption: text(item.selectedBoatOption, 60),
+      extraQuantities: extraQuantities(item.extraQuantities),
+      transferRequired: item.transferRequired === true,
+      transferArea: text(item.transferArea, 80),
       divingLicenseConfirmed: item.divingLicenseConfirmed === true,
       quadMinimumAgeConfirmed: item.quadMinimumAgeConfirmed === true,
     };
@@ -86,6 +95,13 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     const todayInCairo = cairoDateTimeParts(now).date;
     if (date <= todayInCairo) return { error: "Orange Bay bookings must be made at least one day before the trip." as const };
   }
+  if (type === "tour" && tourSlug === "orange-bay-half-day-speedboat") {
+    const cairo = cairoDateTimeParts(now);
+    const tomorrow = new Date(`${cairo.date}T12:00:00Z`);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    const nextDay = tomorrow.toISOString().slice(0, 10);
+    if (date <= cairo.date || (date === nextDay && cairo.time >= "15:00")) return { error: "After 3:00 PM, Orange Bay half-day bookings require at least two days' notice." as const };
+  }
   const selectedCartItems = cartItems(body.cartItems);
   if (tourSlug === "multi-trip") {
     if (selectedCartItems.length < 1) return { error: "Add at least one trip to your cart." as const };
@@ -122,6 +138,10 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       divingLicenseConfirmed,
       quadMinimumAgeConfirmed,
       extras: extras(body.extras),
+      selectedBoatOption: text(body.selectedBoatOption, 60),
+      extraQuantities: extraQuantities(body.extraQuantities),
+      transferRequired: body.transferRequired === true,
+      transferArea: text(body.transferArea, 80),
       location: text(body.location, 100),
       duration: text(body.duration, 80),
       price: text(body.price, 60),

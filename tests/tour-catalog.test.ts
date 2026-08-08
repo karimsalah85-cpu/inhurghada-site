@@ -56,4 +56,20 @@ describe("tour catalog publication safety", () => {
       expect(course?.notes?.some((item) => item.includes("€300") && item.includes("€100"))).toBe(true);
     }
   });
+
+  it("publishes all four private speedboat products with distinct boat tiers", () => {
+    const slugs = ["orange-bay-half-day-speedboat", "orange-bay-full-day-speedboat", "paradise-island-speedboat", "hula-hula-speedboat"];
+    for (const slug of slugs) {
+      const tour = tours.find((item) => item.slug === slug);
+      expect(tour?.bookingMode).toBe("direct");
+      expect(tour?.boatOptions).toHaveLength(8);
+      expect(tour?.category).toBe("Speedboat Trip");
+      expect(tour?.price).toBe(String(tour?.boatOptions?.[0].price));
+      expect(tour?.priceUnit).toBe("per private boat");
+      expect(tour?.boatOptions?.filter((option) => option.capacity === 5)).toHaveLength(2);
+      expect(tour?.showSpeedboatTerms).toBe(true);
+      expect(tour?.galleryImages).toHaveLength(4);
+    }
+    expect(tours.find((tour) => tour.slug === "hula-hula-speedboat")?.requiresMarinaTransferChoice).not.toBe(true);
+  });
 });

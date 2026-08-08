@@ -12,6 +12,10 @@ export type CartItem = {
   youth: number;
   infants: number;
   extras: string[];
+  selectedBoatOption?: string;
+  extraQuantities?: Record<string, number>;
+  transferRequired?: boolean;
+  transferArea?: string;
   subtotal: number;
   requiresDivingLicense: boolean;
   requiresQuadMinimumAge: boolean;

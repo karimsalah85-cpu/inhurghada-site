@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
-import { tours } from "@/data/tours";
+import { getLiveTours } from "@/lib/live-content";
 import { siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
 import { blogPosts } from "@/data/blog-posts";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const tours = await getLiveTours();
   const contentUpdatedAt = new Date("2026-07-23T00:00:00.000Z");
   const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
   const paths = [

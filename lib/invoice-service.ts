@@ -1,3 +1,5 @@
+import { getCancellationPolicyParagraphs } from "@/lib/pdf-policy";
+
 export type InvoiceData = {
   reference: string;
   issuedAt: Date;
@@ -102,7 +104,56 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   text(commands, `Daily Red Sea  |  ${invoice.reference}  |  dailyredsea.com`, 50, 43, 8.5, false, muted);
   text(commands, "Thank you for choosing a Red Sea experience.", 310, 43, 8.5, false, muted);
 
-  return Promise.resolve(buildPdf(commands.join("\n")));
+  const pages = [commands.join("\n"), ...createPolicyPages(invoice.reference)];
+  return Promise.resolve(buildPdf(pages));
+}
+
+function createPolicyPages(reference: string): string[] {
+  const pages: string[][] = [];
+  let commands: string[] = [];
+  let cursorY = 650;
+
+  const startPage = () => {
+    commands = [];
+    rect(commands, 0, 0, 612, 792, light);
+    roundedRect(commands, 50, 80, 512, 632, 10, white);
+    text(commands, "CANCELLATION & REFUND POLICY", 68, 678, 9, true, blue);
+    cursorY = 650;
+  };
+
+  const finishPage = () => {
+    text(
+      commands,
+      `Daily Red Sea  |  ${reference}  |  dailyredsea.com`,
+      50,
+      43,
+      8.5,
+      false,
+      muted,
+    );
+    pages.push(commands);
+  };
+
+  startPage();
+
+  for (const paragraph of getCancellationPolicyParagraphs()) {
+    const lines = wrap(paragraph, 92);
+    const paragraphHeight = lines.length * 14 + 12;
+
+    // Keep each paragraph together; page breaks only occur between paragraphs.
+    if (cursorY - paragraphHeight < 105) {
+      finishPage();
+      startPage();
+    }
+
+    lines.forEach((line, index) => {
+      text(commands, line, 68, cursorY - index * 14, 9, false, slate);
+    });
+    cursorY -= paragraphHeight;
+  }
+
+  finishPage();
+  return pages.map((page) => page.join("\n"));
 }
 
 export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<Buffer> {
@@ -219,8 +270,29 @@ function colorCommand([red, green, blueValue]: Color) { return `${(red / 255).to
 function wrap(value: string, maxChars: number) { const words = escapePdf(value).split(" "); const lines: string[] = []; let line = ""; for (const word of words) { if (`${line} ${word}`.trim().length > maxChars && line) { lines.push(line); line = word; } else line = `${line} ${word}`.trim(); } if (line) lines.push(line); return lines; }
 function escapePdf(value: string) { return value.replace(/[^\x20-\x7E]/g, "?").replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)"); }
 
-function buildPdf(stream: string) {
-  const objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>", `<< /Length ${Buffer.byteLength(stream, "utf8")} >>\nstream\n${stream}\nendstream`];
+function buildPdf(input: string | string[]) {
+  const streams = Array.isArray(input) ? input : [input];
+  const fontRegularId = 3 + streams.length * 2;
+  const fontBoldId = fontRegularId + 1;
+  const pageIds = streams.map((_, index) => 3 + index * 2);
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${streams.length} >>`,
+  ];
+
+  streams.forEach((stream, index) => {
+    const contentId = pageIds[index] + 1;
+    objects.push(
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 ${fontRegularId} 0 R /F2 ${fontBoldId} 0 R >> >> /Contents ${contentId} 0 R >>`,
+      `<< /Length ${Buffer.byteLength(stream, "utf8")} >>\nstream\n${stream}\nendstream`,
+    );
+  });
+
+  objects.push(
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
+  );
+
   let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const offsets = [0];
   objects.forEach((object, index) => { offsets.push(Buffer.byteLength(pdf, "binary")); pdf += `${index + 1} 0 obj\n${object}\nendobj\n`; });
   const xrefOffset = Buffer.byteLength(pdf, "binary");

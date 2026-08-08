@@ -5,6 +5,10 @@ type PricingInput = {
   tourName: string;
   tourSlug?: string;
   extras?: string[];
+  selectedBoatOption?: string;
+  extraQuantities?: Record<string, number>;
+  transferRequired?: boolean;
+  transferArea?: string;
   adults: number;
   youth: number;
   infants: number;
@@ -21,6 +25,10 @@ type PricingInput = {
     adults: number;
     youth: number;
     infants: number;
+    selectedBoatOption?: string;
+    extraQuantities?: Record<string, number>;
+    transferRequired?: boolean;
+    transferArea?: string;
   }[];
 };
 
@@ -31,7 +39,7 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
   return Number.isInteger(value) && value >= minimum && value <= maximum;
 }
 
-function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants">) {
+function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "extraQuantities" | "transferRequired" | "transferArea">) {
   const tour = tours.find((item) => item.slug === input.tourSlug) || tours.find((item) => item.title === input.tourName);
   if (!tour) return { error: "Choose a valid tour." as const };
   if (!wholeNumber(input.adults, 1, 30) || !wholeNumber(input.youth, 0, 30) || !wholeNumber(input.infants, 0, 10)) {
@@ -39,7 +47,7 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   }
 
   const pricing = tour.participantPricing || { adults: Number(tour.price) };
-  if (input.youth && pricing.youth === undefined) return { error: "Youth pricing is not available for this tour." as const };
+  if (input.youth && pricing.youth === undefined && !tour.entrancePricing) return { error: "Youth pricing is not available for this tour." as const };
   if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
   const allowedExtras: Record<string, Record<string, { price: number; charge: "booking" | "adult" }>> = {
     "orange-bay": { "remote-pickup": { price: 4.27, charge: "adult" } },
@@ -53,13 +61,25 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     const option = extraPrices[extra];
     return sum + option.price * (option.charge === "adult" ? input.adults : 1);
   }, 0);
-  const participantTotal = tour.pricingMode === "per-booking"
+  const boat = tour.boatOptions?.find((option) => option.id === input.selectedBoatOption);
+  if (tour.boatOptions?.length && !boat) return { error: "Choose a valid private boat." as const };
+  const guests = input.adults + input.youth + input.infants;
+  if (boat && guests > boat.capacity) return { error: `The selected boat accepts up to ${boat.capacity} passengers.` as const };
+  const quantities = input.extraQuantities || {};
+  if (Object.values(quantities).some((quantity) => !wholeNumber(quantity, 0, 30))) return { error: "Choose valid add-on quantities." as const };
+  const allowedQuantityExtras = new Map((tour.bookingExtras || []).map((option) => [option.id, option]));
+  if (Object.keys(quantities).some((id) => !allowedQuantityExtras.has(id))) return { error: "Choose valid quantity add-ons." as const };
+  const quantityExtrasTotal = Object.entries(quantities).reduce((sum, [id, quantity]) => sum + (allowedQuantityExtras.get(id)?.price || 0) * quantity, 0);
+  if (tour.requiresMarinaTransferChoice && input.transferRequired && !["Hurghada Hotels", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay", "Safaga"].includes(input.transferArea || "")) return { error: "Choose a valid marina transfer area." as const };
+  const entranceTotal = tour.entrancePricing ? input.adults * tour.entrancePricing.adults + input.youth * tour.entrancePricing.youth : 0;
+  const participantTotal = boat
+    ? boat.price + entranceTotal
+    : tour.pricingMode === "per-booking"
     ? pricing.adults
     : input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0);
-  const amount = Math.round((participantTotal + extrasTotal) * 100) / 100;
-  const guests = input.adults + input.youth + input.infants;
+  const amount = Math.round((participantTotal + extrasTotal + quantityExtrasTotal) * 100) / 100;
   const guestSummary = tour.pricingMode === "per-booking"
-    ? `${guests} passenger${guests === 1 ? "" : "s"}`
+    ? `${guests} passenger${guests === 1 ? "" : "s"}${boat ? ` · ${boat.label}` : ""}`
     : `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
   return { data: { amount, guests, guestSummary, tourName: tour.title } };
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
+import { eurToUsd } from "@/data/speedboat-booking";
 
 const tour = { type: "tour" as const, tourName: "Orange Bay Island Snorkeling Boat Trip", adults: 1, youth: 0, infants: 0, service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 };
 const transfer = { type: "transfer" as const, tourName: "", adults: 0, youth: 0, infants: 0, service: "airport", pickup: "Hurghada Airport", dropoff: "Hurghada Hotels", passengers: 2, travelBags: 2 };
@@ -77,5 +78,33 @@ describe("authoritative booking pricing", () => {
     });
     expect(result.data).toMatchObject({ amount: 164.01, guests: 4, guestSummary: "2 trips · 4 participant places" });
     expect(result.data && "items" in result.data ? result.data.items : []).toHaveLength(2);
+  });
+
+  it("prices a speedboat, island entrance and quantity add-ons server-side", () => {
+    const result = calculateBookingPrice({
+      ...tour,
+      tourName: "",
+      tourSlug: "orange-bay-half-day-speedboat",
+      adults: 2,
+      youth: 1,
+      selectedBoatOption: "boat-1",
+      extraQuantities: { "mix-grill": 2, refreshments: 3 },
+      transferRequired: true,
+      transferArea: "Hurghada Hotels",
+    });
+    const expected = eurToUsd(100) + eurToUsd(10) * 2 + eurToUsd(5) + eurToUsd(15) * 2 + eurToUsd(6) * 3;
+    expect(result.data).toMatchObject({ amount: Math.round(expected * 100) / 100, guests: 3 });
+  });
+
+  it("preserves same-capacity boats and enforces the selected capacity", () => {
+    const valid = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "paradise-island-speedboat", adults: 5, selectedBoatOption: "boat-2" });
+    const tooMany = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "paradise-island-speedboat", adults: 6, selectedBoatOption: "boat-2" });
+    expect(valid.data?.guestSummary).toContain("Boat 2");
+    expect(tooMany.error).toMatch(/up to 5 passengers/i);
+  });
+
+  it("validates a requested marina transfer area", () => {
+    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "orange-bay-full-day-speedboat", selectedBoatOption: "boat-1", transferRequired: true, transferArea: "Unknown" });
+    expect(result.error).toMatch(/valid marina transfer area/i);
   });
 });

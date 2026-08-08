@@ -1,5 +1,10 @@
+import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
+import { eurToUsd, fullDayBoatOptions, halfDayBoatOptions, refreshments, speedboatMeals } from "@/data/speedboat-booking";
+
 export type Tour = {
   slug: string;
+  /** Commercial visibility is managed separately from the CMS publishing workflow. */
+  listingStatus?: "active" | "paused" | "unlisted";
   /** Destination ownership keeps tours ready for expansion beyond Hurghada. */
   destinationSlug?: string;
   title: string;
@@ -39,6 +44,13 @@ export type Tour = {
   faqs?: { question: string; answer: string }[];
   /** Inquiry tours are listed publicly but cannot be checked out until a verified price is configured. */
   bookingMode?: "direct" | "inquiry";
+  boatOptions?: BoatOption[];
+  entrancePricing?: { adults: number; youth: number };
+  bookingExtras?: BookingExtra[];
+  requiresMarinaTransferChoice?: boolean;
+  bookingLeadTime?: "next-day-before-15";
+  showSpeedboatTerms?: boolean;
+  galleryImages?: string[];
 };
 
 
@@ -372,6 +384,68 @@ export const tours: Tour[] = [
     // EUR 16.80 is 20% below the verified GetYourGuide EUR 21 adult price.
     price: "19.16", originalPrice: "23.95", rating: "New", reviews: "New", location: "Giftun Island, Hurghada", duration: "5–9 Hours", category: "Island Trip", badge: "New", bookingMode: "direct", participantPricing: { adults: 19.16 },
     description: "Enjoy a peaceful Paradise Island escape with a Red Sea yacht cruise, snorkeling in clear water, sandy beach time and lunch.", highlights: ["Paradise Island beach stop", "Red Sea snorkeling", "Relaxing yacht cruise", "Lunch during the experience", "Pickup available"], included: ["Pickup and return within the confirmed Hurghada zone", "Yacht cruise and island visit", "Snorkeling equipment", "Lunch", "Guide and life jackets"], notIncluded: ["Transfers outside the confirmed pickup zone", "Personal expenses", "Professional photos"], notes: ["Free cancellation is available up to 24 hours before the trip.", "Book at least one day before the preferred trip date.", "Island timing and snorkeling sites can change with sea conditions.", "The exact pickup time is confirmed by WhatsApp.", "Child and infant prices require confirmation before booking because the supplied comparison only showed one adult."], packageName: "Paradise Island Yacht Cruise", packageDescription: "Yacht cruise, Paradise Island beach time, snorkeling, lunch and pickup in the confirmed Hurghada zone.", packagePrice: "19.16", packageLabel: "Adult", availableTimes: ["Morning pickup confirmed by WhatsApp"], whatToBring: ["Swimwear", "Towel", "Sunscreen", "Cash"], seoTitle: "Paradise Island Yacht Cruise from Hurghada | Lunch and Snorkeling", metaDescription: "Book a Paradise Island yacht cruise from Hurghada with snorkeling, beach time, lunch and pickup, priced 20% below the verified comparison fare."
+  },
+  {
+    slug: "orange-bay-half-day-speedboat",
+    title: "Orange Bay Half Day (Up to 5 Hours)",
+    image: "/images/speedboat-orange-bay-branded.png",
+    galleryImages: ["/images/speedboat-guests.jpeg", "/images/speedboat-aerial.jpeg", "/images/speedboat-cruise.jpeg", "/images/speedboat-shallow-water.jpeg"],
+    price: String(halfDayBoatOptions[0].price), rating: "New", reviews: "New", location: "Hurghada Marina", duration: "Up to 5 hours", category: "Speedboat Trip", badge: "New", bookingMode: "direct", pricingMode: "per-booking", priceUnit: "per private boat",
+    boatOptions: halfDayBoatOptions, entrancePricing: { adults: eurToUsd(10), youth: eurToUsd(5) }, bookingExtras: [...speedboatMeals, refreshments], requiresMarinaTransferChoice: true, bookingLeadTime: "next-day-before-15", showSpeedboatTerms: true,
+    description: "Experience the magic of Orange Bay in half a day with flexible departure times, snorkeling in crystal-clear water, and a private speedboat with a dedicated skipper and guide.",
+    highlights: ["Flexible departure times - choose a morning or afternoon schedule", "Speedboat cruise to Orange Bay", "Soft sands and shimmering turquoise water", "Included snorkeling gear for exploring marine life", "Private boat, dedicated skipper/guide and life jackets"],
+    included: ["Snorkeling equipment", "Private skipper/guide", "Life jackets", "Fuel"],
+    notIncluded: ["Soft drinks, fruits and snacks", "Hotel pickup and drop-off", "Lunch", "Orange Bay Island entrance ticket - added per participant when booking"],
+    notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private activity; only your group participates.", "No same-day bookings. After 3:00 PM, next-day departures can no longer be booked.", "Recommended departure times are 8:00 AM and 2:00 PM."],
+    packageName: "Private Orange Bay Half-Day Speedboat", packageDescription: "Select one private boat, participant entrance tickets, optional catering and marina transfer.", packagePrice: String(eurToUsd(100)), packageLabel: "Private boat from", availableTimes: ["08:00", "14:00"], ageBands: { adults: "Adults - Orange Bay entrance €10 each", children: "Children - Orange Bay entrance €5 each", infants: "" },
+    seoTitle: "Orange Bay Half-Day Private Speedboat from Hurghada", metaDescription: "Book a private half-day Orange Bay speedboat from Hurghada with flexible departures, snorkeling equipment and selectable boat options."
+  },
+  {
+    slug: "orange-bay-full-day-speedboat",
+    title: "Orange Bay Full Day (Up to 9 Hours)",
+    image: "/images/speedboat-cruise.jpeg",
+    galleryImages: ["/images/speedboat-orange-bay-branded.png", "/images/speedboat-guests.jpeg", "/images/speedboat-aerial.jpeg", "/images/speedboat-shallow-water.jpeg"],
+    price: String(fullDayBoatOptions[0].price), rating: "New", reviews: "New", location: "Hurghada Marina", duration: "Up to 9 hours", category: "Speedboat Trip", badge: "Premium", bookingMode: "direct", pricingMode: "per-booking", priceUnit: "per private boat",
+    boatOptions: fullDayBoatOptions, entrancePricing: { adults: eurToUsd(10), youth: eurToUsd(5) }, bookingExtras: [...speedboatMeals, refreshments], requiresMarinaTransferChoice: true, showSpeedboatTerms: true,
+    description: "Spend a full day at Orange Bay on a private Bullet speedboat with snorkeling equipment, an expert captain/guide and life jackets. Your boat waits while you enjoy the island at your own pace.",
+    highlights: ["Fabulous Beach", "Reliable Services", "Restaurant", "Children Area", "Colorful reef snorkeling with equipment included", "Private boat stays with your group throughout the day", "Optional lunch packages"],
+    included: ["Snorkeling equipment", "Private skipper/guide", "Life jackets", "Fuel"],
+    notIncluded: ["Soft drinks, bottled water, fruits and snacks unless selected", "Lunch unless selected", "Hotel pickup and drop-off", "Orange Bay Island entrance ticket - added per participant when booking"],
+    notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private speedboat activity; only your group participates.", "Recommended departure is between 8:00 AM and 11:00 AM.", "The latest return time is 6:30 PM."],
+    packageName: "Private Orange Bay Full-Day Speedboat", packageDescription: "Select one private boat, participant entrance tickets, optional catering and marina transfer.", packagePrice: String(eurToUsd(150)), packageLabel: "Private boat from", availableTimes: ["08:00", "09:00", "10:00", "11:00"], ageBands: { adults: "Adults - Orange Bay entrance €10 each", children: "Children - Orange Bay entrance €5 each", infants: "" },
+    seoTitle: "Orange Bay Full-Day Private Speedboat from Hurghada", metaDescription: "Book a private full-day Orange Bay Bullet speedboat with selectable boats, snorkeling gear and optional catering."
+  },
+  {
+    slug: "paradise-island-speedboat",
+    title: "Paradise Island (Duration Up To 5 Hours)",
+    image: "/images/speedboat-aerial.jpeg",
+    galleryImages: ["/images/speedboat-guests.jpeg", "/images/speedboat-cruise.jpeg", "/images/speedboat-shallow-water.jpeg", "/images/speedboat-orange-bay-branded.png"],
+    price: String(halfDayBoatOptions[0].price), rating: "New", reviews: "New", location: "Hurghada New Marina", duration: "Up to 5 hours", category: "Speedboat Trip", badge: "New", bookingMode: "direct", pricingMode: "per-booking", priceUnit: "per private boat",
+    boatOptions: halfDayBoatOptions, entrancePricing: { adults: eurToUsd(20), youth: eurToUsd(10) }, bookingExtras: [refreshments, { id: "open-buffet", label: "Open Buffet", price: eurToUsd(15), unit: "person" }], requiresMarinaTransferChoice: true, showSpeedboatTerms: true,
+    description: "Discover Paradise Island on a private half-day speedboat tour with white sand, turquoise water, coral-reef snorkeling and an optional beach buffet meal.",
+    highlights: ["Flexible Schedule", "Custom Requests", "Local Guidance", "Private speedboat ride", "Coral-reef snorkeling", "Two hours of Paradise Island beach use"],
+    included: ["Snorkeling equipment", "Private skipper/guide", "Life jackets", "Fuel"],
+    notIncluded: ["Soft drinks, fruits and snacks unless selected", "Hotel pickup and drop-off", "Lunch unless selected", "Paradise Island entrance ticket - added per participant when booking"],
+    notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private activity; only your group participates.", "Alcoholic beverages are not available on the island."],
+    itinerary: ["Hurghada New Marina · Speedboat departure", "Red Sea · Snorkeling stop", "Paradise Island · Beach use (2 hours)", "Return to Hurghada New Marina"],
+    packageName: "Private Paradise Island Speedboat", packageDescription: "Select one private boat, participant island entrance, optional refreshments or buffet, and marina transfer.", packagePrice: String(eurToUsd(100)), packageLabel: "Private boat from", availableTimes: ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"], ageBands: { adults: "Adults - Paradise Island entrance €20 each", children: "Children - Paradise Island entrance €10 each", infants: "" },
+    seoTitle: "Paradise Island Private Speedboat from Hurghada", metaDescription: "Book a private five-hour Paradise Island speedboat with snorkeling, beach use and optional buffet."
+  },
+  {
+    slug: "hula-hula-speedboat",
+    title: "Hula Hula (Duration Up To 5 Hours)",
+    image: "/images/speedboat-shallow-water.jpeg",
+    galleryImages: ["/images/speedboat-guests.jpeg", "/images/speedboat-aerial.jpeg", "/images/speedboat-cruise.jpeg", "/images/speedboat-orange-bay-branded.png"],
+    price: String(halfDayBoatOptions[0].price), rating: "New", reviews: "New", location: "Hurghada Marina", duration: "Up to 5 hours", category: "Speedboat Trip", badge: "New", bookingMode: "direct", pricingMode: "per-booking", priceUnit: "per private boat",
+    boatOptions: halfDayBoatOptions, entrancePricing: { adults: eurToUsd(10), youth: eurToUsd(5) }, bookingExtras: [refreshments, { id: "open-buffet", label: "Include lunch - Open Buffet", price: eurToUsd(15), unit: "person" }], showSpeedboatTerms: true,
+    description: "Visit Hula Hula Island by private speedboat for white sand, clear water, sun loungers, snorkeling, beach activities, live music and a family-friendly beach bar atmosphere.",
+    highlights: ["Private island a short ride from Hurghada", "White sand and clear Red Sea water", "Sun loungers and beach activities", "Snorkeling, live music and beach bar", "Suitable for couples, families and groups"],
+    included: ["Snorkeling equipment", "Private skipper/guide", "Life jackets", "Fuel"],
+    notIncluded: ["Soft drinks unless selected", "Hotel pickup and drop-off", "Lunch unless selected", "Hula Hula Island entrance ticket - added per participant when booking"],
+    notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private activity; only your group participates.", "Alcoholic beverages are not available on the island.", "Lunch can be added as an Open Buffet option."],
+    itinerary: ["Hurghada Marina · Private speedboat departure", "Red Sea · Snorkeling stop", "Hula Hula Island · Beach use (2 hours)", "Return to Hurghada Marina"],
+    packageName: "Private Hula Hula Speedboat", packageDescription: "Select one private boat, participant island entrance and optional refreshments or buffet lunch.", packagePrice: String(eurToUsd(100)), packageLabel: "Private boat from", availableTimes: ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"], ageBands: { adults: "Adults - Hula Hula entrance €10 each", children: "Children - Hula Hula entrance €5 each", infants: "" },
+    seoTitle: "Hula Hula Island Private Speedboat from Hurghada", metaDescription: "Book a private Hula Hula Island speedboat with snorkeling, beach use and optional buffet lunch."
   },
   {
     slug: "magawish-speedboat", title: "Private Speed Boat to Magawish Island From Hurghada", image: "/images/hurghada-island-calm-sunset.jpeg",

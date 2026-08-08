@@ -61,6 +61,13 @@ describe("booking input validation", () => {
     expect(validateBookingInput({ ...orangeBay, date: "2026-08-04" }, now).data?.date).toBe("2026-08-04");
   });
 
+  it("enforces the 3 PM cutoff for next-day half-day speedboats", () => {
+    const speedboat = { ...valid, tourSlug: "orange-bay-half-day-speedboat" };
+    expect(validateBookingInput({ ...speedboat, date: "2026-08-09" }, new Date("2026-08-08T12:30:00Z")).error).toMatch(/two days/i);
+    expect(validateBookingInput({ ...speedboat, date: "2026-08-10" }, new Date("2026-08-08T12:30:00Z")).data?.date).toBe("2026-08-10");
+    expect(validateBookingInput({ ...speedboat, date: "2026-08-09" }, new Date("2026-08-08T11:30:00Z")).data?.date).toBe("2026-08-09");
+  });
+
   it("validates safety confirmations for trips in a cart", () => {
     const cart = {
       ...valid,

@@ -10,6 +10,13 @@ export const tourCategories = [
     matches: () => true,
   },
   {
+    slug: "speedboat-trips",
+    title: "Speedboat trips",
+    eyebrow: "Private Red Sea adventures",
+    description: "Choose a private speedboat, group size, island destination, departure time, and optional extras for a flexible Red Sea trip.",
+    matches: (tour: Tour) => tour.category === "Speedboat Trip" || tour.category === "Private Speedboat",
+  },
+  {
     slug: "island-trips",
     title: "Island trips",
     eyebrow: "Turquoise escapes",
@@ -58,6 +65,7 @@ export type TourCategory = (typeof tourCategories)[number];
 export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>> = {
   en: {
     excursions: "Tours & excursions",
+    "speedboat-trips": "Speedboat trips",
     "island-trips": "Island trips",
     "diving-snorkeling": "Diving & snorkeling",
     "desert-safaris": "Desert safaris",
@@ -67,6 +75,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
   },
   ar: {
     excursions: "الجولات والرحلات",
+    "speedboat-trips": "رحلات القارب السريع",
     "island-trips": "رحلات الجزر",
     "diving-snorkeling": "الغوص والسنوركلينج",
     "desert-safaris": "رحلات السفاري الصحراوية",
@@ -76,6 +85,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
   },
   de: {
     excursions: "Touren & Ausflüge",
+    "speedboat-trips": "Speedboot-Ausflüge",
     "island-trips": "Inseltouren",
     "diving-snorkeling": "Tauchen & Schnorcheln",
     "desert-safaris": "Wüstensafaris",
@@ -85,6 +95,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
   },
   ru: {
     excursions: "Туры и экскурсии",
+    "speedboat-trips": "Поездки на скоростном катере",
     "island-trips": "Поездки на острова",
     "diving-snorkeling": "Дайвинг и сноркелинг",
     "desert-safaris": "Сафари по пустыне",
@@ -94,6 +105,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
   },
   pl: {
     excursions: "Wycieczki i atrakcje",
+    "speedboat-trips": "Rejsy motorówką",
     "island-trips": "Wycieczki na wyspy",
     "diving-snorkeling": "Nurkowanie i snorkeling",
     "desert-safaris": "Safari na pustyni",
@@ -103,6 +115,7 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
   },
   zh: {
     excursions: "旅游与活动",
+    "speedboat-trips": "快艇行程",
     "island-trips": "海岛游",
     "diving-snorkeling": "深潜与浮潜",
     "desert-safaris": "沙漠探险",
@@ -115,4 +128,3 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
 export function getTourCategory(slug: string) {
   return tourCategories.find((category) => category.slug === slug);
 }
-

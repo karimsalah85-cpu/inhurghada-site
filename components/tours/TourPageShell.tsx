@@ -13,7 +13,7 @@ import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
 import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
 
-export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; locale?: Locale }) {
+export default function TourPageShell({ tour, locale = "en", relatedTourCandidates = tours }: { tour: Tour; locale?: Locale; relatedTourCandidates?: Tour[] }) {
   const de = locale === "de";
   const ru = locale === "ru";
   const ar = locale === "ar";
@@ -24,7 +24,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
   const reviewCount = Number(tour.reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
-  const galleryImages = transferService
+  const galleryImages = tour.galleryImages ?? (transferService
     ? ["/images/hurghada-airport-transfer.jpg", "/images/senzo-transfer.jpg", "/images/transfer.jpg", "/images/hero.jpg"]
     : tour.slug === "full-day-diving" || tour.slug === "professional-underwater-photographer"
       ? [
@@ -63,7 +63,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
         "/images/desert-safari.jpg",
         "/images/quad-safari-sunset.jpg",
       ]
-      : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"];
+      : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"]);
   const faqs = de ? [
     { question: "Ist die Abholung vom Hotel inklusive?", answer: "Die Abholdetails stehen in den Ausflugsinformationen. Die genaue Zeit und den Ort bestätigen wir nach der Buchung per WhatsApp." },
     { question: "Wann bezahle ich?", answer: "Du kannst online reservieren und bei Ankunft bar bezahlen, sofern bei der Buchung keine andere Zahlungsart angezeigt wird." },
@@ -86,9 +86,9 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
     { question: de ? "Was soll ich mitbringen?" : "What should I bring?", answer: de ? "Bringe deine Buchungsnummer, bequeme Kleidung und alle Dinge mit, die im Abschnitt mit den wichtigen Informationen genannt werden." : "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
-  const relatedTours = tours.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : zh ? localizeTourChinese(item) : item);
+  const relatedTours = relatedTourCandidates.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : zh ? localizeTourChinese(item) : item);
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
-  const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
+  const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: tour.listingStatus === "paused" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
   const schema = { "@context": "https://schema.org", "@graph": [
     { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
     tourSchema,
@@ -112,7 +112,7 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
 
           <div className="lg:sticky lg:top-24 lg:self-start">
             {tour.bookingMode === "inquiry" ? <div className="rounded-3xl border border-cyan-200 bg-white p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-700">Price and availability</p><h2 className="mt-3 text-3xl font-black text-slate-950">Request a verified quotation</h2><p className="mt-4 leading-7 text-slate-600">Daily Red Sea will confirm the supplier, departure, pickup area, participant ages and final price. No payment is taken now.</p><a href={whatsappUrl(`Hello Daily Red Sea, please send me the current price and availability for ${tour.title}.`)} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-emerald-600 px-6 py-4 font-bold text-white hover:bg-emerald-700">Request on WhatsApp</a></div> : <><div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{de ? "Jetzt reservieren, bei Ankunft bar bezahlen" : ru ? "Забронируйте сейчас, оплатите наличными по прибытии" : zh ? "立即预订，抵达后现金付款" : "Reserve now, pay cash on arrival"}</p><p className="mt-1">{de ? "Nach deiner Anfrage bestätigen wir die Abholdetails per WhatsApp." : ru ? "После заявки мы подтвердим детали трансфера через WhatsApp." : zh ? "提交请求后，我们会通过 WhatsApp 确认接送详情。" : "We confirm pickup details by WhatsApp after your request."}</p></div><Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
-              {transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
+              {tour.listingStatus === "paused" ? <div className="min-h-[320px] rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-800">Temporarily unavailable</p><h2 className="mt-3 text-3xl font-black text-slate-950">Bookings are paused</h2><p className="mt-4 leading-7 text-slate-700">We are not accepting new bookings for this trip right now. Existing bookings are unaffected.</p></div> : transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}
                   tourSlug={tour.slug}
                   price={tour.price}
@@ -124,6 +124,11 @@ export default function TourPageShell({ tour, locale = "en" }: { tour: Tour; loc
                   participantPricing={tour.participantPricing}
                   availableTimes={tour.availableTimes}
                   ageBands={tour.ageBands}
+                  boatOptions={tour.boatOptions}
+                  entrancePricing={tour.entrancePricing}
+                  bookingExtras={tour.bookingExtras}
+                  requiresMarinaTransferChoice={tour.requiresMarinaTransferChoice}
+                  bookingLeadTime={tour.bookingLeadTime}
                 />}
             </Suspense></>}
           </div>

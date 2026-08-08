@@ -4,6 +4,7 @@ import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Ticket, TriangleAlert } from "lucide-react";
 import TourItinerary from "@/components/tours/TourItinerary";
+import { speedboatTerms } from "@/data/speedboat-booking";
 
 export default function TourDetails({ tour }: { tour: Tour }) {
   const { formatPrice, language } = useSiteSettings();
@@ -107,6 +108,8 @@ export default function TourDetails({ tour }: { tour: Tour }) {
       </div>
 
       {tour.itinerary ? <TourItinerary items={tour.itinerary} /> : null}
+
+      {tour.showSpeedboatTerms ? <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Terms &amp; Conditions</p><ul className="mt-6 space-y-3">{speedboatTerms.map((item) => <li key={item} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700"><BadgeCheck className="mt-0.5 shrink-0 text-cyan-700" size={18}/><span>{item}</span></li>)}</ul></section> : null}
 
       {tour.notSuitableFor?.length || tour.whatToBring?.length ? <div className="grid gap-8 lg:grid-cols-2"><div className="rounded-3xl border border-rose-200 bg-rose-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-rose-700"><TriangleAlert size={18}/>Not suitable for</p><ul className="mt-5 space-y-3">{tour.notSuitableFor?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-800">What to bring</p><ul className="mt-5 grid gap-3 sm:grid-cols-2">{tour.whatToBring?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div></div> : null}
     </div>

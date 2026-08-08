@@ -15,6 +15,7 @@ import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { whatsappNumber } from "@/lib/contact";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
+import { getUnavailableTrip } from "@/lib/live-content";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -66,6 +67,11 @@ export async function POST(request: NextRequest) {
     if (!validation.data) return bookingJson({ success: false, error: validation.error }, { status: 400 });
     const body = validation.data;
     const bookingType = body.type;
+    if (bookingType === "tour") {
+      const tripSlugs = body.tourSlug === "multi-trip" ? body.cartItems.map((item) => item.tourSlug) : [body.tourSlug];
+      const unavailable = await getUnavailableTrip(tripSlugs);
+      if (unavailable) return bookingJson({ success: false, error: unavailable.status === "paused" ? "This trip is temporarily unavailable for new bookings." : "This trip is no longer available for booking." }, { status: 409 });
+    }
     const { customerName, phone, customerEmail, hotel } = body;
     const pricing = calculateBookingPrice(body);
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });

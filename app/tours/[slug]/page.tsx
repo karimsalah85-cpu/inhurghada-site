@@ -16,7 +16,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tour = (await getLiveTours()).find((item) => item.slug === slug);
+  const liveTours = await getLiveTours();
+  const tour = liveTours.find((item) => item.slug === slug);
   if (!tour) return {};
   const title = tour.seoTitle || `${tour.title} from Hurghada`;
   const description = tour.metaDescription || tour.description;
@@ -46,11 +47,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TourPage({ params }: PageProps) {
   const { slug } = await params;
-  const tour = (await getLiveTours()).find((item) => item.slug === slug);
+  const liveTours = await getLiveTours();
+  const tour = liveTours.find((item) => item.slug === slug);
 
   if (!tour) {
     notFound();
   }
 
-  return <TourPageShell tour={tour} />;
+  return <TourPageShell tour={tour} relatedTourCandidates={liveTours} />;
 }

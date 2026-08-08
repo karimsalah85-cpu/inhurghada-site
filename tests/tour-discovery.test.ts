@@ -11,8 +11,8 @@ describe("tour discovery", () => {
     }
   });
 
-  it("publishes English and translated category pages in the sitemap", () => {
-    const urls = new Set(sitemap().map((entry) => entry.url));
+  it("publishes English and translated category pages in the sitemap", async () => {
+    const urls = new Set((await sitemap()).map((entry) => entry.url));
     for (const category of tourCategories) {
       expect(urls.has(`https://dailyredsea.com/hurghada/${category.slug}`)).toBe(true);
       expect(urls.has(`https://dailyredsea.com/ar/hurghada/${category.slug}`)).toBe(true);
@@ -20,8 +20,8 @@ describe("tour discovery", () => {
     }
   });
 
-  it("includes multilingual alternates on every indexed tour", () => {
-    const entries = sitemap();
+  it("includes multilingual alternates on every indexed tour", async () => {
+    const entries = await sitemap();
     for (const tour of tours) {
       const entry = entries.find((item) => item.url === `https://dailyredsea.com/tours/${tour.slug}`);
       expect(entry?.alternates?.languages?.en).toBe(`https://dailyredsea.com/tours/${tour.slug}`);

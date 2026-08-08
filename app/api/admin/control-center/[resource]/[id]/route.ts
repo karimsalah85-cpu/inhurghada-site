@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { hasAdminPermission, isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
+import { revalidatePath } from "next/cache";
 
 const tables = { content: "content_items", media: "media_assets", availability: "tour_availability", staff: "staff_members", assignments: "booking_assignments", notes: "customer_notes", templates: "communication_templates", queue: "communication_queue", settings: "site_settings", redirects: "redirect_rules" } as const;
 const permissions: Record<keyof typeof tables, AdminPermission> = { content:"content",media:"content",availability:"operations",staff:"operations",assignments:"operations",notes:"operations",templates:"operations",queue:"operations",settings:"settings",redirects:"content" };
@@ -19,7 +20,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") return NextResponse.json({ error: "Invalid update." }, { status: 400 });
   const allowed: Record<string, string[]> = {
-    content: ["content_type", "slug", "locale", "status", "title", "excerpt", "body", "seo_title", "seo_description", "canonical_path", "featured_image", "publish_at"],
+    content: ["content_type", "slug", "locale", "status", "listing_status", "title", "excerpt", "body", "seo_title", "seo_description", "canonical_path", "featured_image", "publish_at"],
     media: ["storage_path", "public_url", "file_name", "mime_type", "alt_text", "credit"], availability: ["tour_slug", "service_date", "start_time", "capacity", "blocked", "price_override", "currency", "notes"], staff: ["name", "staff_type", "phone", "languages", "active", "notes"], assignments: ["booking_id", "supplier_id", "staff_member_id", "assignment_type", "pickup_time", "internal_cost", "currency", "status", "notes"], notes: ["customer_key", "customer_name", "note", "tags"], templates: ["name", "channel", "event_key", "locale", "subject", "body", "active"], queue: ["booking_id", "template_id", "channel", "recipient", "scheduled_for", "status"], settings: ["value", "category", "public", "description"], redirects: ["source_path", "destination_path", "permanent", "active"],
   };
   const update = Object.fromEntries(allowed[resource].filter((field) => Object.hasOwn(body, field)).map((field) => [field, body[field]]));
@@ -31,6 +32,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
   const { data, error } = await supabase.from(table).update(update).eq(key, id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: resource, resource_identifier: id, summary_text: `Updated ${resource} record`, before_value: before, after_value: data });
+  if (resource === "content") {
+    revalidatePath("/", "layout");
+    revalidatePath("/sitemap.xml");
+  }
   return NextResponse.json({ record: data }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
