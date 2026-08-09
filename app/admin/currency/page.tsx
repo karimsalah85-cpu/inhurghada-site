@@ -1,2 +1,2 @@
-import { redirect } from "next/navigation";
-export default function CurrencyPage() { redirect("/admin?panel=settings#control-center"); }
+import AdminPage from "../page";
+export default function CurrencyPage({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}) { return AdminPage({searchParams,workspace:"currency"}); }

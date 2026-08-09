@@ -23,9 +23,10 @@ const groups: NavGroup[] = [
     { href: "/admin/finance", label: "Finance", permissions: ["finance"] },
     { href: "/admin/suppliers", label: "Suppliers", permissions: ["suppliers", "finance"] },
     { href: "/admin/analytics", label: "Analytics", permissions: ["finance", "reports"] },
+    { href: "/admin/reports", label: "Reports", permissions: ["reports"] },
   ] },
   { label: "System & access", items: [
-    { href: "/admin/users", label: "Users & roles", ownerOnly: true },
+    { href: "/admin/users", label: "Users & roles", permissions: ["settings", "staff"] },
     { href: "/admin/integrations", label: "Integrations", permissions: ["settings"] },
     { href: "/admin/environments", label: "Environments", permissions: ["settings"] },
     { href: "/admin/audit-log", label: "Audit log", permissions: ["settings"] },

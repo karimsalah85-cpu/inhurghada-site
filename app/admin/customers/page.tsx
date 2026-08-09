@@ -1,2 +1,2 @@
-import { redirect } from "next/navigation";
-export default function CustomersPage() { redirect("/admin?panel=notes#control-center"); }
+import AdminPage from "../page";
+export default function CustomersPage({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}) { return AdminPage({searchParams,workspace:"customers"}); }

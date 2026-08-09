@@ -1,2 +1,1 @@
-import { redirect } from "next/navigation";
-export default function UsersPage() { redirect("/admin/team"); }
+export { default } from "../team/page";
