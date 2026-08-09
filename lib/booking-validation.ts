@@ -95,12 +95,12 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     const todayInCairo = cairoDateTimeParts(now).date;
     if (date <= todayInCairo) return { error: "Orange Bay bookings must be made at least one day before the trip." as const };
   }
-  if (type === "tour" && tourSlug === "orange-bay-half-day-speedboat") {
+  if (type === "tour" && ["orange-bay-half-day-speedboat", "magawish-speedboat"].includes(tourSlug)) {
     const cairo = cairoDateTimeParts(now);
     const tomorrow = new Date(`${cairo.date}T12:00:00Z`);
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     const nextDay = tomorrow.toISOString().slice(0, 10);
-    if (date <= cairo.date || (date === nextDay && cairo.time >= "15:00")) return { error: "After 3:00 PM, Orange Bay half-day bookings require at least two days' notice." as const };
+    if (date <= cairo.date || (date === nextDay && cairo.time >= "15:00")) return { error: "After 3:00 PM, private half-day speedboat trips require at least two days' notice." as const };
   }
   const selectedCartItems = cartItems(body.cartItems);
   if (tourSlug === "multi-trip") {

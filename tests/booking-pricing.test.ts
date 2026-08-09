@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
-import { eurToUsd } from "@/data/speedboat-booking";
+import { eurToUsd, halfDayBoatOptions } from "@/data/speedboat-booking";
 
 const tour = { type: "tour" as const, tourName: "", tourSlug: "orange-bay", adults: 1, youth: 0, infants: 0, service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 };
 const transfer = { type: "transfer" as const, tourName: "", adults: 0, youth: 0, infants: 0, service: "airport", pickup: "Hurghada Airport", dropoff: "Hurghada Hotels", passengers: 2, travelBags: 2 };
@@ -55,9 +55,10 @@ describe("authoritative booking pricing", () => {
     expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total" } });
   });
 
-  it("charges the Magawish private boat once for the whole group", () => {
-    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "magawish-speedboat", adults: 6 });
-    expect(result.data).toMatchObject({ amount: 150, guests: 6, guestSummary: "6 passengers" });
+  it("prices the selected Magawish boat and combined island entrances", () => {
+    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "magawish-speedboat", adults: 6, selectedBoatOption: "boat-4" });
+    expect(result.data).toMatchObject({ guests: 6, guestSummary: expect.stringContaining("6 passengers") });
+    expect(result.data?.amount).toBeCloseTo(halfDayBoatOptions[3].price + 6 * (eurToUsd(10) + 10));
   });
 
   it("uses the supplied Dolphin House adult, child and infant prices", () => {

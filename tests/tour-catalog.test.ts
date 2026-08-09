@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
+import { halfDayBoatOptions } from "@/data/speedboat-booking";
 
 describe("tour catalog publication safety", () => {
   it("keeps slugs unique", () => {
@@ -44,9 +45,9 @@ describe("tour catalog publication safety", () => {
       expect(tour?.participantPricing).toEqual({ adults: 25, youth: 15, infants: 0 });
       expect(tour?.ageBands?.children).toBe("Youth (ages 4–10)");
     }
-    expect(magawish?.price).toBe("150");
+    expect(magawish?.price).toBe(String(halfDayBoatOptions[0].price));
     expect(magawish?.pricingMode).toBe("per-booking");
-    expect(magawish?.notIncluded).toContain("Magawish Island entrance fee ($10 per person, paid separately)");
+    expect(magawish?.notIncluded?.some((item) => item.includes("Orange Bay entrance") && item.includes("Magawish entrance"))).toBe(true);
   });
 
   it("prices both open-water courses at EUR 300 and excludes EUR 100 materials", () => {
@@ -58,8 +59,8 @@ describe("tour catalog publication safety", () => {
     }
   });
 
-  it("publishes all four private speedboat products with distinct boat tiers", () => {
-    const slugs = ["orange-bay-half-day-speedboat", "orange-bay-full-day-speedboat", "paradise-island-speedboat", "hula-hula-speedboat"];
+  it("publishes all five private speedboat products with distinct boat tiers", () => {
+    const slugs = ["orange-bay-half-day-speedboat", "orange-bay-full-day-speedboat", "paradise-island-speedboat", "hula-hula-speedboat", "magawish-speedboat"];
     for (const slug of slugs) {
       const tour = tours.find((item) => item.slug === slug);
       expect(tour?.bookingMode).toBe("direct");
