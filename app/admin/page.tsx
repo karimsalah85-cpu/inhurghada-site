@@ -13,6 +13,7 @@ type AdminSearchParams = {
   supplier?: string;
   expense_sort?: string;
   range?: string;
+  panel?: string;
 };
 
 const bookingStatuses = ["all", "new", "confirmed", "completed", "cancelled"] as const;
@@ -54,6 +55,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const expenseSort = ["none", "highest", "lowest"].includes(first(params.expense_sort) || "") ? first(params.expense_sort)! : "none";
   const requestedRange = Number(first(params.range) || 30);
   const analyticsRange = ([7, 30, 90].includes(requestedRange) ? requestedRange : 30) as 7 | 30 | 90;
+  const requestedPanel = first(params.panel);
+  const controlPanel = (["content", "media", "availability", "staff", "assignments", "notes", "templates", "queue", "settings", "redirects"].includes(requestedPanel || "") ? requestedPanel : "content") as "content" | "media" | "availability" | "staff" | "assignments" | "notes" | "templates" | "queue" | "settings" | "redirects";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) redirect("/admin/login");
@@ -69,6 +72,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     if (supplier !== "all") canonical.set("supplier", supplier);
     if (expenseSort !== "none") canonical.set("expense_sort", expenseSort);
     if (analyticsRange !== 30) canonical.set("range", String(analyticsRange));
+    if (controlPanel !== "content") canonical.set("panel", controlPanel);
     redirect(`/admin?${canonical.toString()}`);
   }
   const canBookings = hasAdminPermission(user, "bookings") || hasAdminPermission(user, "reports");
@@ -120,5 +124,5 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   const migrationPending = Boolean(suppliersError || salesPeopleError);
 
-  return <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"><div className="mx-auto max-w-7xl"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Operations</p><h1 className="mt-2 text-4xl font-black text-slate-900">Daily Red Sea Admin</h1><p className="mt-2 text-slate-600">Manage customer bookings, cash collection, partners, and business finances.</p>{error ? <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><p className="font-bold">The admin database access needs attention.</p><p className="mt-2 text-sm">{error}</p><p className="mt-2 text-sm">Run the authenticated-admin policy from <code>supabase/schema.sql</code> in Supabase SQL Editor, then refresh this page.</p></div> : <AdminDashboard key={Object.values(bookingView).join("|")} initialBookings={bookings || []} initialVisibleBookings={visibleBookingsWithCosts} bookingView={bookingView} initialExpenses={expenses || []} initialSuppliers={suppliers || []} initialSalesPeople={salesPeople || []} migrationPending={migrationPending} permissions={permissions} currentRole={role} isOwner={isAdminOwner(user)} analyticsRange={analyticsRange} />}</div></main>;
+  return <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"><div className="mx-auto max-w-7xl"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Operations</p><h1 className="mt-2 text-4xl font-black text-slate-900">Daily Red Sea Admin</h1><p className="mt-2 text-slate-600">Manage customer bookings, cash collection, partners, and business finances.</p>{error ? <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><p className="font-bold">The admin database access needs attention.</p><p className="mt-2 text-sm">{error}</p><p className="mt-2 text-sm">Run the authenticated-admin policy from <code>supabase/schema.sql</code> in Supabase SQL Editor, then refresh this page.</p></div> : <AdminDashboard key={Object.values(bookingView).join("|")} initialBookings={bookings || []} initialVisibleBookings={visibleBookingsWithCosts} bookingView={bookingView} initialExpenses={expenses || []} initialSuppliers={suppliers || []} initialSalesPeople={salesPeople || []} migrationPending={migrationPending} permissions={permissions} currentRole={role} isOwner={isAdminOwner(user)} analyticsRange={analyticsRange} initialControlPanel={controlPanel} />}</div></main>;
 }

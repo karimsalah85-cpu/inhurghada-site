@@ -1,0 +1,10 @@
+import AdminPageFrame from "@/components/admin/AdminPageFrame";
+import { requireAdminPage } from "@/lib/admin-page-auth";
+
+type AuditRow = { id: string; actor_email: string | null; action: string; resource_type: string; resource_id: string | null; summary: string | null; before_data: unknown; after_data: unknown; created_at: string };
+
+export default async function AuditLogPage() {
+  const { supabase } = await requireAdminPage("settings");
+  const { data, error } = await supabase.from("admin_audit_log").select("id,actor_email,action,resource_type,resource_id,summary,before_data,after_data,created_at").order("created_at", { ascending: false }).limit(200);
+  return <AdminPageFrame eyebrow="System & access" title="Audit log" description="Append-only history of administrative changes, including the actor, affected record, and timestamp.">{error ? <p role="alert" className="rounded-2xl bg-rose-50 p-4 text-rose-800">{error.message}</p> : <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-slate-100 text-xs uppercase text-slate-500"><tr><th className="p-4">When</th><th className="p-4">Who</th><th className="p-4">Action</th><th className="p-4">Resource</th><th className="p-4">Change</th></tr></thead><tbody>{(data as AuditRow[] | null)?.map((row) => <tr key={row.id} className="border-t border-slate-100"><td className="whitespace-nowrap p-4">{new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Cairo" }).format(new Date(row.created_at))}</td><td className="p-4">{row.actor_email || "System"}</td><td className="p-4 font-bold capitalize">{row.action}</td><td className="p-4"><span className="font-bold">{row.resource_type}</span>{row.resource_id ? <span className="block max-w-48 truncate text-xs text-slate-500">{row.resource_id}</span> : null}</td><td className="p-4">{row.summary || "Administrative change"}</td></tr>)}{!data?.length ? <tr><td colSpan={5} className="p-8 text-center text-slate-500">No audit entries yet.</td></tr> : null}</tbody></table></div>}</AdminPageFrame>;
+}

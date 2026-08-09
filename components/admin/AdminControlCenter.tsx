@@ -3,7 +3,8 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Pencil, RefreshCw, Settings2, Trash2, Upload } from "lucide-react";
 
-type Resource = "content" | "media" | "availability" | "staff" | "assignments" | "notes" | "templates" | "queue" | "settings" | "redirects";
+export type AdminControlResource = "content" | "media" | "availability" | "staff" | "assignments" | "notes" | "templates" | "queue" | "settings" | "redirects";
+type Resource = AdminControlResource;
 type RecordValue = Record<string, unknown> & { id?: string; key?: string };
 type Payload = { configured: false; migration: string } | ({ configured: true; audit: RecordValue[]; health: RecordValue[] } & Record<Resource, RecordValue[]>);
 const tabs: Array<[Resource, string]> = [["content", "Live content"], ["media", "Media"], ["availability", "Calendar & capacity"], ["staff", "Staff"], ["assignments", "Assignments"], ["notes", "Customer notes"], ["templates", "Message templates"], ["queue", "Message queue"], ["settings", "Site settings"], ["redirects", "Redirects"]];
@@ -20,8 +21,8 @@ const empty: Record<Resource, Record<string, unknown>> = {
   redirects: { source_path: "", destination_path: "", permanent: true, active: true },
 };
 
-export default function AdminControlCenter() {
-  const [tab, setTab] = useState<Resource>("content");
+export default function AdminControlCenter({ initialTab = "content" }: { initialTab?: Resource }) {
+  const [tab, setTab] = useState<Resource>(initialTab);
   const [data, setData] = useState<Payload | null>(null);
   const [form, setForm] = useState<Record<string, unknown>>({ ...empty.content });
   const [busy, setBusy] = useState(false);

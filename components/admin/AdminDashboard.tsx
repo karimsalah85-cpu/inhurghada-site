@@ -54,7 +54,7 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function AdminDashboard({ initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner, analyticsRange }: { initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean; analyticsRange: 7 | 30 | 90 }) {
+export default function AdminDashboard({ initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner, analyticsRange, initialControlPanel }: { initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean; analyticsRange: 7 | 30 | 90; initialControlPanel: "content" | "media" | "availability" | "staff" | "assignments" | "notes" | "templates" | "queue" | "settings" | "redirects" }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
   const [visibleBookings, setVisibleBookings] = useState(initialVisibleBookings);
@@ -319,7 +319,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
       </aside> : null}
     </div>
 
-    {can("content") || can("settings") ? <AdminControlCenter /> : null}
+    {can("content") || can("settings") || can("operations") ? <AdminControlCenter initialTab={initialControlPanel} /> : null}
     {can("operations") || can("staff") || can("settings") ? <AdminOperationsCenter /> : null}
     {can("suppliers") || can("finance") ? <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3"><UsersRound className="mt-1 text-cyan-700" size={24}/><div><h2 className="text-2xl font-bold">Suppliers & sales people</h2><p className="mt-1 text-sm text-slate-500">Create reusable contacts and attach them to expenses.</p></div></div>
