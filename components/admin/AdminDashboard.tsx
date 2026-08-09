@@ -7,6 +7,9 @@ import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleDollarSign
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
+import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
+import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
+import TopServicesPanel from "@/components/admin/TopServicesPanel";
 import { countDistinctCustomers } from "@/lib/customer-count";
 import { adminRoles, permissionsForAdminRole, type AdminPermission, type AdminRole } from "@/lib/admin-auth";
 
@@ -51,7 +54,7 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function AdminDashboard({ initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner }: { initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean }) {
+export default function AdminDashboard({ initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner, analyticsRange }: { initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean; analyticsRange: 7 | 30 | 90 }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
   const [visibleBookings, setVisibleBookings] = useState(initialVisibleBookings);
@@ -152,6 +155,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
     if (next.type !== "all") params.set("type", next.type);
     if (next.service !== "all") params.set("service", next.service);
     if (next.search) params.set("search", next.search);
+    if (analyticsRange !== 30) params.set("range", String(analyticsRange));
     if (next.supplier !== "all") params.set("supplier", next.supplier);
     if (next.expense_sort !== "none") params.set("expense_sort", next.expense_sort);
     return `/admin?${params.toString()}#bookings`;
@@ -246,7 +250,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
 
   return <>
     <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold">{can("bookings") ? <a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a> : null}{can("finance") ? <a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a> : null}{can("reports") ? <Link href="/admin/marketing" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800 hover:bg-blue-100">Marketing analytics</Link> : null}{can("content") || can("settings") ? <a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a> : null}{can("suppliers") || can("finance") ? <a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a> : null}{can("reports") ? <a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a> : null}</nav>
+      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold">{can("bookings") ? <a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a> : null}{can("finance") ? <a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a> : null}{can("finance") ? <a href="#analytics" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800 hover:bg-blue-100">Analytics & advertising</a> : null}{can("content") || can("settings") ? <a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a> : null}{can("suppliers") || can("finance") ? <a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a> : null}{can("reports") ? <a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a> : null}</nav>
       <div className="flex flex-wrap items-center gap-2">{isOwner ? <label className="text-xs font-bold text-slate-600">Preview staff access<select aria-label="Preview staff role access" value={previewRole} onChange={(event)=>setPreviewRole(event.target.value as AdminRole|"")} className="ml-2 rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm"><option value="">Owner (live)</option>{adminRoles.filter(role=>role!=="owner").map(role=><option key={role} value={role}>{role.replace("_"," ")}</option>)}</select></label> : <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold capitalize">{currentRole.replace("_"," ")}</span>}<button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button></div>
     </div>
 
@@ -260,6 +264,8 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
       {can("finance") || can("reports") ? <Metric icon={<WalletCards size={19}/>} label="Expenses" value={money(metrics.expenseTotal)} note="Business costs" tone="rose" /> : null}
       {can("finance") || can("reports") ? <Metric icon={<CheckCircle2 size={19}/>} label="Cash profit" value={money(metrics.profit)} note="Collected less expenses" tone="slate" /> : null}
     </div> : null}
+
+    {can("finance") ? <section id="analytics" className="mt-8 scroll-mt-6"><div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm sm:p-8"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-300">Marketing intelligence</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Analytics & advertising</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Website audiences, booking demand, and Google Ads performance in the same admin workspace.</p></div><TopServicesPanel range={analyticsRange}/><GoogleAnalyticsPanel/><GoogleAdsPanel range={analyticsRange}/></section> : null}
 
     {error ? <div role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800">{error}</div> : null}
     {notice ? <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">{notice}</div> : null}
