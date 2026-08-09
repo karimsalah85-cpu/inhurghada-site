@@ -8,7 +8,7 @@ import { absoluteUrl, siteName } from "@/lib/seo";
 import TourViewTracker from "@/components/analytics/TourViewTracker";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { localePath, type Locale } from "@/lib/i18n";
-import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTour } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
 import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
@@ -86,7 +86,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     { question: de ? "Was soll ich mitbringen?" : "What should I bring?", answer: de ? "Bringe deine Buchungsnummer, bequeme Kleidung und alle Dinge mit, die im Abschnitt mit den wichtigen Informationen genannt werden." : "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
-  const relatedTours = relatedTourCandidates.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => de ? localizeTourGerman(item) : ru ? localizeTourRussian(item) : ar ? localizeTourArabic(item) : zh ? localizeTourChinese(item) : item);
+  const relatedTours = relatedTourCandidates.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => localizeTour(item, locale));
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
   const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: tour.listingStatus === "paused" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
   const schema = { "@context": "https://schema.org", "@graph": [
@@ -103,7 +103,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : zh ? "赫尔格达体验" : `${destination?.name || "Hurghada"} experience`}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
-        <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} locale={locale} />
+        <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} imageAlt={tour.imageAlt} galleryImageAlts={tour.galleryImageAlts} locale={locale} />
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">

@@ -2,20 +2,20 @@ import { describe, expect, it } from "vitest";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { eurToUsd } from "@/data/speedboat-booking";
 
-const tour = { type: "tour" as const, tourName: "Orange Bay Island Snorkeling Boat Trip", adults: 1, youth: 0, infants: 0, service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 };
+const tour = { type: "tour" as const, tourName: "", tourSlug: "orange-bay", adults: 1, youth: 0, infants: 0, service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 };
 const transfer = { type: "transfer" as const, tourName: "", adults: 0, youth: 0, infants: 0, service: "airport", pickup: "Hurghada Airport", dropoff: "Hurghada Hotels", passengers: 2, travelBags: 2 };
 
 describe("authoritative booking pricing", () => {
   it("calculates adult, youth and infant tour pricing", () => {
-    expect(calculateBookingPrice({ ...tour, adults: 2, youth: 1, infants: 1 }).data).toMatchObject({ amount: 109.01, guests: 4 });
+    expect(calculateBookingPrice({ ...tour, adults: 2, youth: 1, infants: 1 }).data).toMatchObject({ amount: 80, guests: 4 });
   });
 
-  it("adds the Orange Bay remote pickup supplement for each adult", () => {
-    expect(calculateBookingPrice({ ...tour, tourSlug: "orange-bay", adults: 2, extras: ["remote-pickup"] }).data?.amount).toBeCloseTo(92.46);
+  it("rejects the removed Orange Bay remote pickup supplement", () => {
+    expect(calculateBookingPrice({ ...tour, adults: 2, extras: ["remote-pickup"] }).error).toMatch(/valid optional extras/i);
   });
 
   it("rejects an unknown tour", () => {
-    expect(calculateBookingPrice({ ...tour, tourName: "Fake tour" }).error).toMatch(/valid tour/i);
+    expect(calculateBookingPrice({ ...tour, tourSlug: undefined, tourName: "Fake tour" }).error).toMatch(/valid tour/i);
   });
 
   it("requires an adult", () => {
@@ -23,7 +23,7 @@ describe("authoritative booking pricing", () => {
   });
 
   it("rejects unsupported youth pricing", () => {
-    expect(calculateBookingPrice({ ...tour, tourName: "Professional Underwater Photographer", youth: 1 }).error).toMatch(/not available/i);
+    expect(calculateBookingPrice({ ...tour, tourSlug: undefined, tourName: "Professional Underwater Photographer", youth: 1 }).error).toMatch(/not available/i);
   });
 
   it("calculates the Hurghada airport base fare", () => {
@@ -51,7 +51,7 @@ describe("authoritative booking pricing", () => {
   });
 
   it("prices the private Luxor day trip from the server-side catalog", () => {
-    const result = calculateBookingPrice({ ...tour, tourName: "Private Day Trip to Luxor from Hurghada", adults: 2 });
+    const result = calculateBookingPrice({ ...tour, tourSlug: undefined, tourName: "Private Day Trip to Luxor from Hurghada", adults: 2 });
     expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total" } });
   });
 
@@ -76,7 +76,7 @@ describe("authoritative booking pricing", () => {
         { tourSlug: "full-day-diving", date: "2099-01-02", time: "08:00", adults: 1, youth: 0, infants: 0, extras: [] },
       ],
     });
-    expect(result.data).toMatchObject({ amount: 164.01, guests: 4, guestSummary: "2 trips · 4 participant places" });
+    expect(result.data).toMatchObject({ amount: 135, guests: 4, guestSummary: "2 trips · 4 participant places" });
     expect(result.data && "items" in result.data ? result.data.items : []).toHaveLength(2);
   });
 

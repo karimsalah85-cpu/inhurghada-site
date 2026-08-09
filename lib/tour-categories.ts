@@ -28,7 +28,7 @@ export const tourCategories = [
     title: "Diving & snorkeling",
     eyebrow: "Below the surface",
     description: "Discover Hurghada’s coral reefs with full-day snorkeling, guided diving, and professional underwater photography.",
-    matches: (tour: Tour) => ["Snorkeling", "Diving"].includes(tour.category || "") || tour.slug === "professional-underwater-photographer",
+    matches: (tour: Tour) => tour.categoryPath?.[0] === "Diving & Snorkeling" || ["Snorkeling", "Diving"].includes(tour.category || "") || tour.slug === "professional-underwater-photographer",
   },
   {
     slug: "desert-safaris",

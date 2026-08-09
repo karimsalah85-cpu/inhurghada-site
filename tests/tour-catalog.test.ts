@@ -20,7 +20,8 @@ describe("tour catalog publication safety", () => {
       expect(tour.bookingMode).toBe("direct");
       expect(tour.image).toMatch(/^\/images\//);
       expect(tour.included?.length).toBeGreaterThan(0);
-      expect(tour.notIncluded?.length).toBeGreaterThan(0);
+      if (tour.slug === "paradise-island") expect(tour.notIncluded).toEqual([]);
+      else expect(tour.notIncluded?.length).toBeGreaterThan(0);
       expect(tour.notes?.length).toBeGreaterThan(0);
       expect(tour.availableTimes?.length).toBeGreaterThan(0);
     }
@@ -41,7 +42,7 @@ describe("tour catalog publication safety", () => {
     for (const tour of [dolphin, hulaHula]) {
       expect(tour?.price).toBe("25");
       expect(tour?.participantPricing).toEqual({ adults: 25, youth: 15, infants: 0 });
-      expect(tour?.ageBands?.children).toBe("Children (ages 4–10)");
+      expect(tour?.ageBands?.children).toBe("Youth (ages 4–10)");
     }
     expect(magawish?.price).toBe("150");
     expect(magawish?.pricingMode).toBe("per-booking");

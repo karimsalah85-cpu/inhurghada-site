@@ -3,7 +3,7 @@
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, CircleDollarSign, ClipboardList, Download, ExternalLink, FileText, ListChecks, LogOut, Mail, Search, Send, Trash2, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardList, Download, ExternalLink, FileText, ListChecks, LogOut, Mail, Search, Send, Trash2, UserRound, UsersRound, WalletCards } from "lucide-react";
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
@@ -16,8 +16,10 @@ type Booking = {
   id: string; reference: string; customer_name: string; customer_email: string | null; phone: string;
   tour_name: string | null; date: string | null; guests: number | null; hotel: string | null; notes: string | null;
   amount: number | string; currency: string; status: Status; payment_status: PaymentStatus; created_at: string;
+  type: "tour" | "transfer";
   sales_person_id?: string | null; sales_commission_percent?: number | string | null;
 };
+type BookingView = { month: string; status: string; payment: string; type: string; service: string; search: string };
 type Expense = { id: string; description: string; amount: number | string; currency: string; expense_date: string; category: string | null; expense_type?: string; supplier_id?: string | null; sales_person_id?: string | null; booking_id?: string | null };
 type Supplier = { id: string; name: string; contact_name: string | null; phone: string | null; email: string | null; notes: string | null };
 type SalesPerson = { id: string; name: string; phone: string | null; email: string | null; commission_percent: number | string | null; notes: string | null };
@@ -48,17 +50,13 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function AdminDashboard({ initialBookings, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner }: { initialBookings: Booking[]; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean }) {
+export default function AdminDashboard({ initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner }: { initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
+  const [visibleBookings, setVisibleBookings] = useState(initialVisibleBookings);
   const [expenses, setExpenses] = useState(initialExpenses);
   const [suppliers, setSuppliers] = useState(initialSuppliers);
   const [salesPeople, setSalesPeople] = useState(initialSalesPeople);
-  const [filter, setFilter] = useState<"all" | "active" | "unpaid" | "paid" | "cancelled">("all");
-  const [serviceFilter, setServiceFilter] = useState("all");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkPayment, setBulkPayment] = useState("");
@@ -81,16 +79,6 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     return { projected, collected, outstanding: projected - collected, expenseTotal, profit: collected - expenseTotal, activeCount: active.length, customers: countDistinctCustomers(bookings) };
   }, [bookings, expenses]);
 
-  const visibleBookings = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return bookings.filter((booking) => {
-      const matchesFilter = filter === "all" || (filter === "active" && booking.status !== "cancelled") || (filter === "unpaid" && booking.payment_status === "unpaid") || (filter === "paid" && booking.payment_status === "paid") || (filter === "cancelled" && booking.status === "cancelled");
-      const matchesService = serviceFilter === "all" || (booking.tour_name || "Transfer") === serviceFilter;
-      const matchesDate = (!fromDate || Boolean(booking.date && booking.date >= fromDate)) && (!toDate || Boolean(booking.date && booking.date <= toDate));
-      const searchable = [booking.reference, booking.customer_name, booking.customer_email, booking.phone, booking.tour_name, booking.hotel, booking.date].filter(Boolean).join(" ").toLowerCase();
-      return matchesFilter && matchesService && matchesDate && (!query || searchable.includes(query));
-    });
-  }, [bookings, filter, fromDate, search, serviceFilter, toDate]);
   const services = useMemo(() => [...new Set(bookings.map((booking) => booking.tour_name || "Transfer"))].sort(), [bookings]);
   const selectedIds = [...selected];
   const allVisibleSelected = Boolean(visibleBookings.length) && visibleBookings.every((booking) => selected.has(booking.id));
@@ -100,11 +88,25 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     window.setTimeout(() => setNotice(""), 3500);
   }
 
+  function matchesBookingView(booking: Booking) {
+    const nextMonthDate = new Date(`${bookingView.month}-01T00:00:00Z`);
+    nextMonthDate.setUTCMonth(nextMonthDate.getUTCMonth() + 1);
+    const nextMonth = nextMonthDate.toISOString().slice(0, 7);
+    const matchesMonth = Boolean(booking.date && booking.date >= `${bookingView.month}-01` && booking.date < `${nextMonth}-01`);
+    const matchesStatus = bookingView.status === "all" || booking.status === bookingView.status;
+    const matchesPayment = bookingView.payment === "all" || booking.payment_status === bookingView.payment;
+    const matchesType = bookingView.type === "all" || booking.type === bookingView.type;
+    const matchesService = bookingView.service === "all" || (booking.tour_name || "Transfer") === bookingView.service;
+    const searchable = [booking.reference, booking.customer_name, booking.customer_email, booking.phone, booking.tour_name, booking.hotel, booking.date].filter(Boolean).join(" ").toLowerCase();
+    return matchesMonth && matchesStatus && matchesPayment && matchesType && matchesService && (!bookingView.search || searchable.includes(bookingView.search.toLowerCase()));
+  }
+
   async function updateBooking(id: string, patch: Partial<Pick<Booking, "status" | "payment_status" | "sales_person_id">>) {
     setBusyId(id); setError("");
     try {
       const result = await api<{ booking: Booking; notification: { attempted: boolean; sent: boolean } }>(`/api/admin/bookings/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
       setBookings((items) => items.map((item) => item.id === id ? result.booking : item));
+      setVisibleBookings((items) => matchesBookingView(result.booking) ? items.map((item) => item.id === id ? result.booking : item) : items.filter((item) => item.id !== id));
       feedback(result.notification.attempted
         ? (result.notification.sent ? "Booking updated and customer automatically emailed with the PDF." : "Booking updated, but the customer email could not be sent.")
         : "Booking updated.");
@@ -130,6 +132,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     try {
       await api(`/api/admin/bookings/${id}`, { method: "DELETE" });
       setBookings((items) => items.filter((item) => item.id !== id));
+      setVisibleBookings((items) => items.filter((item) => item.id !== id));
       setSelected((items) => { const next = new Set(items); next.delete(id); return next; });
       feedback(`Booking ${reference} deleted.`);
       router.refresh();
@@ -139,7 +142,23 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
 
   function toggleBooking(id: string) { setSelected((items) => { const next = new Set(items); if (next.has(id)) next.delete(id); else if (next.size < 100) next.add(id); return next; }); }
   function toggleVisible() { setSelected((items) => { const next = new Set(items); visibleBookings.forEach((booking) => { if (allVisibleSelected) next.delete(booking.id); else if (next.size < 100) next.add(booking.id); }); return next; }); }
-  function clearFilters() { setSearch(""); setFilter("all"); setServiceFilter("all"); setFromDate(""); setToDate(""); }
+  function bookingUrl(updates: Partial<BookingView>) {
+    const next = { ...bookingView, ...updates };
+    const params = new URLSearchParams();
+    params.set("month", next.month);
+    if (next.status !== "all") params.set("status", next.status);
+    if (next.payment !== "all") params.set("payment", next.payment);
+    if (next.type !== "all") params.set("type", next.type);
+    if (next.service !== "all") params.set("service", next.service);
+    if (next.search) params.set("search", next.search);
+    return `/admin?${params.toString()}#bookings`;
+  }
+
+  function moveMonth(offset: number) {
+    const [year, month] = bookingView.month.split("-").map(Number);
+    const target = new Date(Date.UTC(year, month - 1 + offset, 1));
+    router.push(bookingUrl({ month: `${target.getUTCFullYear()}-${String(target.getUTCMonth() + 1).padStart(2, "0")}` }));
+  }
 
   async function applyBulkAction() {
     if (!selectedIds.length || (!bulkStatus && !bulkPayment)) return;
@@ -149,6 +168,7 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
       const result = await api<{ bookings: Booking[]; updated: number; notifications: { attempted: number; sent: number } }>("/api/admin/bookings/bulk", { method: "PATCH", body: JSON.stringify({ ids: selectedIds, ...patch }) });
       const changed = new Map(result.bookings.map((booking) => [booking.id, booking]));
       setBookings((items) => items.map((booking) => changed.get(booking.id) || booking));
+      setVisibleBookings((items) => items.map((booking) => changed.get(booking.id) || booking).filter(matchesBookingView));
       const emailNote = result.notifications.attempted
         ? ` ${result.notifications.sent} of ${result.notifications.attempted} customer emails sent automatically.`
         : " No customer status changed.";
@@ -245,7 +265,21 @@ export default function AdminDashboard({ initialBookings, initialExpenses, initi
     <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
       {can("bookings") ? <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-2xl font-bold">Bookings</h2><p className="mt-1 text-sm text-slate-500">Search, confirm availability, record cash, or cancel a request.</p></div><p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{visibleBookings.length} shown</p></div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5"><label className="relative xl:col-span-2"><span className="sr-only">Search bookings</span><Search className="absolute left-3 top-3 text-slate-400" size={18}/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reference, guest, phone, trip, hotel…" className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 outline-none focus:border-cyan-500" /></label><select aria-label="Booking filter" value={filter} onChange={(event) => setFilter(event.target.value as typeof filter)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All bookings</option><option value="active">Active</option><option value="unpaid">Awaiting cash</option><option value="paid">Paid</option><option value="cancelled">Cancelled</option></select><select aria-label="Service filter" value={serviceFilter} onChange={(event) => setServiceFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All services</option>{services.map((service) => <option key={service}>{service}</option>)}</select><button type="button" onClick={clearFilters} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-bold">Clear filters</button><label className="text-xs font-bold text-slate-500">From<input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-normal text-slate-900" /></label><label className="text-xs font-bold text-slate-500">To<input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-normal text-slate-900" /></label></div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <button type="button" onClick={() => moveMonth(-1)} aria-label="View previous month" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400"><ChevronLeft size={19}/></button>
+          <div className="min-w-44 text-center"><p className="inline-flex items-center gap-2 text-lg font-black text-slate-900"><CalendarDays size={19} className="text-cyan-700"/>{new Intl.DateTimeFormat("en", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${bookingView.month}-01T00:00:00Z`))}</p><p className="mt-0.5 text-xs text-slate-500">Scheduled booking date</p></div>
+          <button type="button" onClick={() => moveMonth(1)} aria-label="View next month" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400"><ChevronRight size={19}/></button>
+          <label className="ml-auto text-xs font-bold text-slate-600">Jump to month<input type="month" value={bookingView.month} onChange={(event) => event.target.value && router.push(bookingUrl({ month: event.target.value }))} className="ml-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900"/></label>
+        </div>
+        <form action="/admin#bookings" className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+          <input type="hidden" name="month" value={bookingView.month}/>
+          <label className="relative xl:col-span-2"><span className="sr-only">Search bookings</span><Search className="absolute left-3 top-3 text-slate-400" size={18}/><input name="search" defaultValue={bookingView.search} placeholder="Search reference, guest, phone, trip, hotel…" className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 outline-none focus:border-cyan-500" /></label>
+          <select aria-label="Booking status filter" name="status" defaultValue={bookingView.status} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All statuses</option><option value="new">Pending</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+          <select aria-label="Payment status filter" name="payment" defaultValue={bookingView.payment} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All payments</option><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="refunded">Refunded</option></select>
+          <select aria-label="Booking type filter" name="type" defaultValue={bookingView.type} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">Tours & transfers</option><option value="tour">Tours</option><option value="transfer">Transfers</option></select>
+          <select aria-label="Service filter" name="service" defaultValue={bookingView.service} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All services</option>{services.map((service) => <option key={service}>{service}</option>)}</select>
+          <div className="flex gap-2 xl:col-span-6"><button type="submit" className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white">Apply filters</button><Link href={bookingUrl({ status: "all", payment: "all", type: "all", service: "all", search: "" })} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold">Clear filters</Link></div>
+        </form>
 
         <div className={`mt-5 rounded-2xl border p-4 ${selectedIds.length ? "border-blue-200 bg-blue-50" : "border-slate-200 bg-slate-50"}`}><div className="flex flex-wrap items-center gap-3"><span className="inline-flex items-center gap-2 text-sm font-black"><ListChecks size={17}/>{selectedIds.length} selected</span><select aria-label="Group booking status" value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value)} disabled={!selectedIds.length} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm capitalize disabled:opacity-50"><option value="">Keep booking status</option>{["new", "confirmed", "completed", "cancelled"].map((item) => <option key={item}>{item}</option>)}</select><select aria-label="Group payment status" value={bulkPayment} onChange={(event) => setBulkPayment(event.target.value)} disabled={!selectedIds.length} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm capitalize disabled:opacity-50"><option value="">Keep payment status</option>{["unpaid", "paid", "refunded"].map((item) => <option key={item}>{item}</option>)}</select><button type="button" onClick={applyBulkAction} disabled={!selectedIds.length || (!bulkStatus && !bulkPayment) || busyId === "bulk"} className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-bold text-white disabled:opacity-40">{busyId === "bulk" ? "Updating…" : "Apply to selected"}</button><a aria-disabled={!selectedIds.length} href={selectedIds.length ? selectedReport("pdf") : undefined} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-bold aria-disabled:pointer-events-none aria-disabled:opacity-40"><Download size={15}/> PDF</a><a aria-disabled={!selectedIds.length} href={selectedIds.length ? selectedReport("xlsx") : undefined} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-bold aria-disabled:pointer-events-none aria-disabled:opacity-40"><Download size={15}/> Excel</a>{selectedIds.length ? <button type="button" onClick={() => setSelected(new Set())} className="text-sm font-bold text-slate-600">Clear selection</button> : null}</div><p className="mt-2 text-xs text-slate-500">Select up to 100 bookings, then update them together or download only those records.</p></div>
 

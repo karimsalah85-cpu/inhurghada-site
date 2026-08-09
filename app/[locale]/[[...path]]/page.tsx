@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { tours as fallbackTours } from "@/data/tours";
 import { getLiveTours } from "@/lib/live-content";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
-import { absoluteUrl, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
+import { defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
 import HomePage from "@/app/page";
 import TransfersPage from "@/app/transfers/page";
@@ -19,7 +19,7 @@ import PrivacyPolicyPage from "@/app/privacy-policy/page";
 import TermsConditionsPage from "@/app/terms-conditions/page";
 import TourPageShell from "@/components/tours/TourPageShell";
 import TourCategoryPage from "@/app/hurghada/[category]/page";
-import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTour } from "@/lib/tour-localization";
 import CartPage from "@/app/cart/page";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
@@ -65,11 +65,12 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   const tours = await getLiveTours();
-  const tour = kind === "tour" ? tours.find((item) => item.slug === path[1]) : undefined;
+  const sourceTour = kind === "tour" ? tours.find((item) => item.slug === path[1]) : undefined;
+  const tour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
-  const title = tour ? localizedTourTitle(locale, tour.slug, tour.title) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
+  const title = tour ? tour.seoTitle || localizedTourTitle(locale, tour.slug, tour.title) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
     "orange-bay": "Orange Bay Hurghada Tickets für eine ganztägige Hurghada Bootstour mit Schnorcheln, Mittagessen, Inselaufenthalt und Hoteltransfer buchen.",
@@ -78,7 +79,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     "quad-safari-sunset": "Quad Tour Hurghada bei Sonnenuntergang mit Beduinencamp, Wüstenpanorama und Hotelabholung.",
     "hurghada-airport-transfer": "Flughafentransfer Hurghada im Privatfahrzeug zum klaren Festpreis – passend zur Personenzahl und mit Flugüberwachung.",
   };
-  const description = locale === "de" && tour ? (germanSeoDescriptions[tour.slug] || `${title}. Ausflüge Hurghada mit klaren Preisen und direkter Bestätigung.`) : locale === "de" && kind === "home" ? germanSeoDescriptions.home : tour ? `${title}. ${dictionary.siteDescription}` : category ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}` : descriptions[kind || "home"];
+  const description = tour?.metaDescription || (locale === "de" && tour ? (germanSeoDescriptions[tour.slug] || `${title}. Ausflüge Hurghada mit klaren Preisen und direkter Bestätigung.`) : locale === "de" && kind === "home" ? germanSeoDescriptions.home : tour ? `${title}. ${dictionary.siteDescription}` : category ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}` : descriptions[kind || "home"]);
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
   const canonical = localePath(locale, pathname);
   return {
@@ -106,7 +107,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "tour") {
       const tour = tours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
-      return <TourPageShell locale="de" tour={localizeTourGerman(tour)} />;
+      return <TourPageShell locale="de" tour={localizeTour(tour, "de")} />;
     }
     if (kind === "category") return <TourCategoryPage locale="de" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "transfers") return <TransfersPage locale="de" />;
@@ -126,7 +127,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "tour") {
       const tour = tours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
-      return <TourPageShell locale="ru" tour={localizeTourRussian(tour)} />;
+      return <TourPageShell locale="ru" tour={localizeTour(tour, "ru")} />;
     }
     if (kind === "category") return <TourCategoryPage locale="ru" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "transfers") return <TransfersPage locale="ru" />;
@@ -146,7 +147,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "tour") {
       const tour = tours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
-      return <TourPageShell locale="ar" tour={localizeTourArabic(tour)} />;
+      return <TourPageShell locale="ar" tour={localizeTour(tour, "ar")} />;
     }
     if (kind === "category") return <TourCategoryPage locale="ar" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "transfers") return <TransfersPage locale="ar" />;
@@ -166,7 +167,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "tour") {
       const tour = tours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
-      return <TourPageShell locale="zh" tour={localizeTourChinese(tour)} />;
+      return <TourPageShell locale="zh" tour={localizeTour(tour, "zh")} />;
     }
     if (kind === "category") return <TourCategoryPage locale="zh" params={Promise.resolve({ category: path[1] })} />;
     if (kind === "booking") return <BookingPage />;
@@ -184,13 +185,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (kind === "tour") {
     const tour = tours.find((item) => item.slug === path[1]);
     if (!tour) notFound();
-    const title = localizedTourTitle(locale, tour.slug, tour.title);
-    const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
-    const schema = { "@context": "https://schema.org", "@graph": [
-      { "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: dictionary.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: dictionary.tours, item: absoluteUrl(localePath(locale, "/#tours")) }, { "@type": "ListItem", position: 3, name: title, item: tourUrl }] },
-      { "@type": "TouristTrip", name: title, description: dictionary.siteDescription, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || dictionary.tours, offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock", url: tourUrl }, provider: { "@id": `${absoluteUrl()}#organization` } },
-    ] };
-    return <Shell locale={locale}><main dir={direction} className="bg-slate-50 pb-20"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} /><article className="mx-auto max-w-5xl px-6 py-16"><nav aria-label="Breadcrumb" className="text-sm text-slate-500"><Link href={localePath(locale)}>{dictionary.home}</Link><span className="px-2">/</span><span>{dictionary.tours}</span></nav><p className="mt-8 font-semibold text-cyan-700">{dictionary.tours} · Hurghada</p><h1 className="mt-3 text-4xl font-black sm:text-5xl">{title}</h1><div className="relative mt-8 h-80 overflow-hidden rounded-[2rem]"><Image src={tour.image} alt={title} fill sizes="(max-width: 1024px) 100vw, 900px" className="object-cover" priority /></div><p className="mt-8 text-lg leading-8 text-slate-600">{dictionary.siteDescription}</p><div className="mt-8 grid gap-4 sm:grid-cols-3"><div className="rounded-3xl bg-white p-6 shadow-sm"><p className="text-sm text-slate-500">{dictionary.from}</p>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <p className="mt-2 text-sm font-bold text-slate-400 line-through">${tour.originalPrice}</p> : null}<p className="text-3xl font-black text-blue-700">${tour.price}</p><p className="text-sm text-slate-500">{dictionary.perPerson}</p></div><div className="rounded-3xl bg-white p-6 shadow-sm"><p className="text-sm text-slate-500">{dictionary.tours}</p><p className="mt-2 font-black">{tour.duration}</p></div><div className="rounded-3xl bg-white p-6 shadow-sm"><p className="text-sm text-slate-500">Hurghada</p><p className="mt-2 font-black">{tour.category || dictionary.tours}</p></div></div><div className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-6"><h2 className="text-xl font-black text-emerald-950">{dictionary.cash}</h2><p className="mt-2 text-emerald-900">{dictionary.bookingText}</p></div><Link href={`/tours/${tour.slug}`} className="mt-8 inline-block rounded-full bg-blue-700 px-7 py-4 font-bold text-white">{dictionary.bookNow}</Link></article></main></Shell>;
+    return <TourPageShell locale={locale} tour={localizeTour(tour, locale)} />;
   }
 
   if (kind === "booking/confirmation") return <BookingConfirmationPage />;

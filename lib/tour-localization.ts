@@ -1,4 +1,6 @@
 import type { Tour } from "@/data/tours";
+import type { Locale } from "@/lib/i18n";
+import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
 
 const arabicTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
@@ -554,4 +556,13 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
 
 export function localizeTourChinese(tour: Tour): Tour {
   return { ...tour, ...chineseTourOverrides[tour.slug] };
+}
+
+export function localizeTour(tour: Tour, locale: Locale): Tour {
+  const base = locale === "de" ? localizeTourGerman(tour)
+    : locale === "ru" ? localizeTourRussian(tour)
+    : locale === "ar" ? localizeTourArabic(tour)
+    : locale === "zh" ? localizeTourChinese(tour)
+    : tour;
+  return localizeSnorkelingBoatTrip(base, locale);
 }

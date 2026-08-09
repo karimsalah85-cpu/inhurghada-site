@@ -10,10 +10,12 @@ type TourGalleryProps = {
   title: string;
   mainImage: string;
   galleryImages: string[];
+  imageAlt?: string;
+  galleryImageAlts?: string[];
   locale: Locale;
 };
 
-export default function TourGallery({ title, mainImage, galleryImages, locale }: TourGalleryProps) {
+export default function TourGallery({ title, mainImage, galleryImages, imageAlt, galleryImageAlts = [], locale }: TourGalleryProps) {
   const images = [mainImage, ...galleryImages];
   const imageCount = images.length;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -52,7 +54,7 @@ export default function TourGallery({ title, mainImage, galleryImages, locale }:
       aria-label={`${openLabel}: ${title} ${index + 1}`}
       className={`group relative overflow-hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400 ${primary ? "aspect-[4/3] sm:aspect-auto sm:min-h-64" : "aspect-[4/3] sm:aspect-auto"}`}
     >
-      <Image src={image} alt={`${title} ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" priority={primary} />
+      <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — gallery image ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" priority={primary} />
       <ImageWatermark prominent={primary} />
       <span className="absolute right-3 top-3 rounded-full bg-slate-950/70 p-2 text-white shadow-lg backdrop-blur-sm">
         <Expand size={18} aria-hidden="true" />
@@ -78,7 +80,7 @@ export default function TourGallery({ title, mainImage, galleryImages, locale }:
             <ChevronLeft size={30} />
           </button>
           <div className="relative h-[82vh] w-[86vw] max-w-6xl" onClick={(event) => event.stopPropagation()}>
-            <Image src={images[selectedIndex]} alt={`${title} ${selectedIndex + 1}`} fill sizes="100vw" className="object-contain" priority />
+            <Image src={images[selectedIndex]} alt={selectedIndex === 0 ? imageAlt || title : galleryImageAlts[selectedIndex - 1] || `${title} — gallery image ${selectedIndex + 1}`} fill sizes="100vw" className="object-contain" priority />
           </div>
           <button type="button" onClick={(event) => { event.stopPropagation(); selectNext(); }} aria-label={nextLabel} className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25 sm:right-6">
             <ChevronRight size={30} />

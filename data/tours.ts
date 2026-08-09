@@ -1,5 +1,6 @@
 import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
 import { eurToUsd, fullDayBoatOptions, halfDayBoatOptions, refreshments, speedboatMeals } from "@/data/speedboat-booking";
+import { snorkelingBoatEnglish, snorkelingBoatSlugs } from "@/data/snorkeling-boat-trips";
 
 export type Tour = {
   slug: string;
@@ -38,6 +39,8 @@ export type Tour = {
   };
   availableTimes?: string[];
   category?: string;
+  /** Structured catalog placement from broad category to specific trip type. */
+  categoryPath?: string[];
   badge?: "Most Popular" | "Best Value" | "New" | "Premium";
   seoTitle?: string;
   metaDescription?: string;
@@ -51,6 +54,8 @@ export type Tour = {
   bookingLeadTime?: "next-day-before-15";
   showSpeedboatTerms?: boolean;
   galleryImages?: string[];
+  imageAlt?: string;
+  galleryImageAlts?: string[];
 };
 
 
@@ -541,3 +546,8 @@ export const tours: Tour[] = [
 
 
 ];
+
+for (const slug of snorkelingBoatSlugs) {
+  const tour = tours.find((item) => item.slug === slug);
+  if (tour) Object.assign(tour, snorkelingBoatEnglish[slug]);
+}

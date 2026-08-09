@@ -11,6 +11,7 @@ export default function TourItinerary({ items }: { items: string[] }) {
     de: { eyebrow: "Deine Route", title: "Reiseverlauf", optional: "Optional", note: "Zeiten und Stopps können sich je nach Wetter und Betriebsbedingungen leicht ändern." },
     ru: { eyebrow: "Ваш маршрут", title: "Программа поездки", optional: "По желанию", note: "Время и остановки могут немного меняться из-за погоды и условий проведения." },
     ar: { eyebrow: "مسار الرحلة", title: "برنامج الرحلة", optional: "اختياري", note: "قد تتغير الأوقات ومحطات التوقف قليلاً حسب الطقس وظروف التشغيل." },
+    pl: { eyebrow: "Twoja trasa", title: "Program wycieczki", optional: "Opcjonalnie", note: "Godziny i postoje mogą się nieznacznie zmienić ze względu na pogodę i warunki organizacyjne." },
     zh: { eyebrow: "您的路线", title: "行程安排", optional: "可选", note: "时间和停靠点可能因天气和运营情况略有调整。" },
   };
   const labels = translations[language] || translations.en;
