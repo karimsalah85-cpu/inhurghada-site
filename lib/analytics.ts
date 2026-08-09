@@ -84,6 +84,27 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
   const gtag = ensureGoogleTag();
   gtag("event", event, { ...cleanData, event_id: id });
 
+  if (event === "booking_complete") {
+    const transactionId = typeof cleanData.transaction_id === "string" ? cleanData.transaction_id : id;
+    const value = typeof cleanData.value === "number" ? cleanData.value : 0;
+    const currency = typeof cleanData.currency === "string" ? cleanData.currency : "USD";
+    const itemName = typeof cleanData.item_name === "string" ? cleanData.item_name : "Booking";
+    const itemCategory = typeof cleanData.booking_type === "string" ? cleanData.booking_type : "booking";
+
+    gtag("event", "purchase", {
+      transaction_id: transactionId,
+      value,
+      currency,
+      items: [{
+        item_id: transactionId,
+        item_name: itemName,
+        item_category: itemCategory,
+        price: value,
+        quantity: 1,
+      }],
+    });
+  }
+
   if (!preferences.marketing) return;
 
   const metaEvent = toMetaEvent(event);
