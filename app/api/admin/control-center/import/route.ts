@@ -11,7 +11,7 @@ export async function POST() {
   const now = new Date().toISOString();
   const rows = [
     ...tours.map((tour) => ({ content_type: "tour", slug: tour.slug, locale: "en", status: "published", listing_status: "active", title: tour.title, excerpt: tour.description, body: tour, seo_title: tour.seoTitle || null, seo_description: tour.metaDescription || null, featured_image: tour.image, published_at: now, created_by: user!.id, updated_by: user!.id })),
-    ...blogPosts.map((post) => ({ content_type: "blog", slug: post.slug, locale: "en", status: "published", title: post.title, excerpt: post.intro, body: post, seo_title: post.title, seo_description: post.metaDescription, featured_image: post.heroImage, published_at: post.publishedAt, created_by: user!.id, updated_by: user!.id })),
+    ...blogPosts.map((post) => ({ content_type: "blog", slug: post.slug, locale: "en", status: "published", listing_status: "active", title: post.title, excerpt: post.intro, body: post, seo_title: post.title, seo_description: post.metaDescription, featured_image: post.heroImage, published_at: post.publishedAt, created_by: user!.id, updated_by: user!.id })),
   ];
   const { error } = await supabase.from("content_items").upsert(rows, { onConflict: "content_type,slug,locale", ignoreDuplicates: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
