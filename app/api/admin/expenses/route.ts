@@ -11,7 +11,7 @@ function json(body: unknown, status = 200) {
 
 export async function POST(request: NextRequest) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
-  const { supabase, allowed } = await getAdminAuthorization("edit_expenses");
+  const { supabase, user, allowed } = await getAdminAuthorization("edit_expenses");
   if (!allowed) return json({ error: "Expense-editing permission required." }, 403);
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
   const category = String(body?.category || "").trim().slice(0, 80);
   const date = String(body?.date || "").trim();
   const amount = Number(body?.amount);
+  const currency = /^[A-Z]{3}$/.test(String(body?.currency || "USD").toUpperCase()) ? String(body?.currency || "USD").toUpperCase() : "USD";
   const expenseType = expenseTypes.has(String(body?.expense_type)) ? String(body?.expense_type) : "other";
   const supplierId = typeof body?.supplier_id === "string" && uuidPattern.test(body.supplier_id) ? body.supplier_id : null;
   const salesPersonId = typeof body?.sales_person_id === "string" && uuidPattern.test(body.sales_person_id) ? body.sales_person_id : null;
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   if (expenseType === "sales_commission" && !salesPersonId) return json({ error: "Choose a sales person for this commission." }, 400);
 
   const { data, error } = await supabase.from("expenses").insert({
-    description, amount, currency: "USD", expense_date: date, category: category || null,
+    description, amount, currency, expense_date: date, category: category || null,
     expense_type: expenseType, supplier_id: supplierId, sales_person_id: salesPersonId, booking_id: bookingId,
   }).select().single();
   if (error && ["42703", "PGRST204"].includes(error.code) && !["supplier_per_trip", "sales_commission"].includes(expenseType)) {
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
     console.error("Admin expense save failed", { code: error.code, message: error.message });
     return json({ error: "Could not save the expense. Please check the amount, date, and selected contact." }, 500);
   }
+  await supabase.rpc("record_admin_audit", { action_name: "create", resource_name: "expense", resource_identifier: data.id, summary_text: `Created expense ${description}`, after_value: { ...data, actor: user?.email } });
   return json({ expense: data }, 201);
 }
 

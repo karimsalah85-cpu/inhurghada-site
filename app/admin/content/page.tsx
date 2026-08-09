@@ -1,2 +1,2 @@
-import { redirect } from "next/navigation";
-export default function ContentPage() { redirect("/admin?panel=content#control-center"); }
+import AdminPage from "../page";
+export default function ContentPage({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}) { return AdminPage({searchParams,workspace:"content"}); }

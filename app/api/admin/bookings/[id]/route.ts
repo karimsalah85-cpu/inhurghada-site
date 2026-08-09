@@ -3,6 +3,7 @@ import { hasAdminPermission } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
+import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 
 const bookingStatuses = new Set(["new", "confirmed", "completed", "cancelled"]);
 const paymentStatuses = new Set(["unpaid", "paid", "refunded"]);
@@ -53,9 +54,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   if (error) return json({ error: "Could not update the booking." }, 500);
   const changed = (update.status && update.status !== existing.status)
     || (update.payment_status && update.payment_status !== existing.payment_status);
-  const notification = changed
-    ? await sendBookingAndPaymentStatusNotification(data)
-    : null;
+  const customerAssignment = changed ? await getCustomerVisibleAssignment(supabase, id) : {};
+  const notification = changed ? await sendBookingAndPaymentStatusNotification({ ...data, ...customerAssignment }) : null;
   return json({
     booking: data,
     notification: notification

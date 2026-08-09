@@ -35,6 +35,7 @@ create table public.expenses (
 create table public.suppliers (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  type text not null default 'other' check (type in ('boat', 'driver', 'guide', 'other')),
   contact_name text,
   phone text,
   email text,
@@ -56,6 +57,9 @@ alter table public.expenses
   add column supplier_id uuid references public.suppliers(id) on delete set null,
   add column sales_person_id uuid references public.sales_people(id) on delete set null,
   add column booking_id uuid references public.bookings(id) on delete set null;
+
+create index if not exists expenses_booking_id_idx on public.expenses (booking_id);
+create index if not exists expenses_supplier_id_idx on public.expenses (supplier_id);
 
 alter table public.bookings
   add column sales_person_id uuid references public.sales_people(id) on delete set null,

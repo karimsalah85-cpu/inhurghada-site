@@ -152,6 +152,7 @@ export default function BookingPortal() {
                     <p><span className="text-slate-400">Status:</span> {booking.status}</p>
                     {booking.date ? <p><span className="text-slate-400">Date:</span> {booking.date}</p> : null}
                     {booking.hotel ? <p><span className="text-slate-400">Pickup:</span> {booking.hotel}</p> : null}
+                    {booking.assignedPersonName ? <p><span className="text-slate-400">Assigned {booking.assignedPersonRole || "guide/driver"}:</span> {booking.assignedPersonName}</p> : null}
                   </div>
                 </div>
               ) : null}

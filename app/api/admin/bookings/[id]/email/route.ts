@@ -3,6 +3,7 @@ import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
+import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
@@ -23,7 +24,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (error || !booking) return json({ error: "Booking not found." }, 404);
   if (!booking.customer_email) return json({ error: "This customer does not have an email address." }, 400);
 
-  const result = await sendBookingAndPaymentStatusNotification(booking);
+  const assignment = await getCustomerVisibleAssignment(supabase, id);
+  const result = await sendBookingAndPaymentStatusNotification({ ...booking, ...assignment });
   if (!result.success) {
     console.error("Manual customer status email failed", { reference: booking.reference, reason: "reason" in result ? result.reason : "delivery-failed" });
     const reason = ("reason" in result && result.reason) ? result.reason : "delivery-failed";

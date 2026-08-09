@@ -33,6 +33,8 @@ export type BookingStatusPdfData = {
   currency: string;
   bookingStatus: string;
   paymentStatus: string;
+  assignedPersonName?: string;
+  assignedPersonRole?: "guide" | "driver";
 };
 
 type Color = [number, number, number];
@@ -198,7 +200,8 @@ export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<B
   if (itemLines[1]) text(commands, itemLines[1], 68, 262, 13, true, navy);
   detail(commands, "Experience date", booking.date || "To be confirmed", 68, 235, 205);
   detail(commands, "Travelers", booking.travelers || "To be confirmed", 310, 235, 195);
-  detail(commands, "Pickup", booking.pickup || "We will confirm via WhatsApp", 68, 204, 430);
+  detail(commands, "Pickup", booking.pickup || "We will confirm via WhatsApp", 68, 204, 280);
+  if (booking.assignedPersonName) detail(commands, `Assigned ${booking.assignedPersonRole || "guide/driver"}`, booking.assignedPersonName, 365, 204, 175);
 
   roundedRect(commands, 50, 103, 512, 68, 10, blue);
   text(commands, "BOOKING TOTAL", 68, 143, 8.5, true, [219, 234, 254]);

@@ -16,6 +16,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { whatsappNumber } from "@/lib/contact";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getUnavailableTrip } from "@/lib/live-content";
+import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -34,12 +35,15 @@ export async function GET(request: NextRequest) {
 
   const database = createAdminClient();
   if (database) {
-    const { data } = await database.from("bookings").select("reference, customer_name, customer_email, phone, tour_name, date, guests, hotel, notes, amount, currency, status, created_at").eq("reference", reference).eq("customer_email", email.toLowerCase()).maybeSingle();
-    if (data) return bookingJson({ success: true, booking: {
+    const { data } = await database.from("bookings").select("id, reference, customer_name, customer_email, phone, tour_name, date, guests, hotel, notes, amount, currency, status, created_at").eq("reference", reference).eq("customer_email", email.toLowerCase()).maybeSingle();
+    if (data) {
+      const assignment = await getCustomerVisibleAssignment(database, data.id);
+      return bookingJson({ success: true, booking: {
       reference: data.reference, type: "tour", customerName: data.customer_name, customerEmail: data.customer_email,
       phone: data.phone, tourName: data.tour_name, date: data.date, guests: String(data.guests || 0), hotel: data.hotel,
-      message: data.notes, amount: Number(data.amount || 0), currency: data.currency, status: data.status, createdAt: data.created_at,
+      message: data.notes, amount: Number(data.amount || 0), currency: data.currency, status: data.status, createdAt: data.created_at, ...assignment,
     } });
+    }
   }
 
   const booking = findBooking(reference);

@@ -39,7 +39,9 @@ function nextMonth(month: string) {
   return `${next.getUTCFullYear()}-${String(next.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-export default async function AdminPage({ searchParams }: { searchParams: Promise<AdminSearchParams> }) {
+export type AdminWorkspace = "overview" | "bookings" | "analytics" | "finance" | "trips" | "content";
+
+export default async function AdminPage({ searchParams, workspace = "overview" }: { searchParams: Promise<AdminSearchParams>; workspace?: AdminWorkspace }) {
   const params = await searchParams;
   const requestedMonth = first(params.month);
   const month = validMonth(requestedMonth);
@@ -73,7 +75,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     if (expenseSort !== "none") canonical.set("expense_sort", expenseSort);
     if (analyticsRange !== 30) canonical.set("range", String(analyticsRange));
     if (controlPanel !== "content") canonical.set("panel", controlPanel);
-    redirect(`/admin?${canonical.toString()}`);
+    const workspacePath = workspace === "overview" ? "/admin" : `/admin/${workspace}`;
+    redirect(`${workspacePath}?${canonical.toString()}`);
   }
   const canBookings = hasAdminPermission(user, "bookings") || hasAdminPermission(user, "reports");
   const canFinance = hasAdminPermission(user, "finance");
@@ -123,6 +126,22 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const bookingView = { month, status, payment, type: bookingType, service, search, supplier, expense_sort: expenseSort };
 
   const migrationPending = Boolean(suppliersError || salesPeopleError);
-
-  return <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"><div className="mx-auto max-w-7xl"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Operations</p><h1 className="mt-2 text-4xl font-black text-slate-900">Daily Red Sea Admin</h1><p className="mt-2 text-slate-600">Manage customer bookings, cash collection, partners, and business finances.</p>{error ? <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><p className="font-bold">The admin database access needs attention.</p><p className="mt-2 text-sm">{error}</p><p className="mt-2 text-sm">Run the authenticated-admin policy from <code>supabase/schema.sql</code> in Supabase SQL Editor, then refresh this page.</p></div> : <AdminDashboard key={Object.values(bookingView).join("|")} initialBookings={bookings || []} initialVisibleBookings={visibleBookingsWithCosts} bookingView={bookingView} initialExpenses={expenses || []} initialSuppliers={suppliers || []} initialSalesPeople={salesPeople || []} migrationPending={migrationPending} permissions={permissions} currentRole={role} isOwner={isAdminOwner(user)} analyticsRange={analyticsRange} initialControlPanel={controlPanel} />}</div></main>;
+  const { data: tripStatusAudits } = hasAdminPermission(user, "content")
+    ? await supabase.from("admin_audit_log").select("id,resource_id,after_data,created_at").eq("resource_type", "content").order("created_at", { ascending: false }).limit(30)
+    : { data: [] };
+  const tripStatusChanges = (tripStatusAudits || []).flatMap((entry) => {
+    const after = entry.after_data && typeof entry.after_data === "object" && !Array.isArray(entry.after_data) ? entry.after_data as Record<string, unknown> : {};
+    const listingStatus = String(after.listing_status || "");
+    if (!['active', 'paused', 'unlisted'].includes(listingStatus) || after.content_type !== "tour") return [];
+    return [{ id: String(entry.id), title: String(after.title || after.slug || "Trip"), slug: String(after.slug || ""), listing_status: listingStatus, updated_at: entry.created_at }];
+  }).slice(0, 6);
+  const titles: Record<AdminWorkspace, [string, string]> = {
+    overview: ["Daily Red Sea Admin", "Today’s actionable overview."],
+    bookings: ["Booking management", "Search, filter, update, and inspect bookings."],
+    analytics: ["Analytics & advertising", "Website audiences, booking demand, and advertising performance."],
+    finance: ["Finance", "Booking margins, expenses, and business costs."],
+    trips: ["Trips & listings", "Control which trips are active, paused, or unlisted."],
+    content: ["Trip content", "Manage live content, media, capacity, staff, and assignments."],
+  };
+  return <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"><div className="mx-auto max-w-7xl"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Operations</p><h1 className="mt-2 text-4xl font-black text-slate-900">{titles[workspace][0]}</h1><p className="mt-2 text-slate-600">{titles[workspace][1]}</p>{error ? <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><p className="font-bold">The admin database access needs attention.</p><p className="mt-2 text-sm">{error}</p></div> : <AdminDashboard mode={workspace} initialTripStatusChanges={tripStatusChanges || []} key={Object.values(bookingView).join("|")} initialBookings={bookings || []} initialVisibleBookings={visibleBookingsWithCosts} bookingView={bookingView} initialExpenses={expenses || []} initialSuppliers={suppliers || []} initialSalesPeople={salesPeople || []} migrationPending={migrationPending} permissions={permissions} currentRole={role} isOwner={isAdminOwner(user)} analyticsRange={analyticsRange} initialControlPanel={controlPanel} />}</div></main>;
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { buildBookingStatusPdfAttachment } from "@/lib/booking-status-notification";
 import { createClient } from "@/utils/supabase/server";
+import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,8 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     .single();
   if (error || !booking) return NextResponse.json({ error: "Booking not found." }, { status: 404 });
 
-  const attachment = await buildBookingStatusPdfAttachment(booking);
+  const assignment = await getCustomerVisibleAssignment(supabase, id);
+  const attachment = await buildBookingStatusPdfAttachment({ ...booking, ...assignment });
   return new NextResponse(new Uint8Array(attachment.content), {
     headers: {
       "Content-Type": "application/pdf",

@@ -42,6 +42,8 @@ export type BookingRecord = {
   guests?: string;
   hotel?: string;
   message?: string;
+  assignedPersonName?: string;
+  assignedPersonRole?: "guide" | "driver";
 };
 
 type GlobalWithBookings = typeof globalThis & {

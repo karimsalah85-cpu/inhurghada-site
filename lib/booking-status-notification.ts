@@ -14,6 +14,8 @@ export type StatusBooking = {
   payment_status?: string;
   amount?: number | string;
   currency?: string;
+  assignedPersonName?: string;
+  assignedPersonRole?: "guide" | "driver";
 };
 
 const statusCopy: Record<string, { label: string; message: string }> = {
@@ -61,6 +63,7 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
     ["Date", booking.date || "To be confirmed"],
     ["Booking status", bookingStatus.label],
     ["Payment status", paymentStatus.label],
+    ...(booking.assignedPersonName ? [[`Assigned ${booking.assignedPersonRole || "guide/driver"}`, booking.assignedPersonName]] : []),
     ...(amount ? [["Booking total", amount]] : []),
   ];
   const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
@@ -108,6 +111,8 @@ export async function buildBookingStatusPdfAttachment(booking: StatusBooking) {
     currency: booking.currency || "USD",
     bookingStatus: booking.status || "new",
     paymentStatus: booking.payment_status || "unpaid",
+    assignedPersonName: booking.assignedPersonName,
+    assignedPersonRole: booking.assignedPersonRole,
   });
   return { filename: `daily-red-sea-status-${filenameReference}.pdf`, content };
 }

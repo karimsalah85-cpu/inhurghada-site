@@ -3,7 +3,7 @@
 import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardList, Download, ExternalLink, FileText, ListChecks, LogOut, Mail, Search, Send, Trash2, UserRound, UsersRound, WalletCards } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardList, Download, ExternalLink, FileText, ListChecks, LogOut, Mail, Search, Send, Trash2, UsersRound, WalletCards } from "lucide-react";
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
@@ -12,6 +12,7 @@ import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
 import TopServicesPanel from "@/components/admin/TopServicesPanel";
 import { countDistinctCustomers } from "@/lib/customer-count";
 import { adminRoles, permissionsForAdminRole, type AdminPermission, type AdminRole } from "@/lib/admin-auth";
+import BookingDetailPanel from "@/components/admin/BookingDetailPanel";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
 type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -54,7 +55,7 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export default function AdminDashboard({ initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner, analyticsRange, initialControlPanel }: { initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean; analyticsRange: 7 | 30 | 90; initialControlPanel: "content" | "media" | "availability" | "staff" | "assignments" | "notes" | "templates" | "queue" | "settings" | "redirects" }) {
+export default function AdminDashboard({ mode = "overview", initialTripStatusChanges = [], initialBookings, initialVisibleBookings, bookingView, initialExpenses, initialSuppliers, initialSalesPeople, migrationPending = false, permissions, currentRole, isOwner, analyticsRange, initialControlPanel }: { mode?: "overview" | "bookings" | "analytics" | "finance" | "trips" | "content"; initialTripStatusChanges?: { id:string; title:string; slug:string; listing_status:string; updated_at:string }[]; initialBookings: Booking[]; initialVisibleBookings: Booking[]; bookingView: BookingView; initialExpenses: Expense[]; initialSuppliers: Supplier[]; initialSalesPeople: SalesPerson[]; migrationPending?: boolean; permissions: AdminPermission[]; currentRole: AdminRole; isOwner: boolean; analyticsRange: 7 | 30 | 90; initialControlPanel: "content" | "media" | "availability" | "staff" | "assignments" | "notes" | "templates" | "queue" | "settings" | "redirects" }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
   const [visibleBookings, setVisibleBookings] = useState(initialVisibleBookings);
@@ -158,7 +159,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
     if (analyticsRange !== 30) params.set("range", String(analyticsRange));
     if (next.supplier !== "all") params.set("supplier", next.supplier);
     if (next.expense_sort !== "none") params.set("expense_sort", next.expense_sort);
-    return `/admin?${params.toString()}#bookings`;
+    return `/admin/bookings?${params.toString()}`;
   }
 
   function moveMonth(offset: number) {
@@ -248,33 +249,35 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
     finally { window.location.assign("/admin/login"); }
   }
 
+  if (mode === "overview") {
+    const upcoming = bookings.filter(item => item.status !== "cancelled" && item.date && item.date >= today()).sort((a,b) => String(a.date).localeCompare(String(b.date))).slice(0, 6);
+    const pending = bookings.filter(item => item.status === "new");
+    return <div className="mt-7 space-y-6">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6"><Metric icon={<UsersRound size={18}/>} label="Customers" value={String(metrics.customers)} note="Distinct booking contacts" tone="blue"/><Metric icon={<CircleDollarSign size={18}/>} label="Booked revenue" value={money(metrics.projected)} note="Active bookings" tone="emerald"/><Metric icon={<WalletCards size={18}/>} label="Cash collected" value={money(metrics.collected)} note="Marked paid" tone="emerald"/><Metric icon={<CalendarDays size={18}/>} label="Outstanding" value={money(metrics.outstanding)} note="Expected cash" tone="amber"/><Metric icon={<ClipboardList size={18}/>} label="Expenses" value={money(metrics.expenseTotal)} note="Recorded costs" tone="rose"/><Metric icon={<CheckCircle2 size={18}/>} label="Cash profit" value={money(metrics.profit)} note="Collected minus expenses" tone="slate"/></div>
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex justify-between"><div><h2 className="text-xl font-black">Upcoming bookings</h2><p className="text-sm text-slate-500">Open a reference for assignments and costs.</p></div><Link href="/admin/bookings" className="font-bold text-blue-700">Manage all</Link></div><div className="mt-4 divide-y">{upcoming.map(item=><button key={item.id} onClick={()=>setExpandedId(item.id)} className="flex w-full justify-between py-3 text-left"><span><b className="font-mono text-blue-700">{item.reference}</b><span className="ml-3">{item.tour_name||"Transfer"}</span></span><span className="text-slate-500">{item.date}</span></button>)}{!upcoming.length?<p className="py-5 text-slate-500">No upcoming bookings.</p>:null}</div></section>
+      <div className="grid gap-6 lg:grid-cols-2"><section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><h2 className="text-xl font-black">Pending confirmations</h2><div className="mt-3 space-y-2">{pending.slice(0,5).map(item=><button key={item.id} onClick={()=>setExpandedId(item.id)} className="block"><b>{item.reference}</b> · {item.customer_name}</button>)}{!pending.length?<p className="text-slate-500">Nothing pending.</p>:null}</div></section><section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"><h2 className="text-xl font-black">Recent trip-status changes</h2><div className="mt-3 space-y-2">{initialTripStatusChanges.map(item=><p key={item.id}><b>{item.title}</b> · <span className="capitalize">{item.listing_status === "active" ? "reactivated" : item.listing_status}</span></p>)}{!initialTripStatusChanges.length?<p className="text-slate-500">No recent trip visibility changes.</p>:null}</div></section></div>
+      {expandedId ? <BookingDetailPanel booking={bookings.find(item=>item.id===expandedId)!} onClose={()=>setExpandedId(null)}/> : null}
+    </div>;
+  }
+
   return <>
     <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-      <nav aria-label="Admin sections" className="flex flex-wrap gap-1 text-sm font-bold">{can("bookings") ? <a href="#bookings" className="rounded-lg px-3 py-2 hover:bg-slate-100">Bookings</a> : null}{can("finance") ? <a href="#expenses" className="rounded-lg px-3 py-2 hover:bg-slate-100">Expenses</a> : null}{can("finance") ? <a href="#analytics" className="rounded-lg bg-blue-50 px-3 py-2 text-blue-800 hover:bg-blue-100">Analytics & advertising</a> : null}{can("content") || can("settings") ? <a href="#control-center" className="rounded-lg px-3 py-2 hover:bg-slate-100">Site control</a> : null}{can("suppliers") || can("finance") ? <a href="#partners" className="rounded-lg px-3 py-2 hover:bg-slate-100">Suppliers & sales</a> : null}{can("reports") ? <a href="#reports" className="rounded-lg px-3 py-2 hover:bg-slate-100">Reports</a> : null}</nav>
+      <span className="text-sm font-bold capitalize text-slate-600">{mode}</span>
       <div className="flex flex-wrap items-center gap-2">{isOwner ? <label className="text-xs font-bold text-slate-600">Preview staff access<select aria-label="Preview staff role access" value={previewRole} onChange={(event)=>setPreviewRole(event.target.value as AdminRole|"")} className="ml-2 rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm"><option value="">Owner (live)</option>{adminRoles.filter(role=>role!=="owner").map(role=><option key={role} value={role}>{role.replace("_"," ")}</option>)}</select></label> : <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold capitalize">{currentRole.replace("_"," ")}</span>}<button type="button" onClick={signOut} disabled={busyId === "logout"} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:border-slate-500 disabled:opacity-50"><LogOut size={16}/>{busyId === "logout" ? "Signing out…" : "Sign out"}</button></div>
     </div>
 
     {previewRole ? <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950"><strong>Preview only:</strong> this is what a {previewRole.replace("_"," ")} can see. Your owner session and data are unchanged.</div> : null}
 
-    {can("bookings") || can("finance") || can("reports") ? <div className="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-      {can("bookings") || can("reports") ? <Metric icon={<UserRound size={19}/>} label="Customers" value={String(metrics.customers)} note="Unique phone numbers" tone="slate" /> : null}
-      {can("bookings") || can("reports") ? <Metric icon={<ClipboardList size={19}/>} label="Booked revenue" value={money(metrics.projected)} note={`${metrics.activeCount} active booking${metrics.activeCount === 1 ? "" : "s"}`} tone="blue" /> : null}
-      {can("bookings") || can("finance") || can("reports") ? <Metric icon={<WalletCards size={19}/>} label="Cash collected" value={money(metrics.collected)} note="Marked as paid" tone="emerald" /> : null}
-      {can("bookings") || can("finance") || can("reports") ? <Metric icon={<CircleDollarSign size={19}/>} label="Outstanding" value={money(metrics.outstanding)} note="Still to collect" tone="amber" /> : null}
-      {can("finance") || can("reports") ? <Metric icon={<WalletCards size={19}/>} label="Expenses" value={money(metrics.expenseTotal)} note="Business costs" tone="rose" /> : null}
-      {can("finance") || can("reports") ? <Metric icon={<CheckCircle2 size={19}/>} label="Cash profit" value={money(metrics.profit)} note="Collected less expenses" tone="slate" /> : null}
-    </div> : null}
-
-    {can("finance") ? <section id="analytics" className="mt-8 scroll-mt-6"><div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm sm:p-8"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-300">Marketing intelligence</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Analytics & advertising</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Website audiences, booking demand, and Google Ads performance in the same admin workspace.</p></div><TopServicesPanel range={analyticsRange}/><GoogleAnalyticsPanel/><GoogleAdsPanel range={analyticsRange}/></section> : null}
+    {mode === "analytics" && can("finance") ? <section id="analytics" className="mt-8 scroll-mt-6"><div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm sm:p-8"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-300">Marketing intelligence</p><h2 className="mt-2 text-3xl font-black sm:text-4xl">Analytics & advertising</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">Website audiences, booking demand, and Google Ads performance in the same admin workspace.</p></div><TopServicesPanel range={analyticsRange}/><GoogleAnalyticsPanel/><GoogleAdsPanel range={analyticsRange}/></section> : null}
 
     {error ? <div role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800">{error}</div> : null}
     {notice ? <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">{notice}</div> : null}
     {migrationPending ? <div role="alert" className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"><p className="font-black">Admin database upgrade pending</p><p className="mt-1 leading-6">Basic expenses can still be saved. Supplier expenses, sales commissions, supplier records, and sales people will work after migration <code className="font-mono">202607260001_admin_partners_and_expenses.sql</code> is applied in Supabase.</p></div> : null}
 
-    {can("finance") && visibleBookings.length ? <div className="mt-8 overflow-x-auto rounded-3xl bg-white p-5 shadow-sm sm:p-6"><h2 className="text-xl font-black">Booking costs and margins</h2><p className="mt-1 text-sm text-slate-500">Linked expenses and supplier fulfillment for the filtered booking view.</p><table className="mt-5 w-full min-w-[680px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Booking</th><th className="p-3">Supplier</th><th className="p-3">Revenue</th><th className="p-3">Expenses</th><th className="p-3">Margin</th></tr></thead><tbody>{visibleBookings.map(booking=><tr key={`finance-${booking.id}`} className="border-t"><td className="p-3 font-mono font-bold text-blue-700">{booking.reference}</td><td className="p-3">{booking.supplier_name||"Unassigned"}</td><td className="p-3">{money(Number(booking.amount),booking.currency)}</td><td className="p-3">{money(Number(booking.expense_total||0),booking.currency)}</td><td className="p-3 font-bold text-emerald-700">{money(Number(booking.amount)-Number(booking.expense_total||0),booking.currency)}</td></tr>)}</tbody></table></div>:null}
+    {mode === "finance" && can("finance") && visibleBookings.length ? <div className="mt-8 overflow-x-auto rounded-3xl bg-white p-5 shadow-sm sm:p-6"><h2 className="text-xl font-black">Booking costs and margins</h2><p className="mt-1 text-sm text-slate-500">Linked expenses and supplier fulfillment for the filtered booking view.</p><table className="mt-5 w-full min-w-[680px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Booking</th><th className="p-3">Supplier</th><th className="p-3">Revenue</th><th className="p-3">Expenses</th><th className="p-3">Margin</th></tr></thead><tbody>{visibleBookings.map(booking=><tr key={`finance-${booking.id}`} className="border-t"><td className="p-3 font-mono font-bold text-blue-700">{booking.reference}</td><td className="p-3">{booking.supplier_name||"Unassigned"}</td><td className="p-3">{money(Number(booking.amount),booking.currency)}</td><td className="p-3">{money(Number(booking.expense_total||0),booking.currency)}</td><td className="p-3 font-bold text-emerald-700">{money(Number(booking.amount)-Number(booking.expense_total||0),booking.currency)}</td></tr>)}</tbody></table></div>:null}
 
     <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
-      {can("bookings") ? <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+      {mode === "bookings" && can("bookings") ? <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-2xl font-bold">Bookings</h2><p className="mt-1 text-sm text-slate-500">Search, confirm availability, record cash, or cancel a request.</p></div><p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{visibleBookings.length} shown</p></div>
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
           <button type="button" onClick={() => moveMonth(-1)} aria-label="View previous month" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400"><ChevronLeft size={19}/></button>
@@ -282,7 +285,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
           <button type="button" onClick={() => moveMonth(1)} aria-label="View next month" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400"><ChevronRight size={19}/></button>
           <label className="ml-auto text-xs font-bold text-slate-600">Jump to month<input type="month" value={bookingView.month} onChange={(event) => event.target.value && router.push(bookingUrl({ month: event.target.value }))} className="ml-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900"/></label>
         </div>
-        <form action="/admin#bookings" className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+        <form action="/admin/bookings" className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
           <input type="hidden" name="month" value={bookingView.month}/>
           <label className="relative xl:col-span-2"><span className="sr-only">Search bookings</span><Search className="absolute left-3 top-3 text-slate-400" size={18}/><input name="search" defaultValue={bookingView.search} placeholder="Search reference, guest, phone, trip, hotel…" className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 outline-none focus:border-cyan-500" /></label>
           <select aria-label="Booking status filter" name="status" defaultValue={bookingView.status} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All statuses</option><option value="new">Pending</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
@@ -301,7 +304,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
         {!visibleBookings.length ? <div className="py-12 text-center"><Search className="mx-auto text-slate-300"/><p className="mt-3 text-sm font-semibold text-slate-600">No bookings match this search and filter.</p></div> : null}
       </section> : null}
 
-      {can("finance") ? <aside id="expenses" className="h-fit scroll-mt-6 rounded-3xl bg-white p-6 shadow-sm">
+      {mode === "finance" && can("finance") ? <aside id="expenses" className="h-fit scroll-mt-6 rounded-3xl bg-white p-6 shadow-sm">
         <h2 className="text-2xl font-bold">Expenses</h2>
         <p className="mt-1 text-sm leading-6 text-slate-500">Use a predefined cost type, then connect trip costs to a supplier, sales person, or booking.</p>
         <form className="mt-6 space-y-4" onSubmit={addExpense}>
@@ -319,9 +322,10 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
       </aside> : null}
     </div>
 
-    {can("content") || can("settings") || can("operations") ? <AdminControlCenter initialTab={initialControlPanel} /> : null}
-    {can("operations") || can("staff") || can("settings") ? <AdminOperationsCenter /> : null}
-    {can("suppliers") || can("finance") ? <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+    {mode === "trips" && can("content") ? <AdminControlCenter initialTab="content" variant="trips" /> : null}
+    {mode === "content" && (can("content") || can("settings") || can("operations")) ? <AdminControlCenter initialTab={initialControlPanel} variant="content" /> : null}
+    {false && (can("operations") || can("staff") || can("settings")) ? <AdminOperationsCenter /> : null}
+    {false && (can("suppliers") || can("finance")) ? <section id="partners" className="mt-8 scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3"><UsersRound className="mt-1 text-cyan-700" size={24}/><div><h2 className="text-2xl font-bold">Suppliers & sales people</h2><p className="mt-1 text-sm text-slate-500">Create reusable contacts and attach them to expenses.</p></div></div>
       <div className="mt-6 grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
         <form onSubmit={addPartner} className="space-y-4 rounded-2xl bg-slate-50 p-4">
@@ -339,7 +343,8 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
       </div>
       <SalesPerformancePanel salesPeople={salesPeople} bookings={bookings} expenses={expenses}/>
     </section> : null}
-    {can("reports") ? <div id="reports" className="scroll-mt-6"><SituationReports bookings={bookings} /></div> : null}
+    {false && can("reports") ? <div id="reports" className="scroll-mt-6"><SituationReports bookings={bookings} /></div> : null}
+    {mode === "bookings" && expandedId ? <BookingDetailPanel booking={bookings.find(item => item.id === expandedId) || visibleBookings.find(item => item.id === expandedId)!} onClose={() => setExpandedId(null)} /> : null}
   </>;
 }
 
