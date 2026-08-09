@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { getAdminAuthorization } from "@/lib/admin-permission";
 import { getGoogleAdsReport, googleAdsConfiguration } from "@/lib/google-ads";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!hasAdminPermission(user,"finance")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { allowed } = await getAdminAuthorization("view_analytics");
+  if (!allowed) return NextResponse.json({ error: "Analytics permission required." }, { status: 403 });
 
   const configuration = googleAdsConfiguration();
   if (!configuration.configured) return NextResponse.json({ configured: false, missing: configuration.missing }, { headers: { "Cache-Control": "private, no-store" } });

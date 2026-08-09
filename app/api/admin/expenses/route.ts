@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { getAdminAuthorization } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
-import { createClient } from "@/utils/supabase/server";
 
 const expenseTypes = new Set(["google_ads", "subscriptions", "supplier_per_trip", "sales_commission", "fuel", "guide_fees", "boat_costs", "other"]);
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -12,9 +11,8 @@ function json(body: unknown, status = 200) {
 
 export async function POST(request: NextRequest) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!isAuthorizedAdmin(user)) return json({ error: "Unauthorized." }, 401);
+  const { supabase, allowed } = await getAdminAuthorization("edit_expenses");
+  if (!allowed) return json({ error: "Expense-editing permission required." }, 403);
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const description = String(body?.description || "").trim().slice(0, 200);

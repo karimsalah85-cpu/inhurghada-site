@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -44,6 +45,7 @@ export default function AdminLoginPage() {
         <button className="mt-5 w-full rounded-xl bg-cyan-600 p-3 font-bold text-white disabled:cursor-wait disabled:opacity-60" disabled={isSubmitting}>
           {isSubmitting ? "Signing in…" : "Sign in"}
         </button>
+        <Link href="/admin/forgot-password" className="mt-4 block text-center text-sm font-bold text-cyan-700">Forgot password?</Link>
       </form>
     </main>
   );

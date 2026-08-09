@@ -1,0 +1,3 @@
+import {isAdminOwner,type AdminPermission} from "@/lib/admin-auth";import {createClient} from "@/utils/supabase/server";
+export type LivePermission=AdminPermission|"view_bookings"|"edit_bookings"|"view_expenses"|"edit_expenses"|"view_suppliers"|"edit_suppliers"|"view_analytics"|"view_reports"|"manage_operations"|"manage_content"|"manage_settings"|"manage_users";
+export async function getAdminAuthorization(permission:LivePermission){const supabase=await createClient();const{data:{user}}=await supabase.auth.getUser();if(!user)return{supabase,user:null,allowed:false};if(isAdminOwner(user))return{supabase,user,allowed:true};const{data,error}=await supabase.rpc("admin_has_permission",{permission_name:permission});return{supabase,user,allowed:!error&&data===true};}

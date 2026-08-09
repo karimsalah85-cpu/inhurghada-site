@@ -3,7 +3,7 @@ type AuthUser = {
   app_metadata?: Record<string, unknown> | null;
 };
 
-export const adminRoles = ["owner", "manager", "operator", "content_editor", "finance"] as const;
+export const adminRoles = ["owner", "manager", "sales", "finance", "operations", "content_editor", "operator"] as const;
 export type AdminRole = typeof adminRoles[number];
 
 export const configuredAdminEmail = () => (process.env.ADMIN_EMAIL || "info@dailyredsea.com").trim().toLowerCase();
@@ -19,6 +19,8 @@ export type AdminPermission = "bookings" | "content" | "operations" | "finance" 
 export const rolePermissions: Record<AdminRole, AdminPermission[]> = {
   owner: ["bookings","content","operations","finance","suppliers","reports","settings","staff"],
   manager: ["bookings","content","operations","finance","suppliers","reports","settings"],
+  sales: ["bookings","reports"],
+  operations: ["bookings","operations","suppliers"],
   operator: ["bookings","operations"],
   content_editor: ["content"],
   finance: ["finance","suppliers","reports"],

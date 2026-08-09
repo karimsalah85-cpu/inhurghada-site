@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { configuredAdminEmail, isAuthorizedAdmin } from "@/lib/admin-auth";
+import { configuredAdminEmail, hasAdminPermission, isAuthorizedAdmin } from "@/lib/admin-auth";
 
 const originalAdminEmail = process.env.ADMIN_EMAIL;
 
@@ -19,5 +19,10 @@ describe("admin authorization", () => {
   it("uses the owner address as the secure deployment default", () => {
     delete process.env.ADMIN_EMAIL;
     expect(configuredAdminEmail()).toBe("info@dailyredsea.com");
+  });
+  it("does not grant a sales user finance access", () => {
+    const sales = { email: "sales@example.com", app_metadata: { admin_role: "sales" } };
+    expect(hasAdminPermission(sales, "bookings")).toBe(true);
+    expect(hasAdminPermission(sales, "finance")).toBe(false);
   });
 });

@@ -2,10 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
 import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
+import TopServicesPanel from "@/components/admin/TopServicesPanel";
 import { hasAdminPermission, isAuthorizedAdmin } from "@/lib/admin-auth";
 import { createClient } from "@/utils/supabase/server";
 
-export default async function AdminMarketingPage() {
+export default async function AdminMarketingPage({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
+  const requestedRange = Number((await searchParams).range || 30);
+  const range = ([7, 30, 90].includes(requestedRange) ? requestedRange : 30) as 7 | 30 | 90;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) redirect("/admin/login");
@@ -25,8 +28,9 @@ export default async function AdminMarketingPage() {
           <Link href="/admin" className="rounded-xl border border-slate-600 px-4 py-2.5 text-sm font-bold hover:border-white hover:bg-white hover:text-slate-950">Back to operations</Link>
         </div>
       </header>
+      <TopServicesPanel range={range} />
       <GoogleAnalyticsPanel />
-      <GoogleAdsPanel />
+      <GoogleAdsPanel range={range} />
     </div>
   </main>;
 }

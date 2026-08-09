@@ -18,8 +18,9 @@ type Booking = {
   amount: number | string; currency: string; status: Status; payment_status: PaymentStatus; created_at: string;
   type: "tour" | "transfer";
   sales_person_id?: string | null; sales_commission_percent?: number | string | null;
+  expense_total?: number; supplier_name?: string | null;
 };
-type BookingView = { month: string; status: string; payment: string; type: string; service: string; search: string };
+type BookingView = { month: string; status: string; payment: string; type: string; service: string; search: string; supplier: string; expense_sort: string };
 type Expense = { id: string; description: string; amount: number | string; currency: string; expense_date: string; category: string | null; expense_type?: string; supplier_id?: string | null; sales_person_id?: string | null; booking_id?: string | null };
 type Supplier = { id: string; name: string; contact_name: string | null; phone: string | null; email: string | null; notes: string | null };
 type SalesPerson = { id: string; name: string; phone: string | null; email: string | null; commission_percent: number | string | null; notes: string | null };
@@ -151,6 +152,8 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
     if (next.type !== "all") params.set("type", next.type);
     if (next.service !== "all") params.set("service", next.service);
     if (next.search) params.set("search", next.search);
+    if (next.supplier !== "all") params.set("supplier", next.supplier);
+    if (next.expense_sort !== "none") params.set("expense_sort", next.expense_sort);
     return `/admin?${params.toString()}#bookings`;
   }
 
@@ -262,6 +265,8 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
     {notice ? <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">{notice}</div> : null}
     {migrationPending ? <div role="alert" className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"><p className="font-black">Admin database upgrade pending</p><p className="mt-1 leading-6">Basic expenses can still be saved. Supplier expenses, sales commissions, supplier records, and sales people will work after migration <code className="font-mono">202607260001_admin_partners_and_expenses.sql</code> is applied in Supabase.</p></div> : null}
 
+    {can("finance") && visibleBookings.length ? <div className="mt-8 overflow-x-auto rounded-3xl bg-white p-5 shadow-sm sm:p-6"><h2 className="text-xl font-black">Booking costs and margins</h2><p className="mt-1 text-sm text-slate-500">Linked expenses and supplier fulfillment for the filtered booking view.</p><table className="mt-5 w-full min-w-[680px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Booking</th><th className="p-3">Supplier</th><th className="p-3">Revenue</th><th className="p-3">Expenses</th><th className="p-3">Margin</th></tr></thead><tbody>{visibleBookings.map(booking=><tr key={`finance-${booking.id}`} className="border-t"><td className="p-3 font-mono font-bold text-blue-700">{booking.reference}</td><td className="p-3">{booking.supplier_name||"Unassigned"}</td><td className="p-3">{money(Number(booking.amount),booking.currency)}</td><td className="p-3">{money(Number(booking.expense_total||0),booking.currency)}</td><td className="p-3 font-bold text-emerald-700">{money(Number(booking.amount)-Number(booking.expense_total||0),booking.currency)}</td></tr>)}</tbody></table></div>:null}
+
     <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
       {can("bookings") ? <section id="bookings" className="scroll-mt-6 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-2xl font-bold">Bookings</h2><p className="mt-1 text-sm text-slate-500">Search, confirm availability, record cash, or cancel a request.</p></div><p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{visibleBookings.length} shown</p></div>
@@ -278,6 +283,7 @@ export default function AdminDashboard({ initialBookings, initialVisibleBookings
           <select aria-label="Payment status filter" name="payment" defaultValue={bookingView.payment} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All payments</option><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="refunded">Refunded</option></select>
           <select aria-label="Booking type filter" name="type" defaultValue={bookingView.type} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">Tours & transfers</option><option value="tour">Tours</option><option value="transfer">Transfers</option></select>
           <select aria-label="Service filter" name="service" defaultValue={bookingView.service} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All services</option>{services.map((service) => <option key={service}>{service}</option>)}</select>
+          {can("finance") ? <><select aria-label="Supplier filter" name="supplier" defaultValue={bookingView.supplier} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="all">All suppliers</option>{suppliers.map(item=><option key={item.id}>{item.name}</option>)}</select><select aria-label="Expense sorting" name="expense_sort" defaultValue={bookingView.expense_sort} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"><option value="none">Default order</option><option value="highest">Highest cost first</option><option value="lowest">Lowest cost first</option></select></> : null}
           <div className="flex gap-2 xl:col-span-6"><button type="submit" className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white">Apply filters</button><Link href={bookingUrl({ status: "all", payment: "all", type: "all", service: "all", search: "" })} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold">Clear filters</Link></div>
         </form>
 

@@ -1,0 +1,5 @@
+import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
+import { hasValidRequestOrigin } from "@/lib/request-origin";
+import { createClient } from "@/utils/supabase/server";
+export async function POST(request:NextRequest){if(!hasValidRequestOrigin(request))return NextResponse.json({error:"Invalid origin."},{status:403});const ip=request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown";if(!rateLimit(`admin-reset:${ip}`,5,15*60*1000).allowed)return NextResponse.json({error:"Too many reset requests. Try again later."},{status:429});const body=await request.json().catch(()=>null) as {email?:unknown}|null;const email=typeof body?.email==="string"?body.email.trim().toLowerCase():"";if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){const supabase=await createClient();await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${process.env.NEXT_PUBLIC_SITE_URL||"https://dailyredsea.com"}/admin/reset-password`});}return NextResponse.json({ok:true});}

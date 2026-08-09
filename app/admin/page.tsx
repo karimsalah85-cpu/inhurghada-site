@@ -10,6 +10,8 @@ type AdminSearchParams = {
   type?: string;
   service?: string;
   search?: string;
+  supplier?: string;
+  expense_sort?: string;
 };
 
 const bookingStatuses = ["all", "new", "confirmed", "completed", "cancelled"] as const;
@@ -47,6 +49,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const bookingType = bookingTypes.includes(typeValue as typeof bookingTypes[number]) ? typeValue! : "all";
   const service = first(params.service)?.trim() || "all";
   const search = first(params.search)?.trim().slice(0, 100) || "";
+  const supplier = first(params.supplier)?.trim().slice(0, 100) || "all";
+  const expenseSort = ["none", "highest", "lowest"].includes(first(params.expense_sort) || "") ? first(params.expense_sort)! : "none";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) redirect("/admin/login");
@@ -59,6 +63,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     if (bookingType !== "all") canonical.set("type", bookingType);
     if (service !== "all") canonical.set("service", service);
     if (search) canonical.set("search", search);
+    if (supplier !== "all") canonical.set("supplier", supplier);
+    if (expenseSort !== "none") canonical.set("expense_sort", expenseSort);
     redirect(`/admin?${canonical.toString()}`);
   }
   const canBookings = hasAdminPermission(user, "bookings") || hasAdminPermission(user, "reports");
@@ -95,9 +101,20 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const error = bookingsError?.message || bookingListError?.message || expensesError?.message;
   const normalizedSearch = search.toLowerCase();
   const visibleBookings = normalizedSearch ? (bookingList || []).filter((booking) => [booking.reference, booking.customer_name, booking.customer_email, booking.phone, booking.tour_name, booking.hotel, booking.date].filter(Boolean).join(" ").toLowerCase().includes(normalizedSearch)) : (bookingList || []);
-  const bookingView = { month, status, payment, type: bookingType, service, search };
+  const expenseByBooking = new Map<string, number>();
+  const supplierByBooking = new Map<string, string>();
+  for (const expense of expenses || []) {
+    if (!expense.booking_id) continue;
+    expenseByBooking.set(expense.booking_id, (expenseByBooking.get(expense.booking_id) || 0) + Number(expense.amount || 0));
+    const linkedSupplier = (suppliers || []).find((item) => item.id === expense.supplier_id);
+    if (linkedSupplier) supplierByBooking.set(expense.booking_id, linkedSupplier.name);
+  }
+  let visibleBookingsWithCosts = visibleBookings.map((booking) => ({ ...booking, expense_total: expenseByBooking.get(booking.id) || 0, supplier_name: supplierByBooking.get(booking.id) || null }));
+  if (supplier !== "all") visibleBookingsWithCosts = visibleBookingsWithCosts.filter((booking) => booking.supplier_name === supplier);
+  if (expenseSort !== "none") visibleBookingsWithCosts.sort((a, b) => expenseSort === "highest" ? b.expense_total - a.expense_total : a.expense_total - b.expense_total);
+  const bookingView = { month, status, payment, type: bookingType, service, search, supplier, expense_sort: expenseSort };
 
   const migrationPending = Boolean(suppliersError || salesPeopleError);
 
-  return <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"><div className="mx-auto max-w-7xl"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Operations</p><h1 className="mt-2 text-4xl font-black text-slate-900">Daily Red Sea Admin</h1><p className="mt-2 text-slate-600">Manage customer bookings, cash collection, partners, and business finances.</p>{error ? <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><p className="font-bold">The admin database access needs attention.</p><p className="mt-2 text-sm">{error}</p><p className="mt-2 text-sm">Run the authenticated-admin policy from <code>supabase/schema.sql</code> in Supabase SQL Editor, then refresh this page.</p></div> : <AdminDashboard key={Object.values(bookingView).join("|")} initialBookings={bookings || []} initialVisibleBookings={visibleBookings} bookingView={bookingView} initialExpenses={expenses || []} initialSuppliers={suppliers || []} initialSalesPeople={salesPeople || []} migrationPending={migrationPending} permissions={permissions} currentRole={role} isOwner={isAdminOwner(user)} />}</div></main>;
+  return <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"><div className="mx-auto max-w-7xl"><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">Operations</p><h1 className="mt-2 text-4xl font-black text-slate-900">Daily Red Sea Admin</h1><p className="mt-2 text-slate-600">Manage customer bookings, cash collection, partners, and business finances.</p>{error ? <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950"><p className="font-bold">The admin database access needs attention.</p><p className="mt-2 text-sm">{error}</p><p className="mt-2 text-sm">Run the authenticated-admin policy from <code>supabase/schema.sql</code> in Supabase SQL Editor, then refresh this page.</p></div> : <AdminDashboard key={Object.values(bookingView).join("|")} initialBookings={bookings || []} initialVisibleBookings={visibleBookingsWithCosts} bookingView={bookingView} initialExpenses={expenses || []} initialSuppliers={suppliers || []} initialSalesPeople={salesPeople || []} migrationPending={migrationPending} permissions={permissions} currentRole={role} isOwner={isAdminOwner(user)} />}</div></main>;
 }

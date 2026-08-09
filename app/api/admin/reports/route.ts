@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { createReportPdf } from "@/lib/report-service";
-import { createClient } from "@/utils/supabase/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { getAdminAuthorization } from "@/lib/admin-permission";
 import { countDistinctCustomers } from "@/lib/customer-count";
 
 export const runtime = "nodejs";
@@ -19,15 +18,14 @@ type ReportRow = {
   Payment: string;
   Amount: number;
   Currency: string;
+  Supplier: unknown;
+  Expenses: number;
+  Margin: number;
 };
 
 export async function GET(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
+  const { supabase, allowed } = await getAdminAuthorization("view_reports");
+  if (!allowed) return NextResponse.json({ error: "Reports permission required." }, { status: 403, headers: { "Cache-Control": "private, no-store" } });
 
   const { searchParams } = request.nextUrl;
   const format = searchParams.get("format");
@@ -45,7 +43,7 @@ export async function GET(request: NextRequest) {
   }
   let query = supabase
     .from("bookings")
-    .select("reference,tour_name,date,guests,status,payment_status,amount,currency,created_at,phone,customer_email")
+    .select("id,reference,tour_name,date,guests,status,payment_status,amount,currency,created_at,phone,customer_email")
     .order("date", { ascending: false });
 
   if (ids.length) query = query.in("id", ids);
@@ -60,7 +58,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Could not generate report." }, { status: 500 });
   }
 
-  const rows: ReportRow[] = (data || []).map((item) => ({
+  const bookingIds = (data || []).map(item => item.id).filter(Boolean);
+  const { data: expenseRows } = bookingIds.length ? await supabase.from("expenses").select("booking_id,amount,currency,supplier_id,suppliers(name)").in("booking_id", bookingIds) : { data: [] };
+  const linkedExpenses = new Map<string, { total: number; suppliers: Set<string> }>();
+  for (const expense of expenseRows || []) { if (!expense.booking_id) continue; const summary = linkedExpenses.get(expense.booking_id) || { total: 0, suppliers: new Set<string>() }; summary.total += Number(expense.amount || 0); const relation = expense.suppliers as unknown as { name?: string } | Array<{ name?: string }> | null; const supplier = Array.isArray(relation) ? relation[0]?.name : relation?.name; if (supplier) summary.suppliers.add(supplier); linkedExpenses.set(expense.booking_id, summary); }
+  const rows: ReportRow[] = (data || []).map((item) => {
+    const costs = linkedExpenses.get(item.id) || { total: 0, suppliers: new Set<string>() };
+    return ({
     Reference: safeCell(item.reference),
     Trip: safeCell(item.tour_name || "Private transfer"),
     "Service date": item.date || "To confirm",
@@ -69,7 +73,10 @@ export async function GET(request: NextRequest) {
     Payment: item.payment_status,
     Amount: Number(item.amount || 0),
     Currency: item.currency,
-  }));
+    Supplier: safeCell([...costs.suppliers].join(", ") || "Unassigned"),
+    Expenses: costs.total,
+    Margin: Number(item.amount || 0) - costs.total,
+  }); });
   const active = rows.filter((item) => item.Status !== "cancelled" && item.Payment !== "refunded");
   const customers = countDistinctCustomers((data || []).filter((item) => item.status !== "cancelled" && item.payment_status !== "refunded"));
   const revenueByCurrency = active.reduce<Record<string, number>>((totals, item) => {
