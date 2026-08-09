@@ -13,6 +13,8 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const ar = language === "ar";
   const pl = language === "pl";
   const zh = language === "zh";
+  const reviewCount = Number(tour.reviews);
+  const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
 
@@ -22,15 +24,15 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Description","Beschreibung","Описание","الوصف","项目介绍")}</p>
         <h2 className="mt-4 text-3xl font-bold text-slate-900">{tr("About this tour","Über diesen Ausflug","Об этой экскурсии","عن هذه الرحلة","关于此行程")}</h2>
         <p className="mt-6 text-lg leading-8 text-slate-600">{tour.description}</p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className={`mt-8 grid gap-4 ${hasReviews ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Clock3 size={16} /> {tr("Duration","Dauer","Продолжительность","المدة","时长")}</div>
             <p className="mt-3 text-xl font-semibold text-slate-900">{tour.duration}</p>
           </div>
-          <div className="rounded-2xl bg-slate-50 p-4">
+          {hasReviews ? <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Sparkles size={16} /> {tr("Rating","Bewertung","Рейтинг","التقييم","评分")}</div>
             <p className="mt-3 text-xl font-semibold text-slate-900">{tour.rating} / 5</p>
-          </div>
+          </div> : null}
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
             <p className="mt-3 text-xl font-semibold text-slate-900">{tour.bookingMode === "inquiry" ? tr("Price on request", "Preis auf Anfrage", "Цена по запросу", "السعر عند الطلب", "价格需咨询") : <>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-2 text-base text-slate-400 line-through">{formatPrice(tour.originalPrice)}</span> : null}{formatPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</>}</p>

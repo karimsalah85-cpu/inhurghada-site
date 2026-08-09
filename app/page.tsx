@@ -534,6 +534,7 @@ text-blue-600
                   availableTime={tour.availableTimes?.[0]}
                   priceUnit={tour.priceUnit}
                   bookingMode={tour.bookingMode}
+                  entrancePrice={tour.entrancePricing?.adults}
 
                 />
 
