@@ -14,6 +14,7 @@ export default function AnalyticsProvider() {
   const pathname = usePathname();
   const [preferences, setPreferences] = useState<ConsentPreferences | null>(null);
   const isInitialPath = useRef(true);
+  const hasConfiguredAfterConsent = useRef(false);
 
   useEffect(() => {
     let stored: ConsentPreferences | null = null;
@@ -33,10 +34,14 @@ export default function AnalyticsProvider() {
   useEffect(() => {
     if (!preferences) return;
     updateGoogleConsent(preferences);
+    if (preferences.analytics && gaId && !hasConfiguredAfterConsent.current) {
+      window.gtag?.("config", gaId, { page_path: pathname });
+      hasConfiguredAfterConsent.current = true;
+    }
     if (preferences.analytics && gtmId) {
       window.dataLayer?.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
     }
-  }, [preferences]);
+  }, [preferences, pathname]);
 
   function save(next: ConsentPreferences) {
     localStorage.setItem(consentStorageKey, JSON.stringify(next));
