@@ -3,12 +3,13 @@ import Link from "next/link";
 import { BadgeCheck, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { whatsappUrl } from "@/lib/contact";
 import { languageAlternates, localePath } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About Daily Red Sea",
   description: "Meet the local Hurghada team behind Daily Red Sea tours, excursions, and private transfers.",
-  alternates: { canonical: "/about", languages: { ...languageAlternates("/about"), "x-default": localePath("en", "/about") } },
-};
+  path: "/about",
+});
 
 export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
   const de = locale === "de";
