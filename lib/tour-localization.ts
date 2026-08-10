@@ -676,6 +676,7 @@ export function localizeTour(tour: Tour, locale: Locale): Tour {
     : locale === "ru" ? localizeTourRussian(tour)
     : locale === "ar" ? localizeTourArabic(tour)
     : locale === "zh" ? localizeTourChinese(tour)
+    : locale === "pl" ? localizeTourPolish(tour)
     : tour;
   const withMagawish = tour.slug === "magawish-speedboat" ? { ...base, ...magawishSpeedboatTranslations[locale] } : base;
   return localizeSnorkelingBoatTrip(withMagawish, locale);
