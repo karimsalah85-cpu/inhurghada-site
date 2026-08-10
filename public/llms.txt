@@ -1,0 +1,35 @@
+# Daily Red Sea
+
+> Daily Red Sea is a Hurghada-based tour operator offering Red Sea boat trips, island excursions, snorkeling, scuba diving, desert safaris, historical day trips, and private airport and hotel transfers in Egypt. Prices are shown clearly and local pickup details are confirmed by WhatsApp.
+
+## Main pages
+
+- [Home](https://dailyredsea.com/): Hurghada tours, excursions, boat trips, diving, desert safaris, and transfers.
+- [Hurghada destination](https://dailyredsea.com/destinations/hurghada): Bookable Hurghada experiences grouped by activity.
+- [Island trips](https://dailyredsea.com/hurghada/island-trips): Orange Bay, Mahmya Island, Paradise Island, Hula Hula, and other Red Sea island days.
+- [Diving and snorkeling](https://dailyredsea.com/hurghada/diving-snorkeling): Guided diving, beginner experiences, certification courses, snorkeling, and underwater photography.
+- [Desert safaris](https://dailyredsea.com/hurghada/desert-safaris): Quad biking, camel experiences, Bedouin visits, sunset safaris, and stargazing.
+- [Historical tours](https://dailyredsea.com/hurghada/historical-tours): Private and guided day trips from Hurghada to Luxor, Cairo, and Giza.
+- [Airport transfers](https://dailyredsea.com/hurghada/airport-transfers): Fixed-price private transfers between Hurghada Airport and local hotels and resorts.
+- [Private transfers](https://dailyredsea.com/hurghada/private-transfers): Private hotel, resort, shopping, and local transfers around Hurghada.
+- [Transfers service](https://dailyredsea.com/transfers): Request airport, hotel, marina, and local private transport.
+- [About Daily Red Sea](https://dailyredsea.com/about): Local expertise, selected experiences, and booking support.
+- [Contact](https://dailyredsea.com/contact): WhatsApp, email, and phone support.
+- [FAQ](https://dailyredsea.com/faq): Booking, payment, pickup, cancellation, passport, and traveler questions.
+
+## Booking information
+
+- Most experiences can be reserved online and paid in cash on arrival unless the specific page states otherwise.
+- Tour pages show the starting price, duration, location, inclusions, exclusions, practical notes, and booking requirements.
+- Exact pickup times and hotel details are confirmed by WhatsApp after a request or booking.
+- Weather, sea conditions, supplier availability, age rules, medical requirements, and pickup zones can affect the final itinerary.
+
+## Policies
+
+- [Terms and conditions](https://dailyredsea.com/terms-conditions): Booking, pricing, pickup, changes, cancellations, refunds, and liability.
+- [Privacy policy](https://dailyredsea.com/privacy-policy): Information collected and how booking details are used.
+- [Image credits](https://dailyredsea.com/image-credits): Sources and licenses for destination photography.
+
+## Full URL list
+
+- [XML sitemap](https://dailyredsea.com/sitemap.xml): Full list of public pages and tour URLs.
