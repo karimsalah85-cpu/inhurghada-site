@@ -64,7 +64,7 @@ const chineseFaqs = [
   { question: "接送价格是按人计算吗？", answer: "机场和 Senzo Mall 接送采用预订页面所述的单程固定价格。旅游项目通常按人收费，除非另有明确说明。" },
 ];
 
-export default function FaqPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
+export default function FaqPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
   const ar = locale === "ar";
