@@ -10,8 +10,11 @@ export const metadata: Metadata = pageMetadata({
   image: "/images/hurghada-airport-transfer.jpg",
 });
 
-export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
+export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
+  const ru = locale === "ru";
+  const ar = locale === "ar";
+  const pl = locale === "pl";
   const zh = locale === "zh";
 
   return (
@@ -60,7 +63,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
               text-5xl
               font-bold
             ">
-              {de ? "Flughafen- & Hoteltransfers" : zh ? "机场与酒店接送" : "Airport & Hotel Transfers"}
+              {de ? "Flughafen- & Hoteltransfers" : ru ? "Трансферы из аэропорта и отелей" : ar ? "تنقلات المطار والفنادق" : pl ? "Transfery lotniskowe i hotelowe" : zh ? "机场与酒店接送" : "Airport & Hotel Transfers"}
             </h1>
 
 
@@ -68,7 +71,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
               mt-5
               text-xl
             ">
-              {de ? "Sichere, komfortable Privattransfers in Hurghada" : zh ? "安全舒适的赫尔格达私人接送" : "Safe, comfortable private transfers in Hurghada"}
+              {de ? "Sichere, komfortable Privattransfers in Hurghada" : ru ? "Безопасные и комфортные частные трансферы в Хургаде" : ar ? "تنقلات خاصة آمنة ومريحة في الغردقة" : pl ? "Bezpieczne i wygodne prywatne transfery w Hurghadzie" : zh ? "安全舒适的赫尔格达私人接送" : "Safe, comfortable private transfers in Hurghada"}
             </p>
 
 
@@ -83,10 +86,10 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
       <section id="book-transfer" className="bg-slate-50 px-6 py-20">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
           <div>
-            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Private Transfers" : zh ? "私人接送" : "Private transfers"}</p>
-            <h2 className="mt-3 text-4xl font-bold text-slate-900">{de ? "Bequem von Tür zu Tür reisen" : zh ? "舒适的门到门出行" : "Travel comfortably from door to door"}</h2>
-            <p className="mt-5 text-lg leading-relaxed text-slate-600">{de ? "Sende uns deine Route und Reisedaten. Unser Team antwortet per WhatsApp mit Verfügbarkeit und einem klaren Preis, bevor etwas bestätigt wird." : zh ? "发送您的路线和出行信息。确认前，我们的团队会通过 WhatsApp 回复名额和透明报价。" : "Send your route and travel details. Our team will reply on WhatsApp with availability and a clear quote before anything is confirmed."}</p>
-            <ul className="mt-7 space-y-3 text-slate-700"><li>✓ {de ? "Ankunft und Abfahrt am Flughafen" : zh ? "机场抵达与出发接送" : "Airport arrivals and departures"}</li><li>✓ {de ? "Abholung an Hotels, Resorts und Marinas" : zh ? "酒店、度假村和码头接送" : "Hotel, resort and marina pickups"}</li><li>✓ {de ? "Passende Privatfahrzeuge für deine Gruppe" : zh ? "适合您团队人数的私人车辆" : "Flexible private vehicles for your group"}</li></ul>
+            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Private Transfers" : ru ? "Частные трансферы" : ar ? "تنقلات خاصة" : pl ? "Prywatne transfery" : zh ? "私人接送" : "Private transfers"}</p>
+            <h2 className="mt-3 text-4xl font-bold text-slate-900">{de ? "Bequem von Tür zu Tür reisen" : ru ? "Комфортная поездка от двери до двери" : ar ? "تنقل مريح من الباب إلى الباب" : pl ? "Wygodna podróż od drzwi do drzwi" : zh ? "舒适的门到门出行" : "Travel comfortably from door to door"}</h2>
+            <p className="mt-5 text-lg leading-relaxed text-slate-600">{de ? "Sende uns deine Route und Reisedaten. Unser Team antwortet per WhatsApp mit Verfügbarkeit und einem klaren Preis, bevor etwas bestätigt wird." : ru ? "Отправьте маршрут и данные поездки. Команда ответит в WhatsApp, подтвердит наличие и понятную цену до оформления." : ar ? "أرسل مسارك وتفاصيل الرحلة. سيرد فريقنا عبر واتساب بالتوفر والسعر الواضح قبل التأكيد." : pl ? "Wyślij trasę i dane podróży. Nasz zespół odpowie przez WhatsApp, potwierdzając dostępność i jasną cenę przed rezerwacją." : zh ? "发送您的路线和出行信息。确认前，我们的团队会通过 WhatsApp 回复名额和透明报价。" : "Send your route and travel details. Our team will reply on WhatsApp with availability and a clear quote before anything is confirmed."}</p>
+            <ul className="mt-7 space-y-3 text-slate-700"><li>✓ {de ? "Ankunft und Abfahrt am Flughafen" : ru ? "Встреча и выезд из аэропорта" : ar ? "الاستقبال والمغادرة من المطار" : pl ? "Przyloty i odloty z lotniska" : zh ? "机场抵达与出发接送" : "Airport arrivals and departures"}</li><li>✓ {de ? "Abholung an Hotels, Resorts und Marinas" : ru ? "Трансфер из отелей, курортов и марин" : ar ? "الاستلام من الفنادق والمنتجعات والمراسي" : pl ? "Odbiór z hoteli, kurortów i marin" : zh ? "酒店、度假村和码头接送" : "Hotel, resort and marina pickups"}</li><li>✓ {de ? "Passende Privatfahrzeuge für deine Gruppe" : ru ? "Частный автомобиль по размеру группы" : ar ? "سيارة خاصة تناسب عدد أفراد مجموعتك" : pl ? "Prywatny samochód dopasowany do grupy" : zh ? "适合您团队人数的私人车辆" : "Flexible private vehicles for your group"}</li></ul>
           </div>
           <TransferBookingForm />
         </div>
@@ -112,7 +115,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
           text-4xl
           font-bold
         ">
-          {de ? "Warum unsere Transfers?" : zh ? "为什么选择我们的接送服务？" : "Why Choose Our Transfers?"}
+          {de ? "Warum unsere Transfers?" : ru ? "Почему выбирают наши трансферы?" : ar ? "لماذا تختار تنقلاتنا؟" : pl ? "Dlaczego warto wybrać nasze transfery?" : zh ? "为什么选择我们的接送服务？" : "Why Choose Our Transfers?"}
         </h2>
 
 
@@ -131,12 +134,12 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
             <Car className="text-blue-600"/>
 
             <h3 className="mt-4 text-xl font-bold">
-              {de ? "Private Fahrzeuge" : zh ? "私人车辆" : "Private Vehicles"}
+              {de ? "Private Fahrzeuge" : ru ? "Частные автомобили" : ar ? "سيارات خاصة" : pl ? "Prywatne samochody" : zh ? "私人车辆" : "Private Vehicles"}
             </h3>
 
 
             <p className="mt-3 text-gray-600">
-              {de ? "Komfortable Fahrzeuge mit professionellen Fahrern." : zh ? "舒适车辆与专业司机。" : "Comfortable cars with professional drivers."}
+              {de ? "Komfortable Fahrzeuge mit professionellen Fahrern." : ru ? "Комфортные автомобили и профессиональные водители." : ar ? "سيارات مريحة مع سائقين محترفين." : pl ? "Wygodne samochody i profesjonalni kierowcy." : zh ? "舒适车辆与专业司机。" : "Comfortable cars with professional drivers."}
             </p>
 
           </div>
@@ -150,12 +153,12 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
             <Clock className="text-blue-600"/>
 
             <h3 className="mt-4 text-xl font-bold">
-              {de ? "Pünktlicher Service" : zh ? "准时服务" : "On Time Service"}
+              {de ? "Pünktlicher Service" : ru ? "Пунктуальный сервис" : ar ? "خدمة في الموعد" : pl ? "Punktualna obsługa" : zh ? "准时服务" : "On Time Service"}
             </h3>
 
 
             <p className="mt-3 text-gray-600">
-              {de ? "Flughafenabholung bei Tag und Nacht." : zh ? "全天候提供机场接送。" : "Airport pickup available day and night."}
+              {de ? "Flughafenabholung bei Tag und Nacht." : ru ? "Встреча в аэропорту днём и ночью." : ar ? "استقبال من المطار طوال اليوم." : pl ? "Odbiór z lotniska w dzień i w nocy." : zh ? "全天候提供机场接送。" : "Airport pickup available day and night."}
             </p>
 
           </div>
@@ -169,12 +172,12 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
             <ShieldCheck className="text-blue-600"/>
 
             <h3 className="mt-4 text-xl font-bold">
-              {de ? "Sicher & zuverlässig" : zh ? "安全可靠" : "Safe & Reliable"}
+              {de ? "Sicher & zuverlässig" : ru ? "Безопасно и надёжно" : ar ? "آمن وموثوق" : pl ? "Bezpiecznie i niezawodnie" : zh ? "安全可靠" : "Safe & Reliable"}
             </h3>
 
 
             <p className="mt-3 text-gray-600">
-              {de ? "Erfahrene Fahrer und saubere Fahrzeuge." : zh ? "经验丰富的司机和整洁车辆。" : "Experienced drivers and clean vehicles."}
+              {de ? "Erfahrene Fahrer und saubere Fahrzeuge." : ru ? "Опытные водители и чистые автомобили." : ar ? "سائقون ذوو خبرة وسيارات نظيفة." : pl ? "Doświadczeni kierowcy i czyste samochody." : zh ? "经验丰富的司机和整洁车辆。" : "Experienced drivers and clean vehicles."}
             </p>
 
           </div>
@@ -211,7 +214,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
             text-4xl
             font-bold
           ">
-            {de ? "Transfergebiete" : "Transfer Areas"}
+            {de ? "Transfergebiete" : ru ? "Районы трансфера" : ar ? "مناطق التنقل" : pl ? "Obszary transferu" : zh ? "接送区域" : "Transfer Areas"}
           </h2>
 
 
