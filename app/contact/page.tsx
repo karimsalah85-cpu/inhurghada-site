@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { contactEmail, displayPhoneNumber, whatsappUrl } from "@/lib/contact";
 import { languageAlternates, localePath } from "@/lib/i18n";
+import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Contact Daily Red Sea",
-  description: "Contact the Daily Red Sea team for Hurghada tour, pickup, booking, and private-transfer assistance.",
+  ...pageMetadata({
+    title: "Contact Daily Red Sea",
+    description: "Contact the Daily Red Sea team for Hurghada tour, pickup, booking, and private-transfer assistance.",
+    path: "/contact",
+  }),
   alternates: { canonical: "/contact", languages: { ...languageAlternates("/contact"), "x-default": localePath("en", "/contact") } },
 };
 
