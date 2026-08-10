@@ -125,7 +125,18 @@ const paradiseOperational: Partial<Record<Locale, Partial<Tour>>> = {
 export function localizeSnorkelingBoatTrip(tour: Tour, locale: Locale): Tour {
   const english = snorkelingBoatEnglish[tour.slug as SnorkelingBoatSlug];
   if (!english) return tour;
-  if (locale === "en") return { ...tour, ...english };
+  const commercial = {
+    price: tour.price,
+    originalPrice: tour.originalPrice,
+    packagePrice: tour.packagePrice,
+    participantPricing: tour.participantPricing,
+    pricingMode: tour.pricingMode,
+    priceUnit: tour.priceUnit,
+    boatOptions: tour.boatOptions,
+    entrancePricing: tour.entrancePricing,
+    bookingExtras: tour.bookingExtras,
+  };
+  if (locale === "en") return { ...tour, ...english, ...commercial };
   const translation = snorkelingBoatTranslations[locale][tour.slug as SnorkelingBoatSlug];
   const altSuffix = locale === "de" ? "Boot, Strand und Rotes Meer bei Hurghada"
     : locale === "ru" ? "катер, пляж и Красное море у Хургады"
@@ -142,5 +153,5 @@ export function localizeSnorkelingBoatTrip(tour: Tour, locale: Locale): Tour {
   const existingOperational = locale === "pl" ? polishOperational[tour.slug as SnorkelingBoatSlug] : {
     highlights: tour.highlights, included: tour.included, notIncluded: tour.notIncluded, notes: tour.notes, itinerary: tour.itinerary,
   };
-  return { ...tour, ...english, ...existingOperational, ...localizedText, ...(tour.slug === "paradise-island" ? paradiseOperational[locale] : {}) };
+  return { ...tour, ...english, ...existingOperational, ...localizedText, ...(tour.slug === "paradise-island" ? paradiseOperational[locale] : {}), ...commercial };
 }
