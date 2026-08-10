@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { isLocale } from "@/lib/i18n";
+import { isLocale, localeSwitchPath } from "@/lib/i18n";
 
 export const languages = [
   { code: "en", label: "English" },
@@ -139,10 +139,8 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
 
   function changeLanguage(nextLanguage: Language) {
     setLanguage(nextLanguage);
-    const parts = window.location.pathname.split("/").filter(Boolean);
-    if (parts[0] && isLocale(parts[0])) parts.shift();
-    const supportedLocalizedPath = !parts.length || ["booking", "checkout", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq", "hurghada", "tours"].includes(parts[0]);
-    window.location.assign(supportedLocalizedPath ? `/${nextLanguage}${parts.length ? `/${parts.join("/")}` : ""}${window.location.search}${window.location.hash}` : `/${nextLanguage}`);
+    const destination = localeSwitchPath(window.location.pathname, nextLanguage);
+    window.location.assign(`${destination}${window.location.search}${window.location.hash}`);
   }
 
   const value = useMemo<SiteSettings>(() => ({

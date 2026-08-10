@@ -67,10 +67,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: LocalizedPageProps): Promise<Metadata> {
   const { locale: rawLocale, path = [] } = await params;
-  if (!isLocale(rawLocale)) return {};
+  if (!isLocale(rawLocale)) notFound();
   const locale = rawLocale;
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
+  if (!kind) notFound();
   const tours = await getLiveTours();
   const sourceTour = kind === "tour"
     ? tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1])
@@ -79,7 +80,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
-  const title = tour ? (locale === "en" ? tour.seoTitle || localizedTourTitle(locale, tour.slug, tour.title) : localizedTourTitle(locale, tour.slug, tour.title)) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
+  const title = tour ? tour.seoTitle || tour.title : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
     "orange-bay": "Orange Bay Hurghada Tickets für eine ganztägige Hurghada Bootstour mit Schnorcheln, Mittagessen, Inselaufenthalt und Hoteltransfer buchen.",
@@ -113,7 +114,6 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
 }
 
 export default async function LocalizedPage({ params }: LocalizedPageProps) {
-  const tours = await getLiveTours();
   const { locale: rawLocale, path = [] } = await params;
   if (!isLocale(rawLocale)) notFound();
   const locale = rawLocale;
@@ -121,6 +121,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   if (!kind) notFound();
+  const tours = await getLiveTours();
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   if (locale === "de") {

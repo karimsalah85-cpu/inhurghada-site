@@ -47,7 +47,7 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
     pl: { title: "Odkryj nurkowanie i snorkeling w Hurghadzie", text: "Porównaj wycieczki z przewodnikiem — od pierwszego nurkowania po całodniowe wyprawy na rafy.", cta: "Odkryj nurkowanie i snorkeling" },
     zh: { title: "探索赫尔格达的海底世界", text: "比较有导游的深潜和浮潜体验，从首次潜水到全天珊瑚礁行程。", cta: "探索深潜与浮潜" },
   }[locale] || { title: "Discover diving & snorkeling", text: "Compare guided diving and snorkeling experiences in Hurghada.", cta: "Explore diving & snorkeling" };
-  const pageUrl = absoluteUrl(`/hurghada/${category.slug}`);
+  const pageUrl = absoluteUrl(localePath(locale, `/hurghada/${category.slug}`));
   const buyerGuide = locale === "en" ? ({
     "island-trips": {
       title: "Compare Hurghada island trips",
@@ -79,13 +79,14 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
   const schema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${category.title} in Hurghada`,
+    name: displayTitle,
     url: pageUrl,
+    inLanguage: locale,
     numberOfItems: categoryTours.length,
     itemListElement: categoryTours.map((tour, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url: absoluteUrl(`/tours/${tour.slug}`),
+      url: absoluteUrl(localePath(locale, `/tours/${tour.slug}`)),
       name: tour.title,
     })),
   };

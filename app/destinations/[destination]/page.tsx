@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: path },
+    robots: destination.comingSoon ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: { title, description, url: absoluteUrl(path), siteName, type: "website" },
   };
 }

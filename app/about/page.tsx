@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BadgeCheck, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { whatsappUrl } from "@/lib/contact";
-import { languageAlternates, localePath } from "@/lib/i18n";
+import { localePath } from "@/lib/i18n";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({

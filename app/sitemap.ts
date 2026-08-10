@@ -8,7 +8,6 @@ import { blogPosts } from "@/data/blog-posts";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const tours = await getLiveTours();
-  const contentUpdatedAt = new Date("2026-07-23T00:00:00.000Z");
   const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
   const paths = [
     "",
@@ -19,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/privacy-policy",
     "/terms-conditions",
     "/image-credits",
-    ...destinations.map((destination) => `/destinations/${destination.slug}`),
+    ...destinations.filter((destination) => destination.active && !destination.comingSoon).map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
     ...tours.map((tour) => `/tours/${tour.slug}`),
   ];
@@ -37,7 +36,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             ]);
         return {
           url: `${siteUrl}${localePath(locale, path)}`,
-          lastModified: contentUpdatedAt,
           changeFrequency: path ? "weekly" as const : "daily" as const,
           priority: !path ? 1 : tour ? 0.85 : path.startsWith("/hurghada/") ? 0.8 : 0.6,
           alternates: { languages },

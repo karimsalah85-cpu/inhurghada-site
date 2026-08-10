@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/tours/transfer-to-and-from-senzo-mall",
+        destination: "/tours/senzo-transfer",
+        permanent: true,
+      },
+      {
         source: "/:path*",
         has: [{ type: "host", value: "www.dailyredsea.com" }],
         destination: "https://dailyredsea.com/:path*",

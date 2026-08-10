@@ -110,3 +110,16 @@ export function localePath(locale: Locale, path = "") {
 export function languageAlternates(path = "") {
   return Object.fromEntries(locales.map((locale) => [locale, localePath(locale, path)]));
 }
+
+const localizedRouteRoots = new Set([
+  "about", "booking", "cart", "checkout", "contact", "faq", "hurghada",
+  "privacy-policy", "terms-conditions", "tours", "transfers",
+]);
+
+/** Returns a canonical language-switch target without routing English through /en. */
+export function localeSwitchPath(pathname: string, locale: Locale) {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] && isLocale(parts[0])) parts.shift();
+  const canPreservePath = !parts.length || localizedRouteRoots.has(parts[0]);
+  return localePath(locale, canPreservePath ? `/${parts.join("/")}` : "");
+}

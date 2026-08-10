@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
-import { localePath } from "@/lib/i18n";
+import { localePath, localeSwitchPath } from "@/lib/i18n";
 import SocialLinks from "@/components/layout/SocialLinks";
 import { useCart } from "@/components/cart/CartProvider";
 
@@ -159,6 +159,7 @@ export default function Navbar() {
           <SettingsSelectors
             currency={currency}
             language={language}
+            pathname={pathname}
             setCurrency={setCurrency}
             setLanguage={setLanguage}
           />
@@ -298,6 +299,7 @@ export default function Navbar() {
           <SettingsSelectors
             currency={currency}
             language={language}
+            pathname={pathname}
             setCurrency={setCurrency}
             setLanguage={setLanguage}
             mobile
@@ -319,12 +321,14 @@ export default function Navbar() {
 function SettingsSelectors({
   currency,
   language,
+  pathname,
   setCurrency,
   setLanguage,
   mobile = false,
 }: {
   currency: (typeof currencies)[number];
   language: (typeof languages)[number]["code"];
+  pathname: string;
   setCurrency: (currency: (typeof currencies)[number]) => void;
   setLanguage: (language: (typeof languages)[number]["code"]) => void;
   mobile?: boolean;
@@ -339,6 +343,12 @@ function SettingsSelectors({
       <select id={mobile ? "mobile-language" : "language"} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className={selectClass}>
         {languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
       </select>
+      <details className="relative">
+        <summary className="cursor-pointer rounded-lg px-2 py-2 text-xs font-bold text-cyan-800">Language links</summary>
+        <div aria-label="Available languages" className={mobile ? "mt-2 grid grid-cols-2 gap-1" : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"}>
+          {languages.map((item) => <Link key={item.code} href={localeSwitchPath(pathname, item.code)} hrefLang={item.code} lang={item.code} className={`rounded-lg px-3 py-2 text-sm hover:bg-cyan-50 ${item.code === language ? "bg-cyan-50 font-bold text-cyan-900" : "text-slate-700"}`}>{item.label}</Link>)}
+        </div>
+      </details>
       <div className={mobile ? "" : "flex items-center border-l border-slate-200 pl-1"}>
         <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Display currency</label>
         <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>

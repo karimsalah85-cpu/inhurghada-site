@@ -89,8 +89,13 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const relatedTours = relatedTourCandidates.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => localizeTour(item, locale));
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
   const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: tour.listingStatus === "paused" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
+  const breadcrumbLabels = {
+    en: { home: "Home", tours: "Tours" }, ar: { home: "الرئيسية", tours: "الرحلات" },
+    de: { home: "Startseite", tours: "Ausflüge" }, ru: { home: "Главная", tours: "Экскурсии" },
+    pl: { home: "Strona główna", tours: "Wycieczki" }, zh: { home: "首页", tours: "旅游项目" },
+  }[locale];
   const schema = { "@context": "https://schema.org", "@graph": [
-    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl() }, { "@type": "ListItem", position: 2, name: "Tours", item: `${absoluteUrl() }#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
+    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: breadcrumbLabels.tours, item: `${absoluteUrl(localePath(locale))}#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
     tourSchema,
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
