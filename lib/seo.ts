@@ -91,7 +91,7 @@ function shortenMetadata(value: string, maxLength: number) {
 export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en") {
   let title = value.replace(/\s+/g, " ").trim();
   if (title.length < 30) title = `${title}${metadataTitleSuffix[locale]}`;
-  return shortenMetadata(title, 60);
+  return shortenMetadata(title.replace(/[|,:;–—-]+$/u, "").trim(), 58);
 }
 
 /** Makes short or inherited descriptions useful while capping them at a search-friendly length. */
