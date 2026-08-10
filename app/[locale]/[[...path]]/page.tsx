@@ -183,6 +183,26 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     if (kind === "terms-conditions") return <TermsConditionsPage locale="ar" />;
   }
 
+  if (locale === "pl") {
+    if (kind === "home") return <HomePage />;
+    if (kind === "tour") {
+      const tour = tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1]);
+      if (!tour) notFound();
+      return <TourPageShell locale="pl" tour={localizeTour(tour, "pl")} />;
+    }
+    if (kind === "category") return <TourCategoryPage locale="pl" params={Promise.resolve({ category: path[1] })} />;
+    if (kind === "transfers") return <TransfersPage locale="pl" />;
+    if (kind === "booking") return <BookingPage />;
+    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
+    if (kind === "checkout") return <CheckoutPage />;
+    if (kind === "cart") return <CartPage />;
+    if (kind === "about") return <AboutPage locale="pl" />;
+    if (kind === "contact") return <ContactPage locale="pl" />;
+    if (kind === "faq") return <FaqPage locale="pl" />;
+    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="pl" />;
+    if (kind === "terms-conditions") return <TermsConditionsPage locale="pl" />;
+  }
+
   if (locale === "zh") {
     if (kind === "home") return <HomePage />;
     if (kind === "tour") {
