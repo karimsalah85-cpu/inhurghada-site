@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { destinations, getDestination } from "@/lib/destinations";
 import { tourCategories } from "@/lib/tour-categories";
 import { getLiveTours } from "@/lib/live-content";
+import { absoluteUrl, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 
 type Props = { params: Promise<{ destination: string }> };
 
@@ -15,10 +16,14 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const destination = getDestination((await params).destination);
   if (!destination) return {};
+  const path = `/destinations/${destination.slug}`;
+  const title = normalizeMetaTitle(destination.comingSoon ? `${destination.name} tours — coming soon` : `Things to do in ${destination.name}`);
+  const description = normalizeMetaDescription(destination.tagline);
   return {
-    title: destination.comingSoon ? `${destination.name} tours — coming soon` : `Things to do in ${destination.name}`,
-    description: destination.tagline,
-    alternates: { canonical: `/destinations/${destination.slug}` },
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: { title, description, url: absoluteUrl(path), siteName, type: "website" },
   };
 }
 
