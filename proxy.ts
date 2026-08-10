@@ -1,9 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/proxy";
-import { isKnownApplicationPath } from "@/lib/public-routes";
+import { canonicalAliasTarget, isKnownApplicationPath } from "@/lib/public-routes";
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const aliasTarget = canonicalAliasTarget(pathname);
+  if (aliasTarget) return NextResponse.redirect(new URL(aliasTarget, request.url), 301);
   if (!isKnownApplicationPath(pathname)) {
     return new NextResponse(
       "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Page not found | Daily Red Sea</title></head><body><main><h1>Page not found</h1><p>The requested Daily Red Sea page does not exist.</p><p><a href=\"/\">Return to the homepage</a></p></main></body></html>",

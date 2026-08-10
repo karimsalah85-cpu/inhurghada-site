@@ -2,13 +2,17 @@ import { Car, Clock, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import { pageMetadata } from "@/lib/seo";
+import { languageAlternates } from "@/lib/i18n";
 
-export const metadata: Metadata = pageMetadata({
+export const metadata: Metadata = {
+  ...pageMetadata({
   title: "Private Hurghada Airport & Hotel Transfers",
   description: "Arrange a safe private transfer between Hurghada Airport, hotels, resorts, marinas, and local destinations with Daily Red Sea.",
   path: "/transfers",
   image: "/images/hurghada-airport-transfer.jpg",
-});
+  }),
+  alternates: { canonical: "/transfers", languages: { ...languageAlternates("/transfers"), "x-default": "/transfers" } },
+};
 
 export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
