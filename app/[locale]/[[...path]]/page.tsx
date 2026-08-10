@@ -5,7 +5,14 @@ import { notFound, redirect } from "next/navigation";
 import { tours as fallbackTours } from "@/data/tours";
 import { getLiveTours } from "@/lib/live-content";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
-import { defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
+import {
+  defaultSocialImage,
+  localizedDefaultDescriptions,
+  normalizeMetaDescription,
+  normalizeMetaTitle,
+  siteName,
+  siteUrl,
+} from "@/lib/seo";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
 import HomePage from "@/app/page";
 import TransfersPage from "@/app/transfers/page";
@@ -65,7 +72,9 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   const tours = await getLiveTours();
-  const sourceTour = kind === "tour" ? tours.find((item) => item.slug === path[1]) : undefined;
+  const sourceTour = kind === "tour"
+    ? tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1])
+    : undefined;
   const tour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
@@ -82,9 +91,11 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const description = tour?.metaDescription || (locale === "de" && tour ? (germanSeoDescriptions[tour.slug] || `${title}. Ausflüge Hurghada mit klaren Preisen und direkter Bestätigung.`) : locale === "de" && kind === "home" ? germanSeoDescriptions.home : tour ? `${title}. ${dictionary.siteDescription}` : category ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}` : descriptions[kind || "home"]);
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
   const canonical = localePath(locale, pathname);
+  const normalizedTitle = normalizeMetaTitle(title, locale);
+  const normalizedDescription = normalizeMetaDescription(description, localizedDefaultDescriptions[locale], locale);
   return {
-    title,
-    description,
+    title: normalizedTitle,
+    description: normalizedDescription,
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
     robots: kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: { title, description, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [defaultSocialImage] },
