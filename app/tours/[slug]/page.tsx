@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { tours } from "@/data/tours";
 import { getLiveTours } from "@/lib/live-content";
 import TourPageShell from "@/components/tours/TourPageShell";
-import { siteName } from "@/lib/seo";
+import { normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import { localizeTour } from "@/lib/tour-localization";
 
@@ -17,12 +17,11 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const liveTours = await getLiveTours();
-  const sourceTour = liveTours.find((item) => item.slug === slug);
+  const sourceTour = tours.find((item) => item.slug === slug);
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
   if (!tour) return {};
-  const title = tour.seoTitle || `${tour.title} from Hurghada`;
-  const description = tour.metaDescription || tour.description;
+  const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} from Hurghada`);
+  const description = normalizeMetaDescription(tour.metaDescription || tour.description, tour.description);
   const url = `/tours/${tour.slug}`;
   return {
     title,
