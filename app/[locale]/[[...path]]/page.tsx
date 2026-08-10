@@ -79,7 +79,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const titles: Record<string, string> = { home: dictionary.heroTitle, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
-  const title = tour ? tour.seoTitle || localizedTourTitle(locale, tour.slug, tour.title) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
+  const title = tour ? (locale === "en" ? tour.seoTitle || localizedTourTitle(locale, tour.slug, tour.title) : localizedTourTitle(locale, tour.slug, tour.title)) : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
     "orange-bay": "Orange Bay Hurghada Tickets für eine ganztägige Hurghada Bootstour mit Schnorcheln, Mittagessen, Inselaufenthalt und Hoteltransfer buchen.",
@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     description: normalizedDescription,
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
     robots: kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" ? { index: false, follow: false } : { index: true, follow: true },
-    openGraph: { title, description, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [defaultSocialImage] },
+    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: defaultSocialImage, alt: normalizedTitle }] },
   };
 }
 
@@ -116,7 +116,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (locale === "de") {
     if (kind === "home") return <HomePage />;
     if (kind === "tour") {
-      const tour = tours.find((item) => item.slug === path[1]);
+      const tour = tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
       return <TourPageShell locale="de" tour={localizeTour(tour, "de")} />;
     }
@@ -136,7 +136,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (locale === "ru") {
     if (kind === "home") return <HomePage />;
     if (kind === "tour") {
-      const tour = tours.find((item) => item.slug === path[1]);
+      const tour = tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
       return <TourPageShell locale="ru" tour={localizeTour(tour, "ru")} />;
     }
@@ -156,7 +156,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (locale === "ar") {
     if (kind === "home") return <HomePage />;
     if (kind === "tour") {
-      const tour = tours.find((item) => item.slug === path[1]);
+      const tour = tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
       return <TourPageShell locale="ar" tour={localizeTour(tour, "ar")} />;
     }
@@ -176,7 +176,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (locale === "zh") {
     if (kind === "home") return <HomePage />;
     if (kind === "tour") {
-      const tour = tours.find((item) => item.slug === path[1]);
+      const tour = tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1]);
       if (!tour) notFound();
       return <TourPageShell locale="zh" tour={localizeTour(tour, "zh")} />;
     }
