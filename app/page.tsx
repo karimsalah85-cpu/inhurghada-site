@@ -41,7 +41,27 @@ function HomeContent() {
   const ar = language === "ar";
   const zh = language === "zh";
   const pl = language === "pl";
-  const tr = (en: string, deText: string, ruText: string, arText = en, plText = en, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
+  const sharedLocaleCopy: Record<string, Partial<Record<"ar" | "pl" | "zh", string>>> = {
+    "Why Daily Red Sea": { ar: "لماذا Daily Red Sea؟", pl: "Dlaczego Daily Red Sea?", zh: "为什么选择 Daily Red Sea？" },
+    "Local knowledge, easy booking, clear support.": { ar: "خبرة محلية وحجز سهل ودعم واضح.", pl: "Lokalna wiedza, łatwa rezerwacja i jasne wsparcie.", zh: "本地经验、轻松预订和清晰支持。" },
+    "Carefully selected crews, guides and drivers.": { ar: "أطقم ومرشدون وسائقون مختارون بعناية.", pl: "Starannie wybrane załogi, przewodnicy i kierowcy.", zh: "精心挑选的船员、向导和司机。" },
+    "Fast help for pickup, changes and questions.": { ar: "مساعدة سريعة للاستلام والتغييرات والاستفسارات.", pl: "Szybka pomoc w sprawie odbioru, zmian i pytań.", zh: "快速处理接送、变更和咨询。" },
+    "Clear communication before your tour.": { ar: "تواصل واضح قبل رحلتك.", pl: "Jasna komunikacja przed wycieczką.", zh: "行程前沟通清晰。" },
+    "Your Red Sea adventure, made easy": { ar: "مغامرتك في البحر الأحمر أصبحت أسهل", pl: "Twoja przygoda nad Morzem Czerwonym — prościej", zh: "轻松开启您的红海之旅" },
+    "Why travel with us": { ar: "لماذا تسافر معنا؟", pl: "Dlaczego warto podróżować z nami", zh: "为什么选择我们" },
+    "Plan with local Red Sea experts": { ar: "خطط مع خبراء البحر الأحمر المحليين", pl: "Planuj z lokalnymi ekspertami Morza Czerwonego", zh: "与红海本地专家一起规划" },
+    "Helpful answers": { ar: "إجابات مفيدة", pl: "Pomocne odpowiedzi", zh: "实用解答" },
+    "Hurghada excursions FAQ": { ar: "الأسئلة الشائعة عن رحلات الغردقة", pl: "FAQ o wycieczkach w Hurghadzie", zh: "赫尔格达旅游常见问题" },
+    "Start planning": { ar: "ابدأ التخطيط", pl: "Zacznij planować", zh: "开始规划" },
+    "Ready for your Red Sea adventure?": { ar: "هل أنت مستعد لمغامرة البحر الأحمر؟", pl: "Gotowy na przygodę nad Morzem Czerwonym?", zh: "准备好开启红海之旅了吗？" },
+    "Tours, excursions and private transfers for unforgettable days in Hurghada.": { ar: "رحلات وتجارب وتنقلات خاصة لأيام لا تُنسى في الغردقة.", pl: "Wycieczki i prywatne transfery na niezapomniane dni w Hurghadzie.", zh: "赫尔格达难忘旅程的旅游项目与私人接送。" },
+    "Explore": { ar: "استكشف", pl: "Odkrywaj", zh: "探索" },
+    "Need help?": { ar: "تحتاج إلى مساعدة؟", pl: "Potrzebujesz pomocy?", zh: "需要帮助？" },
+    "Chat on WhatsApp": { ar: "تحدث عبر واتساب", pl: "Napisz na WhatsApp", zh: "通过 WhatsApp 联系" },
+    "Contact us": { ar: "تواصل معنا", pl: "Skontaktuj się z nami", zh: "联系我们" },
+    "All rights reserved.": { ar: "جميع الحقوق محفوظة.", pl: "Wszelkie prawa zastrzeżone.", zh: "版权所有。" },
+  };
+  const tr = (en: string, deText: string, ruText: string, arText = sharedLocaleCopy[en]?.ar || en, plText = sharedLocaleCopy[en]?.pl || en, zhText = sharedLocaleCopy[en]?.zh || en) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
   const searchParams = useSearchParams();
   const router = useRouter();
   const urlSearch = searchParams.get("search") ?? "";
@@ -130,7 +150,7 @@ function HomeContent() {
           </div>
           <div className="mt-9 grid gap-5 md:grid-cols-2">
             {destinations.map((destination) => (
-              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
+              <Link key={destination.slug} href={`/destinations/${destination.slug}`} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
                 <Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-7 text-white">
