@@ -48,6 +48,34 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
     zh: { title: "探索赫尔格达的海底世界", text: "比较有导游的深潜和浮潜体验，从首次潜水到全天珊瑚礁行程。", cta: "探索深潜与浮潜" },
   }[locale] || { title: "Discover diving & snorkeling", text: "Compare guided diving and snorkeling experiences in Hurghada.", cta: "Explore diving & snorkeling" };
   const pageUrl = absoluteUrl(`/hurghada/${category.slug}`);
+  const buyerGuide = locale === "en" ? ({
+    "island-trips": {
+      title: "Compare Hurghada island trips",
+      intro: "Choose by travel style, not only by the island name. Every option below links to trips with current duration, inclusions and booking details.",
+      options: [
+        { title: "Relaxed beach day", text: "Choose Orange Bay or Mahmya when beach time, swimming and a full-day boat experience matter most." },
+        { title: "Private and flexible", text: "Choose a private speedboat when you want a shorter journey, a smaller group and more control over timing." },
+        { title: "Snorkeling focused", text: "Choose a reef or Dolphin House itinerary when time in the water matters more than an extended island stay." },
+      ],
+      questions: [
+        { q: "Which Hurghada island trip is best for families?", a: "A full-day boat trip with hotel pickup, lunch, shaded seating and clearly stated child pricing is usually the easiest family option. Check each trip's age guidance before booking." },
+        { q: "Are snorkeling equipment and hotel pickup included?", a: "Inclusions vary by trip. Each Daily Red Sea listing states whether equipment, lunch, drinks, island entry and pickup are included before you book." },
+      ],
+    },
+    "diving-snorkeling": {
+      title: "Choose the right Red Sea experience",
+      intro: "Compare snorkeling and diving by experience level, time in the water and certification requirements.",
+      options: [
+        { title: "First-time snorkelers", text: "Start with a guided full-day snorkeling boat trip with equipment, lunch and multiple reef stops." },
+        { title: "First-time divers", text: "Choose an introductory dive led by an instructor; no previous certification should be assumed unless the listing says otherwise." },
+        { title: "Certified divers", text: "Choose a two-dive day and check the equipment, certification and recent-diving requirements shown on the tour page." },
+      ],
+      questions: [
+        { q: "Can beginners snorkel in Hurghada?", a: "Yes. Guided trips provide a briefing and flotation equipment, but guests should always tell the crew their swimming confidence and follow sea-condition advice." },
+        { q: "When is snorkeling best in Hurghada?", a: "Trips operate throughout the year. The captain selects suitable reef stops for the day's wind, visibility and sea conditions." },
+      ],
+    },
+  } as Record<string, { title: string; intro: string; options: Array<{ title: string; text: string }>; questions: Array<{ q: string; a: string }> }>)[category.slug] : undefined;
   const schema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -77,6 +105,7 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
       <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8">
         <CategoryTourExplorer tours={categoryTours} locale={locale} />
       </section>
+      {buyerGuide ? <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-6xl"><h2 className="text-3xl font-black text-slate-950">{buyerGuide.title}</h2><p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">{buyerGuide.intro}</p><div className="mt-8 grid gap-5 md:grid-cols-3">{buyerGuide.options.map((option) => <article key={option.title} className="rounded-3xl border border-slate-200 bg-slate-50 p-6"><h3 className="text-xl font-black text-slate-950">{option.title}</h3><p className="mt-3 leading-7 text-slate-600">{option.text}</p></article>)}</div><div className="mt-10 rounded-3xl border border-cyan-200 bg-cyan-50 p-7"><h2 className="text-2xl font-black text-slate-950">Planning questions</h2><div className="mt-4 divide-y divide-cyan-200">{buyerGuide.questions.map((item) => <details key={item.q} className="py-4"><summary className="cursor-pointer font-bold text-slate-950">{item.q}</summary><p className="mt-3 leading-7 text-slate-700">{item.a}</p></details>)}</div></div></div></section> : null}
       {category.slug !== "diving-snorkeling" ? <section className="border-t border-slate-200 bg-cyan-50 px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl rounded-3xl border border-cyan-200 bg-white p-8"><h2 className="text-3xl font-black text-slate-950">{relatedDivingCopy.title}</h2><p className="mt-4 max-w-2xl leading-8 text-slate-600">{relatedDivingCopy.text}</p><Link href={localePath(locale, "/hurghada/diving-snorkeling")} className="mt-6 inline-block rounded-full bg-cyan-700 px-6 py-3 font-bold text-white">{relatedDivingCopy.cta} →</Link></div></section> : null}
       <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-3xl font-black text-slate-950">{de ? "Mit klaren Informationen buchen" : ru ? "Бронируйте с полной информацией" : ar ? "احجز مع معلومات واضحة" : pl ? "Rezerwuj z jasnymi informacjami" : zh ? "信息清晰，放心预订" : "Book with clear information"}</h2><p className="mt-4 leading-8 text-slate-600">{de ? "Jeder Ausflug zeigt Startpreis, Dauer, Abholung, enthaltene Leistungen und wichtige Hinweise vor der Buchung. Unser Team bestätigt die endgültigen Details direkt per WhatsApp." : ru ? "Перед бронированием вы увидите начальную цену, продолжительность, информацию о трансфере, включённые услуги и важные примечания. Наша местная команда подтвердит окончательные детали в WhatsApp." : ar ? "قبل الحجز ستظهر لك السعر المبدئي والمدة والاستلام والخدمات المشمولة والملاحظات المهمة. سيؤكد فريقنا التفاصيل النهائية عبر واتساب." : pl ? "Przed rezerwacją zobaczysz cenę wyjściową, czas trwania, informacje o odbiorze, zakres świadczeń i ważne uwagi. Nasz zespół potwierdzi szczegóły przez WhatsApp." : zh ? "每个项目都会在预订前展示起价、时长、接送信息、包含项目和重要提示。我们的本地团队会通过 WhatsApp 确认最终详情。" : "Every Daily Red Sea experience shows its starting price, duration, pickup information, inclusions, and practical notes before you submit a booking. Our local team confirms final pickup details directly on WhatsApp."}</p></div></section>
     </main>
