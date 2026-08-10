@@ -5,6 +5,14 @@ export const siteName = "Daily Red Sea";
 export const defaultDescription =
   "Book Hurghada tours, Red Sea boat trips, diving experiences, desert adventures, and private transfers with local support.";
 export const defaultSocialImage = "/og-image.svg";
+export const localizedDefaultDescriptions: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
+  en: defaultDescription,
+  ar: "احجز رحلات الغردقة البحرية والسنوركلينج والغوص والسفاري الصحراوي والتنقلات الخاصة مع أسعار واضحة ودعم محلي.",
+  de: "Buche Bootstouren, Schnorcheln, Tauchen, Wüstensafaris und private Transfers in Hurghada mit klaren Preisen und lokaler Betreuung.",
+  ru: "Бронируйте морские прогулки, сноркелинг, дайвинг, сафари и частные трансферы в Хургаде с понятными ценами и местной поддержкой.",
+  pl: "Rezerwuj rejsy, snorkeling, nurkowanie, safari i prywatne transfery w Hurghadzie z jasnymi cenami i lokalnym wsparciem.",
+  zh: "预订赫尔格达游船、浮潜、深潜、沙漠探险和私人接送，价格透明并提供本地支持。",
+};
 
 type PageMetadataInput = {
   title: string;
@@ -24,7 +32,7 @@ export function pageMetadata({
   locale = "en",
 }: PageMetadataInput): Metadata {
   const normalizedTitle = normalizeMetaTitle(title, locale);
-  const normalizedDescription = normalizeMetaDescription(description, defaultDescription, locale);
+  const normalizedDescription = normalizeMetaDescription(description, localizedDefaultDescriptions[locale], locale);
   return {
     title: normalizedTitle,
     description: normalizedDescription,
