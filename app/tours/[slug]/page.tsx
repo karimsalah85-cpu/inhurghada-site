@@ -49,12 +49,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function TourPage({ params }: PageProps) {
   const { slug } = await params;
   const liveTours = await getLiveTours();
-  const sourceTour = liveTours.find((item) => item.slug === slug);
+  const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug);
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
 
   if (!tour) {
     notFound();
   }
 
-  return <TourPageShell tour={tour} relatedTourCandidates={liveTours} />;
+  return <TourPageShell tour={tour} relatedTourCandidates={liveTours.length ? liveTours : tours} />;
 }
