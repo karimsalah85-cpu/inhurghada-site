@@ -3,6 +3,8 @@ type InvitationUser = {
   confirmed_at?: string;
 };
 
+export const adminInvitationRedirectUrl = "https://dailyredsea.com/admin/reset-password";
+
 export function isPendingInvitation(user: InvitationUser | null | undefined) {
   return Boolean(user?.invited_at && !user.confirmed_at);
 }

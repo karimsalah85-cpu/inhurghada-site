@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { escapeInvitationHtml, isPendingInvitation } from "@/lib/admin-invitations";
+import { adminInvitationRedirectUrl, escapeInvitationHtml, isPendingInvitation } from "@/lib/admin-invitations";
 
 describe("admin invitations", () => {
   it("identifies only unaccepted invited users as pending", () => {
@@ -10,5 +10,9 @@ describe("admin invitations", () => {
 
   it("escapes names and generated URLs before placing them in email HTML", () => {
     expect(escapeInvitationHtml(`Karim <admin> & "team"`)).toBe("Karim &lt;admin&gt; &amp; &quot;team&quot;");
+  });
+
+  it("always sends admin invitations to the public password setup page", () => {
+    expect(adminInvitationRedirectUrl).toBe("https://dailyredsea.com/admin/reset-password");
   });
 });

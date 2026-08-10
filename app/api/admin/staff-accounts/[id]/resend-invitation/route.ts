@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { escapeInvitationHtml, isPendingInvitation } from "@/lib/admin-invitations";
+import { adminInvitationRedirectUrl, escapeInvitationHtml, isPendingInvitation } from "@/lib/admin-invitations";
 import { isAdminOwner } from "@/lib/admin-auth";
 import { sendBookingEmail } from "@/lib/booking-service";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
@@ -27,11 +27,10 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (!profile.active) return NextResponse.json({ error: "Reactivate this account before resending its invitation." }, { status: 400 });
   if (!isPendingInvitation(authData.user)) return NextResponse.json({ error: "This invitation has already been accepted." }, { status: 409 });
 
-  const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyredsea.com"}/admin/reset-password`;
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-    type: "recovery",
+    type: "invite",
     email: profile.email,
-    options: { redirectTo },
+    options: { redirectTo: adminInvitationRedirectUrl },
   });
   const invitationUrl = linkData.properties?.action_link;
   if (linkError || !invitationUrl) {
