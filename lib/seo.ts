@@ -12,6 +12,7 @@ type PageMetadataInput = {
   path: string;
   image?: string;
   noIndex?: boolean;
+  locale?: "en" | "ar" | "de" | "ru" | "pl" | "zh";
 };
 
 export function pageMetadata({
@@ -20,9 +21,10 @@ export function pageMetadata({
   path,
   image = defaultSocialImage,
   noIndex = false,
+  locale = "en",
 }: PageMetadataInput): Metadata {
-  const normalizedTitle = normalizeMetaTitle(title);
-  const normalizedDescription = normalizeMetaDescription(description);
+  const normalizedTitle = normalizeMetaTitle(title, locale);
+  const normalizedDescription = normalizeMetaDescription(description, defaultDescription, locale);
   return {
     title: normalizedTitle,
     description: normalizedDescription,
@@ -81,7 +83,7 @@ function shortenMetadata(value: string, maxLength: number) {
 export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en") {
   let title = value.replace(/\s+/g, " ").trim();
   if (title.length < 28) title = `${title}${metadataTitleSuffix[locale]}`;
-  return shortenMetadata(title, 44);
+  return shortenMetadata(title, 40);
 }
 
 /** Makes short or inherited descriptions useful while capping them at a search-friendly length. */
