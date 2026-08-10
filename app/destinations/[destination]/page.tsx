@@ -18,7 +18,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!destination) return {};
   const path = `/destinations/${destination.slug}`;
   const title = normalizeMetaTitle(destination.comingSoon ? `${destination.name} tours — coming soon` : `Things to do in ${destination.name}`);
-  const description = normalizeMetaDescription(destination.tagline);
+  const description = normalizeMetaDescription(
+    destination.slug === "hurghada"
+      ? "Explore Hurghada tours, island trips, snorkeling, diving, desert safaris, historical excursions and private transfers with clear prices and local support."
+      : "Marsa Alam tours are coming soon. Get updates on southern Red Sea trips, reef adventures, desert landscapes and local pickup options from Daily Red Sea.",
+  );
   return {
     title,
     description,
