@@ -12,6 +12,18 @@ describe("public route guard", () => {
     }
   });
 
+  it("keeps the localized route contract intact for every supported locale", () => {
+    const locales = ["en", "ar", "de", "ru", "pl", "zh"];
+    const validPaths = ["", "/about", "/contact", "/faq", "/transfers", "/hurghada/excursions", "/tours/orange-bay"];
+    for (const locale of locales) {
+      for (const path of validPaths) {
+        expect(isKnownApplicationPath(`/${locale}${path}`), `/${locale}${path}`).toBe(true);
+      }
+      expect(isKnownApplicationPath(`/${locale}/transfers/not-real`)).toBe(false);
+      expect(isKnownApplicationPath(`/${locale}/not-a-route`)).toBe(false);
+    }
+  });
+
   it("rejects unknown root and localized catch-all paths", () => {
     expect(isKnownApplicationPath("/definitely-not-a-real-page")).toBe(false);
     expect(isKnownApplicationPath("/de/definitely-not-real")).toBe(false);

@@ -15,6 +15,20 @@ for (const header of requiredHeaders) assert.ok(home.response.headers.get(header
 assert.match(home.body, /<title>[^<]+<\/title>/, "Home page must have a title");
 assert.match(home.body, /rel="canonical"/, "Home page must have a canonical URL");
 
+for (const locale of ["ar", "de", "ru", "pl", "zh"]) {
+  const localizedHome = await get(`/${locale}`);
+  assert.equal(localizedHome.response.status, 200, `/${locale} homepage must return 200`);
+  assert.match(localizedHome.body, new RegExp(`<html[^>]+lang="${locale}"`), `/${locale} must declare html lang=${locale}`);
+  assert.match(localizedHome.body, /rel="canonical"/, `/${locale} must have a canonical URL`);
+}
+
+const englishAlias = await get("/en", { redirect: "manual" });
+assert.ok([307, 308].includes(englishAlias.response.status), `/en must redirect, received ${englishAlias.response.status}`);
+
+const invalidTransfer = await get("/transfers/not-a-real-transfer", { redirect: "manual" });
+assert.equal(invalidTransfer.response.status, 404, "Unknown nested transfer must return 404");
+assert.equal(invalidTransfer.response.headers.get("x-robots-tag"), "noindex", "Unknown nested transfer must be noindex");
+
 const sitemap = await get("/sitemap.xml");
 assert.equal(sitemap.response.status, 200, "Sitemap must return 200");
 const urls = [...sitemap.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
