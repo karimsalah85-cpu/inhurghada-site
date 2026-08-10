@@ -12,6 +12,28 @@ export type BlogPost = {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "best-snorkeling-tours-in-hurghada-for-beginners",
+    title: "Best Snorkeling Tours in Hurghada for Beginners",
+    metaDescription: "Compare beginner-friendly Hurghada snorkeling trips by reef time, island stops, duration, pickup, equipment and price before you book.",
+    publishedAt: "2026-08-10",
+    heroImage: "/images/hurghada-snorkeling-reef-panorama.jpeg",
+    relatedTourSlugs: ["full-day-snorkeling", "orange-bay", "mahmya-island", "dolphin-house-snorkeling"],
+    intro: "Hurghada is an easy place to try Red Sea snorkeling, but the trips are not interchangeable. Some prioritize coral-reef stops, others devote more time to an island beach, and private speedboats trade the shared-boat atmosphere for flexibility. This guide helps first-time snorkelers choose by swimming confidence, schedule and what is actually included.",
+    sections: [
+      { heading: "Start with your swimming confidence", body: ["If you are comfortable in the water but new to snorkeling, choose a guided boat trip that includes a briefing, mask, fins and a flotation vest. Tell the guide before entering the water so they can keep you close to the boat and select the most suitable entry point.", "Travelers who are not confident swimmers should not treat flotation equipment as a substitute for supervision. Stay with the guide, follow the crew's sea-condition advice and skip any stop that feels beyond your comfort level."] },
+      { heading: "Reef trip or island trip?", body: ["A reef-focused full-day snorkeling trip is the strongest choice when seeing coral and fish is the priority. These itineraries normally make more than one water stop, with the captain choosing sites according to wind, visibility and sea conditions.", "Orange Bay and Mahmya trips combine snorkeling with a longer beach stay. Pick them when your group wants swimming, lunch and island relaxation as much as reef time."] },
+      { heading: "Compare the details that change the real price", body: ["Check whether hotel pickup, snorkeling equipment, lunch, drinks and island entrance are included. A lower headline price can cost more once transfers or entry fees are added.", "Also compare the child age bands, total duration and pickup area. Families staying in Makadi Bay, Sahl Hasheesh, Soma Bay or El Gouna should confirm any transfer supplement before booking."] },
+      { heading: "What to bring on the boat", body: ["Bring swimwear, a towel, reef-safe sunscreen, a hat, sunglasses and dry clothes. A light layer helps on windy return journeys, even when the day is warm.", "Keep medication and valuables in a small waterproof bag. If you use prescription lenses, ask in advance whether a suitable mask is available or bring your own."] },
+      { heading: "How to choose between the main options", body: ["Choose the full-day snorkeling trip for maximum value and reef time, Orange Bay for a balanced island-and-snorkeling day, Mahmya for a more premium beach experience, or Dolphin House when the itinerary and sea conditions suit wildlife-focused snorkeling.", "Wildlife is never guaranteed. Treat dolphin sightings as a possibility, not a promise, and choose operators that keep a respectful distance from animals."] },
+    ],
+    faqs: [
+      { question: "Can complete beginners snorkel in Hurghada?", answer: "Yes, if they can follow the crew's instructions and choose a guided trip suitable for their swimming confidence. Tell the guide you are a beginner before entering the water." },
+      { question: "Is snorkeling equipment included?", answer: "Many full-day trips include a mask, fins and flotation equipment, but inclusions vary. Check the individual tour page before booking." },
+      { question: "Which is better for beginners: Orange Bay or a reef trip?", answer: "Orange Bay suits groups wanting beach time as well as snorkeling. A reef-focused trip is better when underwater time is the main goal." },
+      { question: "Is dolphin swimming guaranteed at Dolphin House?", answer: "No. Dolphins are wild animals, so sightings and in-water encounters depend on the day and should never be guaranteed." },
+    ],
+  },
+  {
     slug: "best-desert-safari-tours-for-adrenaline-junkies-in-hurghada",
     title: "Best Desert Safari Tours for Adrenaline Junkies in Hurghada",
     metaDescription: "Compare Hurghada's most exciting desert safari options - quad bikes, dune bashing, sunset rides - and pick the right adrenaline level for your trip.",
