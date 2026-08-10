@@ -558,6 +558,111 @@ export function localizeTourChinese(tour: Tour): Tour {
   return { ...tour, ...chineseTourOverrides[tour.slug] };
 }
 
+const polishTourOverrides: Record<string, Partial<Tour>> = {
+  "orange-bay": {
+    title: "Rejs na Orange Bay ze snorkelingiem", location: "Hurghada, Egipt", duration: "8,5 godziny",
+    description: "Całodniowy rejs na Orange Bay z odbiorem z hotelu w Hurghadzie, snorkelingiem, czasem na wyspie, lunchem, napojami i atrakcjami na wodzie.",
+    highlights: ["Relaks na wyspie Orange Bay", "Rejs po Morzu Czerwonym", "Pływanie w turkusowej wodzie", "Snorkeling wśród raf i ryb", "Dwa postoje na snorkeling", "Czas na plaży"],
+    included: ["Odbiór i powrót do hotelu w Hurghadzie", "Rejs łodzią", "Przewodnik", "Sprzęt do snorkelingu", "Postój na Orange Bay", "Lunch w formie bufetu", "Napoje bezalkoholowe i przekąski", "Kamizelki ratunkowe", "Podatek i opłata morska"],
+    notIncluded: ["Napoje na wyspie", "Dopłata za odbiór z okolic kurortów", "Wydatki osobiste"],
+    notes: ["Start o 7:30. Dokładną godzinę odbioru potwierdzimy przez WhatsApp.", "Rezerwacji należy dokonać co najmniej dzień przed wycieczką.", "Bezpłatne anulowanie jest możliwe do dnia poprzedzającego wyjazd."],
+    packageName: "Rejs na Orange Bay ze snorkelingiem", packageDescription: "Całodniowy rejs na Orange Bay z plażą, snorkelingiem, lunchem i transferem hotelowym.", packageLabel: "Osoba dorosła", ageBands: { adults: "Dorośli (12–99 lat)", children: "Dzieci (2–11 lat)", infants: "Niemowlęta (do 1 roku)" }, availableTimes: ["07:30"],
+  },
+  safari: {
+    title: "Pustynne safari", location: "Pustynia Hurghady", duration: "5 godzin",
+    description: "Przeżyj pustynną przygodę na quadach, podczas przejażdżki na wielbłądzie i wizyty w wiosce Beduinów.",
+    highlights: ["Przejażdżka quadem", "Jazda na wielbłądzie", "Herbata beduińska", "Zachód słońca na pustyni"],
+    included: ["Odbiór z hotelu", "Przejażdżka quadem", "Wizyta w wiosce Beduinów", "Herbata"],
+    notes: ["Dokładną godzinę odbioru potwierdzimy przez WhatsApp.", "Załóż zakryte buty i zabierz okulary przeciwsłoneczne."],
+    packageName: "Pustynne safari", packageDescription: "Jazda quadem, wielbłąd, wioska Beduinów i herbata.", packageLabel: "Za osobę", availableTimes: ["Popołudnie — godzina odbioru przez WhatsApp"],
+  },
+  "professional-underwater-photographer": {
+    title: "Profesjonalny fotograf podwodny", location: "Hurghada, Egipt", duration: "Cały dzień",
+    description: "Zachowaj wspomnienia z Morza Czerwonego dzięki profesjonalnemu fotografowi podwodnemu, który będzie towarzyszyć Ci podczas nurkowania, snorkelingu lub rejsu.",
+    highlights: ["Dedykowany profesjonalny fotograf", "Zdjęcia pod wodą i na powierzchni", "Idealne do nurkowania i snorkelingu", "Profesjonalnie obrobione wspomnienia"],
+    included: ["Fotograf na cały dzień", "Sprzęt do fotografii podwodnej", "Wybrane obrobione zdjęcia cyfrowe", "Koordynacja z wybraną atrakcją"],
+    notIncluded: ["Opłata za rejs, nurkowanie lub snorkeling", "Transfer hotelowy, jeśli nie został ustalony", "Albumy drukowane i dodatkowa obróbka"],
+    notes: ["Zarezerwuj wcześniej, aby potwierdzić dostępność fotografa.", "Podaj aktywność i godzinę wyjazdu przy rezerwacji.", "Cena dotyczy jednego fotografa za cały dzień."],
+    packageName: "Całodniowa fotografia podwodna", packageDescription: "Profesjonalny fotograf dokumentujący Twoją przygodę nad Morzem Czerwonym.", packageLabel: "Za dzień", priceUnit: "za dzień", availableTimes: ["Godzina rozpoczęcia przez WhatsApp"],
+  },
+  "luxor-private-day-trip": {
+    title: "Prywatna wycieczka do Luksoru z Hurghady", location: "Luksor, Egipt", duration: "Około 1 dnia",
+    description: "Odkryj Luksor podczas prywatnej wycieczki z klimatyzowanym samochodem i egiptologiem. Zobacz Dolinę Królów, świątynię Hatszepsut, Kolosy Memnona i świątynię Karnak; odbiór z hotelu i lunch są w cenie.",
+    highlights: ["Prywatny samochód i przewodnik", "Trzy grobowce w Dolinie Królów", "Świątynia Hatszepsut", "Kolosy Memnona", "Kompleks świątyń Karnak", "Lunch i główne bilety w cenie"],
+    included: ["Prywatny odbiór i powrót z Hurghady", "Klimatyzowany samochód", "Wstęp do Doliny Królów z trzema standardowymi grobowcami", "Świątynia Hatszepsut, Kolosy Memnona i Karnak", "Bilety wstępu", "Anglojęzyczny egiptolog", "Lunch z opcją wegetariańską", "Woda mineralna i pozwolenia"],
+    notIncluded: ["Grobowiec Tutanchamona — około 30 USD", "Przewodnik w innym języku — dopłata", "Napoje do lunchu", "Opcjonalny rejs feluką", "Napiwki i wydatki osobiste"],
+    notes: ["Do pozwolenia na podróż potrzebny jest ważny dokument lub paszport.", "Cena 120 USD to cena wyjściowa dla osoby dorosłej; zapytaj o ofertę rodzinną lub grupową.", "Odbiór planowany jest około 05:00 i potwierdzany przez WhatsApp.", "Grobowiec Tutanchamona wymaga osobnego biletu."],
+    packageName: "Prywatna wycieczka do Luksoru", packageDescription: "Prywatny transport, egiptolog, główne bilety, trzy grobowce w Dolinie Królów i lunch.", packageLabel: "Cena wyjściowa dla osoby dorosłej", availableTimes: ["05:00"],
+  },
+  "mahmya-island": {
+    title: "Rejs na wyspę Mahmya", location: "Hurghada, Egipt", duration: "Cały dzień",
+    description: "Odpocznij na białym piasku wyspy Mahmya w Parku Narodowym Giftun. Pływaj w krystalicznej wodzie, spróbuj snorkelingu i ciesz się wyjątkowym dniem nad Morzem Czerwonym.",
+    highlights: ["Wysokiej jakości atrakcja na wyspie", "Biała piaszczysta plaża", "Krystalicznie czysta woda", "Snorkeling", "Lunch", "Transfer z hotelu"],
+    included: ["Odbiór i powrót do hotelu", "Rejs łodzią", "Wstęp na wyspę", "Lunch", "Napoje bezalkoholowe"], notIncluded: ["Wydatki osobiste", "Zdjęcia i filmy"],
+    notes: ["Godzinę odbioru potwierdzimy przez WhatsApp.", "Zabierz strój kąpielowy, krem z filtrem i ręcznik."], packageName: "Wycieczka na wyspę Mahmya", packageDescription: "Wyjątkowy dzień na wyspie z transferem, rejsem i lunchem.", packageLabel: "Za osobę",
+  },
+  "full-day-snorkeling": {
+    title: "Całodniowy snorkeling", location: "Hurghada, Egipt", duration: "8 godzin",
+    description: "Odkrywaj rafy koralowe Morza Czerwonego podczas całodniowej wyprawy snorkelingowej z Hurghady. Kapitan wybiera odpowiednie miejsca zgodnie z pogodą i stanem morza.",
+    highlights: ["Dwa postoje na snorkeling", "Lokalne rafy Morza Czerwonego", "Lunch w formie bufetu", "Napoje bezalkoholowe", "Odbiór z hotelu", "Profesjonalny przewodnik"],
+    included: ["Odbiór z hotelu", "Rejs łodzią", "Sprzęt do snorkelingu", "Lunch", "Napoje bezalkoholowe"], notIncluded: ["Postój na wyspie", "Wydatki osobiste"],
+    notes: ["Ta wycieczka nie obejmuje pobytu na wyspie.", "Miejsca zależą od pogody i stanu morza."], packageName: "Całodniowy snorkeling na rafach", packageDescription: "Spokojny dzień na Morzu Czerwonym z dwoma postojami na snorkeling i lunchem.", packageLabel: "Za osobę", ageBands: { adults: "Dorośli", children: "Dzieci", infants: "Niemowlęta" }, availableTimes: ["08:00"],
+  },
+  "full-day-diving": {
+    title: "Całodniowe nurkowanie", location: "Hurghada, Egipt", duration: "8 godzin",
+    description: "Odkryj podwodny świat Morza Czerwonego podczas dwóch nurkowań z przewodnikiem. Miejsca nurkowe wybiera kapitan zgodnie z pogodą i stanem morza.",
+    highlights: ["Dwa nurkowania z przewodnikiem", "Profesjonalny instruktor", "Lunch na pokładzie", "Napoje bezalkoholowe", "Transfer z hotelu", "Sprzęt dostępny za dopłatą"],
+    included: ["Transfer z hotelu", "Rejs łodzią", "Profesjonalny instruktor", "Lunch", "Napoje bezalkoholowe"], notIncluded: ["Wypożyczenie sprzętu — 30 USD", "Wydatki osobiste"],
+    notes: ["Każdy uczestnik musi mieć ważną licencję nurkową i zabrać jej potwierdzenie.", "Sprzęt nie jest zawarty w cenie podstawowej.", "Miejsca nurkowe zależą od pogody i stanu morza."], packageName: "Dwa nurkowania w Morzu Czerwonym", packageDescription: "Całodniowy rejs z dwoma nurkowaniami z przewodnikiem; wymagana ważna licencja.", packageLabel: "Za osobę", availableTimes: ["08:00"],
+  },
+  "quad-safari-morning": {
+    title: "Poranne safari na quadach", location: "Pustynia Hurghady", duration: "5 godzin",
+    description: "Rozpocznij dzień od jazdy quadem przez Pustynię Wschodnią, podziwiaj górskie widoki i odwiedź tradycyjny obóz Beduinów.",
+    highlights: ["Jazda quadem", "Pustynna przygoda", "Obóz Beduinów", "Herbata", "Górskie widoki"], included: ["Odbiór z hotelu", "Jazda quadem", "Instruktaż bezpieczeństwa", "Herbata beduińska"], notIncluded: ["Chusta i gogle, jeśli potrzebne", "Wydatki osobiste"],
+    notes: ["Minimalny wiek uczestnika to 9 lat.", "Kierowcy muszą stosować się do instruktażu bezpieczeństwa.", "Zabierz okulary przeciwsłoneczne i zakryte buty."], packageName: "Poranne safari na quadach", packageDescription: "Poranna jazda po pustyni z wizytą w obozie Beduinów. Minimalny wiek: 9 lat.", packageLabel: "Za osobę", availableTimes: ["08:00"],
+  },
+  "quad-safari-sunset": {
+    title: "Safari na quadach o zachodzie słońca", location: "Pustynia Hurghady", duration: "5 godzin",
+    description: "Przeżyj zachód słońca na pustyni Hurghady podczas jazdy quadem wśród gór, a następnie odwiedź tradycyjny obóz Beduinów.",
+    highlights: ["Jazda o zachodzie słońca", "Quad", "Obóz Beduinów", "Herbata", "Panorama pustyni"], included: ["Odbiór z hotelu", "Jazda quadem", "Instruktaż bezpieczeństwa", "Herbata beduińska"], notIncluded: ["Wydatki osobiste"],
+    notes: ["Minimalny wiek uczestnika to 9 lat.", "Godzina odbioru zależy od zachodu słońca i jest potwierdzana przez WhatsApp.", "Zabierz zakryte buty."], packageName: "Safari na quadach o zachodzie słońca", packageDescription: "Jazda po pustyni o zachodzie słońca z wizytą u Beduinów. Minimalny wiek: 9 lat.", packageLabel: "Za osobę", availableTimes: ["Popołudnie — godzina odbioru przez WhatsApp"],
+  },
+  "hurghada-airport-transfer": {
+    title: "Prywatny transfer z lotniska w Hurghadzie", location: "Międzynarodowe lotnisko w Hurghadzie", duration: "Elastycznie",
+    description: "Prywatny transfer lotniskowy w jedną stronę za stałą cenę 20 USD w Hurghadzie. Do Makadi Bay, Soma Bay, El Gouna i Sahl Hasheesh obowiązuje dopłata 7 USD.",
+    highlights: ["Stała cena za przejazd", "Odbiór na lotnisku", "Monitorowanie lotu", "Prywatny samochód z klimatyzacją", "Samochód dopasowany do grupy"], included: ["Prywatny samochód", "Kierowca", "Paliwo i parking"], notIncluded: ["Dodatkowe postoje", "Przejazd powrotny"],
+    notes: ["1–2 pasażerów: mały samochód i maksymalnie 2 bagaże.", "Powyżej 2 pasażerów: większy samochód i maksymalnie 2 bagaże na osobę.", "Przy rezerwacji podaj numer lotu i nazwę hotelu."], packageName: "Lotniskowy transfer w jedną stronę", packageDescription: "20 USD w Hurghadzie; dopłata 7 USD za strefy kurortów.", packageLabel: "Stała cena za przejazd", availableTimes: ["Godzina potwierdzana na podstawie lotu"],
+  },
+  "senzo-transfer": {
+    title: "Prywatny transfer do i z Senzo Mall", location: "Hurghada, Egipt", duration: "Elastycznie",
+    description: "Prywatny transfer w jedną stronę do Senzo Mall za stałą cenę 10 USD w Hurghadzie. Do stref kurortów obowiązuje dopłata 7 USD.",
+    highlights: ["Stała cena", "Prywatny samochód", "Odbiór z hotelu", "Elastyczna godzina", "Samochód z klimatyzacją"], included: ["Prywatny transfer", "Kierowca", "Paliwo i parking"], notIncluded: ["Przejazd powrotny", "Bagaże podróżne", "Zakupy i posiłki"],
+    notes: ["Maksymalnie 4 pasażerów.", "W tym transferze nie można przewozić bagażu podróżnego.", "Przejazd w każdą stronę należy zarezerwować osobno."], packageName: "Transfer do Senzo Mall w jedną stronę", packageDescription: "10 USD w Hurghadzie; dopłata 7 USD za strefy kurortów.", packageLabel: "Stała cena za przejazd", availableTimes: ["Wybraną godzinę potwierdzimy przez WhatsApp"],
+  },
+  "dolphin-house-snorkeling": {
+    title: "Rejs do Dolphin House ze snorkelingiem", location: "Hurghada, Egipt", duration: "7 godzin",
+    description: "Siedmiogodzinny rejs jachtem do Dolphin House z dwoma postojami na snorkeling, lunchem, napojami i odbiorem z hotelu.",
+    highlights: ["Poszukiwanie dzikich delfinów", "Dwa postoje na snorkeling", "Lunch i napoje", "Profesjonalna załoga"], included: ["Odbiór z hotelu w Hurghadzie", "Rejs jachtem", "Dolphin House", "Sprzęt do snorkelingu", "Lunch i napoje"],
+    notes: ["Obserwacja delfinów i pływanie z nimi nie są gwarantowane.", "Trasa może zmienić się z powodu pogody i stanu morza.", "Godzinę odbioru potwierdzimy przez WhatsApp."], packageName: "Rejs do Dolphin House", ageBands: { adults: "Dorośli (11+)", children: "Dzieci (4–10 lat)", infants: "Niemowlęta (0–3 lata)" },
+  },
+  "hula-hula-island-snorkeling": {
+    title: "Rejs na wyspę Hula Hula i snorkeling", location: "Hurghada, Egipt", duration: "Cały dzień",
+    description: "Całodniowy rejs jachtem z godziną na wyspie Hula Hula, dwoma postojami na snorkeling, lunchem, napojami i transferem z hotelu.",
+    highlights: ["Godzina na wyspie Hula Hula", "Dwa postoje na snorkeling", "Lunch i napoje", "Odbiór z hotelu"], included: ["Transfer z hotelu", "Rejs jachtem", "Wstęp na wyspę", "Sprzęt i przewodnik do snorkelingu", "Lunch i napoje"],
+    notes: ["Godzinę odbioru potwierdzimy przez WhatsApp.", "Atrakcja jest odpowiednia dla początkujących.", "Miejsca przy rafie zależą od stanu morza."], packageName: "Rejs na wyspę Hula Hula", ageBands: { adults: "Dorośli (11+)", children: "Dzieci (4–10 lat)", infants: "Niemowlęta (0–3 lata)" },
+  },
+  "royal-seascope-submarine": { title: "Royal Seascope — półłódź podwodna", location: "Marina w Hurghadzie", duration: "Około 3 godziny", description: "Zobacz rafy Morza Czerwonego z wygodnej półłodzi podwodnej — bez konieczności nurkowania.", highlights: ["Widok na rafy pod wodą", "Atrakcja dla rodzin", "Wygodny rejs", "Odbiór z hotelu"], notes: ["Godzinę odbioru potwierdzimy przez WhatsApp."], packageName: "Royal Seascope", packageDescription: "Rodzinna morska atrakcja z widokiem na podwodny świat.", packageLabel: "Za osobę" },
+  "beginner-scuba-diving": { title: "Nurkowanie dla początkujących", location: "Hurghada, Egipt", duration: "Cały dzień", description: "Spróbuj nurkowania w Morzu Czerwonym pod opieką profesjonalnego instruktora — doświadczenie nie jest wymagane.", highlights: ["Nurkowanie dla początkujących", "Profesjonalny instruktor", "Sprzęt dostępny", "Odbiór z hotelu"], notes: ["Instruktor oceni warunki i dobierze odpowiedni poziom.", "Dokładne szczegóły potwierdzimy przez WhatsApp."], packageName: "Nurkowanie próbne", packageDescription: "Pierwsze nurkowanie z instruktorem na rafach Hurghady.", packageLabel: "Za osobę" },
+  "padi-open-water-course": { title: "Trzydniowy kurs PADI Open Water", location: "Hurghada, Egipt", duration: "3 dni", description: "Naucz się podstaw nurkowania podczas teorii i treningów w Morzu Czerwonym pod opieką instruktora PADI.", highlights: ["Międzynarodowy kurs PADI", "Dwa nurkowania dziennie", "Teoria i praktyka", "Instruktor PADI", "Szkolenie w Morzu Czerwonym"], included: ["Trzydniowy kurs", "Instruktor PADI", "Standardowy sprzęt", "Lunch i napoje", "Transfer w potwierdzonej strefie hotelowej"], notIncluded: ["Opłata morska", "Materiały i certyfikacja PADI", "Napiwki", "Lot i zakwaterowanie"], notes: ["Wymagana ankieta medyczna i umiejętność pływania.", "Osoby poniżej 18 lat potrzebują zgody opiekuna.", "Po nurkowaniu należy zachować wymagany czas przed lotem."], packageName: "Trzydniowy kurs PADI Open Water", packageDescription: "Teoria i praktyka z dwoma nurkowaniami dziennie, sprzętem, lunchem i transferem.", packageLabel: "Uczestnik", ageBands: { adults: "Uczestnicy (od 10 lat)", children: "", infants: "" }, availableTimes: ["08:00"] },
+  "ssi-open-water-course": { title: "Trzydniowy kurs SSI Open Water Diver", location: "Hurghada, Egipt", duration: "3 dni", description: "Poznaj teorię i praktykę potrzebną do uzyskania certyfikatu SSI Open Water Diver podczas szkolenia w Morzu Czerwonym.", highlights: ["Trzydniowy program SSI", "Nauka cyfrowa i praktyka", "Dwa nurkowania dziennie", "Certyfikowany specjalista SSI", "Szkolenie w Morzu Czerwonym"], included: ["Trzydniowe szkolenie SSI", "Cyfrowa nauka", "Standardowy sprzęt", "Lunch i napoje", "Transfer w potwierdzonej strefie"], notIncluded: ["Opłata morska", "Napiwki", "Zdjęcia", "Lot i zakwaterowanie"], notes: ["Minimalny wiek to 10 lat.", "Osoby niepełnoletnie potrzebują zgody opiekuna.", "Po nurkowaniu należy zachować wymagany czas przed lotem."], packageName: "Trzydniowy kurs SSI Open Water Diver", packageDescription: "Cyfrowa teoria i praktyka z dwoma nurkowaniami dziennie, sprzętem, posiłkami i transferem.", packageLabel: "Uczestnik", ageBands: { adults: "Uczestnicy (od 10 lat)", children: "", infants: "" }, availableTimes: ["08:00"] },
+  "horse-riding-sea-desert": { title: "Jazda konna po pustyni i nad morzem w Hurghadzie", location: "Hurghada, Egipt", duration: "2–4 godziny", description: "Odkrywaj pustynię i wybrzeże Morza Czerwonego na wyszkolonym koniu z profesjonalnym przewodnikiem. Przy bezpiecznych warunkach możliwa jest opcjonalna jazda po płytkiej wodzie.", highlights: ["Jazda po pustyni i wybrzeżu", "Opcjonalny odcinek w wodzie", "Dla początkujących i doświadczonych", "Profesjonalny przewodnik", "Transfer w Hurghadzie"], included: ["Jazda z przewodnikiem", "Wyszkolony koń", "Kask", "Woda", "Transfer w Hurghadzie"], notIncluded: ["Napiwki", "Wydatki osobiste", "Profesjonalne zdjęcia", "Transfer poza Hurghadą"], notes: ["Możliwe bezpłatne anulowanie do 24 godzin przed aktywnością.", "Odcinek w wodzie zależy od pogody, morza i decyzji stajni.", "Wiek i limit wagi potwierdza stajnia."], packageName: "Jazda konna po pustyni i nad morzem", packageDescription: "Dwugodzinna jazda z transferem, kaskiem i opcjonalnym odcinkiem w płytkiej wodzie.", packageLabel: "Jeździec", ageBands: { adults: "Jeźdźcy (od 5 lat)", children: "", infants: "" }, availableTimes: ["Rano — przez WhatsApp", "Zachód słońca — przez WhatsApp"] },
+  "sahl-hasheesh-horse-riding": { title: "Jazda konna po pustyni i nad morzem w Sahl Hasheesh", location: "Sahl Hasheesh, Egipt", duration: "Około 2 godzin", description: "Przejedź konno przez pustynię i wzdłuż wybrzeża Sahl Hasheesh. Przy bezpiecznych warunkach możliwy jest opcjonalny odcinek po płytkiej wodzie.", highlights: ["Trasy pustynne i nadmorskie", "Opcjonalny odcinek w wodzie", "Wyszkolone konie", "Doświadczony lokalny przewodnik", "Dla różnych poziomów"], included: ["Jazda konna po pustyni i nad morzem", "Wyszkolony koń", "Lokalny przewodnik", "Kask"], notIncluded: ["Napiwki", "Wydatki osobiste", "Fotografia", "Transfer, jeśli nie został wybrany"], notes: ["Możliwe bezpłatne anulowanie do 24 godzin przed aktywnością.", "Odcinek w wodzie zależy od przewodnika i stajni.", "Wiek i limit wagi należy potwierdzić ze stajnią."], packageName: "Jazda konna w Sahl Hasheesh", packageDescription: "Około dwóch godzin jazdy po pustyni i wybrzeżu z opcjonalnym odcinkiem w płytkiej wodzie.", packageLabel: "Jeździec", availableTimes: ["Rano — przez WhatsApp", "Zachód słońca — przez WhatsApp"] },
+};
+
+export function localizeTourPolish(tour: Tour): Tour {
+  return { ...tour, ...polishTourOverrides[tour.slug] };
+}
+
 const magawishSpeedboatTranslations: Partial<Record<Locale, Partial<Tour>>> = {
   de: { title: "Private Speedboot-Tour zu Orange Bay und Magawish", description: "Entdecke Orange Bay und Magawish mit einem privaten Speedboot, einem Schnorchelstopp und frei wählbaren Extras für deine Gruppe.", highlights: ["Privates Speedboot für deine Gruppe", "Orange Bay und Magawish", "Schnorchelstopp mit Ausrüstung", "Acht Bootsgrößen", "Optionale Verpflegung und Marina-Transfer"], included: ["Gewähltes Privatboot", "Skipper/Guide", "Treibstoff", "Schnorchelausrüstung", "Schwimmwesten und Sicherheitsausrüstung"], notIncluded: ["Inseleintritte — werden bei der Buchung hinzugefügt", "Essen und Getränke, sofern nicht gewählt", "Hoteltransfer, sofern nicht gewählt", "Persönliche Ausgaben"], packageName: "Privates Speedboot Orange Bay & Magawish", packageDescription: "Wähle Boot, Inseleintritte, optionale Verpflegung und Marina-Transfer.", packageLabel: "Privatboot ab", seoTitle: "Orange Bay & Magawish Speedboot ab Hurghada", metaDescription: "Private Speedboot-Tour ab Hurghada zu Orange Bay und Magawish mit wählbarem Boot, Schnorcheln und optionaler Verpflegung." },
   ru: { title: "Частный катер на Orange Bay и Магавиш", description: "Посетите Orange Bay и Магавиш на частном скоростном катере со сноркелингом и дополнительными услугами для вашей группы.", highlights: ["Частный катер", "Orange Bay и Магавиш", "Сноркелинг со снаряжением", "Восемь вариантов катера", "Дополнительное питание и трансфер"], included: ["Выбранный катер", "Капитан-гид", "Топливо", "Снаряжение", "Спасательное оборудование"], notIncluded: ["Вход на острова — добавляется при бронировании", "Питание, если не выбрано", "Трансфер из отеля, если не выбран", "Личные расходы"], packageName: "Частный катер Orange Bay и Магавиш", packageDescription: "Выберите катер, входные билеты, питание и трансфер до марины.", packageLabel: "Катер от", seoTitle: "Orange Bay и Магавиш на катере из Хургады", metaDescription: "Частная поездка на катере из Хургады к Orange Bay и Магавишу со сноркелингом и дополнительным питанием." },
