@@ -155,8 +155,8 @@ function Paragraph({ children }: { children: string }) {
   return <p className="leading-8"><strong className="text-slate-900">{children.slice(0, separator + 1)}</strong>{children.slice(separator + 1)}</p>;
 }
 
-export default function TermsConditionsPage({ locale = "en" }: { locale?: TermsLocale }) {
-  const content = copy[locale];
+export default function TermsConditionsPage({ locale = "en" }: { locale?: Locale }) {
+  const content = locale === "pl" ? copy.en : copy[locale];
   return (
     <main className="mx-auto max-w-5xl px-6 py-24 lg:px-8">
       <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
