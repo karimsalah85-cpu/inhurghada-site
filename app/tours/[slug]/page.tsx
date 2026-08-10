@@ -17,7 +17,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const sourceTour = tours.find((item) => item.slug === slug);
+  const liveTours = await getLiveTours();
+  const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug);
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
   if (!tour) return {};
   const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} from Hurghada`);
