@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact", languages: { ...languageAlternates("/contact"), "x-default": localePath("en", "/contact") } },
 };
 
-export default function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
+export default function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
   const zh = locale === "zh";
