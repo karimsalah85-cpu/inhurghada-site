@@ -18,7 +18,7 @@ import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
-import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourPolish, localizeTourRussian } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 import GoogleReviews from "@/components/reviews/GoogleReviews";
 import { destinations } from "@/lib/destinations";
@@ -40,7 +40,8 @@ function HomeContent() {
   const ru = language === "ru";
   const ar = language === "ar";
   const zh = language === "zh";
-  const tr = (en: string, deText: string, ruText: string, arText = en) => de ? deText : ru ? ruText : ar ? arText : en;
+  const pl = language === "pl";
+  const tr = (en: string, deText: string, ruText: string, arText = en, plText = en, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
   const searchParams = useSearchParams();
   const router = useRouter();
   const urlSearch = searchParams.get("search") ?? "";
@@ -98,7 +99,7 @@ function HomeContent() {
   const [liveTours, setLiveTours] = useState<Tour[]>(tours);
   useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
   const hurghadaTours = liveTours.filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada");
-  const displayTours = de ? hurghadaTours.map(localizeTourGerman) : ru ? hurghadaTours.map(localizeTourRussian) : ar ? hurghadaTours.map(localizeTourArabic) : zh ? hurghadaTours.map(localizeTourChinese) : hurghadaTours;
+  const displayTours = de ? hurghadaTours.map(localizeTourGerman) : ru ? hurghadaTours.map(localizeTourRussian) : ar ? hurghadaTours.map(localizeTourArabic) : pl ? hurghadaTours.map(localizeTourPolish) : zh ? hurghadaTours.map(localizeTourChinese) : hurghadaTours;
   const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];
@@ -123,21 +124,21 @@ function HomeContent() {
       <section className="bg-white px-6 py-14 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-cyan-700">Red Sea destinations</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">Choose where you want to explore</h2>
-            <p className="mt-4 text-lg leading-8 text-slate-600">Hurghada is available now. Marsa Alam is being prepared as a separate destination with its own trips and booking conditions.</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-cyan-700">{de ? "Reiseziele am Roten Meer" : ru ? "Направления Красного моря" : ar ? "وجهات البحر الأحمر" : pl ? "Destynacje nad Morzem Czerwonym" : zh ? "红海目的地" : "Red Sea destinations"}</p>
+            <h2 className="mt-3 text-4xl font-black text-slate-950">{de ? "Wähle dein Reiseziel" : ru ? "Выберите направление" : ar ? "اختر وجهتك للاستكشاف" : pl ? "Wybierz kierunek podróży" : zh ? "选择您想探索的目的地" : "Choose where you want to explore"}</h2>
+            <p className="mt-4 text-lg leading-8 text-slate-600">{de ? "Hurghada ist jetzt verfügbar. Marsa Alam wird als eigenes Reiseziel mit eigenen Ausflügen und Buchungsbedingungen vorbereitet." : ru ? "Хургада уже доступна. Марса-Алам готовится как отдельное направление со своими экскурсиями и условиями бронирования." : ar ? "الغردقة متاحة الآن، بينما يتم تجهيز مرسى علم كوجهة مستقلة برحلات وشروط حجز خاصة بها." : pl ? "Hurghada jest już dostępna. Marsa Alam jest przygotowywana jako osobny kierunek z własnymi wycieczkami i zasadami rezerwacji." : zh ? "赫尔格达现已开放预订。马萨阿拉姆正在作为独立目的地准备专属项目和预订条件。" : "Hurghada is available now. Marsa Alam is being prepared as a separate destination with its own trips and booking conditions."}</p>
           </div>
           <div className="mt-9 grid gap-5 md:grid-cols-2">
             {destinations.map((destination) => (
-              <Link key={destination.slug} href={`/destinations/${destination.slug}`} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
+              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
                 <Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-7 text-white">
                   <div className="flex items-center gap-3">
                     <h3 className="text-3xl font-black">{destination.name}</h3>
-                    {destination.comingSoon ? <span className="rounded-full bg-amber-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-950">Coming soon</span> : <span className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-950">Available now</span>}
+                    {destination.comingSoon ? <span className="rounded-full bg-amber-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-950">{de ? "Demnächst" : ru ? "Скоро" : ar ? "قريباً" : pl ? "Wkrótce" : zh ? "即将推出" : "Coming soon"}</span> : <span className="rounded-full bg-emerald-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-950">{de ? "Jetzt verfügbar" : ru ? "Доступно сейчас" : ar ? "متاح الآن" : pl ? "Dostępne teraz" : zh ? "现已开放" : "Available now"}</span>}
                   </div>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-200">{destination.tagline}</p>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-200">{destination.slug === "hurghada" ? (de ? "Ausflüge am Roten Meer, Transfers und lokale Erlebnisse" : ru ? "Экскурсии, трансферы и местные впечатления на Красном море" : ar ? "رحلات البحر الأحمر والتنقلات والتجارب المحلية" : pl ? "Wycieczki nad Morzem Czerwonym, transfery i lokalne atrakcje" : zh ? "红海旅游、接送和本地体验" : "Red Sea tours, transfers, and local experiences") : (de ? "Unberührte Riffe, Wüstenlandschaften und Abenteuer im südlichen Roten Meer" : ru ? "Нетронутые рифы, пустынные пейзажи и приключения на юге Красного моря" : ar ? "شعاب نقية ومناظر صحراوية ومغامرات جنوب البحر الأحمر" : pl ? "Dziewicze rafy, pustynne krajobrazy i przygody na południu Morza Czerwonego" : zh ? "原始珊瑚礁、沙漠景观和红海南部探险" : "Untouched reefs, desert landscapes, and southern Red Sea adventures")}</p>
                 </div>
               </Link>
             ))}
@@ -150,18 +151,18 @@ function HomeContent() {
       <section className="bg-slate-50 px-6 py-20 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Die besten Aktivitäten in Hurghada" : ru ? "Лучшие развлечения в Хургаде" : "Best things to do in Hurghada"}</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Hurghada-Erlebnisse für jeden Plan" : ru ? "Отдых в Хургаде на любой вкус" : "Hurghada experiences for every plan"}</h2>
-            <p className="mt-4 text-lg leading-8 text-slate-600">{de ? "Türkisblaues Wasser, goldene Wüstendünen oder eine bequeme Fahrt von Tür zu Tür – dein perfekter Tag in Hurghada beginnt hier." : ru ? "Бирюзовое море, золотые дюны или удобный трансфер от двери до двери — ваш идеальный день в Хургаде начинается здесь." : "Chase turquoise water, golden-hour dunes, or a smooth door-to-door ride—your best Hurghada day starts here."}</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{de ? "Die besten Aktivitäten in Hurghada" : ru ? "Лучшие развлечения в Хургаде" : ar ? "أفضل الأنشطة في الغردقة" : pl ? "Najlepsze atrakcje w Hurghadzie" : zh ? "赫尔格达热门体验" : "Best things to do in Hurghada"}</p>
+            <h2 className="mt-3 text-4xl font-black text-slate-900">{de ? "Hurghada-Erlebnisse für jeden Plan" : ru ? "Отдых в Хургаде на любой вкус" : ar ? "تجارب الغردقة لكل خطة" : pl ? "Atrakcje w Hurghadzie na każdy plan" : zh ? "适合每种计划的赫尔格达体验" : "Hurghada experiences for every plan"}</h2>
+            <p className="mt-4 text-lg leading-8 text-slate-600">{de ? "Türkisblaues Wasser, goldene Wüstendünen oder eine bequeme Fahrt von Tür zu Tür – dein perfekter Tag in Hurghada beginnt hier." : ru ? "Бирюзовое море, золотые дюны или удобный трансфер от двери до двери — ваш идеальный день в Хургаде начинается здесь." : ar ? "مياه فيروزية وكثبان ذهبية وتنقل مريح من الباب إلى الباب — يومك المثالي في الغردقة يبدأ هنا." : pl ? "Turkusowa woda, złote wydmy albo wygodny przejazd od drzwi do drzwi — Twój idealny dzień w Hurghadzie zaczyna się tutaj." : zh ? "碧绿海水、金色沙丘或舒适的门到门接送，您的赫尔格达完美一天从这里开始。" : "Chase turquoise water, golden-hour dunes, or a smooth door-to-door ride—your best Hurghada day starts here."}</p>
           </div>
           <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { icon: ShipWheel, label: de ? "Inseltouren" : ru ? "Островные туры" : "Island Trips", href: "/hurghada/island-trips", description: de ? "Segle über türkisblaues Wasser zu entspannten Stränden am Roten Meer." : ru ? "Морские прогулки к спокойным пляжам Красного моря." : "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: de ? "In See stechen" : ru ? "Выбрать тур" : "Set sail" },
-              { icon: Waves, label: de ? "Tauchen & Schnorcheln" : ru ? "Дайвинг и снорклинг" : "Diving & Snorkeling", href: "/hurghada/diving-snorkeling", description: de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: de ? "Abtauchen" : ru ? "К морю" : "Dive in" },
-              { icon: TentTree, label: de ? "Wüstensafari" : ru ? "Сафари в пустыне" : "Desert Safari", href: "/hurghada/desert-safaris", description: de ? "Erlebe Quads, Bergpanoramen und goldenen Sand im Licht des Sonnenuntergangs." : ru ? "Квадроциклы, горные виды и золотые пески на закате." : "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: de ? "Durch die Dünen" : ru ? "В пустыню" : "Ride the dunes" },
-              { icon: Plane, label: de ? "Flughafentransfers" : ru ? "Трансфер из аэропорта" : "Airport Transfers", href: "/hurghada/airport-transfers", description: de ? "Dein Fahrer erwartet dich und bringt dich ohne Warteschlange direkt zum Hotel." : ru ? "Водитель встретит вас и без ожидания доставит прямо в отель." : "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: de ? "Abholung planen" : ru ? "Заказать трансфер" : "Plan my pickup" },
-              { icon: Landmark, label: de ? "Historische Ausflüge" : ru ? "Исторические экскурсии" : "Historical Tours", href: "/hurghada/historical-tours", description: de ? "Entdecke das alte Ägypten bei einem privaten Tagesausflug nach Luxor." : ru ? "Познакомьтесь с Древним Египтом во время частной поездки в Луксор." : "Step into ancient Egypt with a private Luxor day shaped around its greatest landmarks.", cta: de ? "Geschichte erleben" : ru ? "К истории" : "Travel through history" },
-              { icon: Car, label: de ? "Private Transfers" : ru ? "Частные трансферы" : "Private Transfers", href: "/hurghada/private-transfers", description: de ? "Deine Route, deine Gruppe, dein Zeitplan – bequem von Tür zu Tür." : ru ? "Ваш маршрут, ваша группа и ваше расписание — комфортно от двери до двери." : "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: de ? "Privat fahren" : ru ? "Заказать поездку" : "Travel privately" },
+              { icon: ShipWheel, label: de ? "Inseltouren" : ru ? "Островные туры" : ar ? "رحلات الجزر" : pl ? "Wycieczki na wyspy" : zh ? "海岛游" : "Island Trips", href: "/hurghada/island-trips", description: de ? "Segle über türkisblaues Wasser zu entspannten Stränden am Roten Meer." : ru ? "Морские прогулки к спокойным пляжам Красного моря." : ar ? "أبحر إلى المياه الفيروزية والشواطئ الهادئة في البحر الأحمر." : pl ? "Rejsy po turkusowej wodzie, plaże i spokojny dzień nad Morzem Czerwonym." : zh ? "乘船驶入碧绿海水，在赤脚海滩享受轻松的红海时光。" : "Sail into turquoise water, barefoot beaches, and an unhurried Red Sea day.", cta: de ? "In See stechen" : ru ? "Выбрать тур" : ar ? "انطلق إلى البحر" : pl ? "Wypłyń na morze" : zh ? "出海吧" : "Set sail" },
+              { icon: Waves, label: de ? "Tauchen & Schnorcheln" : ru ? "Дайвинг и снорклинг" : ar ? "الغوص والسنوركلينج" : pl ? "Nurkowanie i snorkeling" : zh ? "潜水与浮潜" : "Diving & Snorkeling", href: "/hurghada/diving-snorkeling", description: de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : ar ? "اكتشف حدائق المرجان وعالم البحر الأحمر تحت الماء." : pl ? "Odkryj rafy koralowe i podwodny świat Morza Czerwonego." : zh ? "探索珊瑚花园、绚丽鱼群和清澈的海底世界。" : "Meet coral gardens, bright reef life, and the clear blue world below the surface.", cta: de ? "Abtauchen" : ru ? "К морю" : ar ? "اغطس معنا" : pl ? "Zanurkuj" : zh ? "潜入海底" : "Dive in" },
+              { icon: TentTree, label: de ? "Wüstensafari" : ru ? "Сафари в пустыне" : ar ? "سفاري الصحراء" : pl ? "Safari na pustyni" : zh ? "沙漠探险" : "Desert Safari", href: "/hurghada/desert-safaris", description: de ? "Erlebe Quads, Bergpanoramen und goldenen Sand im Licht des Sonnenuntergangs." : ru ? "Квадроциклы, горные виды и золотые пески на закате." : ar ? "اترك الشاطئ خلفك واستمتع بالكواد ومناظر الجبال ورمال الغروب." : pl ? "Zamień morze na quady, górskie widoki i piaski w kolorze zachodu słońca." : zh ? "驾驶四轮摩托，欣赏山景与日落染金的沙漠。" : "Trade the shoreline for roaring quads, mountain views, and sunset-colored sand.", cta: de ? "Durch die Dünen" : ru ? "В пустыню" : ar ? "إلى الصحراء" : pl ? "Wydmy czekają" : zh ? "驰骋沙丘" : "Ride the dunes" },
+              { icon: Plane, label: de ? "Flughafentransfers" : ru ? "Трансфер из аэропорта" : ar ? "تنقلات المطار" : pl ? "Transfery lotniskowe" : zh ? "机场接送" : "Airport Transfers", href: "/hurghada/airport-transfers", description: de ? "Dein Fahrer erwartet dich und bringt dich ohne Warteschlange direkt zum Hotel." : ru ? "Водитель встретит вас и без ожидания доставит прямо в отель." : ar ? "يستقبلك السائق ويوصلك مباشرة إلى فندقك بلا طوابير أو حيرة." : pl ? "Kierowca odbierze Cię i zawiezie prosto do hotelu — bez kolejek i zgadywania." : zh ? "下飞机后与司机会合，轻松直达酒店。" : "Land, meet your driver, and glide straight to your hotel—no queues or guesswork.", cta: de ? "Abholung planen" : ru ? "Заказать трансфер" : ar ? "خطط لاستلامك" : pl ? "Zaplanuj odbiór" : zh ? "安排接送" : "Plan my pickup" },
+              { icon: Landmark, label: de ? "Historische Ausflüge" : ru ? "Исторические экскурсии" : ar ? "رحلات تاريخية" : pl ? "Wycieczki historyczne" : zh ? "历史文化之旅" : "Historical Tours", href: "/hurghada/historical-tours", description: de ? "Entdecke das alte Ägypten bei einem privaten Tagesausflug nach Luxor." : ru ? "Познакомьтесь с Древним Египтом во время частной поездки в Луксор." : ar ? "عش أجواء مصر القديمة في رحلة خاصة إلى الأقصر." : pl ? "Poznaj starożytny Egipt podczas prywatnej wycieczki do Luksoru." : zh ? "在私人卢克索一日游中探索古埃及的伟大遗迹。" : "Step into ancient Egypt with a private Luxor day shaped around its greatest landmarks.", cta: de ? "Geschichte erleben" : ru ? "К истории" : ar ? "عبر التاريخ" : pl ? "Podróż przez historię" : zh ? "穿越历史" : "Travel through history" },
+              { icon: Car, label: de ? "Private Transfers" : ru ? "Частные трансферы" : ar ? "تنقلات خاصة" : pl ? "Prywatne transfery" : zh ? "私人接送" : "Private Transfers", href: "/hurghada/private-transfers", description: de ? "Deine Route, deine Gruppe, dein Zeitplan – bequem von Tür zu Tür." : ru ? "Ваш маршрут, ваша группа и ваше расписание — комфортно от двери до двери." : ar ? "طريقك ومجموعتك ووقتك — تنقل مريح من الباب إلى الباب." : pl ? "Twoja trasa, grupa i plan — wygodna podróż od drzwi do drzwi." : zh ? "按您的路线、人数和时间，舒适地探索赫尔格达。" : "Your route, your group, your schedule—comfortable door-to-door travel around Hurghada.", cta: de ? "Privat fahren" : ru ? "Заказать поездку" : ar ? "سافر بشكل خاص" : pl ? "Podróżuj prywatnie" : zh ? "私人出行" : "Travel privately" },
             ].map(({ icon: Icon, label, href, description, cta }) => (
               <Link key={label} href={localePath(language, href)} className="group flex min-h-64 flex-col rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg">
                 <Icon className="text-cyan-700" size={28}/>
@@ -185,9 +186,9 @@ function HomeContent() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <DestinationCard image="/images/hurghada-island-calm-sunset.jpeg" title={ru ? "Отдых на островах" : de ? "Inselerlebnisse" : "Island escapes"} description={ru ? "Морские прогулки, снорклинг и пляжный отдых на Красном море." : de ? "Bootsausflüge, Schnorcheln und Strandtage am Roten Meer." : "Boat trips, snorkeling and beach days on the Red Sea."} href={`${homePath}?search=island`} />
-            <DestinationCard image="/images/hurghada-snorkeling-reef-panorama.jpeg" title={ru ? "Дайвинг и снорклинг" : de ? "Tauchen & Schnorcheln" : "Diving & Snorkeling"} description={de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : "Meet coral gardens, bright reef life, and the clear blue world below the surface."} href={localePath(language, "/hurghada/diving-snorkeling")} />
-            <DestinationCard image="/images/hurghada-desert-camel-closeup.jpeg" title={ru ? "Приключения в пустыне" : de ? "Wüstenabenteuer" : "Desert adventures"} description={ru ? "Квадроциклы, культура бедуинов и незабываемые закаты." : de ? "Quads, Beduinenkultur und unvergessliche Sonnenuntergänge." : "Quad bikes, Bedouin culture and unforgettable sunsets."} href={`${homePath}?search=desert`} />
+            <DestinationCard image="/images/hurghada-island-calm-sunset.jpeg" title={ru ? "Отдых на островах" : de ? "Inselerlebnisse" : ar ? "عطلات الجزر" : pl ? "Wyspy i plaże" : zh ? "海岛休闲" : "Island escapes"} description={ru ? "Морские прогулки, снорклинг и пляжный отдых на Красном море." : de ? "Bootsausflüge, Schnorcheln und Strandtage am Roten Meer." : ar ? "رحلات بحرية وسنوركلينج وأيام شاطئية في البحر الأحمر." : pl ? "Rejsy, snorkeling i plażowe dni nad Morzem Czerwonym." : zh ? "游船、浮潜和红海海滩时光。" : "Boat trips, snorkeling and beach days on the Red Sea."} href={`${homePath}?search=island`} />
+            <DestinationCard image="/images/hurghada-snorkeling-reef-panorama.jpeg" title={ru ? "Дайвинг и снорклинг" : de ? "Tauchen & Schnorcheln" : ar ? "الغوص والسنوركلينج" : pl ? "Nurkowanie i snorkeling" : zh ? "潜水与浮潜" : "Diving & Snorkeling"} description={de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : ar ? "اكتشف حدائق المرجان وعالم البحر الأحمر تحت الماء." : pl ? "Odkryj rafy koralowe i podwodny świat Morza Czerwonego." : zh ? "探索珊瑚花园、绚丽鱼群和清澈海底。" : "Meet coral gardens, bright reef life, and the clear blue world below the surface."} href={localePath(language, "/hurghada/diving-snorkeling")} />
+            <DestinationCard image="/images/hurghada-desert-camel-closeup.jpeg" title={ru ? "Приключения в пустыне" : de ? "Wüstenabenteuer" : ar ? "مغامرات الصحراء" : pl ? "Przygody na pustyni" : zh ? "沙漠探险" : "Desert adventures"} description={ru ? "Квадроциклы, культура бедуинов и незабываемые закаты." : de ? "Quads, Beduinenkultur und unvergessliche Sonnenuntergänge." : ar ? "كواد وثقافة بدوية وغروب لا يُنسى." : pl ? "Quady, kultura Beduinów i niezapomniane zachody słońca." : zh ? "四轮摩托、贝都因文化和难忘的日落。" : "Quad bikes, Bedouin culture and unforgettable sunsets."} href={`${homePath}?search=desert`} />
           </div>
         </div>
       </section>
@@ -377,7 +378,7 @@ function HomeContent() {
                     tracking-[0.35em]
                     text-blue-600
                   ">
-                    {de ? "Transfers" : ru ? "Трансферы" : "Transfers"}
+                    {de ? "Transfers" : ru ? "Трансферы" : ar ? "التنقلات" : pl ? "Transfery" : zh ? "接送服务" : "Transfers"}
                   </p>
 
 
@@ -391,7 +392,7 @@ function HomeContent() {
                     leading-tight
                     sm:text-4xl
                   ">
-                    {de ? "Flughafen- und Hoteltransfer" : ru ? "Трансферы из аэропорта и отелей" : "Airport & Hotel Transfers"}
+                    {de ? "Flughafen- und Hoteltransfer" : ru ? "Трансферы из аэропорта и отелей" : ar ? "تنقلات المطار والفنادق" : pl ? "Transfery lotniskowe i hotelowe" : zh ? "机场与酒店接送" : "Airport & Hotel Transfers"}
                   </h3>
 
 
@@ -401,7 +402,7 @@ function HomeContent() {
                     mt-4
                     text-gray-600
                   ">
-                    {de ? "Private Transfers zwischen dem Flughafen Hurghada und den Hotels am Roten Meer." : ru ? "Частные трансферы между аэропортом Хургады и отелями Красного моря." : "Private transfers between Hurghada Airport and Red Sea hotels."}
+                    {de ? "Private Transfers zwischen dem Flughafen Hurghada und den Hotels am Roten Meer." : ru ? "Частные трансферы между аэропортом Хургады и отелями Красного моря." : ar ? "تنقلات خاصة بين مطار الغردقة وفنادق البحر الأحمر." : pl ? "Prywatne przejazdy między lotniskiem w Hurghadzie a hotelami nad Morzem Czerwonym." : zh ? "赫尔格达机场与红海酒店之间的私人接送。" : "Private transfers between Hurghada Airport and Red Sea hotels."}
                   </p>
 
 
@@ -429,7 +430,7 @@ function HomeContent() {
                 sm:w-auto
                 "
               >
-                {de ? "Transfer buchen" : ru ? "Заказать трансфер" : "Book Transfer"}
+                {de ? "Transfer buchen" : ru ? "Заказать трансфер" : ar ? "احجز التنقل" : pl ? "Zarezerwuj transfer" : zh ? "预订接送" : "Book Transfer"}
               </Link>
 
 
@@ -554,7 +555,7 @@ text-blue-600
                 text-gray-500
               ">
 
-                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : ar ? "لم يتم العثور على رحلات مناسبة" : "No tours found"}
+                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : ar ? "لم يتم العثور على رحلات مناسبة" : pl ? "Nie znaleziono pasujących wycieczek" : zh ? "未找到符合条件的旅游项目" : "No tours found"}
 
               </div>
 
