@@ -54,12 +54,11 @@ Only four sessions were returned: two US desktop sessions to `/blog`, one Saudi 
 
 ## Search Console actions
 
-No sitemap was submitted and no indexing request was sent during this code-only change. Read-only URL Inspection was attempted for the eight priority URLs below, but the connector returned expired-token (401) and temporary service-unavailable (503) responses; no inspection result is claimed. After reconnecting Search Console, deployment and production verification:
+After commit `6850d42` reached READY on both Vercel production projects, `https://dailyredsea.com/sitemap.xml` was resubmitted exactly once through the connected Search Console property and returned success. No individual indexing request was sent. Read-only URL Inspection was attempted for the eight priority URLs below, but the connector returned expired-token (401) and temporary service-unavailable (503) responses; no inspection result is claimed. After reconnecting Search Console:
 
 1. Confirm `/sitemap.xml` returns 200 and contains no placeholder or `noindex` URLs.
-2. Resubmit `https://dailyredsea.com/sitemap.xml` once.
-3. Inspect the homepage, `/hurghada/island-trips`, `/hurghada/diving-snorkeling`, `/tours/orange-bay`, `/tours/full-day-snorkeling`, `/tours/hurghada-airport-transfer`, `/transfers`, and `/tours/luxor-private-day-trip`.
-4. Request indexing only for corrected priority URLs that are not already indexed.
+2. Inspect the homepage, `/hurghada/island-trips`, `/hurghada/diving-snorkeling`, `/tours/orange-bay`, `/tours/full-day-snorkeling`, `/tours/hurghada-airport-transfer`, `/transfers`, and `/tours/luxor-private-day-trip`.
+3. Request indexing only for corrected priority URLs that are not already indexed.
 
 ## Immediate legitimate authority opportunities
 
