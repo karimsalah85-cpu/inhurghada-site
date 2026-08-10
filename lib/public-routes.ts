@@ -13,8 +13,10 @@ const publicFiles = new Set(["/favicon.ico", "/llms.txt", "/robots.txt", "/sitem
 export function isKnownApplicationPath(pathname: string) {
   if (pathname === "/" || publicFiles.has(pathname) || pathname.startsWith("/.well-known/")) return true;
   const parts = pathname.split("/").filter(Boolean);
-  if (parts[0] && isLocale(parts[0])) parts.shift();
-  if (!parts.length || !publicRouteRoots.has(parts[0])) return false;
+  const hasLocalePrefix = Boolean(parts[0] && isLocale(parts[0]));
+  if (hasLocalePrefix) parts.shift();
+  if (!parts.length) return hasLocalePrefix;
+  if (!publicRouteRoots.has(parts[0])) return false;
   // There are no dynamic routes below the transfer hub. Reject unknown nested
   // paths before App Router streaming can turn notFound() into an HTTP 200.
   if (parts[0] === "transfers") return parts.length === 1;

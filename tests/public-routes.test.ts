@@ -6,6 +6,10 @@ describe("public route guard", () => {
     expect(isKnownApplicationPath("/tours/orange-bay")).toBe(true);
     expect(isKnownApplicationPath("/de/tours/orange-bay")).toBe(true);
     expect(isKnownApplicationPath("/sitemap.xml")).toBe(true);
+    for (const locale of ["en", "ar", "de", "ru", "pl", "zh"]) {
+      expect(isKnownApplicationPath(`/${locale}`)).toBe(true);
+      expect(isKnownApplicationPath(`/${locale}/`)).toBe(true);
+    }
   });
 
   it("rejects unknown root and localized catch-all paths", () => {
