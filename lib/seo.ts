@@ -21,24 +21,26 @@ export function pageMetadata({
   image = defaultSocialImage,
   noIndex = false,
 }: PageMetadataInput): Metadata {
+  const normalizedTitle = normalizeMetaTitle(title);
+  const normalizedDescription = normalizeMetaDescription(description);
   return {
-    title,
-    description,
+    title: normalizedTitle,
+    description: normalizedDescription,
     alternates: { canonical: path },
     robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title,
-      description,
+      title: normalizedTitle,
+      description: normalizedDescription,
       url: path,
       siteName,
       locale: "en_US",
       type: "website",
-      images: [{ url: image, alt: title }],
+      images: [{ url: image, alt: normalizedTitle }],
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: normalizedTitle,
+      description: normalizedDescription,
       images: [image],
     },
   };
@@ -47,6 +49,15 @@ export function pageMetadata({
 export function absoluteUrl(path = "/") {
   return new URL(path, siteUrl).toString();
 }
+
+const metadataTitleSuffix: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
+  en: " · Hurghada tours",
+  ar: " · رحلات الغردقة",
+  de: " · Hurghada Ausflüge",
+  ru: " · туры Хургады",
+  pl: " · wycieczki Hurghada",
+  zh: " · 赫尔格达旅游",
+};
 
 const metadataSupportCopy: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
   en: "Clear prices, pickup confirmation and local WhatsApp support from Daily Red Sea.",
@@ -58,7 +69,7 @@ const metadataSupportCopy: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", strin
 };
 
 function shortenMetadata(value: string, maxLength: number) {
-  const normalized = value.replace(/\\s+/g, " ").trim();
+  const normalized = value.replace(/\s+/g, " ").trim();
   if (normalized.length <= maxLength) return normalized;
   const cut = normalized.slice(0, maxLength - 1);
   const boundary = cut.lastIndexOf(" ");
@@ -67,9 +78,9 @@ function shortenMetadata(value: string, maxLength: number) {
 }
 
 /** Keeps route titles within the audit limit before the root layout adds the brand suffix. */
-export function normalizeMetaTitle(value: string) {
-  let title = value.replace(/\\s+/g, " ").trim();
-  if (title.length < 28) title = `${title} · Hurghada tours`;
+export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en") {
+  let title = value.replace(/\s+/g, " ").trim();
+  if (title.length < 28) title = `${title}${metadataTitleSuffix[locale]}`;
   return shortenMetadata(title, 44);
 }
 
@@ -79,9 +90,9 @@ export function normalizeMetaDescription(
   fallback = defaultDescription,
   locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en",
 ) {
-  let description = value.replace(/\\s+/g, " ").trim() || fallback.trim();
+  let description = value.replace(/\s+/g, " ").trim() || fallback.trim();
   if (description.length < 90) {
     description = `${description} ${fallback.trim()} ${metadataSupportCopy[locale]}`.trim();
   }
-  return shortenMetadata(description, 160);
+  return shortenMetadata(description, 155);
 }
