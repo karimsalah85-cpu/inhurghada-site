@@ -61,12 +61,12 @@ export function absoluteUrl(path = "/") {
 }
 
 const metadataTitleSuffix: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
-  en: " · Hurghada tours",
-  ar: " · رحلات الغردقة",
-  de: " · Hurghada Ausflüge",
-  ru: " · туры Хургады",
-  pl: " · wycieczki Hurghada",
-  zh: " · 赫尔格达旅游",
+  en: " · Hurghada tours | Daily Red Sea",
+  ar: " · رحلات الغردقة | Daily Red Sea",
+  de: " · Hurghada Ausflüge | Daily Red Sea",
+  ru: " · туры Хургады | Daily Red Sea",
+  pl: " · wycieczki Hurghada | Daily Red Sea",
+  zh: " · Hurghada tours | Daily Red Sea",
 };
 
 const metadataSupportCopy: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
@@ -87,11 +87,11 @@ function shortenMetadata(value: string, maxLength: number) {
   return `${safeCut.trim()}…`;
 }
 
-/** Keeps route titles within the audit limit before the root layout adds the brand suffix. */
+/** Keeps route titles between the audit minimum and maximum without relying on a root title template. */
 export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en") {
   let title = value.replace(/\s+/g, " ").trim();
-  if (title.length < 28) title = `${title}${metadataTitleSuffix[locale]}`;
-  return shortenMetadata(title, 40);
+  if (title.length < 30) title = `${title}${metadataTitleSuffix[locale]}`;
+  return shortenMetadata(title, 60);
 }
 
 /** Makes short or inherited descriptions useful while capping them at a search-friendly length. */
