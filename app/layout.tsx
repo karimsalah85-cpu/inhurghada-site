@@ -12,10 +12,7 @@ import PublicSiteChrome from "@/components/layout/PublicSiteChrome";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: {
-    default: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
-    template: `%s | ${siteName}`,
-  },
+  title: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
   description: defaultDescription,
   keywords: [
     "Hurghada tours",
