@@ -25,10 +25,10 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   }
   if (profile.role === "owner") return NextResponse.json({ error: "Owner invitations cannot be resent." }, { status: 400 });
   if (!profile.active) return NextResponse.json({ error: "Reactivate this account before resending its invitation." }, { status: 400 });
-  if (!isPendingInvitation(authData.user)) return NextResponse.json({ error: "This invitation has already been accepted." }, { status: 409 });
+  const linkType = isPendingInvitation(authData.user) ? "invite" : "recovery";
 
   const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-    type: "invite",
+    type: linkType,
     email: profile.email,
     options: { redirectTo: adminInvitationRedirectUrl },
   });
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     resource_type: "admin_user",
     resource_id: profile.id,
     summary: `Resent invitation to ${profile.email}`,
-    after_data: { email: profile.email, role: profile.role, active: profile.active },
+    after_data: { email: profile.email, role: profile.role, active: profile.active, link_type: linkType },
   });
 
   return NextResponse.json({ resent: true });
