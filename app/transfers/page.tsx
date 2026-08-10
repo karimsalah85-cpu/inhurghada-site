@@ -16,10 +16,24 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
   const ar = locale === "ar";
   const pl = locale === "pl";
   const zh = locale === "zh";
+  const transferFaqs = [
+    { question: "How much is a private transfer from Hurghada Airport?", answer: "A one-way private airport transfer within Hurghada starts at $20. Makadi Bay, Soma Bay, El Gouna and Sahl Hasheesh add $7 to the base fare." },
+    { question: "Do you monitor delayed flights?", answer: "Yes. Add the flight number to the booking request so the team can confirm the pickup against the latest arrival information." },
+    { question: "Can I book a return airport transfer?", answer: "Yes. Book each direction with its own date, time and pickup details so both journeys can be confirmed correctly." },
+    { question: "Which areas do you cover?", answer: "Private transfers are available for Hurghada, Makadi Bay, Sahl Hasheesh, Soma Bay and El Gouna, subject to vehicle and schedule availability." },
+  ];
+  const transferSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Service", name: "Private Hurghada Airport and Hotel Transfers", serviceType: "Private airport and hotel transfer", areaServed: ["Hurghada", "Makadi Bay", "Sahl Hasheesh", "Soma Bay", "El Gouna"], provider: { "@type": "TravelAgency", name: "Daily Red Sea", url: "https://dailyredsea.com" }, offers: { "@type": "Offer", price: "20", priceCurrency: "USD", url: "https://dailyredsea.com/transfers" } },
+      { "@type": "FAQPage", mainEntity: transferFaqs.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) },
+    ],
+  };
 
   return (
 
     <main className="bg-white">
+      {locale === "en" ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(transferSchema).replace(/</g, "\\u003c") }} /> : null}
 
 
       {/* Hero */}
@@ -256,6 +270,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
 
       </section>
 
+      {locale === "en" ? <section className="border-t border-slate-200 bg-white px-6 py-20"><div className="mx-auto max-w-4xl"><p className="font-semibold uppercase tracking-[0.24em] text-blue-600">Plan your pickup</p><h2 className="mt-3 text-4xl font-bold text-slate-950">Hurghada transfer prices and questions</h2><p className="mt-5 text-lg leading-8 text-slate-600">One-way private airport transfers start at $20 within Hurghada. Makadi Bay, Soma Bay, El Gouna and Sahl Hasheesh add $7. Your final vehicle, pickup point and time are confirmed before travel.</p><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 px-6">{transferFaqs.map((item) => <details key={item.question} className="py-5"><summary className="cursor-pointer font-bold text-slate-950">{item.question}</summary><p className="mt-3 leading-7 text-slate-600">{item.answer}</p></details>)}</div></div></section> : null}
 
 
     </main>
