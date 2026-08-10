@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import CategoryTourExplorer from "@/components/categories/CategoryTourExplorer";
 import { getLiveTours } from "@/lib/live-content";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
-import { absoluteUrl, siteName } from "@/lib/seo";
+import { absoluteUrl, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourRussian } from "@/lib/tour-localization";
 
@@ -18,12 +18,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = getTourCategory((await params).category);
   if (!category) return {};
   const path = `/hurghada/${category.slug}`;
-  const title = `${category.title} in Hurghada`;
+  const title = normalizeMetaTitle(`${category.title} in Hurghada`);
+  const description = normalizeMetaDescription(category.description);
   return {
     title,
-    description: category.description,
+    description,
     alternates: { canonical: path, languages: { ...languageAlternates(path), "x-default": localePath("en", path) } },
-    openGraph: { title, description: category.description, url: path, siteName, type: "website" },
+    openGraph: { title, description, url: absoluteUrl(path), siteName, type: "website" },
   };
 }
 
