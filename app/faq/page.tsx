@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: "Hurghada Tours and Transfers FAQ",
-  description: "Answers about booking, payment, pickup, cancellation, passports, children, and private transfers with Daily Red Sea.",
+  ...pageMetadata({
+    title: "Hurghada Tours and Transfers FAQ",
+    description: "Answers about booking, payment, pickup, cancellation, passports, children, and private transfers with Daily Red Sea.",
+    path: "/faq",
+  }),
   alternates: { canonical: "/faq", languages: { ...languageAlternates("/faq"), "x-default": localePath("en", "/faq") } },
 };
 
