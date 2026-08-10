@@ -88,7 +88,17 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     "quad-safari-sunset": "Quad Tour Hurghada bei Sonnenuntergang mit Beduinencamp, Wüstenpanorama und Hotelabholung.",
     "hurghada-airport-transfer": "Flughafentransfer Hurghada im Privatfahrzeug zum klaren Festpreis – passend zur Personenzahl und mit Flugüberwachung.",
   };
-  const description = tour?.metaDescription || (locale === "de" && tour ? (germanSeoDescriptions[tour.slug] || `${title}. Ausflüge Hurghada mit klaren Preisen und direkter Bestätigung.`) : locale === "de" && kind === "home" ? germanSeoDescriptions.home : tour ? `${title}. ${dictionary.siteDescription}` : category ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}` : descriptions[kind || "home"]);
+  const description = tour
+    ? locale === "en"
+      ? tour.metaDescription || tour.description
+      : locale === "de"
+        ? germanSeoDescriptions[tour.slug] || tour.description
+        : tour.description
+    : locale === "de" && kind === "home"
+      ? germanSeoDescriptions.home
+      : category
+        ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}`
+        : descriptions[kind || "home"];
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
   const canonical = localePath(locale, pathname);
   const normalizedTitle = normalizeMetaTitle(title, locale);
