@@ -11,7 +11,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/about",
 });
 
-export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "zh" }) {
+export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
   const zh = locale === "zh";
@@ -25,7 +25,25 @@ export default function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "r
     "Planning something specific?": "有特别的行程需求？", "Tell us your dates, hotel, group size, and interests. We will help you choose an appropriate available experience without adding hidden costs.": "告诉我们日期、酒店、人数和兴趣，我们会帮助您选择合适且有名额的体验，不收取隐藏费用。",
     "Hello Daily Red Sea, I would like help planning my Hurghada trip.": "您好 Daily Red Sea，我想请您帮助规划赫尔格达行程。", "Ask our local team": "咨询本地团队", "Explore tours": "探索旅游项目",
   };
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : zh ? chinese[en] || en : en;
+  const polish: Record<string, string> = {
+    "Local help in Hurghada": "Lokalne wsparcie w Hurghadzie",
+    "Memorable Red Sea days, made easier.": "Niezapomniane dni nad Morzem Czerwonym — teraz łatwiej.",
+    "Daily Red Sea helps travelers choose and arrange tours, boat trips, desert experiences, historical day trips, and private transfers in and around Hurghada. We focus on clear information, practical local support, and straightforward booking.": "Daily Red Sea pomaga wybrać i zorganizować wycieczki, rejsy, atrakcje pustynne, wyjazdy historyczne i prywatne transfery w Hurghadzie i okolicy. Stawiamy na jasne informacje, lokalne wsparcie i prostą rezerwację.",
+    "Local knowledge": "Lokalna wiedza",
+    "Advice grounded in Hurghada pickup areas, trip timings, and the practical details visitors need.": "Praktyczne porady dotyczące stref odbioru, godzin wyjazdu i szczegółów ważnych dla odwiedzających Hurghadę.",
+    "Selected experiences": "Wybrane atrakcje",
+    "A focused collection of tours and transfers with clear inclusions and starting prices.": "Starannie wybrane wycieczki i transfery z jasnym zakresem usług i cenami wyjściowymi.",
+    "Human confirmation": "Potwierdzenie przez zespół",
+    "Our team confirms availability and pickup details directly by WhatsApp.": "Nasz zespół potwierdza dostępność i szczegóły odbioru bezpośrednio przez WhatsApp.",
+    "Transparent booking": "Przejrzysta rezerwacja",
+    "Your date, travelers, total, payment method, and important requirements are shown before confirmation.": "Przed potwierdzeniem widzisz datę, liczbę osób, sumę, sposób płatności i ważne wymagania.",
+    "Planning something specific?": "Planujesz coś konkretnego?",
+    "Tell us your dates, hotel, group size, and interests. We will help you choose an appropriate available experience without adding hidden costs.": "Podaj daty, hotel, liczbę osób i zainteresowania. Pomożemy wybrać dostępną atrakcję bez ukrytych kosztów.",
+    "Hello Daily Red Sea, I would like help planning my Hurghada trip.": "Dzień dobry Daily Red Sea, proszę o pomoc w zaplanowaniu pobytu w Hurghadzie.",
+    "Ask our local team": "Zapytaj lokalny zespół",
+    "Explore tours": "Odkryj wycieczki",
+  };
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : locale === "pl" ? polish[en] || en : zh ? chinese[en] || en : en;
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
       <article className="mx-auto max-w-5xl">
