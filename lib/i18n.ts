@@ -111,6 +111,12 @@ export function languageAlternates(path = "") {
   return Object.fromEntries(locales.map((locale) => [locale, localePath(locale, path)]));
 }
 
+/** Keeps rendered language state aligned with the canonical locale in the URL. */
+export function localeFromPathname(pathname: string): Locale {
+  const firstSegment = pathname.split("/").filter(Boolean)[0];
+  return firstSegment && isLocale(firstSegment) ? firstSegment : "en";
+}
+
 const localizedRouteRoots = new Set([
   "about", "booking", "cart", "checkout", "contact", "faq", "hurghada",
   "privacy-policy", "terms-conditions", "tours", "transfers",

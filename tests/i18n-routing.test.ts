@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { languageAlternates, localeSwitchPath } from "@/lib/i18n";
+import { languageAlternates, localeFromPathname, localeSwitchPath } from "@/lib/i18n";
 
 describe("localized SEO routing", () => {
+  it("treats the URL as the source of truth for rendered language", () => {
+    expect(localeFromPathname("/ar")).toBe("ar");
+    expect(localeFromPathname("/de/tours/orange-bay")).toBe("de");
+    expect(localeFromPathname("/")).toBe("en");
+    expect(localeFromPathname("/tours/orange-bay")).toBe("en");
+  });
+
   it("switches to canonical unprefixed English without a redirect hop", () => {
     expect(localeSwitchPath("/de/tours/orange-bay", "en")).toBe("/tours/orange-bay");
   });

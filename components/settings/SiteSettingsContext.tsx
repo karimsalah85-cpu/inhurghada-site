@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { isLocale, localeSwitchPath } from "@/lib/i18n";
+import { usePathname } from "next/navigation";
+import { localeFromPathname, localeSwitchPath } from "@/lib/i18n";
 
 export const languages = [
   { code: "en", label: "English" },
@@ -76,6 +77,7 @@ const translations: Record<Language, Record<string, string>> = {
 const SiteSettingsContext = createContext<SiteSettings | null>(null);
 
 export function SiteSettingsProvider({ children, initialLanguage = "en" }: { children: React.ReactNode; initialLanguage?: Language }) {
+  const pathname = usePathname();
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const [publicSettings, setPublicSettings] = useState<Record<string, unknown>>({});
 
@@ -86,16 +88,10 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
   }, []);
 
   useEffect(() => {
-    const routeLocale = window.location.pathname.split("/")[1];
-    const savedLanguage = window.localStorage.getItem("daily-red-sea-language") as Language | null;
-    const preferredLanguage = isLocale(routeLocale)
-      ? routeLocale
-      : savedLanguage && languages.some((item) => item.code === savedLanguage)
-        ? savedLanguage
-        : "en";
+    const preferredLanguage = localeFromPathname(pathname);
     const update = window.setTimeout(() => setLanguage(preferredLanguage), 0);
     return () => window.clearTimeout(update);
-  }, []);
+  }, [pathname]);
   const [currency, setCurrency] = useState<Currency>("USD");
   const [rates, setRates] = useState<Record<Currency, number>>(exchangeRates);
 
