@@ -26,6 +26,16 @@ describe("tour discovery", () => {
     }
   });
 
+  it("publishes the English-only marine-life guide without false locale alternates", async () => {
+    const entries = await sitemap();
+    const guide = entries.find((entry) => entry.url === "https://dailyredsea.com/hurghada/marine-life");
+    expect(guide?.alternates?.languages).toEqual({
+      en: "https://dailyredsea.com/hurghada/marine-life",
+      "x-default": "https://dailyredsea.com/hurghada/marine-life",
+    });
+    expect(entries.some((entry) => entry.url === "https://dailyredsea.com/de/hurghada/marine-life")).toBe(false);
+  });
+
   it("includes multilingual alternates on every indexed tour", async () => {
     const entries = await sitemap();
     for (const tour of tours) {

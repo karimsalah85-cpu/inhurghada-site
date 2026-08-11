@@ -58,5 +58,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
   ];
-  return [...localizedEntries, ...blogEntries];
+  const editorialEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${siteUrl}/hurghada/marine-life`,
+      changeFrequency: "monthly",
+      priority: 0.75,
+      alternates: { languages: { en: `${siteUrl}/hurghada/marine-life`, "x-default": `${siteUrl}/hurghada/marine-life` } },
+    },
+  ];
+  return [...localizedEntries, ...editorialEntries, ...blogEntries];
 }
