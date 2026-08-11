@@ -1,7 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import sitemap from "@/app/sitemap";
 import { tours } from "@/data/tours";
 import { getTourCategory, tourCategories } from "@/lib/tour-categories";
+
+vi.mock("@/lib/live-content", () => ({
+  getLiveTours: vi.fn(async () => tours),
+}));
+
+beforeEach(() => vi.clearAllMocks());
 
 describe("tour discovery", () => {
   it("maps every published category slug to at least one real tour", () => {

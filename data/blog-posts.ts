@@ -12,6 +12,103 @@ export type BlogPost = {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "egypt-visa-guide-2026",
+    title: "Egypt Visa Guide 2026: What to Know Before You Travel",
+    metaDescription: "Plan your Egypt trip with this 2026 visa guide covering e-Visas, visas on arrival, Cairo's QR-code pilot, Sinai entry stamps and Hurghada arrivals.",
+    publishedAt: "2026-08-11",
+    heroImage: "/images/hurghada-airport-transfer.jpg",
+    relatedTourSlugs: ["hurghada-airport-transfer", "senzo-transfer"],
+    intro: "Planning a trip to Hurghada, the Red Sea coast or elsewhere in Egypt? Checking your entry requirements before you fly can save time and stress at the airport. This guide explains the main tourist-visa routes available in 2026, what is different for Hurghada and Sinai, and what to verify before departure. Visa rules, eligibility and fees can change at short notice, so use this as a planning guide and confirm the current requirements for your passport on Egypt's official e-Visa portal or with an Egyptian embassy before booking.",
+    sections: [
+      {
+        heading: "Do you need a visa to enter Egypt?",
+        body: [
+          "Many visitors need a visa to enter Egypt, but the correct route depends on nationality, passport type, trip length and itinerary. Some travelers can apply online or obtain a visa on arrival, while others need approval from an Egyptian embassy before traveling.",
+          "Do not rely on another traveler's experience, even if you live in the same country. Check the rules for the passport you will actually use and make sure it will remain valid for at least six months from your arrival date.",
+        ],
+      },
+      {
+        heading: "Option 1: apply for an Egypt e-Visa before departure",
+        body: [
+          "For eligible travelers, the e-Visa is often the simplest option because the application and card payment are completed before the flight. Use only the official Egyptian portal at visa2egypt.gov.eg; unofficial sites can look convincing while charging additional service fees.",
+          "Create an account, complete the application carefully and follow the portal's current instructions for passport details, supporting files and payment. Apply with enough time for review rather than assuming approval will be immediate, then carry the issued document in the format requested by the portal.",
+          "The official portal shows the current fee, eligible nationalities and permitted stay for the application you select. Check those details during the application instead of relying on an older price quoted by a blog or travel forum.",
+        ],
+      },
+      {
+        heading: "Option 2: obtain a visa on arrival",
+        body: [
+          "Visa on arrival remains available to many, but not all, nationalities. If you are eligible, follow the airport signs and obtain the visa before joining passport control. Carry a suitable payment method and allow extra arrival time in case the counters or immigration desks are busy.",
+          "Keep your accommodation and return or onward-travel details accessible. Border officials decide admission, and they may request supporting information even when it is not routinely checked.",
+        ],
+      },
+      {
+        heading: "Cairo's new digital visa-on-arrival system",
+        body: [
+          "Egypt began introducing a digital visa-on-arrival system at Cairo International Airport in August 2026. The system can issue a QR code after the traveler enters their details and pays electronically through the available official channels. Passport control scans the code alongside the travel document.",
+          "The initial rollout is focused on Cairo, with wider expansion planned. Travelers flying directly to Hurghada should not assume that Cairo's process, channels or service charges are already identical there. Check the current airport procedure shortly before departure, particularly while the system is new.",
+        ],
+      },
+      {
+        heading: "Hurghada arrivals: what Red Sea travelers should know",
+        body: [
+          "Hurghada is on mainland Egypt, so the free Sinai-only entry stamp does not cover a holiday in Hurghada. Eligible travelers normally need the appropriate Egyptian tourist visa even if they plan to stay entirely at a Red Sea resort.",
+          "After immigration and baggage collection, an airport transfer can remove another piece of arrival-day uncertainty. Book using the same name and flight number shown on your itinerary, and tell the transfer provider promptly if the airline changes your arrival time.",
+        ],
+      },
+      {
+        heading: "The Sinai-only entry stamp",
+        body: [
+          "Some eligible visitors arriving at designated South Sinai entry points can receive a free Sinai-only permission for a short resort stay. It is restricted geographically and is not a substitute for a full Egypt visa if you intend to travel to Cairo, Luxor, Hurghada or elsewhere outside the permitted Sinai area.",
+          "Eligibility and the permitted duration depend on current border rules. Confirm the arrangement for your nationality and itinerary before choosing it, especially if you may add excursions outside South Sinai after arrival.",
+        ],
+      },
+      {
+        heading: "Documents to prepare",
+        body: [
+          "Travel with the passport used for the application and check that it has at least six months' validity from arrival. Keep the visa or approval document, hotel address, travel insurance details and return or onward booking easy to reach rather than packed in checked luggage.",
+          "Children generally need their own valid travel documents and may require separate visa applications. Families should submit matching trip details and review every passport number and date before paying.",
+        ],
+      },
+      {
+        heading: "When an embassy application may be required",
+        body: [
+          "If your nationality is not eligible for the e-Visa or visa on arrival, contact the Egyptian embassy or consulate responsible for your place of residence. Additional approval or supporting documents may be required, and processing can take considerably longer than an online application.",
+          "Apply well before departure and avoid buying a non-refundable flight based only on an unofficial eligibility list. Residency permits or visas issued by another country should not be assumed to create an automatic Egyptian visa exemption unless an Egyptian authority confirms it for your case.",
+        ],
+      },
+      {
+        heading: "Final checks before you fly",
+        body: [
+          "Recheck your visa status, passport validity and airline requirements a few days before travel. Use visa2egypt.gov.eg for the official e-Visa service and an Egyptian embassy or consulate when your eligibility is unclear.",
+          "Save copies of important documents securely and keep the originals with you. Current rules shown by the official authority and instructions from your airline take priority over this guide if anything has changed since publication.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is an e-Visa better than a visa on arrival for Egypt?",
+        answer: "An e-Visa lets eligible travelers complete the process before flying and can reduce uncertainty on arrival. A visa on arrival may suit eligible last-minute travelers, but it can involve additional airport queues. Check which options are available for your passport.",
+      },
+      {
+        question: "Do I need an Egypt visa for Hurghada?",
+        answer: "Most international visitors need the appropriate Egyptian entry permission for Hurghada. The Sinai-only entry stamp does not apply because Hurghada is on mainland Egypt.",
+      },
+      {
+        question: "What is the official Egypt e-Visa website?",
+        answer: "The official portal is visa2egypt.gov.eg. Check the domain carefully before entering passport or payment details because commercial application services may charge additional fees.",
+      },
+      {
+        question: "Does Cairo's QR-code visa system also operate at Hurghada Airport?",
+        answer: "The August 2026 rollout began at Cairo International Airport, with broader expansion planned. Travelers arriving directly in Hurghada should verify the airport's current procedure before departure rather than assuming Cairo's process is already available there.",
+      },
+      {
+        question: "How long must my passport be valid for Egypt?",
+        answer: "Egypt's official e-Visa guidance requires a passport valid for at least six months from the arrival date. Your airline or embassy may provide additional instructions for your circumstances.",
+      },
+    ],
+  },
+  {
     slug: "best-snorkeling-tours-in-hurghada-for-beginners",
     title: "Best Snorkeling Tours in Hurghada for Beginners",
     metaDescription: "Compare beginner-friendly Hurghada snorkeling trips by reef time, island stops, duration, pickup, equipment and price before you book.",

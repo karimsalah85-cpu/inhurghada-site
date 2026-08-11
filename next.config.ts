@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { assertDeploymentEnvironment } from "./lib/environment";
+
+assertDeploymentEnvironment(process.env);
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,

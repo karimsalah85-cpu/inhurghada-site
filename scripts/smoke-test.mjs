@@ -15,6 +15,15 @@ for (const header of requiredHeaders) assert.ok(home.response.headers.get(header
 assert.match(home.body, /<title>[^<]+<\/title>/, "Home page must have a title");
 assert.match(home.body, /rel="canonical"/, "Home page must have a canonical URL");
 
+const health = await get("/api/health");
+assert.equal(health.response.status, 200, "Health endpoint must return 200");
+const healthPayload = JSON.parse(health.body);
+assert.equal(healthPayload.status, "healthy", "Runtime dependencies must be healthy");
+
+const adminLogin = await get("/admin/login");
+assert.equal(adminLogin.response.status, 200, "Admin login page must return 200");
+assert.match(adminLogin.body, /Admin sign in/, "Admin login page must render its sign-in form");
+
 for (const locale of ["ar", "de", "ru", "pl", "zh"]) {
   const localizedHome = await get(`/${locale}`);
   assert.equal(localizedHome.response.status, 200, `/${locale} homepage must return 200`);
@@ -82,4 +91,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Smoke test passed: ${urls.length} sitemap pages, security headers, APIs, currencies, and admin protection.`);
+console.log(`Smoke test passed: ${urls.length} sitemap pages, health, security headers, APIs, currencies, and admin protection.`);
