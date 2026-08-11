@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, ShoppingCart, X } from "lucide-react";
+import { ChevronDown, Menu, ShoppingCart, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -17,7 +17,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
-  const { currency, language, setCurrency, setLanguage, t } = useSiteSettings();
+  const { currency, language, setCurrency, t } = useSiteSettings();
   const pathname = usePathname();
   const { items } = useCart();
 
@@ -161,7 +161,6 @@ export default function Navbar() {
             language={language}
             pathname={pathname}
             setCurrency={setCurrency}
-            setLanguage={setLanguage}
           />
 
           <SocialLinks />
@@ -301,7 +300,7 @@ export default function Navbar() {
             language={language}
             pathname={pathname}
             setCurrency={setCurrency}
-            setLanguage={setLanguage}
+            onLanguageSelect={closeMenu}
             mobile
           />
 
@@ -323,14 +322,14 @@ function SettingsSelectors({
   language,
   pathname,
   setCurrency,
-  setLanguage,
+  onLanguageSelect,
   mobile = false,
 }: {
   currency: (typeof currencies)[number];
   language: (typeof languages)[number]["code"];
   pathname: string;
   setCurrency: (currency: (typeof currencies)[number]) => void;
-  setLanguage: (language: (typeof languages)[number]["code"]) => void;
+  onLanguageSelect?: () => void;
   mobile?: boolean;
 }) {
   const selectClass = mobile
@@ -339,21 +338,116 @@ function SettingsSelectors({
 
   return (
     <div className={mobile ? "grid gap-3 rounded-2xl bg-slate-50 p-3" : "flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm"}>
-      <label className="sr-only" htmlFor={mobile ? "mobile-language" : "language"}>Language</label>
-      <select id={mobile ? "mobile-language" : "language"} value={language} onChange={(event) => setLanguage(event.target.value as typeof language)} className={selectClass}>
-        {languages.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}
-      </select>
-      <details className="relative">
-        <summary className="cursor-pointer rounded-lg px-2 py-2 text-xs font-bold text-cyan-800">Language links</summary>
-        <div aria-label="Available languages" className={mobile ? "mt-2 grid grid-cols-2 gap-1" : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"}>
-          {languages.map((item) => <Link key={item.code} href={localeSwitchPath(pathname, item.code)} hrefLang={item.code} lang={item.code} className={`rounded-lg px-3 py-2 text-sm hover:bg-cyan-50 ${item.code === language ? "bg-cyan-50 font-bold text-cyan-900" : "text-slate-700"}`}>{item.label}</Link>)}
-        </div>
-      </details>
+      <LanguageDropdown
+        language={language}
+        pathname={pathname}
+        mobile={mobile}
+        onLanguageSelect={onLanguageSelect}
+      />
       <div className={mobile ? "" : "flex items-center border-l border-slate-200 pl-1"}>
         <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Display currency</label>
         <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
         <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title="Currency rates by Exchange Rate API" className={mobile ? "mt-2 block text-center text-[10px] font-medium text-slate-400 hover:text-slate-600" : "rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600"}>{mobile ? "Rates by Exchange Rate API" : "Rates"}</a>
       </div>
+    </div>
+  );
+}
+
+function LanguageDropdown({
+  language,
+  pathname,
+  mobile,
+  onLanguageSelect,
+}: {
+  language: (typeof languages)[number]["code"];
+  pathname: string;
+  mobile: boolean;
+  onLanguageSelect?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  const menuId = mobile ? "mobile-language-menu" : "desktop-language-menu";
+  const currentLanguage = languages.find((item) => item.code === language) ?? languages[0];
+
+  useEffect(() => {
+    if (!open) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      buttonRef.current?.focus();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  function openAndFocusFirstLanguage() {
+    setOpen(true);
+    window.requestAnimationFrame(() => firstLinkRef.current?.focus());
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-label={`Choose language. Current language: ${currentLanguage.label}`}
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            openAndFocusFirstLanguage();
+          }
+        }}
+        className={mobile
+          ? "flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-700 outline-none transition hover:border-cyan-300 focus-visible:ring-2 focus-visible:ring-cyan-500"
+          : "flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
+      >
+        <span lang={currentLanguage.code}>{currentLanguage.label}</span>
+        <ChevronDown aria-hidden="true" size={16} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      <nav
+        id={menuId}
+        aria-label="Choose site language"
+        hidden={!open}
+        className={mobile
+          ? "mt-2 grid grid-cols-2 gap-1"
+          : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"}
+      >
+        {languages.map((item, index) => {
+          const active = item.code === language;
+          return (
+            <Link
+              key={item.code}
+              ref={index === 0 ? firstLinkRef : undefined}
+              href={localeSwitchPath(pathname, item.code)}
+              hrefLang={item.code}
+              lang={item.code}
+              aria-current={active ? "page" : undefined}
+              onClick={() => {
+                setOpen(false);
+                onLanguageSelect?.();
+              }}
+              className={`rounded-lg px-3 py-2 text-sm outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 ${active ? "bg-cyan-50 font-bold text-cyan-900" : "text-slate-700"}`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }
