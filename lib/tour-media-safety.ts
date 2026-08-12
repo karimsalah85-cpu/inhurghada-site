@@ -31,8 +31,13 @@ const ownedMedia: Record<string, SafeMedia> = {
   },
   diving: {
     image: "/images/owned/red-sea-diver-coral.jpg", alt: localizedAlt("Scuba diver beside a colourful Red Sea coral reef"),
-    gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg"],
-    galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
+    galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  diveTraining: {
+    image: "/images/owned/diving-training-seabed.jpg", alt: localizedAlt("Scuba students practising skills with instructors underwater"),
+    gallery: ["/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
+    galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   mahmya: { image: "/images/owned/mahmya-boats-sunset.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
 };
@@ -62,6 +67,9 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "dolphin-house-marsa-alam": categoryMedia.dolphin,
   "marsa-mubarak-snorkeling": categoryMedia.island,
   "abu-dabbab-snorkeling": categoryMedia.island,
+  "beginner-scuba-diving": ownedMedia.diveTraining,
+  "padi-open-water-course": ownedMedia.diveTraining,
+  "ssi-open-water-course": ownedMedia.diveTraining,
 };
 
 const localizedGalleryAlts = (media: SafeMedia, locale: Locale) => {

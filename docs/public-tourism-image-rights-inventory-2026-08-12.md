@@ -26,14 +26,21 @@ Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supp
 | `images/owned/red-sea-diver.jpg` | `32ac54c2528ac06ace54242472de420a79ec84042870763618cd843cfe7fc633` | `GOPR3175.jpeg` | Diving gallery |
 | `images/owned/red-sea-diver-reef.jpg` | `f91baecec10739b2d49d3eaf49f03b709e0c9a94eb079157f402f12d9507d9d6` | `GOPR3021.jpeg` | Diving gallery |
 | `images/owned/mahmya-boats-sunset.jpg` | `3972c34fb99f01712da800dca3610239302a020215e5528aa62e73894783601b` | `IMG_1275.jpeg` | Mahmya primary |
+| `images/owned/diving-group-surface.jpg` | `0f27f518f4ee715e5f59dfd21c05f7ddb4adc9ab534718735c3b08f53c9c2a04` | `IMG_3638.jpeg` | Diving gallery |
+| `images/owned/diving-training-seabed.jpg` | `91b04ba8715e0f3f7070870665c2961ac47999a2ee7645e4ef3a3cd3a390138d` | `IMG_3805.jpeg` | Beginner and certification-course diving primary |
+| `images/owned/red-sea-aerial-window.jpg` | `8a3455c417e110ebabcc3e309e3a7f5e675847206b8a1b61adcdfacace011865` | `IMG_9078.jpeg` | Retained for a future destination or arrival page; currently unused |
+| `images/owned/diving-training-instructor.jpg` | `cee51431070a0a4c7f04dcca7256b01a5e81aa188da68eead8f5eed1d2de6712` | `IMG_8347.jpeg` | Diving-course gallery |
+| `images/owned/red-sea-coral-closeup.jpg` | `e72fd11242ec4d2cd68b3b99d24dea8b8762f3b3893230eddef44cecd7b4c477` | `GOPR3023.jpeg` | Diving gallery |
+| `images/hero-egypt-red-sea.jpg` | `7e83652db34afc9eb02c7078f3a343f588a4646e1e9410880a10dc09448252f0` | `IMG_9938.png` | Homepage desktop hero; restored at owner request |
+| `images/hero-egypt-red-sea-mobile.jpg` | `7788684077829d00ddbf4a7c27d751ed03176023113b320ac3e4f6dfc7e698aa` | `IMG_9938.png` | Homepage mobile hero; restored at owner request |
+
+`DSC02349.arw` remains an unpublished source attachment. RAW camera files are not suitable browser assets and no derivative was needed for this release.
 
 | File path | SHA-256 | Public usages | Creator | Exact source URL | License type/version | Commercial use | Modification | Attribution | Evidence | Status | Decision |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | `images/desert-safari.jpg` | `a9ded61b4db2610cf65002c95682ad7c1299b7b99676404655d0a88772857ca4` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
 | `images/full-day-diving.jpg` | `250725e7ae858cdce9586b7d5f2a926a6825e97087ac638ba140d40910dee555` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
 | `images/full-day-snorkeling.jpg` | `f43441fd828bb20acbc27cbbc1034e57ddd54c416953de7339805ce7ff003f20` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
-| `images/hero-egypt-red-sea-mobile.jpg` | `7788684077829d00ddbf4a7c27d751ed03176023113b320ac3e4f6dfc7e698aa` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
-| `images/hero-egypt-red-sea.jpg` | `7e83652db34afc9eb02c7078f3a343f588a4646e1e9410880a10dc09448252f0` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
 | `images/hero.jpg` | `40dc009fea270bb8a6edb9c7d470033121eb95ac93ac0279d3bf542daf09baf3` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
 | `images/hurghada-airport-transfer.jpg` | `d127be635229f39b49cbcf8cc3c05adb30563796b0320b5abb5fc8317b24c76f` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
 | `images/hurghada-desert-camel-closeup.jpeg` | `418135114941bee0b1761ed46a26c7c7d5f534369909640e92ec61f089e22086` | Legacy static/CMS references; direct URL redirected | Unknown | Unknown | Unknown | No | No | Unknown | No exact binary evidence | Unresolved (quarantined) | Replace; public redirect to original artwork |
@@ -80,8 +87,8 @@ Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supp
 ## Counts
 
 - Original Daily Red Sea artwork: 13
-- Unresolved legacy tourism binaries: 33, all quarantined from public delivery by redirects and no longer referenced as rendered media
-- Verified owned photography: 18 optimized derivatives from 18 owner-supplied originals
+- Unresolved legacy tourism binaries: 31, all quarantined from public delivery by redirects and no longer referenced as rendered media
+- Verified owned photography: 25 optimized derivatives from 24 owner-supplied originals
 - Verified commercially licensed photography: 0
 - Verified compatible open-license photography: 0
 - Inaccurate public images: 0 after replacement

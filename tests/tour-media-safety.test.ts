@@ -8,10 +8,23 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "senzo-transfer")?.image).toBe("/images/owned/senzo-mall.jpg");
     expect(tours.find((item) => item.slug === "quad-safari-morning")?.image).toBe("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "cairo-giza-day-trip-bus")?.image).toBe("/images/owned/cairo-giza-day.jpg");
+    expect(tours.find((item) => item.slug === "beginner-scuba-diving")?.image).toBe("/images/owned/diving-training-seabed.jpg");
+    expect(tours.find((item) => item.slug === "padi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
+    expect(tours.find((item) => item.slug === "ssi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
 
     for (const slug of ["quad-safari-sunset", "horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour", "turkish-bath-spa"]) {
       expect(tours.find((item) => item.slug === slug)?.image).toMatch(/^\/images\/placeholders\/.+\.svg$/);
     }
+  });
+
+  it("uses the new owner-supplied training and reef images only in diving galleries", () => {
+    const training = tours.find((item) => item.slug === "beginner-scuba-diving")!;
+    expect(training.galleryImages).toEqual([
+      "/images/owned/diving-training-instructor.jpg",
+      "/images/owned/diving-group-surface.jpg",
+      "/images/owned/red-sea-coral-closeup.jpg",
+    ]);
+    expect(tours.find((item) => item.slug === "full-day-diving")?.galleryImages).toContain("/images/owned/diving-group-surface.jpg");
   });
 
   it("overrides unsafe live media while preserving non-media product fields", () => {

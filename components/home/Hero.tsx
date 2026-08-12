@@ -14,14 +14,14 @@ const heroImageCommon = {
 };
 const { props: { srcSet: desktopHeroSrcSet } } = getImageProps({
   ...heroImageCommon,
-  src: "/images/placeholders/sea-activity.svg",
+  src: "/images/hero-egypt-red-sea.jpg",
   width: 1672,
   height: 941,
   quality: 75,
 });
 const { props: { srcSet: mobileHeroSrcSet, ...mobileHeroProps } } = getImageProps({
   ...heroImageCommon,
-  src: "/images/placeholders/sea-activity.svg",
+  src: "/images/hero-egypt-red-sea-mobile.jpg",
   width: 941,
   height: 1672,
   quality: 75,
