@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -104,6 +104,7 @@ const polishBookingCopy: Record<string, string> = {
 };
 
 export default function BookingForm({ tourName, tourSlug, price, originalPrice, priceUnit, pricingMode = "per-person", duration, location, participantPricing, availableTimes, ageBands, boatOptions, entrancePricing, bookingExtras = [], requiresMarinaTransferChoice = false, bookingLeadTime }: BookingFormProps) {
+  const idempotencyKey = useRef<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { formatPrice, language } = useSiteSettings();
@@ -188,9 +189,11 @@ export default function BookingForm({ tourName, tourSlug, price, originalPrice, 
     }
     setSubmitting(true); setError("");
     try {
+      idempotencyKey.current ||= crypto.randomUUID();
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          idempotencyKey: idempotencyKey.current,
           type: "tour", locale: language, customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
           tourName, tourSlug, extras: selectedExtras, selectedBoatOption, extraQuantities, transferRequired, transferArea, location: location || "Hurghada", duration: duration || "Please confirm",
           price: `${formatPrice(String(total))} total`, date, guests: travelerText, hotel,

@@ -26,7 +26,7 @@ describe("media governance migration contract", () => {
   it("keeps localization and usage references relationally valid", () => {
     expect(migration).toMatch(/asset_id uuid not null references public\.media_assets\(id\) on delete cascade/i);
     expect(migration).toMatch(/asset_id uuid not null references public\.media_assets\(id\) on delete restrict/i);
-    expect(migration).toMatch(/media_usages_assignment_unique unique \(asset_id, owner_type, owner_key, role\)/i);
+    expect(migration).toMatch(/media_usages_assignment_unique[\s\S]*unique \(asset_id, owner_type, owner_key, role\)/i);
     expect(migration).toMatch(/create index if not exists media_usages_asset_id_idx/i);
     expect(migration).toMatch(/enable row level security/gi);
   });

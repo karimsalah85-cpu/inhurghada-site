@@ -1,6 +1,7 @@
 import type { Tour } from "@/data/tours";
 import type { Locale } from "@/lib/i18n";
 import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
+import { applyTourMediaSafety } from "@/lib/tour-media-safety";
 
 const arabicTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
@@ -679,5 +680,5 @@ export function localizeTour(tour: Tour, locale: Locale): Tour {
     : locale === "pl" ? localizeTourPolish(tour)
     : tour;
   const withMagawish = tour.slug === "magawish-speedboat" ? { ...base, ...magawishSpeedboatTranslations[locale] } : base;
-  return localizeSnorkelingBoatTrip(withMagawish, locale);
+  return applyTourMediaSafety(localizeSnorkelingBoatTrip(withMagawish, locale), locale);
 }

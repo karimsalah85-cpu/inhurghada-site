@@ -1,3 +1,5 @@
+-- Baseline schema predating the incremental migrations below. Keeping it in
+-- migration history makes clean local and CI replay deterministic.
 create type public.booking_status as enum ('new', 'confirmed', 'completed', 'cancelled');
 create type public.payment_status as enum ('unpaid', 'paid', 'refunded');
 

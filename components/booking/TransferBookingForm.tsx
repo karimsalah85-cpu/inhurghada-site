@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, type ReactNode, useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, useMemo, useRef, useState } from "react";
 import { CalendarDays, Car, Clock3, Hotel, MapPin, MessageCircle, Phone, Plane, User, Users } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -32,6 +32,7 @@ const chineseTransferCopy: Record<string, string> = {
 };
 
 export default function TransferBookingForm({ initialService = "airport" }: { initialService?: TransferService }) {
+  const idempotencyKey = useRef<string | null>(null);
   const router = useRouter();
   const { language } = useSiteSettings();
   const de = language === "de";
@@ -116,10 +117,12 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
     setSubmitting(true);
     try {
+      idempotencyKey.current ||= crypto.randomUUID();
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          idempotencyKey: idempotencyKey.current,
           type: "transfer",
           locale: language,
           customerName: name.trim(),

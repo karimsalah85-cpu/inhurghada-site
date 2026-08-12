@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, MessageCircle, ShoppingCart, Trash2 } from "lucide-react";
@@ -13,6 +13,7 @@ import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { trackEvent } from "@/lib/analytics";
 
 export default function CartCheckout() {
+  const idempotencyKey = useRef<string | null>(null);
   const { items, removeItem, clearCart, total } = useCart();
   const { language, formatPrice } = useSiteSettings();
   const router = useRouter();
@@ -44,11 +45,13 @@ export default function CartCheckout() {
     setSubmitting(true);
     setError("");
     try {
+      idempotencyKey.current ||= crypto.randomUUID();
       const firstItem = items[0];
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          idempotencyKey: idempotencyKey.current,
           type: "tour",
           locale: language,
           customerName: name.trim(),

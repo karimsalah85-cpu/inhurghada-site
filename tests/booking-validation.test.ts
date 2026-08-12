@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateBookingInput } from "@/lib/booking-validation";
 
-const valid = { type: "tour", customerName: "Test Guest", phone: "+20 100 000 0000", customerEmail: "guest@example.com", hotel: "Test Hotel", date: "2099-01-01", tourName: "Orange Bay Island Snorkeling Boat Trip", adults: 1 };
+const valid = { idempotencyKey: "123e4567-e89b-42d3-a456-426614174000", type: "tour", customerName: "Test Guest", phone: "+20 100 000 0000", customerEmail: "guest@example.com", hotel: "Test Hotel", date: "2099-01-01", tourName: "Orange Bay Island Snorkeling Boat Trip", adults: 1 };
 
 describe("booking input validation", () => {
   it("accepts and normalizes valid input", () => {
@@ -12,6 +12,10 @@ describe("booking input validation", () => {
   it("rejects arrays and empty payloads", () => {
     expect(validateBookingInput(null).error).toBeDefined();
     expect(validateBookingInput([]).error).toBeDefined();
+  });
+
+  it("requires a UUID v4 booking attempt key", () => {
+    expect(validateBookingInput({ ...valid, idempotencyKey: "reused-string" }).error).toMatch(/attempt key/i);
   });
 
   it("silently accepts the honeypot as spam", () => {

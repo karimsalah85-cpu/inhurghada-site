@@ -58,10 +58,51 @@ do $$ begin alter table public.media_usages add constraint media_usages_sort_ord
 do $$ begin alter table public.media_usages add constraint media_usages_crop_profile_length_check check (crop_profile is null or length(crop_profile) <= 40); exception when duplicate_object then null; end $$;
 
 alter table public.media_usages drop constraint if exists media_usages_asset_id_owner_type_owner_key_role_sort_order_key;
-do $$ begin alter table public.media_usages add constraint media_usages_assignment_unique unique (asset_id, owner_type, owner_key, role); exception when duplicate_object then null; end $$;
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.media_usages'::regclass
+      and conname = 'media_usages_assignment_unique'
+  ) then
+    alter table public.media_usages add constraint media_usages_assignment_unique
+      unique (asset_id, owner_type, owner_key, role);
+  end if;
+end $$;
 
 alter table public.media_asset_localizations enable row level security;
 alter table public.media_usages enable row level security;
+
+-- The atomic editor uses the authenticated caller (SECURITY INVOKER), so the
+-- caller needs table privileges in addition to passing RLS. Public reads are
+-- limited to publishable, non-archived assets; administration remains governed
+-- by the existing authenticated policies.
+grant select, insert, update, delete on public.media_assets to authenticated;
+grant select, insert, update, delete on public.media_asset_localizations to authenticated;
+grant select, insert, update, delete on public.media_usages to authenticated;
+grant select on public.media_assets, public.media_asset_localizations, public.media_usages to anon;
+
+drop policy if exists "publishable media assets are public" on public.media_assets;
+create policy "publishable media assets are public" on public.media_assets
+  for select to anon, authenticated
+  using (archived_at is null and rights_status in ('owned', 'licensed', 'open-license', 'generated'));
+
+drop policy if exists "publishable media localizations are public" on public.media_asset_localizations;
+create policy "publishable media localizations are public" on public.media_asset_localizations
+  for select to anon, authenticated
+  using (exists (
+    select 1 from public.media_assets asset
+    where asset.id = asset_id and asset.archived_at is null
+      and asset.rights_status in ('owned', 'licensed', 'open-license', 'generated')
+  ));
+
+drop policy if exists "publishable media usages are public" on public.media_usages;
+create policy "publishable media usages are public" on public.media_usages
+  for select to anon, authenticated
+  using (exists (
+    select 1 from public.media_assets asset
+    where asset.id = asset_id and asset.archived_at is null
+      and asset.rights_status in ('owned', 'licensed', 'open-license', 'generated')
+  ));
 
 drop policy if exists "admins manage media localizations" on public.media_asset_localizations;
 create policy "admins manage media localizations" on public.media_asset_localizations

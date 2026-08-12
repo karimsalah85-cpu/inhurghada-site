@@ -1,6 +1,7 @@
 import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
 import { eurToUsd, fullDayBoatOptions, halfDayBoatOptions, refreshments, speedboatMeals } from "@/data/speedboat-booking";
 import { snorkelingBoatEnglish, snorkelingBoatSlugs } from "@/data/snorkeling-boat-trips";
+import { applyTourMediaSafety } from "@/lib/tour-media-safety";
 
 export type Tour = {
   slug: string;
@@ -555,4 +556,8 @@ export const tours: Tour[] = [
 for (const slug of snorkelingBoatSlugs) {
   const tour = tours.find((item) => item.slug === slug);
   if (tour) Object.assign(tour, snorkelingBoatEnglish[slug]);
+}
+
+for (let index = 0; index < tours.length; index += 1) {
+  tours[index] = applyTourMediaSafety(tours[index], "en");
 }

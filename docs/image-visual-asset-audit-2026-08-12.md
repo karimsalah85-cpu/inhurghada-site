@@ -1,12 +1,18 @@
 # Daily Red Sea image and visual-asset audit — 2026-08-12
 
+## Release-safe category artwork
+
+The Cairo/Giza, horse riding, quad safari, Turkish bath/spa, El Gouna, Dolphin House and Senzo products now use separate non-photographic SVG category placeholders under `public/images/placeholders/`. These files are original Daily Red Sea artwork created for this repository, carry no third-party attribution requirement, and deliberately avoid representing a particular operator, venue, wildlife encounter or operating condition. Legacy gallery assignments for those products are suppressed at the shared tour-media boundary, including when legacy CMS or media-registry URLs are present.
+
+This is an interim accuracy and rights-control measure, not a claim that photography is unnecessary. Each affected product still requires authentic operator photography with a recorded creator/source, commercial-use rights evidence, acquisition date, exact binary checksum and appropriate localized alternative text before photographic media can replace the artwork.
+
 ## Executive summary
 
 The repository contains 47 raster/vector visual assets totaling about 19.8 MB; 35 are tourism/brand images under `public/images`. Next.js image optimization, AVIF/WebP negotiation, lazy loading for non-priority images, and homepage desktop/mobile art direction are generally sound. The primary risks are rights provenance, product accuracy, generic galleries, focal-point/crop control, and incomplete administration tooling.
 
 No current tourism binary can be declared cleared solely from repository evidence. `docs/image-credits.md` says provenance is unrecorded, while the public credits page previously made a broader Wikimedia claim. Later replacements and additions are not tied to exact source revisions or license proof. The current Senzo binary is one example where the recorded credit cannot be safely assumed to match the deployed file.
 
-Several images materially misrepresent products: Cairo trips use Luxor/Karnak, quad tours use a camel portrait, horse tours use an island-family scene, and wellness/El Gouna use generic imagery. These should be replaced with authentic operator photography first. No stock or generated replacement was published during this pass.
+The audit found that Cairo trips used Luxor/Karnak, quad tours used a camel portrait, horse tours used an island-family scene, and wellness/El Gouna used generic imagery. The release-safe category artwork above now prevents those inaccurate photos from being published for the affected products while authentic, rights-verified operator photography is obtained.
 
 ## Verified current state
 

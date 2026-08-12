@@ -78,6 +78,11 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   const type: "tour" | "transfer" = body.type === "transfer" ? "transfer" : "tour";
   const date = text(body.date, 10);
   const time = text(body.time, 5);
+  const idempotencyKey = text(body.idempotencyKey, 64).toLowerCase();
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(idempotencyKey)) {
+    return { error: "A valid booking attempt key is required." as const };
+  }
 
   if (customerName.length < 2 || !phonePattern.test(phone) || !hotel) return { error: "Enter a valid name, phone number, and pickup location." as const };
   if (!customerEmail || !emailPattern.test(customerEmail)) return { error: "Enter a valid email address." as const };
@@ -123,6 +128,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
 
   return {
     data: {
+      idempotencyKey,
       type,
       locale: body.locale === "de" ? "de" : body.locale === "ru" ? "ru" : body.locale === "ar" ? "ar" : "en",
       customerName,

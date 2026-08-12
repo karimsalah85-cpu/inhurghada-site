@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   addBooking,
   buildBookingMessage,
@@ -15,8 +16,8 @@ import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { whatsappNumber } from "@/lib/contact";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
-import { getUnavailableTrip } from "@/lib/live-content";
 import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
+import { bookingRequestHash } from "@/lib/booking-idempotency";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -71,22 +72,54 @@ export async function POST(request: NextRequest) {
     if (!validation.data) return bookingJson({ success: false, error: validation.error }, { status: 400 });
     const body = validation.data;
     const bookingType = body.type;
-    if (bookingType === "tour") {
-      const tripSlugs = body.tourSlug === "multi-trip" ? body.cartItems.map((item) => item.tourSlug) : [body.tourSlug];
-      const unavailable = await getUnavailableTrip(tripSlugs);
-      if (unavailable) return bookingJson({ success: false, error: unavailable.status === "paused" ? "This trip is temporarily unavailable for new bookings." : "This trip is no longer available for booking." }, { status: 409 });
-    }
     const { customerName, phone, customerEmail, hotel } = body;
     const pricing = calculateBookingPrice(body);
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
-    const { amount, guests: guestCount, guestSummary, tourName, price } = pricing.data;
+    const { amount: calculatedAmount, guests: guestCount, guestSummary, tourName, price } = pricing.data;
     const tripItems = "items" in pricing.data ? pricing.data.items : undefined;
     const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: $${item.amount.toFixed(2)}`).join("\n\n");
     const bookingNotes = [tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
 
-    const reference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomBytes(3).toString("hex").toUpperCase()}`;
+    const proposedReference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomBytes(3).toString("hex").toUpperCase()}`;
+    const supabase = createRequiredAdminClient();
+    const { idempotencyKey, ...materialRequest } = body;
+    const requestHash = bookingRequestHash(materialRequest);
+    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_idempotent", {
+      p_idempotency_key: idempotencyKey,
+      p_request_hash: requestHash,
+      p_reference: proposedReference,
+      p_type: bookingType,
+      p_customer_name: customerName,
+      p_customer_email: customerEmail,
+      p_phone: phone,
+      p_tour_name: tourName,
+      p_tour_slug: body.tourSlug || (bookingType === "transfer" ? body.service : ""),
+      p_date: body.date,
+      p_start_time: body.time || null,
+      p_guests: guestCount,
+      p_adults: bookingType === "tour" ? body.adults : 0,
+      p_youth: bookingType === "tour" ? body.youth : 0,
+      p_infants: bookingType === "tour" ? body.infants : 0,
+      p_hotel: hotel,
+      p_notes: bookingNotes || null,
+      p_amount: calculatedAmount,
+      p_currency: "USD",
+      p_locale: body.locale,
+      p_items: body.tourSlug === "multi-trip" ? body.cartItems.map((item) => ({ tour_slug: item.tourSlug, date: item.date, time: item.time, places: item.adults + item.youth + item.infants })) : null,
+    });
+    if (bookingError) {
+      console.error("Booking database save failed", bookingError);
+      const conflictMessage = /different booking details/i.test(bookingError.message || "") ? bookingError.message : null;
+      const capacityMessage = /sold out|places remain|capacity|unavailable/i.test(bookingError.message || "") ? bookingError.message : null;
+      return bookingJson({ success: false, error: conflictMessage || capacityMessage || "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: conflictMessage ? 409 : capacityMessage ? 409 : 503 });
+    }
+    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string }; replayed?: boolean } | null;
+    const bookingId = persisted?.booking?.id;
+    const reference = persisted?.booking?.reference;
+    if (!bookingId || !reference) return bookingJson({ success: false, error: "We could not confirm the saved booking." }, { status: 503 });
+    const amount = Number(persisted.booking?.amount ?? calculatedAmount);
     const message = buildBookingMessage({
       reference,
       customerName,
@@ -121,7 +154,7 @@ export async function POST(request: NextRequest) {
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
-    const booking = addBooking({
+    const booking = findBooking(reference) || addBooking({
       reference,
       type: bookingType,
       customerName,
@@ -141,32 +174,11 @@ export async function POST(request: NextRequest) {
       message: bookingNotes,
     });
 
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
-      const supabase = createRequiredAdminClient();
-      const bookingArguments = {
-        p_reference: reference, p_customer_name: customerName, p_customer_email: customerEmail, p_phone: phone,
-        p_tour_name: tourName, p_date: body.date, p_guests: guestCount, p_hotel: hotel,
-        p_notes: bookingNotes || null, p_amount: amount, p_currency: "USD", p_locale: body.locale,
-      };
-      const { error: bookingError } = body.tourSlug === "multi-trip"
-        ? await supabase.rpc("reserve_multi_trip_booking", { ...bookingArguments, p_items: body.cartItems.map((item) => ({ tour_slug: item.tourSlug, date: item.date, time: item.time, places: item.adults + item.youth + item.infants })) })
-        : await supabase.rpc("reserve_booking", {
-          ...bookingArguments, p_type: bookingType, p_tour_slug: body.tourSlug || (bookingType === "transfer" ? body.service : ""),
-          p_start_time: body.time || null, p_adults: bookingType === "tour" ? body.adults : 0,
-          p_youth: bookingType === "tour" ? body.youth : 0, p_infants: bookingType === "tour" ? body.infants : 0,
-        });
-      if (bookingError) {
-        console.error("Booking database save failed", bookingError);
-        const capacityMessage = /sold out|places remain|capacity/i.test(bookingError.message || "") ? bookingError.message : null;
-        return bookingJson({ success: false, error: capacityMessage || "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: capacityMessage ? 409 : 503 });
-      }
-    }
-
     const [whatsappResult, bookingEmailResult, customerEmailResult] = await Promise.all([
-      sendWhatsAppMessage(bookingWhatsApp, message),
-      sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml, confirmationAttachment),
+      deliverBookingNotification(supabase, bookingId, "operator_whatsapp", () => sendWhatsAppMessage(bookingWhatsApp, message)),
+      deliverBookingNotification(supabase, bookingId, "operator_email", () => sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml, confirmationAttachment)),
       customerEmail
-        ? sendBookingEmail(
+        ? deliverBookingNotification(supabase, bookingId, "customer_email", () => sendBookingEmail(
           customerEmail,
           body.locale === "de" ? `Deine Buchungsbestätigung: ${reference}` : body.locale === "ru" ? `Подтверждение бронирования: ${reference}` : body.locale === "ar" ? `تأكيد الحجز: ${reference}` : `Your booking confirmation: ${reference}`,
           body.locale === "de"
@@ -177,7 +189,7 @@ export async function POST(request: NextRequest) {
               ? `<p>مرحباً ${escapeHtml(customerName)}،</p><p>ملخص حجزك مرفق بصيغة PDF. يتم الدفع نقداً عند الوصول.</p><p>رقم الحجز: ${escapeHtml(reference)}</p><p>سنؤكد تفاصيل الاستلام عبر واتساب.</p>`
             : `<p>Hello ${escapeHtml(customerName)},</p><p>Your booking summary is attached. Payment is cash on arrival.</p><p>Reference: ${escapeHtml(reference)}</p><p>We confirm pickup details by WhatsApp.</p>`,
           confirmationAttachment,
-        )
+        ))
         : Promise.resolve({ success: false, reason: "no-customer-email" }),
     ]);
 
@@ -197,6 +209,38 @@ export async function POST(request: NextRequest) {
     console.error("Booking submission failed", error);
     return bookingJson({ success: false, error: "Booking submission failed" }, { status: 500 });
   }
+}
+
+async function deliverBookingNotification(
+  database: SupabaseClient,
+  bookingId: string,
+  kind: "operator_whatsapp" | "operator_email" | "customer_email",
+  deliver: () => Promise<{ success: boolean; reason?: string }>,
+) {
+  const { data: claimed, error: claimError } = await database.rpc("claim_booking_notification", {
+    p_booking_id: bookingId,
+    p_notification_kind: kind,
+  });
+  if (claimError) {
+    console.error("Booking notification claim failed", { kind, message: claimError.message });
+    return { success: false, reason: "claim-failed" };
+  }
+  if (!claimed) return { success: true, reason: "already-claimed-or-sent" };
+
+  let result: { success: boolean; reason?: string };
+  try {
+    result = await deliver();
+  } catch (error) {
+    result = { success: false, reason: error instanceof Error ? error.message : "Delivery failed." };
+  }
+  const { error: finishError } = await database.rpc("finish_booking_notification", {
+    p_booking_id: bookingId,
+    p_notification_kind: kind,
+    p_success: result.success,
+    p_error: result.reason || null,
+  });
+  if (finishError) console.error("Booking notification completion failed", { kind, message: finishError.message });
+  return result;
 }
 
 function buildBookingEmailHtml({
