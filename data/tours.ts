@@ -56,6 +56,8 @@ export type Tour = {
   galleryImages?: string[];
   imageAlt?: string;
   galleryImageAlts?: string[];
+  imageFocalPoint?: { x: number; y: number };
+  galleryImageFocalPoints?: { x: number; y: number }[];
 };
 
 

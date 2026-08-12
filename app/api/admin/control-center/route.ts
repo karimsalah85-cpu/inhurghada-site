@@ -33,6 +33,8 @@ export async function GET() {
   const queries = await Promise.all([
     hasAdminPermission(user,"content") ? supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
     hasAdminPermission(user,"content") ? supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"content") ? supabase.from("media_asset_localizations").select("asset_id,locale,alt_text,caption").limit(1000) : Promise.resolve({data:[],error:null}),
+    hasAdminPermission(user,"content") ? supabase.from("media_usages").select("id,asset_id,owner_type,owner_key,role,sort_order,crop_profile").order("sort_order").limit(1000) : Promise.resolve({data:[],error:null}),
     hasAdminPermission(user,"operations") ? supabase.from("tour_availability").select("*").order("service_date").limit(100) : Promise.resolve({data:[],error:null}),
     hasAdminPermission(user,"operations") ? supabase.from("staff_members").select("*").order("name").limit(100) : Promise.resolve({data:[],error:null}),
     hasAdminPermission(user,"operations") ? supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
@@ -48,8 +50,8 @@ export async function GET() {
   if (migrationError) return json({ configured: false, migration: "202608010001_admin_control_center.sql" });
   const otherError = queries.find((result) => result.error)?.error;
   if (otherError) return json({ error: otherError.message }, 500);
-  const [content, media, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health] = queries.map((result) => result.data || []);
-  return json({ configured: true, content, media, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health });
+  const [content, media, mediaLocalizations, mediaUsages, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health] = queries.map((result) => result.data || []);
+  return json({ configured: true, content, media, mediaLocalizations, mediaUsages, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health });
 }
 
 export async function POST(request: NextRequest) {

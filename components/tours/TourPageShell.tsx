@@ -71,7 +71,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : zh ? "赫尔格达体验" : `${destination?.name || "Hurghada"} experience`}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
-        <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} imageAlt={tour.imageAlt} galleryImageAlts={tour.galleryImageAlts} locale={locale} />
+        <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} imageAlt={tour.imageAlt} galleryImageAlts={tour.galleryImageAlts} imageFocalPoint={tour.imageFocalPoint} galleryImageFocalPoints={tour.galleryImageFocalPoints} locale={locale} />
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">

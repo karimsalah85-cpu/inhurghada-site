@@ -32,6 +32,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
   if (resource === "notes" && typeof update.tags === "string") update.tags = update.tags.split(",").map((item: string) => item.trim()).filter(Boolean);
   if (["content", "availability", "templates", "redirects"].includes(resource)) update.updated_at = new Date().toISOString();
   if (resource === "content") update.updated_by = user!.id;
+  if (resource === "media" && (Array.isArray(body.localizations) || Array.isArray(body.usages))) {
+    const { error: governanceError } = await supabase.rpc("replace_media_governance", {
+      p_asset_id: id,
+      p_localizations: Array.isArray(body.localizations) ? body.localizations : null,
+      p_usages: Array.isArray(body.usages) ? body.usages : null,
+    });
+    if (governanceError) return NextResponse.json({ error: governanceError.message }, { status: 400 });
+  }
   const { data, error } = await supabase.from(table).update(update).eq(key, id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: resource, resource_identifier: id, summary_text: `Updated ${resource} record`, before_value: before, after_value: data });

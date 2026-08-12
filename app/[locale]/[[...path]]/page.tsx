@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   if (!kind) notFound();
-  const tours = await getLiveTours();
+  const tours = await getLiveTours(locale);
   const sourceTour = kind === "tour"
     ? tours.find((item) => item.slug === path[1]) || fallbackTours.find((item) => item.slug === path[1])
     : undefined;
@@ -121,7 +121,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   if (!kind) notFound();
-  const tours = await getLiveTours();
+  const tours = await getLiveTours(locale);
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   if (locale === "de") {

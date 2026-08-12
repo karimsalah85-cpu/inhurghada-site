@@ -12,10 +12,12 @@ type TourGalleryProps = {
   galleryImages: string[];
   imageAlt?: string;
   galleryImageAlts?: string[];
+  imageFocalPoint?: { x: number; y: number };
+  galleryImageFocalPoints?: { x: number; y: number }[];
   locale: Locale;
 };
 
-export default function TourGallery({ title, mainImage, galleryImages, imageAlt, galleryImageAlts = [], locale }: TourGalleryProps) {
+export default function TourGallery({ title, mainImage, galleryImages, imageAlt, galleryImageAlts = [], imageFocalPoint, galleryImageFocalPoints = [], locale }: TourGalleryProps) {
   const images = [mainImage, ...galleryImages];
   const imageCount = images.length;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -54,7 +56,7 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
       aria-label={`${openLabel}: ${title} ${index + 1}`}
       className={`group relative overflow-hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400 ${primary ? "aspect-[4/3] sm:aspect-auto sm:min-h-64" : "aspect-[4/3] sm:aspect-auto"}`}
     >
-      <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — gallery image ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" priority={primary} />
+      <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — gallery image ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" style={{ objectPosition: `${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.x ?? 0.5) * 100}% ${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.y ?? 0.5) * 100}%` }} priority={primary} />
       <ImageWatermark prominent={primary} />
       <span className="absolute right-3 top-3 rounded-full bg-slate-950/70 p-2 text-white shadow-lg backdrop-blur-sm">
         <Expand size={18} aria-hidden="true" />
