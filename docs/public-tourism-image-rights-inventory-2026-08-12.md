@@ -1,6 +1,31 @@
 # Public tourism image rights inventory — 2026-08-12
 
-This manifest is keyed to exact SHA-256 checksums. Repository evidence cannot reconcile any legacy tourism photograph to a creator, exact source revision, licence or commercial permission. Those binaries remain in place for rollback compatibility but are quarantined from public delivery: application data uses original SVG category artwork, shared tour/blog safety functions override CMS media, and direct legacy paths redirect temporarily to `/images/placeholders/sea-activity.svg`. Brand-only `logo.png` and `daily-red-sea-watermark.png` are outside this tourism inventory.
+This manifest is keyed to exact SHA-256 checksums. Repository evidence cannot reconcile any legacy tourism photograph to a creator, exact source revision, licence or commercial permission. Those binaries remain in place for rollback compatibility but are quarantined from public delivery. On 12 August 2026, the site owner supplied a new group of original photographs and explicitly confirmed “all this photos are mine you can use.” Selected files were resized/re-encoded into the paths below; the attachment-to-output mapping and hashes provide the audit trail. Brand-only `logo.png` and `daily-red-sea-watermark.png` are outside this tourism inventory.
+
+## Owner-supplied photography
+
+Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supplied project attachment on 12 August 2026. Rights basis: owner confirmation permitting website use; commercial use and modification permitted; no attribution required. Status: verified owned for this project. Exact product use is restricted by `lib/tour-media-safety.ts`; ambiguous images remain unused.
+
+| Published file | SHA-256 | Attachment filename | Approved use |
+|---|---|---|---|
+| `images/owned/dolphin-house-pod.jpg` | `2b4ea412d332286017d7cd9014ca840d04c1a74d5a86b3509af22a7127c7f4de` | `e019617d-e292-4ee1-9839-7c04f1184cf1.jpeg` | Dolphin House primary; sightings disclaimer required |
+| `images/owned/dolphin-house-close.jpg` | `734d89142ab393546d9f4a9271e9bfe600ee255468ca8411fdc2bd3fcdce293a` | `10d0e115-1e42-4417-bab5-02b12757f895.jpeg` | Dolphin House gallery |
+| `images/owned/dolphin-house-portrait.jpg` | `e1d2e85945c1a78bb767c85fcad730f5b514c36f15642cc4b34f9912cd8c4a26` | `a99dcb3a-70d3-4709-971e-2923e191adfb.jpeg` | Dolphin House gallery |
+| `images/owned/dolphin-house-pair.jpg` | `56bbc6a77a091578c9e52311857fb4f486b952469798807b5faaaa74983bad12` | `40bbed07-6704-489e-ac88-0e064838a288.jpeg` | Dolphin House gallery |
+| `images/owned/senzo-mall.jpg` | `cb57c854fab96f1b036d20816dc667df479dfbf843d0879f47af4c6a22d709c7` | `IMG_0184.png` | Senzo Mall transfer |
+| `images/owned/cairo-giza-day.jpg` | `548c1e13f00189df9c57d15642969937e877305c85a23165855396ce8f8d10a5` | `IMG_3392.jpeg` | Cairo/Giza primary |
+| `images/owned/cairo-giza-night.jpg` | `616b5ea58ec3f9db680ae73b3277670f7f91e54ae84f155610482ba9ec02b08e` | `IMG_3544.jpeg` | Cairo/Giza gallery |
+| `images/owned/quad-safari-morning.jpg` | `5d1c1c17735c379d3aa959b9db6194f752c66bbff21cb41b6118f6d413f4fe23` | `1a578e54-ae38-4075-901a-a12e7114d026.jpeg` | Morning quad safari only |
+| `images/owned/speedboat-action-wide.jpg` | `90f5f15a1082a6288c49652180b07937230607cc26369b9d017ec2f838f1ac12` | `d326f4c0-a94f-4870-b5e1-3c8a65823df1.jpeg` | Speedboat primary |
+| `images/owned/speedboat-action.jpg` | `e6e9d4da21cd65c9a74d13196ad73a7cfd321237975a1958f9f6da18103b90a4` | `53f340c2-474c-4b75-8aa6-0638246ea3d1.jpeg` | Speedboat gallery |
+| `images/owned/speedboat-guests.jpg` | `8a8f962d5c96c6ffc263dc6719f096133202649fbe7dce01a54ebd1b86ac0f09` | `86273497-6a93-4188-b2bb-1f293da80ea2.jpeg` | Speedboat gallery |
+| `images/owned/speedboat-shallows.jpg` | `38117e86f0e85935ff2a58442e1be632675945830ebd2e178a79d92ada0adddb` | `d7c11dfa-6bd4-4858-bb25-6a49f4ad16d5.jpeg` | Speedboat gallery |
+| `images/owned/speedboat-marina.jpg` | `9c127fdea95ab0b750fd3cf6be3c904f2598452cb494d1049cbb6ed3326fa581` | `4b273029-0ded-4f8a-9c7c-1187863258a8.jpeg` | Speedboat gallery |
+| `images/owned/red-sea-diver-coral.jpg` | `0df1ab3465b90f9541930d93183af2904de3b164150502632b03d9363c31df47` | `IMG_8947.jpeg` | Diving primary |
+| `images/owned/red-sea-diver-fish.jpg` | `58aba429fb5fdc0693958a1c8394661a01c9727194295eb25446a37f0f96f8d6` | `968DA20D-11F3-4245-9B44-D6EE8E0AB43E.jpeg` | Diving gallery |
+| `images/owned/red-sea-diver.jpg` | `32ac54c2528ac06ace54242472de420a79ec84042870763618cd843cfe7fc633` | `GOPR3175.jpeg` | Diving gallery |
+| `images/owned/red-sea-diver-reef.jpg` | `f91baecec10739b2d49d3eaf49f03b709e0c9a94eb079157f402f12d9507d9d6` | `GOPR3021.jpeg` | Diving gallery |
+| `images/owned/mahmya-boats-sunset.jpg` | `3972c34fb99f01712da800dca3610239302a020215e5528aa62e73894783601b` | `IMG_1275.jpeg` | Mahmya primary |
 
 | File path | SHA-256 | Public usages | Creator | Exact source URL | License type/version | Commercial use | Modification | Attribution | Evidence | Status | Decision |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -56,10 +81,10 @@ This manifest is keyed to exact SHA-256 checksums. Repository evidence cannot re
 
 - Original Daily Red Sea artwork: 13
 - Unresolved legacy tourism binaries: 33, all quarantined from public delivery by redirects and no longer referenced as rendered media
-- Verified owned photography: 0
+- Verified owned photography: 18 optimized derivatives from 18 owner-supplied originals
 - Verified commercially licensed photography: 0
 - Verified compatible open-license photography: 0
 - Inaccurate public images: 0 after replacement
 - Restricted public images: 0
 
-No unresolved, inaccurate or restricted tourism binary is intentionally delivered as a public image after this change. Authentic photography remains a future replacement task requiring exact source/licence evidence.
+No unresolved, inaccurate or restricted tourism binary is intentionally delivered as a public image after this change. The remaining placeholders require exact, product-matched owner photography before replacement.

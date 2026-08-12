@@ -1,7 +1,41 @@
 import type { Tour } from "@/data/tours";
 import type { Locale } from "@/lib/i18n";
 
-type SafeMedia = { image: string; alt: Record<Locale, string> };
+type SafeMedia = {
+  image: string;
+  alt: Record<Locale, string>;
+  focal?: { x: number; y: number };
+  gallery?: string[];
+  galleryAlts?: Record<Locale, string[]>;
+};
+
+const localizedAlt = (en: string): Record<Locale, string> => ({ en, ar: en, de: en, ru: en, pl: en, zh: en });
+
+const ownedMedia: Record<string, SafeMedia> = {
+  dolphin: {
+    image: "/images/owned/dolphin-house-pod.jpg",
+    alt: localizedAlt("Wild dolphins swimming in clear Red Sea water; sightings on wildlife trips are not guaranteed"),
+    gallery: ["/images/owned/dolphin-house-close.jpg", "/images/owned/dolphin-house-portrait.jpg", "/images/owned/dolphin-house-pair.jpg"],
+    galleryAlts: { en: ["A pod of dolphins swimming near the surface", "A dolphin swimming toward the camera with snorkellers above", "Two dolphins swimming together in clear water"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  senzo: { image: "/images/owned/senzo-mall.jpg", alt: localizedAlt("Senzo Mall shopping, dining and indoor public areas") },
+  cairo: {
+    image: "/images/owned/cairo-giza-day.jpg", alt: localizedAlt("The Giza pyramids seen across Cairo in daylight"), focal: { x: 0.45, y: 0.58 },
+    gallery: ["/images/owned/cairo-giza-night.jpg"], galleryAlts: { en: ["The Giza pyramids illuminated at night beyond Cairo rooftops"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  quadMorning: { image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes on a desert safari") },
+  speedboat: {
+    image: "/images/owned/speedboat-action-wide.jpg", alt: localizedAlt("A Daily Red Sea speedboat carrying guests across clear Red Sea water"),
+    gallery: ["/images/owned/speedboat-action.jpg", "/images/owned/speedboat-guests.jpg", "/images/owned/speedboat-shallows.jpg", "/images/owned/speedboat-marina.jpg"],
+    galleryAlts: { en: ["A speedboat travelling across turquoise water", "Guests enjoying a Red Sea speedboat trip", "A white speedboat moored in shallow clear water", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  diving: {
+    image: "/images/owned/red-sea-diver-coral.jpg", alt: localizedAlt("Scuba diver beside a colourful Red Sea coral reef"),
+    gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg"],
+    galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  mahmya: { image: "/images/owned/mahmya-boats-sunset.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
+};
 
 const categoryMedia: Record<string, SafeMedia> = {
   sea: { image: "/images/placeholders/sea-activity.svg", alt: { en: "Illustrated placeholder for a Red Sea activity", ar: "رسم توضيحي مؤقت لنشاط في البحر الأحمر", de: "Illustrierter Platzhalter für eine Aktivität am Roten Meer", ru: "Иллюстрированная заглушка для отдыха на Красном море", pl: "Ilustrowana grafika zastępcza dla atrakcji nad Morzem Czerwonym", zh: "红海活动插画占位图" } },
@@ -20,23 +54,33 @@ const categoryMedia: Record<string, SafeMedia> = {
 };
 
 const mediaBySlug: Record<string, SafeMedia> = {
-  "quad-safari-morning": categoryMedia.quad, "quad-safari-sunset": categoryMedia.quad,
-  "senzo-transfer": categoryMedia.senzo, "dolphin-house-snorkeling": categoryMedia.dolphin,
+  "quad-safari-morning": ownedMedia.quadMorning, "quad-safari-sunset": categoryMedia.quad,
+  "senzo-transfer": ownedMedia.senzo, "dolphin-house-snorkeling": ownedMedia.dolphin,
   "horse-riding-sea-desert": categoryMedia.horse, "sahl-hasheesh-horse-riding": categoryMedia.horse,
-  "cairo-giza-day-trip-bus": categoryMedia.cairo, "cairo-day-trip-flight": categoryMedia.cairo,
+  "cairo-giza-day-trip-bus": ownedMedia.cairo, "cairo-day-trip-flight": ownedMedia.cairo,
   "el-gouna-city-boat-tour": categoryMedia.elGouna, "turkish-bath-spa": categoryMedia.spa,
+};
+
+const localizedGalleryAlts = (media: SafeMedia, locale: Locale) => {
+  const english = media.galleryAlts?.en || [];
+  const translated = media.galleryAlts?.[locale] || [];
+  return english.map((alt, index) => translated[index] || alt);
 };
 
 export function applyTourMediaSafety(tour: Tour, locale: Locale = "en"): Tour {
   const category = `${tour.category || ""} ${tour.title}`.toLowerCase();
   const safe = mediaBySlug[tour.slug]
-    || (/transfer/.test(category) ? categoryMedia.transfer
+    || (/speedboat/.test(category) ? ownedMedia.speedboat
+      : /diving|scuba/.test(category) ? ownedMedia.diving
+      : /mahmya/.test(category) ? ownedMedia.mahmya
+      : /transfer/.test(category) ? categoryMedia.transfer
       : /diving|scuba|underwater|submarine/.test(category) ? categoryMedia.diving
       : /island|snorkel|boat|speedboat|sea/.test(category) ? categoryMedia.island
       : /desert|safari|quad|camel|stargaz/.test(category) ? categoryMedia.desert
       : /luxor|cairo|cultural/.test(category) ? categoryMedia.culture
       : categoryMedia.sea);
-  return { ...tour, image: safe.image, imageAlt: safe.alt[locale], imageFocalPoint: { x: 0.5, y: 0.5 }, galleryImages: [], galleryImageAlts: [], galleryImageFocalPoints: [] };
+  const galleryImages = safe.gallery || [];
+  return { ...tour, image: safe.image, imageAlt: safe.alt[locale], imageFocalPoint: safe.focal || { x: 0.5, y: 0.5 }, galleryImages, galleryImageAlts: localizedGalleryAlts(safe, locale), galleryImageFocalPoints: galleryImages.map(() => ({ x: 0.5, y: 0.5 })) };
 }
 
 export const applyTourCollectionMediaSafety = (tours: Tour[], locale: Locale = "en") => tours.map((tour) => applyTourMediaSafety(tour, locale));
