@@ -2,6 +2,7 @@
 
 import { facebookUrl, instagramUrl } from "@/lib/contact";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
 export default function SocialLinks({
   className = "",
@@ -10,7 +11,8 @@ export default function SocialLinks({
   className?: string;
   dark?: boolean;
 }) {
-  const { setting } = useSiteSettings();
+  const { setting, language } = useSiteSettings();
+  const copy = publicInterfaceCopy[language];
   const liveFacebookUrl = setting<string>("facebook_url", facebookUrl);
   const liveInstagramUrl = setting<string>("instagram_url", instagramUrl);
   const linkClass = dark
@@ -18,12 +20,12 @@ export default function SocialLinks({
     : "border-slate-200 bg-white text-slate-700 hover:border-cyan-500 hover:text-cyan-700";
 
   return (
-    <div aria-label="Follow Daily Red Sea" className={`flex items-center gap-2 ${className}`}>
+    <div aria-label={copy.follow} className={`flex items-center gap-2 ${className}`}>
       <a
         href={liveFacebookUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Follow Daily Red Sea on Facebook"
+        aria-label={copy.facebook}
         title="Facebook"
         className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${linkClass}`}
       >
@@ -35,7 +37,7 @@ export default function SocialLinks({
         href={liveInstagramUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Follow Daily Red Sea on Instagram"
+        aria-label={copy.instagram}
         title="Instagram"
         className={`inline-flex h-8 w-8 items-center justify-center rounded-full border transition ${linkClass}`}
       >

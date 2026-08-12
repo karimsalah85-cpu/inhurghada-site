@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 import { consentStorageKey, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
+import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
 const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
@@ -59,9 +61,9 @@ export default function AnalyticsProvider() {
 }
 
 function CookieBanner({ onSave }: { onSave: (preferences: ConsentPreferences) => void }) {
+  const { language } = useSiteSettings();
+  const copy = publicInterfaceCopy[language];
   const [analytics, setAnalytics] = useState(true);
   const [marketing, setMarketing] = useState(false);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  useEffect(() => headingRef.current?.focus(), []);
-  return <section role="dialog" aria-modal="true" aria-labelledby="cookie-preferences-title" className="fixed inset-x-4 bottom-4 z-[100] mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl sm:p-6"><h2 ref={headingRef} id="cookie-preferences-title" tabIndex={-1} className="text-lg font-black text-slate-950">Your privacy choices</h2><p className="mt-2 text-sm leading-6 text-slate-600">We use analytics to understand bookings and optional marketing tools to measure advertising. You can change your choice by clearing this site’s stored data in your browser.</p><fieldset className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-slate-800"><legend className="sr-only">Optional cookies</legend><label className="flex items-center gap-2"><input type="checkbox" checked={analytics} onChange={(event) => setAnalytics(event.target.checked)} /> Analytics</label><label className="flex items-center gap-2"><input type="checkbox" checked={marketing} onChange={(event) => setMarketing(event.target.checked)} /> Marketing</label></fieldset><div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => onSave({ analytics: false, marketing: false })} className="rounded-full border border-slate-300 px-4 py-2 text-sm font-bold">Reject optional</button><button type="button" onClick={() => onSave({ analytics, marketing })} className="rounded-full border border-cyan-700 px-4 py-2 text-sm font-bold text-cyan-800">Save choices</button><button type="button" onClick={() => onSave({ analytics: true, marketing: true })} className="rounded-full bg-cyan-700 px-4 py-2 text-sm font-bold text-white">Accept all</button></div></section>;
+  return <section role="region" aria-labelledby="cookie-preferences-title" dir={language === "ar" ? "rtl" : "ltr"} className="fixed inset-x-4 bottom-4 z-[100] mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl sm:p-6"><h2 id="cookie-preferences-title" className="text-lg font-black text-slate-950">{copy.cookieTitle}</h2><p className="mt-2 text-sm leading-6 text-slate-600">{copy.cookieText}</p><fieldset className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-slate-800"><legend className="sr-only">{copy.optionalCookies}</legend><label className="flex items-center gap-2"><input type="checkbox" checked={analytics} onChange={(event) => setAnalytics(event.target.checked)} /> {copy.analytics}</label><label className="flex items-center gap-2"><input type="checkbox" checked={marketing} onChange={(event) => setMarketing(event.target.checked)} /> {copy.marketing}</label></fieldset><div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => onSave({ analytics: false, marketing: false })} className="rounded-full border border-slate-300 px-4 py-2 text-sm font-bold">{copy.reject}</button><button type="button" onClick={() => onSave({ analytics, marketing })} className="rounded-full border border-cyan-700 px-4 py-2 text-sm font-bold text-cyan-800">{copy.save}</button><button type="button" onClick={() => onSave({ analytics: true, marketing: true })} className="rounded-full bg-cyan-700 px-4 py-2 text-sm font-bold text-white">{copy.accept}</button></div></section>;
 }

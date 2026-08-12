@@ -26,7 +26,7 @@ describe("media governance migration contract", () => {
   it("keeps localization and usage references relationally valid", () => {
     expect(migration).toMatch(/asset_id uuid not null references public\.media_assets\(id\) on delete cascade/i);
     expect(migration).toMatch(/asset_id uuid not null references public\.media_assets\(id\) on delete restrict/i);
-    expect(migration).toMatch(/unique \(asset_id, owner_type, owner_key, role\)/i);
+    expect(migration).toMatch(/media_usages_assignment_unique unique \(asset_id, owner_type, owner_key, role\)/i);
     expect(migration).toMatch(/create index if not exists media_usages_asset_id_idx/i);
     expect(migration).toMatch(/enable row level security/gi);
   });
@@ -77,14 +77,20 @@ describe("media administration safety contract", () => {
   });
 
   it("defines database validation for owners, roles, locales, ordering, focal points, and duplicates", () => {
-    expect(migration).toContain("owner_type in ('tour', 'destination', 'category', 'blog', 'page', 'social')");
-    expect(migration).toContain("role in ('featured', 'gallery', 'thumbnail', 'hero', 'social')");
-    expect(migration).toContain("locale in ('en', 'ar', 'de', 'ru', 'pl', 'zh')");
+    expect(migration).toContain("media_usages_owner_type_check check (owner_type in ('tour', 'destination', 'category', 'blog', 'page', 'social'))");
+    expect(migration).toContain("media_usages_role_check check (role in ('featured', 'gallery', 'thumbnail', 'hero', 'social'))");
+    expect(migration).toContain("media_asset_localizations_locale_check check (locale in ('en', 'ar', 'de', 'ru', 'pl', 'zh'))");
     expect(migration).toContain("Duplicate localization locale");
     expect(migration).toContain("Duplicate media usage assignment");
-    expect(migration).toContain("sort_order >= 0");
+    expect(migration).toContain("media_usages_sort_order_check check (sort_order >= 0)");
     expect(migration).toContain("Invalid horizontal focal point");
     expect(migration).toContain("Invalid vertical focal point");
+  });
+
+  it("retrofits named constraints when upgrading an earlier preview schema", () => {
+    expect(migration).toMatch(/create table if not exists public\.media_usages[\s\S]*alter table public\.media_usages add constraint media_usages_owner_type_check/i);
+    expect(migration).toMatch(/drop constraint if exists media_usages_asset_id_owner_type_owner_key_role_sort_order_key/i);
+    expect(migration).toContain("media_usages_assignment_unique");
   });
 
   it("relies on PostgreSQL transaction rollback for any failed save", () => {

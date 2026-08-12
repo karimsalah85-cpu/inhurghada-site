@@ -4,12 +4,12 @@ import { MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
 export default function WhatsAppButton() {
-  const { setting } = useSiteSettings();
+  const { setting, language } = useSiteSettings();
 
-  const message =
-    "Hello Daily Red Sea 🌊 I would like information about your tours.";
+  const message = publicInterfaceCopy[language].whatsapp;
 
   const configuredNumber = setting<string>("whatsapp_number", "").replace(/\D/g, "");
   const url = configuredNumber ? `https://wa.me/${configuredNumber}?text=${encodeURIComponent(message)}` : whatsappUrl(message);

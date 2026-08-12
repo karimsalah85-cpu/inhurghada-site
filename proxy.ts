@@ -4,6 +4,10 @@ import { canonicalAliasTarget, isKnownApplicationPath } from "@/lib/public-route
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const previewAuthRoutes = new Set(["/api/admin/login", "/api/admin/logout", "/api/admin/forgot-password"]);
+  if (process.env.VERCEL_ENV === "preview" && pathname.startsWith("/api/admin/") && !previewAuthRoutes.has(pathname) && !["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+    return NextResponse.json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, { status: 503, headers: { "Cache-Control": "private, no-store" } });
+  }
   const aliasTarget = canonicalAliasTarget(pathname);
   if (aliasTarget) return NextResponse.redirect(new URL(aliasTarget, request.url), 301);
   if (!isKnownApplicationPath(pathname)) {

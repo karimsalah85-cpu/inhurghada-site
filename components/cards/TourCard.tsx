@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Clock, MapPin, ShieldCheck, Star } from "lucide-react";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import ImageWatermark from "@/components/media/ImageWatermark";
+import { localizeProductBadge } from "@/lib/public-interface-i18n";
 
 type TourCardProps = {
   image: string;
@@ -56,7 +57,7 @@ export default function TourCard({
           <ImageWatermark />
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
           {hasReviews ? <div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-sm shadow"><Star size={16} className="fill-yellow-400 text-yellow-400" /><span className="font-semibold">{rating} · {reviewCount}</span></div> : null}
-          <span className="absolute bottom-4 left-4 rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white">{badge ?? t("bestSeller")}</span>
+          <span className="absolute bottom-4 start-4 rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white">{localizeProductBadge(language, badge ?? "Best Seller")}</span>
         </div>
         <div className="p-6">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{category || "Hurghada experience"}</p>

@@ -11,6 +11,7 @@ import { whatsappUrl } from "@/lib/contact";
 import { localePath, localeSwitchPath } from "@/lib/i18n";
 import SocialLinks from "@/components/layout/SocialLinks";
 import { useCart } from "@/components/cart/CartProvider";
+import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
 
 export default function Navbar() {
@@ -21,6 +22,7 @@ export default function Navbar() {
   const { currency, language, setCurrency, t } = useSiteSettings();
   const pathname = usePathname();
   const { items } = useCart();
+  const ui = publicInterfaceCopy[language];
 
 
   function closeMenu() {
@@ -78,7 +80,7 @@ export default function Navbar() {
           href={localePath(language)}
           onClick={closeMenu}
           className="flex shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100"
-          aria-label="Daily Red Sea home"
+          aria-label={ui.home}
         >
           <Image
             src="/brand/dailyredsea-wordmark.svg"
@@ -114,8 +116,8 @@ export default function Navbar() {
             {t("tours")}
           </NavLink>
 
-          <NavLink href="/destinations/marsa-alam" active={pathname === "/destinations/marsa-alam"}>
-            Marsa Alam <span className="ml-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-900">Soon</span>
+          <NavLink href={localePath(language, "/destinations/marsa-alam")} active={pathname === localePath(language, "/destinations/marsa-alam")}>
+            Marsa Alam <span className="ms-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-900">{ui.soon}</span>
           </NavLink>
 
 
@@ -127,7 +129,7 @@ export default function Navbar() {
             {t("about")}
           </NavLink>
 
-          <NavLink href="/blog" active={pathname === "/blog" || pathname.startsWith("/blog/")}>
+          <NavLink href={localePath(language, "/blog")} active={pathname === localePath(language, "/blog") || pathname.startsWith(`${localePath(language, "/blog")}/`)}>
             {language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}
           </NavLink>
           </div>
@@ -154,7 +156,7 @@ export default function Navbar() {
             {t("bookNow")}
           </Link>
 
-          <Link href={localePath(language, "/cart")} aria-label={`${items.length} trips in cart`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
+          <Link href={localePath(language, "/cart")} aria-label={`${items.length} ${ui.cart}`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
             <ShoppingCart size={22} />
             {items.length ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-xs font-bold text-white">{items.length}</span> : null}
           </Link>
@@ -188,7 +190,7 @@ export default function Navbar() {
           text-slate-800
           xl:hidden
           "
-          aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+          aria-label={open ? ui.closeMenu : ui.openMenu}
           aria-expanded={open}
           aria-controls="mobile-navigation"
         >
@@ -215,7 +217,7 @@ export default function Navbar() {
 
         <div
           id="mobile-navigation"
-          aria-label="Mobile navigation"
+          aria-label={ui.mobileNav}
           className="flex max-h-[calc(100vh-68px)] flex-col gap-2 overflow-y-auto border-t border-slate-200 bg-white px-6 py-5 shadow-xl xl:hidden"
         >
 
@@ -236,8 +238,8 @@ export default function Navbar() {
             {t("tours")}
           </MobileLink>
 
-          <MobileLink href="/destinations/marsa-alam" close={closeMenu}>
-            <span className="flex items-center justify-between"><span>Marsa Alam</span><span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black uppercase text-amber-900">Coming soon</span></span>
+          <MobileLink href={localePath(language, "/destinations/marsa-alam")} close={closeMenu}>
+            <span className="flex items-center justify-between"><span>Marsa Alam</span><span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black uppercase text-amber-900">{ui.comingSoon}</span></span>
           </MobileLink>
 
 
@@ -273,7 +275,7 @@ export default function Navbar() {
             {t("about")}
           </MobileLink>
 
-          <MobileLink href="/blog" close={closeMenu}>
+          <MobileLink href={localePath(language, "/blog")} close={closeMenu}>
             {language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}
           </MobileLink>
 
@@ -348,9 +350,9 @@ function SettingsSelectors({
         onLanguageSelect={onLanguageSelect}
       />
       <div className={mobile ? "" : "flex items-center border-l border-slate-200 pl-1"}>
-        <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>Display currency</label>
+        <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>{publicInterfaceCopy[language].currency}</label>
         <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title="Currency rates by Exchange Rate API" className={mobile ? "mt-2 block text-center text-[10px] font-medium text-slate-400 hover:text-slate-600" : "rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600"}>{mobile ? "Rates by Exchange Rate API" : "Rates"}</a>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className={mobile ? "mt-2 block text-center text-[10px] font-medium text-slate-400 hover:text-slate-600" : "rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600"}>{mobile ? publicInterfaceCopy[language].ratesBy : publicInterfaceCopy[language].rates}</a>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath, type Locale } from "@/lib/i18n";
 import ImageWatermark from "@/components/media/ImageWatermark";
+import { localizeProductBadge } from "@/lib/public-interface-i18n";
 
 export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: Tour[]; locale?: Locale }) {
   const [query, setQuery] = useState("");
@@ -55,7 +56,7 @@ export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: 
                 <div className="relative h-56 overflow-hidden">
                   <Image src={tour.image} alt={tour.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
                   <ImageWatermark />
-                  {tour.badge ? <span className="absolute left-4 top-4 rounded-full bg-slate-950/85 px-3 py-2 text-xs font-bold text-white">{tour.badge}</span> : null}
+                  {tour.badge ? <span className="absolute start-4 top-4 rounded-full bg-slate-950/85 px-3 py-2 text-xs font-bold text-white">{localizeProductBadge(locale, tour.badge)}</span> : null}
                 </div>
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-700">{tour.category || "Hurghada experience"}</p>

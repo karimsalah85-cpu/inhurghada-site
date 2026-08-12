@@ -9,6 +9,7 @@ import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib
 import { languageAlternates, localePath } from "@/lib/i18n";
 import CartProvider from "@/components/cart/CartProvider";
 import PublicSiteChrome from "@/components/layout/PublicSiteChrome";
+import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -85,7 +86,7 @@ export default async function RootLayout({
             <OrganizationSchema />
             <AnalyticsProvider />
             <PublicSiteChrome />
-            <a href="#main-content" className="skip-link">Skip to main content</a>
+            <a href="#main-content" className="skip-link">{publicInterfaceCopy[documentLocale as keyof typeof publicInterfaceCopy].skip}</a>
             <div id="main-content" tabIndex={-1}>{children}</div>
           </CartProvider>
         </SiteSettingsProvider>

@@ -30,23 +30,35 @@ exception when duplicate_object then null; end $$;
 
 create table if not exists public.media_asset_localizations (
   asset_id uuid not null references public.media_assets(id) on delete cascade,
-  locale text not null check (locale in ('en', 'ar', 'de', 'ru', 'pl', 'zh')),
-  alt_text text check (alt_text is null or length(alt_text) <= 300),
-  caption text check (caption is null or length(caption) <= 500),
+  locale text not null,
+  alt_text text,
+  caption text,
   primary key (asset_id, locale)
 );
 
 create table if not exists public.media_usages (
   id uuid primary key default gen_random_uuid(),
   asset_id uuid not null references public.media_assets(id) on delete restrict,
-  owner_type text not null check (owner_type in ('tour', 'destination', 'category', 'blog', 'page', 'social')),
-  owner_key text not null check (length(owner_key) between 1 and 200),
-  role text not null check (role in ('featured', 'gallery', 'thumbnail', 'hero', 'social')),
-  sort_order integer not null default 0 check (sort_order >= 0),
-  crop_profile text check (crop_profile is null or length(crop_profile) <= 40),
+  owner_type text not null,
+  owner_key text not null,
+  role text not null,
+  sort_order integer not null default 0,
+  crop_profile text,
   created_at timestamptz not null default now(),
-  unique (asset_id, owner_type, owner_key, role)
+  unique (asset_id, owner_type, owner_key, role, sort_order)
 );
+
+do $$ begin alter table public.media_asset_localizations add constraint media_asset_localizations_locale_check check (locale in ('en', 'ar', 'de', 'ru', 'pl', 'zh')); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_asset_localizations add constraint media_asset_localizations_alt_length_check check (alt_text is null or length(alt_text) <= 300); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_asset_localizations add constraint media_asset_localizations_caption_length_check check (caption is null or length(caption) <= 500); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_usages add constraint media_usages_owner_type_check check (owner_type in ('tour', 'destination', 'category', 'blog', 'page', 'social')); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_usages add constraint media_usages_owner_key_length_check check (length(owner_key) between 1 and 200); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_usages add constraint media_usages_role_check check (role in ('featured', 'gallery', 'thumbnail', 'hero', 'social')); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_usages add constraint media_usages_sort_order_check check (sort_order >= 0); exception when duplicate_object then null; end $$;
+do $$ begin alter table public.media_usages add constraint media_usages_crop_profile_length_check check (crop_profile is null or length(crop_profile) <= 40); exception when duplicate_object then null; end $$;
+
+alter table public.media_usages drop constraint if exists media_usages_asset_id_owner_type_owner_key_role_sort_order_key;
+do $$ begin alter table public.media_usages add constraint media_usages_assignment_unique unique (asset_id, owner_type, owner_key, role); exception when duplicate_object then null; end $$;
 
 alter table public.media_asset_localizations enable row level security;
 alter table public.media_usages enable row level security;
