@@ -18,6 +18,7 @@ type Resource = keyof typeof resources;
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 const text = (value: unknown, max: number) => String(value || "").trim().slice(0, max);
+const previewMutationBlocked = () => process.env.VERCEL_ENV === "preview";
 
 async function authorized() {
   const supabase = await createClient();
@@ -52,6 +53,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (previewMutationBlocked()) return json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, 503);
   const { supabase, user, allowed } = await authorized();
   if (!allowed) return json({ error: "Unauthorized" }, 401);
   const body = await request.json().catch(() => null);

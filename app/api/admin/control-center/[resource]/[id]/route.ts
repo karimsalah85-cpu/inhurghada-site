@@ -5,8 +5,10 @@ import { revalidatePath } from "next/cache";
 
 const tables = { content: "content_items", media: "media_assets", availability: "tour_availability", staff: "staff_members", assignments: "booking_assignments", notes: "customer_notes", templates: "communication_templates", queue: "communication_queue", settings: "site_settings", redirects: "redirect_rules" } as const;
 const permissions: Record<keyof typeof tables, AdminPermission> = { content:"content",media:"content",availability:"operations",staff:"operations",assignments:"operations",notes:"operations",templates:"operations",queue:"operations",settings:"settings",redirects:"content" };
+const previewMutationBlocked = () => process.env.VERCEL_ENV === "preview";
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
+  if (previewMutationBlocked()) return NextResponse.json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, { status: 503 });
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,6 +43,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
 }
 
 export async function DELETE(_request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
+  if (previewMutationBlocked()) return NextResponse.json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, { status: 503 });
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
