@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
       ? tour.metaDescription || tour.description
       : locale === "de"
         ? germanSeoDescriptions[tour.slug] || tour.description
-        : tour.description
+        : tour.metaDescription || tour.description
     : locale === "de" && kind === "home"
       ? germanSeoDescriptions.home
       : category
@@ -114,6 +114,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
     robots: kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: defaultSocialImage, alt: normalizedTitle }] },
+    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [defaultSocialImage] },
   };
 }
 

@@ -123,7 +123,7 @@ export default function CartCheckout() {
           {items.map((item) => {
             const tour = tours.find((entry) => entry.slug === item.tourSlug);
             return <article key={item.id} className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[140px_1fr_auto] sm:items-center">
-              <div className="relative h-28 overflow-hidden rounded-2xl"><Image src={tour?.image || "/images/hero.jpg"} alt="" fill sizes="140px" className="object-cover"/></div>
+              <div className="relative h-28 overflow-hidden rounded-2xl"><Image src={tour?.image || "/images/placeholders/sea-activity.svg"} alt="" fill sizes="140px" className="object-cover"/></div>
               <div><h2 className="font-black text-slate-950">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-slate-600"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-slate-600">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-blue-700">{formatPrice(String(item.subtotal))}</p></div>
               <button type="button" onClick={() => removeItem(item.id)} aria-label={tr("Remove trip", "Ausflug entfernen", "Удалить поездку", "حذف الرحلة")} className="rounded-xl border border-rose-200 p-3 text-rose-600 hover:bg-rose-50"><Trash2 size={19}/></button>
             </article>;

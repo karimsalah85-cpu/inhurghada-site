@@ -2,6 +2,6 @@
 
 The tourism guide added in this update uses iconography only, so it introduces no new third-party image asset.
 
-Existing image files in `public/images/` predate this update. Their original source and licence metadata are not recorded in the repository, so they must be treated as **unverified** before any future commercial use or redistribution. Replace any unverified asset with a locally downloaded image from Unsplash, Pexels, Pixabay, or Wikimedia Commons only after recording its source URL, creator, licence, and attribution requirement here.
+Legacy tourism files in `public/images/` have no exact binary-to-rights evidence. They are retained only for rollback compatibility, are not referenced for rendered tourism media, and their direct paths redirect to original Daily Red Sea artwork. The checksum-level manifest is in `docs/public-tourism-image-rights-inventory-2026-08-12.md`.
 
 Recommended searches: `Hurghada Red Sea coral reef`, `Giftun Islands beach`, `Egyptian food market`, and `Red Sea scuba diving` on the chosen source site.

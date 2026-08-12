@@ -25,6 +25,13 @@ describe("tour media safety", () => {
 
   it("leaves unaffected tours unchanged", () => {
     const original = tours.find((item) => item.slug === "orange-bay")!;
-    expect(applyTourMediaSafety(original)).toBe(original);
+    expect(applyTourMediaSafety(original).image).toMatch(/^\/images\/placeholders\//);
+  });
+
+  it("publishes no tour photography or galleries while exact rights remain unresolved", () => {
+    for (const tour of tours) {
+      expect(tour.image).toMatch(/^\/images\/placeholders\/.+\.svg$/);
+      expect(tour.galleryImages).toEqual([]);
+    }
   });
 });

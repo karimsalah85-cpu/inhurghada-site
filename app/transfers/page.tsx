@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "Private Hurghada Airport & Hotel Transfers",
   description: "Arrange a safe private transfer between Hurghada Airport, hotels, resorts, marinas, and local destinations with Daily Red Sea.",
   path: "/transfers",
-  image: "/images/hurghada-airport-transfer.jpg",
+  image: "/images/placeholders/private-transfer.svg",
   }),
   alternates: { canonical: "/transfers", languages: { ...languageAlternates("/transfers"), "x-default": "/transfers" } },
 };
@@ -50,7 +50,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
       "
       style={{
         backgroundImage:
-        "url('/images/transfer.jpg')"
+        "url('/images/placeholders/private-transfer.svg')"
       }}
       >
 

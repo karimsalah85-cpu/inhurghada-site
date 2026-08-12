@@ -83,7 +83,7 @@ function CheckoutContent({ status, booking, sessionId }: { status: string | null
     <main className="min-h-screen bg-slate-50">
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(6,182,212,0.25),_transparent_40%)]" />
-        <div className="absolute inset-0 bg-[url('/images/hero.jpg')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0 bg-[url('/images/placeholders/sea-activity.svg')] bg-cover bg-center opacity-20" />
         <div className="absolute inset-0 bg-slate-950/80" />
         <div className="relative mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32">
           <div className="max-w-3xl">

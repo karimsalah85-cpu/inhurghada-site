@@ -70,7 +70,7 @@ describe("tour catalog publication safety", () => {
       expect(tour?.priceUnit).toBe("per private boat");
       expect(tour?.boatOptions?.filter((option) => option.capacity === 5)).toHaveLength(2);
       expect(tour?.showSpeedboatTerms).toBe(true);
-      expect(tour?.galleryImages).toHaveLength(4);
+      expect(tour?.galleryImages).toEqual([]);
     }
     expect(tours.find((tour) => tour.slug === "hula-hula-speedboat")?.requiresMarinaTransferChoice).not.toBe(true);
   });

@@ -3,11 +3,16 @@ import { assertDeploymentEnvironment } from "./lib/environment";
 
 assertDeploymentEnvironment(process.env);
 
+const quarantinedTourismImages = [
+  "karnak-temple.jpg", "hurghada-desert-camel-profile.jpeg", "speedboat-shallow-water.jpeg", "hurghada-island-calm-sunset.jpeg", "orange-bay.jpeg", "hero.jpg", "hurghada-desert-camel-closeup.jpeg", "speedboat-cruise.jpeg", "senzo-transfer.jpg", "hurghada-snorkeling-sandy-seabed.jpeg", "desert-safari.jpg", "hurghada-island-family-sunset.jpeg", "hurghada-airport-transfer.jpg", "hurghada-island-beach-loungers.jpeg", "luxor-karnak-columns.jpeg", "hurghada-red-sea-coral-reef.jpeg", "transfer.jpg", "full-day-snorkeling.jpg", "hero-egypt-red-sea.jpg", "luxor-day-trip.jpg", "scuba-diving.jpg", "hurghada-red-sea-scuba-diver.jpeg", "mahmya-island-boats-sunset.jpeg", "hurghada-desert-quad-tour.jpeg", "speedboat-guests.jpeg", "full-day-diving.jpg", "mahmya-island.jpg", "hero-egypt-red-sea-mobile.jpg", "hurghada-snorkeling-reef-panorama.jpeg", "speedboat-orange-bay-branded.png", "speedboat-aerial.jpeg", "hurghada-island-sunset-sandals.jpeg", "quad-safari-sunset.jpg",
+];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
   async redirects() {
     return [
+      ...quarantinedTourismImages.map((file) => ({ source: `/images/${file}`, destination: "/images/placeholders/sea-activity.svg", permanent: false })),
       {
         source: "/lander",
         destination: "/",

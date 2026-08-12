@@ -4,6 +4,12 @@ import type { Locale } from "@/lib/i18n";
 type SafeMedia = { image: string; alt: Record<Locale, string> };
 
 const categoryMedia: Record<string, SafeMedia> = {
+  sea: { image: "/images/placeholders/sea-activity.svg", alt: { en: "Illustrated placeholder for a Red Sea activity", ar: "رسم توضيحي مؤقت لنشاط في البحر الأحمر", de: "Illustrierter Platzhalter für eine Aktivität am Roten Meer", ru: "Иллюстрированная заглушка для отдыха на Красном море", pl: "Ilustrowana grafika zastępcza dla atrakcji nad Morzem Czerwonym", zh: "红海活动插画占位图" } },
+  island: { image: "/images/placeholders/island-trip.svg", alt: { en: "Illustrated placeholder for a Red Sea island trip", ar: "رسم توضيحي مؤقت لرحلة جزيرة في البحر الأحمر", de: "Illustrierter Platzhalter für einen Inselausflug am Roten Meer", ru: "Иллюстрированная заглушка для поездки на остров Красного моря", pl: "Ilustrowana grafika zastępcza dla wycieczki na wyspę Morza Czerwonego", zh: "红海海岛游插画占位图" } },
+  diving: { image: "/images/placeholders/diving.svg", alt: { en: "Illustrated placeholder for a Red Sea diving experience", ar: "رسم توضيحي مؤقت لتجربة غوص في البحر الأحمر", de: "Illustrierter Platzhalter für ein Taucherlebnis am Roten Meer", ru: "Иллюстрированная заглушка для дайвинга в Красном море", pl: "Ilustrowana grafika zastępcza dla nurkowania w Morzu Czerwonym", zh: "红海潜水体验插画占位图" } },
+  desert: { image: "/images/placeholders/desert-experience.svg", alt: { en: "Illustrated placeholder for a Hurghada desert experience", ar: "رسم توضيحي مؤقت لتجربة في صحراء الغردقة", de: "Illustrierter Platzhalter für ein Wüstenerlebnis in Hurghada", ru: "Иллюстрированная заглушка для поездки в пустыню Хургады", pl: "Ilustrowana grafika zastępcza dla atrakcji na pustyni w Hurghadzie", zh: "赫尔格达沙漠体验插画占位图" } },
+  transfer: { image: "/images/placeholders/private-transfer.svg", alt: { en: "Illustrated placeholder for a private transfer", ar: "رسم توضيحي مؤقت لخدمة توصيل خاصة", de: "Illustrierter Platzhalter für einen privaten Transfer", ru: "Иллюстрированная заглушка для частного трансфера", pl: "Ilustrowana grafika zastępcza dla prywatnego transferu", zh: "私人接送插画占位图" } },
+  culture: { image: "/images/placeholders/cultural-trip.svg", alt: { en: "Illustrated placeholder for an Egyptian cultural day trip", ar: "رسم توضيحي مؤقت لرحلة ثقافية في مصر", de: "Illustrierter Platzhalter für einen kulturellen Tagesausflug in Ägypten", ru: "Иллюстрированная заглушка для культурной поездки по Египту", pl: "Ilustrowana grafika zastępcza dla wycieczki kulturowej po Egipcie", zh: "埃及文化一日游插画占位图" } },
   quad: { image: "/images/placeholders/quad-safari.svg", alt: { en: "Illustrated placeholder for a quad bike desert safari", ar: "رسم توضيحي مؤقت لرحلة سفاري بالدراجة الرباعية في الصحراء", de: "Illustrierter Platzhalter für eine Quad-Safari in der Wüste", ru: "Иллюстрированная заглушка для сафари на квадроциклах в пустыне", pl: "Ilustrowana grafika zastępcza dla pustynnego safari na quadach", zh: "沙漠四轮摩托之旅插画占位图" } },
   senzo: { image: "/images/placeholders/senzo-transfer.svg", alt: { en: "Illustrated placeholder for a private Senzo Mall transfer", ar: "رسم توضيحي مؤقت لانتقال خاص إلى سنزو مول", de: "Illustrierter Platzhalter für einen privaten Transfer zur Senzo Mall", ru: "Иллюстрированная заглушка для частного трансфера в Senzo Mall", pl: "Ilustrowana grafika zastępcza dla prywatnego transferu do Senzo Mall", zh: "Senzo Mall 私人接送插画占位图" } },
   dolphin: { image: "/images/placeholders/dolphin-house.svg", alt: { en: "Illustrated placeholder for a Dolphin House snorkeling boat trip; wildlife sightings are not guaranteed", ar: "رسم توضيحي مؤقت لرحلة قارب للغطس في دولفين هاوس؛ مشاهدة الدلافين غير مضمونة", de: "Illustrierter Platzhalter für eine Schnorchelfahrt zum Dolphin House; Wildtiersichtungen sind nicht garantiert", ru: "Иллюстрированная заглушка для снорклинг-тура в Dolphin House; встречи с дельфинами не гарантированы", pl: "Ilustrowana grafika zastępcza dla rejsu snorkelingowego do Dolphin House; obserwacje delfinów nie są gwarantowane", zh: "海豚屋浮潜船行程插画占位图；不保证看到野生海豚" } },
@@ -22,8 +28,14 @@ const mediaBySlug: Record<string, SafeMedia> = {
 };
 
 export function applyTourMediaSafety(tour: Tour, locale: Locale = "en"): Tour {
-  const safe = mediaBySlug[tour.slug];
-  if (!safe) return tour;
+  const category = `${tour.category || ""} ${tour.title}`.toLowerCase();
+  const safe = mediaBySlug[tour.slug]
+    || (/transfer/.test(category) ? categoryMedia.transfer
+      : /diving|scuba|underwater|submarine/.test(category) ? categoryMedia.diving
+      : /island|snorkel|boat|speedboat|sea/.test(category) ? categoryMedia.island
+      : /desert|safari|quad|camel|stargaz/.test(category) ? categoryMedia.desert
+      : /luxor|cairo|cultural/.test(category) ? categoryMedia.culture
+      : categoryMedia.sea);
   return { ...tour, image: safe.image, imageAlt: safe.alt[locale], imageFocalPoint: { x: 0.5, y: 0.5 }, galleryImages: [], galleryImageAlts: [], galleryImageFocalPoints: [] };
 }
 

@@ -75,7 +75,7 @@ export async function getLiveTours(locale: Locale = "en"): Promise<Tour[]> {
   const overrides = new Map(rows.filter((row) => row.status === "published" && row.listing_status !== "unlisted").map((row) => {
     const fallback = tours.find((tour) => tour.slug === row.slug);
     const body = objectBody(row);
-    return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/orange-bay.jpeg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || "") } as Tour];
+    return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || "") } as Tour];
   }));
   return applyTourCollectionMediaSafety(await applyTourMedia([...tours.filter((tour) => !managedSlugs.has(tour.slug)), ...overrides.values()], locale), locale);
 }
@@ -97,14 +97,24 @@ export async function getUnavailableTrip(slugs: string[]): Promise<{ slug: strin
 
 export async function getLiveBlogPosts(): Promise<BlogPost[]> {
   const rows = await contentRows("blog");
-  if (!rows.length) return blogPosts;
+  if (!rows.length) return blogPosts.map(applyBlogMediaSafety);
   const managedSlugs = new Set(rows.map((row) => row.slug));
   const overrides = new Map(rows.filter((row) => row.status === "published").map((row) => {
     const fallback = blogPosts.find((post) => post.slug === row.slug);
     const body = objectBody(row);
-    return [row.slug, { ...fallback, ...body, slug: row.slug, title: row.title, metaDescription: row.seo_description || row.excerpt || String(body.metaDescription || ""), publishedAt: row.published_at || row.publish_at || String(body.publishedAt || new Date().toISOString()), heroImage: row.featured_image || String(body.heroImage || "/images/orange-bay.jpeg"), relatedTourSlugs: Array.isArray(body.relatedTourSlugs) ? body.relatedTourSlugs as string[] : fallback?.relatedTourSlugs || [], intro: String(body.intro || row.excerpt || ""), sections: Array.isArray(body.sections) ? body.sections as BlogPost["sections"] : fallback?.sections || [], faqs: Array.isArray(body.faqs) ? body.faqs as BlogPost["faqs"] : fallback?.faqs || [] } as BlogPost];
+    return [row.slug, { ...fallback, ...body, slug: row.slug, title: row.title, metaDescription: row.seo_description || row.excerpt || String(body.metaDescription || ""), publishedAt: row.published_at || row.publish_at || String(body.publishedAt || new Date().toISOString()), heroImage: row.featured_image || String(body.heroImage || "/images/placeholders/island-trip.svg"), relatedTourSlugs: Array.isArray(body.relatedTourSlugs) ? body.relatedTourSlugs as string[] : fallback?.relatedTourSlugs || [], intro: String(body.intro || row.excerpt || ""), sections: Array.isArray(body.sections) ? body.sections as BlogPost["sections"] : fallback?.sections || [], faqs: Array.isArray(body.faqs) ? body.faqs as BlogPost["faqs"] : fallback?.faqs || [] } as BlogPost];
   }));
-  return [...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()];
+  return [...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()].map(applyBlogMediaSafety);
+}
+
+function applyBlogMediaSafety(post: BlogPost): BlogPost {
+  const text = `${post.title} ${post.intro}`.toLowerCase();
+  const heroImage = /diving|underwater|scuba/.test(text) ? "/images/placeholders/diving.svg"
+    : /desert|safari|quad|camel/.test(text) ? "/images/placeholders/desert-experience.svg"
+    : /transfer|airport/.test(text) ? "/images/placeholders/private-transfer.svg"
+    : /luxor|cairo|temple|culture/.test(text) ? "/images/placeholders/cultural-trip.svg"
+    : "/images/placeholders/island-trip.svg";
+  return { ...post, heroImage };
 }
 
 export async function getPublicSiteSettings(): Promise<Record<string, unknown>> {
