@@ -112,9 +112,13 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     title: normalizedTitle,
     description: normalizedDescription,
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
-    robots: kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" ? { index: false, follow: false } : { index: true, follow: true },
-    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: defaultSocialImage, alt: normalizedTitle }] },
-    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [defaultSocialImage] },
+    robots: tour?.listingStatus === "paused"
+      ? { index: false, follow: true }
+      : kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart"
+        ? { index: false, follow: false }
+        : { index: true, follow: true },
+    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: tour?.image || defaultSocialImage, alt: tour?.imageAlt || normalizedTitle }] },
+    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [tour?.image || defaultSocialImage] },
   };
 }
 

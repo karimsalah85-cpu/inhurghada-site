@@ -42,6 +42,7 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
 function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "extraQuantities" | "transferRequired" | "transferArea">) {
   const tour = tours.find((item) => item.slug === input.tourSlug) || tours.find((item) => item.title === input.tourName);
   if (!tour) return { error: "Choose a valid tour." as const };
+  if (tour.listingStatus === "paused" || tour.listingStatus === "unlisted") return { error: "This tour is not accepting bookings yet." as const };
   if (!wholeNumber(input.adults, 1, 30) || !wholeNumber(input.youth, 0, 30) || !wholeNumber(input.infants, 0, 10)) {
     return { error: "Choose a valid number of travelers." as const };
   }
@@ -80,7 +81,7 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   const guestSummary = tour.pricingMode === "per-booking"
     ? `${guests} passenger${guests === 1 ? "" : "s"}${boat ? ` · ${boat.label}` : ""}`
     : `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
-  return { data: { amount, guests, guestSummary, tourName: tour.title } };
+  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD" } };
 }
 
 export function calculateBookingPrice(input: PricingInput) {
@@ -94,19 +95,21 @@ export function calculateBookingPrice(input: PricingInput) {
         pricedItems.push({ ...result.data, date: item.date, time: item.time });
       }
       const amount = pricedItems.reduce((sum, item) => sum + item.amount, 0);
+      const currencies = [...new Set(pricedItems.map((item) => item.currency))];
+      if (currencies.length !== 1) return { error: "Trips with different base currencies must be booked separately." as const };
       const guests = pricedItems.reduce((sum, item) => sum + item.guests, 0);
       return { data: {
         amount,
         guests,
         guestSummary: `${input.cartItems.length} trips · ${guests} participant places`,
         tourName: `Multi-trip booking: ${pricedItems.map((item) => item.tourName).join(" + ")}`,
-        price: `$${amount.toFixed(2)} combined total`,
+        price: `${currencies[0] === "EUR" ? "€" : "$"}${amount.toFixed(2)} combined total`, currency: currencies[0],
         items: pricedItems,
       } };
     }
     const result = calculateTourItem(input);
     if (!result.data) return result;
-    return { data: { ...result.data, price: `$${result.data.amount.toFixed(2)} total` } };
+    return { data: { ...result.data, price: `${result.data.currency === "EUR" ? "€" : "$"}${result.data.amount.toFixed(2)} total` } };
   }
 
   if (!wholeNumber(input.passengers, 1, 30) || !wholeNumber(input.travelBags, 0, 60)) {
@@ -134,5 +137,5 @@ export function calculateBookingPrice(input: PricingInput) {
 
   const amount = (isAirport ? 20 : 10) + (resortZones.has(input.pickup) || resortZones.has(input.dropoff) ? 7 : 0);
   const tourName = isAirport ? "Hurghada Airport one-way transfer" : "Senzo Mall one-way transfer";
-  return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName, price: `$${amount.toFixed(2)} fixed one-way fare` } };
+  return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName, price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
 }

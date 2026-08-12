@@ -38,11 +38,14 @@ describe("tour discovery", () => {
 
   it("includes multilingual alternates on every indexed tour", async () => {
     const entries = await sitemap();
-    for (const tour of tours) {
+    for (const tour of tours.filter((item) => item.listingStatus !== "paused" && item.listingStatus !== "unlisted")) {
       const entry = entries.find((item) => item.url === `https://dailyredsea.com/tours/${tour.slug}`);
       expect(entry?.alternates?.languages?.en).toBe(`https://dailyredsea.com/tours/${tour.slug}`);
       expect(entry?.alternates?.languages?.ar).toBe(`https://dailyredsea.com/ar/tours/${tour.slug}`);
       expect(entry?.images).toEqual([`https://dailyredsea.com${tour.image}`]);
+    }
+    for (const tour of tours.filter((item) => item.listingStatus === "paused" || item.listingStatus === "unlisted")) {
+      expect(entries.some((item) => item.url === `https://dailyredsea.com/tours/${tour.slug}`)).toBe(false);
     }
   });
 });

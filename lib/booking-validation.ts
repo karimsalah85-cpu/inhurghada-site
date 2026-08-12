@@ -1,3 +1,5 @@
+import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
+
 type BookingInput = Record<string, unknown>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,6 +58,25 @@ function cairoDateTimeParts(value: Date) {
   return { date: `${part("year")}-${part("month")}-${part("day")}`, time: `${part("hour")}:${part("minute")}` };
 }
 
+function calendarDayInCairo(date: string) {
+  return new Date(`${date}T12:00:00Z`).getUTCDay();
+}
+
+export function validateTourSchedule(schedule: TourSchedule, date: string, now = new Date()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { valid: false, error: "Choose a valid booking date." };
+  const cairo = cairoDateTimeParts(now);
+  if (date < cairo.date) return { valid: false, error: "Choose today or a future date." };
+  if (schedule.operatingWeekdays?.length && !schedule.operatingWeekdays.includes(calendarDayInCairo(date))) return { valid: false, error: "This excursion does not operate on the selected weekday." };
+  if (schedule.bookingCutoff) {
+    const cutoffDate = new Date(`${date}T12:00:00Z`);
+    cutoffDate.setUTCDate(cutoffDate.getUTCDate() - schedule.bookingCutoff.daysBefore);
+    const latestDate = cutoffDate.toISOString().slice(0, 10);
+    const latestTime = schedule.bookingCutoff.localTime || "23:59";
+    if (cairo.date > latestDate || (cairo.date === latestDate && cairo.time >= latestTime)) return { valid: false, error: `Bookings close at ${latestTime} Africa/Cairo time ${schedule.bookingCutoff.daysBefore} day before departure.` };
+  }
+  return { valid: true };
+}
+
 export function minimumTransferSlot(now = new Date()) {
   return cairoDateTimeParts(new Date(now.getTime() + 60 * 60 * 1000 + 59_999));
 }
@@ -96,6 +117,14 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
   const tourSlug = text(body.tourSlug, 80);
+  if (type === "tour") {
+    const schedule = isMarsaAlamTourSlug(tourSlug) ? marsaAlamTourSchedules[tourSlug] : undefined;
+    if (schedule) {
+      const result = validateTourSchedule(schedule, date, now);
+      if (!result.valid) return { error: result.error as string };
+      return { error: "This Marsa Alam excursion is available for review but is not accepting bookings until child ages and pickup zones are confirmed." as const };
+    }
+  }
   if (type === "tour" && tourSlug === "orange-bay") {
     const todayInCairo = cairoDateTimeParts(now).date;
     if (date <= todayInCairo) return { error: "Orange Bay bookings must be made at least one day before the trip." as const };
@@ -130,7 +159,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     data: {
       idempotencyKey,
       type,
-      locale: body.locale === "de" ? "de" : body.locale === "ru" ? "ru" : body.locale === "ar" ? "ar" : "en",
+      locale: ["en", "ar", "de", "ru", "pl", "zh"].includes(String(body.locale)) ? String(body.locale) : "en",
       customerName,
       phone,
       customerEmail,

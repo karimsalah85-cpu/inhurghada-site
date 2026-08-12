@@ -42,6 +42,8 @@ type BookingFormProps = {
   bookingExtras?: BookingExtra[];
   requiresMarinaTransferChoice?: boolean;
   bookingLeadTime?: "next-day-before-15";
+  currency?: "USD" | "EUR";
+  operatingWeekdays?: number[];
 };
 
 const tomorrow = () => {
@@ -103,7 +105,7 @@ const polishBookingCopy: Record<string, string> = {
   "From": "Od", "person": "osobę", "Clear local price · pickup confirmed after booking": "Jasna cena lokalna · odbiór potwierdzamy po rezerwacji", "Date": "Data", "Time": "Godzina", "Select your package": "Wybierz pakiet", "Adults": "Dorośli", "each": "za osobę", "Youth (4–10)": "Dzieci (4–10 lat)", "Infants": "Niemowlęta", "Free of charge": "Bezpłatnie", "Book now": "Zarezerwuj", "Added to your trip cart.": "Dodano do koszyka wycieczek.", "Add to trip cart": "Dodaj do koszyka", "View cart": "Zobacz koszyk", "Tell us about yourself": "Podaj swoje dane", "Required field": "Pole wymagane", "Full name": "Imię i nazwisko", "Enter your full name": "Wpisz imię i nazwisko", "Email address": "Adres e-mail", "WhatsApp number": "Numer WhatsApp", "Pickup location": "Miejsce odbioru", "Hotel name or full pickup address": "Nazwa hotelu lub pełny adres odbioru", "Required so we can confirm your pickup on WhatsApp.": "Potrzebne do potwierdzenia odbioru przez WhatsApp.", "Special requests": "Specjalne życzenia", "optional": "opcjonalnie", "Anything we should know?": "Czy powinniśmy o czymś wiedzieć?", "Before booking, please review our": "Przed rezerwacją przeczytaj", "cancellation policy": "zasady anulowania", "By submitting, you agree to our terms and conditions.": "Wysyłając formularz, akceptujesz regulamin.", "Sending booking…": "Wysyłanie rezerwacji…", "Confirm booking": "Potwierdź rezerwację", "Change date or travelers": "Zmień datę lub uczestników", "Please select at least one adult.": "Wybierz co najmniej jedną osobę dorosłą.", "Your booking is reserved now. You pay cash when you arrive; we confirm pickup via WhatsApp.": "Rezerwacja została przyjęta. Płatność gotówką na miejscu; odbiór potwierdzimy przez WhatsApp."
 };
 
-export default function BookingForm({ tourName, tourSlug, price, originalPrice, priceUnit, pricingMode = "per-person", duration, location, participantPricing, availableTimes, ageBands, boatOptions, entrancePricing, bookingExtras = [], requiresMarinaTransferChoice = false, bookingLeadTime }: BookingFormProps) {
+export default function BookingForm({ tourName, tourSlug, price, originalPrice, priceUnit, pricingMode = "per-person", duration, location, participantPricing, availableTimes, ageBands, boatOptions, entrancePricing, bookingExtras = [], requiresMarinaTransferChoice = false, bookingLeadTime, currency = "USD", operatingWeekdays }: BookingFormProps) {
   const idempotencyKey = useRef<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -168,6 +170,8 @@ export default function BookingForm({ tourName, tourSlug, price, originalPrice, 
   const remainingPlaces = availability?.managed ? Math.max(...(availability.slots || []).map((slot) => slot.remaining ?? 9999), 0) : null;
   const unavailable = Boolean(availability?.soldOut || (remainingPlaces !== null && remainingPlaces < requestedPlaces));
   const boatOverCapacity = Boolean(selectedBoat && requestedPlaces > selectedBoat.capacity);
+  const selectedWeekday = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00Z`).getUTCDay() : -1;
+  const unavailableWeekday = Boolean(operatingWeekdays?.length && !operatingWeekdays.includes(selectedWeekday));
   const travelerText = de
     ? `${adults} Erwachsene${youthPrice !== undefined ? ` · ${youth} Kinder` : ""}${infantPrice !== undefined ? ` · ${infants} Kleinkinder` : ""}`
     : ru
@@ -178,6 +182,7 @@ export default function BookingForm({ tourName, tourSlug, price, originalPrice, 
     event.preventDefault();
     if (!adults) { setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); return; }
     if (boatOverCapacity) { setError(`The selected boat accepts up to ${selectedBoat?.capacity} passengers.`); return; }
+    if (unavailableWeekday) { setError("This excursion does not operate on the selected weekday."); return; }
     if (requiresMarinaTransferChoice && transferRequired && !transferArea) { setError("Choose your transfer pickup area."); return; }
     if (requiresDivingLicense && !divingLicenseConfirmed) {
       setError(tr("Every diver must hold a valid diving license for this booking.", "Für diesen Tauchausflug muss jeder Taucher einen gültigen Tauchschein besitzen.", "Для этого погружения у каждого дайвера должен быть действующий сертификат."));
@@ -206,7 +211,7 @@ export default function BookingForm({ tourName, tourSlug, price, originalPrice, 
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Booking submission failed.");
-      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency: "USD", item_name: tourName, booking_type: "tour" });
+      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency, item_name: tourName, booking_type: "tour" });
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
         reference: data.reference,
@@ -243,7 +248,8 @@ export default function BookingForm({ tourName, tourSlug, price, originalPrice, 
         {requiresMarinaTransferChoice ? <fieldset className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><legend className="px-1 text-sm font-black text-slate-900">Do you require transfer to Hurghada marina?</legend><div className="mt-2 flex gap-5 text-sm"><label><input type="radio" name="marina-transfer" checked={!transferRequired} onChange={() => { setTransferRequired(false); setTransferArea(""); }} className="mr-2 accent-emerald-700"/>No</label><label><input type="radio" name="marina-transfer" checked={transferRequired} onChange={() => setTransferRequired(true)} className="mr-2 accent-emerald-700"/>Yes</label></div>{transferRequired ? <select required value={transferArea} onChange={(event) => setTransferArea(event.target.value)} className="mt-3 w-full rounded-xl border border-emerald-200 bg-white p-3 text-sm"><option value="">Select pickup area</option>{marinaTransferOptions.map((area) => <option key={area}>{area}</option>)}</select> : null}<p className="mt-2 text-xs text-emerald-900">Transfer price is confirmed by WhatsApp for the selected area.</p></fieldset> : null}
         {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-slate-900">{de ? "Optionale Extras" : zh ? "可选附加项目" : "Optional extras"}</legend>{extraOptions.map((option) => <label key={option.id} className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedExtras.includes(option.id)} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-4 w-4 accent-blue-600" />{de ? option.de : ru ? option.ru : zh ? option.zh : option.en}</span><strong>+{formatPrice(String(option.price * (option.charge === "adult" ? adults : 1)))}</strong></label>)}</fieldset> : null}
         <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-slate-900">{de ? "Gesamtpreis" : "Total"}</p><p className="text-xs text-slate-500">{de ? "Barzahlung bei Ankunft · keine Online-Zahlung" : "Cash on arrival · no online payment"}</p></div><p className="text-3xl font-black text-blue-700">{formatPrice(String(total))}</p></div>
-        <button disabled={unavailable || boatOverCapacity} type="button" onClick={() => { if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError("Choose your transfer pickup area."); trackEvent("booking_start", { value: total, currency: "USD", item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400">{unavailable ? "Sold out" : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
+        {unavailableWeekday ? <p role="alert" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900">This excursion does not operate on the selected weekday. Choose another date.</p> : null}
+        <button disabled={unavailable || boatOverCapacity || unavailableWeekday} type="button" onClick={() => { if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError("Choose your transfer pickup area."); trackEvent("booking_start", { value: total, currency, item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400">{unavailable ? "Sold out" : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
         <button type="button" onClick={() => {
           if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
           if (boatOverCapacity) return setError(`The selected boat accepts up to ${selectedBoat?.capacity} passengers.`);

@@ -51,7 +51,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
   const relatedTours = relatedTourCandidates.filter((item) => item.slug !== tour.slug && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => localizeTour(item, locale));
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
-  const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || "Hurghada excursion", ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: tour.listingStatus === "paused" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
+  const tourSchema = { "@type": "TouristTrip", "@id": `${tourUrl}#tour`, name: tour.title, description: tour.description, image: absoluteUrl(tour.image), url: tourUrl, inLanguage: locale, touristType: tour.category || `${destination?.name || "Red Sea"} excursion`, ...(tour.bookingMode === "inquiry" ? {} : { offers: { "@type": "Offer", price: tour.price, priceCurrency: tour.currency || "USD", availability: tour.listingStatus === "paused" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", url: tourUrl } }), provider: { "@id": `${absoluteUrl()}#organization`, "@type": "TravelAgency", name: siteName, url: absoluteUrl() } };
   const breadcrumbLabels = {
     en: { home: "Home", tours: "Tours" }, ar: { home: "الرئيسية", tours: "الرحلات" },
     de: { home: "Startseite", tours: "Ausflüge" }, ru: { home: "Главная", tours: "Экскурсии" },
@@ -97,6 +97,8 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
                   bookingExtras={tour.bookingExtras}
                   requiresMarinaTransferChoice={tour.requiresMarinaTransferChoice}
                   bookingLeadTime={tour.bookingLeadTime}
+                  currency={tour.currency}
+                  operatingWeekdays={tour.operatingWeekdays}
                 />}
             </Suspense></>}
           </div>

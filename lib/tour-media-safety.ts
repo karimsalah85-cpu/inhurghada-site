@@ -59,6 +59,9 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "horse-riding-sea-desert": categoryMedia.horse, "sahl-hasheesh-horse-riding": categoryMedia.horse,
   "cairo-giza-day-trip-bus": ownedMedia.cairo, "cairo-day-trip-flight": ownedMedia.cairo,
   "el-gouna-city-boat-tour": categoryMedia.elGouna, "turkish-bath-spa": categoryMedia.spa,
+  "dolphin-house-marsa-alam": categoryMedia.dolphin,
+  "marsa-mubarak-snorkeling": categoryMedia.island,
+  "abu-dabbab-snorkeling": categoryMedia.island,
 };
 
 const localizedGalleryAlts = (media: SafeMedia, locale: Locale) => {

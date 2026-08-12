@@ -21,14 +21,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug);
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
   if (!tour) return {};
-  const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} from Hurghada`);
+  const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} from ${tour.destinationSlug === "marsa-alam" ? "Marsa Alam" : "Hurghada"}`);
   const description = normalizeMetaDescription(tour.metaDescription || tour.description, tour.description);
   const url = `/tours/${tour.slug}`;
   return {
     title,
     description,
     alternates: { canonical: url, languages: { ...languageAlternates(url), "x-default": localePath("en", url) } },
-    robots: { index: true, follow: true },
+    robots: tour.listingStatus === "paused" ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       title,
       description,
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName,
       locale: "en_US",
       type: "website",
-      images: [{ url: tour.image, alt: `${tour.title} in Hurghada` }],
+      images: [{ url: tour.image, alt: tour.imageAlt || `${tour.title} in ${tour.destinationSlug === "marsa-alam" ? "Marsa Alam" : "Hurghada"}` }],
     },
     twitter: {
       card: "summary_large_image",

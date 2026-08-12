@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/image-credits",
     ...destinations.filter((destination) => destination.active && !destination.comingSoon).map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
-    ...tours.map((tour) => `/tours/${tour.slug}`),
+    ...tours.filter((tour) => tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted").map((tour) => `/tours/${tour.slug}`),
   ];
 
   const localizedEntries = locales.flatMap((locale) =>

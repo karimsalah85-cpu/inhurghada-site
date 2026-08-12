@@ -1,4 +1,5 @@
 import type { Tour } from "@/data/tours";
+import { localizeMarsaAlamTour } from "@/data/marsa-alam-tours-i18n";
 import type { Locale } from "@/lib/i18n";
 import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
@@ -675,6 +676,7 @@ const magawishSpeedboatTranslations: Partial<Record<Locale, Partial<Tour>>> = {
 };
 
 export function localizeTour(tour: Tour, locale: Locale): Tour {
+  if (tour.destinationSlug === "marsa-alam") return applyTourMediaSafety(localizeMarsaAlamTour(tour, locale), locale);
   const base = locale === "de" ? localizeTourGerman(tour)
     : locale === "ru" ? localizeTourRussian(tour)
     : locale === "ar" ? localizeTourArabic(tour)

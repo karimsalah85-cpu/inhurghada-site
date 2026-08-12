@@ -52,7 +52,7 @@ describe("authoritative booking pricing", () => {
 
   it("prices the private Luxor day trip from the server-side catalog", () => {
     const result = calculateBookingPrice({ ...tour, tourSlug: undefined, tourName: "Private Day Trip to Luxor from Hurghada", adults: 2 });
-    expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total" } });
+    expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total", currency: "USD" } });
   });
 
   it("prices the selected Magawish boat and combined island entrances", () => {

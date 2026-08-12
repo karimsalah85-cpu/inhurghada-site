@@ -75,9 +75,10 @@ export async function POST(request: NextRequest) {
     const { customerName, phone, customerEmail, hotel } = body;
     const pricing = calculateBookingPrice(body);
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
-    const { amount: calculatedAmount, guests: guestCount, guestSummary, tourName, price } = pricing.data;
+    const { amount: calculatedAmount, guests: guestCount, guestSummary, tourName, price, currency } = pricing.data;
     const tripItems = "items" in pricing.data ? pricing.data.items : undefined;
-    const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: $${item.amount.toFixed(2)}`).join("\n\n");
+    const currencySymbol = currency === "EUR" ? "€" : "$";
+    const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: ${currencySymbol}${item.amount.toFixed(2)}`).join("\n\n");
     const bookingNotes = [tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
@@ -105,7 +106,7 @@ export async function POST(request: NextRequest) {
       p_hotel: hotel,
       p_notes: bookingNotes || null,
       p_amount: calculatedAmount,
-      p_currency: "USD",
+      p_currency: currency,
       p_locale: body.locale,
       p_items: body.tourSlug === "multi-trip" ? body.cartItems.map((item) => ({ tour_slug: item.tourSlug, date: item.date, time: item.time, places: item.adults + item.youth + item.infants })) : null,
     });
@@ -148,9 +149,9 @@ export async function POST(request: NextRequest) {
     const confirmationPdf = await createInvoicePdf({
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
       itemName: tourName,
-      quantity: guestCount, travelerSummary: guestSummary, amount, currency: "usd",
+      quantity: guestCount, travelerSummary: guestSummary, amount, currency: currency.toLowerCase(),
       paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel,
-      tripLines: tripItems?.map((item, index) => `${index + 1}. ${item.tourName} - ${item.date} - $${item.amount.toFixed(2)}`),
+      tripLines: tripItems?.map((item, index) => `${index + 1}. ${item.tourName} - ${item.date} - ${currencySymbol}${item.amount.toFixed(2)}`),
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
@@ -163,7 +164,7 @@ export async function POST(request: NextRequest) {
       status: "submitted",
       createdAt: new Date().toISOString(),
       amount,
-      currency: "usd",
+      currency: currency.toLowerCase(),
       tourName,
       location: body.location,
       duration: body.duration,
