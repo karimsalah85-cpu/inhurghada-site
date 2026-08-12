@@ -24,6 +24,12 @@ const ownedMedia: Record<string, SafeMedia> = {
     gallery: ["/images/owned/cairo-giza-night.jpg"], galleryAlts: { en: ["The Giza pyramids illuminated at night beyond Cairo rooftops"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   quadMorning: { image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes on a desert safari") },
+  desertAdventure: {
+    image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes during a Hurghada desert adventure"),
+    gallery: ["/images/owned/desert-camel-profile.jpg", "/images/owned/desert-camel-front.jpg"],
+    galleryAlts: { en: ["A camel at a desert camp near Hurghada", "A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  airport: { image: "/images/owned/hurghada-airport-sunset.jpg", alt: localizedAlt("Aircraft on the apron at Hurghada airport during sunset") },
   speedboat: {
     image: "/images/owned/speedboat-action-wide.jpg", alt: localizedAlt("A Daily Red Sea speedboat carrying guests across clear Red Sea water"),
     gallery: ["/images/owned/speedboat-action.jpg", "/images/owned/speedboat-guests.jpg", "/images/owned/speedboat-shallows.jpg", "/images/owned/speedboat-marina.jpg"],
@@ -33,6 +39,16 @@ const ownedMedia: Record<string, SafeMedia> = {
     image: "/images/owned/red-sea-diver-coral.jpg", alt: localizedAlt("Scuba diver beside a colourful Red Sea coral reef"),
     gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  underwaterPhotographer: {
+    image: "/images/owned/red-sea-diver-fish.jpg", alt: localizedAlt("Underwater Red Sea photograph of a scuba diver surrounded by reef fish"),
+    gallery: ["/images/owned/red-sea-diver-coral.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg"],
+    galleryAlts: { en: ["Underwater photograph of a diver beside colourful coral", "Underwater portrait of a Red Sea scuba diver", "Scuba diver photographed above a Red Sea coral reef"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  snorkeling: {
+    image: "/images/owned/red-sea-reef-panorama.jpg", alt: localizedAlt("Clear Red Sea water and coral reef at a snorkeling area"),
+    gallery: ["/images/owned/red-sea-coral-closeup.jpg", "/images/owned/red-sea-coast.jpg"],
+    galleryAlts: { en: ["Red Sea coral with small reef fish", "Clear shallow Red Sea water along the coast"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   diveTraining: {
     image: "/images/owned/diving-training-seabed.jpg", alt: localizedAlt("Scuba students practising skills with instructors underwater"),
@@ -64,18 +80,23 @@ const categoryMedia: Record<string, SafeMedia> = {
 };
 
 const mediaBySlug: Record<string, SafeMedia> = {
-  "quad-safari-morning": ownedMedia.quadMorning, "quad-safari-sunset": categoryMedia.quad,
+  "safari": ownedMedia.desertAdventure,
+  "professional-underwater-photographer": ownedMedia.underwaterPhotographer,
+  "quad-safari-morning": ownedMedia.desertAdventure, "quad-safari-sunset": ownedMedia.desertAdventure,
+  "super-safari": ownedMedia.desertAdventure, "desert-stargazing": ownedMedia.desertAdventure,
+  "hurghada-airport-transfer": ownedMedia.airport,
   "senzo-transfer": ownedMedia.senzo, "dolphin-house-snorkeling": ownedMedia.dolphin,
   "horse-riding-sea-desert": categoryMedia.horse, "sahl-hasheesh-horse-riding": categoryMedia.horse,
   "cairo-giza-day-trip-bus": ownedMedia.cairo, "cairo-day-trip-flight": ownedMedia.cairo,
   "el-gouna-city-boat-tour": categoryMedia.elGouna, "turkish-bath-spa": categoryMedia.spa,
-  "dolphin-house-marsa-alam": categoryMedia.dolphin,
-  "marsa-mubarak-snorkeling": categoryMedia.island,
-  "abu-dabbab-snorkeling": categoryMedia.island,
+  "dolphin-house-marsa-alam": ownedMedia.snorkeling,
+  "marsa-mubarak-snorkeling": ownedMedia.snorkeling,
+  "abu-dabbab-snorkeling": ownedMedia.snorkeling,
   "beginner-scuba-diving": ownedMedia.diveTraining,
   "padi-open-water-course": ownedMedia.diveTraining,
   "ssi-open-water-course": ownedMedia.diveTraining,
   "luxor-private-day-trip": ownedMedia.luxor,
+  "full-day-snorkeling": ownedMedia.snorkeling,
 };
 
 const localizedGalleryAlts = (media: SafeMedia, locale: Locale) => {
@@ -88,12 +109,13 @@ export function applyTourMediaSafety(tour: Tour, locale: Locale = "en"): Tour {
   const category = `${tour.category || ""} ${tour.title}`.toLowerCase();
   const safe = mediaBySlug[tour.slug]
     || (/speedboat/.test(category) ? ownedMedia.speedboat
-      : /diving|scuba/.test(category) ? ownedMedia.diving
+      : /diving|scuba|underwater/.test(category) ? ownedMedia.diving
       : /mahmya/.test(category) ? ownedMedia.mahmya
       : /transfer/.test(category) ? categoryMedia.transfer
-      : /diving|scuba|underwater|submarine/.test(category) ? categoryMedia.diving
-      : /island|snorkel|boat|speedboat|sea/.test(category) ? categoryMedia.island
-      : /desert|safari|quad|camel|stargaz/.test(category) ? categoryMedia.desert
+      : /submarine/.test(category) ? categoryMedia.diving
+      : /snorkel/.test(category) ? ownedMedia.snorkeling
+      : /island|boat|speedboat|sea/.test(category) ? categoryMedia.island
+      : /desert|safari|quad|camel|stargaz/.test(category) ? ownedMedia.desertAdventure
       : /luxor|cairo|cultural/.test(category) ? categoryMedia.culture
       : categoryMedia.sea);
   const galleryImages = safe.gallery || [];

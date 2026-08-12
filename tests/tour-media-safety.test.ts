@@ -13,8 +13,20 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "ssi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "luxor-private-day-trip")?.image).toBe("/images/owned/luxor-branded.jpg");
 
-    for (const slug of ["quad-safari-sunset", "horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour", "turkish-bath-spa"]) {
+    for (const slug of ["horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour", "turkish-bath-spa"]) {
       expect(tours.find((item) => item.slug === slug)?.image).toMatch(/^\/images\/placeholders\/.+\.svg$/);
+    }
+  });
+
+  it("restores the requested owner-supplied activity photography", () => {
+    expect(tours.find((item) => item.slug === "safari")?.galleryImages).toContain("/images/owned/desert-camel-profile.jpg");
+    expect(tours.find((item) => item.slug === "quad-safari-sunset")?.image).toBe("/images/owned/quad-safari-morning.jpg");
+    expect(tours.find((item) => item.slug === "hurghada-airport-transfer")?.image).toBe("/images/owned/hurghada-airport-sunset.jpg");
+    expect(tours.find((item) => item.slug === "professional-underwater-photographer")?.image).toBe("/images/owned/red-sea-diver-fish.jpg");
+    expect(tours.find((item) => item.slug === "full-day-snorkeling")?.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
+    expect(tours.find((item) => item.slug === "mahmya-island")?.image).toBe("/images/owned/mahmya-boats-sunset.jpg");
+    for (const tour of tours.filter((item) => item.slug.includes("speedboat"))) {
+      expect(tour.image).toBe("/images/owned/speedboat-action-wide.jpg");
     }
   });
 
@@ -48,8 +60,8 @@ describe("tour media safety", () => {
     expect(safe.imageAlt).toContain("Senzo Mall");
   });
 
-  it("leaves unaffected tours unchanged", () => {
-    const original = tours.find((item) => item.slug === "orange-bay")!;
+  it("keeps activities without matching owner photography on an original placeholder", () => {
+    const original = tours.find((item) => item.slug === "el-gouna-city-boat-tour")!;
     expect(applyTourMediaSafety(original).image).toMatch(/^\/images\/placeholders\//);
   });
 

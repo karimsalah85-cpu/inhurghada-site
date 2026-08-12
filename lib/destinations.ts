@@ -15,7 +15,7 @@ export const destinations: Destination[] = [
     country: "Egypt",
     tagline: "Red Sea tours, transfers, and local experiences",
     active: true,
-    image: "/images/placeholders/sea-activity.svg",
+    image: "/images/hero-egypt-red-sea.jpg",
   },
   {
     slug: "marsa-alam",
@@ -24,7 +24,7 @@ export const destinations: Destination[] = [
     tagline: "Untouched reefs, desert landscapes, and southern Red Sea adventures",
     active: false,
     comingSoon: true,
-    image: "/images/placeholders/island-trip.svg",
+    image: "/images/owned/red-sea-reef-panorama.jpg",
   },
 ];
 

@@ -38,6 +38,11 @@ Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supp
 | `images/owned/luxor-temple-reliefs.jpg` | `224f9e539a2fc11ed87c0118192b9b2128c4a1f40ddb5540ac67bc9e642a63db` | `46403D07-DD05-4980-BD18-5D1302D1324D.jpeg` | Luxor gallery |
 | `images/owned/luxor-temple-columns.jpg` | `c84360d9dd885fc368c2d129c1c3afa583639bf7089ca530a0624aef9fb68aa5` | `9A9FA902-EA77-4E5D-85F9-1B4BB8555234.jpeg` | Luxor gallery |
 | `images/owned/luxor-hieroglyphs.jpg` | `9648bd70f8785bd54c42f30026420d50cc779c1d2069964a43df26378d9bc556` | `454B9CEC-3973-426E-A44C-00884978F894.jpeg` | Luxor gallery |
+| `images/owned/desert-camel-profile.jpg` | `7a3f30b09d87a8afffed99f41880b6c6b9c35491e54945929343b52631d1b19d` | `IMG_8619.jpeg` | Camel and desert-adventure gallery |
+| `images/owned/desert-camel-front.jpg` | `14cf4733920f0a48cf171942f19bfadd5ee8fdbc295f7fbfb3dd3ca48b76875e` | `72C3DA5B-AC6D-4CF2-A2EA-088BAC4A5C19.jpeg` | Camel and desert-adventure gallery |
+| `images/owned/hurghada-airport-sunset.jpg` | `d6a3b5a030111210593e92a274a4d70cb59fff06a3eb56ee31ce5afd11e13c47` | `IMG_1402.jpeg` | Hurghada airport transfer primary; airport context only |
+| `images/owned/red-sea-reef-panorama.jpg` | `2081e0043890e72f0e588e74a865834654631d8263ce46e21977bff844b89220` | `IMG_5002.jpeg` | General Red Sea snorkeling and Marsa Alam destination presentation; not represented as a specific reef |
+| `images/owned/red-sea-coast.jpg` | `778fb34d4c3c9772a6199388137498b5137718fb37840bde11b073c72ebf8308` | `IMG_2077.jpeg` | General Red Sea snorkeling gallery; not represented as a specific site |
 
 `IMG_1058.jpeg` shows a specific excursion boat and remains unpublished because the current Luxor product does not verify that this exact boat is included.
 
@@ -95,7 +100,7 @@ Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supp
 
 - Original Daily Red Sea artwork: 13
 - Unresolved legacy tourism binaries: 31, all quarantined from public delivery by redirects and no longer referenced as rendered media
-- Verified owned photography: 30 optimized derivatives from 29 owner-supplied originals
+- Verified owned photography: 35 optimized derivatives from 34 owner-supplied originals
 - Verified commercially licensed photography: 0
 - Verified compatible open-license photography: 0
 - Inaccurate public images: 0 after replacement

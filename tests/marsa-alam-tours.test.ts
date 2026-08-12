@@ -34,11 +34,11 @@ describe("Marsa Alam controlled-preview tours", () => {
     expect(validateTourSchedule(schedule, "2026-08-17", new Date("2026-08-16T15:00:00Z")).valid).toBe(false);
   });
 
-  it("provides localized, destination-safe placeholder content in every locale", () => {
+  it("provides localized, destination-safe owner media in every locale", () => {
     for (const locale of locales) for (const slug of slugs) {
       const tour = localizeTour(tours.find((item) => item.slug === slug)!, locale);
       expect(tour.destinationSlug).toBe("marsa-alam");
-      expect(tour.image).toMatch(/^\/images\/placeholders\//);
+      expect(tour.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
       expect(tour.imageAlt).toBeTruthy();
       expect(tour.title).toBeTruthy();
       expect(tour.metaDescription).toBeTruthy();
