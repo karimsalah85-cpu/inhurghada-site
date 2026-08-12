@@ -24,46 +24,9 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const reviewCount = Number(tour.reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
-  const galleryImages = tour.galleryImages ?? (transferService
-    ? ["/images/hurghada-airport-transfer.jpg", "/images/senzo-transfer.jpg", "/images/transfer.jpg", "/images/hero.jpg"]
-    : tour.slug === "full-day-diving" || tour.slug === "professional-underwater-photographer"
-      ? [
-        "/images/hurghada-red-sea-coral-reef.jpeg",
-        tour.image === "/images/scuba-diving.jpg" ? "/images/full-day-diving.jpg" : "/images/scuba-diving.jpg",
-        "/images/full-day-snorkeling.jpg",
-        "/images/hurghada-snorkeling-reef-panorama.jpeg",
-      ]
-    : tour.slug === "full-day-snorkeling"
-      ? [
-        "/images/full-day-snorkeling.jpg",
-        "/images/hurghada-snorkeling-sandy-seabed.jpeg",
-        "/images/hurghada-red-sea-coral-reef.jpeg",
-        "/images/orange-bay.jpeg",
-      ]
-    : tour.slug === "mahmya-island"
-      ? [
-        "/images/mahmya-island.jpg",
-        "/images/hurghada-island-beach-loungers.jpeg",
-        "/images/hurghada-island-calm-sunset.jpeg",
-        "/images/hurghada-island-family-sunset.jpeg",
-      ]
-    : tour.category === "Island Trip" || tour.category === "Inselausflug"
-      ? [
-        "/images/hurghada-island-beach-loungers.jpeg",
-        "/images/hurghada-island-sunset-sandals.jpeg",
-        "/images/hurghada-island-calm-sunset.jpeg",
-        "/images/hurghada-island-family-sunset.jpeg",
-      ]
-    : tour.category === "Cultural Day Trip"
-      ? ["/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg", "/images/luxor-day-trip.jpg", "/images/karnak-temple.jpg"]
-    : tour.category === "Desert Safari"
-      ? [
-        "/images/hurghada-desert-quad-tour.jpeg",
-        "/images/hurghada-desert-camel-profile.jpeg",
-        "/images/desert-safari.jpg",
-        "/images/quad-safari-sunset.jpg",
-      ]
-      : ["/images/orange-bay.jpeg", "/images/mahmya-island.jpg", "/images/full-day-snorkeling.jpg", "/images/scuba-diving.jpg"]);
+  // Only show galleries curated for this exact product. Category fallbacks can
+  // misrepresent the actual boat, destination, vehicle, or activity.
+  const galleryImages = tour.galleryImages ?? [];
   const faqs = de ? [
     { question: "Ist die Abholung vom Hotel inklusive?", answer: "Die Abholdetails stehen in den Ausflugsinformationen. Die genaue Zeit und den Ort bestätigen wir nach der Buchung per WhatsApp." },
     { question: "Wann bezahle ich?", answer: "Du kannst online reservieren und bei Ankunft bar bezahlen, sofern bei der Buchung keine andere Zahlungsart angezeigt wird." },

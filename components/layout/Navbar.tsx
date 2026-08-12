@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronDown, Menu, ShoppingCart, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -76,15 +77,17 @@ export default function Navbar() {
         <Link
           href={localePath(language)}
           onClick={closeMenu}
-          className="flex shrink-0 items-center gap-3 rounded-2xl px-2 py-1.5 transition hover:bg-slate-100"
+          className="flex shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100"
+          aria-label="Daily Red Sea home"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 shadow-lg shadow-cyan-500/20">
-            <span className="text-base font-black text-white">DR</span>
-          </div>
-          <div className="whitespace-nowrap leading-tight">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">Daily Red Sea</p>
-            <p className="text-xs text-slate-500">Tours & transfers</p>
-          </div>
+          <Image
+            src="/brand/dailyredsea-wordmark.svg"
+            alt="dailyredsea.com"
+            width={633}
+            height={98}
+            priority
+            className="h-auto w-[180px] sm:w-[220px]"
+          />
         </Link>
 
 

@@ -64,11 +64,11 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
 
   return (
     <>
-      <div className="mt-8 grid gap-3 overflow-hidden rounded-[2rem] sm:h-[420px] sm:grid-cols-2">
+      <div className={`mt-8 grid gap-3 overflow-hidden rounded-[2rem] ${galleryImages.length ? "sm:h-[420px] sm:grid-cols-2" : "sm:h-[420px]"}`}>
         {galleryButton(mainImage, 0, true)}
-        <div className="grid grid-cols-2 gap-3">
+        {galleryImages.length ? <div className="grid grid-cols-2 gap-3">
           {galleryImages.map((image, index) => galleryButton(image, index + 1))}
-        </div>
+        </div> : null}
       </div>
 
       {selectedIndex !== null ? (
