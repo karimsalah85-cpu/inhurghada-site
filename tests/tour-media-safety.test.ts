@@ -11,10 +11,22 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "beginner-scuba-diving")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "padi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "ssi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
+    expect(tours.find((item) => item.slug === "luxor-private-day-trip")?.image).toBe("/images/owned/luxor-branded.jpg");
 
     for (const slug of ["quad-safari-sunset", "horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour", "turkish-bath-spa"]) {
       expect(tours.find((item) => item.slug === slug)?.image).toMatch(/^\/images\/placeholders\/.+\.svg$/);
     }
+  });
+
+  it("uses the owner-supplied Luxor artwork and temple gallery without the unrelated boat", () => {
+    const luxor = tours.find((item) => item.slug === "luxor-private-day-trip")!;
+    expect(luxor.galleryImages).toEqual([
+      "/images/owned/luxor-temple-facade.jpg",
+      "/images/owned/luxor-temple-reliefs.jpg",
+      "/images/owned/luxor-temple-columns.jpg",
+      "/images/owned/luxor-hieroglyphs.jpg",
+    ]);
+    expect(luxor.galleryImages).not.toContain("/images/owned/luxor-boat.jpg");
   });
 
   it("uses the new owner-supplied training and reef images only in diving galleries", () => {

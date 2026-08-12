@@ -40,6 +40,11 @@ const ownedMedia: Record<string, SafeMedia> = {
     galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   mahmya: { image: "/images/owned/mahmya-boats-sunset.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
+  luxor: {
+    image: "/images/owned/luxor-branded.jpg", alt: localizedAlt("Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall"), focal: { x: 0.5, y: 0.42 },
+    gallery: ["/images/owned/luxor-temple-facade.jpg", "/images/owned/luxor-temple-reliefs.jpg", "/images/owned/luxor-temple-columns.jpg", "/images/owned/luxor-hieroglyphs.jpg"],
+    galleryAlts: { en: ["Ancient Egyptian temple facade with carved figures", "Temple wall reliefs beside the Nile", "Hieroglyph-covered columns at an ancient Egyptian temple", "Close view of carved figures and hieroglyphs on a temple wall"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
 };
 
 const categoryMedia: Record<string, SafeMedia> = {
@@ -70,6 +75,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "beginner-scuba-diving": ownedMedia.diveTraining,
   "padi-open-water-course": ownedMedia.diveTraining,
   "ssi-open-water-course": ownedMedia.diveTraining,
+  "luxor-private-day-trip": ownedMedia.luxor,
 };
 
 const localizedGalleryAlts = (media: SafeMedia, locale: Locale) => {

@@ -33,6 +33,13 @@ Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supp
 | `images/owned/red-sea-coral-closeup.jpg` | `e72fd11242ec4d2cd68b3b99d24dea8b8762f3b3893230eddef44cecd7b4c477` | `GOPR3023.jpeg` | Diving gallery |
 | `images/hero-egypt-red-sea.jpg` | `7e83652db34afc9eb02c7078f3a343f588a4646e1e9410880a10dc09448252f0` | `IMG_9938.png` | Homepage desktop hero; restored at owner request |
 | `images/hero-egypt-red-sea-mobile.jpg` | `7788684077829d00ddbf4a7c27d751ed03176023113b320ac3e4f6dfc7e698aa` | `IMG_9938.png` | Homepage mobile hero; restored at owner request |
+| `images/owned/luxor-branded.jpg` | `5dc334716618da0d599112126ac208cc2e6744ed28ab82d2d376ee8215c0dbf1` | `IMG_0051.png` | Luxor tour primary |
+| `images/owned/luxor-temple-facade.jpg` | `fb935f57aa1008c1c5d08796449438e540d77e8d128b4c9b214f835f732a8b35` | `627B718D-2538-41BF-BFC9-EAED48B67265.jpeg` | Luxor gallery |
+| `images/owned/luxor-temple-reliefs.jpg` | `224f9e539a2fc11ed87c0118192b9b2128c4a1f40ddb5540ac67bc9e642a63db` | `46403D07-DD05-4980-BD18-5D1302D1324D.jpeg` | Luxor gallery |
+| `images/owned/luxor-temple-columns.jpg` | `c84360d9dd885fc368c2d129c1c3afa583639bf7089ca530a0624aef9fb68aa5` | `9A9FA902-EA77-4E5D-85F9-1B4BB8555234.jpeg` | Luxor gallery |
+| `images/owned/luxor-hieroglyphs.jpg` | `9648bd70f8785bd54c42f30026420d50cc779c1d2069964a43df26378d9bc556` | `454B9CEC-3973-426E-A44C-00884978F894.jpeg` | Luxor gallery |
+
+`IMG_1058.jpeg` shows a specific excursion boat and remains unpublished because the current Luxor product does not verify that this exact boat is included.
 
 `DSC02349.arw` remains an unpublished source attachment. RAW camera files are not suitable browser assets and no derivative was needed for this release.
 
@@ -88,7 +95,7 @@ Creator/rightsholder for every row: Daily Red Sea site owner. Source: owner-supp
 
 - Original Daily Red Sea artwork: 13
 - Unresolved legacy tourism binaries: 31, all quarantined from public delivery by redirects and no longer referenced as rendered media
-- Verified owned photography: 25 optimized derivatives from 24 owner-supplied originals
+- Verified owned photography: 30 optimized derivatives from 29 owner-supplied originals
 - Verified commercially licensed photography: 0
 - Verified compatible open-license photography: 0
 - Inaccurate public images: 0 after replacement
