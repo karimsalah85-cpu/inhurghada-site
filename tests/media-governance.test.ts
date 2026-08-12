@@ -12,7 +12,7 @@ describe("media governance migration contract", () => {
     expect(migration).toMatch(/alter table public\.media_assets\s+add column if not exists source_url/i);
     expect(migration).not.toMatch(/\b(drop table|truncate|alter column|rename column)\b/i);
     expect(migration).not.toMatch(/delete from public\.media_assets/i);
-    expect(migration).not.toMatch(/\b(storage_path|public_url)\b/);
+    expect(migration).not.toMatch(/\b(drop|rename) column (storage_path|public_url)\b/i);
   });
 
   it("uses safe defaults and constrained governance values", () => {
@@ -26,7 +26,7 @@ describe("media governance migration contract", () => {
   it("keeps localization and usage references relationally valid", () => {
     expect(migration).toMatch(/asset_id uuid not null references public\.media_assets\(id\) on delete cascade/i);
     expect(migration).toMatch(/asset_id uuid not null references public\.media_assets\(id\) on delete restrict/i);
-    expect(migration).toMatch(/unique \(asset_id, owner_type, owner_key, role, sort_order\)/i);
+    expect(migration).toMatch(/unique \(asset_id, owner_type, owner_key, role\)/i);
     expect(migration).toMatch(/create index if not exists media_usages_asset_id_idx/i);
     expect(migration).toMatch(/enable row level security/gi);
   });
@@ -55,11 +55,44 @@ describe("media administration safety contract", () => {
     expect(recordRoute).toContain("This image is still in use and cannot be deleted.");
   });
 
-  it("replaces localization and usage collections through one database transaction", () => {
-    expect(migration).toContain("replace_media_governance");
+  it("updates the media row and optional collections through one atomic RPC", () => {
+    expect(migration).toContain("update_media_asset_atomic");
     expect(migration).toContain("security invoker");
     expect(migration).toContain("admin_has_permission('content')");
-    expect(recordRoute).toContain('supabase.rpc("replace_media_governance"');
+    expect(recordRoute).toContain('supabase.rpc("update_media_asset_atomic"');
+    expect(recordRoute.match(/supabase\.rpc\("update_media_asset_atomic"/g)).toHaveLength(1);
+    const mediaBranch = recordRoute.match(/if \(resource === "media"\)[\s\S]*?return NextResponse\.json\(\{ record: data \}/)?.[0] || "";
+    expect(mediaBranch).not.toContain('.from(table).update(');
+    expect(migration).toMatch(/update public\.media_assets set[\s\S]*return updated_asset/i);
+    expect(migration).toMatch(/delete from public\.media_asset_localizations[\s\S]*delete from public\.media_usages[\s\S]*update public\.media_assets/i);
+  });
+
+  it("preserves optional collections when their parameters are omitted", () => {
+    expect(migration).toMatch(/if p_localizations is not null then[\s\S]*?end if;/i);
+    expect(migration).toMatch(/if p_usages is not null then[\s\S]*?end if;/i);
+    expect(recordRoute).toContain('Object.hasOwn(body, "localizations") ? body.localizations : null');
+    expect(recordRoute).toContain('Object.hasOwn(body, "usages") ? body.usages : null');
+    expect(recordRoute).toContain('update.focal_x = Number(update.focal_x)');
+    expect(recordRoute).toContain('update.focal_y = Number(update.focal_y)');
+  });
+
+  it("defines database validation for owners, roles, locales, ordering, focal points, and duplicates", () => {
+    expect(migration).toContain("owner_type in ('tour', 'destination', 'category', 'blog', 'page', 'social')");
+    expect(migration).toContain("role in ('featured', 'gallery', 'thumbnail', 'hero', 'social')");
+    expect(migration).toContain("locale in ('en', 'ar', 'de', 'ru', 'pl', 'zh')");
+    expect(migration).toContain("Duplicate localization locale");
+    expect(migration).toContain("Duplicate media usage assignment");
+    expect(migration).toContain("sort_order >= 0");
+    expect(migration).toContain("Invalid horizontal focal point");
+    expect(migration).toContain("Invalid vertical focal point");
+  });
+
+  it("relies on PostgreSQL transaction rollback for any failed save", () => {
+    expect(migration).toMatch(/returns public\.media_assets[\s\S]*language plpgsql[\s\S]*security invoker/i);
+    const atomicFunction = migration.slice(migration.indexOf("create or replace function public.update_media_asset_atomic"));
+    expect(atomicFunction).not.toMatch(/\b(exception when|commit|rollback)\b/i);
+    expect(migration).toContain("raise exception 'Invalid media usage'");
+    expect(migration).toContain("raise exception 'Invalid localized media metadata'");
   });
 });
 
