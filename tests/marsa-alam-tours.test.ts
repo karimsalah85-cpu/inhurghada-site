@@ -4,10 +4,23 @@ import { locales } from "@/lib/i18n";
 import { localizeTour } from "@/lib/tour-localization";
 import { validateTourSchedule } from "@/lib/booking-validation";
 import { marsaAlamTourSchedules } from "@/data/tour-schedules";
+import { getDestination } from "@/lib/destinations";
+import { tourCategories } from "@/lib/tour-categories";
 
 const slugs = ["dolphin-house-marsa-alam", "marsa-mubarak-snorkeling", "abu-dabbab-snorkeling"];
 
 describe("Marsa Alam tours", () => {
+  it("keeps Hurghada and Marsa Alam catalogues strictly separated", () => {
+    const active = tours.filter((tour) => tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted");
+    const marsaAlam = active.filter((tour) => tour.destinationSlug === "marsa-alam");
+    const hurghada = active.filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada");
+    expect(marsaAlam.map((tour) => tour.slug)).toEqual(slugs);
+    expect(hurghada.some((tour) => slugs.includes(tour.slug))).toBe(false);
+    expect(marsaAlam.some((tour) => hurghada.some((item) => item.slug === tour.slug))).toBe(false);
+    expect(getDestination("marsa-alam")?.comingSoon).not.toBe(true);
+    expect(tourCategories.filter((category) => marsaAlam.some(category.matches)).map((category) => category.slug)).toEqual(["excursions", "diving-snorkeling"]);
+  });
+
   it("publishes confirmed destination ownership, EUR prices, age bands, and pickup coverage", () => {
     const selected = tours.filter((tour) => slugs.includes(tour.slug));
     expect(selected).toHaveLength(3);

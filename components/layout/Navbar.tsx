@@ -117,7 +117,7 @@ export default function Navbar() {
           </NavLink>
 
           <NavLink href={localePath(language, "/destinations/marsa-alam")} active={pathname === localePath(language, "/destinations/marsa-alam")}>
-            Marsa Alam <span className="ms-1 rounded-full bg-amber-200 px-1.5 py-0.5 text-[9px] font-black uppercase text-amber-900">{ui.soon}</span>
+            Marsa Alam
           </NavLink>
 
 
@@ -239,7 +239,7 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink href={localePath(language, "/destinations/marsa-alam")} close={closeMenu}>
-            <span className="flex items-center justify-between"><span>Marsa Alam</span><span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black uppercase text-amber-900">{ui.comingSoon}</span></span>
+            <span>Marsa Alam</span>
           </MobileLink>
 
 

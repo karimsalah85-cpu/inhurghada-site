@@ -20,7 +20,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const zh = locale === "zh";
   const destination = getDestination(tour.destinationSlug);
   const homeHref = localePath(locale);
-  const toursHref = localePath(locale, "/tours");
+  const toursHref = `${localePath(locale, "/tours")}?destination=${tour.destinationSlug || "hurghada"}`;
   const reviewCount = Number(tour.reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;

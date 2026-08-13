@@ -21,13 +21,17 @@ const copy: Record<Locale, { eyebrow: string; title: string; description: string
   zh: { eyebrow: "Daily Red Sea 行程目录", title: "寻找您的红海体验", description: "搜索当前可预订的行程，比较价格和时长，并查看完整行程与预订详情。" },
 };
 
-export default async function ToursPage({ locale = "en", searchParams }: { locale?: Locale; searchParams?: Promise<{ search?: string }> }) {
-  const tours = (await getLiveTours(locale)).filter((tour) => tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted").map((tour) => localizeTour(tour, locale));
+export default async function ToursPage({ locale = "en", searchParams }: { locale?: Locale; searchParams?: Promise<{ search?: string; destination?: string }> }) {
+  const filters = await searchParams;
+  const tours = (await getLiveTours(locale))
+    .filter((tour) => tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted")
+    .filter((tour) => !filters?.destination || (tour.destinationSlug || "hurghada") === filters.destination)
+    .map((tour) => localizeTour(tour, locale));
   const text = copy[locale];
   const schema = { "@context": "https://schema.org", "@type": "ItemList", name: text.title, numberOfItems: tours.length, itemListElement: tours.map((tour, index) => ({ "@type": "ListItem", position: index + 1, name: tour.title, url: absoluteUrl(localePath(locale, `/tours/${tour.slug}`)) })) };
   return <main className="min-h-screen bg-slate-50">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
     <section className="bg-slate-950 px-6 pb-16 pt-32 text-white sm:px-8"><div className="mx-auto max-w-7xl"><p className="font-bold uppercase tracking-[0.24em] text-cyan-300">{text.eyebrow}</p><h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{text.title}</h1><p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{text.description}</p></div></section>
-    <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8"><CategoryTourExplorer tours={tours} locale={locale} initialQuery={(await searchParams)?.search || ""} /></section>
+    <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8"><CategoryTourExplorer tours={tours} locale={locale} initialQuery={filters?.search || ""} /></section>
   </main>;
 }
