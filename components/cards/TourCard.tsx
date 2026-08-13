@@ -24,6 +24,15 @@ type TourCardProps = {
   entrancePrice?: number;
 };
 
+const cardCopy = {
+  en: { fallback: "Hurghada experience", pickup: "Pickup", inquiry: "Price and pickup on request", clear: "Clear price · pickup confirmed", quotation: "Quotation", request: "Request price", from: "From", perPerson: "per person", entrance: "entrance from", person: "person", inquire: "View & inquire", book: "View & book" },
+  ar: { fallback: "تجربة في الغردقة", pickup: "الاستلام", inquiry: "السعر والاستلام عند الطلب", clear: "سعر واضح · تأكيد الاستلام", quotation: "عرض سعر", request: "اطلب السعر", from: "ابتداءً من", perPerson: "للشخص", entrance: "رسوم الدخول من", person: "للشخص", inquire: "التفاصيل والاستفسار", book: "التفاصيل والحجز" },
+  de: { fallback: "Hurghada-Erlebnis", pickup: "Abholung", inquiry: "Preis und Abholung auf Anfrage", clear: "Klarer Preis · Abholung bestätigt", quotation: "Angebot", request: "Preis anfragen", from: "Ab", perPerson: "pro Person", entrance: "Eintritt ab", person: "Person", inquire: "Ansehen & anfragen", book: "Ansehen & buchen" },
+  ru: { fallback: "Экскурсия в Хургаде", pickup: "Трансфер", inquiry: "Цена и трансфер по запросу", clear: "Понятная цена · трансфер подтверждается", quotation: "Расчёт", request: "Запросить цену", from: "От", perPerson: "за человека", entrance: "вход от", person: "чел.", inquire: "Подробнее и запрос", book: "Подробнее и бронирование" },
+  pl: { fallback: "Atrakcja w Hurghadzie", pickup: "Odbiór", inquiry: "Cena i odbiór na zapytanie", clear: "Jasna cena · potwierdzony odbiór", quotation: "Wycena", request: "Zapytaj o cenę", from: "Od", perPerson: "za osobę", entrance: "wstęp od", person: "osoba", inquire: "Zobacz i zapytaj", book: "Zobacz i zarezerwuj" },
+  zh: { fallback: "赫尔格达体验", pickup: "接送", inquiry: "价格和接送需咨询", clear: "价格透明 · 接送已确认", quotation: "报价", request: "咨询价格", from: "起价", perPerson: "每人", entrance: "门票起价", person: "每人", inquire: "查看并咨询", book: "查看并预订" },
+} as const;
+
 export default function TourCard({
   image,
   title,
@@ -43,9 +52,7 @@ export default function TourCard({
   entrancePrice,
 }: TourCardProps) {
   const { formatPrice, t, language } = useSiteSettings();
-  const de = language === "de";
-  const ru = language === "ru";
-  const ar = language === "ar";
+  const copy = cardCopy[language];
   const reviewCount = Number(reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
 
@@ -60,16 +67,16 @@ export default function TourCard({
           <span className="absolute bottom-4 start-4 rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white">{localizeProductBadge(language, badge ?? "Best Seller")}</span>
         </div>
         <div className="p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{category || "Hurghada experience"}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{category || copy.fallback}</p>
           <h3 className="mt-2 text-2xl font-bold text-slate-900">{title}</h3>
           <div className="mt-3 flex items-center gap-2 text-slate-500"><MapPin size={18} /><span>{location}</span></div>
           <p className="mt-4 line-clamp-3 leading-relaxed text-slate-600">{description}</p>
           <div className="mt-5 flex items-center gap-2 text-slate-500"><Clock size={18} /><span>{t("everyDay")} · {duration}</span></div>
-          {availableTime ? <p className="mt-3 text-sm text-slate-500">{de ? "Abholung" : ru ? "Трансфер" : ar ? "الاستلام" : "Pickup"}: {availableTime}</p> : null}
-          <p className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700"><ShieldCheck size={17} />{bookingMode === "inquiry" ? (de ? "Preis und Abholung auf Anfrage" : ru ? "Цена и трансфер по запросу" : ar ? "السعر والاستلام عند الطلب" : "Price and pickup on request") : de ? "Klarer Preis · Abholung bestätigt" : ru ? "Понятная цена · трансфер подтверждается" : ar ? "سعر واضح · تأكيد الاستلام" : "Clear price · pickup confirmed"}</p>
+          {availableTime ? <p className="mt-3 text-sm text-slate-500">{copy.pickup}: {availableTime}</p> : null}
+          <p className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700"><ShieldCheck size={17} />{bookingMode === "inquiry" ? copy.inquiry : copy.clear}</p>
           <div className="mt-6 flex items-end justify-between gap-4">
-            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">Quotation</p><p className="text-xl font-bold text-blue-700">Request price</p></> : <><p className="text-sm text-slate-500">{de ? "Ab" : ru ? "От" : ar ? "ابتداءً من" : "From"}</p>{originalPrice && Number(originalPrice) > Number(price) ? <p className="text-sm font-semibold text-slate-400 line-through">{formatPrice(originalPrice)}</p> : null}<p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || (de ? "pro Person" : ru ? "за человека" : ar ? "للشخص" : "per person")}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-amber-700">+ {de ? "Eintritt ab" : ru ? "вход от" : ar ? "رسوم دخول من" : "entrance from"} {formatPrice(String(entrancePrice))}/{de ? "Person" : ru ? "чел." : ar ? "للشخص" : "person"}</p> : null}</>}</div>
-            <span className="rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition group-hover:bg-blue-800">{bookingMode === "inquiry" ? "View & inquire" : de ? "Ansehen & buchen" : ru ? "Подробнее и бронирование" : ar ? "التفاصيل والحجز" : "View & book"}</span>
+            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">{copy.quotation}</p><p className="text-xl font-bold text-blue-700">{copy.request}</p></> : <><p className="text-sm text-slate-500">{copy.from}</p>{originalPrice && Number(originalPrice) > Number(price) ? <p className="text-sm font-semibold text-slate-400 line-through">{formatPrice(originalPrice)}</p> : null}<p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || copy.perPerson}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-amber-700">+ {copy.entrance} {formatPrice(String(entrancePrice))}/{copy.person}</p> : null}</>}</div>
+            <span className="rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition group-hover:bg-blue-800">{bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
           </div>
         </div>
       </Link>

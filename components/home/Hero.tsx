@@ -74,8 +74,8 @@ export default function Hero() {
     <section
       className="
       relative
-      min-h-[940px]
-      sm:min-h-screen
+      min-h-[760px]
+      sm:min-h-[820px]
       "
     >
 
@@ -103,13 +103,13 @@ export default function Hero() {
         relative
         z-10
         flex
-        min-h-[940px]
+        min-h-[760px]
         justify-start
-        pb-[32rem]
-        pt-40
-        sm:min-h-screen
+        pb-[25rem]
+        pt-36
+        sm:min-h-[820px]
         sm:justify-center
-        sm:pb-48
+        sm:pb-44
         sm:pt-32
         flex-col
         items-center
@@ -128,11 +128,11 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="text-4xl font-black leading-[1.08] sm:text-5xl md:text-6xl">
+          <h1 className="text-4xl font-black leading-[1.04] sm:text-6xl md:text-7xl">
             {t("heroTitle")}
           </h1>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:mt-6 sm:text-lg md:text-xl">
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-100 sm:mt-6 sm:text-lg md:text-xl">
             {t("heroDescription")}
           </p>
 

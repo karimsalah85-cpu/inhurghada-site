@@ -21,13 +21,15 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
   const images = [mainImage, ...galleryImages];
   const imageCount = images.length;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const de = locale === "de";
-  const ru = locale === "ru";
-  const ar = locale === "ar";
-  const closeLabel = de ? "Galerie schließen" : ru ? "Закрыть галерею" : ar ? "إغلاق المعرض" : "Close gallery";
-  const previousLabel = de ? "Vorheriges Bild" : ru ? "Предыдущее изображение" : ar ? "الصورة السابقة" : "Previous image";
-  const nextLabel = de ? "Nächstes Bild" : ru ? "Следующее изображение" : ar ? "الصورة التالية" : "Next image";
-  const openLabel = de ? "Bild vergrößern" : ru ? "Увеличить изображение" : ar ? "تكبير الصورة" : "Enlarge image";
+  const copy = {
+    en: ["Close gallery", "Previous image", "Next image", "Enlarge image", "gallery image"],
+    ar: ["إغلاق المعرض", "الصورة السابقة", "الصورة التالية", "تكبير الصورة", "صورة من المعرض"],
+    de: ["Galerie schließen", "Vorheriges Bild", "Nächstes Bild", "Bild vergrößern", "Galeriebild"],
+    ru: ["Закрыть галерею", "Предыдущее изображение", "Следующее изображение", "Увеличить изображение", "изображение галереи"],
+    pl: ["Zamknij galerię", "Poprzednie zdjęcie", "Następne zdjęcie", "Powiększ zdjęcie", "zdjęcie w galerii"],
+    zh: ["关闭图库", "上一张图片", "下一张图片", "放大图片", "图库图片"],
+  }[locale];
+  const [closeLabel, previousLabel, nextLabel, openLabel, galleryImageLabel] = copy;
 
   const selectPrevious = useCallback(() => setSelectedIndex((current) => current === null ? null : (current - 1 + imageCount) % imageCount), [imageCount]);
   const selectNext = useCallback(() => setSelectedIndex((current) => current === null ? null : (current + 1) % imageCount), [imageCount]);
@@ -56,7 +58,7 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
       aria-label={`${openLabel}: ${title} ${index + 1}`}
       className={`group relative overflow-hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400 ${primary ? "aspect-[4/3] sm:aspect-auto sm:min-h-64" : "aspect-[4/3] sm:aspect-auto"}`}
     >
-      <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — gallery image ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" style={{ objectPosition: `${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.x ?? 0.5) * 100}% ${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.y ?? 0.5) * 100}%` }} priority={primary} />
+      <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — ${galleryImageLabel} ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" style={{ objectPosition: `${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.x ?? 0.5) * 100}% ${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.y ?? 0.5) * 100}%` }} priority={primary} />
       <ImageWatermark prominent={primary} />
       <span className="absolute right-3 top-3 rounded-full bg-slate-950/70 p-2 text-white shadow-lg backdrop-blur-sm">
         <Expand size={18} aria-hidden="true" />

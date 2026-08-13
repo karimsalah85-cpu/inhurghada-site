@@ -24,6 +24,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { items } = useCart();
   const ui = publicInterfaceCopy[language];
+  const destinationsLabel = language === "ar" ? "الوجهات" : language === "de" ? "Reiseziele" : language === "ru" ? "Направления" : language === "pl" ? "Kierunki" : language === "zh" ? "目的地" : "Destinations";
 
 
   function closeMenu() {
@@ -118,7 +119,7 @@ export default function Navbar() {
           </NavLink>
 
           <details className="group relative">
-            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-slate-700 hover:bg-white hover:text-blue-700">Destinations <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
+            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-slate-700 hover:bg-white hover:text-blue-700">{destinationsLabel} <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
             <div className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
               {destinations.filter((destination) => destination.status === "live").map((destination) => <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="block rounded-xl px-4 py-3 font-semibold text-slate-700 hover:bg-cyan-50 hover:text-cyan-800">{destination.name}</Link>)}
             </div>
@@ -134,14 +135,14 @@ export default function Navbar() {
           </NavLink>
 
           <NavLink href={localePath(language, "/blog")} active={pathname === localePath(language, "/blog") || pathname.startsWith(`${localePath(language, "/blog")}/`)}>
-            {language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}
+            {language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "pl" ? "Poradnik" : language === "zh" ? "旅游指南" : "Blog"}
           </NavLink>
           </div>
 
 
 
           <Link
-            href={`${localePath(language)}#tours`}
+            href={localePath(language, "/tours")}
             className="
             rounded-full
             bg-gradient-to-r from-cyan-600 to-blue-700
@@ -236,13 +237,13 @@ export default function Navbar() {
 
 
           <MobileLink
-            href={`${localePath(language)}#tours`}
+            href={localePath(language, "/tours")}
             close={closeMenu}
           >
             {t("tours")}
           </MobileLink>
 
-          <p className="px-4 pt-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">Destinations</p>
+          <p className="px-4 pt-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">{destinationsLabel}</p>
           {destinations.filter((destination) => destination.status === "live").map((destination) => <MobileLink key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} close={closeMenu}><span>{destination.name}</span></MobileLink>)}
 
 
@@ -268,7 +269,7 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink href={localePath(language, "/cart")} close={closeMenu}>
-            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
+            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "pl" ? "Koszyk wycieczek" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
           </MobileLink>
 
           <MobileLink
@@ -279,7 +280,7 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink href={localePath(language, "/blog")} close={closeMenu}>
-            {language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "zh" ? "旅游指南" : "Blog"}
+            {language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "pl" ? "Poradnik" : language === "zh" ? "旅游指南" : "Blog"}
           </MobileLink>
 
 

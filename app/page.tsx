@@ -119,8 +119,8 @@ function HomeContent() {
 
   const [liveTours, setLiveTours] = useState<Tour[]>(tours);
   useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
-  const hurghadaTours = applyTourCollectionMediaSafety(liveTours.filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada" && tour.listingStatus !== "unlisted"), language);
-  const displayTours = de ? hurghadaTours.map(localizeTourGerman) : ru ? hurghadaTours.map(localizeTourRussian) : ar ? hurghadaTours.map(localizeTourArabic) : pl ? hurghadaTours.map(localizeTourPolish) : zh ? hurghadaTours.map(localizeTourChinese) : hurghadaTours;
+  const publicTours = applyTourCollectionMediaSafety(liveTours.filter((tour) => tour.listingStatus !== "unlisted" && tour.listingStatus !== "paused"), language);
+  const displayTours = de ? publicTours.map(localizeTourGerman) : ru ? publicTours.map(localizeTourRussian) : ar ? publicTours.map(localizeTourArabic) : pl ? publicTours.map(localizeTourPolish) : zh ? publicTours.map(localizeTourChinese) : publicTours;
   const filteredTours = filterTours(displayTours, search);
 
   const tourOrder = ["orange-bay", "full-day-snorkeling", "full-day-diving", "mahmya-island", "quad-safari-morning", "quad-safari-sunset", "hurghada-airport-transfer", "senzo-transfer"];
@@ -151,7 +151,7 @@ function HomeContent() {
           </div>
           <div className="mt-9 grid gap-5 md:grid-cols-2">
             {destinations.map((destination) => (
-              <Link key={destination.slug} href={`/destinations/${destination.slug}`} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm">
+              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group relative min-h-72 overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-cyan-400">
                 <Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-7 text-white">
@@ -208,7 +208,7 @@ function HomeContent() {
 
           <div className="grid gap-6 md:grid-cols-3">
             <DestinationCard image="/images/owned/mahmya-boats-sunset.jpg" title={ru ? "Отдых на островах" : de ? "Inselerlebnisse" : ar ? "عطلات الجزر" : pl ? "Wyspy i plaże" : zh ? "海岛休闲" : "Island escapes"} description={ru ? "Морские прогулки, снорклинг и пляжный отдых на Красном море." : de ? "Bootsausflüge, Schnorcheln und Strandtage am Roten Meer." : ar ? "رحلات بحرية وسنوركلينج وأيام شاطئية في البحر الأحمر." : pl ? "Rejsy, snorkeling i plażowe dni nad Morzem Czerwonym." : zh ? "游船、浮潜和红海海滩时光。" : "Boat trips, snorkeling and beach days on the Red Sea."} href={`${homePath}?search=island`} />
-            <DestinationCard image="/images/owned/red-sea-diver-reef.jpg" title={ru ? "Дайвинг и снорклинг" : de ? "Tauchen & Schnorcheln" : ar ? "الغوص والسنوركلينج" : pl ? "Nurkowanie i snorkeling" : zh ? "潜水与浮潜" : "Diving & Snorkeling"} description={de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : ar ? "اكتشف حدائق المرجان وعالم البحر الأحمر تحت الماء." : pl ? "Odkryj rafy koralowe i podwodny świat Morza Czerwonego." : zh ? "探索珊瑚花园、绚丽鱼群和清澈海底。" : "Meet coral gardens, bright reef life, and the clear blue world below the surface."} href={localePath(language, "/hurghada/diving-snorkeling")} />
+            <DestinationCard image="/images/owned/red-sea-diver-reef.jpg" title={ru ? "Дайвинг и снорклинг" : de ? "Tauchen & Schnorcheln" : ar ? "الغوص والسنوركلينج" : pl ? "Nurkowanie i snorkeling" : zh ? "潜水与浮潜" : "Diving & Snorkeling"} description={de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : ar ? "اكتشف حدائق المرجان وعالم البحر الأحمر تحت الماء." : pl ? "Odkryj rafy koralowe i podwodny świat Morza Czerwonego." : zh ? "探索珊瑚花园、绚丽鱼群和清澈海底。" : "Meet coral gardens, bright reef life, and the clear blue world below the surface."} href={`${homePath}?search=diving`} />
             <DestinationCard image="/images/owned/quad-safari-morning.jpg" title={ru ? "Приключения в пустыне" : de ? "Wüstenabenteuer" : ar ? "مغامرات الصحراء" : pl ? "Przygody na pustyni" : zh ? "沙漠探险" : "Desert adventures"} description={ru ? "Квадроциклы, культура бедуинов и незабываемые закаты." : de ? "Quads, Beduinenkultur und unvergessliche Sonnenuntergänge." : ar ? "كواد وثقافة بدوية وغروب لا يُنسى." : pl ? "Quady, kultura Beduinów i niezapomniane zachody słońca." : zh ? "四轮摩托、贝都因文化和难忘的日落。" : "Quad bikes, Bedouin culture and unforgettable sunsets."} href={`${homePath}?search=desert`} />
           </div>
         </div>
@@ -513,20 +513,17 @@ text-blue-600
 
 )}
 
-          <div className="
-            grid
-            gap-8
-            md:grid-cols-2
-            lg:grid-cols-3
-          ">
-
-
-
-          {
-            filteredTours.length > 0 ? (
-
-
-              filteredTours.map((tour: Tour)=>(
+          <div className="space-y-16">
+          {filteredTours.length > 0 ? destinations.filter((destination) => destination.status === "live").map((destination) => {
+            const destinationTours = filteredTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).slice(0, 6);
+            if (!destinationTours.length) return null;
+            return <section key={destination.slug} aria-labelledby={`home-${destination.slug}-title`}>
+              <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                <div><p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-700">{destination.country} · {destination.region}</p><h3 id={`home-${destination.slug}-title`} className="mt-2 text-3xl font-black text-slate-950">{destination.name}</h3><p className="mt-2 max-w-2xl text-slate-600">{destination.tagline}</p></div>
+                <Link href={localePath(language, `/destinations/${destination.slug}`)} className="font-bold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
+              </div>
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {destinationTours.map((tour: Tour)=>(
 
 
                 <TourCard
@@ -561,10 +558,10 @@ text-blue-600
                 />
 
 
-              ))
-
-
-            ) : (
+              ))}
+              </div>
+            </section>;
+          }) : (
 
 
 
@@ -582,9 +579,7 @@ text-blue-600
 
 
 
-            )
-
-          }
+            )}
 
 
 
@@ -598,7 +593,7 @@ text-blue-600
 
       </section>
 
-      <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">{tr("Why Daily Red Sea", "Warum Daily Red Sea?", "Почему Daily Red Sea")}</p><h2 className="mt-4 text-4xl font-black">{tr("Local knowledge, easy booking, clear support.", "Lokale Erfahrung, einfache Buchung, klare Unterstützung.", "Местные знания, простое бронирование и понятная поддержка.")}</h2><p className="mt-5 leading-7 text-slate-300">{tr("We help you find the right Hurghada excursion with direct local support before your day begins.", "Wir helfen dir mit direkter lokaler Betreuung, den passenden Ausflug in Hurghada zu finden.", "Мы поможем выбрать подходящую экскурсию в Хургаде и поддержим вас до начала поездки.")}</p></div>{[
+      <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">{tr("Why Daily Red Sea", "Warum Daily Red Sea?", "Почему Daily Red Sea")}</p><h2 className="mt-4 text-4xl font-black">{tr("Local knowledge, easy booking, clear support.", "Lokale Erfahrung, einfache Buchung, klare Unterstützung.", "Местные знания, простое бронирование и понятная поддержка.")}</h2><p className="mt-5 leading-7 text-slate-300">{tr("We help you choose the right experience for your Red Sea destination with direct local support before your day begins.", "Wir helfen dir mit direkter lokaler Betreuung, das passende Erlebnis für dein Reiseziel am Roten Meer zu finden.", "Мы поможем выбрать подходящую поездку для вашего курорта на Красном море и поддержим вас до её начала.", "نساعدك في اختيار التجربة المناسبة لوجهتك في البحر الأحمر مع دعم محلي مباشر قبل بدء يومك.", "Pomagamy wybrać właściwą atrakcję dla Twojego miejsca nad Morzem Czerwonym i zapewniamy lokalne wsparcie przed wyjazdem.", "我们帮助您为红海目的地选择合适的体验，并在出发前提供直接的本地支持。")}</p></div>{[
         {icon:ShieldCheck,title:tr("Trusted local partners","Vertrauenswürdige lokale Partner","Надёжные местные партнёры"),text:tr("Carefully selected crews, guides and drivers.","Sorgfältig ausgewählte Crews, Reiseführer und Fahrer.","Тщательно отобранные команды, гиды и водители.")},
         {icon:MessageCircle,title:tr("Easy WhatsApp booking","Einfache WhatsApp-Buchung","Простое бронирование в WhatsApp"),text:tr("Fast help for pickup, changes and questions.","Schnelle Hilfe bei Abholung, Änderungen und Fragen.","Быстрая помощь с трансфером, изменениями и вопросами.")},
         {icon:Headphones,title:tr("Helpful support","Hilfreiche Betreuung","Заботливая поддержка"),text:tr("Clear communication before your tour.","Klare Kommunikation vor deinem Ausflug.","Понятное общение перед экскурсией.")},
@@ -609,7 +604,7 @@ text-blue-600
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-bold">{tr("Your Red Sea adventure, made easy", "Dein Abenteuer am Roten Meer – einfach geplant", "Ваш отдых на Красном море — легко и удобно")}</h2>
           <p className="mt-5 text-lg leading-relaxed text-gray-600">
-            {tr("Daily Red Sea connects you with memorable Hurghada experiences, from island cruises and diving to desert adventures and private transfers.", "Daily Red Sea verbindet dich mit unvergesslichen Erlebnissen in Hurghada – von Insel- und Tauchausflügen bis zu Wüstenabenteuern und Privattransfers.", "Daily Red Sea предлагает яркие впечатления в Хургаде: островные прогулки, дайвинг, приключения в пустыне и частные трансферы.")}
+            {tr("Daily Red Sea connects you with memorable experiences across Red Sea destinations, from boat trips and diving to desert adventures and private transfers.", "Daily Red Sea verbindet dich mit unvergesslichen Erlebnissen in Reisezielen am Roten Meer – von Bootstouren und Tauchen bis zu Wüstenabenteuern und Privattransfers.", "Daily Red Sea предлагает яркие впечатления на курортах Красного моря: морские прогулки, дайвинг, приключения в пустыне и частные трансферы.", "تربطك Daily Red Sea بتجارب لا تُنسى في وجهات البحر الأحمر، من الرحلات البحرية والغوص إلى مغامرات الصحراء والتنقلات الخاصة.", "Daily Red Sea łączy Cię z niezapomnianymi atrakcjami w różnych miejscach nad Morzem Czerwonym — od rejsów i nurkowania po pustynię i prywatne transfery.", "Daily Red Sea 为您连接红海各目的地的精彩体验，从游船和潜水到沙漠探险与私人接送。")}
           </p>
         </div>
       </section>
