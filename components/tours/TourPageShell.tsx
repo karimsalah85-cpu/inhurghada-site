@@ -21,6 +21,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const destination = getDestination(tour.destinationSlug);
   const homeHref = localePath(locale);
   const toursHref = `${localePath(locale, "/tours")}?destination=${tour.destinationSlug || "hurghada"}`;
+  const destinationHref = localePath(locale, `/destinations/${tour.destinationSlug}`);
   const reviewCount = Number(tour.reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
@@ -58,7 +59,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     pl: { home: "Strona główna", tours: "Wycieczki" }, zh: { home: "首页", tours: "旅游项目" },
   }[locale];
   const schema = { "@context": "https://schema.org", "@graph": [
-    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: breadcrumbLabels.tours, item: absoluteUrl(localePath(locale, "/tours")) }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
+    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: destination?.name || "Hurghada", item: absoluteUrl(destinationHref) }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
     tourSchema,
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
@@ -67,7 +68,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
       <TourViewTracker title={tour.title} price={tour.price} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : zh ? "首页" : "Home"}</Link><span className="px-2" aria-hidden="true">/</span><Link href={toursHref} className="hover:text-cyan-700">{de ? "Ausflüge" : ru ? "Экскурсии" : ar ? "الرحلات" : zh ? "旅游项目" : "Tours"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
+        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : zh ? "首页" : "Home"}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationHref} className="hover:text-cyan-700">{destination?.name || "Hurghada"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{de ? `${destination?.name || "Hurghada"}-Erlebnis` : ru ? `Экскурсия · ${destination?.name || "Хургада"}` : zh ? "赫尔格达体验" : `${destination?.name || "Hurghada"} experience`}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {de ? "Kundenbewertungen" : ru ? "отзывов гостей" : "customer reviews"}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
@@ -83,6 +84,8 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
               {tour.listingStatus === "paused" ? <div className="min-h-[320px] rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-800">Temporarily unavailable</p><h2 className="mt-3 text-3xl font-black text-slate-950">Bookings are paused</h2><p className="mt-4 leading-7 text-slate-700">We are not accepting new bookings for this trip right now. Existing bookings are unaffected.</p></div> : transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}
                   tourSlug={tour.slug}
+                  destinationSlug={tour.destinationSlug}
+                  pickupZones={destination?.pickupZones.filter((zone) => zone.supplement === 0).map((zone) => zone.name)}
                   price={tour.price}
                   originalPrice={tour.originalPrice}
                   priceUnit={tour.priceUnit}

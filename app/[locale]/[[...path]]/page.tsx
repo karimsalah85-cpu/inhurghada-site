@@ -31,6 +31,7 @@ import CartPage from "@/app/cart/page";
 import DestinationPage from "@/app/destinations/[destination]/page";
 import BlogIndexPage from "@/app/blog/page";
 import ToursPage from "@/app/tours/page";
+import { destinations, getDestination } from "@/lib/destinations";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -66,13 +67,13 @@ function pageKind(path: string[]) {
   if (path.length === 1 && path[0] === "tours") return "tours";
   if (path.length === 2 && path[0] === "tours") return "tour";
   if (path.length === 2 && path[0] === "hurghada" && getTourCategory(path[1])) return "category";
-  if (path.length === 2 && path[0] === "destinations" && path[1] === "marsa-alam") return "destination";
+  if (path.length === 2 && path[0] === "destinations" && getDestination(path[1])) return "destination";
   if (path.length === 1 && path[0] === "blog") return "blog";
   return ["booking", "booking/confirmation", "checkout", "cart", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq"].includes(path.join("/")) ? path.join("/") : null;
 }
 
 export async function generateStaticParams() {
-  const paths = [[], ["tours"], ["blog"], ["destinations", "marsa-alam"], ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug])];
+  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug])];
   return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
 }
 
@@ -90,7 +91,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const tour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
   if (kind === "tour" && !tour) notFound();
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
-  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `Marsa Alam · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
+  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": "Booking confirmation", checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
   const title = tour ? tour.seoTitle || tour.title : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
@@ -141,7 +142,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const tours = await getLiveTours(locale);
   const direction = locale === "ar" ? "rtl" : "ltr";
 
-  if (kind === "destination") return <div dir={direction}><DestinationPage params={Promise.resolve({ destination: "marsa-alam" })} /></div>;
+  if (kind === "destination") return <div dir={direction}><DestinationPage params={Promise.resolve({ destination: path[1] })} /></div>;
   if (kind === "tours") return <div dir={direction}><ToursPage locale={locale} /></div>;
   if (kind === "blog") return <div dir={direction}><BlogIndexPage /></div>;
 

@@ -9,7 +9,7 @@ import { getImageProps } from "next/image";
 import ImageWatermark from "@/components/media/ImageWatermark";
 
 const heroImageCommon = {
-  alt: "Hurghada experiences including desert, ancient Egyptian temples, Red Sea boat trips, and scuba diving",
+  alt: "Red Sea experiences including desert, ancient Egyptian temples, boat trips, and scuba diving",
   sizes: "100vw",
 };
 const { props: { srcSet: desktopHeroSrcSet } } = getImageProps({
@@ -39,10 +39,10 @@ export default function Hero() {
 
   function searchTours() {
 
-    const search = destination.toLowerCase().trim();
+    const selectedDestination = destination.toLowerCase().trim();
 
 
-    if (!search) {
+    if (!selectedDestination) {
       alert(t("destination"));
       return;
     }
@@ -50,7 +50,7 @@ export default function Hero() {
 
     const params = new URLSearchParams();
 
-    params.set("search", search);
+    params.set("destination", selectedDestination);
 
 
     if (date) {
@@ -63,7 +63,7 @@ export default function Hero() {
     }
 
 
-    router.push(`${localePath(language)}?${params.toString()}`);
+    router.push(`${localePath(language, "/tours")}?${params.toString()}`);
 
   }
 
@@ -224,7 +224,7 @@ export default function Hero() {
                 <MapPin className="text-blue-600"/>
 
 
-                <input
+                <select
 
                   value={destination}
 
@@ -232,23 +232,14 @@ export default function Hero() {
                     setDestination(e.target.value)
                   }
 
-                  onKeyDown={(e)=>{
-
-                    if(e.key==="Enter"){
-                      searchTours();
-                    }
-
-                  }}
-
-                  placeholder={t("searchPlaceholder")}
-
+                  aria-label={t("destination")}
                   className="
                   w-full
                   bg-transparent
                   outline-none
                   "
 
-                />
+                ><option value="">{t("searchPlaceholder")}</option><option value="hurghada">Hurghada</option><option value="marsa-alam">Marsa Alam</option></select>
 
 
               </div>

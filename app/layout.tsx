@@ -13,10 +13,11 @@ import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
+  title: "Daily Red Sea | Red Sea Tours & Experiences",
   description: defaultDescription,
   keywords: [
     "Hurghada tours",
+    "Marsa Alam tours",
     "Orange Bay",
     "boat trips Hurghada",
     "private transfers",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
   openGraph: {
-    title: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
+    title: "Daily Red Sea | Red Sea Tours & Experiences",
     description: defaultDescription,
     url: siteUrl,
     siteName,
@@ -44,13 +45,13 @@ export const metadata: Metadata = {
         url: defaultSocialImage,
         width: 1200,
         height: 630,
-        alt: "Daily Red Sea tours and transfers in Hurghada",
+        alt: "Daily Red Sea tours in Hurghada and Marsa Alam",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Daily Red Sea | Hurghada Tours, Transfers & Boat Trips",
+    title: "Daily Red Sea | Red Sea Tours & Experiences",
     description: defaultDescription,
     images: [defaultSocialImage],
   },
