@@ -40,9 +40,9 @@ const ownedMedia: Record<string, SafeMedia> = {
     galleryAlts: { en: ["A camel at a desert camp near Hurghada", "A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   camelAdventure: {
-    image: "/images/owned/desert-camel-profile.jpg", alt: localizedAlt("A camel at a desert camp near Hurghada"),
-    gallery: ["/images/owned/desert-camel-front.jpg", "/images/owned/quad-safari-morning.jpg"],
-    galleryAlts: { en: ["A camel facing the camera at a desert camp", "Guests riding red quad bikes during a Hurghada desert adventure"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    image: "/images/owned/desert-camel-front.jpg", alt: localizedAlt("A camel facing the camera at a desert camp near Hurghada"),
+    gallery: ["/images/owned/quad-safari-morning.jpg"],
+    galleryAlts: { en: ["Guests riding red quad bikes during a Hurghada desert adventure"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   airport: { image: "/images/owned/hurghada-airport-flight.png", alt: localizedAlt("Aerial view of the Red Sea coast from an arriving aircraft") },
   speedboat: {
@@ -64,6 +64,11 @@ const ownedMedia: Record<string, SafeMedia> = {
     image: "/images/owned/red-sea-reef-panorama.jpg", alt: localizedAlt("Clear Red Sea water and coral reef at a snorkeling area"),
     gallery: ["/images/owned/red-sea-coral-closeup.jpg", "/images/owned/red-sea-coast.jpg"],
     galleryAlts: { en: ["Red Sea coral with small reef fish", "Clear shallow Red Sea water along the coast"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
+  orangeBay: {
+    image: "/images/owned/red-sea-reef-panorama.jpg", alt: localizedAlt("Turquoise Red Sea water and coral reef on the Orange Bay snorkeling route"),
+    gallery: ["/images/owned/red-sea-coral-closeup.jpg", "/images/owned/red-sea-coast.jpg"],
+    galleryAlts: { en: ["Coral and reef fish on the Orange Bay snorkeling route", "Clear Red Sea water near Orange Bay"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   diveTraining: {
     image: "/images/owned/diving-training-seabed.jpg", alt: localizedAlt("Scuba students practising skills with instructors underwater"),
@@ -95,6 +100,7 @@ const categoryMedia: Record<string, SafeMedia> = {
 };
 
 const mediaBySlug: Record<string, SafeMedia> = {
+  "orange-bay": ownedMedia.orangeBay,
   "safari": ownedMedia.camelAdventure,
   "professional-underwater-photographer": ownedMedia.underwaterPhotographer,
   "quad-safari-morning": ownedMedia.desertAdventure, "quad-safari-sunset": ownedMedia.desertAdventure,

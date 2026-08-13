@@ -132,7 +132,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
     title: "Orange Bay Hurghada Bootstour mit Schnorcheln", location: "Hurghada, Ägypten", duration: "8 Stunden", category: "Inselausflug",
     description: "Sichere dir deine Orange Bay Hurghada Tickets für einen entspannten Tag auf dem Roten Meer: komfortable Bootstour, zwei Schnorchelstopps an farbenfrohen Korallenriffen, Mittagessen an Bord und Freizeit am weißen Sandstrand.",
-    highlights: ["Orange Bay Island und Strandzeit", "Hurghada Bootstour auf einer komfortablen Yacht", "Zwei Schnorchelstopps an Korallenriffen", "Schwimmen im türkisfarbenen Wasser", "Mittagessen und Getränke an Bord"],
+    highlights: ["Orange Bay Island und Strandzeit", "Hurghada Bootstour auf einem komfortablen Boot", "Zwei Schnorchelstopps an Korallenriffen", "Schwimmen im türkisfarbenen Wasser", "Mittagessen und Getränke an Bord"],
     included: ["Hotelabholung und Rücktransfer", "Bootsfahrt", "Eintritt zur Orange Bay", "Zwei Schnorchelstopps", "Schnorchelausrüstung", "Mittagessen und alkoholfreie Getränke", "Crew und Sicherheitsausrüstung"],
     notIncluded: ["Unterwasserfotos und Videos", "Strandtücher", "Badebekleidung", "Sonnenschutz"],
     notes: ["Die genaue Abholzeit bestätigen wir nach der Buchung per WhatsApp.", "Nimm deinen Reisepass oder eine Kopie für die Hafengenehmigung mit.", "Bring Badebekleidung, Handtuch und Sonnenschutz mit."],
@@ -237,13 +237,13 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Kinder unter 10 Jahren", "Schwangere", "Personen mit schweren Rücken- oder Herzproblemen", "Personen, die medizinische oder Schwimmanforderungen nicht erfüllen"], whatToBring: ["Reisepass oder Ausweis", "Handtuch", "Badebekleidung", "Sonnenbrille"], seoTitle: "3-tägiger SSI Open Water Diver Kurs in Hurghada", metaDescription: "Buche einen dreitägigen SSI Open Water Diver Kurs in Hurghada mit digitalem Lernen, zwei Tauchgängen täglich, Ausrüstung und Transfer."
   },
   "dolphin-house-snorkeling": {
-    title: "Dolphin-House-Schnorcheltour ab Hurghada", description: "Siebenstündige Yachttour zum Dolphin House mit zwei Schnorchelstopps, Mittagessen, Getränken und Hoteltransfer.",
-    highlights: ["Wilde Delfine mit etwas Glück", "Zwei Schnorchelstopps", "Mittagessen und Getränke", "Professionelle Crew"], included: ["Hoteltransfer in Hurghada", "Yachtfahrt", "Dolphin House", "Schnorchelausrüstung", "Mittagessen und Getränke"],
+    title: "Dolphin-House-Schnorcheltour ab Hurghada", description: "Siebenstündige Bootstour zum Dolphin House mit zwei Schnorchelstopps, Mittagessen, Getränken und Hoteltransfer.",
+    highlights: ["Wilde Delfine mit etwas Glück", "Zwei Schnorchelstopps", "Mittagessen und Getränke", "Professionelle Crew"], included: ["Hoteltransfer in Hurghada", "Bootsfahrt", "Dolphin House", "Schnorchelausrüstung", "Mittagessen und Getränke"],
     notes: ["Delfinsichtungen und Schwimmen sind nicht garantiert.", "Route kann sich mit Wetter und Seegang ändern.", "Abholung wird per WhatsApp bestätigt."], packageName: "Dolphin-House-Schnorcheltour", ageBands: { adults: "Erwachsene (ab 11 Jahren)", children: "Kinder (4–10 Jahre)", infants: "Kleinkinder (0–3 Jahre)" },
   },
   "hula-hula-island-snorkeling": {
-    title: "Hula-Hula-Insel Bootstour und Schnorcheln", description: "Ganztägige Yachttour mit einer Stunde auf Hula Hula Island, zwei Schnorchelstopps, Mittagessen und Getränken.",
-    highlights: ["Eine Stunde auf Hula Hula Island", "Zwei Schnorchelstopps", "Mittagessen und Getränke", "Hoteltransfer"], included: ["Hoteltransfer", "Yachtfahrt", "Inselzugang", "Schnorchelausrüstung und Guide", "Mittagessen und Getränke"],
+    title: "Hula-Hula-Insel Bootstour und Schnorcheln", description: "Ganztägige Bootstour mit einer Stunde auf Hula Hula Island, zwei Schnorchelstopps, Mittagessen und Getränken.",
+    highlights: ["Eine Stunde auf Hula Hula Island", "Zwei Schnorchelstopps", "Mittagessen und Getränke", "Hoteltransfer"], included: ["Hoteltransfer", "Bootsfahrt", "Inselzugang", "Schnorchelausrüstung und Guide", "Mittagessen und Getränke"],
     notes: ["Abholung wird per WhatsApp bestätigt.", "Für Anfänger geeignet.", "Riffplätze können sich je nach Seegang ändern."], packageName: "Hula-Hula-Insel Bootstour", ageBands: { adults: "Erwachsene (ab 11 Jahren)", children: "Kinder (4–10 Jahre)", infants: "Kleinkinder (0–3 Jahre)" },
   },
   "magawish-speedboat": {

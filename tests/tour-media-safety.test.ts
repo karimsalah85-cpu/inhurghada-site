@@ -23,15 +23,17 @@ describe("tour media safety", () => {
   });
 
   it("restores the requested owner-supplied activity photography", () => {
-    expect(tours.find((item) => item.slug === "safari")?.image).toBe("/images/owned/desert-camel-profile.jpg");
-    expect(tours.find((item) => item.slug === "super-safari")?.image).toBe("/images/owned/desert-camel-profile.jpg");
-    expect(tours.find((item) => item.slug === "desert-stargazing")?.image).toBe("/images/owned/desert-camel-profile.jpg");
+    expect(tours.find((item) => item.slug === "safari")?.image).toBe("/images/owned/desert-camel-front.jpg");
+    expect(tours.find((item) => item.slug === "super-safari")?.image).toBe("/images/owned/desert-camel-front.jpg");
+    expect(tours.find((item) => item.slug === "desert-stargazing")?.image).toBe("/images/owned/desert-camel-front.jpg");
     expect(tours.find((item) => item.slug === "safari")?.galleryImages).toContain("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "quad-safari-sunset")?.image).toBe("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "hurghada-airport-transfer")?.image).toBe("/images/owned/hurghada-airport-flight.png");
     expect(tours.find((item) => item.slug === "professional-underwater-photographer")?.image).toBe("/images/owned/red-sea-diver-fish.jpg");
     expect(tours.find((item) => item.slug === "full-day-snorkeling")?.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
     expect(tours.find((item) => item.slug === "mahmya-island")?.image).toBe("/images/owned/mahmya-island-boats-owner.jpg");
+    expect(tours.find((item) => item.slug === "orange-bay")?.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
+    expect(tours.find((item) => item.slug === "orange-bay")?.galleryImages).not.toContain("/images/owned/mahmya-island-boats-owner.jpg");
     for (const tour of tours.filter((item) => item.slug.includes("speedboat"))) {
       expect(tour.image).toBe("/images/owned/speedboat-action-wide.jpg");
     }

@@ -54,8 +54,8 @@ Daily Red Sea starting price is 80% of the comparable GetYourGuide advertised **
 
 | Product | GetYourGuide from | Daily Red Sea from |
 | --- | ---: | ---: |
-| Dolphin House yacht and snorkeling | €33.00 | €26.40 |
-| Paradise Island yacht cruise | €21.00 | €16.80 |
+| Dolphin House boat and snorkeling | €33.00 | €26.40 |
+| Paradise Island boat cruise | €21.00 | €16.80 |
 | Orange Bay/Magawish sea taxi | $33.00 | $26.40 |
 | Royal Seascope | $22.00 | $17.60 |
 | Beginner diving | $30.00 | $24.00 |
