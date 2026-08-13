@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getLiveTours } from "@/lib/live-content";
+import { getLiveBlogPosts, getLiveTours } from "@/lib/live-content";
 import { siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
@@ -7,7 +7,7 @@ import { destinations } from "@/lib/destinations";
 import { blogPosts } from "@/data/blog-posts";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const tours = await getLiveTours();
+  const [tours, posts] = await Promise.all([getLiveTours(), getLiveBlogPosts()]);
   const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
   const paths = [
     "",
@@ -46,11 +46,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogEntries: MetadataRoute.Sitemap = [
     {
       url: `${siteUrl}/blog`,
-      lastModified: new Date(Math.min(Math.max(...blogPosts.map((post) => new Date(post.publishedAt).getTime())), Date.now())),
+      lastModified: new Date(Math.min(Math.max(...posts.map((post) => new Date(post.publishedAt).getTime())), Date.now())),
       changeFrequency: "weekly",
       priority: 0.75,
     },
-    ...blogPosts.map((post) => ({
+    ...posts.map((post) => ({
       url: `${siteUrl}/blog/${post.slug}`,
       lastModified: publishedAt(post.publishedAt),
       changeFrequency: "monthly" as const,
