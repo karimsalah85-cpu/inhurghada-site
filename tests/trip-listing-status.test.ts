@@ -38,4 +38,12 @@ describe("trip listing status", () => {
     const live = await getLiveTours();
     expect(live.some((tour) => tour.slug === source.slug)).toBe(false);
   });
+
+  it("does not let stale active CMS rows republish a locally unlisted trip", async () => {
+    const source = tours.find((tour) => tour.listingStatus === "unlisted")!;
+    rows = [{ slug: source.slug, status: "published", listing_status: "active", title: source.title, excerpt: source.description, body: { ...source, listingStatus: "active" }, seo_title: null, seo_description: null, featured_image: source.image, published_at: null, publish_at: null }];
+    const { getLiveTours } = await import("@/lib/live-content");
+    const live = await getLiveTours();
+    expect(live.some((tour) => tour.slug === source.slug)).toBe(false);
+  });
 });

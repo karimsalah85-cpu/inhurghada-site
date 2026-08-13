@@ -20,7 +20,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const zh = locale === "zh";
   const destination = getDestination(tour.destinationSlug);
   const homeHref = localePath(locale);
-  const toursHref = `${homeHref}#tours`;
+  const toursHref = localePath(locale, "/tours");
   const reviewCount = Number(tour.reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
@@ -58,7 +58,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     pl: { home: "Strona główna", tours: "Wycieczki" }, zh: { home: "首页", tours: "旅游项目" },
   }[locale];
   const schema = { "@context": "https://schema.org", "@graph": [
-    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: breadcrumbLabels.tours, item: `${absoluteUrl(localePath(locale))}#tours` }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
+    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: breadcrumbLabels.tours, item: absoluteUrl(localePath(locale, "/tours")) }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
     tourSchema,
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };

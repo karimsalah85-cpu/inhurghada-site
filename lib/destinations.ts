@@ -22,8 +22,7 @@ export const destinations: Destination[] = [
     name: "Marsa Alam",
     country: "Egypt",
     tagline: "Untouched reefs, desert landscapes, and southern Red Sea adventures",
-    active: false,
-    comingSoon: true,
+    active: true,
     image: "/images/owned/red-sea-reef-panorama.jpg",
   },
 ];

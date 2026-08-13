@@ -11,6 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
   const paths = [
     "",
+    "/tours",
     "/transfers",
     "/about",
     "/contact",

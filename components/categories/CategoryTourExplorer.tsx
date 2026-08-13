@@ -10,8 +10,8 @@ import { localePath, type Locale } from "@/lib/i18n";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localizeProductBadge } from "@/lib/public-interface-i18n";
 
-export default function CategoryTourExplorer({ tours, locale = "en" }: { tours: Tour[]; locale?: Locale }) {
-  const [query, setQuery] = useState("");
+export default function CategoryTourExplorer({ tours, locale = "en", initialQuery = "" }: { tours: Tour[]; locale?: Locale; initialQuery?: string }) {
+  const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState<"featured" | "price-low" | "price-high">("featured");
   const { formatPrice } = useSiteSettings();
   const de = locale === "de";

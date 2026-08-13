@@ -4,9 +4,9 @@ export type TourSchedule = {
 };
 
 export const marsaAlamTourSchedules = {
-  "dolphin-house-marsa-alam": { operatingWeekdays: [1, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo", assumption: true } },
-  "marsa-mubarak-snorkeling": { operatingWeekdays: [0, 2, 3, 4, 6] },
-  "abu-dabbab-snorkeling": { operatingWeekdays: [1, 3, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo", assumption: true } },
+  "dolphin-house-marsa-alam": { operatingWeekdays: [1, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" } },
+  "marsa-mubarak-snorkeling": { operatingWeekdays: [0, 2, 3, 4, 6], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" } },
+  "abu-dabbab-snorkeling": { operatingWeekdays: [1, 3, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" } },
 } as const satisfies Record<string, TourSchedule>;
 
 export type MarsaAlamTourSlug = keyof typeof marsaAlamTourSchedules;

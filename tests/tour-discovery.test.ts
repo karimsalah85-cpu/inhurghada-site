@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import sitemap from "@/app/sitemap";
+import { generateStaticParams as generateLocalizedStaticParams } from "@/app/[locale]/[[...path]]/page";
 import { tours } from "@/data/tours";
 import { getTourCategory, tourCategories } from "@/lib/tour-categories";
 
@@ -10,6 +11,21 @@ vi.mock("@/lib/live-content", () => ({
 beforeEach(() => vi.clearAllMocks());
 
 describe("tour discovery", () => {
+  it("keeps intentionally unlisted tours out of public discovery", () => {
+    expect(tours.filter((tour) => tour.listingStatus === "unlisted").map((tour) => tour.slug)).toEqual(expect.arrayContaining([
+      "royal-seascope-submarine",
+      "sahl-hasheesh-horse-riding",
+      "el-gouna-city-boat-tour",
+    ]));
+  });
+
+  it("does not pre-render localized routes for unlisted tours", async () => {
+    const localizedPaths = await generateLocalizedStaticParams();
+    for (const tour of tours.filter((item) => item.listingStatus === "unlisted")) {
+      expect(localizedPaths.some((item) => item.path.join("/") === `tours/${tour.slug}`)).toBe(false);
+    }
+  });
+
   it("maps every published category slug to at least one real tour", () => {
     for (const category of tourCategories) {
       expect(getTourCategory(category.slug)?.slug).toBe(category.slug);

@@ -112,7 +112,7 @@ export default function Navbar() {
           </NavLink>
 
 
-          <NavLink href={`${localePath(language)}#tours`}>
+          <NavLink href={localePath(language, "/tours")}>
             {t("tours")}
           </NavLink>
 

@@ -202,13 +202,13 @@ function HomeContent() {
               <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{t("chooseExperience")}</p>
               <h2 className="mt-3 text-4xl font-bold text-slate-900">{t("exploreAdventure")}</h2>
             </div>
-            <Link href={`${homePath}#tours`} className="font-semibold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
+            <Link href={localePath(language, "/tours")} className="font-semibold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            <DestinationCard image="/images/placeholders/island-trip.svg" title={ru ? "Отдых на островах" : de ? "Inselerlebnisse" : ar ? "عطلات الجزر" : pl ? "Wyspy i plaże" : zh ? "海岛休闲" : "Island escapes"} description={ru ? "Морские прогулки, снорклинг и пляжный отдых на Красном море." : de ? "Bootsausflüge, Schnorcheln und Strandtage am Roten Meer." : ar ? "رحلات بحرية وسنوركلينج وأيام شاطئية في البحر الأحمر." : pl ? "Rejsy, snorkeling i plażowe dni nad Morzem Czerwonym." : zh ? "游船、浮潜和红海海滩时光。" : "Boat trips, snorkeling and beach days on the Red Sea."} href={`${homePath}?search=island`} />
-            <DestinationCard image="/images/placeholders/island-trip.svg" title={ru ? "Дайвинг и снорклинг" : de ? "Tauchen & Schnorcheln" : ar ? "الغوص والسنوركلينج" : pl ? "Nurkowanie i snorkeling" : zh ? "潜水与浮潜" : "Diving & Snorkeling"} description={de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : ar ? "اكتشف حدائق المرجان وعالم البحر الأحمر تحت الماء." : pl ? "Odkryj rafy koralowe i podwodny świat Morza Czerwonego." : zh ? "探索珊瑚花园、绚丽鱼群和清澈海底。" : "Meet coral gardens, bright reef life, and the clear blue world below the surface."} href={localePath(language, "/hurghada/diving-snorkeling")} />
-            <DestinationCard image="/images/placeholders/desert-experience.svg" title={ru ? "Приключения в пустыне" : de ? "Wüstenabenteuer" : ar ? "مغامرات الصحراء" : pl ? "Przygody na pustyni" : zh ? "沙漠探险" : "Desert adventures"} description={ru ? "Квадроциклы, культура бедуинов и незабываемые закаты." : de ? "Quads, Beduinenkultur und unvergessliche Sonnenuntergänge." : ar ? "كواد وثقافة بدوية وغروب لا يُنسى." : pl ? "Quady, kultura Beduinów i niezapomniane zachody słońca." : zh ? "四轮摩托、贝都因文化和难忘的日落。" : "Quad bikes, Bedouin culture and unforgettable sunsets."} href={`${homePath}?search=desert`} />
+            <DestinationCard image="/images/owned/mahmya-boats-sunset.jpg" title={ru ? "Отдых на островах" : de ? "Inselerlebnisse" : ar ? "عطلات الجزر" : pl ? "Wyspy i plaże" : zh ? "海岛休闲" : "Island escapes"} description={ru ? "Морские прогулки, снорклинг и пляжный отдых на Красном море." : de ? "Bootsausflüge, Schnorcheln und Strandtage am Roten Meer." : ar ? "رحلات بحرية وسنوركلينج وأيام شاطئية في البحر الأحمر." : pl ? "Rejsy, snorkeling i plażowe dni nad Morzem Czerwonym." : zh ? "游船、浮潜和红海海滩时光。" : "Boat trips, snorkeling and beach days on the Red Sea."} href={`${homePath}?search=island`} />
+            <DestinationCard image="/images/owned/red-sea-diver-reef.jpg" title={ru ? "Дайвинг и снорклинг" : de ? "Tauchen & Schnorcheln" : ar ? "الغوص والسنوركلينج" : pl ? "Nurkowanie i snorkeling" : zh ? "潜水与浮潜" : "Diving & Snorkeling"} description={de ? "Entdecke Korallengärten und die farbenfrohe Unterwasserwelt des Roten Meeres." : ru ? "Откройте коралловые рифы и яркий подводный мир Красного моря." : ar ? "اكتشف حدائق المرجان وعالم البحر الأحمر تحت الماء." : pl ? "Odkryj rafy koralowe i podwodny świat Morza Czerwonego." : zh ? "探索珊瑚花园、绚丽鱼群和清澈海底。" : "Meet coral gardens, bright reef life, and the clear blue world below the surface."} href={localePath(language, "/hurghada/diving-snorkeling")} />
+            <DestinationCard image="/images/owned/quad-safari-morning.jpg" title={ru ? "Приключения в пустыне" : de ? "Wüstenabenteuer" : ar ? "مغامرات الصحراء" : pl ? "Przygody na pustyni" : zh ? "沙漠探险" : "Desert adventures"} description={ru ? "Квадроциклы, культура бедуинов и незабываемые закаты." : de ? "Quads, Beduinenkultur und unvergessliche Sonnenuntergänge." : ar ? "كواد وثقافة بدوية وغروب لا يُنسى." : pl ? "Quady, kultura Beduinów i niezapomniane zachody słońca." : zh ? "四轮摩托、贝都因文化和难忘的日落。" : "Quad bikes, Bedouin culture and unforgettable sunsets."} href={`${homePath}?search=desert`} />
           </div>
         </div>
       </section>
@@ -651,7 +651,7 @@ text-blue-600
           <div>
             <p className="font-semibold text-white">{tr("Explore","Entdecken","Разделы")}</p>
             <div className="mt-3 space-y-2">
-              <Link className="block hover:text-white" href={`${homePath}#tours`}>{t("tours")}</Link>
+              <Link className="block hover:text-white" href={localePath(language, "/tours")}>{t("tours")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/transfers")}>{t("transfers")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/booking")}>{t("booking")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/checkout")}>{t("checkout")}</Link>

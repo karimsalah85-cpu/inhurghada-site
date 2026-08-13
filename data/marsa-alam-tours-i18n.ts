@@ -12,11 +12,11 @@ const pickup = {
 };
 
 const common = {
-  ar: { location: "مرسى علم، مصر", category: "سنوركلينج", packageLabel: "للشخص", ageBands: { adults: "سعر البالغ — حد العمر بانتظار التأكيد", children: "سعر الطفل — حد العمر بانتظار التأكيد", infants: "لم يتم تأكيد سعر للرضع" } },
-  de: { location: "Marsa Alam, Ägypten", category: "Schnorcheln", packageLabel: "pro Person", ageBands: { adults: "Erwachsenenpreis – Altersgrenze noch zu bestätigen", children: "Kinderpreis – Altersgrenze noch zu bestätigen", infants: "Kein Kleinkindpreis bestätigt" } },
-  ru: { location: "Марса-Алам, Египет", category: "Сноркелинг", packageLabel: "за человека", ageBands: { adults: "Цена для взрослых — возрастная граница уточняется", children: "Цена для детей — возрастная граница уточняется", infants: "Цена для младенцев не подтверждена" } },
-  pl: { location: "Marsa Alam, Egipt", category: "Snorkeling", packageLabel: "za osobę", ageBands: { adults: "Cena dla dorosłych — granica wieku do potwierdzenia", children: "Cena dla dzieci — granica wieku do potwierdzenia", infants: "Brak potwierdzonej ceny dla niemowląt" } },
-  zh: { location: "埃及马萨阿拉姆", category: "浮潜", packageLabel: "每人", ageBands: { adults: "成人价格——年龄界限待确认", children: "儿童价格——年龄界限待确认", infants: "婴儿价格尚未确认" } },
+  ar: { location: "مرسى علم، مصر", category: "سنوركلينج", packageLabel: "للشخص", ageBands: { adults: "البالغون (12 سنة فأكثر)", children: "الأطفال (2–11 سنة)", infants: "الرضع دون سنتين — مجاناً" } },
+  de: { location: "Marsa Alam, Ägypten", category: "Schnorcheln", packageLabel: "pro Person", ageBands: { adults: "Erwachsene (ab 12 Jahren)", children: "Kinder (2–11 Jahre)", infants: "Kleinkinder unter 2 Jahren – kostenlos" } },
+  ru: { location: "Марса-Алам, Египет", category: "Сноркелинг", packageLabel: "за человека", ageBands: { adults: "Взрослые (от 12 лет)", children: "Дети (2–11 лет)", infants: "Младенцы до 2 лет — бесплатно" } },
+  pl: { location: "Marsa Alam, Egipt", category: "Snorkeling", packageLabel: "za osobę", ageBands: { adults: "Dorośli (od 12 lat)", children: "Dzieci (2–11 lat)", infants: "Niemowlęta poniżej 2 lat — bezpłatnie" } },
+  zh: { location: "埃及马萨阿拉姆", category: "浮潜", packageLabel: "每人", ageBands: { adults: "成人（12岁及以上）", children: "儿童（2–11岁）", infants: "2岁以下婴儿免费" } },
 } satisfies Record<Exclude<Locale, "en">, Copy>;
 
 const translations: Record<Exclude<Locale, "en">, Record<string, Copy>> = {
@@ -66,11 +66,23 @@ for (const locale of ["de", "ru", "pl", "zh"] as const) {
   for (const [slug, [title, description, seoTitle]] of Object.entries(compact[locale])) {
     const marine = slug !== "abu-dabbab-snorkeling";
     const detail = detailCopy[locale];
-    const hasCutoff = slug !== "marsa-mubarak-snorkeling";
+    const hasCutoff = true;
     translations[locale][slug] = { ...common[locale], title, description, seoTitle, metaDescription: description, duration: marine ? (locale === "zh" ? "全天" : locale === "ru" ? "Весь день" : locale === "pl" ? "Cały dzień" : "Ganztägig") : (locale === "zh" ? "约6小时" : locale === "ru" ? "Около 6 часов" : locale === "pl" ? "Około 6 godzin" : "Etwa 6 Stunden"), highlights: [description], included: marine ? [pickup[locale], detail.boat, detail.lunch, ...(slug === "marsa-mubarak-snorkeling" ? [detail.entry] : [])] : [pickup[locale], detail.entry], notIncluded: [detail.personal, ...(!marine ? [detail.noLunch] : [])], notes: [pickup[locale], detail.safety, hasCutoff ? detail.cutoff : detail.noCutoff, detail.child], itinerary: marine ? [detail.pickup, detail.marina, detail.depart, detail.first, detail.lunch, detail.second, detail.return] : [detail.pickup, detail.beach, detail.beachTime, detail.returnBeach], whatToBring: [...detail.bring], notSuitableFor: [...detail.suitable], faqs: [{ question: detail.wildlifeQ, answer: detail.wildlifeA }] };
   }
 }
 
 export function localizeMarsaAlamTour(tour: Tour, locale: Locale): Tour {
-  return locale === "en" ? tour : { ...tour, ...common[locale], ...translations[locale][tour.slug] };
+  const localized = locale === "en" ? tour : { ...tour, ...common[locale], ...translations[locale][tour.slug] };
+  const obsolete = /pending confirmation|must be confirmed|assumption requiring confirmation|whether this is the beach departure|noch zu bestätigen|muss.*bestätigt|уточняется|необходимо подтвердить|trzeba potwierdzić|wymaga potwierdzenia|待确认|必须确认|بانتظار التأكيد|يجب تأكيد|يحتاج إلى تأكيد|لم يتم توفيره/i;
+  const confirmedNotes: Record<Locale, string[]> = {
+    en: ["Hotel pickup from Marsa Alam, Port Ghalib and Coraya Bay is included with no extra charge.", "Bookings close at 18:00 Cairo time on the previous day.", "Adults are ages 12+, children are ages 2–11, and infants under 2 travel free."],
+    de: ["Die Hotelabholung in Marsa Alam, Port Ghalib und Coraya Bay ist ohne Aufpreis inklusive.", "Buchungsschluss ist am Vortag um 18:00 Uhr Kairo-Zeit.", "Erwachsene ab 12 Jahren, Kinder von 2–11 Jahren und Kleinkinder unter 2 Jahren kostenlos."],
+    ru: ["Трансфер из отелей Марса-Алама, Порт-Галиба и Корая-Бей включён без доплаты.", "Бронирование закрывается накануне в 18:00 по Каиру.", "Взрослые — от 12 лет, дети — 2–11 лет, младенцы до 2 лет — бесплатно."],
+    ar: ["الاستلام من فنادق مرسى علم وبورت غالب وخليج كورايا مشمول دون رسوم إضافية.", "يغلق الحجز الساعة 18:00 بتوقيت القاهرة في اليوم السابق.", "البالغون من 12 سنة، والأطفال من 2 إلى 11 سنة، والرضع دون سنتين مجاناً."],
+    pl: ["Odbiór z hoteli w Marsa Alam, Port Ghalib i Coraya Bay jest wliczony bez dopłaty.", "Rezerwacje zamykają się dzień wcześniej o 18:00 czasu kairskiego.", "Dorośli od 12 lat, dzieci 2–11 lat, niemowlęta poniżej 2 lat bezpłatnie."],
+    zh: ["马萨阿拉姆、加利卜港和科拉亚湾酒店接送均已包含，不收取额外费用。", "预订于出发前一天开罗时间18:00截止。", "成人为12岁及以上，儿童为2–11岁，2岁以下婴儿免费。"],
+  };
+  const notes = [...(localized.notes || []).filter((note) => !obsolete.test(note)), ...confirmedNotes[locale]];
+  if (tour.slug === "abu-dabbab-snorkeling") notes.push(locale === "en" ? "The return transfer departs Abu Dabbab Beach at approximately 13:00." : localized.itinerary?.at(-1) || "");
+  return { ...localized, notes: notes.filter(Boolean) };
 }

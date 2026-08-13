@@ -12,13 +12,13 @@ type PageProps = {
 };
 
 export function generateStaticParams() {
-  return tours.map(({ slug }) => ({ slug }));
+  return tours.filter((tour) => tour.listingStatus !== "unlisted").map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const liveTours = await getLiveTours();
-  const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug);
+  const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug && item.listingStatus !== "unlisted");
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
   if (!tour) return {};
   const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} from ${tour.destinationSlug === "marsa-alam" ? "Marsa Alam" : "Hurghada"}`);
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function TourPage({ params }: PageProps) {
   const { slug } = await params;
   const liveTours = await getLiveTours();
-  const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug);
+  const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug && item.listingStatus !== "unlisted");
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
 
   if (!tour) {

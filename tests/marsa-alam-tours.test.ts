@@ -7,17 +7,17 @@ import { marsaAlamTourSchedules } from "@/data/tour-schedules";
 
 const slugs = ["dolphin-house-marsa-alam", "marsa-mubarak-snorkeling", "abu-dabbab-snorkeling"];
 
-describe("Marsa Alam controlled-preview tours", () => {
-  it("keeps destination ownership, EUR prices, unresolved child bands, and booking disabled", () => {
+describe("Marsa Alam tours", () => {
+  it("publishes confirmed destination ownership, EUR prices, age bands, and pickup coverage", () => {
     const selected = tours.filter((tour) => slugs.includes(tour.slug));
     expect(selected).toHaveLength(3);
     expect(selected.map((tour) => [tour.destinationSlug, tour.currency, tour.listingStatus])).toEqual([
-      ["marsa-alam", "EUR", "paused"], ["marsa-alam", "EUR", "paused"], ["marsa-alam", "EUR", "paused"],
+      ["marsa-alam", "EUR", "active"], ["marsa-alam", "EUR", "active"], ["marsa-alam", "EUR", "active"],
     ]);
     expect(selected.map((tour) => tour.participantPricing)).toEqual([
-      { adults: 99, youth: 50 }, { adults: 60, youth: 40 }, { adults: 50, youth: 30 },
+      { adults: 99, youth: 50, infants: 0 }, { adults: 60, youth: 40, infants: 0 }, { adults: 50, youth: 30, infants: 0 },
     ]);
-    expect(selected.every((tour) => tour.participantPricing?.infants === undefined && tour.bookingBlocker)).toBe(true);
+    expect(selected.every((tour) => tour.ageBands?.adults === "Adults (ages 12+)" && tour.ageBands.children === "Children (ages 2–11)" && tour.participantPricing?.infants === 0 && !tour.bookingBlocker)).toBe(true);
   });
 
   it("uses one authoritative recurring schedule and rejects unavailable weekdays", () => {
@@ -28,10 +28,14 @@ describe("Marsa Alam controlled-preview tours", () => {
     expect(validateTourSchedule(marsaAlamTourSchedules["dolphin-house-marsa-alam"], "2026-08-18", new Date("2026-08-15T12:00:00Z")).valid).toBe(false);
   });
 
-  it("enforces the assumed previous-day 18:00 Cairo cutoff", () => {
-    const schedule = marsaAlamTourSchedules["abu-dabbab-snorkeling"];
-    expect(validateTourSchedule(schedule, "2026-08-17", new Date("2026-08-16T14:59:00Z")).valid).toBe(true);
-    expect(validateTourSchedule(schedule, "2026-08-17", new Date("2026-08-16T15:00:00Z")).valid).toBe(false);
+  it("enforces the confirmed previous-day 18:00 Cairo cutoff for every trip", () => {
+    for (const [slug, schedule] of Object.entries(marsaAlamTourSchedules)) {
+      expect("assumption" in schedule.bookingCutoff).toBe(false);
+      const serviceDate = slug === "marsa-mubarak-snorkeling" ? "2026-08-18" : "2026-08-17";
+      const dayBefore = slug === "marsa-mubarak-snorkeling" ? "2026-08-17" : "2026-08-16";
+      expect(validateTourSchedule(schedule, serviceDate, new Date(`${dayBefore}T14:59:00Z`)).valid).toBe(true);
+      expect(validateTourSchedule(schedule, serviceDate, new Date(`${dayBefore}T15:00:00Z`)).valid).toBe(false);
+    }
   });
 
   it("provides localized, destination-safe owner media in every locale", () => {

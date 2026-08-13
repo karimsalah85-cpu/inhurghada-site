@@ -70,14 +70,17 @@ async function applyTourMedia(tourRows: Tour[], locale = "en") {
 
 export async function getLiveTours(locale: Locale = "en"): Promise<Tour[]> {
   const rows = await contentRows("tour");
-  if (!rows.length) return applyTourCollectionMediaSafety(await applyTourMedia(tours, locale), locale);
-  const managedSlugs = new Set(rows.map((row) => row.slug));
-  const overrides = new Map(rows.filter((row) => row.status === "published" && row.listing_status !== "unlisted").map((row) => {
+  const locallyUnlistedSlugs = new Set(tours.filter((tour) => tour.listingStatus === "unlisted").map((tour) => tour.slug));
+  const listedTours = tours.filter((tour) => tour.listingStatus !== "unlisted");
+  if (!rows.length) return applyTourCollectionMediaSafety(await applyTourMedia(listedTours, locale), locale);
+  const publicRows = rows.filter((row) => !locallyUnlistedSlugs.has(row.slug));
+  const managedSlugs = new Set(publicRows.map((row) => row.slug));
+  const overrides = new Map(publicRows.filter((row) => row.status === "published" && row.listing_status !== "unlisted").map((row) => {
     const fallback = tours.find((tour) => tour.slug === row.slug);
     const body = objectBody(row);
     return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || "") } as Tour];
   }));
-  return applyTourCollectionMediaSafety(await applyTourMedia([...tours.filter((tour) => !managedSlugs.has(tour.slug)), ...overrides.values()], locale), locale);
+  return applyTourCollectionMediaSafety(await applyTourMedia([...listedTours.filter((tour) => !managedSlugs.has(tour.slug)), ...overrides.values()], locale), locale);
 }
 
 export async function getUnavailableTrip(slugs: string[]): Promise<{ slug: string; status: TripListingStatus } | null> {
