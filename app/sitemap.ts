@@ -4,7 +4,6 @@ import { siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
-import { blogPosts } from "@/data/blog-posts";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [tours, posts] = await Promise.all([getLiveTours(), getLiveBlogPosts()]);
