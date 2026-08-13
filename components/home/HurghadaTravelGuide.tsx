@@ -5,10 +5,10 @@ import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 
 const copy = {
   en: {
-    eyebrow: "Best things to do in Hurghada",
-    title: "The best things to do in Hurghada and the Red Sea",
-    intro: "The best things to do in Hurghada combine Red Sea boat trips, snorkeling and diving, relaxed island beach days, desert quad safaris, and easy private transfers. Hurghada is also a convenient base for a private day trip to Luxor.",
-    detail: "Choose Orange Bay or Mahmya for turquoise water and sandy beaches, book a guided reef day for underwater scenery, or head into the Eastern Desert for sunrise or sunset. Compare duration, inclusions, pickup details, and transparent prices before booking.",
+    eyebrow: "Plan your Red Sea experience",
+    title: "Things to do in Hurghada and Marsa Alam",
+    intro: "Hurghada and Marsa Alam offer distinct Red Sea experiences, from island boat trips, snorkeling and diving to desert adventures and practical private transfers. Choose the destination that matches your hotel and travel plans.",
+    detail: "Explore Hurghada for islands, desert safaris, transfers and historical day trips, or choose Marsa Alam for its own southern reef excursions. Compare destination, duration, inclusions, pickup details and transparent prices before booking.",
     items: [
       ["Red Sea days", "Hurghada’s coastline is known for clear water, sandy beaches and coral reefs. Choose snorkeling and diving experiences for your confidence level and the day’s sea conditions."],
       ["Beyond the beach", "Giftun Islands are popular for boat days, Hurghada Marina for an evening walk, and El Dahar for a more traditional local atmosphere."],
@@ -18,10 +18,10 @@ const copy = {
     ],
   },
   de: {
-    eyebrow: "Die besten Aktivitäten in Hurghada",
-    title: "Die besten Aktivitäten in Hurghada und am Roten Meer",
-    intro: "Zu den besten Aktivitäten in Hurghada gehören Bootstouren auf dem Roten Meer, Schnorcheln und Tauchen, entspannte Inseltage, Quad-Safaris in der Wüste und bequeme Privattransfers. Hurghada ist außerdem ein guter Ausgangspunkt für einen privaten Tagesausflug nach Luxor.",
-    detail: "Wähle Orange Bay oder Mahmya für türkisfarbenes Wasser und Sandstrände, buche einen geführten Rifffieldtag oder fahre bei Sonnenauf- oder -untergang in die östliche Wüste. Vergleiche vor der Buchung Dauer, Leistungen, Abholdetails und transparente Preise.",
+    eyebrow: "Plane dein Erlebnis am Roten Meer",
+    title: "Aktivitäten in Hurghada und Marsa Alam",
+    intro: "Hurghada und Marsa Alam bieten unterschiedliche Erlebnisse am Roten Meer – von Bootstouren, Schnorcheln und Tauchen bis zu Wüstenabenteuern und Privattransfers. Wähle das Reiseziel passend zu deinem Hotel und deinen Plänen.",
+    detail: "Entdecke in Hurghada Inseln, Wüstensafaris, Transfers und historische Tagesausflüge oder wähle Marsa Alam für eigene Ausflüge zu den südlichen Riffen. Vergleiche Reiseziel, Dauer, Leistungen, Abholdetails und transparente Preise.",
     items: [
       ["Tage am Roten Meer", "Hurghadas Küste ist für klares Wasser, Sandstrände und Korallenriffe bekannt. Wähle Schnorchel- und Taucherlebnisse passend zu deiner Erfahrung und den Meeresbedingungen."],
       ["Mehr als Strand", "Die Giftun-Inseln sind beliebt für Bootstage, die Hurghada Marina für Abendspaziergänge und El Dahar für eine traditionellere Atmosphäre."],
@@ -31,10 +31,10 @@ const copy = {
     ],
   },
   ru: {
-    eyebrow: "Лучшие развлечения в Хургаде",
-    title: "Что посмотреть и чем заняться в Хургаде",
-    intro: "Лучший отдых в Хургаде — это морские прогулки, сноркелинг и дайвинг, пляжные дни на островах, сафари на квадроциклах и удобные частные трансферы. Из Хургады также удобно отправиться на индивидуальную экскурсию в Луксор.",
-    detail: "Выберите Orange Bay или Махмею ради бирюзовой воды и песчаных пляжей, забронируйте поездку к рифам или отправьтесь в Восточную пустыню. Перед бронированием сравните продолжительность, услуги, трансфер и цены.",
+    eyebrow: "Спланируйте отдых на Красном море",
+    title: "Чем заняться в Хургаде и Марса-Аламе",
+    intro: "Хургада и Марса-Алам предлагают разные впечатления на Красном море: морские прогулки, сноркелинг, дайвинг, пустынные приключения и частные трансферы. Выберите направление рядом с вашим отелем и подходящее вашим планам.",
+    detail: "В Хургаде доступны острова, сафари, трансферы и исторические поездки, а в Марса-Аламе — отдельные экскурсии к южным рифам. Перед бронированием сравните направление, продолжительность, услуги, трансфер и цены.",
     items: [
       ["Дни на Красном море", "Побережье Хургады известно чистой водой, песчаными пляжами и коралловыми рифами. Выбирайте сноркелинг и дайвинг с учётом опыта и состояния моря."],
       ["Не только пляж", "Острова Гифтун подходят для морских прогулок, набережная Хургады — для вечерних прогулок, а Эль-Дахар — для знакомства с местной атмосферой."],
