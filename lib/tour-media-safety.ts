@@ -20,8 +20,18 @@ const ownedMedia: Record<string, SafeMedia> = {
   },
   senzo: { image: "/images/owned/senzo-mall.jpg", alt: localizedAlt("Senzo Mall shopping, dining and indoor public areas") },
   cairo: {
-    image: "/images/owned/cairo-giza-day.jpg", alt: localizedAlt("The Giza pyramids seen across Cairo in daylight"), focal: { x: 0.45, y: 0.58 },
-    gallery: ["/images/owned/cairo-giza-night.jpg"], galleryAlts: { en: ["The Giza pyramids illuminated at night beyond Cairo rooftops"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    image: "/images/owned/cairo-pyramids-city-owner.jpg", alt: localizedAlt("The Giza pyramids rising beyond Cairo rooftops"), focal: { x: 0.45, y: 0.58 },
+    gallery: [
+      "/images/owned/cairo-gem-grand-hall-owner.jpg",
+      "/images/owned/cairo-gem-tutankhamun-mask-owner.jpg",
+      "/images/owned/cairo-gem-tutankhamun-throne-owner.jpg",
+      "/images/owned/cairo-gem-colossus-owner.jpg",
+      "/images/owned/cairo-gem-tutankhamun-mask-profile-owner.jpg",
+      "/images/owned/cairo-gem-sarcophagus-owner.jpg",
+      "/images/owned/cairo-gem-stone-head-owner.jpg",
+      "/images/owned/cairo-gem-seated-statue-owner.jpg",
+    ],
+    galleryAlts: { en: ["Ancient Egyptian colossus in the Grand Egyptian Museum hall", "Tutankhamun's gold funerary mask", "Tutankhamun's decorated golden throne", "Monumental ancient Egyptian statue in the Grand Egyptian Museum", "Profile of Tutankhamun's gold funerary mask", "Ancient Egyptian stone sarcophagus", "Carved ancient Egyptian stone head", "Seated ancient Egyptian statue in the Grand Egyptian Museum"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   quadMorning: { image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes on a desert safari") },
   desertAdventure: {
@@ -60,7 +70,7 @@ const ownedMedia: Record<string, SafeMedia> = {
     gallery: ["/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
-  mahmya: { image: "/images/owned/mahmya-boats-sunset.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
+  mahmya: { image: "/images/owned/mahmya-island-boats-owner.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
   luxor: {
     image: "/images/owned/luxor-branded.jpg", alt: localizedAlt("Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall"), focal: { x: 0.5, y: 0.42 },
     gallery: ["/images/owned/luxor-temple-facade.jpg", "/images/owned/luxor-temple-reliefs.jpg", "/images/owned/luxor-temple-columns.jpg", "/images/owned/luxor-hieroglyphs.jpg"],

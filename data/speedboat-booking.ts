@@ -1,4 +1,4 @@
-export type BoatOption = { id: string; label: string; capacity: number; price: number };
+export type BoatOption = { id: string; label: string; capacity: number; price: number; extraHourPrice?: number };
 export type BookingExtra = { id: string; label: string; price: number; unit: "person" | "item" };
 
 // Catalog prices are stored in USD and converted by the global currency selector.
@@ -6,15 +6,15 @@ const EUR_RATE = 0.876691;
 export const eurToUsd = (euros: number) => Number((euros / EUR_RATE).toFixed(2));
 
 export const halfDayBoatOptions: BoatOption[] = [
-  ["boat-1", "Boat 1 - up to 4 passengers", 4, 100],
-  ["boat-2", "Boat 2 - up to 5 passengers", 5, 115],
-  ["boat-3", "Boat 3 - up to 5 passengers", 5, 125],
-  ["boat-4", "Boat 4 - up to 7 passengers", 7, 140],
-  ["boat-5", "Boat 5 - up to 7 passengers", 7, 140],
-  ["boat-6", "Boat 6 - up to 7 passengers", 7, 160],
-  ["boat-7", "Boat 7 - up to 7 passengers", 7, 160],
-  ["boat-8", "Boat 8 - up to 9 passengers", 9, 200],
-].map(([id, label, capacity, euros]) => ({ id: String(id), label: String(label), capacity: Number(capacity), price: eurToUsd(Number(euros)) }));
+  ["boat-1", "Boat 1 - up to 4 passengers", 4, 120, 30],
+  ["boat-2", "Boat 2 - up to 5 passengers", 5, 140, 30],
+  ["boat-3", "Boat 3 - up to 6 passengers", 6, 170, 35],
+  ["boat-4", "Boat 4 - up to 7 passengers", 7, 200, 40],
+  ["boat-5", "Boat 5 - up to 8 passengers", 8, 220, 40],
+  ["boat-6", "Boat 6 - up to 7 passengers", 7, 240, 40],
+  ["boat-7", "Boat 7 - up to 7 passengers", 7, 240, 40],
+  ["boat-8", "Boat 8 - up to 9 passengers", 9, 300, 50],
+].map(([id, label, capacity, euros, extraHourEuros]) => ({ id: String(id), label: String(label), capacity: Number(capacity), price: eurToUsd(Number(euros)), extraHourPrice: eurToUsd(Number(extraHourEuros)) }));
 
 export const fullDayBoatOptions: BoatOption[] = [
   ["boat-1", "Boat 1 - up to 4 passengers", 4, 150],

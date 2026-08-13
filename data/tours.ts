@@ -414,7 +414,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     included: ["Snorkeling equipment", "Private skipper/guide", "Life jackets", "Fuel"],
     notIncluded: ["Soft drinks, fruits and snacks", "Hotel pickup and drop-off", "Lunch", "Orange Bay Island entrance ticket - added per participant when booking"],
     notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private activity; only your group participates.", "No same-day bookings. After 3:00 PM, next-day departures can no longer be booked.", "Recommended departure times are 8:00 AM and 2:00 PM."],
-    packageName: "Private Orange Bay Half-Day Speedboat", packageDescription: "Select one private boat, participant entrance tickets, optional catering and marina transfer.", packagePrice: String(eurToUsd(100)), packageLabel: "Private boat from", availableTimes: ["08:00", "14:00"], ageBands: { adults: "Adults - Orange Bay entrance €10 each", children: "Children - Orange Bay entrance €5 each", infants: "" },
+    packageName: "Private Orange Bay Half-Day Speedboat", packageDescription: "Select one private boat, participant entrance tickets, optional catering and marina transfer.", packagePrice: String(halfDayBoatOptions[0].price), packageLabel: "Private boat from", availableTimes: ["08:00", "14:00"], ageBands: { adults: "Adults - Orange Bay entrance €10 each", children: "Children - Orange Bay entrance €5 each", infants: "" },
     seoTitle: "Orange Bay Half-Day Private Speedboat from Hurghada", metaDescription: "Book a private half-day Orange Bay speedboat from Hurghada with flexible departures, snorkeling equipment and selectable boat options."
   },
   {
@@ -445,7 +445,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     notIncluded: ["Soft drinks, fruits and snacks unless selected", "Hotel pickup and drop-off", "Lunch unless selected", "Paradise Island entrance ticket - added per participant when booking"],
     notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private activity; only your group participates.", "Alcoholic beverages are not available on the island."],
     itinerary: ["Hurghada New Marina · Speedboat departure", "Red Sea · Snorkeling stop", "Paradise Island · Beach use (2 hours)", "Return to Hurghada New Marina"],
-    packageName: "Private Paradise Island Speedboat", packageDescription: "Select one private boat, participant island entrance, optional refreshments or buffet, and marina transfer.", packagePrice: String(eurToUsd(100)), packageLabel: "Private boat from", availableTimes: ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"], ageBands: { adults: "Adults - Paradise Island entrance €20 each", children: "Children - Paradise Island entrance €10 each", infants: "" },
+    packageName: "Private Paradise Island Speedboat", packageDescription: "Select one private boat, participant island entrance, optional refreshments or buffet, and marina transfer.", packagePrice: String(halfDayBoatOptions[0].price), packageLabel: "Private boat from", availableTimes: ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"], ageBands: { adults: "Adults - Paradise Island entrance €20 each", children: "Children - Paradise Island entrance €10 each", infants: "" },
     seoTitle: "Paradise Island Private Speedboat from Hurghada", metaDescription: "Book a private five-hour Paradise Island speedboat with snorkeling, beach use and optional buffet."
   },
   {
@@ -461,11 +461,11 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     notIncluded: ["Soft drinks unless selected", "Hotel pickup and drop-off", "Lunch unless selected", "Hula Hula Island entrance ticket - added per participant when booking"],
     notes: ["Confirmation is received at the time of booking.", "Children must be accompanied by an adult.", "This is a private activity; only your group participates.", "Alcoholic beverages are not available on the island.", "Lunch can be added as an Open Buffet option."],
     itinerary: ["Hurghada Marina · Private speedboat departure", "Red Sea · Snorkeling stop", "Hula Hula Island · Beach use (2 hours)", "Return to Hurghada Marina"],
-    packageName: "Private Hula Hula Speedboat", packageDescription: "Select one private boat, participant island entrance and optional refreshments or buffet lunch.", packagePrice: String(eurToUsd(100)), packageLabel: "Private boat from", availableTimes: ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"], ageBands: { adults: "Adults - Hula Hula entrance €10 each", children: "Children - Hula Hula entrance €5 each", infants: "" },
+    packageName: "Private Hula Hula Speedboat", packageDescription: "Select one private boat, participant island entrance and optional refreshments or buffet lunch.", packagePrice: String(halfDayBoatOptions[0].price), packageLabel: "Private boat from", availableTimes: ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"], ageBands: { adults: "Adults - Hula Hula entrance €10 each", children: "Children - Hula Hula entrance €5 each", infants: "" },
     seoTitle: "Hula Hula Island Private Speedboat from Hurghada", metaDescription: "Book a private Hula Hula Island speedboat with snorkeling, beach use and optional buffet lunch."
   },
   {
-    slug: "magawish-speedboat", title: "Orange Bay and Magawish Speedboat Trip", image: "/images/placeholders/sea-activity.svg",
+    slug: "magawish-speedboat", listingStatus: "unlisted", title: "Orange Bay and Magawish Speedboat Trip", image: "/images/placeholders/sea-activity.svg",
     galleryImages: [],
     price: String(halfDayBoatOptions[0].price), rating: "New", reviews: "New", location: "Hurghada Marina", duration: "Approximately 4 Hours", category: "Speedboat Trip", badge: "Premium", bookingMode: "direct", pricingMode: "per-booking", priceUnit: "per private boat",
     boatOptions: halfDayBoatOptions, entrancePricing: { adults: eurToUsd(10) + 10, youth: eurToUsd(5) + 10 }, bookingExtras: [...speedboatMeals, refreshments], requiresMarinaTransferChoice: true, bookingLeadTime: "next-day-before-15", showSpeedboatTerms: true,

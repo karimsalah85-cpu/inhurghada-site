@@ -55,10 +55,10 @@ describe("authoritative booking pricing", () => {
     expect(result).toEqual({ data: { amount: 240, guests: 2, guestSummary: "2 adults", tourName: "Private Day Trip to Luxor from Hurghada", price: "$240.00 total", currency: "USD" } });
   });
 
-  it("prices the selected Magawish boat and combined island entrances", () => {
-    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "magawish-speedboat", adults: 6, selectedBoatOption: "boat-4" });
+  it("prices the selected Orange Bay half-day boat and island entrances", () => {
+    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "orange-bay-half-day-speedboat", adults: 6, selectedBoatOption: "boat-4" });
     expect(result.data).toMatchObject({ guests: 6, guestSummary: expect.stringContaining("6 passengers") });
-    expect(result.data?.amount).toBeCloseTo(halfDayBoatOptions[3].price + 6 * (eurToUsd(10) + 10));
+    expect(result.data?.amount).toBeCloseTo(halfDayBoatOptions[3].price + 6 * eurToUsd(10));
   });
 
   it("uses the supplied Dolphin House adult, child and infant prices", () => {
@@ -93,7 +93,7 @@ describe("authoritative booking pricing", () => {
       transferRequired: true,
       transferArea: "Hurghada Hotels",
     });
-    const expected = eurToUsd(100) + eurToUsd(10) * 2 + eurToUsd(5) + eurToUsd(15) * 2 + eurToUsd(6) * 3;
+    const expected = eurToUsd(120) + eurToUsd(10) * 2 + eurToUsd(5) + eurToUsd(15) * 2 + eurToUsd(6) * 3;
     expect(result.data).toMatchObject({ amount: Math.round(expected * 100) / 100, guests: 3 });
   });
 

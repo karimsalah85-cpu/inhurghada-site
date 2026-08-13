@@ -59,7 +59,7 @@ describe("tour catalog publication safety", () => {
     }
   });
 
-  it("publishes all five private speedboat products with distinct boat tiers", () => {
+  it("publishes four private speedboat products and keeps Magawish unlisted", () => {
     const slugs = ["orange-bay-half-day-speedboat", "orange-bay-full-day-speedboat", "paradise-island-speedboat", "hula-hula-speedboat", "magawish-speedboat"];
     for (const slug of slugs) {
       const tour = tours.find((item) => item.slug === slug);
@@ -68,12 +68,22 @@ describe("tour catalog publication safety", () => {
       expect(tour?.category).toBe("Speedboat Trip");
       expect(tour?.price).toBe(String(tour?.boatOptions?.[0].price));
       expect(tour?.priceUnit).toBe("per private boat");
-      expect(tour?.boatOptions?.filter((option) => option.capacity === 5)).toHaveLength(2);
       expect(tour?.showSpeedboatTerms).toBe(true);
       expect(tour?.image).toBe("/images/owned/speedboat-action-wide.jpg");
       expect(tour?.galleryImages).toHaveLength(4);
       expect(tour?.galleryImages?.every((image) => image.startsWith("/images/owned/speedboat-"))).toBe(true);
     }
+    expect(tours.find((tour) => tour.slug === "magawish-speedboat")?.listingStatus).toBe("unlisted");
+    expect(halfDayBoatOptions.map(({ capacity, price, extraHourPrice }) => ({ capacity, price, extraHourPrice }))).toEqual([
+      { capacity: 4, price: 136.88, extraHourPrice: 34.22 },
+      { capacity: 5, price: 159.69, extraHourPrice: 34.22 },
+      { capacity: 6, price: 193.91, extraHourPrice: 39.92 },
+      { capacity: 7, price: 228.13, extraHourPrice: 45.63 },
+      { capacity: 8, price: 250.94, extraHourPrice: 45.63 },
+      { capacity: 7, price: 273.76, extraHourPrice: 45.63 },
+      { capacity: 7, price: 273.76, extraHourPrice: 45.63 },
+      { capacity: 9, price: 342.2, extraHourPrice: 57.03 },
+    ]);
     expect(tours.find((tour) => tour.slug === "hula-hula-speedboat")?.requiresMarinaTransferChoice).not.toBe(true);
   });
 });
