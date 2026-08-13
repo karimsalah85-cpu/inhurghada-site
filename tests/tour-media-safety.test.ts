@@ -9,7 +9,7 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "quad-safari-morning")?.image).toBe("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "cairo-giza-day-trip-bus")?.image).toBe("/images/owned/cairo-pyramids-city-owner.jpg");
     expect(tours.find((item) => item.slug === "cairo-day-trip-flight")?.galleryImages).toContain("/images/owned/cairo-gem-tutankhamun-mask-owner.jpg");
-    expect(tours.find((item) => item.slug === "beginner-scuba-diving")?.image).toBe("/images/owned/diving-training-seabed.jpg");
+    expect(tours.find((item) => item.slug === "beginner-scuba-diving")?.image).toBe("/images/owned/beginner-scuba-diving-group.jpg");
     expect(tours.find((item) => item.slug === "padi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "ssi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "luxor-private-day-trip")?.image).toBe("/images/owned/luxor-branded.jpg");
@@ -53,6 +53,7 @@ describe("tour media safety", () => {
   it("uses the new owner-supplied training and reef images only in diving galleries", () => {
     const training = tours.find((item) => item.slug === "beginner-scuba-diving")!;
     expect(training.galleryImages).toEqual([
+      "/images/owned/diving-training-seabed.jpg",
       "/images/owned/diving-training-instructor.jpg",
       "/images/owned/diving-group-surface.jpg",
       "/images/owned/red-sea-coral-closeup.jpg",

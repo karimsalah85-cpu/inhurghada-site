@@ -75,6 +75,11 @@ const ownedMedia: Record<string, SafeMedia> = {
     gallery: ["/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
+  beginnerScuba: {
+    image: "/images/owned/beginner-scuba-diving-group.jpg", alt: localizedAlt("Beginner scuba divers underwater with their instructor in the Red Sea"),
+    gallery: ["/images/owned/diving-training-seabed.jpg", "/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
+    galleryAlts: { en: ["Scuba students practising skills underwater", "A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
   mahmya: { image: "/images/owned/mahmya-island-boats-owner.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
   luxor: {
     image: "/images/owned/luxor-branded.jpg", alt: localizedAlt("Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall"), focal: { x: 0.5, y: 0.42 },
@@ -118,7 +123,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "dolphin-house-marsa-alam": ownedMedia.snorkeling,
   "marsa-mubarak-snorkeling": ownedMedia.snorkeling,
   "abu-dabbab-snorkeling": ownedMedia.snorkeling,
-  "beginner-scuba-diving": ownedMedia.diveTraining,
+  "beginner-scuba-diving": ownedMedia.beginnerScuba,
   "padi-open-water-course": ownedMedia.diveTraining,
   "ssi-open-water-course": ownedMedia.diveTraining,
   "luxor-private-day-trip": ownedMedia.luxor,

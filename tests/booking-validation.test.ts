@@ -72,6 +72,21 @@ describe("booking input validation", () => {
     expect(validateBookingInput({ ...speedboat, date: "2026-08-09" }, new Date("2026-08-08T11:30:00Z")).data?.date).toBe("2026-08-09");
   });
 
+  it("accepts Marsa Alam bookings after validating their schedule and cutoff", () => {
+    const marsaAlam = {
+      ...valid,
+      tourSlug: "marsa-mubarak-snorkeling",
+      tourName: "Marsa Mubarak Full-Day Snorkeling Boat Trip from Marsa Alam",
+      date: "2026-08-18",
+      adults: 1,
+      youth: 1,
+      infants: 0,
+    };
+    const result = validateBookingInput(marsaAlam, new Date("2026-08-16T12:00:00Z"));
+    expect(result.error).toBeUndefined();
+    expect(result.data).toMatchObject({ tourSlug: "marsa-mubarak-snorkeling", youth: 1 });
+  });
+
   it("validates safety confirmations for trips in a cart", () => {
     const cart = {
       ...valid,

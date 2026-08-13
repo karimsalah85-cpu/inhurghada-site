@@ -122,7 +122,6 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     if (schedule) {
       const result = validateTourSchedule(schedule, date, now);
       if (!result.valid) return { error: result.error as string };
-      return { error: "This Marsa Alam excursion is available for review but is not accepting bookings until child ages and pickup zones are confirmed." as const };
     }
   }
   if (type === "tour" && tourSlug === "orange-bay") {
