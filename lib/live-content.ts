@@ -24,6 +24,17 @@ function objectBody(row: ContentRow) {
   return row.body && typeof row.body === "object" && !Array.isArray(row.body) ? row.body as Record<string, unknown> : {};
 }
 
+function codeControlledTourFields(fallback: Tour | undefined) {
+  if (!fallback?.boatOptions?.length) return {};
+  return {
+    boatOptions: fallback.boatOptions,
+    price: fallback.price,
+    packagePrice: fallback.packagePrice,
+    pricingMode: fallback.pricingMode,
+    priceUnit: fallback.priceUnit,
+  } satisfies Partial<Tour>;
+}
+
 export type MediaAssetRow = { id: string; public_url: string | null; storage_path: string; alt_text: string | null; focal_x: number | string | null; focal_y: number | string | null };
 export type MediaUsageRow = { asset_id: string; owner_key: string; role: string; sort_order: number };
 export type MediaLocalizationRow = { asset_id: string; locale: string; alt_text: string | null };
@@ -78,7 +89,7 @@ export async function getLiveTours(locale: Locale = "en"): Promise<Tour[]> {
   const overrides = new Map(publicRows.filter((row) => row.status === "published" && row.listing_status !== "unlisted").map((row) => {
     const fallback = tours.find((tour) => tour.slug === row.slug);
     const body = objectBody(row);
-    return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || "") } as Tour];
+    return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || ""), ...codeControlledTourFields(fallback) } as Tour];
   }));
   return applyTourCollectionMediaSafety(await applyTourMedia([...listedTours.filter((tour) => !managedSlugs.has(tour.slug)), ...overrides.values()], locale), locale);
 }
