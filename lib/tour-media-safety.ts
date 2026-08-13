@@ -34,7 +34,7 @@ const ownedMedia: Record<string, SafeMedia> = {
     gallery: ["/images/owned/desert-camel-front.jpg", "/images/owned/quad-safari-morning.jpg"],
     galleryAlts: { en: ["A camel facing the camera at a desert camp", "Guests riding red quad bikes during a Hurghada desert adventure"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
-  airport: { image: "/images/owned/hurghada-airport-sunset.jpg", alt: localizedAlt("Aircraft on the apron at Hurghada airport during sunset") },
+  airport: { image: "/images/owned/hurghada-airport-flight.png", alt: localizedAlt("Aerial view of the Red Sea coast from an arriving aircraft") },
   speedboat: {
     image: "/images/owned/speedboat-action-wide.jpg", alt: localizedAlt("A Daily Red Sea speedboat carrying guests across clear Red Sea water"),
     gallery: ["/images/owned/speedboat-action.jpg", "/images/owned/speedboat-guests.jpg", "/images/owned/speedboat-shallows.jpg", "/images/owned/speedboat-marina.jpg"],

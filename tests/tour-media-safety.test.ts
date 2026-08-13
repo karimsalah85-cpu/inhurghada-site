@@ -27,7 +27,7 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "desert-stargazing")?.image).toBe("/images/owned/desert-camel-profile.jpg");
     expect(tours.find((item) => item.slug === "safari")?.galleryImages).toContain("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "quad-safari-sunset")?.image).toBe("/images/owned/quad-safari-morning.jpg");
-    expect(tours.find((item) => item.slug === "hurghada-airport-transfer")?.image).toBe("/images/owned/hurghada-airport-sunset.jpg");
+    expect(tours.find((item) => item.slug === "hurghada-airport-transfer")?.image).toBe("/images/owned/hurghada-airport-flight.png");
     expect(tours.find((item) => item.slug === "professional-underwater-photographer")?.image).toBe("/images/owned/red-sea-diver-fish.jpg");
     expect(tours.find((item) => item.slug === "full-day-snorkeling")?.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
     expect(tours.find((item) => item.slug === "mahmya-island")?.image).toBe("/images/owned/mahmya-boats-sunset.jpg");
@@ -74,7 +74,7 @@ describe("tour media safety", () => {
   it("publishes only approved repository photography or original placeholders", () => {
     const restoredImages = new Set(["/images/hurghada-island-family-sunset.jpeg", "/images/hero.jpg"]);
     for (const tour of tours) {
-      expect(tour.image.match(/^\/images\/(owned\/.+\.jpg|placeholders\/.+\.svg)$/) || restoredImages.has(tour.image)).toBeTruthy();
+      expect(tour.image.match(/^\/images\/(owned\/.+\.(jpg|png)|placeholders\/.+\.svg)$/) || restoredImages.has(tour.image)).toBeTruthy();
       for (const image of tour.galleryImages || []) expect(image).toMatch(/^\/images\/owned\/.+\.jpg$/);
     }
   });
