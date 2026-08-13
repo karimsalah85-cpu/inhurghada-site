@@ -29,6 +29,11 @@ const ownedMedia: Record<string, SafeMedia> = {
     gallery: ["/images/owned/desert-camel-profile.jpg", "/images/owned/desert-camel-front.jpg"],
     galleryAlts: { en: ["A camel at a desert camp near Hurghada", "A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
+  camelAdventure: {
+    image: "/images/owned/desert-camel-profile.jpg", alt: localizedAlt("A camel at a desert camp near Hurghada"),
+    gallery: ["/images/owned/desert-camel-front.jpg", "/images/owned/quad-safari-morning.jpg"],
+    galleryAlts: { en: ["A camel facing the camera at a desert camp", "Guests riding red quad bikes during a Hurghada desert adventure"], ar: [], de: [], ru: [], pl: [], zh: [] },
+  },
   airport: { image: "/images/owned/hurghada-airport-sunset.jpg", alt: localizedAlt("Aircraft on the apron at Hurghada airport during sunset") },
   speedboat: {
     image: "/images/owned/speedboat-action-wide.jpg", alt: localizedAlt("A Daily Red Sea speedboat carrying guests across clear Red Sea water"),
@@ -80,10 +85,15 @@ const categoryMedia: Record<string, SafeMedia> = {
 };
 
 const mediaBySlug: Record<string, SafeMedia> = {
-  "safari": ownedMedia.desertAdventure,
+  "safari": ownedMedia.camelAdventure,
   "professional-underwater-photographer": ownedMedia.underwaterPhotographer,
   "quad-safari-morning": ownedMedia.desertAdventure, "quad-safari-sunset": ownedMedia.desertAdventure,
-  "super-safari": ownedMedia.desertAdventure, "desert-stargazing": ownedMedia.desertAdventure,
+  "super-safari": ownedMedia.camelAdventure, "desert-stargazing": ownedMedia.camelAdventure,
+  "orange-bay-half-day-speedboat": ownedMedia.speedboat,
+  "orange-bay-full-day-speedboat": ownedMedia.speedboat,
+  "paradise-island-speedboat": ownedMedia.speedboat,
+  "hula-hula-speedboat": ownedMedia.speedboat,
+  "magawish-speedboat": ownedMedia.speedboat,
   "hurghada-airport-transfer": ownedMedia.airport,
   "senzo-transfer": ownedMedia.senzo, "dolphin-house-snorkeling": ownedMedia.dolphin,
   "horse-riding-sea-desert": { image: "/images/hurghada-island-family-sunset.jpeg", alt: localizedAlt("Guests enjoying a Red Sea island sunset") }, "sahl-hasheesh-horse-riding": categoryMedia.horse,

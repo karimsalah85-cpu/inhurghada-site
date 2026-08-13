@@ -22,7 +22,10 @@ describe("tour media safety", () => {
   });
 
   it("restores the requested owner-supplied activity photography", () => {
-    expect(tours.find((item) => item.slug === "safari")?.galleryImages).toContain("/images/owned/desert-camel-profile.jpg");
+    expect(tours.find((item) => item.slug === "safari")?.image).toBe("/images/owned/desert-camel-profile.jpg");
+    expect(tours.find((item) => item.slug === "super-safari")?.image).toBe("/images/owned/desert-camel-profile.jpg");
+    expect(tours.find((item) => item.slug === "desert-stargazing")?.image).toBe("/images/owned/desert-camel-profile.jpg");
+    expect(tours.find((item) => item.slug === "safari")?.galleryImages).toContain("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "quad-safari-sunset")?.image).toBe("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "hurghada-airport-transfer")?.image).toBe("/images/owned/hurghada-airport-sunset.jpg");
     expect(tours.find((item) => item.slug === "professional-underwater-photographer")?.image).toBe("/images/owned/red-sea-diver-fish.jpg");
