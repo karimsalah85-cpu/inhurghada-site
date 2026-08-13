@@ -36,10 +36,13 @@ export default function CartCheckout() {
   const [error, setError] = useState("");
   const requiresDivingLicense = items.some((item) => item.requiresDivingLicense);
   const requiresQuadMinimumAge = items.some((item) => item.requiresQuadMinimumAge);
+  const cartCurrencies = [...new Set(items.map((item) => item.currency))];
+  const cartDestinations = [...new Set(items.map((item) => item.destinationSlug))];
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!items.length) return;
+    if (cartCurrencies.length > 1) return setError("Please book USD and EUR trips separately so each booking has one settlement currency.");
     if (requiresDivingLicense && !divingConfirmed) return setError(tr("Confirm that every diver has a valid diving license.", "Bestätige, dass jeder Taucher einen gültigen Tauchschein besitzt.", "Подтвердите наличие действующего сертификата у каждого дайвера.", "أكد أن كل غواص يحمل رخصة غوص سارية."));
     if (requiresQuadMinimumAge && !quadConfirmed) return setError(tr("Confirm that every quad participant is at least 9 years old.", "Bestätige, dass alle Quad-Teilnehmer mindestens 9 Jahre alt sind.", "Подтвердите, что всем участникам тура на квадроциклах не менее 9 лет.", "أكد أن عمر كل مشارك في رحلة الكواد لا يقل عن 9 سنوات."));
     setSubmitting(true);
@@ -62,7 +65,7 @@ export default function CartCheckout() {
           time: firstItem.time,
           tourName: `Multi-trip booking (${items.length})`,
           tourSlug: "multi-trip",
-          location: "Hurghada",
+          location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : "Hurghada").join(" and "),
           duration: `${items.length} trips`,
           message,
           adults: 0,
@@ -87,7 +90,7 @@ export default function CartCheckout() {
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Cart booking failed.");
-      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency: "USD", item_name: "Multi-trip cart", booking_type: "tour" });
+      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency: cartCurrencies[0] || "USD", item_name: "Multi-trip cart", booking_type: "tour" });
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
         reference: data.reference,

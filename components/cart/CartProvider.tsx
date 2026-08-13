@@ -6,6 +6,8 @@ export type CartItem = {
   id: string;
   tourSlug: string;
   tourName: string;
+  destinationSlug: "hurghada" | "marsa-alam";
+  currency: "USD" | "EUR";
   date: string;
   time: string;
   adults: number;
