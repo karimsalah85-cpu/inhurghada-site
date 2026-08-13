@@ -482,7 +482,7 @@ text-gray-700
 "
 >
 
-{de ? "Gefunden:" : ru ? "Найдено:" : ar ? "تم العثور على:" : "Found"}
+{de ? "Gefunden:" : ru ? "Найдено:" : ar ? "تم العثور على:" : pl ? "Znaleziono:" : zh ? "找到：" : "Found"}
 
 <span className="
 mx-2
@@ -494,9 +494,9 @@ text-blue-600
 
 </span>
 
-{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : ar ? "رحلات" : `tour${filteredTours.length === 1 ? "" : "s"}`}
+{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : ar ? "رحلات" : pl ? (filteredTours.length === 1 ? "wycieczkę" : "wycieczki") : zh ? "个行程" : `tour${filteredTours.length === 1 ? "" : "s"}`}
 
-{de ? "für:" : ru ? "по запросу:" : ar ? "للبحث:" : "for:"}
+{de ? "für:" : ru ? "по запросу:" : ar ? "للبحث:" : pl ? "dla:" : zh ? "搜索：" : "for:"}
 
 <span className="
 ml-2

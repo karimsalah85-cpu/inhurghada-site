@@ -27,6 +27,14 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     pl: { experience: "Atrakcja", reviews: "opinii klientów", reserve: "Zarezerwuj teraz i zapłać gotówką na miejscu", pickup: "Po wysłaniu zgłoszenia potwierdzimy odbiór przez WhatsApp.", reviewEyebrow: "Opinie klientów", reviewTitle: "Podróżowaliście już z nami?", reviewText: "Podziel się opinią z wycieczki i pomóż przyszłym gościom wybrać atrakcję.", reviewCta: "Oceń wycieczkę", before: "Przed rezerwacją", faq: "Najczęstsze pytania", more: "Odkryj więcej", related: "Podobne atrakcje", relatedText: "Znajdź inny rejs po Morzu Czerwonym, dzień nurkowania, safari lub prywatny transfer.", from: "Od", all: "Zobacz wszystkie wycieczki" },
     zh: { experience: "体验", reviews: "条客户评价", reserve: "立即预订，抵达后现金付款", pickup: "提交请求后，我们会通过 WhatsApp 确认接送详情。", reviewEyebrow: "客户评价", reviewTitle: "已经和我们一起旅行过？", reviewText: "分享您的行程评价，帮助其他客人选择合适的体验。", reviewCta: "评价此行程", before: "预订须知", faq: "常见问题", more: "探索更多", related: "相关体验", relatedText: "寻找适合您的其他红海行程、潜水日、沙漠探险或私人接送。", from: "起价", all: "探索所有行程" },
   }[locale];
+  const pausedCopy = {
+    en: ["Temporarily unavailable", "Bookings are paused", "We are not accepting new bookings for this trip right now. Existing bookings are unaffected."],
+    de: ["Vorübergehend nicht verfügbar", "Buchungen sind pausiert", "Für diesen Ausflug nehmen wir derzeit keine neuen Buchungen an. Bestehende Buchungen bleiben gültig."],
+    ru: ["Временно недоступно", "Бронирование приостановлено", "Сейчас мы не принимаем новые бронирования на эту экскурсию. Существующие бронирования остаются в силе."],
+    ar: ["غير متاح مؤقتاً", "الحجوزات متوقفة مؤقتاً", "لا نقبل حجوزات جديدة لهذه الرحلة حالياً. الحجوزات الحالية لا تتأثر."],
+    pl: ["Tymczasowo niedostępne", "Rezerwacje są wstrzymane", "Obecnie nie przyjmujemy nowych rezerwacji na tę wycieczkę. Istniejące rezerwacje pozostają ważne."],
+    zh: ["暂时不可预订", "预订已暂停", "该行程目前不接受新预订，现有预订不受影响。"],
+  }[locale];
   const destination = getDestination(tour.destinationSlug);
   const homeHref = localePath(locale);
   const toursHref = `${localePath(locale, "/tours")}?destination=${tour.destinationSlug || "hurghada"}`;
@@ -94,7 +102,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
 
           <div className="lg:sticky lg:top-24 lg:self-start">
             {tour.bookingMode === "inquiry" ? <div className="rounded-3xl border border-cyan-200 bg-white p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-700">{ui.more}</p><h2 className="mt-3 text-3xl font-black text-slate-950">{ui.related}</h2><p className="mt-4 leading-7 text-slate-600">{ui.relatedText}</p><a href={whatsappUrl(`Hello Daily Red Sea, please send me the current price and availability for ${tour.title}.`)} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-emerald-600 px-6 py-4 font-bold text-white hover:bg-emerald-700">WhatsApp</a></div> : <><div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{ui.reserve}</p><p className="mt-1">{ui.pickup}</p></div><Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
-              {tour.listingStatus === "paused" ? <div className="min-h-[320px] rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-800">Temporarily unavailable</p><h2 className="mt-3 text-3xl font-black text-slate-950">Bookings are paused</h2><p className="mt-4 leading-7 text-slate-700">We are not accepting new bookings for this trip right now. Existing bookings are unaffected.</p></div> : transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
+              {tour.listingStatus === "paused" ? <div className="min-h-[320px] rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-800">{pausedCopy[0]}</p><h2 className="mt-3 text-3xl font-black text-slate-950">{pausedCopy[1]}</h2><p className="mt-4 leading-7 text-slate-700">{pausedCopy[2]}</p></div> : transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}
                   tourSlug={tour.slug}
                   destinationSlug={tour.destinationSlug}
