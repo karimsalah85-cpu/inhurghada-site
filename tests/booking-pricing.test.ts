@@ -105,7 +105,7 @@ describe("authoritative booking pricing", () => {
   });
 
   it("validates a requested marina transfer area", () => {
-    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "orange-bay-full-day-speedboat", selectedBoatOption: "boat-1", transferRequired: true, transferArea: "Unknown" });
+    const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "orange-bay-half-day-speedboat", selectedBoatOption: "boat-1", transferRequired: true, transferArea: "Unknown" });
     expect(result.error).toMatch(/valid marina transfer area/i);
   });
 });

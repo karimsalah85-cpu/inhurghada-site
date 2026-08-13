@@ -30,7 +30,7 @@ type SiteSettings = {
   currency: Currency;
   setLanguage: (language: Language) => void;
   setCurrency: (currency: Currency) => void;
-  formatPrice: (usdPrice: string | number) => string;
+  formatPrice: (price: string | number, sourceCurrency?: Currency) => string;
   t: (key: string, fallback?: string) => string;
   setting: <T = unknown>(key: string, fallback: T) => T;
 };
@@ -149,11 +149,11 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
       return typeof override === "string" && override.trim() ? override : translations[language][key] || fallback || key;
     },
     setting: (key, fallback) => publicSettings[key] === undefined ? fallback : publicSettings[key] as typeof fallback,
-    formatPrice: (usdPrice) => new Intl.NumberFormat(language, {
+    formatPrice: (price, sourceCurrency = "USD") => new Intl.NumberFormat(language, {
       style: "currency",
       currency,
       maximumFractionDigits: 2,
-    }).format(Number(usdPrice) * rates[currency]),
+    }).format((Number(price) / rates[sourceCurrency]) * rates[currency]),
   }), [currency, language, publicSettings, rates]);
 
   return <SiteSettingsContext.Provider value={value}>{children}</SiteSettingsContext.Provider>;

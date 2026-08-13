@@ -64,7 +64,7 @@ describe("Marsa Alam tours", () => {
     for (const locale of locales) for (const slug of slugs) {
       const tour = localizeTour(tours.find((item) => item.slug === slug)!, locale);
       expect(tour.destinationSlug).toBe("marsa-alam");
-      expect(tour.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
+      expect(tour.image).toBe(slug === "dolphin-house-marsa-alam" ? "/images/owned/dolphin-house-pod.jpg" : "/images/owned/red-sea-reef-panorama.jpg");
       expect(tour.imageAlt).toBeTruthy();
       expect(tour.title).toBeTruthy();
       expect(tour.metaDescription).toBeTruthy();

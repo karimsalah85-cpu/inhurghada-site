@@ -7,7 +7,7 @@ import { applyTourMediaSafety } from "@/lib/tour-media-safety";
 const arabicTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
     title: "رحلة أورانج باي البحرية مع السنوركلينج", location: "الغردقة، مصر", duration: "8 ساعات", category: "رحلة جزيرة",
-    description: "استمتع بيوم كامل في أورانج باي يشمل رحلة يخت مريحة، محطتين للسنوركلينج، غداء على القارب ووقتاً على الشاطئ.",
+    description: "استمتع بيوم كامل في أورانج باي يشمل رحلة قارب مريحة، محطتين للسنوركلينج، غداء على القارب ووقتاً على الشاطئ.",
     highlights: ["جزيرة أورانج باي", "محطتان للسنوركلينج", "غداء ومشروبات", "الاستلام من الفندق"],
     included: ["الاستلام والتوصيل من الفندق", "رحلة القارب", "دخول أورانج باي", "معدات السنوركلينج", "الغداء والمشروبات"],
     notIncluded: ["الصور والفيديو", "المناشف", "المصاريف الشخصية"], notes: ["يتم تأكيد وقت الاستلام عبر واتساب.", "أحضر جواز السفر أو صورة منه وتصريح السباحة والمنشفة."],
@@ -90,13 +90,13 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["الأطفال دون 10 سنوات", "الحوامل", "مرضى القلب أو الظهر", "من لا يستوفي المتطلبات الطبية ومتطلبات السباحة"], whatToBring: ["جواز سفر أو بطاقة هوية", "منشفة", "ملابس سباحة", "نظارة شمسية"], seoTitle: "دورة SSI للمياه المفتوحة لمدة 3 أيام في الغردقة", metaDescription: "احجز دورة SSI للمياه المفتوحة في الغردقة مع التعلم الرقمي وغطستين يومياً والمعدات والغداء والتوصيل."
   },
   "dolphin-house-snorkeling": {
-    title: "رحلة دولفين هاوس والسنوركلينج من الغردقة", description: "رحلة يخت لمدة سبع ساعات إلى منطقة دولفين هاوس مع محطتين للسنوركلينج وغداء ومشروبات وتوصيل الفندق.",
-    highlights: ["مشاهدة الدلافين البرية دون ضمان", "محطتان للسنوركلينج", "غداء ومشروبات على اليخت", "طاقم محترف ومعدات سلامة"], included: ["توصيل فنادق الغردقة", "رحلة يخت", "زيارة دولفين هاوس", "معدات السنوركلينج", "الغداء والمشروبات"],
+    title: "رحلة دولفين هاوس والسنوركلينج من الغردقة", description: "رحلة قارب لمدة سبع ساعات إلى منطقة دولفين هاوس مع محطتين للسنوركلينج وغداء ومشروبات وتوصيل الفندق.",
+    highlights: ["مشاهدة الدلافين البرية دون ضمان", "محطتان للسنوركلينج", "غداء ومشروبات على القارب", "طاقم محترف ومعدات سلامة"], included: ["توصيل فنادق الغردقة", "رحلة قارب", "زيارة دولفين هاوس", "معدات السنوركلينج", "الغداء والمشروبات"],
     notes: ["مشاهدة الدلافين أو السباحة قربها غير مضمونة.", "قد يتغير المسار حسب الطقس وحالة البحر.", "يؤكد وقت الاستلام عبر واتساب."], packageName: "رحلة دولفين هاوس والسنوركلينج", ageBands: { adults: "البالغون (11 سنة فأكثر)", children: "الأطفال (4–10 سنوات)", infants: "الرضع (0–3 سنوات)" },
   },
   "hula-hula-island-snorkeling": {
-    title: "رحلة جزيرة هولا هولا والسنوركلينج", description: "يوم كامل على يخت من الغردقة يشمل ساعة على جزيرة هولا هولا ومحطتين للسنوركلينج وغداء ومشروبات.",
-    highlights: ["ساعة على جزيرة هولا هولا", "محطتان للسنوركلينج", "غداء ومشروبات", "توصيل فنادق الغردقة"], included: ["توصيل الفندق", "رحلة يخت", "دخول الجزيرة", "معدات ومرشد سنوركلينج", "الغداء والمشروبات"],
+    title: "رحلة جزيرة هولا هولا والسنوركلينج", description: "يوم كامل على قارب من الغردقة يشمل ساعة على جزيرة هولا هولا ومحطتين للسنوركلينج وغداء ومشروبات.",
+    highlights: ["ساعة على جزيرة هولا هولا", "محطتان للسنوركلينج", "غداء ومشروبات", "توصيل فنادق الغردقة"], included: ["توصيل الفندق", "رحلة قارب", "دخول الجزيرة", "معدات ومرشد سنوركلينج", "الغداء والمشروبات"],
     notes: ["يؤكد وقت الاستلام عبر واتساب.", "الرحلة مناسبة للمبتدئين.", "قد تتغير مواقع الشعاب حسب حالة البحر."], packageName: "رحلة جزيرة هولا هولا", ageBands: { adults: "البالغون (11 سنة فأكثر)", children: "الأطفال (4–10 سنوات)", infants: "الرضع (0–3 سنوات)" },
   },
   "magawish-speedboat": {
@@ -282,9 +282,9 @@ export function localizeTourGerman(tour: Tour): Tour {
 const russianTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
     title: "Морская прогулка на Orange Bay со сноркелингом", location: "Хургада, Египет", duration: "8 часов", category: "Островная экскурсия",
-    description: "Проведите день на Красном море: комфортная прогулка на яхте, две остановки для сноркелинга у коралловых рифов, обед на борту и отдых на белом пляже Orange Bay.",
-    highlights: ["Остров Orange Bay и пляжный отдых", "Прогулка на комфортабельной яхте", "Две остановки для сноркелинга", "Купание в бирюзовой воде", "Обед и напитки на борту"],
-    included: ["Трансфер из отеля и обратно", "Прогулка на яхте", "Вход на Orange Bay", "Снаряжение для сноркелинга", "Обед и безалкогольные напитки", "Команда и спасательное оборудование"],
+    description: "Проведите день на Красном море: комфортная прогулка на катере, две остановки для сноркелинга у коралловых рифов, обед на борту и отдых на белом пляже Orange Bay.",
+    highlights: ["Остров Orange Bay и пляжный отдых", "Прогулка на комфортабельной катере", "Две остановки для сноркелинга", "Купание в бирюзовой воде", "Обед и напитки на борту"],
+    included: ["Трансфер из отеля и обратно", "Прогулка на катере", "Вход на Orange Bay", "Снаряжение для сноркелинга", "Обед и безалкогольные напитки", "Команда и спасательное оборудование"],
     notIncluded: ["Подводные фото и видео", "Пляжные полотенца", "Купальные принадлежности", "Солнцезащитные средства"],
     notes: ["Точное время трансфера подтверждается через WhatsApp.", "Возьмите паспорт или копию для портового разрешения.", "Возьмите купальные принадлежности, полотенце и солнцезащитный крем."],
     packageName: "Морская прогулка на Orange Bay", packageDescription: "Экскурсия на целый день с пляжем, сноркелингом, обедом и трансфером.", packageLabel: "Взрослый",
@@ -320,7 +320,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     highlights: ["Премиальный островной отдых", "Белый песчаный пляж", "Прозрачная вода", "Сноркелинг", "Обед", "Трансфер из отеля"],
     included: ["Трансфер из отеля и обратно", "Морская прогулка", "Вход на остров", "Обед", "Безалкогольные напитки"], notIncluded: ["Личные расходы", "Фото и видео"],
     notes: ["Время трансфера подтверждается через WhatsApp.", "Возьмите купальные принадлежности, полотенце и солнцезащитный крем."],
-    packageName: "Экскурсия на остров Махмея", packageDescription: "Премиальный островной день с трансфером, яхтой и обедом.", packageLabel: "За человека",
+    packageName: "Экскурсия на остров Махмея", packageDescription: "Премиальный островной день с трансфером, катером и обедом.", packageLabel: "За человека",
   },
   "full-day-snorkeling": {
     title: "Сноркелинг на весь день", location: "Хургада, Египет", duration: "8 часов", category: "Сноркелинг",
@@ -388,13 +388,13 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Дети младше 10 лет", "Беременные", "Люди с серьёзными заболеваниями сердца или спины", "Гости, не отвечающие медицинским требованиям и требованиям к плаванию"], whatToBring: ["Паспорт или удостоверение личности", "Полотенце", "Купальник", "Солнцезащитные очки"]
   },
   "dolphin-house-snorkeling": {
-    title: "Морская прогулка в Дом дельфинов из Хургады", description: "Семичасовая прогулка на яхте в район Dolphin House с двумя остановками для сноркелинга, обедом, напитками и трансфером.",
-    highlights: ["Наблюдение за дикими дельфинами", "Два сноркелинг-стопа", "Обед и напитки", "Профессиональная команда"], included: ["Трансфер из отеля", "Яхта", "Dolphin House", "Снаряжение", "Обед и напитки"],
+    title: "Морская прогулка в Дом дельфинов из Хургады", description: "Семичасовая прогулка на катере в район Dolphin House с двумя остановками для сноркелинга, обедом, напитками и трансфером.",
+    highlights: ["Наблюдение за дикими дельфинами", "Два сноркелинг-стопа", "Обед и напитки", "Профессиональная команда"], included: ["Трансфер из отеля", "Катер", "Dolphin House", "Снаряжение", "Обед и напитки"],
     notes: ["Встреча с дельфинами и плавание не гарантируются.", "Маршрут зависит от погоды и моря.", "Время трансфера подтвердим в WhatsApp."], packageName: "Прогулка в Дом дельфинов", ageBands: { adults: "Взрослые (от 11 лет)", children: "Дети (4–10 лет)", infants: "Малыши (0–3 года)" },
   },
   "hula-hula-island-snorkeling": {
-    title: "Остров Hula Hula: яхта и сноркелинг", description: "Полный день на яхте: час на острове Hula Hula, два сноркелинг-стопа, обед, напитки и трансфер из Хургады.",
-    highlights: ["Час на острове Hula Hula", "Два сноркелинг-стопа", "Обед и напитки", "Трансфер из отеля"], included: ["Трансфер", "Яхта", "Вход на остров", "Снаряжение и гид", "Обед и напитки"],
+    title: "Остров Hula Hula: катер и сноркелинг", description: "Полный день на катере: час на острове Hula Hula, два сноркелинг-стопа, обед, напитки и трансфер из Хургады.",
+    highlights: ["Час на острове Hula Hula", "Два сноркелинг-стопа", "Обед и напитки", "Трансфер из отеля"], included: ["Трансфер", "Катер", "Вход на остров", "Снаряжение и гид", "Обед и напитки"],
     notes: ["Время трансфера подтвердим в WhatsApp.", "Подходит новичкам.", "Места у рифов зависят от состояния моря."], packageName: "Прогулка на остров Hula Hula", ageBands: { adults: "Взрослые (от 11 лет)", children: "Дети (4–10 лет)", infants: "Малыши (0–3 года)" },
   },
   "magawish-speedboat": {
@@ -429,13 +429,13 @@ export function localizeTourRussian(tour: Tour): Tour {
 const chineseTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
     title: "橙湾浮潜游船之旅", location: "埃及赫尔格达", duration: "8 小时", category: "海岛游",
-    description: "从赫尔格达乘舒适游艇前往橙湾，体验两次珊瑚礁浮潜、船上午餐，并在洁白沙滩上悠闲度过一天。",
-    highlights: ["橙湾海岛时光", "豪华游艇巡航", "两次珊瑚礁浮潜", "清澈海水中游泳", "船上午餐和饮料", "酒店接送"],
-    included: ["酒店往返接送", "游艇行程", "橙湾门票", "两次浮潜", "浮潜装备", "午餐和软饮", "救生及安全设备"],
+    description: "从赫尔格达乘舒适游船前往橙湾，体验两次珊瑚礁浮潜、船上午餐，并在洁白沙滩上悠闲度过一天。",
+    highlights: ["橙湾海岛时光", "豪华游船巡航", "两次珊瑚礁浮潜", "清澈海水中游泳", "船上午餐和饮料", "酒店接送"],
+    included: ["酒店往返接送", "游船行程", "橙湾门票", "两次浮潜", "浮潜装备", "午餐和软饮", "救生及安全设备"],
     notIncluded: ["水下照片和视频", "沙滩毛巾", "泳衣和防晒用品"],
     notes: ["接送时间将在预订后通过 WhatsApp 确认。", "请携带护照或复印件、泳衣、毛巾和防晒霜。"],
-    packageName: "橙湾浮潜游船之旅", packageDescription: "包含酒店接送、游艇、浮潜、海岛停留和午餐的橙湾一日游。", packageLabel: "成人",
-    itinerary: ["从赫尔格达酒店接您前往码头", "乘游艇巡航红海", "在珊瑚礁进行两次浮潜", "橙湾沙滩自由活动", "船上午餐并送返酒店"],
+    packageName: "橙湾浮潜游船之旅", packageDescription: "包含酒店接送、游船、浮潜、海岛停留和午餐的橙湾一日游。", packageLabel: "成人",
+    itinerary: ["从赫尔格达酒店接您前往码头", "乘游船巡航红海", "在珊瑚礁进行两次浮潜", "橙湾沙滩自由活动", "船上午餐并送返酒店"],
   },
   safari: {
     title: "沙漠探险", location: "赫尔格达沙漠", duration: "5 小时", category: "沙漠探险",
@@ -524,13 +524,13 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["10 岁以下儿童", "孕妇", "有严重心脏或背部问题者", "无法满足健康或游泳要求者"], whatToBring: ["护照或身份证", "毛巾", "泳衣", "太阳镜"]
   },
   "dolphin-house-snorkeling": {
-    title: "赫尔格达海豚屋浮潜游船", description: "七小时游艇之旅，前往海豚屋并进行两次珊瑚礁浮潜，含午餐、饮料和酒店接送。",
-    highlights: ["寻找野生海豚", "两次浮潜", "船上午餐和饮料", "专业船员"], included: ["赫尔格达酒店接送", "游艇巡航", "海豚屋", "浮潜装备", "午餐和饮料"],
+    title: "赫尔格达海豚屋浮潜游船", description: "七小时游船之旅，前往海豚屋并进行两次珊瑚礁浮潜，含午餐、饮料和酒店接送。",
+    highlights: ["寻找野生海豚", "两次浮潜", "船上午餐和饮料", "专业船员"], included: ["赫尔格达酒店接送", "游船巡航", "海豚屋", "浮潜装备", "午餐和饮料"],
     notes: ["野生海豚出现和伴游均不保证。", "路线可能因天气和海况调整。", "接送时间通过 WhatsApp 确认。"], packageName: "海豚屋浮潜游船", ageBands: { adults: "成人（11 岁及以上）", children: "儿童（4–10 岁）", infants: "幼儿（0–3 岁）" },
   },
   "hula-hula-island-snorkeling": {
-    title: "Hula Hula 岛游船与浮潜", description: "全天游艇行程，含 Hula Hula 岛一小时、两次浮潜、午餐、饮料和赫尔格达酒店接送。",
-    highlights: ["Hula Hula 岛一小时", "两次浮潜", "午餐和饮料", "酒店接送"], included: ["酒店接送", "游艇巡航", "登岛", "浮潜装备和向导", "午餐和饮料"],
+    title: "Hula Hula 岛游船与浮潜", description: "全天游船行程，含 Hula Hula 岛一小时、两次浮潜、午餐、饮料和赫尔格达酒店接送。",
+    highlights: ["Hula Hula 岛一小时", "两次浮潜", "午餐和饮料", "酒店接送"], included: ["酒店接送", "游船巡航", "登岛", "浮潜装备和向导", "午餐和饮料"],
     notes: ["接送时间通过 WhatsApp 确认。", "适合初学者。", "珊瑚礁地点可能随海况调整。"], packageName: "Hula Hula 岛游船", ageBands: { adults: "成人（11 岁及以上）", children: "儿童（4–10 岁）", infants: "幼儿（0–3 岁）" },
   },
   "magawish-speedboat": {
@@ -645,14 +645,14 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
   },
   "dolphin-house-snorkeling": {
     title: "Rejs do Dolphin House ze snorkelingiem", location: "Hurghada, Egipt", duration: "7 godzin",
-    description: "Siedmiogodzinny rejs jachtem do Dolphin House z dwoma postojami na snorkeling, lunchem, napojami i odbiorem z hotelu.",
-    highlights: ["Poszukiwanie dzikich delfinów", "Dwa postoje na snorkeling", "Lunch i napoje", "Profesjonalna załoga"], included: ["Odbiór z hotelu w Hurghadzie", "Rejs jachtem", "Dolphin House", "Sprzęt do snorkelingu", "Lunch i napoje"],
+    description: "Siedmiogodzinny rejs łodzią do Dolphin House z dwoma postojami na snorkeling, lunchem, napojami i odbiorem z hotelu.",
+    highlights: ["Poszukiwanie dzikich delfinów", "Dwa postoje na snorkeling", "Lunch i napoje", "Profesjonalna załoga"], included: ["Odbiór z hotelu w Hurghadzie", "Rejs łodzią", "Dolphin House", "Sprzęt do snorkelingu", "Lunch i napoje"],
     notes: ["Obserwacja delfinów i pływanie z nimi nie są gwarantowane.", "Trasa może zmienić się z powodu pogody i stanu morza.", "Godzinę odbioru potwierdzimy przez WhatsApp."], packageName: "Rejs do Dolphin House", ageBands: { adults: "Dorośli (11+)", children: "Dzieci (4–10 lat)", infants: "Niemowlęta (0–3 lata)" },
   },
   "hula-hula-island-snorkeling": {
     title: "Rejs na wyspę Hula Hula i snorkeling", location: "Hurghada, Egipt", duration: "Cały dzień",
-    description: "Całodniowy rejs jachtem z godziną na wyspie Hula Hula, dwoma postojami na snorkeling, lunchem, napojami i transferem z hotelu.",
-    highlights: ["Godzina na wyspie Hula Hula", "Dwa postoje na snorkeling", "Lunch i napoje", "Odbiór z hotelu"], included: ["Transfer z hotelu", "Rejs jachtem", "Wstęp na wyspę", "Sprzęt i przewodnik do snorkelingu", "Lunch i napoje"],
+    description: "Całodniowy rejs łodzią z godziną na wyspie Hula Hula, dwoma postojami na snorkeling, lunchem, napojami i transferem z hotelu.",
+    highlights: ["Godzina na wyspie Hula Hula", "Dwa postoje na snorkeling", "Lunch i napoje", "Odbiór z hotelu"], included: ["Transfer z hotelu", "Rejs łodzią", "Wstęp na wyspę", "Sprzęt i przewodnik do snorkelingu", "Lunch i napoje"],
     notes: ["Godzinę odbioru potwierdzimy przez WhatsApp.", "Atrakcja jest odpowiednia dla początkujących.", "Miejsca przy rafie zależą od stanu morza."], packageName: "Rejs na wyspę Hula Hula", ageBands: { adults: "Dorośli (11+)", children: "Dzieci (4–10 lat)", infants: "Niemowlęta (0–3 lata)" },
   },
   "royal-seascope-submarine": { title: "Royal Seascope — półłódź podwodna", location: "Marina w Hurghadzie", duration: "Około 3 godziny", description: "Zobacz rafy Morza Czerwonego z wygodnej półłodzi podwodnej — bez konieczności nurkowania.", highlights: ["Widok na rafy pod wodą", "Atrakcja dla rodzin", "Wygodny rejs", "Odbiór z hotelu"], notes: ["Godzinę odbioru potwierdzimy przez WhatsApp."], packageName: "Royal Seascope", packageDescription: "Rodzinna morska atrakcja z widokiem na podwodny świat.", packageLabel: "Za osobę" },

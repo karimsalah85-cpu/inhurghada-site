@@ -16,6 +16,8 @@ describe("tour discovery", () => {
       "royal-seascope-submarine",
       "sahl-hasheesh-horse-riding",
       "el-gouna-city-boat-tour",
+      "cairo-day-trip-flight",
+      "orange-bay-full-day-speedboat",
     ]));
   });
 

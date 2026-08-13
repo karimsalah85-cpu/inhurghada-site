@@ -22,6 +22,7 @@ import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTo
 import { filterTours } from "@/lib/tour-search";
 import GoogleReviews from "@/components/reviews/GoogleReviews";
 import { destinations } from "@/lib/destinations";
+import { applyTourCollectionMediaSafety } from "@/lib/tour-media-safety";
 
 
 
@@ -118,7 +119,7 @@ function HomeContent() {
 
   const [liveTours, setLiveTours] = useState<Tour[]>(tours);
   useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
-  const hurghadaTours = liveTours.filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada");
+  const hurghadaTours = applyTourCollectionMediaSafety(liveTours.filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada" && tour.listingStatus !== "unlisted"), language);
   const displayTours = de ? hurghadaTours.map(localizeTourGerman) : ru ? hurghadaTours.map(localizeTourRussian) : ar ? hurghadaTours.map(localizeTourArabic) : pl ? hurghadaTours.map(localizeTourPolish) : zh ? hurghadaTours.map(localizeTourChinese) : hurghadaTours;
   const filteredTours = filterTours(displayTours, search);
 

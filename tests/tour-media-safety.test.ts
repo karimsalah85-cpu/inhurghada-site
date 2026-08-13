@@ -5,6 +5,7 @@ import { applyTourMediaSafety } from "@/lib/tour-media-safety";
 describe("tour media safety", () => {
   it("uses verified owned photos only where the supplied image matches the product", () => {
     expect(tours.find((item) => item.slug === "dolphin-house-snorkeling")?.image).toBe("/images/owned/dolphin-house-pod.jpg");
+    expect(tours.find((item) => item.slug === "dolphin-house-marsa-alam")?.image).toBe("/images/owned/dolphin-house-pod.jpg");
     expect(tours.find((item) => item.slug === "senzo-transfer")?.image).toBe("/images/owned/senzo-mall.jpg");
     expect(tours.find((item) => item.slug === "quad-safari-morning")?.image).toBe("/images/owned/quad-safari-morning.jpg");
     expect(tours.find((item) => item.slug === "cairo-giza-day-trip-bus")?.image).toBe("/images/owned/cairo-pyramids-city-owner.jpg");
@@ -34,9 +35,9 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "mahmya-island")?.image).toBe("/images/owned/mahmya-island-boats-owner.jpg");
     expect(tours.find((item) => item.slug === "orange-bay")?.image).toBe("/images/owned/red-sea-reef-panorama.jpg");
     expect(tours.find((item) => item.slug === "orange-bay")?.galleryImages).not.toContain("/images/owned/mahmya-island-boats-owner.jpg");
-    for (const tour of tours.filter((item) => item.slug.includes("speedboat"))) {
-      expect(tour.image).toBe("/images/owned/speedboat-action-wide.jpg");
-    }
+    expect(tours.find((item) => item.slug === "orange-bay-half-day-speedboat")?.image).toBe("/images/owned/speedboat-action-wide.jpg");
+    expect(tours.find((item) => item.slug === "paradise-island-speedboat")?.image).toBe("/images/owned/speedboat-guests.jpg");
+    expect(tours.find((item) => item.slug === "hula-hula-speedboat")?.image).toBe("/images/owned/speedboat-shallows.jpg");
   });
 
   it("uses the owner-supplied Luxor artwork and temple gallery without the unrelated boat", () => {
