@@ -7,6 +7,9 @@ import { getLiveTours } from "@/lib/live-content";
 import { absoluteUrl, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { tourCategories } from "@/lib/tour-categories";
 import CategoryTourExplorer from "@/components/categories/CategoryTourExplorer";
+import { languageAlternates, localeOg, localePath, type Locale } from "@/lib/i18n";
+import { marsaAlamCopy } from "@/lib/destination-i18n";
+import { localizeTour } from "@/lib/tour-localization";
 
 type Props = { params: Promise<{ destination: string }> };
 
@@ -15,22 +18,25 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale: Locale = "en";
   const destination = getDestination((await params).destination);
   if (!destination) return {};
-  const path = `/destinations/${destination.slug}`;
-  const title = normalizeMetaTitle(destination.status === "coming-soon" ? `${destination.name} tours — coming soon` : destination.seo.title);
-  const description = normalizeMetaDescription(destination.seo.description);
+  const basePath = `/destinations/${destination.slug}`;
+  const path = localePath(locale, basePath);
+  const copy = destination.slug === "marsa-alam" ? marsaAlamCopy[locale] : undefined;
+  const title = normalizeMetaTitle(destination.status === "coming-soon" ? `${destination.name} tours — coming soon` : copy?.title || destination.seo.title, locale);
+  const description = normalizeMetaDescription(copy?.description || destination.seo.description, destination.seo.description, locale);
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, languages: { ...languageAlternates(basePath), "x-default": localePath("en", basePath) } },
     robots: destination.status === "coming-soon" ? { index: false, follow: true } : { index: true, follow: true },
-    openGraph: { title, description, url: absoluteUrl(path), siteName, type: "website", images: [{ url: absoluteUrl(destination.seo.ogImage), alt: destination.name }] },
+    openGraph: { title, description, url: absoluteUrl(path), siteName, locale: localeOg[locale], type: "website", images: [{ url: absoluteUrl(destination.seo.ogImage), alt: copy?.imageAlt || destination.name }] },
     twitter: { card: "summary_large_image", title, description, images: [absoluteUrl(destination.seo.ogImage)] },
   };
 }
 
-export default async function DestinationPage({ params }: Props) {
+export default async function DestinationPage({ params, locale = "en" }: Props & { locale?: Locale }) {
   const destination = getDestination((await params).destination);
   if (!destination) notFound();
 
@@ -39,11 +45,12 @@ export default async function DestinationPage({ params }: Props) {
   }
 
   const tours = await getLiveTours();
-  const destinationTours = tours.filter((tour) => tour.destinationSlug === destination.slug && tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted");
+  const destinationTours = tours.filter((tour) => tour.destinationSlug === destination.slug && tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted").map((tour) => localizeTour(tour, locale));
   const categories = tourCategories.filter((category) => category.slug !== "excursions" && destinationTours.some(category.matches));
   const otherDestinations = destinations.filter((item) => item.slug !== destination.slug && item.status === "live");
-  const pageUrl = absoluteUrl(`/destinations/${destination.slug}`);
-  const schema = { "@context": "https://schema.org", "@type": "TouristDestination", "@id": `${pageUrl}#destination`, name: destination.name, description: destination.longDescription, url: pageUrl, image: absoluteUrl(destination.image), geo: { "@type": "GeoCoordinates", latitude: destination.coordinates.latitude, longitude: destination.coordinates.longitude }, containedInPlace: { "@type": "AdministrativeArea", name: `${destination.region}, ${destination.country}` } };
+  const copy = destination.slug === "marsa-alam" ? marsaAlamCopy[locale] : marsaAlamCopy.en;
+  const pageUrl = absoluteUrl(localePath(locale, `/destinations/${destination.slug}`));
+  const schema = { "@context": "https://schema.org", "@type": "TouristDestination", "@id": `${pageUrl}#destination`, name: destination.name, description: copy.description, url: pageUrl, image: absoluteUrl(destination.image), inLanguage: locale, geo: { "@type": "GeoCoordinates", latitude: destination.coordinates.latitude, longitude: destination.coordinates.longitude }, containedInPlace: { "@type": "AdministrativeArea", name: copy.eyebrow } };
 
-  return <main className="min-h-screen bg-slate-50 pb-20 pt-24"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}/><section className="relative overflow-hidden px-6 py-20 text-white sm:px-8"><Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="100vw" priority className="object-cover"/><div className="absolute inset-0 bg-slate-950/70"/><div className="relative mx-auto max-w-7xl"><p className="font-semibold uppercase tracking-[0.24em] text-cyan-300">{destination.country} · {destination.region}</p><h1 className="mt-4 text-5xl font-black sm:text-6xl">Things to do in {destination.name}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-slate-200">{destination.longDescription}</p></div></section><div className="mx-auto max-w-7xl px-6 sm:px-8">{categories.length ? <section className="py-14"><h2 className="text-3xl font-black text-slate-950">Explore by category</h2><div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{categories.map((category) => <Link key={category.slug} href={`/${destination.slug}/${category.slug}`} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-cyan-400"><p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">{category.eyebrow}</p><h3 className="mt-3 text-2xl font-black text-slate-950">{category.title}</h3><p className="mt-3 text-slate-600">{destinationTours.filter(category.matches).length} experiences</p></Link>)}</div></section> : null}<section className="py-8"><h2 className="text-3xl font-black text-slate-950">Bookable {destination.name} experiences</h2><p className="mt-3 text-slate-600">{destinationTours.length} trips with destination-specific pricing, schedules and pickup information.</p><div className="mt-8"><CategoryTourExplorer tours={destinationTours}/></div></section>{otherDestinations.length ? <section className="mt-12 rounded-[2rem] bg-slate-950 p-8 text-white"><p className="font-bold uppercase tracking-[0.2em] text-cyan-300">Explore other Red Sea destinations</p><div className="mt-5 flex flex-wrap gap-3">{otherDestinations.map((item) => <Link key={item.slug} href={`/destinations/${item.slug}`} className="rounded-full bg-white px-5 py-3 font-bold text-slate-950">{item.name} →</Link>)}</div></section> : null}</div></main>;
+  return <main dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-slate-50 pb-20 pt-24"><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }}/><section className="relative overflow-hidden px-6 py-20 text-white sm:px-8"><Image src={destination.image} alt={copy.imageAlt} fill sizes="100vw" priority className="object-cover"/><div className="absolute inset-0 bg-slate-950/70"/><div className="relative mx-auto max-w-7xl"><p className="font-semibold uppercase tracking-[0.24em] text-cyan-300">{copy.eyebrow}</p><h1 className="mt-4 text-5xl font-black sm:text-6xl">{copy.heading}</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-slate-200">{copy.description}</p></div></section><div className="mx-auto max-w-7xl px-6 sm:px-8">{categories.length ? <section className="py-14"><h2 className="text-3xl font-black text-slate-950">{copy.categories}</h2><div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{categories.map((category) => <Link key={category.slug} href={localePath(locale, `/${destination.slug}/${category.slug}`)} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-cyan-400"><p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">{category.eyebrow}</p><h3 className="mt-3 text-2xl font-black text-slate-950">{category.title}</h3><p className="mt-3 text-slate-600">{destinationTours.filter(category.matches).length} {copy.experiences}</p></Link>)}</div></section> : null}<section className="py-8"><h2 className="text-3xl font-black text-slate-950">{copy.bookable}</h2><p className="mt-3 text-slate-600">{copy.trips(destinationTours.length)}</p><div className="mt-8"><CategoryTourExplorer tours={destinationTours}/></div></section>{otherDestinations.length ? <section className="mt-12 rounded-[2rem] bg-slate-950 p-8 text-white"><p className="font-bold uppercase tracking-[0.2em] text-cyan-300">{copy.otherDestinations}</p><div className="mt-5 flex flex-wrap gap-3">{otherDestinations.map((item) => <Link key={item.slug} href={localePath(locale, `/destinations/${item.slug}`)} className="rounded-full bg-white px-5 py-3 font-bold text-slate-950">{item.name} →</Link>)}</div></section> : null}</div></main>;
 }
