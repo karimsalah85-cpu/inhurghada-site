@@ -38,6 +38,10 @@ describe("PDF generators", () => {
     expect(output.toString("binary")).toContain(
       "(CANCELLATION & REFUND POLICY) Tj",
     );
+    expect(output.toString("binary")).not.toContain("PLACEHOLDER");
+    expect(output.toString("binary")).toContain(
+      "(The cancellation terms shown on your activity page apply to this booking. Unless that page) Tj",
+    );
   });
 
   it("includes the configured policy in the booking PDF", async () => {
