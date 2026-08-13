@@ -35,11 +35,11 @@ export const destinations: Destination[] = [
     longDescription: "Explore Hurghada with clear local prices, practical pickup information and direct booking support from Daily Red Sea.",
     coordinates: { latitude: 27.2579, longitude: 33.8116 },
     defaultCurrency: "USD",
-    image: "/images/hero-egypt-red-sea.jpg",
+    image: "/images/owned/hurghada-marina-mosque.jpg",
     seo: {
       title: "Things to do in Hurghada",
       description: "Explore Hurghada tours, island trips, snorkeling, diving, desert safaris, historical excursions and private transfers with clear prices and local support.",
-      ogImage: "/images/hero-egypt-red-sea.jpg",
+      ogImage: "/images/owned/hurghada-marina-mosque.jpg",
     },
     pickupZones: [
       { name: "Hurghada hotels", supplement: 0, currency: "USD" },
