@@ -13,7 +13,6 @@ beforeEach(() => vi.clearAllMocks());
 describe("tour discovery", () => {
   it("keeps intentionally unlisted tours out of public discovery", () => {
     expect(tours.filter((tour) => tour.listingStatus === "unlisted").map((tour) => tour.slug)).toEqual(expect.arrayContaining([
-      "royal-seascope-submarine",
       "sahl-hasheesh-horse-riding",
       "el-gouna-city-boat-tour",
       "cairo-day-trip-flight",

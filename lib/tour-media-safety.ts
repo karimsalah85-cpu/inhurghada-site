@@ -90,6 +90,11 @@ const ownedMedia: Record<string, SafeMedia> = {
     gallery: ["/images/owned/diving-training-seabed.jpg", "/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["Scuba students practising skills underwater", "A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
+  glassBottomBoat: {
+    image: "/images/owned/hurghada-glass-bottom-boat.jpg",
+    alt: localizedAlt("Two panoramic glass-bottom boats above a clear coral reef in Hurghada"),
+    focal: { x: 0.52, y: 0.57 },
+  },
   mahmya: { image: "/images/owned/mahmya-island-boats-owner.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
   luxor: {
     image: "/images/owned/luxor-branded.jpg", alt: localizedAlt("Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall"), focal: { x: 0.5, y: 0.42 },
@@ -125,6 +130,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "paradise-island-speedboat": ownedMedia.speedboatGuests,
   "hula-hula-speedboat": ownedMedia.speedboatShallows,
   "magawish-speedboat": ownedMedia.speedboat,
+  "royal-seascope-submarine": ownedMedia.glassBottomBoat,
   "hurghada-airport-transfer": ownedMedia.airport,
   "senzo-transfer": ownedMedia.senzo, "dolphin-house-snorkeling": ownedMedia.dolphin,
   "horse-riding-sea-desert": { image: "/images/hurghada-island-family-sunset.jpeg", alt: localizedAlt("Guests enjoying a Red Sea island sunset") }, "sahl-hasheesh-horse-riding": categoryMedia.horse,

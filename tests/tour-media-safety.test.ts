@@ -14,6 +14,7 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "padi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "ssi-open-water-course")?.image).toBe("/images/owned/diving-training-seabed.jpg");
     expect(tours.find((item) => item.slug === "luxor-private-day-trip")?.image).toBe("/images/owned/luxor-branded.jpg");
+    expect(tours.find((item) => item.slug === "royal-seascope-submarine")?.image).toBe("/images/owned/hurghada-glass-bottom-boat.jpg");
 
     expect(tours.find((item) => item.slug === "horse-riding-sea-desert")?.image).toBe("/images/hurghada-island-family-sunset.jpeg");
     expect(tours.find((item) => item.slug === "turkish-bath-spa")?.image).toBe("/images/hero.jpg");

@@ -50,6 +50,17 @@ describe("tour catalog publication safety", () => {
     expect(magawish?.notIncluded?.some((item) => item.includes("Orange Bay entrance") && item.includes("Magawish entrance"))).toBe(true);
   });
 
+  it("publishes the Hurghada glass-bottom boat with the supplied schedule and pricing", () => {
+    const trip = tours.find((tour) => tour.slug === "royal-seascope-submarine");
+    expect(trip?.listingStatus).toBe("active");
+    expect(trip?.price).toBe("25");
+    expect(trip?.participantPricing).toEqual({ adults: 25, youth: 12.5, infants: 0 });
+    expect(trip?.availableTimes).toEqual(["09:00", "10:30", "12:30", "15:00"]);
+    expect(trip?.duration).toBe("2.5 Hours");
+    expect(trip?.departureMarina).toBe("Hurghada Marina");
+    expect(trip?.notIncluded).toContain("Hotel pickup and drop-off — available for an extra charge");
+  });
+
   it("prices both open-water courses at EUR 300 and excludes EUR 100 materials", () => {
     for (const slug of ["padi-open-water-course", "ssi-open-water-course"]) {
       const course = tours.find((tour) => tour.slug === slug);
