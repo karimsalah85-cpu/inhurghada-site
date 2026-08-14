@@ -6,6 +6,7 @@ import { getTourCategory, tourCategories } from "@/lib/tour-categories";
 
 vi.mock("@/lib/live-content", () => ({
   getLiveTours: vi.fn(async () => tours),
+  getLiveBlogPosts: vi.fn(async () => []),
 }));
 
 beforeEach(() => vi.clearAllMocks());
