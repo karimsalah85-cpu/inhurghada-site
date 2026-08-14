@@ -85,7 +85,7 @@ export default function Navbar() {
           aria-label={ui.home}
         >
           <Image
-            src="/brand/dailyredsea-wordmark.svg"
+            src="/brand/dailyredsea-wordmark.svg?v=coral-2"
             alt="dailyredsea.com"
             width={633}
             height={98}
