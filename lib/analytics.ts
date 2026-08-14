@@ -77,7 +77,8 @@ export function updateGoogleConsent(preferences: ConsentPreferences) {
 
 export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData = {}) {
   const preferences = consent();
-  if (!preferences?.analytics || typeof window === "undefined") return;
+  // Keep Google events flowing as anonymous consent-mode pings until a visitor makes a choice.
+  if (typeof window === "undefined") return;
 
   const id = eventId();
   const cleanData = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
@@ -105,7 +106,7 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
     });
   }
 
-  if (!preferences.marketing) return;
+  if (!preferences?.marketing) return;
 
   const metaEvent = toMetaEvent(event);
   if (metaEvent && window.fbq) {
