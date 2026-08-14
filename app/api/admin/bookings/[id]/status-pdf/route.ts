@@ -18,7 +18,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
   const { data: booking, error } = await supabase
     .from("bookings")
-    .select("reference,customer_name,customer_email,phone,tour_name,date,guests,hotel,status,payment_status,amount,currency")
+    .select("reference,customer_name,customer_email,phone,tour_name,date,guests,hotel,status,payment_status,amount,currency,locale")
     .eq("id", id)
     .single();
   if (error || !booking) return NextResponse.json({ error: "Booking not found." }, { status: 404 });

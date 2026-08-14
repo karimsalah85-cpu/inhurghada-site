@@ -16,6 +16,7 @@ import {
   ListChecks,
   LogOut,
   Mail,
+  Plus,
   Search,
   Send,
   Trash2,
@@ -56,6 +57,8 @@ type Booking = {
   payment_status: PaymentStatus;
   created_at: string;
   type: "tour" | "transfer";
+  booking_source?: "website" | "manual";
+  locale?: "en" | "ar" | "de" | "ru" | "pl" | "zh";
   sales_person_id?: string | null;
   sales_commission_percent?: number | string | null;
   expense_total?: number;
@@ -210,6 +213,7 @@ export default function AdminDashboard({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showManualBooking, setShowManualBooking] = useState(false);
   const [expense, setExpense] = useState({
     description: "",
     amount: "",
@@ -389,6 +393,44 @@ export default function AdminDashboard({
           ? reason.message
           : "Could not send the status email.",
       );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function createManualBooking(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusyId("manual-booking");
+    setError("");
+    try {
+      const form = event.currentTarget;
+      const result = await api<{ booking: Booking }>("/api/admin/bookings", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      setBookings((items) => [result.booking, ...items]);
+      if (matchesBookingView(result.booking)) setVisibleBookings((items) => [result.booking, ...items]);
+      form.reset();
+      setShowManualBooking(false);
+      feedback(`Manual booking ${result.booking.reference} created.`);
+      router.refresh();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not create the manual booking.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function sendThankYouEmail(booking: Booking) {
+    if (!booking.customer_email || booking.status !== "completed") return;
+    if (!window.confirm(`Send a thank-you email to ${booking.customer_email}?`)) return;
+    setBusyId(`thank-you-${booking.id}`);
+    setError("");
+    try {
+      await api(`/api/admin/bookings/${booking.id}/thank-you`, { method: "POST" });
+      feedback(`Thank-you email sent to ${booking.customer_email}.`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not send the thank-you email.");
     } finally {
       setBusyId(null);
     }
@@ -968,10 +1010,32 @@ export default function AdminDashboard({
                   request.
                 </p>
               </div>
-              <p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
-                {visibleBookings.length} shown
-              </p>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setShowManualBooking((value) => !value)} className="inline-flex items-center gap-2 rounded-xl bg-cyan-700 px-4 py-2 text-sm font-bold text-white hover:bg-cyan-800">
+                  <Plus size={17} /> Manual booking
+                </button>
+                <p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{visibleBookings.length} shown</p>
+              </div>
             </div>
+            {showManualBooking ? (
+              <form onSubmit={createManualBooking} className="mt-5 grid gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 md:grid-cols-2 xl:grid-cols-4">
+                <h3 className="text-lg font-black text-slate-900 md:col-span-2 xl:col-span-4">Add a booking received outside the website</h3>
+                <input name="customer_name" required maxLength={120} placeholder="Customer name" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <input name="phone" required maxLength={40} placeholder="Phone / WhatsApp" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <input name="customer_email" type="email" maxLength={180} placeholder="Email (optional)" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <select name="locale" aria-label="Booking language" defaultValue="en" className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"><option value="en">English</option><option value="ar">Arabic</option><option value="de">German</option><option value="ru">Russian</option><option value="pl">Polish</option><option value="zh">Chinese</option></select>
+                <select name="type" aria-label="Booking type" defaultValue="tour" className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"><option value="tour">Tour</option><option value="transfer">Transfer</option></select>
+                <input name="tour_name" required maxLength={180} placeholder="Trip or transfer name" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <input name="date" required type="date" defaultValue={today()} className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <input name="guests" required type="number" min="1" max="99" defaultValue="1" placeholder="Guests" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <input name="hotel" maxLength={180} placeholder="Hotel / pickup" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <input name="amount" required type="number" min="0" step="0.01" placeholder="Total amount" className="rounded-xl border border-slate-200 px-3 py-2.5" />
+                <select name="currency" aria-label="Currency" defaultValue="USD" className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"><option>USD</option><option>EUR</option><option>EGP</option></select>
+                <select name="payment_status" aria-label="Payment status" defaultValue="unpaid" className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="refunded">Refunded</option></select>
+                <textarea name="notes" maxLength={2000} placeholder="Internal booking notes" className="min-h-24 rounded-xl border border-slate-200 px-3 py-2.5 md:col-span-2 xl:col-span-4" />
+                <div className="flex gap-2 md:col-span-2 xl:col-span-4"><button disabled={busyId === "manual-booking"} className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50">{busyId === "manual-booking" ? "Saving…" : "Save manual booking"}</button><button type="button" onClick={() => setShowManualBooking(false)} className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold">Cancel</button></div>
+              </form>
+            ) : null}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
               <button
                 type="button"
@@ -1249,6 +1313,7 @@ export default function AdminDashboard({
                         <p className="mt-1 font-semibold">
                           {booking.customer_name}
                         </p>
+                        <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-slate-400">{booking.booking_source === "manual" ? "Manual booking" : "Website booking"} · {(booking.locale || "en").toUpperCase()}</p>
                         <ContactLinks booking={booking} />
                         {expandedId === booking.id && booking.notes ? (
                           <p className="mt-2 max-w-xs whitespace-pre-line rounded-lg bg-slate-50 p-2 text-xs text-slate-600">
@@ -1340,6 +1405,16 @@ export default function AdminDashboard({
                           >
                             <Send size={16} className="mr-1.5" /> Resend + PDF
                           </button>
+                          <button
+                            type="button"
+                            aria-label={`Send thank-you email for ${booking.reference}`}
+                            title={booking.status === "completed" ? "Send post-trip thank-you email" : "Available after trip completion"}
+                            disabled={!booking.customer_email || booking.status !== "completed" || busyId === `thank-you-${booking.id}`}
+                            onClick={() => sendThankYouEmail(booking)}
+                            className="inline-flex whitespace-nowrap rounded-lg px-2 py-2 text-xs font-bold text-cyan-700 hover:bg-cyan-50 disabled:cursor-not-allowed disabled:opacity-30"
+                          >
+                            <Mail size={16} className="mr-1.5" /> Thank you
+                          </button>
                           <a
                             href={`/api/admin/bookings/${booking.id}/status-pdf`}
                             aria-label={`Download customer status PDF ${booking.reference}`}
@@ -1416,6 +1491,7 @@ export default function AdminDashboard({
                         <h3 className="mt-1 font-bold">
                           {booking.customer_name}
                         </h3>
+                        <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-slate-400">{booking.booking_source === "manual" ? "Manual" : "Website"} · {(booking.locale || "en").toUpperCase()}</p>
                       </div>
                     </div>
                     <p className="font-black">
@@ -1501,6 +1577,14 @@ export default function AdminDashboard({
                       className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 disabled:opacity-40"
                     >
                       <Send size={14} /> Resend email + PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendThankYouEmail(booking)}
+                      disabled={!booking.customer_email || booking.status !== "completed" || busyId === `thank-you-${booking.id}`}
+                      className="inline-flex items-center gap-2 text-xs font-bold text-cyan-700 disabled:opacity-40"
+                    >
+                      <Mail size={14} /> Send thank you
                     </button>
                     <a
                       href={`/api/admin/bookings/${booking.id}/status-pdf`}

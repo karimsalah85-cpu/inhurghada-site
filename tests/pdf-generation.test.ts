@@ -119,4 +119,17 @@ describe("PDF generators", () => {
     expect(output.subarray(0, 5).toString()).toBe("%PDF-");
     expect(output.length).toBeGreaterThan(4_000);
   });
+
+  it("uses the booking language in confirmation and status PDFs", async () => {
+    const confirmation = await createInvoicePdf({
+      reference: "DRS-DE-1", issuedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Gast",
+      itemName: "Glasbodenboot", quantity: 2, amount: 50, currency: "USD", locale: "de",
+    });
+    const status = await createBookingStatusPdf({
+      reference: "DRS-DE-1", generatedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Gast",
+      itemName: "Glasbodenboot", amount: 50, currency: "USD", bookingStatus: "completed", paymentStatus: "paid", locale: "de",
+    });
+    expect(confirmation.toString("binary")).toContain("(BUCHUNGSBESTAETIGUNG) Tj");
+    expect(status.toString("binary")).toContain("(BUCHUNGSSTATUS) Tj");
+  });
 });

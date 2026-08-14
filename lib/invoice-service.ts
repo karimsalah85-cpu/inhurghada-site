@@ -1,4 +1,5 @@
 import { getCancellationPolicyParagraphs } from "@/lib/pdf-policy";
+import { bookingLocale } from "@/lib/booking-communications-i18n";
 
 export type InvoiceData = {
   reference: string;
@@ -17,6 +18,7 @@ export type InvoiceData = {
   time?: string;
   hotel?: string;
   tripLines?: string[];
+  locale?: string;
 };
 
 export type BookingStatusPdfData = {
@@ -35,6 +37,7 @@ export type BookingStatusPdfData = {
   paymentStatus: string;
   assignedPersonName?: string;
   assignedPersonRole?: "guide" | "driver";
+  locale?: string;
 };
 
 type Color = [number, number, number];
@@ -47,11 +50,22 @@ const muted: Color = [100, 116, 139];
 const light: Color = [241, 245, 249];
 const white: Color = [255, 255, 255];
 
+const pdfCopy = {
+  en: { confirmation: "BOOKING CONFIRMATION", issued: "Issued", cash: "CASH ON ARRIVAL", reference: "BOOKING REFERENCE", guest: "GUEST DETAILS", guestName: "Guest name", pending: "To be confirmed", experience: "EXPERIENCE DETAILS", date: "Experience date", time: "Departure time", travelers: "Travelers", pickup: "Pickup", total: "TOTAL TO PAY", next: "WHAT HAPPENS NEXT", statusUpdate: "BOOKING STATUS UPDATE", updated: "Updated", current: "CURRENT STATUS", booking: "BOOKING", payment: "PAYMENT", bookingDetails: "BOOKING DETAILS", help: "NEED HELP?" },
+  de: { confirmation: "BUCHUNGSBESTAETIGUNG", issued: "Ausgestellt", cash: "BARZAHLUNG VOR ORT", reference: "BUCHUNGSNUMMER", guest: "GASTDATEN", guestName: "Name", pending: "Wird noch bestaetigt", experience: "ERLEBNISDETAILS", date: "Datum", time: "Abfahrtszeit", travelers: "Reisende", pickup: "Abholung", total: "GESAMTBETRAG", next: "WIE GEHT ES WEITER", statusUpdate: "BUCHUNGSSTATUS", updated: "Aktualisiert", current: "AKTUELLER STATUS", booking: "BUCHUNG", payment: "ZAHLUNG", bookingDetails: "BUCHUNGSDETAILS", help: "BRAUCHEN SIE HILFE?" },
+  pl: { confirmation: "POTWIERDZENIE REZERWACJI", issued: "Wystawiono", cash: "PLATNOSC GOTOWKA", reference: "NUMER REZERWACJI", guest: "DANE GOSCIA", guestName: "Imie i nazwisko", pending: "Do potwierdzenia", experience: "SZCZEGOLY WYCIECZKI", date: "Data", time: "Godzina wyjazdu", travelers: "Uczestnicy", pickup: "Odbior", total: "DO ZAPLATY", next: "CO DALEJ", statusUpdate: "STATUS REZERWACJI", updated: "Zaktualizowano", current: "AKTUALNY STATUS", booking: "REZERWACJA", payment: "PLATNOSC", bookingDetails: "SZCZEGOLY REZERWACJI", help: "POTRZEBUJESZ POMOCY?" },
+  ru: { confirmation: "PODTVERZHDENIE BRONIROVANIYA", issued: "Vydano", cash: "OPLATA NALICHNYMI", reference: "NOMER BRONIROVANIYA", guest: "DANNYE GOSTYA", guestName: "Imya gosta", pending: "Budet podtverzhdeno", experience: "DETALI POEZDKI", date: "Data", time: "Vremya otpravleniya", travelers: "Uchastniki", pickup: "Transfer", total: "K OPLATE", next: "CHTO DAL'SHE", statusUpdate: "STATUS BRONIROVANIYA", updated: "Obnovleno", current: "TEKUSHCHIY STATUS", booking: "BRONIROVANIE", payment: "OPLATA", bookingDetails: "DETALI BRONIROVANIYA", help: "NUZHNA POMOSHCH?" },
+  ar: { confirmation: "TA'KID AL-HAJZ", issued: "Sudira fi", cash: "AL-DAF' NAQDAN", reference: "RAQM AL-HAJZ", guest: "BAYANAT AL-DAYF", guestName: "Ism al-dayf", pending: "Sayutam al-ta'kid", experience: "TAFASIL AL-RIHLA", date: "Tarikh al-rihla", time: "Waqt al-mughadara", travelers: "Al-musafirun", pickup: "Al-istilam", total: "AL-IJMALI", next: "AL-KHUTWAT AL-TALIYA", statusUpdate: "TAHDITH HALAT AL-HAJZ", updated: "Tamma al-tahdith", current: "AL-HALA AL-HALIYA", booking: "AL-HAJZ", payment: "AL-DAF'", bookingDetails: "TAFASIL AL-HAJZ", help: "TAHTAJ MUSA'ADA?" },
+  zh: { confirmation: "YUDING QUEREN", issued: "Qianfa riqi", cash: "DAOCHANG XIANJIN ZHIFU", reference: "YUDING BIANHAO", guest: "KEHU XINXI", guestName: "Kehu xingming", pending: "Dai queren", experience: "XINGCHENG XIANGQING", date: "Xingcheng riqi", time: "Chufa shijian", travelers: "Renshu", pickup: "Jiesong", total: "YINGFU ZONGE", next: "XIAYIBU", statusUpdate: "YUDING ZHUANGTAI", updated: "Gengxin", current: "DANGQIAN ZHUANGTAI", booking: "YUDING", payment: "FUKUAN", bookingDetails: "YUDING XIANGQING", help: "XUYAO BANGZHU?" },
+} as const;
+
 /**
  * A self-contained, branded PDF voucher. It only uses the PDF core Helvetica
  * fonts, so it works reliably inside Vercel serverless functions.
  */
 export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
+  const locale = bookingLocale(invoice.locale);
+  const t = pdfCopy[locale];
   const money = formatMoney(invoice.amount, invoice.currency);
   const quantity = Math.max(Number(invoice.quantity) || 1, 1);
   const issuedDate = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(invoice.issuedAt);
@@ -64,43 +78,43 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   text(commands, "DR", 66, 714, 15, true, white);
   text(commands, "DAILY RED SEA", 122, 735, 22, true, white);
   text(commands, "TOURS AND TRANSFERS - HURGHADA, EGYPT", 122, 715, 8.5, false, [203, 213, 225]);
-  text(commands, "BOOKING CONFIRMATION", 50, 670, 17, true, white);
-  text(commands, `Issued ${issuedDate}`, 50, 654, 9, false, [203, 213, 225]);
+  text(commands, t.confirmation, 50, 670, 17, true, white);
+  text(commands, `${t.issued} ${issuedDate}`, 50, 654, 9, false, [203, 213, 225]);
   roundedRect(commands, 413, 684, 149, 32, 8, [20, 83, 45]);
-  text(commands, "CASH ON ARRIVAL", 428, 695, 10, true, [220, 252, 231]);
+  text(commands, t.cash, 428, 695, 9, true, [220, 252, 231]);
 
   roundedRect(commands, 50, 588, 512, 42, 8, white);
-  text(commands, "BOOKING REFERENCE", 66, 609, 8.5, true, muted);
+  text(commands, t.reference, 66, 609, 8.5, true, muted);
   text(commands, invoice.reference, 66, 594, 14, true, navy);
   text(commands, "Keep this reference for support and pickup confirmation", 265, 602, 9, false, slate);
 
-  sectionCard(commands, 50, 450, 512, 118, "GUEST DETAILS");
-  detail(commands, "Guest name", invoice.customerName || "Guest", 68, 518, 215);
-  detail(commands, "WhatsApp", invoice.customerPhone || "To be confirmed", 310, 518, 220);
-  detail(commands, "Email", invoice.customerEmail || "To be confirmed", 68, 476, 430);
+  sectionCard(commands, 50, 450, 512, 118, t.guest);
+  detail(commands, t.guestName, invoice.customerName || "Guest", 68, 518, 215);
+  detail(commands, "WhatsApp", invoice.customerPhone || t.pending, 310, 518, 220);
+  detail(commands, "Email", invoice.customerEmail || t.pending, 68, 476, 430);
 
-  sectionCard(commands, 50, 267, 512, 163, "EXPERIENCE DETAILS");
+  sectionCard(commands, 50, 267, 512, 163, t.experience);
   const itemLines = wrap(invoice.itemName || "Daily Red Sea booking", 48);
   text(commands, itemLines[0], 68, 380, 14, true, navy);
   if (invoice.tripLines?.length) {
     invoice.tripLines.slice(0, 4).forEach((line, index) => text(commands, wrap(line, 82)[0], 68, 355 - index * 17, 9, false, slate));
-    detail(commands, "Travelers", invoice.travelerSummary || `${quantity} traveler places`, 68, 292, 205);
-    detail(commands, "Pickup", invoice.hotel || "We will confirm via WhatsApp", 310, 292, 215);
+    detail(commands, t.travelers, invoice.travelerSummary || `${quantity}`, 68, 292, 205);
+    detail(commands, t.pickup, invoice.hotel || t.pending, 310, 292, 215);
   } else {
     if (itemLines[1]) text(commands, itemLines[1], 68, 363, 14, true, navy);
-    detail(commands, "Experience date", invoice.date || "To be confirmed", 68, 334, 205);
-    detail(commands, "Departure time", invoice.time || "To be confirmed", 310, 334, 195);
-    detail(commands, "Travelers", invoice.travelerSummary || `${quantity} traveler${quantity === 1 ? "" : "s"}`, 68, 292, 205);
-    detail(commands, "Pickup", invoice.hotel || "We will confirm via WhatsApp", 310, 292, 215);
+    detail(commands, t.date, invoice.date || t.pending, 68, 334, 205);
+    detail(commands, t.time, invoice.time || t.pending, 310, 334, 195);
+    detail(commands, t.travelers, invoice.travelerSummary || `${quantity}`, 68, 292, 205);
+    detail(commands, t.pickup, invoice.hotel || t.pending, 310, 292, 215);
   }
 
   roundedRect(commands, 50, 180, 512, 67, 10, blue);
-  text(commands, "TOTAL TO PAY", 68, 218, 9, true, [219, 234, 254]);
+  text(commands, t.total, 68, 218, 9, true, [219, 234, 254]);
   text(commands, money, 68, 192, 24, true, white);
   text(commands, "Pay in cash when you arrive - no online payment collected", 285, 205, 9, false, [219, 234, 254]);
 
   roundedRect(commands, 50, 83, 512, 76, 10, white);
-  text(commands, "WHAT HAPPENS NEXT", 68, 137, 9, true, blue);
+  text(commands, t.next, 68, 137, 9, true, blue);
   text(commands, "1. Keep this confirmation.  2. We confirm pickup by WhatsApp.  3. Show your reference when requested.", 68, 116, 8.8, false, slate);
   text(commands, "Daily Red Sea is not currently VAT registered. No tax has been charged.", 68, 96, 8.3, false, muted);
   text(commands, `Daily Red Sea  |  ${invoice.reference}  |  dailyredsea.com`, 50, 43, 8.5, false, muted);
@@ -159,6 +173,8 @@ function createPolicyPages(reference: string): string[] {
 }
 
 export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<Buffer> {
+  const locale = bookingLocale(booking.locale);
+  const t = pdfCopy[locale];
   const generatedDate = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(booking.generatedAt);
   const bookingState = displayStatus(booking.bookingStatus);
   const paymentState = displayStatus(booking.paymentStatus);
@@ -173,42 +189,42 @@ export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<B
   text(commands, "DR", 66, 714, 15, true, white);
   text(commands, "DAILY RED SEA", 122, 735, 22, true, white);
   text(commands, "TOURS AND TRANSFERS - HURGHADA, EGYPT", 122, 715, 8.5, false, [203, 213, 225]);
-  text(commands, "BOOKING STATUS UPDATE", 50, 670, 17, true, white);
-  text(commands, `Updated ${generatedDate}`, 50, 654, 9, false, [203, 213, 225]);
+  text(commands, t.statusUpdate, 50, 670, 17, true, white);
+  text(commands, `${t.updated} ${generatedDate}`, 50, 654, 9, false, [203, 213, 225]);
 
   roundedRect(commands, 50, 584, 512, 46, 8, white);
-  text(commands, "BOOKING REFERENCE", 66, 610, 8, true, muted);
+  text(commands, t.reference, 66, 610, 8, true, muted);
   text(commands, booking.reference, 66, 592, 14, true, navy);
   text(commands, "Your latest booking and payment information", 320, 600, 9, false, slate);
 
-  sectionCard(commands, 50, 463, 512, 101, "CURRENT STATUS");
+  sectionCard(commands, 50, 463, 512, 101, t.current);
   roundedRect(commands, 68, 487, 214, 44, 8, bookingTone.background);
-  text(commands, "BOOKING", 82, 514, 7.5, true, bookingTone.foreground);
+  text(commands, t.booking, 82, 514, 7.5, true, bookingTone.foreground);
   text(commands, bookingState, 82, 495, 13, true, bookingTone.foreground);
   roundedRect(commands, 310, 487, 234, 44, 8, paymentTone.background);
-  text(commands, "PAYMENT", 324, 514, 7.5, true, paymentTone.foreground);
+  text(commands, t.payment, 324, 514, 7.5, true, paymentTone.foreground);
   text(commands, paymentState, 324, 495, 13, true, paymentTone.foreground);
 
-  sectionCard(commands, 50, 340, 512, 103, "GUEST DETAILS");
-  detail(commands, "Guest name", booking.customerName || "Guest", 68, 402, 215);
-  detail(commands, "WhatsApp", booking.customerPhone || "To be confirmed", 310, 402, 220);
-  detail(commands, "Email", booking.customerEmail || "To be confirmed", 68, 363, 430);
+  sectionCard(commands, 50, 340, 512, 103, t.guest);
+  detail(commands, t.guestName, booking.customerName || "Guest", 68, 402, 215);
+  detail(commands, "WhatsApp", booking.customerPhone || t.pending, 310, 402, 220);
+  detail(commands, "Email", booking.customerEmail || t.pending, 68, 363, 430);
 
-  sectionCard(commands, 50, 191, 512, 129, "BOOKING DETAILS");
+  sectionCard(commands, 50, 191, 512, 129, t.bookingDetails);
   const itemLines = wrap(booking.itemName || "Daily Red Sea booking", 53);
   text(commands, itemLines[0], 68, 278, 13, true, navy);
   if (itemLines[1]) text(commands, itemLines[1], 68, 262, 13, true, navy);
-  detail(commands, "Experience date", booking.date || "To be confirmed", 68, 235, 205);
-  detail(commands, "Travelers", booking.travelers || "To be confirmed", 310, 235, 195);
-  detail(commands, "Pickup", booking.pickup || "We will confirm via WhatsApp", 68, 204, 280);
+  detail(commands, t.date, booking.date || t.pending, 68, 235, 205);
+  detail(commands, t.travelers, booking.travelers || t.pending, 310, 235, 195);
+  detail(commands, t.pickup, booking.pickup || t.pending, 68, 204, 280);
   if (booking.assignedPersonName) detail(commands, `Assigned ${booking.assignedPersonRole || "guide/driver"}`, booking.assignedPersonName, 365, 204, 175);
 
   roundedRect(commands, 50, 103, 512, 68, 10, blue);
-  text(commands, "BOOKING TOTAL", 68, 143, 8.5, true, [219, 234, 254]);
+  text(commands, t.total, 68, 143, 8.5, true, [219, 234, 254]);
   text(commands, formatMoney(booking.amount, booking.currency), 68, 117, 23, true, white);
   text(commands, paymentMessage(booking.paymentStatus), 300, 128, 8.8, false, [219, 234, 254]);
 
-  text(commands, "NEED HELP?", 50, 73, 8.5, true, blue);
+  text(commands, t.help, 50, 73, 8.5, true, blue);
   text(commands, "Reply to the email that included this PDF or contact us on WhatsApp.", 50, 57, 8.5, false, slate);
   text(commands, "Cancellation policy: dailyredsea.com/terms-conditions", 50, 42, 8.5, false, slate);
   text(commands, `Daily Red Sea  |  ${booking.reference}`, 390, 42, 8, false, muted);
