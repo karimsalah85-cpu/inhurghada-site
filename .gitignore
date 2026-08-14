@@ -40,6 +40,9 @@ yarn-error.log*
 # project-local developer tools
 .tools/
 
+# local database backups
+/backups/
+
 # supabase local link metadata
 supabase/.temp/
 
