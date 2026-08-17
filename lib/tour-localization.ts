@@ -122,6 +122,22 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "ركوب خيل في صحراء وبحر سهل حشيش", packageDescription: "نحو ساعتين من ركوب الخيل في الصحراء والساحل مع جزء اختياري في المياه الضحلة.", packageLabel: "راكب", ageBands: { adults: "الركاب (العمر يؤكده الإسطبل)", children: "", infants: "" }, availableTimes: ["موعد صباحي يؤكد عبر واتساب", "موعد الغروب يؤكد عبر واتساب"],
     notSuitableFor: ["الحوامل", "من لديهم مشكلات خطيرة في الظهر أو الرقبة أو الحركة", "من هم خارج حدود العمر أو الوزن التي يؤكدها الإسطبل"], whatToBring: ["بنطال طويل", "حذاء مغلق", "واقي شمس", "نظارة شمسية", "ملابس سباحة ومنشفة عند اختيار السباحة"]
   },
+  "royal-seascope-submarine": {
+    title: "رحلة قارب زجاجي القاع وسنوركلينج في الغردقة", location: "مارينا الغردقة", duration: "ساعتان ونصف", category: "نشاط بحري عائلي",
+    description: "انطلق من مارينا الغردقة في رحلة قارب زجاجي القاع لمدة ساعتين ونصف، تجمع بين مناظر بانورامية للشعاب المرجانية في البحر الأحمر ومحطة سنوركلينج لمدة 30 دقيقة.",
+    highlights: ["أربع رحلات يوميًا", "45 دقيقة استكشاف عبر نوافذ زجاجية بانورامية", "محطة سنوركلينج لمدة 30 دقيقة", "رحلة مناسبة للعائلات لمدة ساعتين ونصف", "الانطلاق مباشرة من مارينا الغردقة"],
+    included: ["رحلة قارب زجاجي القاع لمدة ساعتين ونصف", "تجربة مشاهدة الشعاب عبر القاع الزجاجي لمدة 45 دقيقة", "محطة سنوركلينج لمدة 30 دقيقة"], notIncluded: ["الاستلام والتوصيل من الفندق — متاح مقابل رسوم إضافية", "الطعام والمشروبات", "المصاريف الشخصية"],
+    notes: ["نقطة اللقاء في مارينا الغردقة؛ تنطلق الرحلة من المارينا.", "توصيل الفندق غير مشمول ويمكن ترتيبه مقابل رسوم إضافية.", "تكلفة تذكرة الطفل 50% من سعر البالغ. الرضع مجانًا.", "يتم تأكيد الفئة العمرية الدقيقة للأطفال والرضع قبل الحجز.", "يعتمد المسار وإمكانية السنوركلينج ووضوح الرؤية تحت الماء على الطقس وحالة البحر وتعليمات سلامة الطاقم."],
+    packageName: "رحلة القارب الزجاجي القاع في الغردقة", packageDescription: "انطلاقة من المارينا لمدة ساعتين ونصف مع مشاهدة بانورامية للشعاب عبر القاع الزجاجي ومحطة سنوركلينج.", packageLabel: "للبالغ",
+  },
+  "beginner-scuba-diving": {
+    title: "تجربة الغوص للمبتدئين", location: "الغردقة، مصر", duration: "يوم كامل", category: "غوص",
+    description: "جرّب الغوص تحت إشراف مباشر من مدرب مختص، مع إحاطة تعريفية ومعدات وغطسات تمهيدية في مواقع مناسبة بالبحر الأحمر.",
+    highlights: ["لا يلزم ترخيص غوص", "إشراف مدرب مختص", "غطسات تمهيدية في البحر الأحمر", "غداء على متن القارب"],
+    included: ["توصيل الفندق ضمن المنطقة المؤكدة", "رحلة قارب", "مدرب غوص", "معدات الغوص القياسية", "الغداء والمشروبات الغازية"], notIncluded: ["الموافقة الطبية إذا لزم الأمر", "الصور", "التوصيل خارج الغردقة حتى تأكيد السعر"],
+    notes: ["يلزم تعبئة استبيان صحي قبل الغوص.", "يعتمد الحد الأدنى للعمر وعمق الغوص على قواعد مركز الغوص المعتمد.", "يجب على الضيوف اتباع تعليمات المدرب، ويجوز رفض المشاركة لأسباب طبية أو أمنية.", "يتم تأكيد شروط الإلغاء مع مركز الغوص."],
+    packageName: "غطسة تجريبية", packageDescription: "أول غطسة مع مدرب على شعاب الغردقة المرجانية.", packageLabel: "للشخص",
+  },
 };
 
 export function localizeTourArabic(tour: Tour): Tour {
@@ -268,6 +284,22 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     notes: ["Kostenlose Stornierung bis 24 Stunden vorher.", "Wasserabschnitt nur nach Freigabe durch Guide und Stall.", "Alters- und Gewichtsgrenzen müssen bestätigt werden.", "Bewertungen anderer Plattformen werden nicht übernommen."],
     packageName: "Wüsten- und Meer-Ausritt in Sahl Hasheesh", packageDescription: "Etwa zwei Stunden geführtes Reiten in Wüste und Küste mit optionalem flachen Wasserabschnitt.", packageLabel: "Reiter", ageBands: { adults: "Reiter (Alter durch Stall bestätigt)", children: "", infants: "" }, availableTimes: ["Morgentermin per WhatsApp", "Sonnenuntergangstermin per WhatsApp"],
     notSuitableFor: ["Schwangere", "Personen mit schweren Rücken-, Nacken- oder Mobilitätsproblemen", "Gäste außerhalb der bestätigten Alters- oder Gewichtsgrenzen"], whatToBring: ["Lange Hose", "Geschlossene Schuhe", "Sonnenschutz", "Sonnenbrille", "Badebekleidung und Handtuch bei Wasseroption"]
+  },
+  "royal-seascope-submarine": {
+    title: "Hurghada Glasbodenboot-Tour mit Schnorcheln", location: "Hurghada Marina", duration: "2,5 Stunden", category: "Familien-Meeresaktivität",
+    description: "Starte ab der Hurghada Marina zu einer 2,5-stündigen Glasbodenboot-Tour, die einen Panoramablick auf das Riff im Roten Meer mit einem 30-minütigen Schnorchelstopp verbindet.",
+    highlights: ["Vier tägliche Abfahrten", "45 Minuten Erkundung durch Panorama-Glasfenster", "30-minütiger Schnorchelstopp", "Familienfreundliche 2,5-stündige Tour", "Abfahrt direkt ab der Hurghada Marina"],
+    included: ["2,5-stündige Glasbodenboot-Tour", "45-minütiges Riff-Erlebnis durch den Glasboden", "30-minütiger Schnorchelstopp"], notIncluded: ["Hotelabholung und -rückbringung — gegen Aufpreis buchbar", "Essen und Getränke", "Persönliche Ausgaben"],
+    notes: ["Treffpunkt ist die Hurghada Marina; die Bootstour startet dort.", "Der Hoteltransfer ist nicht inbegriffen und kann gegen Aufpreis gebucht werden.", "Kinderticket kostet 50 % des Erwachsenenpreises. Kleinkinder fahren kostenlos.", "Die genaue Alterseinstufung für Kinder und Kleinkinder wird vor der Buchung bestätigt.", "Route, Schnorchelmöglichkeit und Sicht unter Wasser hängen von Wetter, Seegang und den Sicherheitsanweisungen der Crew ab."],
+    packageName: "Hurghada Glasbodenboot-Tour", packageDescription: "2,5-stündige Abfahrt ab der Marina mit Panorama-Riffblick durch den Glasboden und einem Schnorchelstopp.", packageLabel: "Erwachsener",
+  },
+  "beginner-scuba-diving": {
+    title: "Schnuppertauchen für Anfänger", location: "Hurghada, Ägypten", duration: "Ganztägig", category: "Tauchen",
+    description: "Probiere Gerätetauchen unter direkter Aufsicht eines Tauchlehrers aus – mit Briefing, Ausrüstung und Schnuppertauchgängen an geeigneten Stellen im Roten Meer.",
+    highlights: ["Kein Tauchschein erforderlich", "Betreuung durch Tauchlehrer", "Schnuppertauchgänge im Roten Meer", "Mittagessen an Bord"],
+    included: ["Hoteltransfer in der bestätigten Zone", "Bootsfahrt", "Tauchlehrer", "Standard-Tauchausrüstung", "Mittagessen und Softdrinks"], notIncluded: ["Ärztliche Freigabe, falls erforderlich", "Fotos", "Transfers außerhalb Hurghadas bis zur Preisbestätigung"],
+    notes: ["Vor dem Tauchen ist ein Gesundheitsfragebogen auszufüllen.", "Mindestalter und Tauchtiefe richten sich nach den Regeln des zertifizierten Tauchcenters.", "Gäste müssen den Anweisungen des Tauchlehrers folgen und können aus medizinischen oder Sicherheitsgründen abgelehnt werden.", "Stornobedingungen werden mit dem Tauchcenter bestätigt."],
+    packageName: "Schnuppertauchgang", packageDescription: "Erster Tauchgang mit Tauchlehrer an den Riffen von Hurghada.", packageLabel: "Pro Person",
   },
 };
 
@@ -420,6 +452,22 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "Конная прогулка в Сахл-Хашише", packageDescription: "Около двух часов по пустыне и побережью с дополнительным участком на мелководье.", packageLabel: "Всадник", ageBands: { adults: "Всадники (возраст подтверждает конюшня)", children: "", infants: "" }, availableTimes: ["Утреннее время подтвердим в WhatsApp", "Время на закате подтвердим в WhatsApp"],
     notSuitableFor: ["Беременные", "Люди с серьёзными проблемами спины, шеи или подвижности", "Гости за пределами подтверждённых ограничений возраста или веса"], whatToBring: ["Длинные брюки", "Закрытая обувь", "Солнцезащитный крем", "Очки", "Купальник и полотенце для морской опции"]
   },
+  "royal-seascope-submarine": {
+    title: "Прогулка на катере со стеклянным дном и сноркелингом в Хургаде", location: "Марина Хургады", duration: "2,5 часа", category: "Семейная морская активность",
+    description: "Отправление из марины Хургады на 2,5-часовую прогулку на катере со стеклянным дном: панорамные виды на риф Красного моря и 30-минутная остановка для сноркелинга.",
+    highlights: ["Четыре отправления в день", "45 минут осмотра через панорамные стеклянные окна", "30-минутная остановка для сноркелинга", "Поездка на 2,5 часа, подходит для семей", "Отправление прямо из марины Хургады"],
+    included: ["2,5-часовая прогулка на катере со стеклянным дном", "45-минутный просмотр рифа через стеклянное дно", "30-минутная остановка для сноркелинга"], notIncluded: ["Трансфер из отеля и обратно — доступен за дополнительную плату", "Еда и напитки", "Личные расходы"],
+    notes: ["Встреча в марине Хургады; прогулка начинается там.", "Трансфер из отеля не включён, его можно заказать за дополнительную плату.", "Детский билет стоит 50% от взрослого. Младенцы едут бесплатно.", "Точный возрастной порог для детей и младенцев подтверждается перед бронированием.", "Маршрут, возможность сноркелинга и видимость под водой зависят от погоды, состояния моря и указаний команды по безопасности."],
+    packageName: "Прогулка на катере со стеклянным дном в Хургаде", packageDescription: "2,5-часовое отправление из марины с панорамным просмотром рифа через стеклянное дно и остановкой для сноркелинга.", packageLabel: "Взрослый",
+  },
+  "beginner-scuba-diving": {
+    title: "Пробное погружение для начинающих", location: "Хургада, Египет", duration: "Весь день", category: "Дайвинг",
+    description: "Попробуйте дайвинг под непосредственным наблюдением инструктора: инструктаж, снаряжение и ознакомительные погружения в подходящих местах Красного моря.",
+    highlights: ["Лицензия на дайвинг не требуется", "Сопровождение инструктора", "Ознакомительные погружения в Красном море", "Обед на борту"],
+    included: ["Трансфер из отеля в подтверждённой зоне", "Поездка на катере", "Инструктор по дайвингу", "Стандартное снаряжение для дайвинга", "Обед и безалкогольные напитки"], notIncluded: ["Медицинское заключение при необходимости", "Фотографии", "Трансфер за пределы Хургады до подтверждения цены"],
+    notes: ["Перед погружением необходимо заполнить анкету о состоянии здоровья.", "Минимальный возраст и глубина погружения зависят от правил сертифицированного дайв-центра.", "Гости обязаны следовать указаниям инструктора; участие может быть отклонено по медицинским или соображениям безопасности.", "Условия отмены подтверждаются с дайв-центром."],
+    packageName: "Пробное погружение", packageDescription: "Первое погружение с инструктором на рифах Хургады.", packageLabel: "За человека",
+  },
 };
 
 export function localizeTourRussian(tour: Tour): Tour {
@@ -555,6 +603,22 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     notes: ["活动开始前 24 小时可免费取消。", "是否进入浅水区由向导和马场决定。", "须向马场确认年龄和体重限制。", "本站不会复制其他平台的评价。"],
     packageName: "萨尔哈希什沙漠与海岸骑马", packageDescription: "约两小时沙漠和海岸向导骑马，安全时可增加浅水环节。", packageLabel: "骑手", ageBands: { adults: "骑手（年龄由马场确认）", children: "", infants: "" }, availableTimes: ["上午时间通过 WhatsApp 确认", "日落时间通过 WhatsApp 确认"],
     notSuitableFor: ["孕妇", "有严重背部、颈部或行动问题者", "不符合马场确认的年龄或体重限制者"], whatToBring: ["长裤", "包头鞋", "防晒霜", "太阳镜", "选择海水项目时携带泳衣和毛巾"]
+  },
+  "royal-seascope-submarine": {
+    title: "赫尔格达玻璃底船浮潜之旅", location: "赫尔格达码头", duration: "2.5小时", category: "家庭海上活动",
+    description: "从赫尔格达码头出发，开启2.5小时玻璃底船之旅，透过全景玻璃窗欣赏红海珊瑚礁，并享受30分钟浮潜。",
+    highlights: ["每日四班出发", "45分钟全景玻璃窗观礁", "30分钟浮潜", "适合家庭的2.5小时行程", "直接从赫尔格达码头出发"],
+    included: ["2.5小时玻璃底船之旅", "45分钟玻璃底观礁体验", "30分钟浮潜"], notIncluded: ["酒店接送 — 可另付费安排", "餐食和饮料", "个人消费"],
+    notes: ["在赫尔格达码头集合，船程从码头出发。", "不含酒店接送，可另付费安排。", "儿童票为成人票价的50%，婴儿免费。", "儿童和婴儿的具体年龄标准将在预订前确认。", "航线、浮潜安排及水下能见度取决于天气、海况及船员的安全指示。"],
+    packageName: "赫尔格达玻璃底船之旅", packageDescription: "2.5小时码头出发行程，含玻璃底全景观礁和浮潜。", packageLabel: "成人",
+  },
+  "beginner-scuba-diving": {
+    title: "初学者体验潜水", location: "赫尔格达，埃及", duration: "全天", category: "潜水",
+    description: "在潜水教练全程陪同下尝试水肺潜水，包含讲解、装备及在合适的红海地点进行的入门潜水。",
+    highlights: ["无需潜水执照", "教练全程陪同", "红海入门潜水", "船上午餐"],
+    included: ["确认区域内的酒店接送", "船程", "潜水教练", "标准潜水装备", "午餐和软饮料"], notIncluded: ["如需要的体检证明", "照片", "赫尔格达以外的接送（需另行报价）"],
+    notes: ["潜水前需填写健康问卷。", "最低年龄和潜水深度取决于认证潜水中心的规定。", "客人须听从教练指示，如出于医疗或安全原因可能被拒绝参与。", "取消条款以潜水中心确认为准。"],
+    packageName: "体验潜水", packageDescription: "在潜水教练带领下于赫尔格达珊瑚礁进行首次潜水。", packageLabel: "每人",
   },
 };
 

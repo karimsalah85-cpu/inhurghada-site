@@ -9,7 +9,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/terms-conditions",
 });
 
-type TermsLocale = Extract<Locale, "en" | "de" | "ru" | "ar" | "zh">;
+type TermsLocale = Extract<Locale, "en" | "de" | "ru" | "ar" | "zh" | "pl">;
 type Section = { title: string; id?: string; paragraphs: string[] };
 
 const copy: Record<TermsLocale, { legal: string; title: string; intro: string; back: string; sections: Section[] }> = {
@@ -147,6 +147,33 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       ] },
     ],
   },
+  pl: {
+    legal: "Informacje prawne",
+    title: "Regulamin",
+    intro: "Dokonując rezerwacji wycieczki, transferu lub innej aktywności u Daily Red Sea, akceptujesz poniższe warunki. Obowiązują one łącznie z wszelkimi szczegółowymi warunkami podanymi na stronie danej wycieczki.",
+    back: "Powrót do strony głównej",
+    sections: [
+      { title: "Rezerwacje i potwierdzenie", paragraphs: ["Zgłoszenie przesłane przez naszą stronę internetową lub WhatsApp nie jest potwierdzone, dopóki nie otrzymasz potwierdzenia od naszego zespołu, zawierającego ostateczną cenę, szczegóły odbioru oraz sposób płatności. Prosimy o dokładne sprawdzenie potwierdzenia i natychmiastowe zgłoszenie nam wszelkich nieprawidłowości."] },
+      { title: "Ceny i płatność", paragraphs: ["Ceny podane są za osobę lub za rezerwację, w wybranej przez Ciebie walucie, i obejmują świadczenia wymienione na stronie danej wycieczki. O ile nie zaznaczono inaczej, płatność przyjmowana jest w gotówce po przyjeździe; niektóre wycieczki mogą wymagać przedpłaty online lub zadatku, o czym zostaniesz wyraźnie poinformowany przed potwierdzeniem rezerwacji. Nie doliczamy żadnych ukrytych opłat do podanej ceny."] },
+      { title: "Odbiór i uczestnictwo", paragraphs: ["Godziny odbioru są orientacyjne i zostają potwierdzone dzień wcześniej (lub rano w dniu aktywności) przez WhatsApp; mogą ulec zmianie z powodu ruchu drogowego, pogody lub lokalizacji hotelu. Niektóre aktywności mają wymagania dotyczące wieku, stanu zdrowia, umiejętności pływania lub sprawności fizycznej, podane na stronie wycieczki — prosimy zapoznać się z nimi przed rezerwacją i poinformować nas z wyprzedzeniem o istotnych schorzeniach."] },
+      { title: "Zmiany w rezerwacji", paragraphs: ["Jeśli musisz zmienić datę, liczebność grupy lub szczegóły odbioru, skontaktuj się z nami przez WhatsApp jak najwcześniej. Zmiany zależą od dostępności i mogą nie być możliwe tuż przed datą aktywności."] },
+      { title: "Anulacje i zwroty", id: "cancellations", paragraphs: [
+        "Bezpłatne anulowanie: O ile na stronie danej wycieczki nie podano innego terminu, anulacje dokonane co najmniej 24 godziny przed zaplanowaną godziną odbioru uprawniają do pełnego zwrotu (lub nie wiążą się z żadną opłatą w przypadku rezerwacji z płatnością gotówką po przyjeździe).",
+        "Późne anulacje: Anulacje dokonane w ciągu 24 godzin przed odbiorem oraz niestawienie się nie uprawniają do zwrotu, ponieważ lokalni dostawcy rezerwują dla Ciebie miejsce i ponoszą związane z tym koszty.",
+        "Warunki właściwe dla danej wycieczki: Niektóre aktywności (na przykład wycieczki prywatne, łodzie o ograniczonej liczbie miejsc lub usługi realizowane przez podmioty zewnętrzne) mogą wymagać dłuższego okresu wypowiedzenia lub być bezzwrotne — informacja ta zawsze będzie podana na stronie wycieczki przed dokonaniem rezerwacji.",
+        "Anulacje z naszej strony: Jeśli my lub nasz lokalny dostawca musimy odwołać lub przełożyć aktywność (z powodu pogody, bezpieczeństwa, niewystarczającej liczby uczestników lub przyczyn operacyjnych), zaproponujemy pełny zwrot środków lub możliwość zmiany terminu bądź aktywności.",
+        "Jak anulować: Napisz do nas na WhatsApp, podając numer rezerwacji, najszybciej jak to możliwe. Potwierdzimy Twoje uprawnienie do zwrotu i, jeśli ma to zastosowanie, zrealizujemy go na pierwotną metodę płatności w podanej liczbie dni roboczych (na przykład 5–7 dni) — w przypadku rezerwacji z płatnością gotówką po przyjeździe nie pobiera się żadnej opłaty.",
+      ] },
+      { title: "Odpowiedzialność", paragraphs: [
+        "Daily Red Sea działa jako platforma rezerwacji i koordynacji, łącząca podróżnych z lokalnymi operatorami, załogami, przewodnikami i kierowcami z Hurghady, którzy faktycznie realizują daną aktywność.",
+        "Wycieczki, rejsy łodzią, safari i transfery są realizowane przez niezależnych lokalnych dostawców zgodnie z ich własnymi standardami bezpieczeństwa oraz obowiązującymi przepisami egipskimi.",
+        "Uczestnictwo w aktywnościach wodnych (nurkowanie ze snorkelem, nurkowanie, rejsy łodzią) oraz lądowych (jazda quadem, safari po pustyni) wiąże się z nieodłącznym ryzykiem. Goście uczestniczą na własne ryzyko i są zobowiązani zawsze przestrzegać instruktażu bezpieczeństwa oraz poleceń przewodnika lub załogi.",
+        "Daily Red Sea nie ponosi odpowiedzialności za obrażenia, straty, choroby lub szkody wynikające z nieprzestrzegania przez gościa instrukcji bezpieczeństwa, niezgłoszonych przy rezerwacji istniejących wcześniej schorzeń lub zdarzeń pozostających poza naszą uzasadnioną kontrolą (w tym pogody, zjawisk naturalnych, działań osób trzecich lub siły wyższej).",
+        "Trasy, przebieg i godziny mogą zostać zmienione przez lokalnego operatora z przyczyn bezpieczeństwa lub operacyjnych; dołożymy starań, aby jak najwcześniej informować o istotnych zmianach.",
+        "Żadne postanowienie niniejszego regulaminu nie wyłącza odpowiedzialności, której zgodnie z obowiązującym prawem nie można wyłączyć.",
+      ] },
+    ],
+  },
 };
 
 function Paragraph({ children }: { children: string }) {
@@ -156,7 +183,7 @@ function Paragraph({ children }: { children: string }) {
 }
 
 export default function TermsConditionsPage({ locale = "en" }: { locale?: Locale }) {
-  const content = locale === "pl" ? copy.en : copy[locale];
+  const content = copy[locale];
   return (
     <main className="mx-auto max-w-5xl px-6 py-24 lg:px-8">
       <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm sm:p-12">

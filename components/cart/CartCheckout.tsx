@@ -20,11 +20,26 @@ export default function CartCheckout() {
   const de = language === "de";
   const ru = language === "ru";
   const ar = language === "ar";
+  const pl = language === "pl";
   const zh = language === "zh";
   const chinese: Record<string, string> = {
     "Confirm that every diver has a valid diving license.": "请确认每位潜水员都持有有效潜水证。", "Confirm that every quad participant is at least 9 years old.": "请确认每位四轮摩托参与者均年满 9 岁。", "Your trip cart is empty": "您的行程购物车为空", "Choose a tour, select its date and travelers, then add it to your cart.": "选择旅游项目、日期和出行人数，然后添加到购物车。", "Explore tours": "探索旅游项目", "Multi-trip booking": "多行程预订", "Your trip cart": "您的行程购物车", "adults": "位成人", "youth": "位儿童", "infants": "位婴儿", "Remove trip": "移除行程", "Combined total": "合计", "Complete one booking": "完成一个预订", "All trips will use one booking reference, email and PDF summary.": "所有行程将共用一个预订编号、电子邮件和 PDF 摘要。", "Full name": "姓名", "Email": "电子邮箱", "WhatsApp number": "WhatsApp 号码", "Hotel / pickup location": "酒店／接送地点", "Every diver has a valid diving license and will bring proof.": "每位潜水员均持有有效潜水证，并会携带证明。", "Every quad participant is at least 9 years old.": "每位四轮摩托参与者均年满 9 岁。", "Special requests": "特别要求", "By submitting, you agree to our": "提交即表示您同意我们的", "terms and cancellation policy": "条款和取消政策", "Sending…": "正在提交…", "Book all trips": "预订所有行程", "Multiple times": "多个时间", "See the attached trip summary": "请查看附带的行程摘要",
   };
-  const tr = (en: string, deText: string, ruText: string, arText = en) => de ? deText : ru ? ruText : ar ? arText : zh ? chinese[en] || en : en;
+  const polish: Record<string, string> = {
+    "Confirm that every diver has a valid diving license.": "Potwierdź, że każdy nurek posiada ważne uprawnienia nurkowe.", "Confirm that every quad participant is at least 9 years old.": "Potwierdź, że każdy uczestnik wycieczki quadami ma ukończone 9 lat.", "Your trip cart is empty": "Twój koszyk wycieczek jest pusty", "Choose a tour, select its date and travelers, then add it to your cart.": "Wybierz wycieczkę, jej datę i liczbę uczestników, a następnie dodaj ją do koszyka.", "Explore tours": "Przeglądaj wycieczki", "Multi-trip booking": "Rezerwacja kilku wycieczek", "Your trip cart": "Twój koszyk wycieczek", "adults": "dorosłych", "youth": "dzieci", "infants": "niemowląt", "Remove trip": "Usuń wycieczkę", "Combined total": "Razem", "Complete one booking": "Dokończ jedną rezerwację", "All trips will use one booking reference, email and PDF summary.": "Wszystkie wycieczki będą miały wspólny numer rezerwacji, e-mail i podsumowanie PDF.", "Full name": "Imię i nazwisko", "Email": "E-mail", "WhatsApp number": "Numer WhatsApp", "Hotel / pickup location": "Hotel / miejsce odbioru", "Every diver has a valid diving license and will bring proof.": "Każdy nurek posiada ważne uprawnienia nurkowe i zabierze ze sobą dowód.", "Every quad participant is at least 9 years old.": "Każdy uczestnik wycieczki quadami ma ukończone 9 lat.", "Special requests": "Specjalne życzenia", "By submitting, you agree to our": "Wysyłając formularz, akceptujesz nasze", "terms and cancellation policy": "warunki i zasady anulowania", "Sending…": "Wysyłanie…", "Book all trips": "Zarezerwuj wszystkie wycieczki", "Multiple times": "Różne godziny", "See the attached trip summary": "Zobacz załączone podsumowanie wycieczek",
+  };
+  const tr = (en: string, deText: string, ruText: string, arText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? chinese[en] || en : en;
+  const tripBookingLabel = (count: number) => de
+    ? `${count} Ausflüge`
+    : ru
+    ? `Бронирование: ${count} поездки`
+    : ar
+    ? `حجز ${count} رحلات`
+    : pl
+    ? `Rezerwacja ${count} wycieczek`
+    : zh
+    ? `${count} 项行程预订`
+    : `${count} trip booking`;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -95,7 +110,7 @@ export default function CartCheckout() {
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
         reference: data.reference,
         customerName: name.trim(),
-        serviceName: tr(`${items.length} trip booking`, `${items.length} Ausflüge`, `Бронирование: ${items.length} поездки`, `حجز ${items.length} رحلات`),
+        serviceName: tripBookingLabel(items.length),
         date: items.map((item) => item.date).join(", "),
         time: tr("Multiple times", "Mehrere Uhrzeiten", "Несколько времён", "مواعيد متعددة"),
         travelers: tr("See the attached trip summary", "Siehe beigefügte Reiseübersicht", "См. приложенную сводку", "راجع ملخص الرحلات المرفق"),

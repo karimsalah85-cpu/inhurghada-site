@@ -14,7 +14,26 @@ export const metadata: Metadata = pageMetadata({
 export function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
+  const ar = locale === "ar";
   const zh = locale === "zh";
+  const arabic: Record<string, string> = {
+    "Local help in Hurghada": "مساعدة محلية في الغردقة",
+    "Memorable Red Sea days, made easier.": "أيام لا تُنسى في البحر الأحمر، أصبحت أسهل.",
+    "Daily Red Sea helps travelers choose and arrange tours, boat trips, desert experiences, historical day trips, and private transfers in and around Hurghada. We focus on clear information, practical local support, and straightforward booking.": "تساعد Daily Red Sea المسافرين على اختيار وتنظيم الرحلات وجولات القوارب وتجارب الصحراء والرحلات التاريخية اليومية وخدمات التوصيل الخاص في الغردقة وما حولها. نركز على تقديم معلومات واضحة ودعم محلي عملي وحجز بسيط ومباشر.",
+    "Local knowledge": "معرفة محلية",
+    "Advice grounded in Hurghada pickup areas, trip timings, and the practical details visitors need.": "نصائح مبنية على مناطق الاستلام في الغردقة ومواعيد الرحلات والتفاصيل العملية التي يحتاجها الزوار.",
+    "Selected experiences": "تجارب مختارة",
+    "A focused collection of tours and transfers with clear inclusions and starting prices.": "مجموعة مختارة من الرحلات وخدمات التوصيل مع توضيح واضح لما تشمله الأسعار المبدئية.",
+    "Human confirmation": "تأكيد شخصي",
+    "Our team confirms availability and pickup details directly by WhatsApp.": "يقوم فريقنا بتأكيد التوفر وتفاصيل الاستلام مباشرة عبر واتساب.",
+    "Transparent booking": "حجز شفاف",
+    "Your date, travelers, total, payment method, and important requirements are shown before confirmation.": "يتم عرض التاريخ وعدد المسافرين والإجمالي وطريقة الدفع والمتطلبات المهمة قبل التأكيد.",
+    "Planning something specific?": "هل تخطط لشيء محدد؟",
+    "Tell us your dates, hotel, group size, and interests. We will help you choose an appropriate available experience without adding hidden costs.": "أخبرنا بتواريخك وفندقك وعدد أفراد المجموعة واهتماماتك. سنساعدك في اختيار تجربة متاحة ومناسبة دون أي تكاليف خفية.",
+    "Hello Daily Red Sea, I would like help planning my Hurghada trip.": "مرحباً Daily Red Sea، أرغب في المساعدة لتخطيط رحلتي إلى الغردقة.",
+    "Ask our local team": "تواصل مع فريقنا المحلي",
+    "Explore tours": "استكشف الرحلات",
+  };
   const chinese: Record<string, string> = {
     "Local help in Hurghada": "赫尔格达本地协助", "Memorable Red Sea days, made easier.": "轻松畅享难忘的红海时光。",
     "Daily Red Sea helps travelers choose and arrange tours, boat trips, desert experiences, historical day trips, and private transfers in and around Hurghada. We focus on clear information, practical local support, and straightforward booking.": "Daily Red Sea 帮助游客选择和安排赫尔格达及周边的旅游项目、游船、沙漠体验、历史一日游和私人接送。我们提供清晰的信息、实用的本地支持和简单直接的预订流程。",
@@ -43,7 +62,7 @@ export function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar
     "Ask our local team": "Zapytaj lokalny zespół",
     "Explore tours": "Odkryj wycieczki",
   };
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : locale === "pl" ? polish[en] || en : zh ? chinese[en] || en : en;
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : ar ? arabic[en] || en : locale === "pl" ? polish[en] || en : zh ? chinese[en] || en : en;
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
       <article className="mx-auto max-w-5xl">

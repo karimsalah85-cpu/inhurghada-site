@@ -17,12 +17,42 @@ export const metadata: Metadata = {
 export function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
   const de = locale === "de";
   const ru = locale === "ru";
+  const ar = locale === "ar";
+  const pl = locale === "pl";
   const zh = locale === "zh";
+  const arabic: Record<string, string> = {
+    "We are here to help": "نحن هنا لمساعدتك",
+    "Contact Daily Red Sea": "تواصل مع Daily Red Sea",
+    "For the fastest response, send your travel date, hotel, number of adults and children, and the tour or transfer you are considering.": "للحصول على أسرع رد، أرسل تاريخ رحلتك واسم الفندق وعدد البالغين والأطفال والرحلة أو خدمة التوصيل التي تفكر فيها.",
+    "Hello Daily Red Sea, I need help with a booking.": "مرحباً Daily Red Sea، أحتاج إلى مساعدة بخصوص حجز.",
+    "Fastest": "الأسرع",
+    "Tour advice, availability, pickup changes, and booking help.": "نصائح حول الرحلات والتوفر وتغيير الاستلام والمساعدة في الحجز.",
+    "Useful for detailed requests and documents.": "مفيد للطلبات التفصيلية والمستندات.",
+    "Telephone": "الهاتف",
+    "For urgent same-day assistance.": "للمساعدة العاجلة في نفس اليوم.",
+    "Already booked?": "هل قمت بالحجز مسبقاً؟",
+    "Include your booking reference when contacting us. For pickup changes or urgent questions close to departure, use WhatsApp so the team can identify your booking quickly.": "يرجى ذكر رقم الحجز عند التواصل معنا. لتغيير موعد الاستلام أو للأسئلة العاجلة قبل موعد الرحلة، استخدم واتساب حتى يتمكن الفريق من التعرف على حجزك بسرعة.",
+    "Find my booking": "ابحث عن حجزي",
+  };
+  const polish: Record<string, string> = {
+    "We are here to help": "Jesteśmy tu, aby pomóc",
+    "Contact Daily Red Sea": "Skontaktuj się z Daily Red Sea",
+    "For the fastest response, send your travel date, hotel, number of adults and children, and the tour or transfer you are considering.": "Aby otrzymać najszybszą odpowiedź, podaj datę podróży, hotel, liczbę dorosłych i dzieci oraz wycieczkę lub transfer, którym jesteś zainteresowany/a.",
+    "Hello Daily Red Sea, I need help with a booking.": "Dzień dobry Daily Red Sea, potrzebuję pomocy z rezerwacją.",
+    "Fastest": "Najszybciej",
+    "Tour advice, availability, pickup changes, and booking help.": "Porady dotyczące wycieczek, dostępność, zmiany odbioru i pomoc z rezerwacją.",
+    "Useful for detailed requests and documents.": "Przydatne przy szczegółowych zapytaniach i dokumentach.",
+    "Telephone": "Telefon",
+    "For urgent same-day assistance.": "Do pilnej pomocy tego samego dnia.",
+    "Already booked?": "Masz już rezerwację?",
+    "Include your booking reference when contacting us. For pickup changes or urgent questions close to departure, use WhatsApp so the team can identify your booking quickly.": "Podaj numer rezerwacji podczas kontaktu z nami. W przypadku zmiany odbioru lub pilnych pytań tuż przed wyjazdem skorzystaj z WhatsApp, aby zespół mógł szybko zidentyfikować Twoją rezerwację.",
+    "Find my booking": "Znajdź moją rezerwację",
+  };
   const chinese: Record<string, string> = {
     "We are here to help": "我们随时为您提供帮助", "Contact Daily Red Sea": "联系 Daily Red Sea", "For the fastest response, send your travel date, hotel, number of adults and children, and the tour or transfer you are considering.": "为了更快获得回复，请发送出行日期、酒店、成人和儿童人数，以及您考虑的旅游或接送服务。",
     "Hello Daily Red Sea, I need help with a booking.": "您好 Daily Red Sea，我需要预订帮助。", "Fastest": "最快回复", "Tour advice, availability, pickup changes, and booking help.": "旅游建议、名额查询、接送变更和预订帮助。", "Useful for detailed requests and documents.": "适合详细咨询和发送文件。", "Telephone": "电话", "For urgent same-day assistance.": "适合当天紧急协助。", "Already booked?": "已经预订？", "Include your booking reference when contacting us. For pickup changes or urgent questions close to departure, use WhatsApp so the team can identify your booking quickly.": "联系我们时请提供预订编号。如需更改接送或在出发前有紧急问题，请使用 WhatsApp，以便团队快速找到您的预订。", "Find my booking": "查找我的预订",
   };
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : zh ? chinese[en] || en : en;
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : ar ? arabic[en] || en : pl ? polish[en] || en : zh ? chinese[en] || en : en;
   return (
     <main className="min-h-screen bg-slate-50 px-6 pb-20 pt-32 sm:px-8">
       <div className="mx-auto max-w-5xl">

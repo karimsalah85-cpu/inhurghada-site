@@ -3,7 +3,8 @@ import Image from "@/components/media/WatermarkedImage";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { tours as fallbackTours } from "@/data/tours";
-import { getLiveTours } from "@/lib/live-content";
+import { blogPosts as fallbackBlogPosts } from "@/data/blog-posts";
+import { getLiveTours, getLiveBlogPosts } from "@/lib/live-content";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
 import {
   defaultSocialImage,
@@ -30,9 +31,10 @@ import { localizeTour } from "@/lib/tour-localization";
 import CartPage from "@/app/cart/page";
 import { DestinationPage } from "@/components/pages/destinations/DestinationPage";
 import BlogIndexPage from "@/app/blog/page";
+import BlogArticlePage from "@/app/blog/[slug]/page";
 import { ToursPage } from "@/components/pages/ToursPage";
-import { destinations, getDestination } from "@/lib/destinations";
-import { marsaAlamCopy } from "@/lib/destination-i18n";
+import { destinations, getDestination, type DestinationSlug } from "@/lib/destinations";
+import { destinationCopyByLocale } from "@/lib/destination-i18n";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -70,11 +72,12 @@ function pageKind(path: string[]) {
   if (path.length === 2 && path[0] === "hurghada" && getTourCategory(path[1])) return "category";
   if (path.length === 2 && path[0] === "destinations" && getDestination(path[1])) return "destination";
   if (path.length === 1 && path[0] === "blog") return "blog";
+  if (path.length === 2 && path[0] === "blog") return "blog-post";
   return ["booking", "booking/confirmation", "checkout", "cart", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq"].includes(path.join("/")) ? path.join("/") : null;
 }
 
 export async function generateStaticParams() {
-  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug])];
+  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
   return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
 }
 
@@ -91,12 +94,14 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     : undefined;
   const tour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
   if (kind === "tour" && !tour) notFound();
+  const blogPost = kind === "blog-post" ? (await getLiveBlogPosts()).find((post) => post.slug === path[1]) : undefined;
+  if (kind === "blog-post" && !blogPost) notFound();
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认" }[locale];
   const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
-  const destinationCopy = kind === "destination" && path[1] === "marsa-alam" ? marsaAlamCopy[locale] : undefined;
-  const title = tour ? tour.seoTitle || tour.title : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : destinationCopy?.title || titles[kind || "home"];
+  const destinationCopy = kind === "destination" ? destinationCopyByLocale[path[1] as DestinationSlug]?.[locale] : undefined;
+  const title = tour ? tour.seoTitle || tour.title : blogPost ? `${blogPost.title} | ${siteName}` : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : destinationCopy?.title || titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
     "orange-bay": "Orange Bay Hurghada Tickets für eine ganztägige Hurghada Bootstour mit Schnorcheln, Mittagessen, Inselaufenthalt und Hoteltransfer buchen.",
@@ -113,9 +118,11 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
         : tour.metaDescription || tour.description
     : locale === "de" && kind === "home"
       ? germanSeoDescriptions.home
-      : category
-        ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}`
-        : destinationCopy?.description || descriptions[kind || "home"];
+      : blogPost
+        ? blogPost.metaDescription
+        : category
+          ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}`
+          : destinationCopy?.description || descriptions[kind || "home"];
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
   const canonical = localePath(locale, pathname);
   const normalizedTitle = normalizeMetaTitle(title, locale);
@@ -129,8 +136,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
       : kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart"
         ? { index: false, follow: false }
         : { index: true, follow: true },
-    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: tour?.image || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage, alt: tour?.imageAlt || destinationCopy?.imageAlt || normalizedTitle }] },
-    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [tour?.image || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage] },
+    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: tour?.image || blogPost?.heroImage || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage, alt: tour?.imageAlt || destinationCopy?.imageAlt || normalizedTitle }] },
+    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [tour?.image || blogPost?.heroImage || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage] },
   };
 }
 
@@ -147,7 +154,8 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
 
   if (kind === "destination") return <DestinationPage locale={locale} params={Promise.resolve({ destination: path[1] })} />;
   if (kind === "tours") return <div dir={direction}><ToursPage locale={locale} /></div>;
-  if (kind === "blog") return <div dir={direction}><BlogIndexPage /></div>;
+  if (kind === "blog") return <div dir={direction}><BlogIndexPage locale={locale} /></div>;
+  if (kind === "blog-post") return <div dir={direction}><BlogArticlePage params={Promise.resolve({ slug: path[1] })} locale={locale} /></div>;
 
   if (locale === "de") {
     if (kind === "home") return <HomePage />;
