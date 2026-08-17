@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasAdminPermission } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!isAuthorizedAdmin(user)) return json({ error: "Unauthorized." }, 401);
+  if (!hasAdminPermission(user, "suppliers")) return json({ error: "Unauthorized." }, 401);
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const type = String(body?.type || "") as PartnerType;

@@ -252,6 +252,7 @@ export default async function AdminPage({
       )
     : bookingList || [];
   const expenseByBooking = new Map<string, number>();
+  const expenseByBookingCurrency = new Map<string, Record<string, number>>();
   const supplierByBooking = new Map<string, string>();
   for (const expense of expenses || []) {
     if (!expense.booking_id) continue;
@@ -260,6 +261,9 @@ export default async function AdminPage({
       (expenseByBooking.get(expense.booking_id) || 0) +
         Number(expense.amount || 0),
     );
+    const byCurrency = expenseByBookingCurrency.get(expense.booking_id) || {};
+    byCurrency[expense.currency] = (byCurrency[expense.currency] || 0) + Number(expense.amount || 0);
+    expenseByBookingCurrency.set(expense.booking_id, byCurrency);
     const linkedSupplier = (suppliers || []).find(
       (item) => item.id === expense.supplier_id,
     );
@@ -269,6 +273,7 @@ export default async function AdminPage({
   let visibleBookingsWithCosts = visibleBookings.map((booking) => ({
     ...booking,
     expense_total: expenseByBooking.get(booking.id) || 0,
+    expense_by_currency: expenseByBookingCurrency.get(booking.id) || {},
     supplier_name: supplierByBooking.get(booking.id) || null,
   }));
   if (supplier !== "all")

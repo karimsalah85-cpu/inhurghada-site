@@ -62,6 +62,7 @@ type Booking = {
   sales_person_id?: string | null;
   sales_commission_percent?: number | string | null;
   expense_total?: number;
+  expense_by_currency?: Record<string, number>;
   supplier_name?: string | null;
 };
 type BookingView = {
@@ -117,6 +118,19 @@ const expenseOptions = [
 
 const money = (amount: number, currency = "USD") =>
   new Intl.NumberFormat("en", { style: "currency", currency }).format(amount);
+const sumByCurrency = (items: { amount: unknown; currency: string }[]) => {
+  const totals: Record<string, number> = {};
+  for (const item of items) totals[item.currency] = (totals[item.currency] || 0) + Number(item.amount);
+  return totals;
+};
+const moneyBreakdown = (byCurrency: Record<string, number>) => {
+  const entries = Object.entries(byCurrency).filter(([, amount]) => amount !== 0);
+  if (!entries.length) return money(0);
+  return entries
+    .sort(([a], [b]) => (a === "USD" ? -1 : b === "USD" ? 1 : a.localeCompare(b)))
+    .map(([currency, amount]) => money(amount, currency))
+    .join(" · ");
+};
 const today = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 const statusColors: Record<Status | PaymentStatus, string> = {
@@ -245,23 +259,28 @@ export default function AdminDashboard({
       (booking) =>
         booking.status !== "cancelled" && booking.payment_status !== "refunded",
     );
-    const projected = active.reduce(
-      (sum, booking) => sum + Number(booking.amount),
-      0,
+    const projectedByCurrency = sumByCurrency(active);
+    const collectedByCurrency = sumByCurrency(
+      bookings.filter((booking) => booking.payment_status === "paid"),
     );
-    const collected = bookings
-      .filter((booking) => booking.payment_status === "paid")
-      .reduce((sum, booking) => sum + Number(booking.amount), 0);
-    const expenseTotal = expenses.reduce(
-      (sum, item) => sum + Number(item.amount),
-      0,
-    );
+    const expenseByCurrency = sumByCurrency(expenses);
+    const currenciesInPlay = new Set([
+      ...Object.keys(projectedByCurrency),
+      ...Object.keys(collectedByCurrency),
+      ...Object.keys(expenseByCurrency),
+    ]);
+    const outstandingByCurrency: Record<string, number> = {};
+    const profitByCurrency: Record<string, number> = {};
+    for (const currency of currenciesInPlay) {
+      outstandingByCurrency[currency] = (projectedByCurrency[currency] || 0) - (collectedByCurrency[currency] || 0);
+      profitByCurrency[currency] = (collectedByCurrency[currency] || 0) - (expenseByCurrency[currency] || 0);
+    }
     return {
-      projected,
-      collected,
-      outstanding: projected - collected,
-      expenseTotal,
-      profit: collected - expenseTotal,
+      projectedByCurrency,
+      collectedByCurrency,
+      outstandingByCurrency,
+      expenseByCurrency,
+      profitByCurrency,
       activeCount: active.length,
       customers: countDistinctCustomers(bookings),
     };
@@ -727,35 +746,35 @@ export default function AdminDashboard({
           <Metric
             icon={<CircleDollarSign size={18} />}
             label="Booked revenue"
-            value={money(metrics.projected)}
+            value={moneyBreakdown(metrics.projectedByCurrency)}
             note="Active bookings"
             tone="emerald"
           />
           <Metric
             icon={<WalletCards size={18} />}
             label="Cash collected"
-            value={money(metrics.collected)}
+            value={moneyBreakdown(metrics.collectedByCurrency)}
             note="Marked paid"
             tone="emerald"
           />
           <Metric
             icon={<CalendarDays size={18} />}
             label="Outstanding"
-            value={money(metrics.outstanding)}
+            value={moneyBreakdown(metrics.outstandingByCurrency)}
             note="Expected cash"
             tone="amber"
           />
           <Metric
             icon={<ClipboardList size={18} />}
             label="Expenses"
-            value={money(metrics.expenseTotal)}
+            value={moneyBreakdown(metrics.expenseByCurrency)}
             note="Recorded costs"
             tone="rose"
           />
           <Metric
             icon={<CheckCircle2 size={18} />}
             label="Cash profit"
-            value={money(metrics.profit)}
+            value={moneyBreakdown(metrics.profitByCurrency)}
             note="Collected minus expenses"
             tone="slate"
           />
@@ -977,17 +996,15 @@ export default function AdminDashboard({
                     {money(Number(booking.amount), booking.currency)}
                   </td>
                   <td className="p-3">
-                    {money(
-                      Number(booking.expense_total || 0),
-                      booking.currency,
-                    )}
+                    {moneyBreakdown(booking.expense_by_currency || {})}
                   </td>
                   <td className="p-3 font-bold text-emerald-700">
-                    {money(
-                      Number(booking.amount) -
-                        Number(booking.expense_total || 0),
-                      booking.currency,
-                    )}
+                    {moneyBreakdown({
+                      ...Object.fromEntries(
+                        Object.keys(booking.expense_by_currency || {}).map((currency) => [currency, -(booking.expense_by_currency?.[currency] || 0)]),
+                      ),
+                      [booking.currency]: Number(booking.amount) - (booking.expense_by_currency?.[booking.currency] || 0),
+                    })}
                   </td>
                 </tr>
               ))}
@@ -2062,34 +2079,34 @@ function SalesPerformancePanel({
         booking.status !== "cancelled" &&
         booking.payment_status !== "refunded",
     );
-    const total = sales.reduce(
-      (sum, booking) => sum + Number(booking.amount || 0),
-      0,
-    );
-    const earned = sales.reduce(
-      (sum, booking) =>
-        sum +
-        (Number(booking.amount || 0) *
-          Number(
-            booking.sales_commission_percent ?? person.commission_percent ?? 0,
-          )) /
-          100,
-      0,
-    );
-    const paid = expenses
-      .filter(
+    const totalByCurrency = sumByCurrency(sales);
+    const earnedByCurrency: Record<string, number> = {};
+    for (const booking of sales) {
+      const percent = Number(
+        booking.sales_commission_percent ?? person.commission_percent ?? 0,
+      );
+      earnedByCurrency[booking.currency] =
+        (earnedByCurrency[booking.currency] || 0) +
+        (Number(booking.amount || 0) * percent) / 100;
+    }
+    const paidByCurrency = sumByCurrency(
+      expenses.filter(
         (item) =>
           item.expense_type === "sales_commission" &&
           item.sales_person_id === person.id,
-      )
-      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      ),
+    );
+    const outstandingByCurrency: Record<string, number> = {};
+    for (const currency of new Set([...Object.keys(earnedByCurrency), ...Object.keys(paidByCurrency)])) {
+      outstandingByCurrency[currency] = Math.max(0, (earnedByCurrency[currency] || 0) - (paidByCurrency[currency] || 0));
+    }
     return {
       person,
       sales,
-      total,
-      earned,
-      paid,
-      outstanding: Math.max(0, earned - paid),
+      totalByCurrency,
+      earnedByCurrency,
+      paidByCurrency,
+      outstandingByCurrency,
     };
   });
   return (
@@ -2114,7 +2131,7 @@ function SalesPerformancePanel({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ person, sales, total, earned, paid, outstanding }) => (
+            {rows.map(({ person, sales, totalByCurrency, earnedByCurrency, paidByCurrency, outstandingByCurrency }) => (
               <tr key={person.id} className="border-t">
                 <td className="p-3">
                   <strong>{person.name}</strong>
@@ -2123,12 +2140,12 @@ function SalesPerformancePanel({
                     Default {Number(person.commission_percent || 0)}%
                   </span>
                 </td>
-                <td className="p-3 font-bold">{money(total)}</td>
+                <td className="p-3 font-bold">{moneyBreakdown(totalByCurrency)}</td>
                 <td className="p-3">{sales.length}</td>
-                <td className="p-3">{money(earned)}</td>
-                <td className="p-3 text-emerald-700">{money(paid)}</td>
+                <td className="p-3">{moneyBreakdown(earnedByCurrency)}</td>
+                <td className="p-3 text-emerald-700">{moneyBreakdown(paidByCurrency)}</td>
                 <td className="p-3 font-bold text-amber-700">
-                  {money(outstanding)}
+                  {moneyBreakdown(outstandingByCurrency)}
                 </td>
               </tr>
             ))}

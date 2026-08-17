@@ -10,10 +10,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
   if (!uuidPattern.test(id)) return json({ error: "Invalid booking identifier." }, 400);
   const { supabase, allowed } = await getAdminAuthorization("view_bookings");
   if (!allowed) return json({ error: "Booking access required." }, 403);
+  const { allowed: canViewCosts } = await getAdminAuthorization("view_expenses");
   const [bookingResult, expensesResult, assignmentsResult, staffResult, suppliersResult] = await Promise.all([
     supabase.from("bookings").select("*").eq("id", id).single(),
-    supabase.from("expenses").select("*").eq("booking_id", id).order("expense_date", { ascending: false }),
-    supabase.from("booking_assignments").select("*").eq("booking_id", id).neq("status", "cancelled"),
+    canViewCosts ? supabase.from("expenses").select("*").eq("booking_id", id).order("expense_date", { ascending: false }) : Promise.resolve({ data: [] }),
+    canViewCosts ? supabase.from("booking_assignments").select("*").eq("booking_id", id).neq("status", "cancelled") : Promise.resolve({ data: [] }),
     supabase.from("staff_members").select("id,name,staff_type,active").eq("active", true).in("staff_type", ["guide", "driver"]),
     supabase.from("suppliers").select("id,name,type").order("name"),
   ]);
