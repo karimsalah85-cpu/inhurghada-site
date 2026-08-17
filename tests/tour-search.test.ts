@@ -77,4 +77,17 @@ describe("multilingual tour search", () => {
     expect(slugs("WÜSTE")).toContain("safari");
     expect(filterTours(tours, "")).toHaveLength(tours.length);
   });
+
+  it("treats a comma-separated query as OR across destinations", () => {
+    // A Hurghada diving course that never says "snorkeling"...
+    expect(slugs("diving")).toContain("full-day-diving");
+    expect(slugs("diving")).not.toContain("dolphin-house-marsa-alam");
+    // ...and a Marsa Alam snorkeling trip that never says "diving"...
+    expect(slugs("snorkeling")).toContain("dolphin-house-marsa-alam");
+    expect(slugs("snorkeling")).not.toContain("full-day-diving");
+    // ...both show up once the query offers either term as an alternative.
+    const both = slugs("diving,snorkeling");
+    expect(both).toContain("full-day-diving");
+    expect(both).toContain("dolphin-house-marsa-alam");
+  });
 });

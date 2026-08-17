@@ -22,7 +22,9 @@ function normalize(value: string) {
     .trim();
 }
 
-export function tourMatchesSearch(tour: Tour, query: string) {
+export function tourMatchesSearch(tour: Tour, query: string): boolean {
+  /** A comma joins alternative queries (OR); each alternative still requires all of its own words (AND). */
+  if (query.includes(",")) return query.split(",").some((alternative) => tourMatchesSearch(tour, alternative));
   const words = normalize(query).split(/\s+/).filter(Boolean);
   if (!words.length) return true;
   const searchable = normalize([
