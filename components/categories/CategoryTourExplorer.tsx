@@ -5,34 +5,56 @@ import Link from "next/link";
 import { Clock, MapPin, Search, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { Tour } from "@/data/tours";
+import type { DestinationSlug } from "@/lib/destinations";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath, type Locale } from "@/lib/i18n";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localizeProductBadge } from "@/lib/public-interface-i18n";
 
-const explorerCopy: Record<Locale, { search: string; sort: string; featured: string; low: string; high: string; experience: string; experiences: string; assurance: string; inquiryAssurance: string; quotation: string; request: string; from: string; perPerson: string; entrance: string; person: string; inquire: string; book: string; reviews: string; empty: string }> = {
-  en: { search: "Search these experiences", sort: "Sort tours", featured: "Featured", low: "Price: low to high", high: "Price: high to low", experience: "experience", experiences: "experiences", assurance: "Clear price · pickup confirmed", inquiryAssurance: "Price and pickup on request", quotation: "Quotation", request: "Request price", from: "From", perPerson: "per person", entrance: "entrance from", person: "person", inquire: "View & inquire", book: "View & book", reviews: "customer reviews", empty: "No matching experiences. Try a different search." },
-  ar: { search: "ابحث في الرحلات", sort: "ترتيب الرحلات", featured: "المميزة", low: "السعر: من الأقل إلى الأعلى", high: "السعر: من الأعلى إلى الأقل", experience: "تجربة", experiences: "تجارب", assurance: "سعر واضح · تأكيد الاستلام", inquiryAssurance: "السعر والاستلام عند الطلب", quotation: "عرض سعر", request: "اطلب السعر", from: "ابتداءً من", perPerson: "للشخص", entrance: "الدخول من", person: "للشخص", inquire: "عرض واستفسار", book: "عرض وحجز", reviews: "تقييمات العملاء", empty: "لا توجد تجارب مطابقة. جرّب بحثًا آخر." },
-  de: { search: "Diese Erlebnisse durchsuchen", sort: "Ausflüge sortieren", featured: "Empfohlen", low: "Preis: niedrig nach hoch", high: "Preis: hoch nach niedrig", experience: "Erlebnis", experiences: "Erlebnisse", assurance: "Klarer Preis · Abholung bestätigt", inquiryAssurance: "Preis und Abholung auf Anfrage", quotation: "Angebot", request: "Preis anfragen", from: "Ab", perPerson: "pro Person", entrance: "Eintritt ab", person: "Person", inquire: "Ansehen & anfragen", book: "Ansehen & buchen", reviews: "Kundenbewertungen", empty: "Keine passenden Erlebnisse. Versuche eine andere Suche." },
-  ru: { search: "Поиск экскурсий", sort: "Сортировать экскурсии", featured: "Рекомендуемые", low: "Цена: по возрастанию", high: "Цена: по убыванию", experience: "экскурсия", experiences: "экскурсий", assurance: "Понятная цена · трансфер подтверждается", inquiryAssurance: "Цена и трансфер по запросу", quotation: "Расчёт", request: "Запросить цену", from: "От", perPerson: "за человека", entrance: "вход от", person: "чел.", inquire: "Подробнее и запрос", book: "Подробнее и бронирование", reviews: "отзывов гостей", empty: "Подходящих экскурсий не найдено. Попробуйте другой запрос." },
-  pl: { search: "Szukaj atrakcji", sort: "Sortuj wycieczki", featured: "Polecane", low: "Cena: rosnąco", high: "Cena: malejąco", experience: "atrakcja", experiences: "atrakcji", assurance: "Jasna cena · potwierdzony odbiór", inquiryAssurance: "Cena i odbiór na zapytanie", quotation: "Wycena", request: "Zapytaj o cenę", from: "Od", perPerson: "za osobę", entrance: "wstęp od", person: "osoba", inquire: "Zobacz i zapytaj", book: "Zobacz i zarezerwuj", reviews: "opinii klientów", empty: "Brak pasujących atrakcji. Spróbuj innego wyszukiwania." },
-  zh: { search: "搜索这些体验", sort: "旅游排序", featured: "推荐", low: "价格：从低到高", high: "价格：从高到低", experience: "项体验", experiences: "项体验", assurance: "价格透明 · 接送已确认", inquiryAssurance: "价格和接送需咨询", quotation: "报价", request: "咨询价格", from: "起价", perPerson: "每人", entrance: "门票起价", person: "每人", inquire: "查看并咨询", book: "查看并预订", reviews: "条客户评价", empty: "没有匹配的体验，请尝试其他搜索。" },
+type PriceBand = "all" | "under-25" | "25-50" | "50-100" | "100-plus";
+
+function matchesPriceBand(tour: Tour, band: PriceBand) {
+  if (band === "all") return true;
+  if (tour.bookingMode === "inquiry") return false;
+  const price = Number(tour.price);
+  if (band === "under-25") return price < 25;
+  if (band === "25-50") return price >= 25 && price <= 50;
+  if (band === "50-100") return price > 50 && price <= 100;
+  return price > 100;
+}
+
+const explorerCopy: Record<Locale, { search: string; sort: string; featured: string; low: string; high: string; experience: string; experiences: string; assurance: string; inquiryAssurance: string; quotation: string; request: string; from: string; perPerson: string; entrance: string; person: string; inquire: string; book: string; reviews: string; empty: string; locationLabel: string; categoryLabel: string; priceLabel: string; allLocations: string; hurghada: string; marsaAlam: string; allCategories: string; allPrices: string; priceUnder25: string; price25to50: string; price50to100: string; price100plus: string; reset: string }> = {
+  en: { search: "Search these experiences", sort: "Sort tours", featured: "Featured", low: "Price: low to high", high: "Price: high to low", experience: "experience", experiences: "experiences", assurance: "Clear price · pickup confirmed", inquiryAssurance: "Price and pickup on request", quotation: "Quotation", request: "Request price", from: "From", perPerson: "per person", entrance: "entrance from", person: "person", inquire: "View & inquire", book: "View & book", reviews: "customer reviews", empty: "No matching experiences. Try a different search.", locationLabel: "Filter by location", categoryLabel: "Filter by category", priceLabel: "Filter by price", allLocations: "All locations", hurghada: "Hurghada", marsaAlam: "Marsa Alam", allCategories: "All categories", allPrices: "Any price", priceUnder25: "Under $25", price25to50: "$25 – $50", price50to100: "$50 – $100", price100plus: "$100+", reset: "Reset filters" },
+  ar: { search: "ابحث في الرحلات", sort: "ترتيب الرحلات", featured: "المميزة", low: "السعر: من الأقل إلى الأعلى", high: "السعر: من الأعلى إلى الأقل", experience: "تجربة", experiences: "تجارب", assurance: "سعر واضح · تأكيد الاستلام", inquiryAssurance: "السعر والاستلام عند الطلب", quotation: "عرض سعر", request: "اطلب السعر", from: "ابتداءً من", perPerson: "للشخص", entrance: "الدخول من", person: "للشخص", inquire: "عرض واستفسار", book: "عرض وحجز", reviews: "تقييمات العملاء", empty: "لا توجد تجارب مطابقة. جرّب بحثًا آخر.", locationLabel: "التصفية حسب الموقع", categoryLabel: "التصفية حسب الفئة", priceLabel: "التصفية حسب السعر", allLocations: "كل المواقع", hurghada: "الغردقة", marsaAlam: "مرسى علم", allCategories: "كل الفئات", allPrices: "أي سعر", priceUnder25: "أقل من 25$", price25to50: "25$ – 50$", price50to100: "50$ – 100$", price100plus: "أكثر من 100$", reset: "إعادة تعيين الفلاتر" },
+  de: { search: "Diese Erlebnisse durchsuchen", sort: "Ausflüge sortieren", featured: "Empfohlen", low: "Preis: niedrig nach hoch", high: "Preis: hoch nach niedrig", experience: "Erlebnis", experiences: "Erlebnisse", assurance: "Klarer Preis · Abholung bestätigt", inquiryAssurance: "Preis und Abholung auf Anfrage", quotation: "Angebot", request: "Preis anfragen", from: "Ab", perPerson: "pro Person", entrance: "Eintritt ab", person: "Person", inquire: "Ansehen & anfragen", book: "Ansehen & buchen", reviews: "Kundenbewertungen", empty: "Keine passenden Erlebnisse. Versuche eine andere Suche.", locationLabel: "Nach Ort filtern", categoryLabel: "Nach Kategorie filtern", priceLabel: "Nach Preis filtern", allLocations: "Alle Orte", hurghada: "Hurghada", marsaAlam: "Marsa Alam", allCategories: "Alle Kategorien", allPrices: "Jeder Preis", priceUnder25: "Unter 25 $", price25to50: "25 $ – 50 $", price50to100: "50 $ – 100 $", price100plus: "Über 100 $", reset: "Filter zurücksetzen" },
+  ru: { search: "Поиск экскурсий", sort: "Сортировать экскурсии", featured: "Рекомендуемые", low: "Цена: по возрастанию", high: "Цена: по убыванию", experience: "экскурсия", experiences: "экскурсий", assurance: "Понятная цена · трансфер подтверждается", inquiryAssurance: "Цена и трансфер по запросу", quotation: "Расчёт", request: "Запросить цену", from: "От", perPerson: "за человека", entrance: "вход от", person: "чел.", inquire: "Подробнее и запрос", book: "Подробнее и бронирование", reviews: "отзывов гостей", empty: "Подходящих экскурсий не найдено. Попробуйте другой запрос.", locationLabel: "Фильтр по локации", categoryLabel: "Фильтр по категории", priceLabel: "Фильтр по цене", allLocations: "Все локации", hurghada: "Хургада", marsaAlam: "Марса-Алам", allCategories: "Все категории", allPrices: "Любая цена", priceUnder25: "До $25", price25to50: "$25 – $50", price50to100: "$50 – $100", price100plus: "Свыше $100", reset: "Сбросить фильтры" },
+  pl: { search: "Szukaj atrakcji", sort: "Sortuj wycieczki", featured: "Polecane", low: "Cena: rosnąco", high: "Cena: malejąco", experience: "atrakcja", experiences: "atrakcji", assurance: "Jasna cena · potwierdzony odbiór", inquiryAssurance: "Cena i odbiór na zapytanie", quotation: "Wycena", request: "Zapytaj o cenę", from: "Od", perPerson: "za osobę", entrance: "wstęp od", person: "osoba", inquire: "Zobacz i zapytaj", book: "Zobacz i zarezerwuj", reviews: "opinii klientów", empty: "Brak pasujących atrakcji. Spróbuj innego wyszukiwania.", locationLabel: "Filtruj według lokalizacji", categoryLabel: "Filtruj według kategorii", priceLabel: "Filtruj według ceny", allLocations: "Wszystkie lokalizacje", hurghada: "Hurghada", marsaAlam: "Marsa Alam", allCategories: "Wszystkie kategorie", allPrices: "Dowolna cena", priceUnder25: "Poniżej 25 $", price25to50: "25 $ – 50 $", price50to100: "50 $ – 100 $", price100plus: "Powyżej 100 $", reset: "Wyczyść filtry" },
+  zh: { search: "搜索这些体验", sort: "旅游排序", featured: "推荐", low: "价格：从低到高", high: "价格：从高到低", experience: "项体验", experiences: "项体验", assurance: "价格透明 · 接送已确认", inquiryAssurance: "价格和接送需咨询", quotation: "报价", request: "咨询价格", from: "起价", perPerson: "每人", entrance: "门票起价", person: "每人", inquire: "查看并咨询", book: "查看并预订", reviews: "条客户评价", empty: "没有匹配的体验，请尝试其他搜索。", locationLabel: "按地点筛选", categoryLabel: "按类别筛选", priceLabel: "按价格筛选", allLocations: "所有地点", hurghada: "赫尔格达", marsaAlam: "马尔萨阿拉姆", allCategories: "所有类别", allPrices: "不限价格", priceUnder25: "低于 $25", price25to50: "$25 – $50", price50to100: "$50 – $100", price100plus: "$100 以上", reset: "重置筛选" },
 };
 
 export default function CategoryTourExplorer({ tours, locale = "en", initialQuery = "" }: { tours: Tour[]; locale?: Locale; initialQuery?: string }) {
   const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState<"featured" | "price-low" | "price-high">("featured");
+  const [location, setLocation] = useState<"all" | DestinationSlug>("all");
+  const [category, setCategory] = useState("all");
+  const [priceBand, setPriceBand] = useState<PriceBand>("all");
   const { formatPrice } = useSiteSettings();
   const copy = explorerCopy[locale];
+  const categories = useMemo(() => Array.from(new Set(tours.map((tour) => tour.category).filter((value): value is string => Boolean(value)))).sort(), [tours]);
+  const hasActiveFilters = location !== "all" || category !== "all" || priceBand !== "all";
+  const resetFilters = () => { setLocation("all"); setCategory("all"); setPriceBand("all"); };
   const visibleTours = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const result = tours.filter((tour) =>
-      !normalized || [tour.title, tour.description, tour.location, tour.duration, ...(tour.highlights || [])].join(" ").toLowerCase().includes(normalized)
+      (!normalized || [tour.title, tour.description, tour.location, tour.duration, ...(tour.highlights || [])].join(" ").toLowerCase().includes(normalized)) &&
+      (location === "all" || (tour.destinationSlug || "hurghada") === location) &&
+      (category === "all" || tour.category === category) &&
+      matchesPriceBand(tour, priceBand)
     );
     if (sort === "price-low") return [...result].sort((a, b) => (a.bookingMode === "inquiry" ? 1 : b.bookingMode === "inquiry" ? -1 : Number(a.price) - Number(b.price)));
     if (sort === "price-high") return [...result].sort((a, b) => (a.bookingMode === "inquiry" ? 1 : b.bookingMode === "inquiry" ? -1 : Number(b.price) - Number(a.price)));
     return result;
-  }, [query, sort, tours]);
+  }, [query, sort, location, category, priceBand, tours]);
 
   return (
     <>
@@ -51,6 +73,35 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
           </select>
         </label>
       </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <label>
+          <span className="sr-only">{copy.locationLabel}</span>
+          <select value={location} onChange={(event) => setLocation(event.target.value as typeof location)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+            <option value="all">{copy.allLocations}</option>
+            <option value="hurghada">{copy.hurghada}</option>
+            <option value="marsa-alam">{copy.marsaAlam}</option>
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">{copy.categoryLabel}</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+            <option value="all">{copy.allCategories}</option>
+            {categories.map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">{copy.priceLabel}</span>
+          <select value={priceBand} onChange={(event) => setPriceBand(event.target.value as PriceBand)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+            <option value="all">{copy.allPrices}</option>
+            <option value="under-25">{copy.priceUnder25}</option>
+            <option value="25-50">{copy.price25to50}</option>
+            <option value="50-100">{copy.price50to100}</option>
+            <option value="100-plus">{copy.price100plus}</option>
+          </select>
+        </label>
+      </div>
+      {hasActiveFilters ? <button type="button" onClick={resetFilters} className="mt-3 text-sm font-bold text-cyan-700 underline underline-offset-4">{copy.reset}</button> : null}
 
       <p className="mt-6 text-sm font-semibold text-slate-500" aria-live="polite">{visibleTours.length} {visibleTours.length === 1 ? copy.experience : copy.experiences}</p>
       <div className="mt-5 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
