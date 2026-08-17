@@ -17,7 +17,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
-  const displayPrice = (value: string) => tour.currency === "EUR" ? new Intl.NumberFormat(language, { style: "currency", currency: "EUR" }).format(Number(value)) : formatPrice(value);
+  const displayPrice = (value: string) => formatPrice(value, tour.currency);
 
   return (
     <div className="space-y-8">
@@ -102,7 +102,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
               </div>
               <div className="text-right">
                 <p className="text-sm text-slate-500">{tour.bookingMode === "inquiry" ? tr("Quotation", "Angebot", "Предложение", "عرض سعر", "报价") : de ? "Ab" : ru ? "От" : zh ? "起价" : "Starting from"}</p>
-                <p className="text-2xl font-bold text-cyan-700">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(tour.packagePrice ?? tour.price)}</p>
+                <p className="text-2xl font-bold text-cyan-700">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(tour.packagePrice ?? tour.price, tour.currency)}</p>
               </div>
             </div>
             <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-cyan-700">
