@@ -2,14 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { destinations, getDestination } from "@/lib/destinations";
+import { destinations, getDestination, type Destination } from "@/lib/destinations";
 import { getLiveTours } from "@/lib/live-content";
 import { absoluteUrl, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { tourCategories } from "@/lib/tour-categories";
 import CategoryTourExplorer from "@/components/categories/CategoryTourExplorer";
 import { languageAlternates, localeOg, localePath, type Locale } from "@/lib/i18n";
-import { marsaAlamCopy } from "@/lib/destination-i18n";
+import { marsaAlamCopy, type DestinationCopy } from "@/lib/destination-i18n";
 import { localizeTour } from "@/lib/tour-localization";
+
+/** Destinations without dedicated translated copy (everything but Marsa Alam) render their own SEO fields in English, matching the fallback already used in generateMetadata below. */
+function fallbackDestinationCopy(destination: Destination): DestinationCopy {
+  return { ...marsaAlamCopy.en, title: destination.seo.title, description: destination.seo.description, eyebrow: `${destination.country} · ${destination.region}`, heading: destination.seo.title, bookable: `Bookable ${destination.name} experiences`, imageAlt: destination.seo.title };
+}
 
 type Props = { params: Promise<{ destination: string }> };
 
@@ -48,7 +53,7 @@ export async function DestinationPage({ params, locale = "en" }: Props & { local
   const destinationTours = tours.filter((tour) => tour.destinationSlug === destination.slug && tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted").map((tour) => localizeTour(tour, locale));
   const categories = tourCategories.filter((category) => category.slug !== "excursions" && destinationTours.some(category.matches));
   const otherDestinations = destinations.filter((item) => item.slug !== destination.slug && item.status === "live");
-  const copy = destination.slug === "marsa-alam" ? marsaAlamCopy[locale] : marsaAlamCopy.en;
+  const copy = destination.slug === "marsa-alam" ? marsaAlamCopy[locale] : fallbackDestinationCopy(destination);
   const pageUrl = absoluteUrl(localePath(locale, `/destinations/${destination.slug}`));
   const schema = { "@context": "https://schema.org", "@type": "TouristDestination", "@id": `${pageUrl}#destination`, name: destination.name, description: copy.description, url: pageUrl, image: absoluteUrl(destination.image), inLanguage: locale, geo: { "@type": "GeoCoordinates", latitude: destination.coordinates.latitude, longitude: destination.coordinates.longitude }, containedInPlace: { "@type": "AdministrativeArea", name: copy.eyebrow } };
 
