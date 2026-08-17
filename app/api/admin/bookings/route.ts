@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     phone, tour_name: tourName, date, guests,
     hotel: clean(body?.hotel, 180) || null,
     notes: clean(body?.notes, 2000) || null,
-    amount, currency: ["USD", "EUR", "EGP"].includes(clean(body?.currency, 3).toUpperCase()) ? clean(body?.currency, 3).toUpperCase() : "USD",
+    amount, currency: ["USD", "EUR", "GBP", "EGP", "SAR"].includes(clean(body?.currency, 3).toUpperCase()) ? clean(body?.currency, 3).toUpperCase() : "USD",
     status: ["new", "confirmed", "completed", "cancelled"].includes(String(body?.status)) ? body?.status : "new",
     payment_status: ["unpaid", "paid", "refunded"].includes(String(body?.payment_status)) ? body?.payment_status : "unpaid",
     locale: bookingLocale(clean(body?.locale, 2)), booking_source: "manual",

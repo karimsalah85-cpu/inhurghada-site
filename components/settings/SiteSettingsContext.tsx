@@ -13,7 +13,7 @@ export const languages = [
   { code: "zh", label: "简体中文" },
 ] as const;
 
-export const currencies = ["USD", "EUR", "GBP", "EGP"] as const;
+export const currencies = ["USD", "EUR", "GBP", "EGP", "SAR"] as const;
 
 export type Language = (typeof languages)[number]["code"];
 type Currency = (typeof currencies)[number];
@@ -23,6 +23,7 @@ const exchangeRates: Record<Currency, number> = {
   EUR: 0.876691,
   GBP: 0.747063,
   EGP: 51.008475,
+  SAR: 3.75,
 };
 
 type SiteSettings = {
