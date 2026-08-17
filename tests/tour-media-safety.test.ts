@@ -53,14 +53,16 @@ describe("tour media safety", () => {
   });
 
   it("uses the new owner-supplied training and reef images only in diving galleries", () => {
+    // diving-group-surface.jpg is corrupted (decodes to a solid black image) and was
+    // replaced everywhere it was referenced; see the corrupted-asset note in git history.
     const training = tours.find((item) => item.slug === "beginner-scuba-diving")!;
     expect(training.galleryImages).toEqual([
       "/images/owned/diving-training-seabed.jpg",
       "/images/owned/diving-training-instructor.jpg",
-      "/images/owned/diving-group-surface.jpg",
+      "/images/owned/red-sea-diver.jpg",
       "/images/owned/red-sea-coral-closeup.jpg",
     ]);
-    expect(tours.find((item) => item.slug === "full-day-diving")?.galleryImages).toContain("/images/owned/diving-group-surface.jpg");
+    expect(tours.find((item) => item.slug === "full-day-diving")?.galleryImages).toContain("/images/owned/beginner-scuba-diving-group.jpg");
   });
 
   it("overrides unsafe live media while preserving non-media product fields", () => {

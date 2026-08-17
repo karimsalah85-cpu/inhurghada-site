@@ -36,8 +36,8 @@ const ownedMedia: Record<string, SafeMedia> = {
   quadMorning: { image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes on a desert safari") },
   desertAdventure: {
     image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes during a Hurghada desert adventure"),
-    gallery: ["/images/owned/desert-camel-profile.jpg", "/images/owned/desert-camel-front.jpg"],
-    galleryAlts: { en: ["A camel at a desert camp near Hurghada", "A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    gallery: ["/images/owned/desert-camel-front.jpg"],
+    galleryAlts: { en: ["A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   camelAdventure: {
     image: "/images/owned/desert-camel-front.jpg", alt: localizedAlt("A camel facing the camera at a desert camp near Hurghada"),
@@ -62,7 +62,7 @@ const ownedMedia: Record<string, SafeMedia> = {
   },
   diving: {
     image: "/images/owned/red-sea-diver-coral.jpg", alt: localizedAlt("Scuba diver beside a colourful Red Sea coral reef"),
-    gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
+    gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg", "/images/owned/beginner-scuba-diving-group.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   underwaterPhotographer: {
@@ -82,12 +82,12 @@ const ownedMedia: Record<string, SafeMedia> = {
   },
   diveTraining: {
     image: "/images/owned/diving-training-seabed.jpg", alt: localizedAlt("Scuba students practising skills with instructors underwater"),
-    gallery: ["/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
+    gallery: ["/images/owned/diving-training-instructor.jpg", "/images/owned/red-sea-diver-coral.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   beginnerScuba: {
     image: "/images/owned/beginner-scuba-diving-group.jpg", alt: localizedAlt("Beginner scuba divers underwater with their instructor in the Red Sea"),
-    gallery: ["/images/owned/diving-training-seabed.jpg", "/images/owned/diving-training-instructor.jpg", "/images/owned/diving-group-surface.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
+    gallery: ["/images/owned/diving-training-seabed.jpg", "/images/owned/diving-training-instructor.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
     galleryAlts: { en: ["Scuba students practising skills underwater", "A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
   glassBottomBoat: {
