@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -13,7 +13,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   if (!Object.hasOwn(tables, type) || !uuidPattern.test(id)) return json({ error: "Invalid partner identifier." }, 400);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!hasAdminPermission(user, "suppliers")) return json({ error: "Unauthorized." }, 401);
+  if (!(await hasLivePermission(supabase, user, "suppliers"))) return json({ error: "Unauthorized." }, 401);
   const { error } = await supabase.from(tables[type as keyof typeof tables]).delete().eq("id", id);
   if (error) return json({ error: "Could not delete this record." }, 500);
   return json({ ok: true });

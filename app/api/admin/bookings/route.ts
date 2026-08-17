@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
 import { bookingLocale } from "@/lib/booking-communications-i18n";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!hasAdminPermission(user, "bookings")) return json({ error: "Unauthorized." }, 401);
+  if (!(await hasLivePermission(supabase, user, "bookings"))) return json({ error: "Unauthorized." }, 401);
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const customerName = clean(body?.customer_name, 120);
   const phone = clean(body?.phone, 40);

@@ -4,12 +4,12 @@ import AdminLegacyHashRedirect from "@/components/admin/AdminLegacyHashRedirect"
 import { createClient } from "@/utils/supabase/server";
 import {
   adminRoles,
-  hasAdminPermission,
   isAdminOwner,
   isAuthorizedAdmin,
   type AdminPermission,
   type AdminRole,
 } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
 
 type AdminSearchParams = {
   month?: string;
@@ -163,22 +163,31 @@ export default async function AdminPage({
       workspace === "overview" ? "/admin" : `/admin/${workspace}`;
     redirect(`${workspacePath}?${canonical.toString()}`);
   }
+  const allPermissions = [
+    "bookings",
+    "content",
+    "operations",
+    "finance",
+    "suppliers",
+    "reports",
+    "settings",
+    "staff",
+  ] satisfies AdminPermission[];
+  const permissionChecks = Object.fromEntries(
+    allPermissions.map((permission) => [
+      permission,
+      hasLivePermission(supabase, user, permission),
+    ]),
+  ) as Record<AdminPermission, Promise<boolean>>;
+  await Promise.all(Object.values(permissionChecks));
   const canBookings =
-    hasAdminPermission(user, "bookings") || hasAdminPermission(user, "reports");
-  const canFinance = hasAdminPermission(user, "finance");
-  const canSuppliers = hasAdminPermission(user, "suppliers");
-  const permissions = (
-    [
-      "bookings",
-      "content",
-      "operations",
-      "finance",
-      "suppliers",
-      "reports",
-      "settings",
-      "staff",
-    ] satisfies AdminPermission[]
-  ).filter((permission) => hasAdminPermission(user, permission));
+    (await permissionChecks.bookings) || (await permissionChecks.reports);
+  const canFinance = await permissionChecks.finance;
+  const canSuppliers = await permissionChecks.suppliers;
+  const permissions: AdminPermission[] = [];
+  for (const permission of allPermissions) {
+    if (await permissionChecks[permission]) permissions.push(permission);
+  }
   const role = isAdminOwner(user)
     ? "owner"
     : adminRoles.includes(user?.app_metadata?.admin_role as AdminRole)
@@ -298,7 +307,7 @@ export default async function AdminPage({
   };
 
   const migrationPending = Boolean(suppliersError || salesPeopleError);
-  const { data: tripStatusAudits } = hasAdminPermission(user, "content")
+  const { data: tripStatusAudits } = (await permissionChecks.content)
     ? await supabase
         .from("admin_audit_log")
         .select("id,resource_id,after_data,created_at")

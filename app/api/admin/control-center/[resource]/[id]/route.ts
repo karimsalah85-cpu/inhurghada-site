@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { hasAdminPermission, isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
+import { isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
+import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { revalidatePath } from "next/cache";
 
 const tables = { content: "content_items", media: "media_assets", availability: "tour_availability", staff: "staff_members", assignments: "booking_assignments", notes: "customer_notes", templates: "communication_templates", queue: "communication_queue", settings: "site_settings", redirects: "redirect_rules" } as const;
@@ -8,13 +10,14 @@ const permissions: Record<keyof typeof tables, AdminPermission> = { content:"con
 const previewMutationBlocked = () => process.env.VERCEL_ENV === "preview";
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
+  if (!hasValidRequestOrigin(request)) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
   if (previewMutationBlocked()) return NextResponse.json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, { status: 503 });
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { resource, id } = await context.params;
   if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
-  if (!hasAdminPermission(user,permissions[resource as keyof typeof tables])) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
+  if (!(await hasLivePermission(supabase, user, permissions[resource as keyof typeof tables]))) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
   const table = tables[resource as keyof typeof tables];
   const key = resource === "settings" ? "key" : "id";
   const { data: before, error: readError } = await supabase.from(table).select("*").eq(key, id).single();
@@ -56,14 +59,15 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
   return NextResponse.json({ record: data }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
-export async function DELETE(_request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ resource: string; id: string }> }) {
+  if (!hasValidRequestOrigin(request)) return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
   if (previewMutationBlocked()) return NextResponse.json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, { status: 503 });
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { resource, id } = await context.params;
   if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
-  if (!hasAdminPermission(user,permissions[resource as keyof typeof tables])) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
+  if (!(await hasLivePermission(supabase, user, permissions[resource as keyof typeof tables]))) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
   const table = tables[resource as keyof typeof tables];
   const key = resource === "settings" ? "key" : "id";
   const { data: before, error: readError } = await supabase.from(table).select("*").eq(key, id).single();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
@@ -16,15 +16,16 @@ function json(body: unknown, status = 200) {
 async function authorizedClient() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  return hasAdminPermission(user, "bookings") ? supabase : null;
+  return (await hasLivePermission(supabase, user, "bookings")) ? { supabase, user } : null;
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   const { id } = await context.params;
   if (!uuidPattern.test(id)) return json({ error: "Invalid booking identifier." }, 400);
-  const supabase = await authorizedClient();
-  if (!supabase) return json({ error: "Unauthorized." }, 401);
+  const authorized = await authorizedClient();
+  if (!authorized) return json({ error: "Unauthorized." }, 401);
+  const { supabase, user } = authorized;
 
   const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown; sales_person_id?: unknown } | null;
   const update: { status?: string; payment_status?: string; sales_person_id?: string | null; sales_commission_percent?: number | null } = {};
@@ -45,13 +46,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
   const { data: existing, error: readError } = await supabase
     .from("bookings")
-    .select("status,payment_status")
+    .select("*")
     .eq("id", id)
     .single();
   if (readError || !existing) return json({ error: "Booking not found." }, 404);
 
   const { data, error } = await supabase.from("bookings").update(update).eq("id", id).select().single();
   if (error) return json({ error: "Could not update the booking." }, 500);
+  await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: "booking", resource_identifier: id, summary_text: `Updated booking ${data.reference || id}`, before_value: existing, after_value: { ...data, actor: user?.email } });
   const changed = (update.status && update.status !== existing.status)
     || (update.payment_status && update.payment_status !== existing.payment_status);
   const customerAssignment = changed ? await getCustomerVisibleAssignment(supabase, id) : {};
@@ -68,9 +70,12 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   const { id } = await context.params;
   if (!uuidPattern.test(id)) return json({ error: "Invalid booking identifier." }, 400);
-  const supabase = await authorizedClient();
-  if (!supabase) return json({ error: "Unauthorized." }, 401);
+  const authorized = await authorizedClient();
+  if (!authorized) return json({ error: "Unauthorized." }, 401);
+  const { supabase, user } = authorized;
+  const { data: existing } = await supabase.from("bookings").select("*").eq("id", id).single();
   const { error } = await supabase.from("bookings").delete().eq("id", id);
   if (error) return json({ error: "Could not delete the booking." }, 500);
+  await supabase.rpc("record_admin_audit", { action_name: "delete", resource_name: "booking", resource_identifier: id, summary_text: `Deleted booking ${existing?.reference || id}`, before_value: existing ? { ...existing, actor: user?.email } : { actor: user?.email }, after_value: null });
   return json({ ok: true });
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
 import { buildThankYouEmail } from "@/lib/booking-communications-i18n";
 import { sendBookingEmail } from "@/lib/booking-service";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (!uuidPattern.test(id)) return json({ error: "Invalid booking identifier." }, 400);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!hasAdminPermission(user, "bookings")) return json({ error: "Unauthorized." }, 401);
+  if (!(await hasLivePermission(supabase, user, "bookings"))) return json({ error: "Unauthorized." }, 401);
   const { data: booking, error } = await supabase.from("bookings").select("reference,customer_name,customer_email,tour_name,status,locale").eq("id", id).single();
   if (error || !booking) return json({ error: "Booking not found." }, 404);
   if (booking.status !== "completed") return json({ error: "Mark the trip as completed before sending a thank-you email." }, 409);

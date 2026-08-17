@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hasAdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -8,7 +8,7 @@ const json = (body: unknown, status = 200) => NextResponse.json(body, { status, 
 async function authorized() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  return { supabase, user, allowed: hasAdminPermission(user, "operations") };
+  return { supabase, user, allowed: await hasLivePermission(supabase, user, "operations") };
 }
 
 export async function GET() {

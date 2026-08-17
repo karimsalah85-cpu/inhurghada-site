@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
-import { hasAdminPermission, isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
+import { isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
+import { hasLivePermission as permitted } from "@/lib/admin-permission";
+import { hasValidRequestOrigin } from "@/lib/request-origin";
 
 const resources = {
   content: "content_items",
@@ -30,19 +32,25 @@ const resourcePermission: Record<Resource, AdminPermission> = { content: "conten
 export async function GET() {
   const { supabase, user, allowed } = await authorized();
   if (!allowed) return json({ error: "Unauthorized" }, 401);
+  const CAP = 100;
+  const [canContent, canOperations, canSettings] = await Promise.all([
+    permitted(supabase, user, "content"),
+    permitted(supabase, user, "operations"),
+    permitted(supabase, user, "settings"),
+  ]);
   const queries = await Promise.all([
-    hasAdminPermission(user,"content") ? supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"content") ? supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"content") ? supabase.from("media_asset_localizations").select("asset_id,locale,alt_text,caption").limit(1000) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"content") ? supabase.from("media_usages").select("id,asset_id,owner_type,owner_key,role,sort_order,crop_profile").order("sort_order").limit(1000) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"operations") ? supabase.from("tour_availability").select("*").order("service_date").limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"operations") ? supabase.from("staff_members").select("*").order("name").limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"operations") ? supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"operations") ? supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"operations") ? supabase.from("communication_templates").select("*").order("name").limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"operations") ? supabase.from("communication_queue").select("*").order("scheduled_for", { ascending: false }).limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"settings") ? supabase.from("site_settings").select("*").order("category").limit(100) : Promise.resolve({data:[],error:null}),
-    hasAdminPermission(user,"content") ? supabase.from("redirect_rules").select("*").order("source_path").limit(100) : Promise.resolve({data:[],error:null}),
+    canContent ? supabase.from("content_items").select("*").order("updated_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canContent ? supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canContent ? supabase.from("media_asset_localizations").select("asset_id,locale,alt_text,caption").limit(1000) : Promise.resolve({data:[],error:null}),
+    canContent ? supabase.from("media_usages").select("id,asset_id,owner_type,owner_key,role,sort_order,crop_profile").order("sort_order").limit(1000) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("tour_availability").select("*").order("service_date").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("staff_members").select("*").order("name").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("communication_templates").select("*").order("name").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("communication_queue").select("*").order("scheduled_for", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canSettings ? supabase.from("site_settings").select("*").order("category").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canContent ? supabase.from("redirect_rules").select("*").order("source_path").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     supabase.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(50),
     supabase.from("system_health_checks").select("*").order("checked_at", { ascending: false }).limit(20),
   ]);
@@ -51,17 +59,21 @@ export async function GET() {
   const otherError = queries.find((result) => result.error)?.error;
   if (otherError) return json({ error: otherError.message }, 500);
   const [content, media, mediaLocalizations, mediaUsages, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health] = queries.map((result) => result.data || []);
-  return json({ configured: true, content, media, mediaLocalizations, mediaUsages, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health });
+  const capped = { content, media, availability, staff, assignments, notes, templates, queue, settings, redirects };
+  const truncated = Object.fromEntries(Object.entries(capped).map(([key, rows]) => [key, rows.length > CAP]));
+  for (const key of Object.keys(capped)) capped[key as keyof typeof capped] = capped[key as keyof typeof capped].slice(0, CAP);
+  return json({ configured: true, ...capped, mediaLocalizations, mediaUsages, audit, health, truncated });
 }
 
 export async function POST(request: NextRequest) {
+  if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   if (previewMutationBlocked()) return json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, 503);
   const { supabase, user, allowed } = await authorized();
   if (!allowed) return json({ error: "Unauthorized" }, 401);
   const body = await request.json().catch(() => null);
   const resource = text(body?.resource, 30) as Resource;
   if (!Object.hasOwn(resources, resource)) return json({ error: "Unknown admin resource." }, 400);
-  if (!hasAdminPermission(user, resourcePermission[resource])) return json({ error: "Your role cannot manage this resource." }, 403);
+  if (!(await permitted(supabase, user, resourcePermission[resource]))) return json({ error: "Your role cannot manage this resource." }, 403);
   let record: Record<string, unknown>;
   if (resource === "content") {
     record = { content_type: text(body.content_type, 20), slug: text(body.slug, 160).toLowerCase(), locale: text(body.locale, 8) || "en", status: text(body.status, 20) || "draft", listing_status: text(body.listing_status, 20) || "active", title: text(body.title, 200), excerpt: text(body.excerpt, 500) || null, seo_title: text(body.seo_title, 200) || null, seo_description: text(body.seo_description, 500) || null, canonical_path: text(body.canonical_path, 250) || null, featured_image: text(body.featured_image, 500) || null, body: typeof body.body === "object" && body.body ? body.body : { content: text(body.body, 20_000) }, publish_at: body.publish_at || null, created_by: user!.id, updated_by: user!.id };
