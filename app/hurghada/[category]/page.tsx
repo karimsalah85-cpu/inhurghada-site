@@ -37,7 +37,9 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
   const pl = locale === "pl";
   const zh = locale === "zh";
   const tours = await getLiveTours();
-  const categoryTours = tours.filter(category.matches).map((tour) => de ? localizeTourGerman(tour) : ru ? localizeTourRussian(tour) : ar ? localizeTourArabic(tour) : pl ? localizeTourPolish(tour) : zh ? localizeTourChinese(tour) : tour);
+  const categoryTours = tours
+    .filter((tour) => (tour.destinationSlug || "hurghada") === "hurghada" && tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted" && category.matches(tour))
+    .map((tour) => de ? localizeTourGerman(tour) : ru ? localizeTourRussian(tour) : ar ? localizeTourArabic(tour) : pl ? localizeTourPolish(tour) : zh ? localizeTourChinese(tour) : tour);
   const displayTitle = categoryLabels[locale][category.slug];
   const relatedDivingCopy = {
     en: { title: "Dive deeper into Hurghada", text: "Compare guided diving and snorkeling experiences, from first dives to full-day reef trips.", cta: "Explore diving & snorkeling" },
