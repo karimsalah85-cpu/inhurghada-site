@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "@/components/media/WatermarkedImage";
 import { getLiveBlogPosts } from "@/lib/live-content";
 import { pageMetadata } from "@/lib/seo";
 import { localePath } from "@/lib/i18n";
@@ -75,6 +76,9 @@ export default async function BlogIndexPage({ locale = "en" }: { locale?: BlogLo
             href={localePath(locale, `/blog/${post.slug}`)}
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-cyan-400"
           >
+            <div className="relative -mx-6 -mt-6 mb-5 h-52 overflow-hidden rounded-t-3xl bg-slate-100">
+              <Image src={post.heroImage} alt={post.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" />
+            </div>
             <p className="text-sm text-slate-500">{new Date(post.publishedAt).toLocaleDateString(copy.dateLocale, { year: "numeric", month: "long", day: "numeric" })}</p>
             <h2 className="mt-2 text-xl font-black">{post.title}</h2>
             <p className="mt-3 leading-7 text-slate-600">{post.metaDescription}</p>
