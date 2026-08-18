@@ -606,7 +606,7 @@ text-blue-600
         <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8">
           <div className="mx-auto max-w-7xl">
             <p className="font-semibold uppercase tracking-[0.24em] text-cyan-700">Plan with local answers</p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-950">Hurghada guides before you book</h2>
+            <h2 className="mt-3 text-3xl font-bold text-slate-950">Red Sea guides before you book</h2>
             <p className="mt-3 max-w-2xl leading-7 text-slate-600">Clear, practical answers on choosing the right Red Sea trip, written for first-time visitors.</p>
             <div className="mt-7 grid gap-4 md:grid-cols-3">
               <Link href="/blog/best-snorkeling-tours-in-hurghada-for-beginners" className="rounded-2xl border border-slate-200 p-5 transition hover:border-cyan-500 hover:bg-cyan-50"><p className="font-bold text-slate-950">Best snorkeling tours for beginners</p><p className="mt-2 text-sm leading-6 text-slate-600">Choose reef time, island time or a wildlife-focused day.</p></Link>
