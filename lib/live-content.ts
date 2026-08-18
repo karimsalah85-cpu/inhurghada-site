@@ -109,28 +109,48 @@ export async function getUnavailableTrip(slugs: string[]): Promise<{ slug: strin
   return { slug: unavailable.slug, status: unavailable.listing_status === "paused" ? "paused" : "unlisted" };
 }
 
-function resolveBlogHeroImages(posts: BlogPost[], liveTours: Tour[]): BlogPost[] {
-  const tourImages = new Map(liveTours.map((tour) => [tour.slug, tour.image]));
+const generatedBlogHeroImages: Record<string, string> = {
+  "egypt-visa-guide-2026": "/images/hero-egypt-red-sea.jpg",
+  "best-snorkeling-tours-in-hurghada-for-beginners": "/images/hurghada-snorkeling-reef-panorama.jpeg",
+  "best-desert-safari-tours-for-adrenaline-junkies-in-hurghada": "/images/hurghada-desert-quad-tour.jpeg",
+  "how-to-combine-snorkeling-and-desert-safari-in-one-day-trip": "/images/hurghada-desert-camel-closeup.jpeg",
+  "budget-scuba-diving-courses-for-backpackers-in-hurghada": "/images/hurghada-red-sea-scuba-diver.jpeg",
+  "night-snorkeling-trips-for-adventurous-travelers": "/images/hurghada-red-sea-coral-reef.jpeg",
+  "off-season-excursion-deals-in-hurghada-for-summer-travelers": "/images/hurghada-island-calm-sunset.jpeg",
+  "how-to-arrange-a-custom-multi-day-itinerary-in-hurghada": "/images/speedboat-aerial.jpeg",
+  "full-moon-party-boat-trips-in-hurghada": "/images/mahmya-island-boats-sunset.jpeg",
+  "how-to-negotiate-group-rates-for-large-tour-bookings-in-hurghada": "/images/speedboat-guests.jpeg",
+  "valentine-s-day-excursions-for-couples-in-hurghada": "/images/hurghada-island-sunset-sandals.jpeg",
+  "halal-friendly-excursions-in-hurghada": "/images/full-day-snorkeling.jpg",
+  "eid-holiday-excursions-in-hurghada": "/images/speedboat-orange-bay-branded.png",
+  "pre-wedding-photoshoot-desert-safari-package-in-hurghada": "/images/hurghada-desert-camel-profile.jpeg",
+  "spring-break-excursions-for-university-groups-in-hurghada": "/images/speedboat-cruise.jpeg",
+  "graduation-trip-excursions-for-students-from-hurghada": "/images/orange-bay.jpeg",
+  "hurghada-to-luxor-day-trip-what-to-expect-in-2026": "/images/luxor-karnak-columns.jpeg",
+  "private-airport-transfers-in-hurghada-a-practical-guide": "/images/hurghada-airport-transfer.jpg",
+  "liveaboard-diving-safaris-from-hurghada-what-to-know": "/images/scuba-diving.jpg",
+  "hurghada-to-cairo-day-trip-is-it-worth-it": "/images/hero-egypt-red-sea-mobile.jpg",
+  "private-transfer-to-senzo-mall-hurghada": "/images/senzo-transfer.jpg",
+};
+
+function resolveBlogHeroImages(posts: BlogPost[]): BlogPost[] {
   return posts.map((post) => {
     if (post.heroImage && !post.heroImage.startsWith("/images/placeholders/")) return post;
-    const heroImage = post.relatedTourSlugs
-      .map((slug) => tourImages.get(slug))
-      .find((image): image is string => typeof image === "string" && !image.startsWith("/images/placeholders/"));
+    const heroImage = generatedBlogHeroImages[post.slug];
     return heroImage ? { ...post, heroImage } : applyBlogMediaSafety(post);
   });
 }
 
 export async function getLiveBlogPosts(): Promise<BlogPost[]> {
   const rows = await contentRows("blog");
-  const liveTours = await getLiveTours();
-  if (!rows.length) return resolveBlogHeroImages(blogPosts, liveTours);
+  if (!rows.length) return resolveBlogHeroImages(blogPosts);
   const managedSlugs = new Set(rows.map((row) => row.slug));
   const overrides = new Map(rows.filter((row) => row.status === "published").map((row) => {
     const fallback = blogPosts.find((post) => post.slug === row.slug);
     const body = objectBody(row);
     return [row.slug, { ...fallback, ...body, slug: row.slug, title: row.title, metaDescription: row.seo_description || row.excerpt || String(body.metaDescription || ""), publishedAt: row.published_at || row.publish_at || String(body.publishedAt || new Date().toISOString()), heroImage: row.featured_image || String(body.heroImage || "/images/placeholders/island-trip.svg"), relatedTourSlugs: Array.isArray(body.relatedTourSlugs) ? body.relatedTourSlugs as string[] : fallback?.relatedTourSlugs || [], intro: String(body.intro || row.excerpt || ""), sections: Array.isArray(body.sections) ? body.sections as BlogPost["sections"] : fallback?.sections || [], faqs: Array.isArray(body.faqs) ? body.faqs as BlogPost["faqs"] : fallback?.faqs || [] } as BlogPost];
   }));
-  return resolveBlogHeroImages([...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()], liveTours);
+  return resolveBlogHeroImages([...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()]);
 }
 
 function applyBlogMediaSafety(post: BlogPost): BlogPost {
