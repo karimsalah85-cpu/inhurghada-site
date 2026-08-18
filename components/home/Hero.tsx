@@ -74,7 +74,7 @@ export default function Hero() {
     <section
       className="
       relative
-      min-h-[760px]
+      min-h-[640px]
       sm:min-h-[820px]
       "
     >
@@ -91,9 +91,12 @@ export default function Hero() {
         absolute
         inset-0
         bg-gradient-to-b
-        from-black/70
-        via-black/40
-        to-black/60
+        from-black/55
+        via-black/25
+        to-black/55
+        sm:from-black/70
+        sm:via-black/40
+        sm:to-black/60
         "
       />
 
@@ -103,10 +106,10 @@ export default function Hero() {
         relative
         z-10
         flex
-        min-h-[760px]
+        min-h-[640px]
         justify-start
-        pb-[25rem]
-        pt-36
+        pb-64
+        pt-28
         sm:min-h-[820px]
         sm:justify-center
         sm:pb-44
@@ -175,10 +178,11 @@ export default function Hero() {
 
         <div
           className="
-          rounded-[1.75rem]
+          rounded-2xl
           border border-slate-200/80
           bg-white
-          p-4
+          p-3
+          sm:rounded-[1.75rem]
           sm:p-6
           shadow-[0_25px_80px_-20px_rgba(15,23,42,0.35)]
           "
@@ -188,7 +192,9 @@ export default function Hero() {
           <div
             className="
             grid
-            gap-4
+            grid-cols-2
+            gap-2.5
+            sm:gap-4
             md:grid-cols-4
             "
           >
@@ -202,26 +208,28 @@ export default function Hero() {
               rounded-xl
               border
               bg-gray-50
-              p-3
+              p-2
+              sm:p-3
               "
             >
 
 
               <label
                 className="
-                text-sm
+                text-xs
                 font-medium
                 text-gray-500
+                sm:text-sm
                 "
               >
                 {t("destination")}
               </label>
 
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
 
 
-                <MapPin className="text-blue-600"/>
+                <MapPin className="size-4 shrink-0 text-blue-600 sm:size-5"/>
 
 
                 <select
@@ -260,26 +268,28 @@ export default function Hero() {
               rounded-xl
               border
               bg-gray-50
-              p-3
+              p-2
+              sm:p-3
               "
             >
 
 
               <label
                 className="
-                text-sm
+                text-xs
                 font-medium
                 text-gray-500
+                sm:text-sm
                 "
               >
                 {t("travelDate")}
               </label>
 
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
 
 
-                <Calendar className="text-blue-600"/>
+                <Calendar className="size-4 shrink-0 text-blue-600 sm:size-5"/>
 
 
                 <input
@@ -319,26 +329,28 @@ export default function Hero() {
               rounded-xl
               border
               bg-gray-50
-              p-3
+              p-2
+              sm:p-3
               "
             >
 
 
               <label
                 className="
-                text-sm
+                text-xs
                 font-medium
                 text-gray-500
+                sm:text-sm
                 "
               >
                 {t("guests")}
               </label>
 
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
 
 
-                <Users className="text-blue-600"/>
+                <Users className="size-4 shrink-0 text-blue-600 sm:size-5"/>
 
 
                 <input
@@ -381,14 +393,17 @@ export default function Hero() {
               onClick={searchTours}
 
               className="
+              col-span-2
               rounded-xl
               bg-blue-600
               px-6
-              py-4
+              py-3
               font-semibold
               text-white
               transition
               hover:bg-blue-700
+              sm:py-4
+              md:col-span-1
               "
 
             >
