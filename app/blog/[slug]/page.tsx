@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const post = (await getLiveBlogPosts()).find((item) => item.slug === slug);
   if (!post) return {};
-  return pageMetadata({ title: `${post.title} | Daily Red Sea`, description: post.metaDescription, path: `/blog/${post.slug}` });
+  return pageMetadata({ title: `${post.title} | Daily Red Sea`, description: post.metaDescription, path: `/blog/${post.slug}`, image: post.heroImage });
 }
 
 export default async function BlogArticlePage({ params, locale = "en" }: PageProps) {
