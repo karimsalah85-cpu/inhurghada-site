@@ -109,16 +109,28 @@ export async function getUnavailableTrip(slugs: string[]): Promise<{ slug: strin
   return { slug: unavailable.slug, status: unavailable.listing_status === "paused" ? "paused" : "unlisted" };
 }
 
+function resolveBlogHeroImages(posts: BlogPost[], liveTours: Tour[]): BlogPost[] {
+  const tourImages = new Map(liveTours.map((tour) => [tour.slug, tour.image]));
+  return posts.map((post) => {
+    if (post.heroImage && !post.heroImage.startsWith("/images/placeholders/")) return post;
+    const heroImage = post.relatedTourSlugs
+      .map((slug) => tourImages.get(slug))
+      .find((image): image is string => Boolean(image) && !image.startsWith("/images/placeholders/"));
+    return heroImage ? { ...post, heroImage } : applyBlogMediaSafety(post);
+  });
+}
+
 export async function getLiveBlogPosts(): Promise<BlogPost[]> {
   const rows = await contentRows("blog");
-  if (!rows.length) return blogPosts.map(applyBlogMediaSafety);
+  const liveTours = await getLiveTours();
+  if (!rows.length) return resolveBlogHeroImages(blogPosts, liveTours);
   const managedSlugs = new Set(rows.map((row) => row.slug));
   const overrides = new Map(rows.filter((row) => row.status === "published").map((row) => {
     const fallback = blogPosts.find((post) => post.slug === row.slug);
     const body = objectBody(row);
     return [row.slug, { ...fallback, ...body, slug: row.slug, title: row.title, metaDescription: row.seo_description || row.excerpt || String(body.metaDescription || ""), publishedAt: row.published_at || row.publish_at || String(body.publishedAt || new Date().toISOString()), heroImage: row.featured_image || String(body.heroImage || "/images/placeholders/island-trip.svg"), relatedTourSlugs: Array.isArray(body.relatedTourSlugs) ? body.relatedTourSlugs as string[] : fallback?.relatedTourSlugs || [], intro: String(body.intro || row.excerpt || ""), sections: Array.isArray(body.sections) ? body.sections as BlogPost["sections"] : fallback?.sections || [], faqs: Array.isArray(body.faqs) ? body.faqs as BlogPost["faqs"] : fallback?.faqs || [] } as BlogPost];
   }));
-  return [...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()].map(applyBlogMediaSafety);
+  return resolveBlogHeroImages([...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()], liveTours);
 }
 
 function applyBlogMediaSafety(post: BlogPost): BlogPost {
