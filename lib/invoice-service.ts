@@ -287,7 +287,17 @@ function circle(commands: string[], x: number, y: number, radius: number, color:
 
 function colorCommand([red, green, blueValue]: Color) { return `${(red / 255).toFixed(3)} ${(green / 255).toFixed(3)} ${(blueValue / 255).toFixed(3)} rg`; }
 function wrap(value: string, maxChars: number) { const words = escapePdf(value).split(" "); const lines: string[] = []; let line = ""; for (const word of words) { if (`${line} ${word}`.trim().length > maxChars && line) { lines.push(line); line = word; } else line = `${line} ${word}`.trim(); } if (line) lines.push(line); return lines; }
-function escapePdf(value: string) { return value.replace(/[^\x20-\x7E]/g, "?").replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)"); }
+// WinAnsiEncoding (declared on the fonts below) maps the euro sign to byte 0x80
+// and matches Unicode code points 1:1 for the U+00A0-U+00FF range (£, ¥, etc.),
+// so those survive; anything else outside printable ASCII still falls back to "?".
+function escapePdf(value: string) {
+  return value
+    .replace(/\u20AC/g, String.fromCharCode(0x80))
+    .replace(/[^\x20-\x7E\x80\xA0-\xFF]/g, "?")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+}
 
 function buildPdf(input: string | string[]) {
   const streams = Array.isArray(input) ? input : [input];
@@ -308,8 +318,8 @@ function buildPdf(input: string | string[]) {
   });
 
   objects.push(
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>",
   );
 
   let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n"; const offsets = [0];
