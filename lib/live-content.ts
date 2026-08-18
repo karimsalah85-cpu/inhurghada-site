@@ -115,7 +115,7 @@ function resolveBlogHeroImages(posts: BlogPost[], liveTours: Tour[]): BlogPost[]
     if (post.heroImage && !post.heroImage.startsWith("/images/placeholders/")) return post;
     const heroImage = post.relatedTourSlugs
       .map((slug) => tourImages.get(slug))
-      .find((image): image is string => Boolean(image) && !image.startsWith("/images/placeholders/"));
+      .find((image): image is string => typeof image === "string" && !image.startsWith("/images/placeholders/"));
     return heroImage ? { ...post, heroImage } : applyBlogMediaSafety(post);
   });
 }
