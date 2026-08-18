@@ -117,6 +117,10 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
                   availableTimes={tour.availableTimes}
                   ageBands={tour.ageBands}
                   boatOptions={tour.boatOptions}
+                  packageOptions={tour.additionalPackages?.length ? [
+                    { id: "primary", label: `${tour.packageName ?? tour.title}${tour.packageLabel ? ` — ${tour.packageLabel}` : ""}`, price: Number(tour.packagePrice ?? tour.price) },
+                    ...tour.additionalPackages.map((pkg, index) => ({ id: `package-${index}`, label: `${pkg.name}${pkg.label ? ` — ${pkg.label}` : ""}`, price: Number(pkg.price) })),
+                  ].sort((a, b) => a.price - b.price) : undefined}
                   entrancePricing={tour.entrancePricing}
                   bookingExtras={tour.bookingExtras}
                   requiresMarinaTransferChoice={tour.requiresMarinaTransferChoice}
