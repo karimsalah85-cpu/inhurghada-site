@@ -122,6 +122,7 @@ export async function getLiveBlogPosts(): Promise<BlogPost[]> {
 }
 
 function applyBlogMediaSafety(post: BlogPost): BlogPost {
+  if (post.heroImage && !post.heroImage.startsWith("/images/placeholders/")) return post;
   const text = `${post.title} ${post.intro}`.toLowerCase();
   const heroImage = /diving|underwater|scuba/.test(text) ? "/images/placeholders/diving.svg"
     : /desert|safari|quad|camel/.test(text) ? "/images/placeholders/desert-experience.svg"
