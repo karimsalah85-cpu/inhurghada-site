@@ -17,9 +17,8 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "royal-seascope-submarine")?.image).toBe("/images/owned/hurghada-glass-bottom-boat.jpg");
 
     expect(tours.find((item) => item.slug === "horse-riding-sea-desert")?.image).toBe("/images/hurghada-island-family-sunset.jpeg");
-    expect(tours.find((item) => item.slug === "turkish-bath-spa")?.image).toBe("/images/hero.jpg");
 
-    for (const slug of ["sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour"]) {
+    for (const slug of ["sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour", "turkish-bath-spa"]) {
       expect(tours.find((item) => item.slug === slug)?.image).toMatch(/^\/images\/placeholders\/.+\.svg$/);
     }
   });

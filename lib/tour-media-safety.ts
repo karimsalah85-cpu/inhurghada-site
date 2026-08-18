@@ -135,7 +135,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "senzo-transfer": ownedMedia.senzo, "dolphin-house-snorkeling": ownedMedia.dolphin,
   "horse-riding-sea-desert": { image: "/images/hurghada-island-family-sunset.jpeg", alt: localizedAlt("Guests enjoying a Red Sea island sunset") }, "sahl-hasheesh-horse-riding": categoryMedia.horse,
   "cairo-giza-day-trip-bus": ownedMedia.cairo, "cairo-day-trip-flight": ownedMedia.cairo,
-  "el-gouna-city-boat-tour": categoryMedia.elGouna, "turkish-bath-spa": { image: "/images/hero.jpg", alt: localizedAlt("Red Sea coast and beach in Hurghada") },
+  "el-gouna-city-boat-tour": categoryMedia.elGouna, "turkish-bath-spa": categoryMedia.spa,
   "dolphin-house-marsa-alam": ownedMedia.dolphin,
   "marsa-mubarak-snorkeling": ownedMedia.snorkeling,
   "abu-dabbab-snorkeling": ownedMedia.snorkeling,
