@@ -6,6 +6,7 @@ import TourPageShell from "@/components/tours/TourPageShell";
 import { normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import { localizeTour } from "@/lib/tour-localization";
+import { getDestination } from "@/lib/destinations";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -21,7 +22,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const sourceTour = liveTours.find((item) => item.slug === slug) || tours.find((item) => item.slug === slug && item.listingStatus !== "unlisted");
   const tour = sourceTour ? localizeTour(sourceTour, "en") : undefined;
   if (!tour) return {};
-  const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} from ${tour.destinationSlug === "marsa-alam" ? "Marsa Alam" : "Hurghada"}`);
+  const destinationName = getDestination(tour.destinationSlug)?.name || "Red Sea";
+  const title = normalizeMetaTitle(tour.seoTitle || `${tour.title} in ${destinationName}`);
   const description = normalizeMetaDescription(tour.metaDescription || tour.description, tour.description);
   const url = `/tours/${tour.slug}`;
   return {
@@ -36,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName,
       locale: "en_US",
       type: "website",
-      images: [{ url: tour.image, alt: tour.imageAlt || `${tour.title} in ${tour.destinationSlug === "marsa-alam" ? "Marsa Alam" : "Hurghada"}` }],
+      images: [{ url: tour.image, alt: tour.imageAlt || `${tour.title} in ${destinationName}` }],
     },
     twitter: {
       card: "summary_large_image",

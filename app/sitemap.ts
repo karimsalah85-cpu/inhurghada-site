@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...destinations.filter((destination) => destination.status === "live").map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
     ...tourCategories.filter((category) => category.slug !== "excursions" && tours.some((tour) => tour.destinationSlug === "marsa-alam" && category.matches(tour))).map((category) => `/marsa-alam/${category.slug}`),
+    ...tourCategories.filter((category) => category.slug !== "excursions" && tours.some((tour) => tour.destinationSlug === "jeddah" && category.matches(tour))).map((category) => `/jeddah/${category.slug}`),
     ...tours.filter((tour) => tour.listingStatus !== "paused" && tour.listingStatus !== "unlisted").map((tour) => `/tours/${tour.slug}`),
   ];
 
@@ -39,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         return {
           url: `${siteUrl}${localePath(locale, path)}`,
           changeFrequency: path ? "weekly" as const : "daily" as const,
-          priority: !path ? 1 : tour ? 0.85 : path.startsWith("/hurghada/") || path.startsWith("/marsa-alam/") ? 0.8 : 0.6,
+          priority: !path ? 1 : tour ? 0.85 : path.startsWith("/hurghada/") || path.startsWith("/marsa-alam/") || path.startsWith("/jeddah/") ? 0.8 : 0.6,
           alternates: { languages },
           ...(tour ? { images: [`${siteUrl}${tour.image}`] } : {}),
         };

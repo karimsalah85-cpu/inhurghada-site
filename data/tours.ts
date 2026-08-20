@@ -12,7 +12,7 @@ export type Tour = {
   /** Destination ownership keeps tours ready for expansion beyond Hurghada. */
   destinationSlug: DestinationSlug;
   /** Authoritative catalog currency; legacy products default to USD. */
-  currency?: "USD" | "EUR";
+  currency?: "USD" | "EUR" | "SAR";
   /** JavaScript weekday numbers, Sunday = 0. */
   operatingWeekdays?: number[];
   bookingCutoff?: { daysBefore: number; localTime?: string; timeZone: "Africa/Cairo"; assumption?: boolean };
@@ -576,6 +576,64 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
       { name: "Relaxing Massage – 90 Minutes", description: "About This Treatment: The classic massage for relaxation and renewal. Swedish massage uses long, flowing strokes, kneading, and circular motions to release tension and improve circulation. It's the all-purpose technique for stress relief and overall wellbeing. Features & Highlights: traditional full-body therapy; enhances blood flow and oxygenation; gentle yet effective relaxation.", price: "40", label: "Per person, 90 minutes" },
     ],
     description: "Two ways to unwind in Hurghada: the classic Relaxing Massage, available in 60 or 90 minutes, or the full Turkish Hammam Ritual with sauna, steam, jacuzzi, scrub and massage. Choose your package below.", highlights: ["Relaxing Massage – 60 minutes (25 EUR) or 90 minutes (40 EUR)", "Turkish Hammam Ritual – 120 minutes (50 EUR)", "Sauna, steam and jacuzzi circuit", "Traditional loofah and Moroccan soap cleansing", "Full-body massage for tension release"], included: ["Treatments listed in the confirmed package", "Towel and spa facilities", "Tea or water when provided", "Transfer in the confirmed pickup zone"], notIncluded: ["Extra treatments", "Personal products", "Transfers outside the confirmed zone"], notes: ["Relaxing Massage: 60 minutes for 25 EUR or 90 minutes for 40 EUR, per person.", "Turkish Hammam Ritual: 120 minutes for 50 EUR, per person.", "Open daily from 9:00 AM to 11:00 PM.", "Tell the spa about pregnancy, injuries, allergies or medical conditions before booking.", "Minimum age, privacy arrangements and cancellation terms are confirmed in advance."], availableTimes: ["Daily, 9:00 AM – 11:00 PM"], notSuitableFor: ["Guests with medical conditions not cleared for heat or massage treatments"], whatToBring: ["Swimwear", "Dry clothes", "Any essential medication"], seoTitle: "Turkish Hammam and Relaxing Massage in Hurghada", metaDescription: "Book a Relaxing Massage (60 min for 25 EUR, 90 min for 40 EUR) or the full Turkish Hammam ritual (120 min for 50 EUR) in Hurghada, open daily 9:00 AM–11:00 PM."
+  },
+  {
+    slug: "basic-diver-jeddah",
+    listingStatus: "active",
+    destinationSlug: "jeddah",
+    currency: "SAR",
+    title: "SSI Basic Diver — Try Scuba Diving",
+    image: "/images/owned/basic-diver-jeddah.jpg",
+    price: "550",
+    originalPrice: "600",
+    priceUnit: "per person",
+    rating: "New",
+    reviews: "New",
+    location: "Al-Haddad Scuba Shop, Jeddah",
+    duration: "Approximately 4 hours",
+    category: "Diving",
+    categoryPath: ["Diving & Snorkeling", "Beginner Diving"],
+    badge: "New",
+    bookingMode: "direct",
+    participantPricing: { adults: 550 },
+    availableTimes: ["10:15 AM", "11:00 AM", "12:00 AM"],
+    operatingWeekdays: [0, 1, 2, 3, 4, 5, 6],
+    description: "Try scuba diving in Jeddah in a half-day SSI Basic Diver program for first-time, non-certified participants, including theory, confined-water skills and a 30–45 minute open-water dive.",
+    highlights: [
+      "Designed for first-time and non-certified divers",
+      "Three phases: theory, confined-water skills and an open-water dive",
+      "Approximately 30–45 minutes in open water",
+      "Dive to a maximum of 12 metres, according to comfort and instructor guidance",
+      "SSI Basic Diver recognition valid for 6 months",
+      "Professional instructor supervision throughout",
+    ],
+    included: ["Scuba diving equipment", "Resort fees", "Classroom safety and theory session", "Confined-water skills session", "Instructor-led open-water dive"],
+    notIncluded: ["Snacks and beverages", "Towels", "Transport to the meeting point unless separately confirmed"],
+    notes: [
+      "Meet at Al-Haddad Scuba Shop and arrive at least 15 minutes before the scheduled start for check-in and the safety briefing.",
+      "Reserve at least 24 hours before the experience.",
+      "Participants must disclose medical conditions. The supplied terms specifically identify heart conditions and high blood pressure as concerns.",
+      "Do not fly for at least 24 hours after the dive.",
+      "Final depth and dive duration depend on participant comfort, conditions and the instructor's safety decision.",
+    ],
+    itinerary: [
+      "Arrive at Al-Haddad Scuba Shop at least 15 minutes early",
+      "Complete check-in, health screening and a classroom safety briefing",
+      "Learn how to use the scuba equipment",
+      "Practise essential skills in a pool or confined water",
+      "Complete an instructor-led open-water dive for approximately 30–45 minutes",
+      "Receive SSI Basic Diver recognition after successful completion",
+    ],
+    notSuitableFor: ["Guests with medical conditions that make scuba diving unsafe", "Guests who plan to fly within 24 hours after the experience"],
+    whatToBring: ["Towel", "Dry change of clothes", "Sunscreen", "Swimwear", "Valid identification", "Any required medical clearance"],
+    packageName: "SSI Basic Diver — Try Scuba Diving",
+    packageDescription: "A half-day first scuba experience with theory, confined-water training, equipment and an instructor-led open-water dive.",
+    packagePrice: "550",
+    packageLabel: "Per person",
+    ageBands: { adults: "Participant", children: "Contact us to confirm minimum age", infants: "Not applicable" },
+    seoTitle: "Try Scuba Diving in Jeddah | SSI Basic Diver",
+    metaDescription: "Book an SSI Basic Diver try-scuba experience in Jeddah: theory, confined-water skills, equipment and a 30–45 minute open-water dive for SAR 550.",
+    imageAlt: "SSI Basic Diver course artwork showing scuba divers underwater",
   },
   {
     slug: "dolphin-house-marsa-alam", listingStatus: "active", destinationSlug: "marsa-alam", currency: "EUR", title: "Dolphin House Full-Day Snorkeling Boat Trip from Marsa Alam", image: "/images/placeholders/dolphin-house.svg", price: "99", rating: "New", reviews: "New", location: "Marsa Alam Marina, Marsa Alam", duration: "Full day", category: "Snorkeling", badge: "New", bookingMode: "direct", priceUnit: "per person", participantPricing: { adults: 99, youth: 50, infants: 0 }, ageBands: { adults: "Adults (ages 12+)", children: "Children (ages 2–11)", infants: "Infants (under 2) — free" }, availableTimes: ["07:00 pickup · 08:30 boat departure"], operatingWeekdays: [1, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" }, departureMarina: "Marsa Alam Marina",

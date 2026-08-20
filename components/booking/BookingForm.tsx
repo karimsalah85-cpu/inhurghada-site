@@ -22,6 +22,7 @@ import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { useCart } from "@/components/cart/CartProvider";
 import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
 import { marinaTransferOptions } from "@/data/speedboat-booking";
+import type { DestinationSlug } from "@/lib/destinations";
 
 type ParticipantPricing = { adults: number; youth?: number; infants?: number };
 type PackageOption = { id: string; label: string; price: number };
@@ -29,7 +30,7 @@ type PackageOption = { id: string; label: string; price: number };
 type BookingFormProps = {
   tourName: string;
   tourSlug: string;
-  destinationSlug?: "hurghada" | "marsa-alam";
+  destinationSlug?: DestinationSlug;
   pickupZones?: string[];
   price?: string;
   originalPrice?: string;
@@ -46,7 +47,7 @@ type BookingFormProps = {
   bookingExtras?: BookingExtra[];
   requiresMarinaTransferChoice?: boolean;
   bookingLeadTime?: "next-day-before-15";
-  currency?: "USD" | "EUR";
+  currency?: "USD" | "EUR" | "SAR";
   operatingWeekdays?: number[];
 };
 

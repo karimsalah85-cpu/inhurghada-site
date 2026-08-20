@@ -528,6 +528,7 @@ text-blue-600
                   priceUnit={tour.priceUnit}
                   bookingMode={tour.bookingMode}
                   entrancePrice={tour.entrancePricing?.adults}
+                  currency={tour.currency}
 
                 />
 

@@ -31,7 +31,7 @@ describe("Marsa Alam tours", () => {
       { adults: 99, youth: 50, infants: 0 }, { adults: 60, youth: 40, infants: 0 }, { adults: 50, youth: 30, infants: 0 },
     ]);
     expect(selected.every((tour) => tour.ageBands?.adults === "Adults (ages 12+)" && tour.ageBands.children === "Children (ages 2–11)" && tour.participantPricing?.infants === 0 && !tour.bookingBlocker)).toBe(true);
-    expect(tours.every((tour) => ["hurghada", "marsa-alam"].includes(tour.destinationSlug))).toBe(true);
+    expect(tours.every((tour) => ["hurghada", "marsa-alam", "jeddah"].includes(tour.destinationSlug))).toBe(true);
     expect(getDestination("marsa-alam")?.defaultCurrency).toBe("EUR");
     expect(getDestination("marsa-alam")?.pickupZones).toEqual([
       { name: "Marsa Alam hotels", supplement: 0, currency: "EUR" },

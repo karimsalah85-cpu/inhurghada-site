@@ -4,6 +4,7 @@ import { Clock, MapPin, ShieldCheck, Star } from "lucide-react";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import { localizeProductBadge } from "@/lib/public-interface-i18n";
+import type { Currency } from "@/components/settings/SiteSettingsContext";
 
 type TourCardProps = {
   image: string;
@@ -22,6 +23,7 @@ type TourCardProps = {
   priceUnit?: string;
   bookingMode?: "direct" | "inquiry";
   entrancePrice?: number;
+  currency?: Currency;
 };
 
 const cardCopy = {
@@ -50,6 +52,7 @@ export default function TourCard({
   priceUnit,
   bookingMode,
   entrancePrice,
+  currency,
 }: TourCardProps) {
   const { formatPrice, t, language } = useSiteSettings();
   const copy = cardCopy[language];
@@ -75,7 +78,7 @@ export default function TourCard({
           {availableTime ? <p className="mt-3 text-sm text-slate-500">{copy.pickup}: {availableTime}</p> : null}
           <p className="mt-3 flex items-center gap-2 text-sm font-medium text-emerald-700"><ShieldCheck size={17} />{bookingMode === "inquiry" ? copy.inquiry : copy.clear}</p>
           <div className="mt-6 flex items-end justify-between gap-4">
-            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">{copy.quotation}</p><p className="text-xl font-bold text-blue-700">{copy.request}</p></> : <><p className="text-sm text-slate-500">{copy.from}</p>{originalPrice && Number(originalPrice) > Number(price) ? <p className="text-sm font-semibold text-slate-400 line-through">{formatPrice(originalPrice)}</p> : null}<p className="text-3xl font-bold text-blue-700">{formatPrice(price)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || copy.perPerson}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-amber-700">+ {copy.entrance} {formatPrice(String(entrancePrice))}/{copy.person}</p> : null}</>}</div>
+            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">{copy.quotation}</p><p className="text-xl font-bold text-blue-700">{copy.request}</p></> : <><p className="text-sm text-slate-500">{copy.from}</p>{originalPrice && Number(originalPrice) > Number(price) ? <p className="text-sm font-semibold text-slate-400 line-through">{formatPrice(originalPrice, currency)}</p> : null}<p className="text-3xl font-bold text-blue-700">{formatPrice(price, currency)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || copy.perPerson}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-amber-700">+ {copy.entrance} {formatPrice(String(entrancePrice), currency)}/{copy.person}</p> : null}</>}</div>
             <span className="rounded-xl bg-blue-700 px-4 py-3 font-semibold text-white transition group-hover:bg-blue-800">{bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
           </div>
         </div>

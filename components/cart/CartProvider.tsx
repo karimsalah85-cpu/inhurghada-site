@@ -1,13 +1,14 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { DestinationSlug } from "@/lib/destinations";
 
 export type CartItem = {
   id: string;
   tourSlug: string;
   tourName: string;
-  destinationSlug: "hurghada" | "marsa-alam";
-  currency: "USD" | "EUR";
+  destinationSlug: DestinationSlug;
+  currency: "USD" | "EUR" | "SAR";
   date: string;
   time: string;
   adults: number;

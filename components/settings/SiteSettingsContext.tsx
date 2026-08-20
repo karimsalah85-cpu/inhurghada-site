@@ -16,7 +16,7 @@ export const languages = [
 export const currencies = ["USD", "EUR", "GBP", "EGP", "SAR"] as const;
 
 export type Language = (typeof languages)[number]["code"];
-type Currency = (typeof currencies)[number];
+export type Currency = (typeof currencies)[number];
 
 const exchangeRates: Record<Currency, number> = {
   USD: 1,

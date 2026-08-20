@@ -1,10 +1,10 @@
-export type DestinationSlug = "hurghada" | "marsa-alam";
+export type DestinationSlug = "hurghada" | "marsa-alam" | "jeddah";
 export type DestinationStatus = "live" | "coming-soon";
 
 export type PickupZone = {
   name: string;
   supplement: number;
-  currency: "USD" | "EUR";
+  currency: "USD" | "EUR" | "SAR";
 };
 
 export type Destination = {
@@ -17,7 +17,7 @@ export type Destination = {
   shortDescription: string;
   longDescription: string;
   coordinates: { latitude: number; longitude: number };
-  defaultCurrency: "USD" | "EUR";
+  defaultCurrency: "USD" | "EUR" | "SAR";
   image: string;
   seo: { title: string; description: string; ogImage: string };
   pickupZones: PickupZone[];
@@ -66,6 +66,27 @@ export const destinations: Destination[] = [
       { name: "Marsa Alam hotels", supplement: 0, currency: "EUR" },
       { name: "Port Ghalib", supplement: 0, currency: "EUR" },
       { name: "Coraya Bay", supplement: 0, currency: "EUR" },
+    ],
+  },
+  {
+    slug: "jeddah",
+    name: "Jeddah",
+    country: "Saudi Arabia",
+    region: "Makkah Province",
+    status: "live",
+    tagline: "Red Sea diving and coastal experiences in Jeddah",
+    shortDescription: "Discover beginner-friendly diving and future Red Sea experiences in Jeddah with clear SAR pricing and local meeting details.",
+    longDescription: "Explore Jeddah's Red Sea experiences with locally supplied schedules, meeting points, booking conditions and prices in Saudi riyals.",
+    coordinates: { latitude: 21.5433, longitude: 39.1728 },
+    defaultCurrency: "SAR",
+    image: "/images/owned/jeddah-al-balad-night.jpeg",
+    seo: {
+      title: "Things to do in Jeddah",
+      description: "Book Red Sea diving and coastal experiences in Jeddah with clear SAR prices, local meeting points and direct booking support.",
+      ogImage: "/images/owned/jeddah-al-balad-night.jpeg",
+    },
+    pickupZones: [
+      { name: "Al-Haddad Scuba Shop (meeting point)", supplement: 0, currency: "SAR" },
     ],
   },
 ];

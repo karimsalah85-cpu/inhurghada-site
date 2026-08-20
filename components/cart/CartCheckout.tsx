@@ -52,12 +52,13 @@ export default function CartCheckout() {
   const requiresDivingLicense = items.some((item) => item.requiresDivingLicense);
   const requiresQuadMinimumAge = items.some((item) => item.requiresQuadMinimumAge);
   const cartCurrencies = [...new Set(items.map((item) => item.currency))];
+  const cartCurrency = cartCurrencies[0] || "USD";
   const cartDestinations = [...new Set(items.map((item) => item.destinationSlug))];
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!items.length) return;
-    if (cartCurrencies.length > 1) return setError("Please book USD and EUR trips separately so each booking has one settlement currency.");
+    if (cartCurrencies.length > 1) return setError("Please book trips in different settlement currencies separately.");
     if (requiresDivingLicense && !divingConfirmed) return setError(tr("Confirm that every diver has a valid diving license.", "Bestätige, dass jeder Taucher einen gültigen Tauchschein besitzt.", "Подтвердите наличие действующего сертификата у каждого дайвера.", "أكد أن كل غواص يحمل رخصة غوص سارية."));
     if (requiresQuadMinimumAge && !quadConfirmed) return setError(tr("Confirm that every quad participant is at least 9 years old.", "Bestätige, dass alle Quad-Teilnehmer mindestens 9 Jahre alt sind.", "Подтвердите, что всем участникам тура на квадроциклах не менее 9 лет.", "أكد أن عمر كل مشارك في رحلة الكواد لا يقل عن 9 سنوات."));
     setSubmitting(true);
@@ -80,7 +81,7 @@ export default function CartCheckout() {
           time: firstItem.time,
           tourName: `Multi-trip booking (${items.length})`,
           tourSlug: "multi-trip",
-          location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : "Hurghada").join(" and "),
+          location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : slug === "jeddah" ? "Jeddah" : "Hurghada").join(" and "),
           duration: `${items.length} trips`,
           message,
           adults: 0,
@@ -114,7 +115,7 @@ export default function CartCheckout() {
         date: items.map((item) => item.date).join(", "),
         time: tr("Multiple times", "Mehrere Uhrzeiten", "Несколько времён", "مواعيد متعددة"),
         travelers: tr("See the attached trip summary", "Siehe beigefügte Reiseübersicht", "См. приложенную сводку", "راجع ملخص الرحلات المرفق"),
-        total: formatPrice(String(total)),
+        total: formatPrice(String(total), cartCurrency),
         customerEmailSent: Boolean(data.customerEmailSent),
         whatsappSent: Boolean(data.whatsappSent),
         bookingConfirmationPdf: String(data.bookingConfirmationPdf || ""),
@@ -142,11 +143,11 @@ export default function CartCheckout() {
             const tour = tours.find((entry) => entry.slug === item.tourSlug);
             return <article key={item.id} className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[140px_1fr_auto] sm:items-center">
               <div className="relative h-28 overflow-hidden rounded-2xl"><Image src={tour?.image || "/images/placeholders/sea-activity.svg"} alt="" fill sizes="140px" className="object-cover"/></div>
-              <div><h2 className="font-black text-slate-950">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-slate-600"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-slate-600">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-blue-700">{formatPrice(String(item.subtotal))}</p></div>
+              <div><h2 className="font-black text-slate-950">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-slate-600"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-slate-600">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-blue-700">{formatPrice(String(item.subtotal), item.currency)}</p></div>
               <button type="button" onClick={() => removeItem(item.id)} aria-label={tr("Remove trip", "Ausflug entfernen", "Удалить поездку", "حذف الرحلة")} className="rounded-xl border border-rose-200 p-3 text-rose-600 hover:bg-rose-50"><Trash2 size={19}/></button>
             </article>;
           })}
-          <div className="flex items-center justify-between rounded-2xl bg-slate-950 p-6 text-white"><span className="font-bold">{tr("Combined total", "Gesamtpreis", "Общая сумма", "المجموع الكلي")}</span><strong className="text-3xl">{formatPrice(String(total))}</strong></div>
+          <div className="flex items-center justify-between rounded-2xl bg-slate-950 p-6 text-white"><span className="font-bold">{tr("Combined total", "Gesamtpreis", "Общая сумма", "المجموع الكلي")}</span><strong className="text-3xl">{formatPrice(String(total), cartCurrency)}</strong></div>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
           <h2 className="text-2xl font-black text-slate-950">{tr("Complete one booking", "Eine Buchung abschließen", "Оформить одно бронирование", "إكمال حجز واحد")}</h2>
@@ -160,7 +161,7 @@ export default function CartCheckout() {
           <label className="block text-sm font-bold text-slate-800">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal text-slate-950 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/></label>
           <p className="text-xs leading-5 text-slate-500">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-blue-700 underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
           {error ? <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p> : null}
-          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(total))}`} <MessageCircle size={18}/></button>
+          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(total), cartCurrency)}`} <MessageCircle size={18}/></button>
         </form>
       </div>
     </section>
