@@ -247,7 +247,7 @@ export default function Hero() {
                   outline-none
                   "
 
-                ><option value="">{t("searchPlaceholder")}</option><option value="hurghada">Hurghada</option><option value="marsa-alam">Marsa Alam</option></select>
+                ><option value="">{t("searchPlaceholder")}</option><option value="hurghada">Hurghada</option><option value="marsa-alam">Marsa Alam</option><option value="jeddah">Jeddah</option></select>
 
 
               </div>
