@@ -39,7 +39,7 @@ type SiteSettings = {
 const translations: Record<Language, Record<string, string>> = {
   en: {
     home: "Home", tours: "Tours", transfers: "Transfers", booking: "Booking", checkout: "Checkout", about: "About", bookNow: "Book Now", whatsappBooking: "WhatsApp Booking",
-    discoverHurghada: "Discover the Red Sea", heroTitle: "Discover Red Sea Tours & Experiences", heroDescription: "Explore verified trips in Hurghada and Marsa Alam with clear prices, hotel pickup information and easy WhatsApp support.",
+    discoverHurghada: "Discover the Red Sea", heroTitle: "Discover Red Sea Tours & Experiences", heroDescription: "Explore verified trips in Hurghada, Marsa Alam and Jeddah with clear prices, pickup or meeting-point details, and easy WhatsApp support.",
     privateTransfers: "Private transfers", boatTrips: "Boat trips & snorkeling", desertAdventures: "Desert adventures", destination: "Destination", travelDate: "Travel Date", guests: "Guests", searchTours: "Search tours",
     chooseExperience: "Choose your experience", exploreAdventure: "Explore the Red Sea by adventure", viewAllTours: "View all tours", popularTours: "Popular Tours", popularToursDescription: "Explore diving trips, snorkeling, Orange Bay cruises and Red Sea adventures.", searchPlaceholder: "Choose a destination", bestSeller: "Best Seller", everyDay: "Every day", perPerson: "per person", bookYourTrip: "Book Your Trip", fullName: "Full Name", whatsappNumber: "WhatsApp Number", emailAddress: "Email address", pickupLocation: "Hotel Name / Pickup Location", specialRequests: "Special requests", sendBooking: "Send booking request", cashOnArrival: "Pay cash on arrival",
   },
