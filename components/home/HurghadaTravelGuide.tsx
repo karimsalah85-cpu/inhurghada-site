@@ -6,7 +6,7 @@ import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 const copy = {
   en: {
     eyebrow: "Plan your Red Sea experience",
-    title: "Things to do in Hurghada and Marsa Alam",
+    title: "Things to do in Hurghada, Marsa Alam and Jeddah",
     intro: "Hurghada and Marsa Alam offer distinct Red Sea experiences, from island boat trips, snorkeling and diving to desert adventures and practical private transfers. Choose the destination that matches your hotel and travel plans.",
     detail: "Explore Hurghada for islands, desert safaris, transfers and historical day trips, or choose Marsa Alam for its own southern reef excursions. Compare destination, duration, inclusions, pickup details and transparent prices before booking.",
     items: [
