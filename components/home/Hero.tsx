@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MapPin, Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -35,6 +35,17 @@ export default function Hero() {
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
   const [guests, setGuests] = useState("1");
+  const [greetingKey, setGreetingKey] = useState<"goodMorning" | "goodAfternoon" | "goodEvening" | null>(null);
+
+  useEffect(() => {
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+      setGreetingKey(hour < 12 ? "goodMorning" : hour < 18 ? "goodAfternoon" : "goodEvening");
+    };
+    updateGreeting();
+    const intervalId = window.setInterval(updateGreeting, 60_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
 
   function searchTours() {
@@ -124,6 +135,9 @@ export default function Hero() {
 
 
         <div className="max-w-4xl text-white">
+          <p className={`mb-4 text-base font-bold text-white transition-opacity sm:text-lg ${greetingKey ? "opacity-100" : "opacity-0"}`} aria-live="polite">
+            {greetingKey ? `${t(greetingKey)} 👋` : "\u00a0"}
+          </p>
           <div className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 backdrop-blur-md sm:mb-8 sm:gap-3 sm:px-4">
             <span className="h-2.5 w-2.5 rounded-full bg-cyan-300" />
             <span className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200 sm:text-sm sm:tracking-[0.35em]">

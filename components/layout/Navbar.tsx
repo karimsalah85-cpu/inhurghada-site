@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Menu, ShoppingCart, X } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { ChevronDown, Menu, Search, ShoppingCart, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
@@ -161,6 +161,8 @@ export default function Navbar() {
             {t("bookNow")}
           </Link>
 
+          <NavTourSearch language={language} t={t} />
+
           <Link href={localePath(language, "/cart")} aria-label={`${items.length} ${ui.cart}`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
             <ShoppingCart size={22} />
             {items.length ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-xs font-bold text-white">{items.length}</span> : null}
@@ -234,6 +236,8 @@ export default function Navbar() {
           >
             {t("home")}
           </MobileLink>
+
+          <NavTourSearch language={language} t={t} mobile onSearch={closeMenu} />
 
 
           <MobileLink
@@ -324,6 +328,54 @@ export default function Navbar() {
 
   );
 
+}
+
+function NavTourSearch({
+  language,
+  t,
+  mobile = false,
+  onSearch,
+}: {
+  language: (typeof languages)[number]["code"];
+  t: (key: string, fallback?: string) => string;
+  mobile?: boolean;
+  onSearch?: () => void;
+}) {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const search = query.trim();
+    if (!search) return;
+    trackEvent("search", { search_term: search, placement: "navigation" });
+    onSearch?.();
+    router.push(`${localePath(language, "/tours")}?search=${encodeURIComponent(search)}`);
+  }
+
+  return (
+    <form
+      role="search"
+      onSubmit={submitSearch}
+      className={mobile
+        ? "flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2"
+        : "flex w-52 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 shadow-sm transition focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-100"}
+    >
+      <Search aria-hidden="true" size={18} className="shrink-0 text-cyan-700" />
+      <label htmlFor={mobile ? "mobile-tour-search" : "desktop-tour-search"} className="sr-only">{t("navSearch")}</label>
+      <input
+        id={mobile ? "mobile-tour-search" : "desktop-tour-search"}
+        type="search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder={t("navSearchPlaceholder")}
+        className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+      />
+      <button type="submit" disabled={!query.trim()} aria-label={t("navSearch")} className="rounded-full bg-blue-700 p-2 text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40">
+        <Search aria-hidden="true" size={16} />
+      </button>
+    </form>
+  );
 }
 
 function SettingsSelectors({
