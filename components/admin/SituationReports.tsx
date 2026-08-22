@@ -19,12 +19,23 @@ const money = (amount: number, currency: string) => new Intl.NumberFormat("en", 
 const labelDate = (value: string) => new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 const queryValue = (value: string) => encodeURIComponent(value);
 
-export default function SituationReports({ bookings }: { bookings: ReportBooking[] }) {
-  const now = new Date();
-  const monthStart = dateValue(new Date(now.getFullYear(), now.getMonth(), 1));
-  const [mode, setMode] = useState<"today" | "next7" | "month" | "year" | "custom">("month");
+function monthBounds(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return {
+    start: dateValue(new Date(year, monthNumber - 1, 1)),
+    end: dateValue(new Date(year, monthNumber, 0)),
+  };
+}
+
+export default function SituationReports({ bookings, initialMonth }: { bookings: ReportBooking[]; initialMonth?: string }) {
+  const today = cairoDate();
+  const currentMonth = today.slice(0, 7);
+  const requestedMonth = initialMonth && /^\d{4}-\d{2}$/.test(initialMonth) ? initialMonth : currentMonth;
+  const { start: monthStart, end: monthEnd } = monthBounds(requestedMonth);
+  const initialTo = monthStart > today ? monthEnd : monthEnd < today ? monthEnd : today;
+  const [mode, setMode] = useState<"today" | "next7" | "month" | "year" | "custom">(requestedMonth === currentMonth ? "month" : "custom");
   const [from, setFrom] = useState(monthStart);
-  const [to, setTo] = useState(cairoDate());
+  const [to, setTo] = useState(initialTo);
   const [trip, setTrip] = useState("all");
   const [status, setStatus] = useState("all");
   const [payment, setPayment] = useState("all");

@@ -2047,7 +2047,7 @@ export default function AdminDashboard({
       ) : null}
       {mode === "reports" && can("reports") ? (
         <div id="reports" className="scroll-mt-6">
-          <SituationReports bookings={bookings} />
+          <SituationReports bookings={bookings} initialMonth={bookingView.month} />
         </div>
       ) : null}
       {mode === "bookings" && expandedId ? (
