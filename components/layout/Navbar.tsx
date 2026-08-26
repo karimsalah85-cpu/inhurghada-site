@@ -9,7 +9,6 @@ import { currencies, languages, useSiteSettings } from "@/components/settings/Si
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath, localeSwitchPath } from "@/lib/i18n";
-import SocialLinks from "@/components/layout/SocialLinks";
 import { useCart } from "@/components/cart/CartProvider";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 import { destinations } from "@/lib/destinations";
@@ -66,7 +65,7 @@ export default function Navbar() {
         className="
         mx-auto
         flex
-        max-w-[1500px]
+        max-w-7xl
         items-center
         justify-between
         px-5
@@ -103,7 +102,7 @@ export default function Navbar() {
           className="
           hidden
           items-center
-          gap-3
+          gap-2
           xl:flex
           "
         >
@@ -130,13 +129,6 @@ export default function Navbar() {
             {t("transfers")}
           </NavLink>
 
-          <NavLink href={localePath(language, "/about")} active={pathname === localePath(language, "/about")}>
-            {t("about")}
-          </NavLink>
-
-          <NavLink href={localePath(language, "/blog")} active={pathname === localePath(language, "/blog") || pathname.startsWith(`${localePath(language, "/blog")}/`)}>
-            {language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "pl" ? "Poradnik" : language === "zh" ? "旅游指南" : "Blog"}
-          </NavLink>
           </div>
 
 
@@ -158,7 +150,7 @@ export default function Navbar() {
             hover:to-blue-800
             "
           >
-            {t("bookNow")}
+            {language === "ar" ? "خطط لرحلتك" : language === "de" ? "Reise planen" : language === "ru" ? "Спланировать" : language === "pl" ? "Zaplanuj podróż" : language === "zh" ? "规划行程" : "Plan your trip"}
           </Link>
 
           <Link href={localePath(language, "/cart")} aria-label={`${items.length} ${ui.cart}`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
@@ -172,8 +164,6 @@ export default function Navbar() {
             pathname={pathname}
             setCurrency={setCurrency}
           />
-
-          <SocialLinks />
 
         </div>
 
@@ -311,8 +301,6 @@ export default function Navbar() {
             onLanguageSelect={closeMenu}
             mobile
           />
-
-          <SocialLinks className="mt-1" />
 
         </div>
 

@@ -27,7 +27,7 @@ export default function WhatsAppButton() {
         bottom-4
         right-4
         z-50
-        flex
+        hidden
         items-center
         gap-2
         rounded-full
@@ -35,6 +35,7 @@ export default function WhatsAppButton() {
         h-14
         w-14
         justify-center
+        sm:flex
         sm:bottom-6
         sm:right-6
         sm:h-auto
