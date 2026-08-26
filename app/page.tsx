@@ -123,7 +123,7 @@ function HomeContent() {
   const filteredTours = filterTours(displayTours, search);
   const displaySearch = search.replace(/,/g, ", ");
 
-  const tourOrder = ["orange-bay", "full-day-diving", "quad-safari-sunset", "dolphin-house-marsa-alam", "marsa-mubarak-snorkeling", "basic-diver-jeddah"];
+  const tourOrder = ["orange-bay", "full-day-diving", "dolphin-house-marsa-alam", "marsa-mubarak-snorkeling", "basic-diver-jeddah", "jeddah-yacht-sunset-cruise"];
   filteredTours.sort((left, right) => {
     const leftIndex = tourOrder.indexOf(left.slug);
     const rightIndex = tourOrder.indexOf(right.slug);
