@@ -18,8 +18,8 @@ describe("localized SEO routing", () => {
     expect(localeSwitchPath("/ar/booking/confirmation", "de")).toBe("/de/booking/confirmation");
   });
 
-  it("falls back clearly to the selected home page when no equivalent exists", () => {
-    expect(localeSwitchPath("/blog/orange-bay-guide", "ar")).toBe("/ar");
+  it("preserves localized blog routes now that articles have translated equivalents", () => {
+    expect(localeSwitchPath("/blog/orange-bay-guide", "ar")).toBe("/ar/blog/orange-bay-guide");
   });
 
   it("builds a reciprocal alternate set for canonical routes", () => {
