@@ -16,7 +16,7 @@ export const blogPosts: BlogPost[] = [
     title: "Egypt Visa Guide 2026: What to Know Before You Travel",
     metaDescription: "Plan your Egypt trip with this 2026 visa guide covering e-Visas, visas on arrival, Cairo's QR-code pilot, Sinai entry stamps and Hurghada arrivals.",
     publishedAt: "2026-08-11",
-    heroImage: "/images/placeholders/private-transfer.svg",
+    heroImage: "/images/owned/hurghada-airport-flight.png",
     relatedTourSlugs: ["hurghada-airport-transfer", "senzo-transfer"],
     intro: "Planning a trip to Hurghada, the Red Sea coast or elsewhere in Egypt? Checking your entry requirements before you fly can save time and stress at the airport. This guide explains the main tourist-visa routes available in 2026, what is different for Hurghada and Sinai, and what to verify before departure. Visa rules, eligibility and fees can change at short notice, so use this as a planning guide and confirm the current requirements for your passport on Egypt's official e-Visa portal or with an Egyptian embassy before booking.",
     sections: [
@@ -113,7 +113,7 @@ export const blogPosts: BlogPost[] = [
     title: "Best Snorkeling Tours in Hurghada for Beginners",
     metaDescription: "Compare beginner-friendly Hurghada snorkeling trips by reef time, island stops, duration, pickup, equipment and price before you book.",
     publishedAt: "2026-08-10",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/red-sea-reef-panorama.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "orange-bay", "mahmya-island", "dolphin-house-snorkeling"],
     intro: "Hurghada is an easy place to try Red Sea snorkeling, but the trips are not interchangeable. Some prioritize coral-reef stops, others devote more time to an island beach, and private speedboats trade the shared-boat atmosphere for flexibility. This guide helps first-time snorkelers choose by swimming confidence, schedule and what is actually included.",
     sections: [
@@ -135,7 +135,7 @@ export const blogPosts: BlogPost[] = [
     title: "Best Desert Safari Tours for Adrenaline Junkies in Hurghada",
     metaDescription: "Compare Hurghada's most exciting desert safari options - quad bikes, dune bashing, sunset rides - and pick the right adrenaline level for your trip.",
     publishedAt: "2026-08-01",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/quad-safari-morning.jpg",
     relatedTourSlugs: ["quad-safari-morning", "quad-safari-sunset", "safari"],
     intro: "Hurghada's Eastern Desert is one of the most underrated adrenaline playgrounds on the Red Sea coast. Beyond the beach, the mountains and open desert tracks just outside the city turn into a genuine off-road adventure the moment you throw a leg over a quad bike. If you want more than a slow camel photo-op, here is how to pick the safari that actually delivers a rush.",
     sections: [
@@ -155,7 +155,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Combine Snorkeling and Desert Safari in One Day Trip",
     metaDescription: "Thinking about doing snorkeling and a desert safari on the same day in Hurghada? Here's whether it's realistic, how to time it, and what to expect.",
     publishedAt: "2026-08-01",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/desert-camel-front.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "safari", "quad-safari-sunset"],
     intro: "Short Hurghada itineraries push travelers to try to fit everything into one trip - snorkeling in the morning, desert safari in the afternoon. It is possible, but it takes the right pairing and realistic timing. Here's how to actually make it work without exhausting yourself.",
     sections: [
@@ -175,7 +175,7 @@ export const blogPosts: BlogPost[] = [
     title: "Budget Scuba Diving Courses for Backpackers in Hurghada",
     metaDescription: "Hurghada is one of the cheapest places in the world to dive the Red Sea. Here's how backpackers can dive on a budget without cutting corners on safety.",
     publishedAt: "2026-08-01",
-    heroImage: "/images/placeholders/diving.svg",
+    heroImage: "/images/owned/red-sea-diver-coral.jpg",
     relatedTourSlugs: ["full-day-diving", "professional-underwater-photographer"],
     intro: "Hurghada consistently ranks as one of the most affordable places in the world to dive the Red Sea, which is exactly why it shows up on so many backpacker routes through Egypt. Here's how to dive here on a tight budget without compromising on safety or missing the reefs that make the Red Sea famous.",
     sections: [
@@ -195,7 +195,7 @@ export const blogPosts: BlogPost[] = [
     title: "Night Snorkeling Trips for Adventurous Travelers in Hurghada",
     metaDescription: "Curious about night snorkeling in Hurghada? Here's what's actually different after dark, what to expect, and how to know if it's right for you.",
     publishedAt: "2026-08-01",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/red-sea-coral-closeup.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "full-day-diving"],
     intro: "Daytime snorkeling in Hurghada shows you bright coral and darting reef fish. After dark, the same reef turns into a completely different world - nocturnal creatures come out, colors shift under torchlight, and the whole experience feels more intimate. Here's what night snorkeling actually involves before you book one.",
     sections: [
@@ -215,7 +215,7 @@ export const blogPosts: BlogPost[] = [
     title: "Off-Season Excursion Deals in Hurghada for Summer Travelers",
     metaDescription: "Traveling to Hurghada in the summer heat? Here's how off-season timing affects tour prices, crowd levels, and which excursions handle the heat best.",
     publishedAt: "2026-08-01",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/speedboat-action-wide.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "quad-safari-sunset", "orange-bay"],
     intro: "Summer in Hurghada means fewer crowds, quieter boats, and generally better availability - but it also means serious heat, especially inland. If you're traveling in the hotter months, here's how to choose excursions that work with the season instead of against it.",
     sections: [
@@ -235,7 +235,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Arrange a Custom Multi-Day Itinerary in Hurghada",
     metaDescription: "Want to plan several days of Hurghada excursions without the guesswork? Here's how to build a custom multi-day itinerary that actually flows well.",
     publishedAt: "2026-08-02",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/red-sea-coast.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "safari", "full-day-diving", "orange-bay"],
     intro: "Booking Hurghada excursions one at a time works fine for a single trip, but for a longer stay it usually leaves gaps, overlaps, or an exhausting back-to-back schedule. A custom multi-day itinerary - planned as one package with one local contact - solves that, and it's easier to arrange than most travelers expect.",
     sections: [
@@ -255,7 +255,7 @@ export const blogPosts: BlogPost[] = [
     title: "Full Moon Party Boat Trips in Hurghada: What to Expect",
     metaDescription: "Curious about a full moon boat party in Hurghada? Here's what these evening trips actually involve and how they differ from a daytime snorkeling boat.",
     publishedAt: "2026-08-02",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/hurghada-marina-mosque.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "orange-bay"],
     intro: "A full moon boat trip trades the reef stops of a daytime excursion for something more social - music, a sunset transition into open water under moonlight, and a completely different atmosphere from a standard snorkeling day. Here's what to actually expect before booking one.",
     sections: [
@@ -275,7 +275,7 @@ export const blogPosts: BlogPost[] = [
     title: "How to Get Group Rates for Large Tour Bookings in Hurghada",
     metaDescription: "Booking Hurghada tours for a big group or wedding party? Here's how group pricing actually works and how to get the best rate for a large booking.",
     publishedAt: "2026-08-02",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/speedboat-guests.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "safari", "orange-bay"],
     intro: "Large groups - wedding parties, corporate retreats, extended families - regularly get better per-person pricing on Hurghada excursions than individual travelers booking the same trip. Here's how that pricing actually works and how to make sure your group gets a fair rate.",
     sections: [
@@ -295,7 +295,7 @@ export const blogPosts: BlogPost[] = [
     title: "Valentine's Day Excursions for Couples in Hurghada",
     metaDescription: "Planning a romantic day out in Hurghada for Valentine's? Here are the excursions that actually work best for couples, from private boats to sunset safaris.",
     publishedAt: "2026-08-02",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/mahmya-boats-sunset.jpg",
     relatedTourSlugs: ["mahmya-island", "quad-safari-sunset", "professional-underwater-photographer"],
     intro: "Valentine's Day in a beach resort can mean an overcrowded hotel restaurant, or it can mean a genuinely memorable day out on the Red Sea. Here's how to pick a Hurghada excursion that actually feels romantic rather than just another group tour with a heart-shaped napkin.",
     sections: [
@@ -315,7 +315,7 @@ export const blogPosts: BlogPost[] = [
     title: "Halal-Friendly Excursions in Hurghada: What to Know",
     metaDescription: "Traveling to Hurghada and want halal-friendly excursions? Here's what to expect around meals, prayer, and alcohol on typical Red Sea day trips.",
     publishedAt: "2026-08-02",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/hurghada-glass-bottom-boat.jpg",
     relatedTourSlugs: ["orange-bay", "full-day-snorkeling", "safari"],
     intro: "Egypt is a majority-Muslim country, and Hurghada's tourism industry is generally well set up for halal-friendly travel - but excursion details vary, especially around meals and alcohol onboard. Here's what to check before booking so your day trip matches your expectations.",
     sections: [
@@ -335,7 +335,7 @@ export const blogPosts: BlogPost[] = [
     title: "Eid Holiday Excursions in Hurghada: What to Book and When",
     metaDescription: "Visiting Hurghada during Eid? Here's what to know about booking excursions during the holiday - demand, timing, and which trips suit a family celebration.",
     publishedAt: "2026-08-02",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/mahmya-island-boats-owner.jpg",
     relatedTourSlugs: ["orange-bay", "mahmya-island", "safari"],
     intro: "Eid is one of the busiest holiday periods in Egyptian tourism, and Hurghada sees a noticeable spike in both local and international visitors booking excursions during this window. If your trip lines up with Eid, a bit of extra planning goes a long way toward avoiding a fully booked-out day.",
     sections: [
@@ -355,7 +355,7 @@ export const blogPosts: BlogPost[] = [
     title: "Pre-Wedding Photoshoot Desert Safari Packages in Hurghada",
     metaDescription: "Planning a pre-wedding shoot in the desert around Hurghada? Here's how to arrange a safari-based photoshoot package with the right timing and light.",
     publishedAt: "2026-08-03",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/desert-camel-profile.jpg",
     relatedTourSlugs: ["safari", "professional-underwater-photographer", "quad-safari-sunset"],
     intro: "The desert outside Hurghada gives pre-wedding photos a dramatic backdrop that a beach or hotel garden can't match - open dunes, mountain silhouettes, and golden-hour light with almost no distractions in frame. Here's how couples typically arrange a photoshoot-focused desert safari.",
     sections: [
@@ -375,7 +375,7 @@ export const blogPosts: BlogPost[] = [
     title: "Spring Break Excursions for University Groups in Hurghada",
     metaDescription: "Planning a spring break trip to Hurghada with a university group? Here's how to pick excursions and lock in group rates without the logistics headache.",
     publishedAt: "2026-08-03",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/speedboat-action.jpg",
     relatedTourSlugs: ["full-day-snorkeling", "orange-bay", "quad-safari-morning"],
     intro: "Spring break brings a specific kind of group to Hurghada - university-age travelers wanting an active, social trip on a tight shared budget. Here's how to structure the excursion side of a group spring break trip so it actually works for everyone in the group.",
     sections: [
@@ -395,7 +395,7 @@ export const blogPosts: BlogPost[] = [
     title: "Graduation Trip Excursions for Students Visiting Hurghada",
     metaDescription: "Celebrating graduation with a trip to Hurghada? Here's how to plan a memorable excursion lineup for a student group on a graduation trip budget.",
     publishedAt: "2026-08-03",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/speedboat-marina.jpg",
     relatedTourSlugs: ["orange-bay", "quad-safari-sunset", "full-day-diving"],
     intro: "A graduation trip sits in a slightly different spot than a typical spring break group - often a smaller circle of close friends, a bit more budget to spend on one standout experience, and a genuine milestone worth marking properly. Here's how to plan excursions that make it feel like one.",
     sections: [
@@ -415,7 +415,7 @@ export const blogPosts: BlogPost[] = [
     title: "Hurghada to Luxor Day Trip: What to Expect in 2026",
     metaDescription: "Planning a Hurghada to Luxor day trip? Here's the real 2026 timeline, what you'll actually see at Karnak and the Valley of the Kings, and how to prepare.",
     publishedAt: "2026-08-04",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/luxor-branded.jpg",
     relatedTourSlugs: ["safari"],
     intro: "A Hurghada to Luxor day trip covers roughly 500 kilometers round trip and packs two of Egypt's biggest ancient sites into a single long day. It is a genuinely full day, not a relaxed half-day outing, so knowing the real timeline in 2026 before you book saves you from a nasty surprise at 4am.",
     sections: [
@@ -438,7 +438,7 @@ export const blogPosts: BlogPost[] = [
     title: "Private Airport Transfers in Hurghada: A Practical Guide (2026)",
     metaDescription: "Landing in Hurghada in 2026? Here's how private airport transfers actually work - pricing factors, timing, and what to confirm before you fly.",
     publishedAt: "2026-08-04",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/hurghada-airport-sunset.jpg",
     relatedTourSlugs: [],
     intro: "Hurghada International Airport sits close enough to most resort areas that a private transfer is usually a short, straightforward ride - but the details around pickup timing, vehicle type, and what happens if your flight is delayed are worth knowing before you land in 2026.",
     sections: [
@@ -460,7 +460,7 @@ export const blogPosts: BlogPost[] = [
     title: "Liveaboard Diving Safaris from Hurghada: What to Know Before You Book",
     metaDescription: "Considering a liveaboard diving safari from Hurghada? Here's how multi-day boat diving actually works, what reef sites you'll reach, and who it suits.",
     publishedAt: "2026-08-05",
-    heroImage: "/images/placeholders/diving.svg",
+    heroImage: "/images/owned/red-sea-diver-fish.jpg",
     relatedTourSlugs: ["full-day-diving", "professional-underwater-photographer"],
     intro: "A liveaboard trades a single day-trip dive boat for several days sleeping onboard, reaching reef sites a day boat simply can't cover round-trip. For divers who've already done the standard Hurghada day trips and want more, here's what a liveaboard safari actually involves.",
     sections: [
@@ -480,7 +480,7 @@ export const blogPosts: BlogPost[] = [
     title: "Hurghada to Cairo Day Trip: Is It Worth It in 2026?",
     metaDescription: "Thinking about a Hurghada to Cairo day trip to see the Pyramids? Here's the real travel time, what you'd see, and whether it's actually worth it in 2026.",
     publishedAt: "2026-08-05",
-    heroImage: "/images/placeholders/desert-experience.svg",
+    heroImage: "/images/owned/cairo-giza-day.jpg",
     relatedTourSlugs: ["safari"],
     intro: "Cairo and the Pyramids of Giza sit roughly 450 kilometers from Hurghada, and the honest answer on whether a single-day trip is worth it depends entirely on how much travel time you're willing to trade for a few hours at the pyramids. Here's the real math for 2026.",
     sections: [
@@ -501,7 +501,7 @@ export const blogPosts: BlogPost[] = [
     title: "Private Transfer to Senzo Mall Hurghada: What to Know Before You Book",
     metaDescription: "Planning a shopping day at Senzo Mall in Hurghada? Here's how private transfer pricing, timing and zone coverage actually work in 2026.",
     publishedAt: "2026-08-09",
-    heroImage: "/images/placeholders/island-trip.svg",
+    heroImage: "/images/owned/senzo-mall.jpg",
     relatedTourSlugs: ["senzo-transfer", "hurghada-airport-transfer"],
     intro: "Senzo Mall is Hurghada's go-to spot for a change of pace from the beach - air-conditioned shopping, restaurants, and a cinema, all in one place. Getting there is simple with a private transfer, but pricing and timing work a little differently from a scheduled tour. Here's what to know before you book.",
     sections: [
