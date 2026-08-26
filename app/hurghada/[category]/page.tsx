@@ -78,19 +78,35 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
       ],
     },
   } as Record<string, { title: string; intro: string; options: Array<{ title: string; text: string }>; questions: Array<{ q: string; a: string }> }>)[category.slug] : undefined;
+  const homeLabel = de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : pl ? "Strona główna" : zh ? "首页" : "Home";
+  const destinationLabel = ru ? "Хургада" : ar ? "الغردقة" : zh ? "赫尔格达" : "Hurghada";
+  const destinationPath = localePath(locale, "/destinations/hurghada");
   const schema = {
     "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: displayTitle,
-    url: pageUrl,
-    inLanguage: locale,
-    numberOfItems: categoryTours.length,
-    itemListElement: categoryTours.map((tour, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: absoluteUrl(localePath(locale, `/tours/${tour.slug}`)),
-      name: tour.title,
-    })),
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${pageUrl}#breadcrumb`,
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: homeLabel, item: absoluteUrl(localePath(locale)) },
+          { "@type": "ListItem", position: 2, name: destinationLabel, item: absoluteUrl(destinationPath) },
+          { "@type": "ListItem", position: 3, name: displayTitle, item: pageUrl },
+        ],
+      },
+      {
+        "@type": "ItemList",
+        name: displayTitle,
+        url: pageUrl,
+        inLanguage: locale,
+        numberOfItems: categoryTours.length,
+        itemListElement: categoryTours.map((tour, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: absoluteUrl(localePath(locale, `/tours/${tour.slug}`)),
+          name: tour.title,
+        })),
+      },
+    ],
   };
 
   return (
@@ -98,7 +114,7 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="bg-slate-950 px-6 pb-20 pt-32 text-white sm:px-8">
         <div className="mx-auto max-w-6xl">
-          <nav aria-label="Breadcrumb" className="text-sm text-slate-400"><Link href={localePath(locale)} className="hover:text-white">{de ? "Startseite" : ru ? "Главная" : ar ? "الرئيسية" : pl ? "Strona główna" : zh ? "首页" : "Home"}</Link><span className="px-2">/</span><span>{ru ? "Хургада" : ar ? "الغردقة" : zh ? "赫尔格达" : "Hurghada"}</span><span className="px-2">/</span><span className="text-white">{displayTitle}</span></nav>
+          <nav aria-label="Breadcrumb" className="text-sm text-slate-400"><Link href={localePath(locale)} className="hover:text-white">{homeLabel}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationPath} className="hover:text-white">{destinationLabel}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-white" aria-current="page">{displayTitle}</span></nav>
           <p className="mt-10 font-semibold uppercase tracking-[0.28em] text-cyan-300">{ru ? "Экскурсии в Хургаде" : ar ? "رحلات الغردقة" : pl ? "Wycieczki w Hurghadzie" : zh ? "赫尔格达旅游项目" : category.eyebrow}</p>
           <h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{zh ? `赫尔格达${displayTitle}` : <>{displayTitle} {de ? "in Hurghada" : ru ? "в Хургаде" : "in Hurghada"}</>}</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{de ? "Entdecke passende Ausflüge Hurghada mit transparenten Preisen, klaren Leistungen und direkter Bestätigung." : ru ? "Выбирайте экскурсии в Хургаде с прозрачными ценами, понятным описанием услуг и прямым подтверждением." : ar ? "اختر رحلات الغردقة بأسعار واضحة وخدمات مفهومة وتأكيد مباشر." : pl ? "Wybierz wycieczki w Hurghadzie z jasnymi cenami, czytelnym zakresem usług i bezpośrednim potwierdzeniem." : zh ? "探索适合您的赫尔格达行程，价格透明、包含项目清晰，并可获得直接确认。" : category.description}</p>

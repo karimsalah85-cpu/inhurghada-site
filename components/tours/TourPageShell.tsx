@@ -12,6 +12,7 @@ import { localizeTour } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
 import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
+import { categoryLabels } from "@/lib/tour-categories";
 
 export default function TourPageShell({ tour, locale = "en", relatedTourCandidates = tours }: { tour: Tour; locale?: Locale; relatedTourCandidates?: Tour[] }) {
   const de = locale === "de";
@@ -39,6 +40,9 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const homeHref = localePath(locale);
   const toursHref = `${localePath(locale, "/tours")}?destination=${tour.destinationSlug || "hurghada"}`;
   const destinationHref = localePath(locale, `/destinations/${tour.destinationSlug}`);
+  const isOrangeBay = tour.slug === "orange-bay";
+  const islandTripsHref = localePath(locale, "/hurghada/island-trips");
+  const islandTripsLabel = categoryLabels[locale]["island-trips"];
   const reviewCount = Number(tour.reviews);
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
@@ -79,8 +83,14 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     de: { home: "Startseite", tours: "Ausflüge" }, ru: { home: "Главная", tours: "Экскурсии" },
     pl: { home: "Strona główna", tours: "Wycieczki" }, zh: { home: "首页", tours: "旅游项目" },
   }[locale];
+  const breadcrumbItems = [
+    { "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) },
+    { "@type": "ListItem", position: 2, name: destination?.name || "Hurghada", item: absoluteUrl(destinationHref) },
+    ...(isOrangeBay ? [{ "@type": "ListItem", position: 3, name: islandTripsLabel, item: absoluteUrl(islandTripsHref) }] : []),
+    { "@type": "ListItem", position: isOrangeBay ? 4 : 3, name: tour.title, item: tourUrl },
+  ];
   const schema = { "@context": "https://schema.org", "@graph": [
-    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: [{ "@type": "ListItem", position: 1, name: breadcrumbLabels.home, item: absoluteUrl(localePath(locale)) }, { "@type": "ListItem", position: 2, name: destination?.name || "Hurghada", item: absoluteUrl(destinationHref) }, { "@type": "ListItem", position: 3, name: tour.title, item: tourUrl }] },
+    { "@type": "BreadcrumbList", "@id": `${tourUrl}#breadcrumb`, itemListElement: breadcrumbItems },
     tourSchema,
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
@@ -89,7 +99,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
       <TourViewTracker title={tour.title} price={tour.price} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{breadcrumbLabels.home}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationHref} className="hover:text-cyan-700">{destination?.name || "Hurghada"}</Link><span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
+        <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{breadcrumbLabels.home}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationHref} className="hover:text-cyan-700">{destination?.name || "Hurghada"}</Link>{isOrangeBay ? <><span className="px-2" aria-hidden="true">/</span><Link href={islandTripsHref} className="hover:text-cyan-700">{islandTripsLabel}</Link></> : null}<span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{destination?.name || "Hurghada"} · {ui.experience}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
         <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {ui.reviews}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
