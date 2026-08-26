@@ -249,6 +249,15 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "غوص تجريبي SSI Basic Diver", packageDescription: "أول تجربة غوص لنصف يوم تشمل النظرية والتدريب في مياه محصورة والمعدات وغطسة في المياه المفتوحة بإشراف مدرب.", packageLabel: "للشخص", ageBands: { adults: "المشارك", children: "تواصل معنا لتأكيد الحد الأدنى للعمر", infants: "غير ينطبق" },
     seoTitle: "جرّب الغوص في جدة | SSI Basic Diver", metaDescription: "احجز تجربة غوص SSI Basic Diver في جدة: نظرية ومهارات مياه محصورة ومعدات وغطسة مفتوحة لمدة 30-45 دقيقة بسعر 550 ريال سعودي.",
   },
+  "certified-diver-boat-trip-jeddah": {
+    title: "رحلة قارب للغواصين المعتمدين - غطستان بمرشد", location: "متجر الحداد للغوص، جدة", duration: "6-8 ساعات", category: "غوص",
+    description: "غطستان بالقارب بصحبة مرشد للغواصين المعتمدين فقط، لاستكشاف مواقع حطام السفن والشعاب المرجانية في البحر الأحمر قرب جدة، ضمن رحلة نصف يوم تنطلق من متجر الحداد للغوص.",
+    highlights: ["للغواصين المعتمدين فقط - يلزم إثبات الشهادة", "غطستان بالقارب مع مرشد في مواقع حطام السفن أو الشعاب المرجانية", "مواقع محتملة تشمل شعاب أنس ودقيس وحطام آن آن وحطام تشيكن وكريزي 8", "خزانات الغوص وأحزمة الأوزان والوجبات الخفيفة والمشروبات مشمولة", "حد أقصى 20 غواصاً لكل رحلة"],
+    included: ["خزانات الغوص وأحزمة الأوزان", "الوجبات الخفيفة والمشروبات"], notIncluded: ["معدات الغوص - متوفرة للإيجار بشكل منفصل", "المواصلات إلى متجر الحداد للغوص ما لم تُؤكد بشكل منفصل"],
+    notes: ["للغواصين المعتمدين فقط؛ يلزم إثبات الشهادة.", "يجب الحجز قبل 24 ساعة على الأقل.", "يُعتبر الوصول المتأخر أكثر من 15 دقيقة بمثابة خدمة مقدمة، دون استرداد.", "قد يُعاد جدولة الرحلات أو استرداد ثمنها في حال سوء الأحوال الجوية.", "الحد الأقصى 20 مقعداً لكل رحلة."],
+    packageName: "رحلة قارب للغواصين المعتمدين - غطستان", packageDescription: "غطستان بالقارب بصحبة مرشد للغواصين المعتمدين مع خزانات وأحزمة أوزان ووجبات خفيفة ومشروبات مشمولة.", packageLabel: "للشخص", ageBands: { adults: "الغواصون المعتمدون", children: "", infants: "" },
+    seoTitle: "رحلة قارب للغواصين المعتمدين في جدة | غطستان بمرشد", metaDescription: "احجز رحلة قارب بغطستين بمرشد للغواصين المعتمدين في جدة، لاستكشاف مواقع حطام السفن والشعاب المرجانية قرب متجر الحداد للغوص، بسعر 400 ريال سعودي للشخص شاملة الخزانات والوجبات الخفيفة.",
+  },
 };
 
 export function localizeTourArabic(tour: Tour): Tour {
@@ -522,6 +531,15 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     whatToBring: ["Handtuch", "Trockene Wechselkleidung", "Sonnenschutz", "Badebekleidung", "Gültiger Ausweis", "Erforderliche ärztliche Freigabe"],
     packageName: "SSI Basic Diver – Schnuppertauchen", packageDescription: "Ein halbtägiges erstes Taucherlebnis mit Theorie, Training im begrenzten Wasser, Ausrüstung und einem vom Instruktor geleiteten Freiwassertauchgang.", packageLabel: "Pro Person", ageBands: { adults: "Teilnehmer", children: "Kontaktiere uns zur Bestätigung des Mindestalters", infants: "Nicht zutreffend" },
     seoTitle: "Schnuppertauchen in Jeddah | SSI Basic Diver", metaDescription: "Buche ein SSI-Basic-Diver-Schnuppertauchen in Jeddah: Theorie, Übungen im begrenzten Wasser, Ausrüstung und ein 30–45-minütiger Freiwassertauchgang für SAR 550.",
+  },
+  "certified-diver-boat-trip-jeddah": {
+    title: "Bootstour für zertifizierte Taucher — Zwei geführte Tauchgänge", location: "Al-Haddad Scuba Shop, Jeddah", duration: "6–8 Stunden", category: "Tauchen",
+    description: "Zwei geführte Bootstauchgänge nur für zertifizierte Taucher zu Wrack- und Korallenriffplätzen im Roten Meer bei Jeddah, im Rahmen einer Halbtagestour ab dem Al-Haddad Scuba Shop.",
+    highlights: ["Nur für zertifizierte Taucher — Nachweis der Zertifizierung erforderlich", "Zwei geführte Bootstauchgänge an Wrack- oder Korallenriffplätzen", "Mögliche Orte sind Anas Reef, Duqais, Ann-Ann-Wrack, Chicken Wreck und Crazy 8", "Tauchflaschen, Bleigurte, Snacks und Getränke inklusive", "Maximal 20 Taucher pro Tour"],
+    included: ["Tauchflaschen und Bleigurte", "Snacks und Getränke"], notIncluded: ["Tauchausrüstung — separat mietbar", "Transport zum Al-Haddad Scuba Shop, sofern nicht separat bestätigt"],
+    notes: ["Nur für zertifizierte Taucher; ein Zertifizierungsnachweis ist erforderlich.", "Buche mindestens 24 Stunden im Voraus.", "Ankünfte mit mehr als 15 Minuten Verspätung gelten als erbrachte Leistung, ohne Rückerstattung.", "Touren können bei schwerem Wetter verschoben oder erstattet werden.", "Maximal 20 Plätze pro Tour."],
+    packageName: "Bootstour für zertifizierte Taucher — Zwei Tauchgänge", packageDescription: "Zwei geführte Bootstauchgänge für zertifizierte Taucher mit Tauchflaschen, Bleigurten, Snacks und Getränken inklusive.", packageLabel: "Pro Person", ageBands: { adults: "Zertifizierte Taucher", children: "", infants: "" },
+    seoTitle: "Bootstour für zertifizierte Taucher in Jeddah | Zwei geführte Tauchgänge", metaDescription: "Buche eine geführte Bootstour mit zwei Tauchgängen für zertifizierte Taucher in Jeddah, zu Wrack- und Korallenriffplätzen nahe dem Al-Haddad Scuba Shop, für 400 SAR pro Person inklusive Flaschen und Snacks.",
   },
 };
 
@@ -801,6 +819,15 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "SSI Basic Diver — пробное погружение", packageDescription: "Первое погружение на полдня с теорией, тренировкой в закрытой воде, снаряжением и погружением в открытой воде под руководством инструктора.", packageLabel: "На человека", ageBands: { adults: "Участник", children: "Свяжитесь с нами для подтверждения минимального возраста", infants: "Не применяется" },
     seoTitle: "Пробное погружение в Джидде | SSI Basic Diver", metaDescription: "Забронируйте пробное погружение SSI Basic Diver в Джидде: теория, навыки в закрытой воде, снаряжение и погружение в открытой воде на 30–45 минут за 550 SAR.",
   },
+  "certified-diver-boat-trip-jeddah": {
+    title: "Поездка на катере для сертифицированных дайверов — два погружения с гидом", location: "Al-Haddad Scuba Shop, Джидда", duration: "6-8 часов", category: "Дайвинг",
+    description: "Два погружения с гидом с катера только для сертифицированных дайверов, к местам затонувших кораблей и коралловых рифов Красного моря у Джидды, в рамках поездки на полдня от Al-Haddad Scuba Shop.",
+    highlights: ["Только для сертифицированных дайверов — требуется подтверждение сертификации", "Два погружения с катера с гидом у затонувших кораблей или рифов", "Возможные места: риф Anas, Duqais, затонувший корабль Ann Ann, Chicken Wreck и Crazy 8", "Баллоны, грузовые пояса, закуски и напитки включены", "Максимум 20 дайверов на поездку"],
+    included: ["Баллоны и грузовые пояса", "Закуски и напитки"], notIncluded: ["Снаряжение для дайвинга — доступна отдельная аренда", "Транспорт до Al-Haddad Scuba Shop, если не подтверждён отдельно"],
+    notes: ["Только для сертифицированных дайверов; требуется подтверждение сертификации.", "Бронируйте минимум за 24 часа.", "Опоздание более чем на 15 минут засчитывается как оказанная услуга, без возврата средств.", "Поездки могут быть перенесены или возвращены при сильной непогоде.", "Максимум 20 мест на поездку."],
+    packageName: "Поездка на катере для сертифицированных дайверов — два погружения", packageDescription: "Два погружения с катера с гидом для сертифицированных дайверов с баллонами, грузовыми поясами, закусками и напитками.", packageLabel: "За человека", ageBands: { adults: "Сертифицированные дайверы", children: "", infants: "" },
+    seoTitle: "Поездка на катере для сертифицированных дайверов в Джидде | Два погружения с гидом", metaDescription: "Забронируйте поездку на катере с двумя погружениями с гидом для сертифицированных дайверов в Джидде, у затонувших кораблей и рифов рядом с Al-Haddad Scuba Shop, за 400 SAR с человека, включая баллоны и закуски.",
+  },
 };
 
 export function localizeTourRussian(tour: Tour): Tour {
@@ -1064,6 +1091,15 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     packageName: "SSI Basic Diver——体验潜水", packageDescription: "半天的初次潜水体验，包含理论、封闭水域训练、装备及教练带领的开放水域潜水。", packageLabel: "每人", ageBands: { adults: "参与者", children: "请联系我们确认最低年龄", infants: "不适用" },
     seoTitle: "吉达体验潜水 | SSI Basic Diver", metaDescription: "在吉达预订SSI Basic Diver体验潜水：理论、封闭水域技巧、装备及30-45分钟开放水域潜水，价格550沙特里亚尔。",
   },
+  "certified-diver-boat-trip-jeddah": {
+    title: "认证潜水员快艇潜水之旅 — 两次向导潜水", location: "吉达 Al-Haddad 潜水店", duration: "6-8小时", category: "潜水",
+    description: "专为持证潜水员设计的两次向导船潜，探索吉达附近红海的沉船和珊瑚礁地点，半天行程从Al-Haddad潜水店出发。",
+    highlights: ["仅限持证潜水员 — 需出示潜水证书", "两次向导船潜，前往沉船或珊瑚礁地点", "可能的地点包括Anas礁、Duqais、Ann Ann沉船、Chicken Wreck和Crazy 8", "含气瓶、配重带、小吃和饮料", "每次行程最多20名潜水员"],
+    included: ["气瓶和配重带", "小吃和饮料"], notIncluded: ["潜水装备 — 可单独租赁", "前往Al-Haddad潜水店的交通（除非另行确认）"],
+    notes: ["仅限持证潜水员；须出示潜水证书。", "请至少提前24小时预订。", "迟到超过15分钟将视为已提供服务，不予退款。", "如遇恶劣天气，行程可能改期或退款。", "每次行程最多20个名额。"],
+    packageName: "认证潜水员快艇之旅 — 两次潜水", packageDescription: "为持证潜水员安排的两次向导船潜，含气瓶、配重带、小吃和饮料。", packageLabel: "每人", ageBands: { adults: "持证潜水员", children: "", infants: "" },
+    seoTitle: "吉达认证潜水员船潜之旅 | 两次向导潜水", metaDescription: "在吉达预订两次向导船潜行程，专为持证潜水员设计，探索Al-Haddad潜水店附近的沉船和珊瑚礁，每人400沙特里亚尔，含气瓶和小吃。",
+  },
 };
 
 export function localizeTourChinese(tour: Tour): Tour {
@@ -1279,6 +1315,15 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     whatToBring: ["Ręcznik", "Suche ubranie na zmianę", "Ochrona przeciwsłoneczna", "Strój kąpielowy", "Ważny dokument tożsamości", "Wszelkie wymagane zaświadczenie lekarskie"],
     packageName: "SSI Basic Diver – nurkowanie próbne", packageDescription: "Półdniowe pierwsze doświadczenie nurkowe z teorią, treningiem w wodzie ograniczonej, sprzętem i nurkowaniem na wodach otwartych pod okiem instruktora.", packageLabel: "Za osobę", ageBands: { adults: "Uczestnik", children: "Skontaktuj się z nami, aby potwierdzić minimalny wiek", infants: "Nie dotyczy" },
     seoTitle: "Nurkowanie próbne w Dżuddzie | SSI Basic Diver", metaDescription: "Zarezerwuj nurkowanie próbne SSI Basic Diver w Dżuddzie: teoria, umiejętności w wodzie ograniczonej, sprzęt i 30–45-minutowe nurkowanie na wodach otwartych za 550 SAR.",
+  },
+  "certified-diver-boat-trip-jeddah": {
+    title: "Rejs łodzią dla nurków certyfikowanych — dwa nurkowania z przewodnikiem", location: "Al-Haddad Scuba Shop, Dżudda", duration: "6-8 godzin", category: "Nurkowanie",
+    description: "Dwa nurkowania z przewodnikiem z łodzi wyłącznie dla nurków certyfikowanych, przy wrakach i rafach koralowych Morza Czerwonego koło Dżuddy, w ramach wycieczki na pół dnia z Al-Haddad Scuba Shop.",
+    highlights: ["Tylko dla nurków certyfikowanych — wymagane potwierdzenie certyfikacji", "Dwa nurkowania z łodzi z przewodnikiem przy wrakach lub rafach koralowych", "Możliwe miejsca: rafa Anas, Duqais, wrak Ann Ann, Chicken Wreck i Crazy 8", "Butle, pasy balastowe, przekąski i napoje w cenie", "Maksymalnie 20 nurków na wycieczkę"],
+    included: ["Butle i pasy balastowe", "Przekąski i napoje"], notIncluded: ["Sprzęt do nurkowania — dostępny osobno do wynajęcia", "Transport do Al-Haddad Scuba Shop, jeśli nie potwierdzony osobno"],
+    notes: ["Tylko dla nurków certyfikowanych; wymagane potwierdzenie certyfikacji.", "Rezerwuj co najmniej 24 godziny wcześniej.", "Przybycie ponad 15 minut po czasie jest traktowane jako zrealizowana usługa, bez zwrotu kosztów.", "Wycieczki mogą zostać przełożone lub zwrócone w przypadku silnej pogody.", "Maksymalnie 20 miejsc na wycieczkę."],
+    packageName: "Rejs łodzią dla nurków certyfikowanych — dwa nurkowania", packageDescription: "Dwa nurkowania z łodzi z przewodnikiem dla nurków certyfikowanych z butlami, pasami balastowymi, przekąskami i napojami w cenie.", packageLabel: "Za osobę", ageBands: { adults: "Nurkowie certyfikowani", children: "", infants: "" },
+    seoTitle: "Rejs łodzią dla nurków certyfikowanych w Dżuddzie | Dwa nurkowania z przewodnikiem", metaDescription: "Zarezerwuj rejs łodzią z dwoma nurkowaniami z przewodnikiem dla nurków certyfikowanych w Dżuddzie, przy wrakach i rafach koło Al-Haddad Scuba Shop, za 400 SAR od osoby, w tym butle i przekąski.",
   },
 };
 

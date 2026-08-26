@@ -121,6 +121,7 @@ const categoryMedia: Record<string, SafeMedia> = {
 
 const mediaBySlug: Record<string, SafeMedia> = {
   "basic-diver-jeddah": { image: "/images/owned/basic-diver-jeddah.jpg", alt: localizedAlt("SSI Basic Diver course artwork showing scuba divers underwater") },
+  "certified-diver-boat-trip-jeddah": { image: "/images/owned/certified-diver-boat-trip-jeddah.jpg", alt: localizedAlt("Certified scuba divers geared up on a boat before a guided dive trip in Jeddah") },
   "orange-bay": ownedMedia.orangeBay,
   "safari": ownedMedia.camelAdventure,
   "professional-underwater-photographer": ownedMedia.underwaterPhotographer,
