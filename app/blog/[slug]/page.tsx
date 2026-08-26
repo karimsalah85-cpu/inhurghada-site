@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blogPosts } from "@/data/blog-posts";
 import { getLiveBlogPosts, getLiveTours } from "@/lib/live-content";
+import { localizeBlogPost } from "@/lib/blog-localization";
 import { absoluteUrl, pageMetadata, siteName } from "@/lib/seo";
 import { localePath } from "@/lib/i18n";
 
@@ -56,8 +57,9 @@ export default async function BlogArticlePage({ params, locale = "en" }: PagePro
   const { slug } = await params;
   const copy = blogArticleCopy[locale];
   const [posts, tours] = await Promise.all([getLiveBlogPosts(), getLiveTours(locale)]);
-  const post = posts.find((item) => item.slug === slug);
-  if (!post) notFound();
+  const rawPost = posts.find((item) => item.slug === slug);
+  if (!rawPost) notFound();
+  const post = localizeBlogPost(rawPost, locale);
 
   const relatedTours = post.relatedTourSlugs.map((tourSlug) => tours.find((tour) => tour.slug === tourSlug)).filter(Boolean) as typeof tours;
 

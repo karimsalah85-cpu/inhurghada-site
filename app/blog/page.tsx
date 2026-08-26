@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "@/components/media/WatermarkedImage";
 import { getLiveBlogPosts } from "@/lib/live-content";
+import { localizeBlogPosts } from "@/lib/blog-localization";
 import { pageMetadata } from "@/lib/seo";
 import { localePath } from "@/lib/i18n";
 
@@ -60,7 +61,7 @@ const blogIndexCopy: Record<BlogLocale, { eyebrow: string; heading: string; subt
 
 export default async function BlogIndexPage({ locale = "en" }: { locale?: BlogLocale }) {
   const copy = blogIndexCopy[locale];
-  const blogPosts = await getLiveBlogPosts();
+  const blogPosts = localizeBlogPosts(await getLiveBlogPosts(), locale);
   const posts = [...blogPosts].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
   return (
     <main className="mx-auto max-w-5xl px-6 py-20">

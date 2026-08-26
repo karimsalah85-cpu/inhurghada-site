@@ -118,7 +118,7 @@ export function localeFromPathname(pathname: string): Locale {
 }
 
 const localizedRouteRoots = new Set([
-  "about", "booking", "cart", "checkout", "contact", "faq", "hurghada",
+  "about", "blog", "booking", "cart", "checkout", "contact", "destinations", "faq", "hurghada",
   "privacy-policy", "terms-conditions", "tours", "transfers",
 ]);
 
