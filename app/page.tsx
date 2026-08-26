@@ -185,30 +185,6 @@ function HomeContent() {
         </div>
       </section>
 
-      <section className="bg-slate-50 px-6 py-16 sm:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{t("chooseExperience")}</p>
-              <h2 className="mt-3 text-4xl font-bold text-slate-900">{t("exploreAdventure")}</h2>
-            </div>
-            <Link href={localePath(language, "/tours")} className="font-semibold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { href: "/hurghada/island-trips", title: tr("Island escapes", "Inselerlebnisse", "Отдых на островах", "عطلات الجزر", "Wyspy i plaże", "海岛休闲"), text: tr("Beach days and reef stops", "Strandtage und Riffstopps", "Пляжи и остановки у рифов", "أيام الشاطئ ومحطات الشعاب", "Plaże i przystanki przy rafach", "海滩时光与珊瑚礁停留") },
-              { href: "/hurghada/diving-snorkeling", title: tr("Diving & snorkeling", "Tauchen & Schnorcheln", "Дайвинг и снорклинг", "الغوص والسنوركلينج", "Nurkowanie i snorkeling", "潜水与浮潜"), text: tr("Clear water and bright reefs", "Klares Wasser und bunte Riffe", "Чистая вода и яркие рифы", "مياه صافية وشعاب ملونة", "Czysta woda i kolorowe rafy", "清澈海水与多彩珊瑚礁") },
-              { href: "/hurghada/desert-safaris", title: tr("Desert adventures", "Wüstenabenteuer", "Приключения в пустыне", "مغامرات الصحراء", "Przygody na pustyni", "沙漠探险"), text: tr("Quads, Bedouin culture, sunsets", "Quads, Beduinenkultur, Sonnenuntergänge", "Квадроциклы, бедуины и закаты", "كواد وثقافة بدوية وغروب", "Quady, kultura Beduinów i zachody", "四轮摩托、贝都因文化与日落") },
-              { href: "/transfers", title: tr("Private transfers", "Privattransfers", "Частные трансферы", "تنقلات خاصة", "Prywatne transfery", "私人接送"), text: tr("Airport and hotel connections", "Flughafen- und Hotelverbindungen", "Аэропорт и отели", "توصيلات المطار والفنادق", "Lotnisko i hotele", "机场与酒店接送") },
-            ].map((category) => <Link key={category.href} href={localePath(language, category.href)} className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-cyan-400 hover:shadow-lg"><span><span className="block font-black text-slate-950">{category.title}</span><span className="mt-1 block text-sm text-slate-600">{category.text}</span></span><ArrowRight className="shrink-0 text-cyan-700 transition group-hover:translate-x-1" size={20}/></Link>)}
-          </div>
-        </div>
-      </section>
-
-
-
-
       <section
  ref={toursSection}
  id="tours"
