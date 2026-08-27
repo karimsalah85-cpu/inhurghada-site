@@ -56,3 +56,14 @@ html { scroll-behavior: smooth; }
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Waves of rings rippling outward from BottomNav's raised Book button. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bottom-nav-ring {
+    0% { transform: scale(0.9); opacity: 0.55; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .bottom-nav-ring {
+    animation: bottom-nav-ring 2.1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
