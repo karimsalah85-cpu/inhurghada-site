@@ -15,7 +15,8 @@ export type Tour = {
   currency?: "USD" | "EUR" | "SAR";
   /** JavaScript weekday numbers, Sunday = 0. */
   operatingWeekdays?: number[];
-  bookingCutoff?: { daysBefore: number; localTime?: string; timeZone: "Africa/Cairo"; assumption?: boolean };
+  bookingCutoff?: { daysBefore: number; localTime?: string; timeZone: "Africa/Cairo" | "Asia/Riyadh"; assumption?: boolean };
+  fulfillmentType?: import("@/lib/tour-booking").FulfillmentType;
   departureMarina?: string;
   bookingBlocker?: string;
   title: string;
@@ -712,6 +713,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     ageBands: { adults: "Adults (ages 13+)", children: "Children (ages 3–12)", infants: "Infants (ages 0–2) — free" },
     availableTimes: ["5:00 PM sunset cruise"],
     operatingWeekdays: [1, 3, 4],
+    bookingCutoff: { daysBefore: 1, localTime: "17:00", timeZone: "Asia/Riyadh", assumption: true },
+    fulfillmentType: "meeting_point",
     departureMarina: "Rixos Resort Gate 2, Obhur Bay",
     description: "Cruise through Jeddah's Obhur Bay aboard the three-deck Shorouk Sat yacht during golden hour, with coastal views, an air-conditioned salon, fresh sandwiches and complimentary hot and cold drinks.",
     highlights: [
@@ -753,6 +756,91 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     metaDescription: "Book the Shorouk Sat Jeddah yacht sunset cruise in Obhur Bay for SAR 120 per adult, with sandwiches, beverages and three viewing decks.",
     imageAlt: "Shorouk Sat yacht cruising through Jeddah's Obhur Bay at sunset",
     imageFocalPoint: { x: 0.53, y: 0.5 },
+  },
+  {
+    slug: "bayada-snorkeling-trip-jeddah",
+    listingStatus: "active",
+    destinationSlug: "jeddah",
+    currency: "SAR",
+    title: "Bayada Daily Snorkeling Boat Trip from Jeddah",
+    image: "/images/owned/red-sea-reef-panorama.jpg",
+    price: "350",
+    priceUnit: "per person",
+    rating: "New",
+    reviews: "New",
+    location: "Al-Haddad Scuba Shop, Jeddah",
+    duration: "5–6 hours",
+    category: "Snorkeling",
+    categoryPath: ["Diving & Snorkeling", "Snorkeling"],
+    badge: "New",
+    bookingMode: "direct",
+    fulfillmentType: "meeting_point",
+    departureMarina: "Al-Haddad Scuba Shop, Jeddah",
+    participantPricing: { adults: 350 },
+    operatingWeekdays: [0, 1, 2, 3, 4, 5, 6],
+    bookingCutoff: { daysBefore: 1, timeZone: "Asia/Riyadh", assumption: true },
+    availableTimes: ["Gathering 9:15 AM (Sunday–Thursday)", "Gathering 7:15 AM (Friday–Saturday)"],
+    description:
+      "Spend a half day snorkeling the reefs of the Bayada area near Jeddah on Al-Haddad Scuba's daily boat trip. Each departure visits a rotating choice of Red Sea sites with a professional snorkeling instructor, and equipment, snacks and drinks are included.",
+    highlights: [
+      "Daily departures to a rotating choice of Bayada-area snorkeling sites",
+      "Professional snorkeling instructor guiding and supporting you in the water",
+      "Snorkel over vibrant marine life and healthy coral reefs",
+      "About 30 to 40 minutes by boat to the day's site",
+      "Four to five hours of in-water and sightseeing time with regular breaks",
+      "Snorkeling equipment, snacks and beverages included",
+      "Small group capped at 20 guests per trip",
+    ],
+    included: [
+      "Boat trip to the selected Bayada-area site",
+      "Professional snorkeling instructor",
+      "Snorkeling equipment: mask, snorkel and fins",
+      "Snacks",
+      "Soft drinks and water",
+      "Pre-trip safety briefing and equipment fitting",
+    ],
+    notIncluded: [
+      "Scuba diving equipment, available for rent separately",
+      "Transport to Al-Haddad Scuba Shop unless separately confirmed",
+      "Towels",
+      "Personal expenses and gratuities",
+    ],
+    notes: [
+      "Meet at Al-Haddad Scuba Shop and arrive at least 15 minutes before the gathering time for check-in and the safety briefing.",
+      "Reserve at least 24 hours before the trip.",
+      "All participants must have no travel ban and must not be on a government wanted list.",
+      "Arrivals more than 15 minutes late are treated as served, with no refund.",
+      "Trips may be rescheduled or refunded in the event of severe weather.",
+      "The specific site is chosen on the day according to sea and weather conditions.",
+      "Maximum 20 seats per trip.",
+    ],
+    itinerary: [
+      "Gather at Al-Haddad Scuba Shop for check-in, briefing and final preparations, about 30 minutes",
+      "Collect and fit snorkeling equipment with a short safety demonstration, about 15 minutes",
+      "Board the boat and sail about 30 to 40 minutes to the day's site",
+      "Snorkel and explore with the instructor, with regular breaks, about four to five hours of total activity time",
+      "Return to shore, arriving back between roughly 2:00 PM and 4:30 PM depending on conditions",
+    ],
+    notSuitableFor: [
+      "Guests subject to a travel ban or listed on a government wanted list",
+      "Guests who are not comfortable in open water",
+      "Unaccompanied young children; contact us to confirm the minimum age",
+    ],
+    whatToBring: ["Dry change of clothes", "Towel", "Sunscreen", "Swimwear", "Valid identification"],
+    faqs: [
+      { question: "What time does the Bayada snorkeling trip start?", answer: "Gathering is at 9:15 AM from Sunday to Thursday and at 7:15 AM on Friday and Saturday. Arrive at least 15 minutes early for check-in and the safety briefing." },
+      { question: "Which site will we visit?", answer: "Bayada trips rotate between several snorkeling spots around the Bayada area. The exact site is decided on the day according to sea and weather conditions." },
+      { question: "Is snorkeling equipment provided?", answer: "Yes. Mask, snorkel and fins are included, along with a professional snorkeling instructor. Scuba diving equipment is not included but can be rented separately." },
+      { question: "Do I need to be a strong swimmer?", answer: "You should be comfortable in open water. A professional instructor guides and supports the group throughout the trip." },
+    ],
+    ageBands: { adults: "Participant", children: "Contact us to confirm the minimum age", infants: "Not applicable" },
+    packageName: "Bayada Daily Snorkeling Boat Trip",
+    packageDescription: "A half-day guided snorkeling boat trip to a rotating choice of Bayada-area Red Sea sites, with instructor, equipment, snacks and drinks.",
+    packagePrice: "350",
+    packageLabel: "Per person",
+    seoTitle: "Bayada Daily Snorkeling Boat Trip from Jeddah",
+    metaDescription: "Book Al-Haddad Scuba's daily Bayada snorkeling boat trip from Jeddah: a rotating choice of Red Sea reef sites with a professional instructor, plus equipment, snacks and drinks, for SAR 350 per person.",
+    imageAlt: "Snorkeler exploring a coral reef in clear Red Sea water near Jeddah",
   },
   {
     slug: "dolphin-house-marsa-alam", listingStatus: "active", destinationSlug: "marsa-alam", currency: "EUR", title: "Dolphin House Full-Day Snorkeling Boat Trip from Marsa Alam", image: "/images/placeholders/dolphin-house.svg", price: "99", rating: "New", reviews: "New", location: "Marsa Alam Marina, Marsa Alam", duration: "Full day", category: "Snorkeling", badge: "New", bookingMode: "direct", priceUnit: "per person", participantPricing: { adults: 99, youth: 50, infants: 0 }, ageBands: { adults: "Adults (ages 12+)", children: "Children (ages 2–11)", infants: "Infants (under 2) — free" }, availableTimes: ["07:00 pickup · 08:30 boat departure"], operatingWeekdays: [1, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" }, departureMarina: "Marsa Alam Marina",

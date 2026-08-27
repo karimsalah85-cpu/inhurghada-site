@@ -13,6 +13,7 @@ import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
 import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
 import { categoryLabels } from "@/lib/tour-categories";
+import ShareTripButton from "@/components/share/ShareTripButton";
 
 export default function TourPageShell({ tour, locale = "en", relatedTourCandidates = tours }: { tour: Tour; locale?: Locale; relatedTourCandidates?: Tour[] }) {
   const de = locale === "de";
@@ -102,7 +103,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
         <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{breadcrumbLabels.home}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationHref} className="hover:text-cyan-700">{destination?.name || "Hurghada"}</Link>{isOrangeBay ? <><span className="px-2" aria-hidden="true">/</span><Link href={islandTripsHref} className="hover:text-cyan-700">{islandTripsLabel}</Link></> : null}<span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{destination?.name || "Hurghada"} · {ui.experience}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
-        <div className="mt-4 flex flex-wrap gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {ui.reviews}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span></div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {ui.reviews}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span>{tour.slug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={locale} tourSlug={tour.slug}/> : null}</div>
         <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} imageAlt={tour.imageAlt} galleryImageAlts={tour.galleryImageAlts} imageFocalPoint={tour.imageFocalPoint} galleryImageFocalPoints={tour.galleryImageFocalPoints} locale={locale} />
       </section>
 
@@ -137,6 +138,8 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
                   bookingLeadTime={tour.bookingLeadTime}
                   currency={tour.currency}
                   operatingWeekdays={tour.operatingWeekdays}
+                  fulfillmentType={tour.fulfillmentType}
+                  meetingPoint={tour.departureMarina}
                 />}
             </Suspense></>}
           </div>
@@ -146,7 +149,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">{ui.before}</p><h2 className="mt-3 text-3xl font-bold text-slate-900">{ui.faq}</h2><div className="mt-6 divide-y divide-slate-200">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-slate-900">{faq.question}</summary><p className="mt-3 leading-7 text-slate-600">{faq.answer}</p></details>)}</div></div>
-          <div className="rounded-3xl bg-slate-950 p-8 text-white"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">{ui.more}</p><h2 className="mt-3 text-3xl font-bold">{ui.related} · {destination?.name || "Hurghada"}</h2><p className="mt-4 leading-7 text-slate-300">{ui.relatedText}</p><div className="mt-6 space-y-3">{relatedTours.map((item) => <Link key={item.slug} href={localePath(locale, `/tours/${item.slug}`)} className="flex items-center justify-between rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold hover:border-cyan-300 hover:text-cyan-200"><span>{item.title}</span><span>{ui.from} {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? <span className="mr-1 text-slate-400 line-through">${item.originalPrice}</span> : null}${item.price}</span></Link>)}</div><Link href={toursHref} className="mt-7 inline-flex rounded-full bg-cyan-400 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">{ui.all}</Link></div>
+          <div className="rounded-3xl bg-slate-950 p-8 text-white"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">{ui.more}</p><h2 className="mt-3 text-3xl font-bold">{ui.related} · {destination?.name || "Hurghada"}</h2><p className="mt-4 leading-7 text-slate-300">{ui.relatedText}</p><div className="mt-6 space-y-3">{relatedTours.map((item) => { const format = (value: string) => new Intl.NumberFormat(locale, { style: "currency", currency: item.currency || "USD" }).format(Number(value)); return <Link key={item.slug} href={localePath(locale, `/tours/${item.slug}`)} className="flex items-center justify-between rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold hover:border-cyan-300 hover:text-cyan-200"><span>{item.title}</span><span>{ui.from} {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? <span className="mr-1 text-slate-400 line-through">{format(item.originalPrice)}</span> : null}{format(item.price)}</span></Link>; })}</div><Link href={toursHref} className="mt-7 inline-flex rounded-full bg-cyan-400 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">{ui.all}</Link></div>
         </div>
       </section>
     </main>

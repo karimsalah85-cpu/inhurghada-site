@@ -23,6 +23,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
 import { marinaTransferOptions } from "@/data/speedboat-booking";
 import type { DestinationSlug } from "@/lib/destinations";
+import { isOperatingDate, nextDepartures, nextOperatingDate, type FulfillmentType } from "@/lib/tour-booking";
 
 type ParticipantPricing = { adults: number; youth?: number; infants?: number };
 type PackageOption = { id: string; label: string; price: number };
@@ -49,6 +50,8 @@ type BookingFormProps = {
   bookingLeadTime?: "next-day-before-15";
   currency?: "USD" | "EUR" | "SAR";
   operatingWeekdays?: number[];
+  fulfillmentType?: FulfillmentType;
+  meetingPoint?: string;
 };
 
 const tomorrow = () => {
@@ -115,7 +118,7 @@ const polishBookingCopy: Record<string, string> = {
 };
 Object.assign(polishBookingCopy, { "Sold out or not enough places for this group.": "Brak miejsc lub niewystarczająca liczba miejsc dla tej grupy.", "Available": "Dostępne", "places remaining": "wolnych miejsc", "Time confirmed by WhatsApp": "Godzinę potwierdzimy przez WhatsApp", "Select your private boat": "Wybierz prywatną łódź", "Extra hour": "Dodatkowa godzina", "Travelers and island entrance": "Uczestnicy i wstęp na wyspę", "entrance each": "wstęp za osobę", "Optional add-ons": "Opcjonalne dodatki", "per person": "za osobę", "Total": "Razem", "Cash on arrival · no online payment": "Płatność gotówką na miejscu · bez płatności online", "Cash on arrival": "Płatność gotówką na miejscu", "at": "o", "Sold out": "Brak miejsc", "Included pickup zones": "Strefy odbioru w cenie", "ID or passport required before the trip": "Przed wycieczką wymagany jest dowód lub paszport", "A valid ID or passport is mandatory for trip permit reasons. Please make sure you have it available before your experience.": "Do uzyskania zezwolenia wymagany jest ważny dowód lub paszport. Przygotuj go przed wycieczką.", "Preferred guide language": "Preferowany język przewodnika", "This excursion does not operate on the selected weekday. Choose another date.": "Ta wycieczka nie odbywa się w wybranym dniu tygodnia. Wybierz inną datę.", "Choose your transfer pickup area.": "Wybierz strefę odbioru.", "Do you require transfer to Hurghada marina?": "Czy potrzebujesz transferu do mariny w Hurghadzie?", "No": "Nie", "Yes": "Tak", "Select pickup area": "Wybierz strefę odbioru", "Transfer price is confirmed by WhatsApp for the selected area.": "Cena transferu dla wybranej strefy zostanie potwierdzona przez WhatsApp.", "Booking submission failed.": "Nie udało się wysłać rezerwacji.", "Valid diving license required": "Wymagane ważne uprawnienia nurkowe", "Every diver must hold a valid scuba diving license and bring proof on the trip.": "Każdy nurek musi posiadać ważne uprawnienia nurkowe i zabrać ze sobą dowód na wycieczkę.", "Minimum age: 9 years": "Minimalny wiek: 9 lat", "Every participant must be at least 9 years old on the day of the tour.": "Każdy uczestnik musi mieć ukończone 9 lat w dniu wycieczki.", "I confirm that every diver holds a valid scuba diving license and will bring proof on the trip.": "Potwierdzam, że każdy nurek posiada ważne uprawnienia nurkowe i zabierze ze sobą dowód na wycieczkę.", "I confirm that every participant is at least 9 years old.": "Potwierdzam, że wszyscy uczestnicy mają ukończone 9 lat.", "Optional extras": "Opcjonalne dodatki", "total per booking": "łącznie za rezerwację" });
 
-export default function BookingForm({ tourName, tourSlug, destinationSlug = "hurghada", pickupZones = [], price, originalPrice, priceUnit, pricingMode = "per-person", duration, location, participantPricing, availableTimes, ageBands, boatOptions, packageOptions, entrancePricing, bookingExtras = [], requiresMarinaTransferChoice = false, bookingLeadTime, currency = "USD", operatingWeekdays }: BookingFormProps) {
+export default function BookingForm({ tourName, tourSlug, destinationSlug = "hurghada", pickupZones = [], price, originalPrice, priceUnit, pricingMode = "per-person", duration, location, participantPricing, availableTimes, ageBands, boatOptions, packageOptions, entrancePricing, bookingExtras = [], requiresMarinaTransferChoice = false, bookingLeadTime, currency = "USD", operatingWeekdays, fulfillmentType = "hotel_pickup", meetingPoint }: BookingFormProps) {
   const idempotencyKey = useRef<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -158,7 +161,10 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
   const [adults, setAdults] = useState(Math.min(30, Math.max(1, Number(searchParams.get("guests")) || 1)));
   const [youth, setYouth] = useState(0);
   const [infants, setInfants] = useState(0);
-  const [date, setDate] = useState(searchParams.get("date") || minimumBookingDate(bookingLeadTime));
+  const minimumDate = minimumBookingDate(bookingLeadTime);
+  const sharedDate = searchParams.get("date") || "";
+  const initialDate = sharedDate >= minimumDate && isOperatingDate(sharedDate, operatingWeekdays) ? sharedDate : nextOperatingDate(minimumDate, operatingWeekdays);
+  const [date, setDate] = useState(initialDate);
   const [time, setTime] = useState(times[0]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -208,6 +214,8 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
   const boatOverCapacity = Boolean(selectedBoat && requestedPlaces > selectedBoat.capacity);
   const selectedWeekday = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00Z`).getUTCDay() : -1;
   const unavailableWeekday = Boolean(operatingWeekdays?.length && !operatingWeekdays.includes(selectedWeekday));
+  const upcomingDepartures = nextDepartures(minimumDate, operatingWeekdays);
+  const meetingPointProduct = fulfillmentType === "meeting_point";
   const travelerText = de
     ? `${adults} Erwachsene${youthPrice !== undefined ? ` · ${youth} Kinder` : ""}${infantPrice !== undefined ? ` · ${infants} Kleinkinder` : ""}`
     : ru
@@ -274,16 +282,18 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера."));
     if (requiresDivingLicense && !divingLicenseConfirmed) return setError(tr("Every diver must hold a valid diving license for this booking.", "Für diesen Tauchausflug muss jeder Taucher einen gültigen Tauchschein besitzen.", "Для этого погружения у каждого дайвера должен быть действующий сертификат."));
     if (requiresQuadMinimumAge && !quadMinimumAgeConfirmed) return setError(tr("Every quad-tour participant must be at least 9 years old.", "Alle Teilnehmer der Quad-Tour müssen mindestens 9 Jahre alt sein.", "Каждому участнику тура на квадроциклах должно быть не менее 9 лет."));
+    trackEvent("checkout_started", { value: total, currency, item_name: tourName, destination: destinationSlug });
     trackEvent("booking_start", { value: total, currency, item_name: tourName, booking_type: "tour" });
     setStep("checkout");
   }
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl sm:p-7">
-      <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">{tr("From", "Ab", "От")} {originalPrice && Number(originalPrice) > adultPrice ? <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(originalPrice, currency)}</span> : null}<span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice), currency)}</span> / {priceUnit || tr("person", "Person", "человека")}</p><p className="mt-1 text-sm font-medium text-emerald-700">{tr("Clear local price · pickup confirmed after booking", "Klarer lokaler Preis · Abholung nach Buchung bestätigt", "Понятная местная цена · трансфер подтверждается после бронирования")}</p></div><ShieldCheck className="text-emerald-600" /></div>
+      <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">{tr("From", "Ab", "От")} {originalPrice && Number(originalPrice) > adultPrice ? <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(originalPrice, currency)}</span> : null}<span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice), currency)}</span> / {priceUnit || tr("person", "Person", "человека")}</p><p className="mt-1 text-sm font-medium text-emerald-700">{meetingPointProduct ? (ar ? "سعر واضح · نقطة التجمع موضحة قبل الحجز" : "Clear local price · meeting point shown before booking") : tr("Clear local price · pickup confirmed after booking", "Klarer lokaler Preis · Abholung nach Buchung bestätigt", "Понятная местная цена · трансфер подтверждается после бронирования")}</p></div><ShieldCheck className="text-emerald-600" /></div>
       {step === "select" ? <>
         <div className="mt-6 space-y-4">
-          <label className="block text-sm font-bold text-slate-700">{tr("Date", "Datum", "Дата")} <RequiredMark/><div className="relative mt-1"><CalendarDays className="absolute left-3 top-3 text-slate-400" size={18}/><input required type="date" min={minimumBookingDate(bookingLeadTime)} value={date} onChange={(event) => setDate(event.target.value)} className="w-full rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></div></label>
+          <label className="block text-sm font-bold text-slate-700">{tr("Date", "Datum", "Дата")} <RequiredMark/><div className="relative mt-1"><CalendarDays className="absolute left-3 top-3 text-slate-400" size={18}/><input required type="date" min={minimumDate} value={date} onChange={(event) => { setDate(event.target.value); trackEvent("date_selected", { item_id: tourSlug, date: event.target.value }); }} className="w-full rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></div></label>
+          {operatingWeekdays?.length ? <div className="flex flex-wrap gap-2" aria-label={ar ? "المواعيد القادمة" : "Next departures"}>{upcomingDepartures.map((departure) => <button key={departure} type="button" onClick={() => setDate(departure)} className={`rounded-full border px-3 py-2 text-xs font-bold ${date === departure ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-white text-slate-700"}`}>{new Intl.DateTimeFormat(ar ? "ar-SA" : "en-SA", { weekday: "short", month: "short", day: "numeric", timeZone: "Asia/Riyadh" }).format(new Date(`${departure}T12:00:00Z`))}</button>)}</div> : null}
           {availability?.managed ? <p className={`rounded-xl p-3 text-sm font-bold ${unavailable ? "bg-rose-50 text-rose-800" : "bg-emerald-50 text-emerald-800"}`}>{unavailable ? tr("Sold out or not enough places for this group.", "Ausverkauft oder nicht genügend Plätze für diese Gruppe.", "Нет мест или недостаточно мест для этой группы.") : remainingPlaces === 9999 ? tr("Available", "Verfügbar", "Доступно") : `${remainingPlaces} ${tr("places remaining", "Plätze verfügbar", "мест осталось")}`}</p> : null}
           <label className="block text-sm font-bold text-slate-700">{tr("Time", "Uhrzeit", "Время")} <RequiredMark/><div className="relative mt-1"><Clock3 className="absolute left-3 top-3 text-slate-400" size={18}/><select required value={time} onChange={(event) => setTime(event.target.value)} className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">{times.map((option) => <option key={option}>{option === "Time confirmed by WhatsApp" ? tr(option, "Uhrzeit wird per WhatsApp bestätigt", "Время подтверждается в WhatsApp") : option}</option>)}</select><ChevronDown className="absolute right-3 top-3 text-slate-400" size={18}/></div></label>
         </div>

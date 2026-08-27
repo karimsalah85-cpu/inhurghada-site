@@ -7,7 +7,15 @@ export type AnalyticsEventName =
   | "whatsapp_click"
   | "google_review_click"
   | "phone_click"
-  | "email_click";
+  | "email_click"
+  | "share_opened"
+  | "share_completed"
+  | "date_selected"
+  | "travelers_changed"
+  | "add_to_cart"
+  | "checkout_started"
+  | "checkout_validation_error"
+  | "empty_checkout_recovery";
 
 export type AnalyticsEventData = Record<string, string | number | boolean | undefined>;
 
