@@ -763,7 +763,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     destinationSlug: "jeddah",
     currency: "SAR",
     title: "Bayada Daily Snorkeling Boat Trip from Jeddah",
-    image: "/images/owned/red-sea-reef-panorama.jpg",
+    image: "/images/owned/jeddah-bayada-snorkeler.jpg",
     price: "350",
     priceUnit: "per person",
     rating: "New",
@@ -840,7 +840,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     packageLabel: "Per person",
     seoTitle: "Bayada Daily Snorkeling Boat Trip from Jeddah",
     metaDescription: "Book Al-Haddad Scuba's daily Bayada snorkeling boat trip from Jeddah: a rotating choice of Red Sea reef sites with a professional instructor, plus equipment, snacks and drinks, for SAR 350 per person.",
-    imageAlt: "Snorkeler exploring a coral reef in clear Red Sea water near Jeddah",
+    imageAlt: "Snorkeler giving peace signs underwater above a Red Sea reef near Jeddah",
+    imageFocalPoint: { x: 0.5, y: 0.4 },
   },
   {
     slug: "dolphin-house-marsa-alam", listingStatus: "active", destinationSlug: "marsa-alam", currency: "EUR", title: "Dolphin House Full-Day Snorkeling Boat Trip from Marsa Alam", image: "/images/placeholders/dolphin-house.svg", price: "99", rating: "New", reviews: "New", location: "Marsa Alam Marina, Marsa Alam", duration: "Full day", category: "Snorkeling", badge: "New", bookingMode: "direct", priceUnit: "per person", participantPricing: { adults: 99, youth: 50, infants: 0 }, ageBands: { adults: "Adults (ages 12+)", children: "Children (ages 2–11)", infants: "Infants (under 2) — free" }, availableTimes: ["07:00 pickup · 08:30 boat departure"], operatingWeekdays: [1, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" }, departureMarina: "Marsa Alam Marina",
