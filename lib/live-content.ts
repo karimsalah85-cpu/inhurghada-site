@@ -142,6 +142,7 @@ const generatedBlogHeroImages: Record<string, string> = {
   "liveaboard-diving-safaris-from-hurghada-what-to-know": "/images/owned/red-sea-diver-fish.jpg",
   "hurghada-to-cairo-day-trip-is-it-worth-it": "/images/owned/cairo-giza-day.jpg",
   "private-transfer-to-senzo-mall-hurghada": "/images/owned/senzo-mall.jpg",
+  "red-sea-excursions-from-hurghada-guide": "/images/placeholders/sea-activity.svg",
 };
 
 function resolveBlogHeroImages(posts: BlogPost[]): BlogPost[] {
