@@ -23,10 +23,11 @@ export default function OrganizationSchema() {
           addressLocality: "Hurghada",
           addressCountry: "EG",
         },
-        areaServed: {
-          "@type": "City",
-          name: "Hurghada",
-        },
+        areaServed: [
+          { "@type": "City", name: "Hurghada", containedInPlace: { "@type": "Country", name: "Egypt" } },
+          { "@type": "City", name: "Marsa Alam", containedInPlace: { "@type": "Country", name: "Egypt" } },
+          { "@type": "City", name: "Jeddah", containedInPlace: { "@type": "Country", name: "Saudi Arabia" } },
+        ],
         contactPoint: {
           "@type": "ContactPoint",
           telephone: "+201030809150",
@@ -39,7 +40,7 @@ export default function OrganizationSchema() {
         "@id": `${absoluteUrl()}#website`,
         url: absoluteUrl(),
         name: siteName,
-        description: "Hurghada tours, Red Sea excursions, diving, desert safaris and private transfers.",
+        description: "Red Sea tours and local experiences in Hurghada, Marsa Alam and Jeddah, including diving, boat trips, desert adventures and private transfers.",
         inLanguage: ["en", "ar", "de", "ru", "pl", "zh"],
         publisher: { "@id": organizationId },
       },

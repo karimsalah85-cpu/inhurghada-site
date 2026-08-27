@@ -3,6 +3,7 @@ import sitemap from "@/app/sitemap";
 import robots from "@/app/robots";
 import nextConfig from "@/next.config";
 import { generateMetadata as generateCategoryMetadata } from "@/app/hurghada/[category]/page";
+import { generateMetadata as generateJeddahCategoryMetadata } from "@/app/jeddah/[category]/page";
 import { generateMetadata as generateTourMetadata } from "@/app/tours/[slug]/page";
 import { tours } from "@/data/tours";
 
@@ -17,8 +18,20 @@ describe("SEO build contract", () => {
     const urls = entries.map((entry) => entry.url);
     expect(urls).toContain("https://dailyredsea.com/hurghada/diving-snorkeling");
     expect(urls).toContain("https://dailyredsea.com/tours/orange-bay");
+    expect(urls).toContain("https://dailyredsea.com/jeddah/diving-snorkeling");
+    expect(urls).toContain("https://dailyredsea.com/jeddah/boat-cruises");
+    expect(urls).toContain("https://dailyredsea.com/ar/jeddah/diving-snorkeling");
+    expect(urls).toContain("https://dailyredsea.com/ar/jeddah/boat-cruises");
     expect(urls.some((url) => url.startsWith("https://www.dailyredsea.com"))).toBe(false);
     expect(new Set(urls).size).toBe(urls.length);
+  });
+
+  it("keeps Jeddah category metadata self-canonical and reciprocal", async () => {
+    const diving = await generateJeddahCategoryMetadata({ params: Promise.resolve({ category: "diving-snorkeling" }) });
+    const cruises = await generateJeddahCategoryMetadata({ params: Promise.resolve({ category: "boat-cruises" }) });
+    expect(diving.alternates?.canonical).toBe("/jeddah/diving-snorkeling");
+    expect(diving.alternates?.languages).toMatchObject({ en: "/jeddah/diving-snorkeling", ar: "/ar/jeddah/diving-snorkeling" });
+    expect(cruises.alternates?.canonical).toBe("/jeddah/boat-cruises");
   });
 
   it("advertises only the canonical sitemap in robots.txt", () => {

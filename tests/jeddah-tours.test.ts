@@ -3,8 +3,16 @@ import { tours } from "@/data/tours";
 import { getDestination } from "@/lib/destinations";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
 import { localizeTour } from "@/lib/tour-localization";
+import { getTourCategory } from "@/lib/tour-categories";
 
 describe("Jeddah destination", () => {
+  it("maps the live diving and yacht inventory to dedicated category hubs", () => {
+    const diving = getTourCategory("diving-snorkeling");
+    const cruises = getTourCategory("boat-cruises");
+    const jeddahTours = tours.filter((tour) => tour.destinationSlug === "jeddah");
+    expect(jeddahTours.filter((tour) => diving?.matches(tour)).map((tour) => tour.slug)).toEqual(expect.arrayContaining(["basic-diver-jeddah", "certified-diver-boat-trip-jeddah"]));
+    expect(jeddahTours.filter((tour) => cruises?.matches(tour)).map((tour) => tour.slug)).toContain("jeddah-yacht-sunset-cruise");
+  });
   it("publishes Jeddah with SAR pricing and its first active listing", () => {
     const destination = getDestination("jeddah");
     const listing = tours.find((tour) => tour.slug === "basic-diver-jeddah");

@@ -103,12 +103,12 @@ export default function TourDetails({ tour }: { tour: Tour }) {
                     <p className="mt-2 text-sm leading-7 text-slate-600">{pkg.description}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-slate-500">{tour.bookingMode === "inquiry" ? tr("Quotation", "Angebot", "Предложение", "عرض سعر", "报价") : de ? "Ab" : ru ? "От" : zh ? "起价" : "Starting from"}</p>
+                    <p className="text-sm text-slate-500">{tour.bookingMode === "inquiry" ? tr("Quotation", "Angebot", "Предложение", "عرض سعر", "报价") : tr("Starting from", "Ab", "От", "ابتداءً من", "起价")}</p>
                     <p className="text-2xl font-bold text-cyan-700">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(pkg.price, tour.currency)}</p>
                   </div>
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-cyan-700">
-                  <Compass size={16} /> {pkg.label ?? (de ? "Erwachsener" : ru ? "Взрослый" : zh ? "成人" : "Adult")}
+                  <Compass size={16} /> {pkg.label ?? tr("Adult", "Erwachsener", "Взрослый", "بالغ", "成人")}
                 </div>
               </div>
             ))}
@@ -120,7 +120,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
 
       {tour.showSpeedboatTerms ? <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Terms &amp; Conditions</p><ul className="mt-6 space-y-3">{speedboatTerms.map((item) => <li key={item} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700"><BadgeCheck className="mt-0.5 shrink-0 text-cyan-700" size={18}/><span>{item}</span></li>)}</ul></section> : null}
 
-      {tour.notSuitableFor?.length || tour.whatToBring?.length ? <div className="grid gap-8 lg:grid-cols-2"><div className="rounded-3xl border border-rose-200 bg-rose-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-rose-700"><TriangleAlert size={18}/>Not suitable for</p><ul className="mt-5 space-y-3">{tour.notSuitableFor?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-800">What to bring</p><ul className="mt-5 grid gap-3 sm:grid-cols-2">{tour.whatToBring?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div></div> : null}
+      {tour.notSuitableFor?.length || tour.whatToBring?.length ? <div className="grid gap-8 lg:grid-cols-2"><div className="rounded-3xl border border-rose-200 bg-rose-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-rose-700"><TriangleAlert size={18}/>{tr("Not suitable for", "Nicht geeignet für", "Не подходит для", "غير مناسب لـ", "不适合")}</p><ul className="mt-5 space-y-3">{tour.notSuitableFor?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-800">{tr("What to bring", "Mitzubringen", "Что взять с собой", "ماذا تحضر", "携带物品")}</p><ul className="mt-5 grid gap-3 sm:grid-cols-2">{tour.whatToBring?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div></div> : null}
     </div>
   );
 }

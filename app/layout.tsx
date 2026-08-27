@@ -16,7 +16,8 @@ export const metadata: Metadata = {
   title: "Daily Red Sea | Red Sea Tours & Experiences",
   description: defaultDescription,
   keywords: [
-    "Hurghada tours",
+    "Red Sea tours",
+    "Jeddah tours",
     "Marsa Alam tours",
     "Orange Bay",
     "boat trips Hurghada",
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
         url: defaultSocialImage,
         width: 1200,
         height: 630,
-        alt: "Daily Red Sea tours in Hurghada and Marsa Alam",
+        alt: "Daily Red Sea tours in Hurghada, Marsa Alam and Jeddah",
       },
     ],
   },

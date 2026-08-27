@@ -27,11 +27,12 @@ import { PrivacyPolicyPage } from "@/components/pages/PrivacyPolicyPage";
 import TermsConditionsPage from "@/app/terms-conditions/page";
 import TourPageShell from "@/components/tours/TourPageShell";
 import TourCategoryPage from "@/app/hurghada/[category]/page";
+import DestinationCategoryPage from "@/components/categories/DestinationCategoryPage";
 import { localizeTour } from "@/lib/tour-localization";
 import CartPage from "@/app/cart/page";
 import { DestinationPage } from "@/components/pages/destinations/DestinationPage";
-import BlogIndexPage from "@/app/blog/page";
-import BlogArticlePage from "@/app/blog/[slug]/page";
+import { LocalizedBlogIndex } from "@/components/blog/BlogIndexPage";
+import { LocalizedBlogArticle } from "@/components/blog/BlogArticlePage";
 import { ToursPage } from "@/components/pages/ToursPage";
 import { destinations, getDestination, type DestinationSlug } from "@/lib/destinations";
 import { destinationCopyByLocale } from "@/lib/destination-i18n";
@@ -69,7 +70,7 @@ function pageKind(path: string[]) {
   if (!path.length) return "home";
   if (path.length === 1 && path[0] === "tours") return "tours";
   if (path.length === 2 && path[0] === "tours") return "tour";
-  if (path.length === 2 && path[0] === "hurghada" && getTourCategory(path[1])) return "category";
+  if (path.length === 2 && ["hurghada", "marsa-alam", "jeddah"].includes(path[0]) && getTourCategory(path[1])) return "category";
   if (path.length === 2 && path[0] === "destinations" && getDestination(path[1])) return "destination";
   if (path.length === 1 && path[0] === "blog") return "blog";
   if (path.length === 2 && path[0] === "blog") return "blog-post";
@@ -77,7 +78,8 @@ function pageKind(path: string[]) {
 }
 
 export async function generateStaticParams() {
-  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
+  const destinationCategoryPaths = destinations.flatMap((destination) => tourCategories.filter((category) => category.slug !== "excursions" && fallbackTours.some((tour) => tour.destinationSlug === destination.slug && category.matches(tour))).map((category) => [destination.slug, category.slug]));
+  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...destinationCategoryPaths, ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
   return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
 }
 
@@ -101,7 +103,9 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
   const destinationCopy = kind === "destination" ? destinationCopyByLocale[path[1] as DestinationSlug]?.[locale] : undefined;
-  const title = tour ? tour.seoTitle || tour.title : blogPost ? `${blogPost.title} | ${siteName}` : category ? `${categoryLabels[locale][category.slug]} · Hurghada` : destinationCopy?.title || titles[kind || "home"];
+  const categoryDestination = category ? getDestination(path[0]) : undefined;
+  const categoryDestinationName = locale === "ar" && categoryDestination?.slug === "jeddah" ? "جدة" : categoryDestination?.name || "Hurghada";
+  const title = tour ? tour.seoTitle || tour.title : blogPost ? `${blogPost.title} | ${siteName}` : category ? `${categoryLabels[locale][category.slug]} · ${categoryDestinationName} | ${siteName}` : destinationCopy?.title || titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
     "orange-bay": "Orange Bay Hurghada Tickets für eine ganztägige Hurghada Bootstour mit Schnorcheln, Mittagessen, Inselaufenthalt und Hoteltransfer buchen.",
@@ -121,7 +125,9 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
       : blogPost
         ? blogPost.metaDescription
         : category
-          ? `${categoryLabels[locale][category.slug]}. ${dictionary.siteDescription}`
+          ? locale === "ar" && path[0] === "jeddah"
+            ? `${categoryLabels.ar[category.slug]} في جدة مع أسعار واضحة بالريال السعودي ومواعيد وتفاصيل تجمع ودعم مباشر للحجز.`
+            : `Compare ${categoryLabels[locale][category.slug]} in ${categoryDestinationName} with clear prices, schedules, meeting details and local booking support.`
           : destinationCopy?.description || descriptions[kind || "home"];
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
   const canonical = localePath(locale, pathname);
@@ -153,9 +159,10 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   if (kind === "destination") return <DestinationPage locale={locale} params={Promise.resolve({ destination: path[1] })} />;
+  if (kind === "category" && path[0] !== "hurghada") return <DestinationCategoryPage locale={locale} destinationSlug={path[0]} categorySlug={path[1]} />;
   if (kind === "tours") return <div dir={direction}><ToursPage locale={locale} /></div>;
-  if (kind === "blog") return <div dir={direction}><BlogIndexPage locale={locale} /></div>;
-  if (kind === "blog-post") return <div dir={direction}><BlogArticlePage params={Promise.resolve({ slug: path[1] })} locale={locale} /></div>;
+  if (kind === "blog") return <div dir={direction}><LocalizedBlogIndex locale={locale} /></div>;
+  if (kind === "blog-post") return <div dir={direction}><LocalizedBlogArticle params={Promise.resolve({ slug: path[1] })} locale={locale} /></div>;
 
   if (locale === "de") {
     if (kind === "home") return <HomePage />;

@@ -22,6 +22,11 @@ describe("localized SEO routing", () => {
     expect(localeSwitchPath("/blog/orange-bay-guide", "ar")).toBe("/ar/blog/orange-bay-guide");
   });
 
+  it("preserves Jeddah category routes when switching languages", () => {
+    expect(localeSwitchPath("/jeddah/diving-snorkeling", "ar")).toBe("/ar/jeddah/diving-snorkeling");
+    expect(localeSwitchPath("/ar/jeddah/boat-cruises", "en")).toBe("/jeddah/boat-cruises");
+  });
+
   it("builds a reciprocal alternate set for canonical routes", () => {
     expect(languageAlternates("/tours/orange-bay")).toEqual({
       en: "/tours/orange-bay", ar: "/ar/tours/orange-bay", de: "/de/tours/orange-bay",

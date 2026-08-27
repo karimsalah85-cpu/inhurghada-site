@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const siteUrl = "https://dailyredsea.com";
 export const siteName = "Daily Red Sea";
 export const defaultDescription =
-  "Book Hurghada tours, Red Sea boat trips, diving experiences, desert adventures, and private transfers with local support.";
+  "Book Red Sea tours in Hurghada, Marsa Alam and Jeddah, including diving, boat trips, desert adventures and private transfers with local support.";
 export const defaultSocialImage = "/og-image.svg";
 export const localizedDefaultDescriptions: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
   en: defaultDescription,

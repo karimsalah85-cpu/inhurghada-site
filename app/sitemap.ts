@@ -27,10 +27,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const localizedEntries = locales.flatMap((locale) =>
     paths
-      .filter((path) => (locale === "en" || path !== "/image-credits") && (locale === "en" || !path.startsWith("/destinations/")))
+      .filter((path) => locale === "en" || path !== "/image-credits")
       .map((path) => {
         const tour = path.startsWith("/tours/") ? tours.find((item) => path === `/tours/${item.slug}`) : undefined;
-        const isEnglishOnly = path === "/image-credits" || path.startsWith("/destinations/");
+        const isEnglishOnly = path === "/image-credits";
         const languages = isEnglishOnly
           ? { en: `${siteUrl}${path}`, "x-default": `${siteUrl}${path}` }
           : Object.fromEntries([
