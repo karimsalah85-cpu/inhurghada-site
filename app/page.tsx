@@ -130,9 +130,7 @@ function HomeContent() {
     const rightIndex = tourOrder.indexOf(right.slug);
     return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex);
   });
-  const homepageTours = search
-    ? filteredTours
-    : tourOrder.map((slug) => displayTours.find((tour) => tour.slug === slug)).filter((tour): tour is Tour => Boolean(tour)).slice(0, 6);
+  const homepageTours = filteredTours;
   const destinationDetails: Record<string, { signature: string; startingPrice: string }> = {
     hurghada: { signature: tr("Islands, reefs & desert", "Inseln, Riffe & Wüste", "Острова, рифы и пустыня", "الجزر والشعاب والصحراء", "Wyspy, rafy i pustynia", "海岛、珊瑚礁与沙漠"), startingPrice: "$8" },
     "marsa-alam": { signature: tr("Wild reefs & marine life", "Wilde Riffe & Meeresleben", "Дикие рифы и морская жизнь", "شعاب بكر وحياة بحرية", "Dzikie rafy i życie morskie", "原生态珊瑚礁与海洋生物"), startingPrice: "€45" },
@@ -483,7 +481,7 @@ text-blue-600
 
           <div className="space-y-16">
           {homepageTours.length > 0 ? destinations.filter((destination) => destination.status === "live").map((destination) => {
-            const destinationTours = homepageTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).slice(0, 6);
+            const destinationTours = homepageTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).slice(0, 12);
             if (!destinationTours.length) return null;
             return <section key={destination.slug} aria-labelledby={`home-${destination.slug}-title`}>
               <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
