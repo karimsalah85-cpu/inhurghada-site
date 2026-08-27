@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
 import { getDestination } from "@/lib/destinations";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
+import { localizeTour } from "@/lib/tour-localization";
 
 describe("Jeddah destination", () => {
   it("publishes Jeddah with SAR pricing and its first active listing", () => {
@@ -32,5 +33,32 @@ describe("Jeddah destination", () => {
     });
     expect(listing?.availableTimes).not.toContain("7:00 PM evening cruise");
     expect(applyTourMediaSafety(listing!).image).toBe("/images/owned/jeddah-yacht-sunset-cruise.jpg");
+  });
+
+  it("fully localizes every customer-facing yacht field in each available non-English language", () => {
+    const listing = tours.find((tour) => tour.slug === "jeddah-yacht-sunset-cruise")!;
+    const expectedPriceUnits = { ar: "للبالغ", de: "pro Erwachsenem", ru: "за взрослого", pl: "za osobę dorosłą", zh: "每位成人" } as const;
+
+    for (const locale of ["ar", "de", "ru", "pl", "zh"] as const) {
+      const localized = localizeTour(listing, locale);
+      expect(localized.title).not.toBe(listing.title);
+      expect(localized.description).not.toBe(listing.description);
+      expect(localized.highlights).not.toEqual(listing.highlights);
+      expect(localized.included).not.toEqual(listing.included);
+      expect(localized.notIncluded).not.toEqual(listing.notIncluded);
+      expect(localized.notes).not.toEqual(listing.notes);
+      expect(localized.itinerary).not.toEqual(listing.itinerary);
+      expect(localized.notSuitableFor).not.toEqual(listing.notSuitableFor);
+      expect(localized.whatToBring).not.toEqual(listing.whatToBring);
+      expect(localized.faqs).not.toEqual(listing.faqs);
+      expect(localized.ageBands).not.toEqual(listing.ageBands);
+      expect(localized.availableTimes).not.toEqual(listing.availableTimes);
+      expect(localized.priceUnit).toBe(expectedPriceUnits[locale]);
+      expect(localized.departureMarina).not.toBe(listing.departureMarina);
+      expect(localized.categoryPath).not.toEqual(listing.categoryPath);
+      expect(localized.seoTitle).not.toBe(listing.seoTitle);
+      expect(localized.metaDescription).not.toBe(listing.metaDescription);
+      expect(localized.imageAlt).not.toBe(listing.imageAlt);
+    }
   });
 });
