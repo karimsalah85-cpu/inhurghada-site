@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { availabilityStatus } from "@/lib/tour-booking";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,9 @@ export async function GET(request: NextRequest) {
   if (!supabase) return NextResponse.json({ managed: false });
   const { data, error } = await supabase.from("tour_availability").select("start_time,capacity,reserved,blocked,price_override,currency").eq("tour_slug", tourSlug).eq("service_date", date).order("start_time");
   if (error) return NextResponse.json({ error: "Availability is temporarily unavailable." }, { status: 503 });
-  const slots = (data || []).map((slot) => ({ ...slot, remaining: slot.blocked ? 0 : slot.capacity == null ? null : Math.max(0, slot.capacity - slot.reserved), soldOut: slot.blocked || (slot.capacity != null && slot.reserved >= slot.capacity) }));
+  const slots = (data || []).map((slot) => {
+    const remaining = slot.blocked ? 0 : slot.capacity == null ? null : Math.max(0, slot.capacity - slot.reserved);
+    return { ...slot, remaining, soldOut: slot.blocked || remaining === 0, status: availabilityStatus(true, remaining, slot.blocked) };
+  });
   return NextResponse.json({ managed: slots.length > 0, soldOut: slots.length > 0 && slots.every((slot) => slot.soldOut), slots }, { headers: { "Cache-Control": "public, s-maxage=20" } });
 }

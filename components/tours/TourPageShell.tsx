@@ -38,6 +38,8 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     zh: ["暂时不可预订", "预订已暂停", "该行程目前不接受新预订，现有预订不受影响。"],
   }[locale];
   const destination = getDestination(tour.destinationSlug);
+  const meetingPointCopy = locale === "ar" ? `التجمع في ${tour.departureMarina || "نقطة التجمع الموضحة"}. لا يلزم عنوان فندق.` : `Meet at ${tour.departureMarina || "the listed meeting point"}. No hotel address is required.`;
+  const weatherCopy = locale === "ar" ? "قد تتغير الرحلة بسبب الطقس أو حالة البحر. إذا ألغى المشغل الرحلة، سنساعدك في إعادة الحجز أو الإلغاء وفق السياسة المعروضة." : "Weather or sea conditions may change the trip. If the operator cancels, we will help with rebooking or cancellation under the displayed policy.";
   const homeHref = localePath(locale);
   const toursHref = `${localePath(locale, "/tours")}?destination=${tour.destinationSlug || "hurghada"}`;
   const destinationHref = localePath(locale, `/destinations/${tour.destinationSlug}`);
@@ -112,6 +114,8 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
           <TourDetails tour={tour} />
 
           <div id="book" className="scroll-mt-24 lg:sticky lg:top-24 lg:self-start">
+            {tour.fulfillmentType === "meeting_point" ? <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950"><p className="font-bold">{locale === "ar" ? "نقطة التجمع" : "Meeting point"}</p><p className="mt-1">{meetingPointCopy}</p></div> : null}
+            {tour.destinationSlug === "jeddah" ? <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><p className="font-bold">{locale === "ar" ? "الطقس والإلغاء" : "Weather and cancellation"}</p><p className="mt-1 leading-6">{weatherCopy}</p><Link href={localePath(locale, "/terms-conditions#cancellations")} className="mt-2 inline-flex font-bold underline">{locale === "ar" ? "عرض سياسة الإلغاء" : "View cancellation policy"}</Link></div> : null}
             {tour.bookingMode === "inquiry" ? <div className="rounded-3xl border border-cyan-200 bg-white p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-700">{ui.more}</p><h2 className="mt-3 text-3xl font-black text-slate-950">{ui.related}</h2><p className="mt-4 leading-7 text-slate-600">{ui.relatedText}</p><a href={whatsappUrl(`Hello Daily Red Sea, please send me the current price and availability for ${tour.title}.`)} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex w-full justify-center rounded-2xl bg-emerald-600 px-6 py-4 font-bold text-white hover:bg-emerald-700">WhatsApp</a></div> : <><div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"><p className="font-bold">{ui.reserve}</p><p className="mt-1">{ui.pickup}</p></div><Suspense fallback={<div className="min-h-[620px] rounded-3xl border bg-white shadow-sm" />}>
               {tour.listingStatus === "paused" ? <div className="min-h-[320px] rounded-3xl border border-amber-200 bg-amber-50 p-7 shadow-sm"><p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-800">{pausedCopy[0]}</p><h2 className="mt-3 text-3xl font-black text-slate-950">{pausedCopy[1]}</h2><p className="mt-4 leading-7 text-slate-700">{pausedCopy[2]}</p></div> : transferService ? <TransferBookingForm initialService={transferService} /> : <BookingForm
                   tourName={tour.title}

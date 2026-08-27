@@ -1,13 +1,19 @@
 import type { Locale } from "@/lib/i18n";
 
 const SENSITIVE_KEYS = new Set(["name", "email", "phone", "reference", "passport", "booking"]);
+export const sharedTripMarker = "shared";
 
 export function buildTripShareUrl(origin: string, locale: Locale, tourSlug: string, date?: string) {
   const prefix = locale === "en" ? "" : `/${locale}`;
   const url = new URL(`${prefix}/tours/${encodeURIComponent(tourSlug)}`, origin);
   if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) url.searchParams.set("date", date);
+  url.searchParams.set(sharedTripMarker, "1");
   for (const key of [...url.searchParams.keys()]) if (SENSITIVE_KEYS.has(key.toLowerCase())) url.searchParams.delete(key);
   return url.toString();
+}
+
+export function isSharedTripUrl(search: string) {
+  return new URLSearchParams(search).get(sharedTripMarker) === "1";
 }
 
 export function tripShareText(locale: Locale) {
@@ -19,4 +25,3 @@ export function tripShareText(locale: Locale) {
 export function whatsappShareUrl(text: string, url: string) {
   return `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
 }
-

@@ -93,7 +93,7 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
     const update = window.setTimeout(() => setLanguage(preferredLanguage), 0);
     return () => window.clearTimeout(update);
   }, [pathname]);
-  const [currency, setCurrency] = useState<Currency>("USD");
+  const [currency, setCurrency] = useState<Currency>(() => pathname.includes("/jeddah") || pathname.includes("jeddah-") ? "SAR" : "USD");
   const [rates, setRates] = useState<Record<Currency, number>>(exchangeRates);
 
   useEffect(() => {

@@ -24,14 +24,25 @@ function objectBody(row: ContentRow) {
   return row.body && typeof row.body === "object" && !Array.isArray(row.body) ? row.body as Record<string, unknown> : {};
 }
 
-function codeControlledTourFields(fallback: Tour | undefined) {
-  if (!fallback?.boatOptions?.length) return {};
+export function codeControlledTourFields(fallback: Tour | undefined) {
+  if (!fallback) return {};
   return {
-    boatOptions: fallback.boatOptions,
+    ...(fallback.boatOptions?.length ? { boatOptions: fallback.boatOptions } : {}),
     price: fallback.price,
     packagePrice: fallback.packagePrice,
+    originalPrice: fallback.originalPrice,
+    currency: fallback.currency,
+    participantPricing: fallback.participantPricing,
+    entrancePricing: fallback.entrancePricing,
+    additionalPackages: fallback.additionalPackages,
     pricingMode: fallback.pricingMode,
     priceUnit: fallback.priceUnit,
+    availableTimes: fallback.availableTimes,
+    operatingWeekdays: fallback.operatingWeekdays,
+    bookingCutoff: fallback.bookingCutoff,
+    fulfillmentType: fallback.fulfillmentType,
+    departureMarina: fallback.departureMarina,
+    bookingMode: fallback.bookingMode,
   } satisfies Partial<Tour>;
 }
 
