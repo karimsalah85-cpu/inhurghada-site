@@ -49,3 +49,21 @@ html { scroll-behavior: smooth; }
     @apply mt-1 block w-full rounded-xl border border-slate-200 bg-white p-2.5 text-sm font-medium text-slate-900 outline-none focus:border-cyan-500;
   }
 }
+
+/* Keeps page content clear of the fixed mobile bottom navigation (BottomNav is xl:hidden). */
+@media (max-width: 1279.98px) {
+  #main-content {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Waves of rings rippling outward from BottomNav's raised Book button. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bottom-nav-ring {
+    0% { transform: scale(0.9); opacity: 0.55; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .bottom-nav-ring {
+    animation: bottom-nav-ring 2.1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
