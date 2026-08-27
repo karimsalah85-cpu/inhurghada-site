@@ -24,30 +24,23 @@ export default function WhatsAppButton() {
       rel="noopener noreferrer"
       className="
         fixed
-        bottom-4
-        right-4
+        bottom-6
+        right-6
         z-50
         hidden
         items-center
         gap-2
         rounded-full
         bg-green-600
-        h-14
-        w-14
-        justify-center
-        sm:flex
-        sm:bottom-6
-        sm:right-6
-        sm:h-auto
-        sm:w-auto
-        sm:px-5
-        sm:py-3.5
+        px-5
+        py-3.5
         font-semibold
         text-white
         shadow-xl
         transition
         hover:scale-105
         hover:bg-green-700
+        xl:flex
       "
     >
 

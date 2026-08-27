@@ -49,3 +49,10 @@ html { scroll-behavior: smooth; }
     @apply mt-1 block w-full rounded-xl border border-slate-200 bg-white p-2.5 text-sm font-medium text-slate-900 outline-none focus:border-cyan-500;
   }
 }
+
+/* Keeps page content clear of the fixed mobile bottom navigation (BottomNav is xl:hidden). */
+@media (max-width: 1279.98px) {
+  #main-content {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+}
