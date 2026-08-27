@@ -9,25 +9,26 @@ import { trackEvent } from "@/lib/analytics";
 
 const trackedSharedLinks = new Set<string>();
 
-export default function ShareTripButton({ locale, tourSlug, date, compact = false }: { locale: Locale; tourSlug: string; date?: string; compact?: boolean }) {
+export default function ShareTripButton({ locale, tourSlug, tourTitle, destination, date, compact = false }: { locale: Locale; tourSlug: string; tourTitle?: string; destination?: string; date?: string; compact?: boolean }) {
   const params = useSearchParams();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ar = locale === "ar";
   const selectedDate = date || params.get("date") || undefined;
   const url = typeof window === "undefined" ? "" : buildTripShareUrl(window.location.origin, locale, tourSlug, selectedDate);
-  const text = tripShareText(locale);
+  const text = tripShareText(locale, tourTitle);
+  const shareTitle = tourTitle || (ar ? "رحلة غروب جدة" : "Jeddah sunset cruise");
   useEffect(() => {
     const key = `${tourSlug}:${window.location.search}`;
     if (isSharedTripUrl(window.location.search) && !trackedSharedLinks.has(key)) {
       trackedSharedLinks.add(key);
-      trackEvent("shared_link_opened", { item_id: tourSlug, destination: "jeddah" });
+      trackEvent("shared_link_opened", { item_id: tourSlug, destination });
     }
-  }, [tourSlug]);
+  }, [destination, tourSlug]);
   async function nativeShare() {
-    trackEvent("share_opened", { item_id: tourSlug, destination: "jeddah" });
+    trackEvent("share_opened", { item_id: tourSlug, destination });
     if (navigator.share) {
-      try { await navigator.share({ title: ar ? "رحلة غروب جدة" : "Jeddah sunset cruise", text, url }); trackEvent("share_native", { item_id: tourSlug }); trackEvent("share_completed", { method: "native", item_id: tourSlug }); return; } catch (error) { if ((error as DOMException).name === "AbortError") return; }
+      try { await navigator.share({ title: shareTitle, text, url }); trackEvent("share_native", { item_id: tourSlug }); trackEvent("share_completed", { method: "native", item_id: tourSlug }); return; } catch (error) { if ((error as DOMException).name === "AbortError") return; }
     }
     setOpen((value) => !value);
   }
@@ -39,7 +40,7 @@ export default function ShareTripButton({ locale, tourSlug, date, compact = fals
     {open ? <div className="absolute end-0 top-full z-40 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 text-sm shadow-xl" role="menu">
       <button type="button" onClick={copy} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-slate-50" role="menuitem">{copied ? <Check size={17}/> : <Copy size={17}/>} {copied ? (ar ? "تم نسخ الرابط" : "Link copied") : (ar ? "نسخ الرابط" : "Copy link")}</button>
       <a href={whatsappShareUrl(text, url)} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("share_whatsapp", { item_id: tourSlug }); trackEvent("share_completed", { method: "whatsapp", item_id: tourSlug }); }} className="flex items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-slate-50" role="menuitem">WhatsApp</a>
-      <a href={`mailto:?subject=${encodeURIComponent(ar ? "رحلة غروب جدة" : "Jeddah sunset cruise")}&body=${encodeURIComponent(`${text}\n\n${url}`)}`} onClick={() => trackEvent("share_email", { item_id: tourSlug })} className="flex items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-slate-50" role="menuitem"><Mail size={17}/>{ar ? "البريد الإلكتروني" : "Email"}</a>
+      <a href={`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`} onClick={() => trackEvent("share_email", { item_id: tourSlug })} className="flex items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-slate-50" role="menuitem"><Mail size={17}/>{ar ? "البريد الإلكتروني" : "Email"}</a>
     </div> : null}
   </div>;
 }

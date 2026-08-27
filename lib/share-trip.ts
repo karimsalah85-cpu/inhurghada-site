@@ -16,7 +16,10 @@ export function isSharedTripUrl(search: string) {
   return new URLSearchParams(search).get(sharedTripMarker) === "1";
 }
 
-export function tripShareText(locale: Locale) {
+export function tripShareText(locale: Locale, tourTitle?: string) {
+  if (tourTitle) return locale === "ar"
+    ? `${tourTitle} — شاهد المواعيد والأسعار على ديلي رد سي.`
+    : `${tourTitle} — see dates and prices on Daily Red Sea.`;
   return locale === "ar"
     ? "رحلة غروب بحرية في جدة — شاهد المواعيد والأسعار على ديلي رد سي."
     : "Jeddah sunset cruise on the Red Sea — see dates and prices on Daily Red Sea.";

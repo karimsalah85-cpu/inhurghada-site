@@ -7,6 +7,7 @@ import Image from "next/image";
 
 import Hero from "@/components/home/Hero";
 import TourCard from "@/components/cards/TourCard";
+import MobileTourCarousel from "@/components/home/MobileTourCarousel";
 
 import { BadgeCheck, MessageCircle, ShieldCheck, Headphones, ArrowRight, Car, Search } from "lucide-react";
 
@@ -489,7 +490,7 @@ text-blue-600
                 <div><p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-700">{destination.country} · {destination.region}</p><h3 id={`home-${destination.slug}-title`} className="mt-2 text-3xl font-black text-slate-950">{destination.name}</h3><p className="mt-2 max-w-2xl text-slate-600">{destination.tagline}</p></div>
                 <Link href={localePath(language, `/destinations/${destination.slug}`)} className="font-bold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
               </div>
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <MobileTourCarousel label={`${destination.name} tours`}>
               {destinationTours.map((tour: Tour)=>(
 
 
@@ -522,12 +523,14 @@ text-blue-600
                   bookingMode={tour.bookingMode}
                   entrancePrice={tour.entrancePricing?.adults}
                   currency={tour.currency}
+                  tourSlug={tour.slug}
+                  destination={tour.destinationSlug || "hurghada"}
 
                 />
 
 
               ))}
-              </div>
+              </MobileTourCarousel>
             </section>;
           }) : (
 

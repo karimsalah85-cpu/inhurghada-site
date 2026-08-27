@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Clock, MapPin, ShieldCheck, Star } from "lucide-react";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import ImageWatermark from "@/components/media/ImageWatermark";
+import ShareTripButton from "@/components/share/ShareTripButton";
 import { localizeProductBadge } from "@/lib/public-interface-i18n";
 import type { Currency } from "@/components/settings/SiteSettingsContext";
+import type { DestinationSlug } from "@/lib/destinations";
 
 type TourCardProps = {
   image: string;
@@ -24,6 +26,8 @@ type TourCardProps = {
   bookingMode?: "direct" | "inquiry";
   entrancePrice?: number;
   currency?: Currency;
+  tourSlug: string;
+  destination?: DestinationSlug;
 };
 
 const cardCopy = {
@@ -53,6 +57,8 @@ export default function TourCard({
   bookingMode,
   entrancePrice,
   currency,
+  tourSlug,
+  destination,
 }: TourCardProps) {
   const { formatPrice, t, language } = useSiteSettings();
   const copy = cardCopy[language];
@@ -60,7 +66,10 @@ export default function TourCard({
   const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
 
   return (
-    <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition duration-300 md:hover:-translate-y-2 md:hover:shadow-2xl">
+    <article className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition duration-300 md:hover:-translate-y-2 md:hover:shadow-2xl">
+      <div className="absolute end-4 top-4 z-20">
+        <ShareTripButton locale={language} tourSlug={tourSlug} tourTitle={title} destination={destination} compact />
+      </div>
       <Link href={link} className="group block">
         <div className="relative h-60 overflow-hidden sm:h-64">
           <Image src={image} alt={title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />

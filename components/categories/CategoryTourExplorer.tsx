@@ -9,6 +9,7 @@ import type { DestinationSlug } from "@/lib/destinations";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath, type Locale } from "@/lib/i18n";
 import ImageWatermark from "@/components/media/ImageWatermark";
+import ShareTripButton from "@/components/share/ShareTripButton";
 import { localizeProductBadge } from "@/lib/public-interface-i18n";
 
 type PriceBand = "all" | "under-25" | "25-50" | "50-100" | "100-plus";
@@ -117,7 +118,10 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
           const reviewCount = Number(tour.reviews);
           const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
           return (
-            <article key={tour.slug} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+            <article key={tour.slug} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+              <div className="absolute end-4 top-4 z-20">
+                <ShareTripButton locale={locale} tourSlug={tour.slug} tourTitle={tour.title} destination={tour.destinationSlug || "hurghada"} compact />
+              </div>
               <Link href={localePath(locale, `/tours/${tour.slug}`)} className="group block">
                 <div className="relative h-56 overflow-hidden">
                   <Image src={tour.image} alt={tour.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
