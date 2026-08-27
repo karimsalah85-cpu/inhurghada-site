@@ -17,7 +17,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/faq",
     "/privacy-policy",
     "/terms-conditions",
-    "/image-credits",
     ...destinations.filter((destination) => destination.status === "live").map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
     ...tourCategories.filter((category) => category.slug !== "excursions" && tours.some((tour) => tour.destinationSlug === "marsa-alam" && category.matches(tour))).map((category) => `/marsa-alam/${category.slug}`),
@@ -27,16 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const localizedEntries = locales.flatMap((locale) =>
     paths
-      .filter((path) => locale === "en" || path !== "/image-credits")
       .map((path) => {
         const tour = path.startsWith("/tours/") ? tours.find((item) => path === `/tours/${item.slug}`) : undefined;
-        const isEnglishOnly = path === "/image-credits";
-        const languages = isEnglishOnly
-          ? { en: `${siteUrl}${path}`, "x-default": `${siteUrl}${path}` }
-          : Object.fromEntries([
-              ...Object.entries(languageAlternates(path)).map(([language, route]) => [language, `${siteUrl}${route}`]),
-              ["x-default", `${siteUrl}${localePath("en", path)}`],
-            ]);
+        const languages = Object.fromEntries([
+          ...Object.entries(languageAlternates(path)).map(([language, route]) => [language, `${siteUrl}${route}`]),
+          ["x-default", `${siteUrl}${localePath("en", path)}`],
+        ]);
         return {
           url: `${siteUrl}${localePath(locale, path)}`,
           changeFrequency: path ? "weekly" as const : "daily" as const,

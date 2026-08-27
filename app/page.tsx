@@ -621,7 +621,6 @@ text-blue-600
               <a className="block font-semibold text-amber-300 hover:text-amber-200" href={googleReviewUrl} onClick={() => trackEvent("google_review_click", { placement: "footer" })} target="_blank" rel="noopener noreferrer">★ {tr("Review us on Google", "Google-Bewertung abgeben", "Оставить отзыв в Google", "قيّمنا على Google", "Oceń nas na Google", "在 Google 上评价我们")}</a>
               <Link className="block hover:text-white" href={localePath(language, "/privacy-policy")}>{tr("Privacy Policy","Datenschutz","Политика конфиденциальности","سياسة الخصوصية","Polityka prywatności","隐私政策")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/terms-conditions")}>{tr("Terms & Conditions","Allgemeine Geschäftsbedingungen","Условия использования","الشروط والأحكام","Regulamin","条款与条件")}</Link>
-              <Link className="block hover:text-white" href="/image-credits">{tr("Image Credits","Bildnachweise","Источники изображений","مصادر الصور","Źródła zdjęć","图片来源")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/contact")}>{tr("Contact us","Kontakt","Связаться с нами")}</Link>
               <Link className="block hover:text-white" href="/blog">{language === "de" ? "Blog" : language === "ru" ? "Блог" : language === "ar" ? "المدونة" : language === "pl" ? "Poradnik" : language === "zh" ? "旅游指南" : "Blog"}</Link>
             </div>

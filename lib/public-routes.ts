@@ -3,7 +3,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 
 const publicRouteRoots = new Set([
   "about", "admin", "api", "blog", "booking", "cart", "checkout", "contact",
-  "destinations", "faq", "hurghada", "jeddah", "marsa-alam", "image-credits", "privacy-policy", "reviews",
+  "destinations", "faq", "hurghada", "jeddah", "marsa-alam", "privacy-policy", "reviews",
   "terms-conditions", "tours", "transfers",
 ]);
 
