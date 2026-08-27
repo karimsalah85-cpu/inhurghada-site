@@ -267,6 +267,17 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     } finally { setSubmitting(false); }
   }
 
+  function beginCheckout() {
+    if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
+    if (boatOverCapacity) return setError(boatCapacityError(selectedBoat?.capacity));
+    if (unavailable || unavailableWeekday) return;
+    if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера."));
+    if (requiresDivingLicense && !divingLicenseConfirmed) return setError(tr("Every diver must hold a valid diving license for this booking.", "Für diesen Tauchausflug muss jeder Taucher einen gültigen Tauchschein besitzen.", "Для этого погружения у каждого дайвера должен быть действующий сертификат."));
+    if (requiresQuadMinimumAge && !quadMinimumAgeConfirmed) return setError(tr("Every quad-tour participant must be at least 9 years old.", "Alle Teilnehmer der Quad-Tour müssen mindestens 9 Jahre alt sein.", "Каждому участнику тура на квадроциклах должно быть не менее 9 лет."));
+    trackEvent("booking_start", { value: total, currency, item_name: tourName, booking_type: "tour" });
+    setStep("checkout");
+  }
+
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl sm:p-7">
       <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">{tr("From", "Ab", "От")} {originalPrice && Number(originalPrice) > adultPrice ? <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(originalPrice, currency)}</span> : null}<span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice), currency)}</span> / {priceUnit || tr("person", "Person", "человека")}</p><p className="mt-1 text-sm font-medium text-emerald-700">{tr("Clear local price · pickup confirmed after booking", "Klarer lokaler Preis · Abholung nach Buchung bestätigt", "Понятная местная цена · трансфер подтверждается после бронирования")}</p></div><ShieldCheck className="text-emerald-600" /></div>
@@ -286,7 +297,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-slate-900">{tr("Optional extras", "Optionale Extras", "Дополнительные опции")}</legend>{extraOptions.map((option) => <label key={option.id} className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm"><span className="flex items-center gap-3"><input type="checkbox" checked={selectedExtras.includes(option.id)} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-4 w-4 accent-blue-600" />{de ? option.de : ru ? option.ru : zh ? option.zh : option.en}</span><strong>+{formatPrice(String(option.price * (option.charge === "adult" ? adults : 1)))}</strong></label>)}</fieldset> : null}
         <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-slate-900">{tr("Total", "Gesamtpreis", "Итого")}</p><p className="text-xs text-slate-500">{tr("Cash on arrival · no online payment", "Barzahlung bei Ankunft · keine Online-Zahlung", "Оплата наличными по прибытии · без онлайн-оплаты")}</p></div><p className="text-3xl font-black text-blue-700">{formatPrice(String(total), currency)}</p></div>
         {unavailableWeekday ? <p role="alert" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900">{tr("This excursion does not operate on the selected weekday. Choose another date.", "Dieser Ausflug findet am gewählten Wochentag nicht statt. Wähle ein anderes Datum.", "Экскурсия не проводится в выбранный день недели. Выберите другую дату.")}</p> : null}
-        <button disabled={unavailable || boatOverCapacity || unavailableWeekday} type="button" onClick={() => { if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера.")); trackEvent("booking_start", { value: total, currency, item_name: tourName, booking_type: "tour" }); setStep("checkout"); }} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400">{unavailable ? tr("Sold out", "Ausverkauft", "Мест нет") : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
+        <button disabled={unavailable || boatOverCapacity || unavailableWeekday} type="button" onClick={beginCheckout} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-4 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400">{unavailable ? tr("Sold out", "Ausverkauft", "Мест нет") : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
         <button type="button" onClick={() => {
           if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
           if (boatOverCapacity) return setError(boatCapacityError(selectedBoat?.capacity));
@@ -316,6 +327,15 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         <button type="button" onClick={() => setStep("select")} className="w-full text-sm font-semibold text-slate-600 hover:text-blue-700">← {tr("Change date or travelers", "Datum oder Reisende ändern", "Изменить дату или гостей")}</button>
         <p className="text-center text-xs leading-5 text-slate-500">{tr("Your booking is reserved now. You pay cash when you arrive; we confirm pickup via WhatsApp.", "Deine Buchung ist reserviert. Du bezahlst bei Ankunft bar; wir bestätigen die Abholung per WhatsApp.", "Заявка на бронирование принята. Оплата наличными по прибытии; трансфер мы подтвердим в WhatsApp.")}</p>
       </form>}
+      {step === "select" ? <>
+        <div className="h-20 lg:hidden" aria-hidden="true" />
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-12px_30px_-18px_rgba(15,23,42,0.7)] backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-3xl items-center gap-3">
+            <div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{tr("Total", "Gesamtpreis", "Итого")}</p><p className="truncate text-xl font-black text-blue-700">{formatPrice(String(total), currency)}</p></div>
+            <button disabled={unavailable || boatOverCapacity || unavailableWeekday} type="button" onClick={beginCheckout} className="flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white shadow-lg shadow-blue-900/20 hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400">{unavailable ? tr("Sold out", "Ausverkauft", "Мест нет") : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
+          </div>
+        </div>
+      </> : null}
     </div>
   );
 }
