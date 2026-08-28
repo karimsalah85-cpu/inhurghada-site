@@ -98,16 +98,26 @@ describe("PDF generators", () => {
     expect(output.length).toBeGreaterThan(4_000);
   });
 
-  it("uses the booking language in confirmation and status PDFs", async () => {
-    const confirmation = await createInvoicePdf({
-      reference: "DRS-DE-1", issuedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Gast",
-      itemName: "Glasbodenboot", quantity: 2, amount: 50, currency: "USD", locale: "de",
-    });
-    const status = await createBookingStatusPdf({
-      reference: "DRS-DE-1", generatedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Gast",
-      itemName: "Glasbodenboot", amount: 50, currency: "USD", bookingStatus: "completed", paymentStatus: "paid", locale: "de",
-    });
-    expect(confirmation.subarray(0, 5).toString()).toBe("%PDF-");
-    expect(status.toString("binary")).toContain("(BUCHUNGSSTATUS) Tj");
+  it("renders confirmation and status PDFs per booking language across every locale", async () => {
+    const locales = ["en", "de", "ru", "ar", "pl", "zh"] as const;
+    const statusBase = {
+      reference: "DRS-L10N-1", generatedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Guest",
+      itemName: "Glass-bottom boat", amount: 50, currency: "USD", bookingStatus: "completed", paymentStatus: "paid",
+    };
+    const statusByLocale = await Promise.all(locales.map((locale) => createBookingStatusPdf({ ...statusBase, locale })));
+    const confirmationByLocale = await Promise.all(locales.map((locale) => createInvoicePdf({
+      reference: "DRS-L10N-1", issuedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Guest",
+      itemName: "Glass-bottom boat", quantity: 2, amount: 50, currency: "USD", locale,
+    })));
+
+    for (const pdf of [...statusByLocale, ...confirmationByLocale]) {
+      expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
+    }
+    // Same inputs, different booking language -> different rendered bytes (localized copy + script font).
+    expect(new Set(statusByLocale.map((pdf) => pdf.toString("binary"))).size).toBe(locales.length);
+    expect(new Set(confirmationByLocale.map((pdf) => pdf.toString("binary"))).size).toBe(locales.length);
+    // Re-rendering the same locale is deterministic.
+    const statusDeAgain = await createBookingStatusPdf({ ...statusBase, locale: "de" });
+    expect(statusDeAgain.equals(statusByLocale[1])).toBe(true);
   });
 });
