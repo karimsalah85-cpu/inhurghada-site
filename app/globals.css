@@ -28,6 +28,17 @@ body {
 
 html { scroll-behavior: smooth; }
 
+/*
+ * Safety net against horizontal overflow on narrow screens: a single long
+ * token (a pasted URL, a long German compound word) must wrap instead of
+ * forcing the whole page wider than the viewport. `anywhere` — unlike
+ * `break-word` — also shrinks the element's min-content width, so flex/grid
+ * tracks can collapse back to the viewport.
+ */
+p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
+  overflow-wrap: anywhere;
+}
+
 ::selection { background: #a5f3fc; color: #082f49; }
 
 :focus-visible {
