@@ -121,6 +121,7 @@ Object.assign(polishBookingCopy, { "Sold out or not enough places for this group
 
 export default function BookingForm({ tourName, tourSlug, destinationSlug = "hurghada", pickupZones = [], price, originalPrice, priceUnit, pricingMode = "per-person", duration, location, participantPricing, availableTimes, ageBands, boatOptions, packageOptions, entrancePricing, bookingExtras = [], requiresMarinaTransferChoice = false, bookingLeadTime, currency = "USD", operatingWeekdays, fulfillmentType = "hotel_pickup", meetingPoint }: BookingFormProps) {
   const idempotencyKey = useRef<string | null>(null);
+  const lastSubmissionSignature = useRef<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { formatPrice, language } = useSiteSettings();
@@ -243,20 +244,27 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     }
     setSubmitting(true); setError("");
     try {
-      idempotencyKey.current ||= crypto.randomUUID();
+      const payload = {
+        type: "tour", locale: language, customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
+        tourName, tourSlug, extras: selectedExtras, selectedBoatOption, extraQuantities, transferRequired, transferArea, location: location || "Hurghada", duration: duration || "Please confirm",
+        price: `${formatPrice(String(total), currency)} total`, date, guests: travelerText, hotel,
+        message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedBoat ? `\nBoat: ${selectedBoat.label}` : ""}${selectedPackage ? `\nPackage: ${selectedPackage.label}` : ""}${bookingExtras.some((option) => extraQuantities[option.id]) ? `\nQuantity extras: ${bookingExtras.filter((option) => extraQuantities[option.id]).map((option) => `${option.label} x${extraQuantities[option.id]}`).join(", ")}` : ""}${requiresMarinaTransferChoice ? `\nMarina transfer: ${transferRequired ? `Yes - ${transferArea}` : "No"}` : ""}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
+        adults, youth, infants,
+        divingLicenseConfirmed,
+        quadMinimumAgeConfirmed,
+        website,
+      };
+      // Reuse the same idempotency key only when retrying this exact attempt;
+      // once the customer edits and resubmits, the details differ and the
+      // server would otherwise reject the reused key as a conflicting replay.
+      const signature = JSON.stringify(payload);
+      if (lastSubmissionSignature.current !== signature) {
+        idempotencyKey.current = crypto.randomUUID();
+        lastSubmissionSignature.current = signature;
+      }
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
-          type: "tour", locale: language, customerName: name.trim(), phone: phone.trim(), customerEmail: email.trim(),
-          tourName, tourSlug, extras: selectedExtras, selectedBoatOption, extraQuantities, transferRequired, transferArea, location: location || "Hurghada", duration: duration || "Please confirm",
-          price: `${formatPrice(String(total), currency)} total`, date, guests: travelerText, hotel,
-          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedBoat ? `\nBoat: ${selectedBoat.label}` : ""}${selectedPackage ? `\nPackage: ${selectedPackage.label}` : ""}${bookingExtras.some((option) => extraQuantities[option.id]) ? `\nQuantity extras: ${bookingExtras.filter((option) => extraQuantities[option.id]).map((option) => `${option.label} x${extraQuantities[option.id]}`).join(", ")}` : ""}${requiresMarinaTransferChoice ? `\nMarina transfer: ${transferRequired ? `Yes - ${transferArea}` : "No"}` : ""}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
-          adults, youth, infants,
-          divingLicenseConfirmed,
-          quadMinimumAgeConfirmed,
-          website,
-        }),
+        body: JSON.stringify({ idempotencyKey: idempotencyKey.current, ...payload }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || bookingSubmissionFailedText);

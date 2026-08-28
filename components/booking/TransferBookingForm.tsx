@@ -37,6 +37,7 @@ const polishTransferCopy: Record<string, string> = {
 
 export default function TransferBookingForm({ initialService = "airport" }: { initialService?: TransferService }) {
   const idempotencyKey = useRef<string | null>(null);
+  const lastSubmissionSignature = useRef<string | null>(null);
   const router = useRouter();
   const { language } = useSiteSettings();
   const de = language === "de";
@@ -133,33 +134,40 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
     setSubmitting(true);
     try {
-      idempotencyKey.current ||= crypto.randomUUID();
+      const payload = {
+        type: "transfer",
+        locale: language,
+        customerName: name.trim(),
+        phone: phone.trim(),
+        customerEmail: email.trim(),
+        tourName: serviceName,
+        location: `${pickup} to ${dropoff}`,
+        duration: "One way",
+        price: `$${total.toFixed(2)} fixed one-way fare`,
+        guests: passengers,
+        date,
+        time,
+        hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
+        message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} (${resortSupplement ? `$${baseFare} base + $7 resort supplement` : `$${baseFare} base`})\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
+        service,
+        pickup,
+        dropoff,
+        passengers: passengerCount,
+        travelBags: bagCount,
+        website,
+      };
+      // Reuse the same idempotency key only when retrying this exact attempt;
+      // once the customer edits and resubmits, the details differ and the
+      // server would otherwise reject the reused key as a conflicting replay.
+      const signature = JSON.stringify(payload);
+      if (lastSubmissionSignature.current !== signature) {
+        idempotencyKey.current = crypto.randomUUID();
+        lastSubmissionSignature.current = signature;
+      }
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
-          type: "transfer",
-          locale: language,
-          customerName: name.trim(),
-          phone: phone.trim(),
-          customerEmail: email.trim(),
-          tourName: serviceName,
-          location: `${pickup} to ${dropoff}`,
-          duration: "One way",
-          price: `$${total.toFixed(2)} fixed one-way fare`,
-          guests: passengers,
-          date,
-          time,
-          hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
-          message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} (${resortSupplement ? `$${baseFare} base + $7 resort supplement` : `$${baseFare} base`})\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
-          service,
-          pickup,
-          dropoff,
-          passengers: passengerCount,
-          travelBags: bagCount,
-          website,
-        }),
+        body: JSON.stringify({ idempotencyKey: idempotencyKey.current, ...payload }),
       });
 
       const data = await response.json();

@@ -100,7 +100,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   const type: "tour" | "transfer" = body.type === "transfer" ? "transfer" : "tour";
   const tourSlug = text(body.tourSlug, 80);
   const date = text(body.date, 10);
-  const time = text(body.time, 5);
+  const time = text(body.time, 80);
   const idempotencyKey = text(body.idempotencyKey, 64).toLowerCase();
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(idempotencyKey)) {

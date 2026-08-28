@@ -15,6 +15,7 @@ import ShareTripButton from "@/components/share/ShareTripButton";
 
 export default function CartCheckout() {
   const idempotencyKey = useRef<string | null>(null);
+  const lastSubmissionSignature = useRef<string | null>(null);
   const { items, removeItem, clearCart, total } = useCart();
   const { language, formatPrice } = useSiteSettings();
   const router = useRouter();
@@ -66,45 +67,52 @@ export default function CartCheckout() {
     setSubmitting(true);
     setError("");
     try {
-      idempotencyKey.current ||= crypto.randomUUID();
       const firstItem = items[0];
+      const payload = {
+        type: "tour",
+        locale: language,
+        customerName: name.trim(),
+        customerEmail: email.trim(),
+        phone: phone.trim(),
+        hotel: hotel.trim(),
+        date: firstItem.date,
+        time: firstItem.time,
+        tourName: `Multi-trip booking (${items.length})`,
+        tourSlug: "multi-trip",
+        location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : slug === "jeddah" ? "Jeddah" : "Hurghada").join(" and "),
+        duration: `${items.length} trips`,
+        message,
+        adults: 0,
+        youth: 0,
+        infants: 0,
+        cartItems: items.map((item) => ({
+          tourSlug: item.tourSlug,
+          date: item.date,
+          time: item.time,
+          adults: item.adults,
+          youth: item.youth,
+          infants: item.infants,
+          extras: item.extras,
+          selectedBoatOption: item.selectedBoatOption,
+          extraQuantities: item.extraQuantities,
+          transferRequired: item.transferRequired,
+          transferArea: item.transferArea,
+          divingLicenseConfirmed: item.requiresDivingLicense ? divingConfirmed : true,
+          quadMinimumAgeConfirmed: item.requiresQuadMinimumAge ? quadConfirmed : true,
+        })),
+      };
+      // Reuse the same idempotency key only when retrying this exact attempt;
+      // once the customer edits and resubmits, the details differ and the
+      // server would otherwise reject the reused key as a conflicting replay.
+      const signature = JSON.stringify(payload);
+      if (lastSubmissionSignature.current !== signature) {
+        idempotencyKey.current = crypto.randomUUID();
+        lastSubmissionSignature.current = signature;
+      }
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
-          type: "tour",
-          locale: language,
-          customerName: name.trim(),
-          customerEmail: email.trim(),
-          phone: phone.trim(),
-          hotel: hotel.trim(),
-          date: firstItem.date,
-          time: firstItem.time,
-          tourName: `Multi-trip booking (${items.length})`,
-          tourSlug: "multi-trip",
-          location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : slug === "jeddah" ? "Jeddah" : "Hurghada").join(" and "),
-          duration: `${items.length} trips`,
-          message,
-          adults: 0,
-          youth: 0,
-          infants: 0,
-          cartItems: items.map((item) => ({
-            tourSlug: item.tourSlug,
-            date: item.date,
-            time: item.time,
-            adults: item.adults,
-            youth: item.youth,
-            infants: item.infants,
-            extras: item.extras,
-            selectedBoatOption: item.selectedBoatOption,
-            extraQuantities: item.extraQuantities,
-            transferRequired: item.transferRequired,
-            transferArea: item.transferArea,
-            divingLicenseConfirmed: item.requiresDivingLicense ? divingConfirmed : true,
-            quadMinimumAgeConfirmed: item.requiresQuadMinimumAge ? quadConfirmed : true,
-          })),
-        }),
+        body: JSON.stringify({ idempotencyKey: idempotencyKey.current, ...payload }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Cart booking failed.");

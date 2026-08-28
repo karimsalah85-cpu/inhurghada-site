@@ -22,6 +22,15 @@ import { bookingLocale, buildCustomerConfirmationEmail } from "@/lib/booking-com
 import { tours } from "@/data/tours";
 import { localizeTour } from "@/lib/tour-localization";
 
+// Tour listings often use free-text time labels ("Gathering 9:15 AM...", "Time
+// confirmed by WhatsApp") that Postgres's `time` column can't parse. Only pass
+// through a value the DB can actually store; the full label still reaches the
+// customer via the booking message/notes. Mirrors the guard already used by
+// reserve_multi_trip_booking for cart items.
+function parsableStartTime(value: string) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : null;
+}
+
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("Cache-Control", "private, no-store");
@@ -118,7 +127,7 @@ export async function POST(request: NextRequest) {
       p_tour_name: tourName,
       p_tour_slug: body.tourSlug || (bookingType === "transfer" ? body.service : ""),
       p_date: body.date,
-      p_start_time: body.time || null,
+      p_start_time: parsableStartTime(body.time),
       p_guests: guestCount,
       p_adults: bookingType === "tour" ? body.adults : 0,
       p_youth: bookingType === "tour" ? body.youth : 0,
@@ -166,15 +175,25 @@ export async function POST(request: NextRequest) {
       tourName,
       message: bookingNotes,
     });
-    const confirmationPdf = await createInvoicePdf({
-      reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
-      itemName: localizedItemName,
-      quantity: guestCount, travelerSummary: localizedGuestSummary, amount, currency: currency.toLowerCase(),
-      paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel: pickupOrMeetingPoint,
-      tripLines: localizedTripLines,
-      locale: body.locale,
-    });
-    const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
+    // The booking is already persisted above: a PDF failure (e.g. a font or
+    // library issue) must not fail the whole request and hide a booking that
+    // actually saved. Fall back to sending confirmations without the PDF.
+    let confirmationPdf: Buffer | null = null;
+    try {
+      confirmationPdf = await createInvoicePdf({
+        reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
+        itemName: localizedItemName,
+        quantity: guestCount, travelerSummary: localizedGuestSummary, amount, currency: currency.toLowerCase(),
+        paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel: pickupOrMeetingPoint,
+        tripLines: localizedTripLines,
+        locale: body.locale,
+      });
+    } catch (error) {
+      console.error("Booking confirmation PDF generation failed", error);
+    }
+    const confirmationAttachment = confirmationPdf
+      ? { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf }
+      : undefined;
 
     const booking = findBooking(reference) || addBooking({
       reference,
@@ -219,7 +238,7 @@ export async function POST(request: NextRequest) {
       whatsappUrl: buildWhatsAppLink(bookingWhatsApp, message),
       emailSent: bookingEmailResult.success,
       customerEmailSent: customerEmailResult.success,
-      bookingConfirmationPdf: confirmationPdf.toString("base64"),
+      bookingConfirmationPdf: confirmationPdf ? confirmationPdf.toString("base64") : null,
       paymentUrl: null,
       paymentStatus: "cash-on-arrival",
     });
