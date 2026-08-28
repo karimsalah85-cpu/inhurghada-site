@@ -59,7 +59,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
 
   return (
     <>
-      <div className="sticky top-[4.5rem] z-20 rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur sm:static sm:p-4">
+      <div className="rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur sm:p-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <label className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4">
           <Search size={19} className="text-cyan-700" />
@@ -126,7 +126,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
                 <div className="relative h-56 overflow-hidden">
                   <Image src={tour.image} alt={tour.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
                   <ImageWatermark />
-                  {tour.badge ? <span className="absolute start-4 top-4 rounded-full bg-slate-950/85 px-3 py-2 text-xs font-bold text-white">{localizeProductBadge(locale, tour.badge)}</span> : null}
+                  {tour.badge ? <span className="absolute start-4 top-4 rounded-full bg-brand-navy px-3 py-2 text-xs font-bold text-white">{localizeProductBadge(locale, tour.badge)}</span> : null}
                 </div>
                 <div className="p-6">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-700">{tour.category || "Hurghada experience"}</p>
@@ -139,7 +139,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
                   </div>
                   <div className="mt-6 flex flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>{tour.bookingMode === "inquiry" ? <><p className="text-xs text-slate-500">{copy.quotation}</p><p className="text-xl font-black text-blue-700">{copy.request}</p></> : <><p className="text-xs text-slate-500">{copy.from}</p>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <p className="text-xs font-bold text-slate-400 line-through">{formatPrice(tour.originalPrice, tour.currency)}</p> : null}<p className="text-2xl font-black text-blue-700">{formatPrice(tour.price, tour.currency)}</p><p className="text-xs text-slate-500">{tour.priceUnit || copy.perPerson}</p>{tour.entrancePricing ? <p className="mt-2 text-xs font-bold text-amber-700">+ {copy.entrance} {formatPrice(String(tour.entrancePricing.adults))}/{copy.person}</p> : null}</>}</div>
-                    <span className="rounded-xl bg-blue-700 px-4 py-3 text-center text-sm font-bold text-white">{tour.bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
+                    <span className={`rounded-xl px-4 py-3 text-center text-sm font-bold text-white ${tour.bookingMode === "inquiry" ? "bg-blue-700" : "bg-brand-orange-cta"}`}>{tour.bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
                   </div>
                   {hasReviews ? <p className="mt-4 text-xs font-semibold text-amber-600">★ {tour.rating} · {reviewCount} {copy.reviews}</p> : null}
                 </div>

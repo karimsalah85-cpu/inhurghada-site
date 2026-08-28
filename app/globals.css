@@ -8,6 +8,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand-navy: #0d3b78;
+  --color-brand-navy-soft: #e8eef7;
+  --color-brand-navy-tint: #f4f7fb;
+  --color-brand-orange: #ff3300;
+  --color-brand-orange-cta: #e2380f;
+  --color-brand-orange-soft: #ffebe6;
+  --color-brand-orange-tint: #fff7f5;
   --font-sans: Arial, Helvetica, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }

@@ -118,9 +118,9 @@ export default function Navbar() {
           </NavLink>
 
           <details className="group relative">
-            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-slate-700 hover:bg-white hover:text-blue-700">{destinationsLabel} <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
+            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-slate-700 hover:bg-brand-navy-tint hover:text-brand-navy">{destinationsLabel} <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
             <div className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-              {destinations.filter((destination) => destination.status === "live").map((destination) => <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="block rounded-xl px-4 py-3 font-semibold text-slate-700 hover:bg-cyan-50 hover:text-cyan-800">{destination.name}</Link>)}
+              {destinations.filter((destination) => destination.status === "live").map((destination) => <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="block rounded-xl px-4 py-3 font-semibold text-slate-700 hover:bg-brand-navy-tint hover:text-brand-navy">{destination.name}</Link>)}
             </div>
           </details>
 
@@ -466,7 +466,7 @@ function NavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition ${active ? "bg-white text-blue-700 shadow-sm" : "text-slate-700 hover:bg-white/80 hover:text-blue-700"}`}
+      className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition ${active ? "bg-white text-brand-navy shadow-sm" : "text-slate-700 hover:bg-brand-navy-tint hover:text-brand-navy"}`}
     >
 
       {children}
@@ -499,7 +499,7 @@ function MobileLink({
       href={href}
       ref={linkRef}
       onClick={close}
-      className="rounded-xl px-3 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-100 hover:text-blue-700"
+      className="rounded-xl px-3 py-3 text-base font-semibold text-slate-800 transition hover:bg-brand-navy-tint hover:text-brand-navy"
     >
 
       {children}

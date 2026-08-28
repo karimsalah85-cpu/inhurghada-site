@@ -56,17 +56,17 @@ export default function BottomNav() {
 
         <div className="flex flex-col items-center">
           <div className="relative -mt-8 h-14 w-14">
-            <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-orange-500/50" style={{ animationDelay: "0s" }} />
-            <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-orange-500/50" style={{ animationDelay: "0.7s" }} />
-            <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-orange-500/50" style={{ animationDelay: "1.4s" }} />
+            <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange/50" style={{ animationDelay: "0s" }} />
+            <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange/50" style={{ animationDelay: "0.7s" }} />
+            <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange/50" style={{ animationDelay: "1.4s" }} />
             <Link
               href={bookHref}
               onClick={() => trackEvent("booking_start", { placement: "bottom_nav", tour_slug: focusedTourSlug || undefined })}
               aria-label={t("booking")}
               className="
               relative flex h-14 w-14 items-center justify-center rounded-full
-              bg-gradient-to-r from-orange-500 to-orange-600
-              font-bold text-white shadow-lg shadow-orange-500/30
+              bg-brand-orange-cta
+              font-bold text-white shadow-lg shadow-brand-orange-cta/30
               ring-4 ring-white
               transition active:scale-95
               "
@@ -108,7 +108,7 @@ function BottomNavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${active ? "text-blue-700" : "text-slate-600"}`}
+      className={`flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${active ? "text-brand-navy" : "text-slate-600"}`}
     >
       {icon}
       <span>{label}</span>
