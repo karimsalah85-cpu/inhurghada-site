@@ -10,6 +10,15 @@ const quarantinedTourismImages = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
+  // pdfkit resolves its built-in AFM fonts through the "#standard-fonts/*"
+  // subpath import and createInvoicePdf reads the embedded Noto TTFs via a
+  // process.cwd()-relative path — @vercel/nft can trace neither, so both must
+  // be pinned into the serverless bundle for every route that renders a PDF.
+  outputFileTracingIncludes: {
+    "/api/bookings": ["./node_modules/pdfkit/js/standard-fonts/**", "./assets/fonts/**"],
+    "/api/invoices/*": ["./node_modules/pdfkit/js/standard-fonts/**", "./assets/fonts/**"],
+    "/api/admin/bookings/**": ["./node_modules/pdfkit/js/standard-fonts/**", "./assets/fonts/**"],
+  },
   async redirects() {
     return [
       ...quarantinedTourismImages.map((file) => ({ source: `/images/${file}`, destination: "/images/placeholders/sea-activity.svg", permanent: false })),
