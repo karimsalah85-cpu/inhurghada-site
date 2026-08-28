@@ -1,3 +1,5 @@
+import { ryzeBlogPosts } from "./ryze-blog-posts";
+
 export type BlogPost = {
   slug: string;
   title: string;
@@ -576,4 +578,5 @@ export const blogPosts: BlogPost[] = [
       { question: "Should I book a private transfer in advance or arrange one on arrival?", answer: "Booking in advance with your flight details means your pickup is tracked against your actual arrival time, which removes a layer of uncertainty after a long flight." },
     ],
   },
+  ...ryzeBlogPosts,
 ];
