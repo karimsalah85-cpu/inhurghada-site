@@ -7,6 +7,9 @@ on:
       - ryze/publishing-setup
     paths:
       - "blog/data/**"
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,8 +31,15 @@ jobs:
         with:
           node-version: 24
 
-      - name: Convert Ryze articles
+      - name: Convert GitHub-published Ryze articles
+        if: github.event_name == 'push'
         run: node scripts/ryze-convert.mjs
+
+      - name: Sync existing Ryze-hosted articles
+        if: github.event_name != 'push'
+        env:
+          RYZE_HOSTED_URL: https://dailyredsea.byryze.com
+        run: node scripts/ryze-hosted-sync.mjs
 
       - name: Commit generated blog data
         run: |
