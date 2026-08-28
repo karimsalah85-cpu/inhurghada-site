@@ -2,6 +2,7 @@ import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
+// Keep the legacy hosted blog as the migration source until every article lives on dailyredsea.com.
 const sourceSite = (process.env.RYZE_HOSTED_URL || "https://dailyredsea.byryze.com").replace(/\/$/, "");
 const outputFile = path.join(root, "data", "ryze-blog-posts.ts");
 const imageDir = path.join(root, "public", "images", "ryze-blog");
