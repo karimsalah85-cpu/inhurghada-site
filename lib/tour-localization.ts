@@ -247,7 +247,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["الضيوف ذوو الحالات الطبية التي تجعل الغوص غير آمن", "الضيوف الذين يخططون للسفر جواً خلال 24 ساعة بعد التجربة"],
     whatToBring: ["منشفة", "ملابس جافة للتغيير", "واقي شمس", "ملابس سباحة", "هوية سارية", "أي موافقة طبية مطلوبة"],
     packageName: "غوص تجريبي SSI Basic Diver", packageDescription: "أول تجربة غوص لنصف يوم تشمل النظرية والتدريب في مياه محصورة والمعدات وغطسة في المياه المفتوحة بإشراف مدرب.", packageLabel: "للشخص", ageBands: { adults: "المشارك", children: "تواصل معنا لتأكيد الحد الأدنى للعمر", infants: "غير ينطبق" },
-    seoTitle: "جرّب الغوص في جدة | SSI Basic Diver", metaDescription: "احجز تجربة غوص SSI Basic Diver في جدة: نظرية ومهارات مياه محصورة ومعدات وغطسة مفتوحة لمدة 30-45 دقيقة بسعر 550 ريال سعودي.",
+    seoTitle: "جرّب الغوص في جدة | SSI Basic Diver", metaDescription: "احجز تجربة غوص SSI Basic Diver في جدة: نظرية ومهارات مياه محصورة ومعدات وغطسة مفتوحة لمدة 30-45 دقيقة، الآن 468 ريال سعودي (بدلاً من 550).",
   },
   "jeddah-yacht-sunset-cruise": {
     title: "جولة يخت شروق سات وقت الغروب في جدة",
@@ -269,7 +269,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     ageBands: { adults: "البالغون (13 سنة فأكثر)", children: "الأطفال (3–12 سنة)", infants: "الرضع (0–2 سنة) — مجاناً" },
     availableTimes: ["5:00 مساءً — رحلة الغروب"],
     seoTitle: "جولة يخت وقت الغروب في خليج أبحر جدة",
-    metaDescription: "احجز جولة يخت شروق سات وقت الغروب في خليج أبحر جدة بسعر 120 ريالاً للبالغ، وتشمل السندويشات والمشروبات وثلاثة أدوار للمشاهدة.",
+    metaDescription: "احجز جولة يخت شروق سات وقت الغروب في خليج أبحر جدة، الآن 102 ريال للبالغ (بدلاً من 120)، وتشمل السندويشات والمشروبات وثلاثة أدوار للمشاهدة.",
     imageAlt: "يخت شروق سات يبحر في خليج أبحر بجدة وقت الغروب",
   },
   "certified-diver-boat-trip-jeddah": {
@@ -279,7 +279,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     included: ["خزانات الغوص وأحزمة الأوزان", "الوجبات الخفيفة والمشروبات"], notIncluded: ["معدات الغوص - متوفرة للإيجار بشكل منفصل", "المواصلات إلى متجر الحداد للغوص ما لم تُؤكد بشكل منفصل"],
     notes: ["للغواصين المعتمدين فقط؛ يلزم إثبات الشهادة.", "يجب الحجز قبل 24 ساعة على الأقل.", "يُعتبر الوصول المتأخر أكثر من 15 دقيقة بمثابة خدمة مقدمة، دون استرداد.", "قد يُعاد جدولة الرحلات أو استرداد ثمنها في حال سوء الأحوال الجوية.", "الحد الأقصى 20 مقعداً لكل رحلة."],
     packageName: "رحلة قارب للغواصين المعتمدين - غطستان", packageDescription: "غطستان بالقارب بصحبة مرشد للغواصين المعتمدين مع خزانات وأحزمة أوزان ووجبات خفيفة ومشروبات مشمولة.", packageLabel: "للشخص", ageBands: { adults: "الغواصون المعتمدون", children: "", infants: "" },
-    seoTitle: "رحلة قارب للغواصين المعتمدين في جدة | غطستان بمرشد", metaDescription: "احجز رحلة قارب بغطستين بمرشد للغواصين المعتمدين في جدة، لاستكشاف مواقع حطام السفن والشعاب المرجانية قرب متجر الحداد للغوص، بسعر 400 ريال سعودي للشخص شاملة الخزانات والوجبات الخفيفة.",
+    seoTitle: "رحلة قارب للغواصين المعتمدين في جدة | غطستان بمرشد", metaDescription: "احجز رحلة قارب بغطستين بمرشد للغواصين المعتمدين في جدة، لاستكشاف مواقع حطام السفن والشعاب المرجانية قرب متجر الحداد للغوص، الآن 340 ريالاً سعودياً للشخص (بدلاً من 400)، شاملة الخزانات والوجبات الخفيفة.",
   },
   "bayada-snorkeling-trip-jeddah": {
     title: "رحلة سنوركلينج يومية في بياضة من جدة",
@@ -304,7 +304,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     packageDescription: "رحلة قارب سنوركلينج بصحبة مرشد لنصف يوم إلى مجموعة متغيرة من مواقع البحر الأحمر في منطقة بياضة، مع مدرب ومعدات ووجبات خفيفة ومشروبات.",
     packageLabel: "للشخص",
     seoTitle: "رحلة سنوركلينج يومية في بياضة من جدة",
-    metaDescription: "احجز رحلة سنوركلينج بياضة اليومية من الحداد سكوبا في جدة: مجموعة متغيرة من مواقع الشعاب في البحر الأحمر مع مدرب محترف ومعدات ووجبات خفيفة ومشروبات بسعر 350 ريالاً سعودياً للشخص.",
+    metaDescription: "احجز رحلة سنوركلينج بياضة اليومية من الحداد سكوبا في جدة: مجموعة متغيرة من مواقع الشعاب في البحر الأحمر مع مدرب محترف ومعدات ووجبات خفيفة ومشروبات، الآن 298 ريالاً سعودياً للشخص (بدلاً من 350).",
   },
 };
 
@@ -578,7 +578,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Gäste mit Erkrankungen, die Gerätetauchen unsicher machen", "Gäste, die innerhalb von 24 Stunden nach dem Erlebnis fliegen möchten"],
     whatToBring: ["Handtuch", "Trockene Wechselkleidung", "Sonnenschutz", "Badebekleidung", "Gültiger Ausweis", "Erforderliche ärztliche Freigabe"],
     packageName: "SSI Basic Diver – Schnuppertauchen", packageDescription: "Ein halbtägiges erstes Taucherlebnis mit Theorie, Training im begrenzten Wasser, Ausrüstung und einem vom Instruktor geleiteten Freiwassertauchgang.", packageLabel: "Pro Person", ageBands: { adults: "Teilnehmer", children: "Kontaktiere uns zur Bestätigung des Mindestalters", infants: "Nicht zutreffend" },
-    seoTitle: "Schnuppertauchen in Jeddah | SSI Basic Diver", metaDescription: "Buche ein SSI-Basic-Diver-Schnuppertauchen in Jeddah: Theorie, Übungen im begrenzten Wasser, Ausrüstung und ein 30–45-minütiger Freiwassertauchgang für SAR 550.",
+    seoTitle: "Schnuppertauchen in Jeddah | SSI Basic Diver", metaDescription: "Buche ein SSI-Basic-Diver-Schnuppertauchen in Jeddah: Theorie, Übungen im begrenzten Wasser, Ausrüstung und ein 30–45-minütiger Freiwassertauchgang, jetzt SAR 468 (statt SAR 550).",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "Bootstour für zertifizierte Taucher — Zwei geführte Tauchgänge", location: "Al-Haddad Scuba Shop, Jeddah", duration: "6–8 Stunden", category: "Tauchen",
@@ -587,7 +587,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     included: ["Tauchflaschen und Bleigurte", "Snacks und Getränke"], notIncluded: ["Tauchausrüstung — separat mietbar", "Transport zum Al-Haddad Scuba Shop, sofern nicht separat bestätigt"],
     notes: ["Nur für zertifizierte Taucher; ein Zertifizierungsnachweis ist erforderlich.", "Buche mindestens 24 Stunden im Voraus.", "Ankünfte mit mehr als 15 Minuten Verspätung gelten als erbrachte Leistung, ohne Rückerstattung.", "Touren können bei schwerem Wetter verschoben oder erstattet werden.", "Maximal 20 Plätze pro Tour."],
     packageName: "Bootstour für zertifizierte Taucher — Zwei Tauchgänge", packageDescription: "Zwei geführte Bootstauchgänge für zertifizierte Taucher mit Tauchflaschen, Bleigurten, Snacks und Getränken inklusive.", packageLabel: "Pro Person", ageBands: { adults: "Zertifizierte Taucher", children: "", infants: "" },
-    seoTitle: "Bootstour für zertifizierte Taucher in Jeddah | Zwei geführte Tauchgänge", metaDescription: "Buche eine geführte Bootstour mit zwei Tauchgängen für zertifizierte Taucher in Jeddah, zu Wrack- und Korallenriffplätzen nahe dem Al-Haddad Scuba Shop, für 400 SAR pro Person inklusive Flaschen und Snacks.",
+    seoTitle: "Bootstour für zertifizierte Taucher in Jeddah | Zwei geführte Tauchgänge", metaDescription: "Buche eine geführte Bootstour mit zwei Tauchgängen für zertifizierte Taucher in Jeddah, zu Wrack- und Korallenriffplätzen nahe dem Al-Haddad Scuba Shop, jetzt 340 SAR pro Person (statt 400 SAR), inklusive Flaschen und Snacks.",
   },
   "jeddah-yacht-sunset-cruise": {
     title: "Jeddah Yacht-Sonnenuntergangsfahrt auf der Shorouk Sat", location: "Obhur Bay, Jeddah", duration: "Etwa 2–2,5 Stunden inklusive Check-in", category: "Bootsfahrt",
@@ -606,7 +606,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     ],
     packageName: "Shorouk Sat Sonnenuntergangsfahrt", packageDescription: "Eine Yachtfahrt zur goldenen Stunde durch die Obhur Bay mit drei Aussichtsdecks, klimatisiertem Salon, Sandwiches und Getränken.", packageLabel: "Pro Erwachsener", priceUnit: "pro Erwachsenem", departureMarina: "Rixos Resort Tor 2, Obhur Bay", categoryPath: ["Bootsfahrten", "Sonnenuntergangsfahrt"],
     ageBands: { adults: "Erwachsene (ab 13 Jahren)", children: "Kinder (3–12 Jahre)", infants: "Kleinkinder (0–2 Jahre) — kostenlos" }, availableTimes: ["17:00 Uhr Sonnenuntergangsfahrt"],
-    seoTitle: "Jeddah Yacht-Sonnenuntergangsfahrt in der Obhur Bay", metaDescription: "Buche die Shorouk-Sat-Sonnenuntergangsfahrt in Jeddahs Obhur Bay für 120 SAR pro Erwachsenem, mit Sandwiches, Getränken und drei Aussichtsdecks.",
+    seoTitle: "Jeddah Yacht-Sonnenuntergangsfahrt in der Obhur Bay", metaDescription: "Buche die Shorouk-Sat-Sonnenuntergangsfahrt in Jeddahs Obhur Bay, jetzt 102 SAR pro Erwachsenem (statt 120 SAR), mit Sandwiches, Getränken und drei Aussichtsdecks.",
     imageAlt: "Die Yacht Shorouk Sat fährt bei Sonnenuntergang durch Jeddahs Obhur Bay",
   },
   "bayada-snorkeling-trip-jeddah": {
@@ -632,7 +632,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     packageDescription: "Halbtägige geführte Schnorchel-Bootstour zu wechselnden Plätzen im Roten Meer in der Bayada-Region, mit Guide, Ausrüstung, Snacks und Getränken.",
     packageLabel: "Pro Person",
     seoTitle: "Tägliche Bayada-Schnorcheltour ab Dschidda",
-    metaDescription: "Buche die tägliche Bayada-Schnorcheltour von Al-Haddad Scuba ab Dschidda: wechselnde Riffplätze im Roten Meer mit professionellem Guide sowie Ausrüstung, Snacks und Getränken für 350 SAR pro Person.",
+    metaDescription: "Buche die tägliche Bayada-Schnorcheltour von Al-Haddad Scuba ab Dschidda: wechselnde Riffplätze im Roten Meer mit professionellem Guide sowie Ausrüstung, Snacks und Getränken, jetzt 298 SAR pro Person (statt 350 SAR).",
   },
 };
 
@@ -910,7 +910,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Гости с заболеваниями, делающими дайвинг небезопасным", "Гости, планирующие лететь самолётом в течение 24 часов после мероприятия"],
     whatToBring: ["Полотенце", "Сухая сменная одежда", "Солнцезащита", "Купальный костюм", "Действительное удостоверение личности", "Необходимое медицинское разрешение"],
     packageName: "SSI Basic Diver — пробное погружение", packageDescription: "Первое погружение на полдня с теорией, тренировкой в закрытой воде, снаряжением и погружением в открытой воде под руководством инструктора.", packageLabel: "На человека", ageBands: { adults: "Участник", children: "Свяжитесь с нами для подтверждения минимального возраста", infants: "Не применяется" },
-    seoTitle: "Пробное погружение в Джидде | SSI Basic Diver", metaDescription: "Забронируйте пробное погружение SSI Basic Diver в Джидде: теория, навыки в закрытой воде, снаряжение и погружение в открытой воде на 30–45 минут за 550 SAR.",
+    seoTitle: "Пробное погружение в Джидде | SSI Basic Diver", metaDescription: "Забронируйте пробное погружение SSI Basic Diver в Джидде: теория, навыки в закрытой воде, снаряжение и погружение в открытой воде на 30–45 минут, теперь 468 SAR (раньше 550 SAR).",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "Поездка на катере для сертифицированных дайверов — два погружения с гидом", location: "Al-Haddad Scuba Shop, Джидда", duration: "6-8 часов", category: "Дайвинг",
@@ -919,7 +919,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     included: ["Баллоны и грузовые пояса", "Закуски и напитки"], notIncluded: ["Снаряжение для дайвинга — доступна отдельная аренда", "Транспорт до Al-Haddad Scuba Shop, если не подтверждён отдельно"],
     notes: ["Только для сертифицированных дайверов; требуется подтверждение сертификации.", "Бронируйте минимум за 24 часа.", "Опоздание более чем на 15 минут засчитывается как оказанная услуга, без возврата средств.", "Поездки могут быть перенесены или возвращены при сильной непогоде.", "Максимум 20 мест на поездку."],
     packageName: "Поездка на катере для сертифицированных дайверов — два погружения", packageDescription: "Два погружения с катера с гидом для сертифицированных дайверов с баллонами, грузовыми поясами, закусками и напитками.", packageLabel: "За человека", ageBands: { adults: "Сертифицированные дайверы", children: "", infants: "" },
-    seoTitle: "Поездка на катере для сертифицированных дайверов в Джидде | Два погружения с гидом", metaDescription: "Забронируйте поездку на катере с двумя погружениями с гидом для сертифицированных дайверов в Джидде, у затонувших кораблей и рифов рядом с Al-Haddad Scuba Shop, за 400 SAR с человека, включая баллоны и закуски.",
+    seoTitle: "Поездка на катере для сертифицированных дайверов в Джидде | Два погружения с гидом", metaDescription: "Забронируйте поездку на катере с двумя погружениями с гидом для сертифицированных дайверов в Джидде, у затонувших кораблей и рифов рядом с Al-Haddad Scuba Shop, теперь 340 SAR с человека (раньше 400 SAR), включая баллоны и закуски.",
   },
   "jeddah-yacht-sunset-cruise": {
     title: "Закатный круиз на яхте Shorouk Sat в Джидде", location: "Бухта Обхур, Джидда", duration: "Около 2-2,5 часов включая регистрацию", category: "Круиз на лодке",
@@ -938,7 +938,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     ],
     packageName: "Закатный круиз Shorouk Sat", packageDescription: "Круиз на яхте в час заката по бухте Обхур с тремя смотровыми палубами, кондиционируемым салоном, сэндвичами и напитками.", packageLabel: "За взрослого", priceUnit: "за взрослого", departureMarina: "Ворота 2 отеля Rixos, бухта Обхур", categoryPath: ["Круизы на яхте", "Закатный круиз"],
     ageBands: { adults: "Взрослые (от 13 лет)", children: "Дети (3-12 лет)", infants: "Младенцы (0-2 года) — бесплатно" }, availableTimes: ["Закатный круиз в 17:00"],
-    seoTitle: "Закатный круиз на яхте в бухте Обхур, Джидда", metaDescription: "Забронируйте закатный круиз на яхте Shorouk Sat в бухте Обхур, Джидда, за 120 SAR со взрослого, включая сэндвичи, напитки и три смотровые палубы.",
+    seoTitle: "Закатный круиз на яхте в бухте Обхур, Джидда", metaDescription: "Забронируйте закатный круиз на яхте Shorouk Sat в бухте Обхур, Джидда, теперь 102 SAR со взрослого (раньше 120 SAR), включая сэндвичи, напитки и три смотровые палубы.",
     imageAlt: "Яхта Shorouk Sat плывёт по бухте Обхур в Джидде на закате",
   },
   "bayada-snorkeling-trip-jeddah": {
@@ -964,7 +964,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     packageDescription: "Полудневный лодочный тур с гидом по снорклингу к чередующимся местам Красного моря в районе Баяда, с инструктором, снаряжением, закусками и напитками.",
     packageLabel: "За человека",
     seoTitle: "Ежедневный снорклинг-тур в районе Баяда из Джидды",
-    metaDescription: "Забронируйте ежедневный снорклинг-тур Al-Haddad Scuba в районе Баяда из Джидды: чередующиеся рифовые места Красного моря с профессиональным инструктором, а также снаряжение, закуски и напитки за 350 SAR с человека.",
+    metaDescription: "Забронируйте ежедневный снорклинг-тур Al-Haddad Scuba в районе Баяда из Джидды: чередующиеся рифовые места Красного моря с профессиональным инструктором, а также снаряжение, закуски и напитки, теперь 298 SAR с человека (раньше 350 SAR).",
   },
 };
 
@@ -1227,7 +1227,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["有使潜水不安全的健康状况的客人", "计划在体验后24小时内乘飞机的客人"],
     whatToBring: ["毛巾", "干净换洗衣物", "防晒用品", "泳装", "有效身份证件", "任何所需的医疗许可"],
     packageName: "SSI Basic Diver——体验潜水", packageDescription: "半天的初次潜水体验，包含理论、封闭水域训练、装备及教练带领的开放水域潜水。", packageLabel: "每人", ageBands: { adults: "参与者", children: "请联系我们确认最低年龄", infants: "不适用" },
-    seoTitle: "吉达体验潜水 | SSI Basic Diver", metaDescription: "在吉达预订SSI Basic Diver体验潜水：理论、封闭水域技巧、装备及30-45分钟开放水域潜水，价格550沙特里亚尔。",
+    seoTitle: "吉达体验潜水 | SSI Basic Diver", metaDescription: "在吉达预订SSI Basic Diver体验潜水：理论、封闭水域技巧、装备及30-45分钟开放水域潜水，现价468沙特里亚尔（原价550）。",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "认证潜水员快艇潜水之旅 — 两次向导潜水", location: "吉达 Al-Haddad 潜水店", duration: "6-8小时", category: "潜水",
@@ -1236,7 +1236,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     included: ["气瓶和配重带", "小吃和饮料"], notIncluded: ["潜水装备 — 可单独租赁", "前往Al-Haddad潜水店的交通（除非另行确认）"],
     notes: ["仅限持证潜水员；须出示潜水证书。", "请至少提前24小时预订。", "迟到超过15分钟将视为已提供服务，不予退款。", "如遇恶劣天气，行程可能改期或退款。", "每次行程最多20个名额。"],
     packageName: "认证潜水员快艇之旅 — 两次潜水", packageDescription: "为持证潜水员安排的两次向导船潜，含气瓶、配重带、小吃和饮料。", packageLabel: "每人", ageBands: { adults: "持证潜水员", children: "", infants: "" },
-    seoTitle: "吉达认证潜水员船潜之旅 | 两次向导潜水", metaDescription: "在吉达预订两次向导船潜行程，专为持证潜水员设计，探索Al-Haddad潜水店附近的沉船和珊瑚礁，每人400沙特里亚尔，含气瓶和小吃。",
+    seoTitle: "吉达认证潜水员船潜之旅 | 两次向导潜水", metaDescription: "在吉达预订两次向导船潜行程，专为持证潜水员设计，探索Al-Haddad潜水店附近的沉船和珊瑚礁，现价每人340沙特里亚尔（原价400），含气瓶和小吃。",
   },
   "jeddah-yacht-sunset-cruise": {
     title: "吉达Shorouk Sat游艇日落巡游", location: "吉达奥布尔湾", duration: "约2-2.5小时（含登记）", category: "游船巡游",
@@ -1255,7 +1255,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     ],
     packageName: "Shorouk Sat日落巡游", packageDescription: "黄金时刻畅游奥布尔湾的游艇巡游，含三层观景甲板、空调沙龙、三明治及饮品。", packageLabel: "每位成人", priceUnit: "每位成人", departureMarina: "奥布尔湾Rixos度假村2号门", categoryPath: ["游艇巡游", "日落巡游"],
     ageBands: { adults: "成人（13岁及以上）", children: "儿童（3-12岁）", infants: "婴儿（0-2岁）— 免费" }, availableTimes: ["下午5点日落巡游"],
-    seoTitle: "吉达奥布尔湾游艇日落巡游", metaDescription: "预订吉达奥布尔湾Shorouk Sat游艇日落巡游，每位成人120沙特里亚尔，含三明治、饮品及三层观景甲板。",
+    seoTitle: "吉达奥布尔湾游艇日落巡游", metaDescription: "预订吉达奥布尔湾Shorouk Sat游艇日落巡游，现价每位成人102沙特里亚尔（原价120），含三明治、饮品及三层观景甲板。",
     imageAlt: "Shorouk Sat游艇在日落时分航行于吉达奥布尔湾",
   },
   "bayada-snorkeling-trip-jeddah": {
@@ -1281,7 +1281,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     packageDescription: "半天有教练带领的浮潜船之旅，前往巴亚达地区轮换的红海浮潜点，含教练、装备、点心和饮品。",
     packageLabel: "每人",
     seoTitle: "吉达出发巴亚达每日浮潜船之旅",
-    metaDescription: "预订 Al-Haddad Scuba 从吉达出发的巴亚达每日浮潜船之旅：轮换的红海珊瑚礁浮潜点，配专业教练，含装备、点心和饮品，每人 350 沙特里亚尔。",
+    metaDescription: "预订 Al-Haddad Scuba 从吉达出发的巴亚达每日浮潜船之旅：轮换的红海珊瑚礁浮潜点，配专业教练，含装备、点心和饮品，现价每人 298 沙特里亚尔（原价 350）。",
   },
 };
 
@@ -1497,7 +1497,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Goście ze schorzeniami czyniącymi nurkowanie niebezpiecznym", "Goście planujący lot samolotem w ciągu 24 godzin po doświadczeniu"],
     whatToBring: ["Ręcznik", "Suche ubranie na zmianę", "Ochrona przeciwsłoneczna", "Strój kąpielowy", "Ważny dokument tożsamości", "Wszelkie wymagane zaświadczenie lekarskie"],
     packageName: "SSI Basic Diver – nurkowanie próbne", packageDescription: "Półdniowe pierwsze doświadczenie nurkowe z teorią, treningiem w wodzie ograniczonej, sprzętem i nurkowaniem na wodach otwartych pod okiem instruktora.", packageLabel: "Za osobę", ageBands: { adults: "Uczestnik", children: "Skontaktuj się z nami, aby potwierdzić minimalny wiek", infants: "Nie dotyczy" },
-    seoTitle: "Nurkowanie próbne w Dżuddzie | SSI Basic Diver", metaDescription: "Zarezerwuj nurkowanie próbne SSI Basic Diver w Dżuddzie: teoria, umiejętności w wodzie ograniczonej, sprzęt i 30–45-minutowe nurkowanie na wodach otwartych za 550 SAR.",
+    seoTitle: "Nurkowanie próbne w Dżuddzie | SSI Basic Diver", metaDescription: "Zarezerwuj nurkowanie próbne SSI Basic Diver w Dżuddzie: teoria, umiejętności w wodzie ograniczonej, sprzęt i 30–45-minutowe nurkowanie na wodach otwartych, teraz 468 SAR (wcześniej 550 SAR).",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "Rejs łodzią dla nurków certyfikowanych — dwa nurkowania z przewodnikiem", location: "Al-Haddad Scuba Shop, Dżudda", duration: "6-8 godzin", category: "Nurkowanie",
@@ -1506,7 +1506,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     included: ["Butle i pasy balastowe", "Przekąski i napoje"], notIncluded: ["Sprzęt do nurkowania — dostępny osobno do wynajęcia", "Transport do Al-Haddad Scuba Shop, jeśli nie potwierdzony osobno"],
     notes: ["Tylko dla nurków certyfikowanych; wymagane potwierdzenie certyfikacji.", "Rezerwuj co najmniej 24 godziny wcześniej.", "Przybycie ponad 15 minut po czasie jest traktowane jako zrealizowana usługa, bez zwrotu kosztów.", "Wycieczki mogą zostać przełożone lub zwrócone w przypadku silnej pogody.", "Maksymalnie 20 miejsc na wycieczkę."],
     packageName: "Rejs łodzią dla nurków certyfikowanych — dwa nurkowania", packageDescription: "Dwa nurkowania z łodzi z przewodnikiem dla nurków certyfikowanych z butlami, pasami balastowymi, przekąskami i napojami w cenie.", packageLabel: "Za osobę", ageBands: { adults: "Nurkowie certyfikowani", children: "", infants: "" },
-    seoTitle: "Rejs łodzią dla nurków certyfikowanych w Dżuddzie | Dwa nurkowania z przewodnikiem", metaDescription: "Zarezerwuj rejs łodzią z dwoma nurkowaniami z przewodnikiem dla nurków certyfikowanych w Dżuddzie, przy wrakach i rafach koło Al-Haddad Scuba Shop, za 400 SAR od osoby, w tym butle i przekąski.",
+    seoTitle: "Rejs łodzią dla nurków certyfikowanych w Dżuddzie | Dwa nurkowania z przewodnikiem", metaDescription: "Zarezerwuj rejs łodzią z dwoma nurkowaniami z przewodnikiem dla nurków certyfikowanych w Dżuddzie, przy wrakach i rafach koło Al-Haddad Scuba Shop, teraz 340 SAR od osoby (wcześniej 400 SAR), w tym butle i przekąski.",
   },
   "jeddah-yacht-sunset-cruise": {
     title: "Rejs jachtem o zachodzie słońca Shorouk Sat w Dżuddzie", location: "Zatoka Obhur, Dżudda", duration: "Około 2-2,5 godziny łącznie z odprawą", category: "Rejs łodzią",
@@ -1525,7 +1525,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     ],
     packageName: "Rejs o zachodzie słońca Shorouk Sat", packageDescription: "Rejs jachtem o złotej godzinie przez zatokę Obhur z trzema pokładami widokowymi, klimatyzowanym salonem, kanapkami i napojami.", packageLabel: "Za dorosłego", priceUnit: "za osobę dorosłą", departureMarina: "Brama 2 Rixos Resort, zatoka Obhur", categoryPath: ["Rejsy jachtem", "Rejs o zachodzie słońca"],
     ageBands: { adults: "Dorośli (od 13 lat)", children: "Dzieci (3-12 lat)", infants: "Niemowlęta (0-2 lata) — bezpłatnie" }, availableTimes: ["Rejs o zachodzie słońca o 17:00"],
-    seoTitle: "Rejs jachtem o zachodzie słońca w zatoce Obhur, Dżudda", metaDescription: "Zarezerwuj rejs jachtem Shorouk Sat o zachodzie słońca w zatoce Obhur w Dżuddzie za 120 SAR od dorosłego, z kanapkami, napojami i trzema pokładami widokowymi.",
+    seoTitle: "Rejs jachtem o zachodzie słońca w zatoce Obhur, Dżudda", metaDescription: "Zarezerwuj rejs jachtem Shorouk Sat o zachodzie słońca w zatoce Obhur w Dżuddzie, teraz 102 SAR od dorosłego (wcześniej 120 SAR), z kanapkami, napojami i trzema pokładami widokowymi.",
     imageAlt: "Jacht Shorouk Sat płynący przez zatokę Obhur w Dżuddzie o zachodzie słońca",
   },
   "bayada-snorkeling-trip-jeddah": {
@@ -1551,7 +1551,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     packageDescription: "Półdniowa wycieczka łodzią z przewodnikiem snorkelingowym do rotacyjnie wybieranych miejsc Morza Czerwonego w rejonie Bayada, z instruktorem, sprzętem, przekąskami i napojami.",
     packageLabel: "Za osobę",
     seoTitle: "Codzienna wycieczka snorkelingowa w rejonie Bayada z Dżuddy",
-    metaDescription: "Zarezerwuj codzienną wycieczkę snorkelingową Bayada od Al-Haddad Scuba z Dżuddy: rotacyjnie wybierane rafy Morza Czerwonego z profesjonalnym instruktorem oraz sprzęt, przekąski i napoje za 350 SAR od osoby.",
+    metaDescription: "Zarezerwuj codzienną wycieczkę snorkelingową Bayada od Al-Haddad Scuba z Dżuddy: rotacyjnie wybierane rafy Morza Czerwonego z profesjonalnym instruktorem oraz sprzęt, przekąski i napoje, teraz 298 SAR od osoby (wcześniej 350 SAR).",
   },
 };
 

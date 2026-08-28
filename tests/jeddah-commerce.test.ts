@@ -8,7 +8,8 @@ describe("Jeddah commerce authority", () => {
     const controlled = codeControlledTourFields(tour);
     expect(controlled).toMatchObject({
       currency: "SAR",
-      price: "120",
+      price: "102",
+      originalPrice: "120",
       fulfillmentType: "meeting_point",
       departureMarina: "Rixos Resort Gate 2, Obhur Bay",
       operatingWeekdays: [1, 3, 4],
