@@ -33,4 +33,9 @@ describe("customer booking email signature", () => {
       withCustomerEmailSignature("INFO@DAILYREDSEA.COM", originalHtml),
     ).toBe(originalHtml);
   });
+
+  it("does not append a duplicate signature to complete branded emails", () => {
+    const originalHtml = `<div data-drs-complete-email="true">Booking</div>`;
+    expect(withCustomerEmailSignature("traveler@example.com", originalHtml)).toBe(originalHtml);
+  });
 });

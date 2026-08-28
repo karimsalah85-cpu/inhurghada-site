@@ -18,7 +18,9 @@ import { whatsappNumber } from "@/lib/contact";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 import { bookingRequestHash } from "@/lib/booking-idempotency";
-import { buildCustomerConfirmationEmail } from "@/lib/booking-communications-i18n";
+import { bookingLocale, buildCustomerConfirmationEmail } from "@/lib/booking-communications-i18n";
+import { tours } from "@/data/tours";
+import { localizeTour } from "@/lib/tour-localization";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -78,7 +80,24 @@ export async function POST(request: NextRequest) {
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
     const { amount: calculatedAmount, guests: guestCount, guestSummary, tourName, price, currency } = pricing.data;
     const tripItems = "items" in pricing.data ? pricing.data.items : undefined;
-    const currencySymbol = currency === "EUR" ? "€" : "$";
+    const currencySymbol = currency === "EUR" ? "€" : currency === "SAR" ? "SAR " : "$";
+    const locale = bookingLocale(body.locale);
+    const sourceTour = body.tourSlug ? tours.find((tour) => tour.slug === body.tourSlug) : undefined;
+    const localizedTour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
+    const localizedGuestSummary = bookingType === "tour"
+      ? formatTravelerSummary(body.adults, body.youth, body.infants, locale)
+      : formatPassengerSummary(body.passengers, locale);
+    const pickupOrMeetingPoint = hotel || localizedTour?.departureMarina || localizedTour?.location || "";
+    const localizedItemName = bookingType === "transfer"
+      ? localizedTransferName(body.service, locale)
+      : body.tourSlug === "multi-trip"
+        ? localizedMultiTripName(locale)
+        : localizedTour?.title || tourName;
+    const localizedTripLines = tripItems?.map((item, index) => {
+      const source = tours.find((tour) => tour.slug === body.cartItems[index]?.tourSlug);
+      const title = source ? localizeTour(source, locale).title : item.tourName;
+      return `${index + 1}. ${title} - ${item.date} - ${currencySymbol}${item.amount.toFixed(2)}`;
+    });
     const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: ${currencySymbol}${item.amount.toFixed(2)}`).join("\n\n");
     const bookingNotes = [tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
@@ -149,10 +168,10 @@ export async function POST(request: NextRequest) {
     });
     const confirmationPdf = await createInvoicePdf({
       reference, issuedAt: new Date(), customerName, customerEmail, customerPhone: phone,
-      itemName: tourName,
-      quantity: guestCount, travelerSummary: guestSummary, amount, currency: currency.toLowerCase(),
-      paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel,
-      tripLines: tripItems?.map((item, index) => `${index + 1}. ${item.tourName} - ${item.date} - ${currencySymbol}${item.amount.toFixed(2)}`),
+      itemName: localizedItemName,
+      quantity: guestCount, travelerSummary: localizedGuestSummary, amount, currency: currency.toLowerCase(),
+      paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel: pickupOrMeetingPoint,
+      tripLines: localizedTripLines,
       locale: body.locale,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
@@ -182,7 +201,11 @@ export async function POST(request: NextRequest) {
       deliverBookingNotification(supabase, bookingId, "operator_email", () => sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml, confirmationAttachment)),
       customerEmail
         ? deliverBookingNotification(supabase, bookingId, "customer_email", () => {
-          const customerConfirmation = buildCustomerConfirmationEmail({ locale: body.locale, customerName, reference });
+          const customerConfirmation = buildCustomerConfirmationEmail({
+            locale, customerName, reference, itemName: localizedItemName, date: body.date,
+            time: body.time || undefined, travelers: localizedGuestSummary,
+            pickup: pickupOrMeetingPoint || undefined, amount, currency,
+          });
           return sendBookingEmail(customerEmail, customerConfirmation.subject, customerConfirmation.html, confirmationAttachment);
         })
         : Promise.resolve({ success: false, reason: "no-customer-email" }),
@@ -204,6 +227,34 @@ export async function POST(request: NextRequest) {
     console.error("Booking submission failed", error);
     return bookingJson({ success: false, error: "Booking submission failed" }, { status: 500 });
   }
+}
+
+function formatTravelerSummary(adults: number, youth: number, infants: number, locale: string) {
+  const counts = { adults, youth, infants };
+  const labels = {
+    en: ["adult", "youth", "infant"], de: ["Erwachsene", "Kinder", "Kleinkinder"],
+    ru: ["взрослых", "детей", "младенцев"], ar: ["بالغ", "طفل", "رضيع"],
+    pl: ["dorosłych", "dzieci", "niemowląt"], zh: ["位成人", "位儿童", "位婴儿"],
+  }[locale] ?? ["adult", "youth", "infant"];
+  return (Object.values(counts) as number[])
+    .map((count, index) => count > 0 ? `${count} ${labels[index]}${locale === "en" && count !== 1 && index !== 1 ? "s" : ""}` : "")
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function formatPassengerSummary(passengers: number, locale: string) {
+  const label = { en: "passenger", de: "Fahrgäste", ru: "пассажиров", ar: "مسافر", pl: "pasażerów", zh: "位乘客" }[locale] || "passenger";
+  return `${passengers} ${label}${locale === "en" && passengers !== 1 ? "s" : ""}`;
+}
+
+function localizedTransferName(service: string, locale: string) {
+  const airport = { en: "Hurghada Airport one-way transfer", de: "Einfacher Transfer zum Flughafen Hurghada", ru: "Трансфер в одну сторону до аэропорта Хургады", ar: "خدمة نقل باتجاه واحد من أو إلى مطار الغردقة", pl: "Transfer w jedną stronę na lotnisko w Hurghadzie", zh: "赫尔格达机场单程接送" };
+  const senzo = { en: "Senzo Mall one-way transfer", de: "Einfacher Transfer zur Senzo Mall", ru: "Трансфер в одну сторону до Senzo Mall", ar: "خدمة نقل باتجاه واحد من أو إلى سنزو مول", pl: "Transfer w jedną stronę do Senzo Mall", zh: "Senzo Mall 单程接送" };
+  return (service === "airport" ? airport : senzo)[locale as keyof typeof airport] || (service === "airport" ? airport.en : senzo.en);
+}
+
+function localizedMultiTripName(locale: string) {
+  return { en: "Multi-trip booking", de: "Buchung mehrerer Ausflüge", ru: "Бронирование нескольких экскурсий", ar: "حجز رحلات متعددة", pl: "Rezerwacja wielu wycieczek", zh: "多行程预订" }[locale] || "Multi-trip booking";
 }
 
 async function deliverBookingNotification(

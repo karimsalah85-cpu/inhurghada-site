@@ -225,7 +225,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     ? `${adults} Erwachsene${youthPrice !== undefined ? ` · ${youth} Kinder` : ""}${infantPrice !== undefined ? ` · ${infants} Kleinkinder` : ""}`
     : ru
       ? `${adults} взр.${youthPrice !== undefined ? ` · ${youth} дет.` : ""}${infantPrice !== undefined ? ` · ${infants} младен.` : ""}`
-    : pl ? `${adults} dorosłych${youthPrice !== undefined ? ` · ${youth} dzieci` : ""}${infantPrice !== undefined ? ` · ${infants} niemowląt` : ""}` : zh ? `${adults} 位成人${youthPrice !== undefined ? ` · ${youth} 位儿童` : ""}${infantPrice !== undefined ? ` · ${infants} 位婴儿` : ""}` : `${adults} adult${adults === 1 ? "" : "s"}${youthPrice !== undefined ? ` · ${youth} youth` : ""}${infantPrice !== undefined ? ` · ${infants} infant${infants === 1 ? "" : "s"}` : ""}`;
+    : ar ? `${adults} بالغ${youthPrice !== undefined ? ` · ${youth} طفل` : ""}${infantPrice !== undefined ? ` · ${infants} رضيع` : ""}` : pl ? `${adults} dorosłych${youthPrice !== undefined ? ` · ${youth} dzieci` : ""}${infantPrice !== undefined ? ` · ${infants} niemowląt` : ""}` : zh ? `${adults} 位成人${youthPrice !== undefined ? ` · ${youth} 位儿童` : ""}${infantPrice !== undefined ? ` · ${infants} 位婴儿` : ""}` : `${adults} adult${adults === 1 ? "" : "s"}${youthPrice !== undefined ? ` · ${youth} youth` : ""}${infantPrice !== undefined ? ` · ${infants} infant${infants === 1 ? "" : "s"}` : ""}`;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

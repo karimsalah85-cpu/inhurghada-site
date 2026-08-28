@@ -15,6 +15,15 @@ describe("booking communication languages", () => {
     expect(confirmation.subject).toContain(confirmationText);
     expect(thankYou.subject).toContain(thankYouText);
     expect(confirmation.html).toContain(`lang="${locale}"`);
+    expect(confirmation.html).toContain("data-drs-complete-email");
+  });
+
+  it("includes accurate localized booking details in the customer email", () => {
+    const email = buildCustomerConfirmationEmail({ locale: "ar", customerName: "كريم", reference: "DRS-123", itemName: "رحلة بحرية في جدة", date: "2026-08-30", time: "5:00 مساءً", travelers: "2 بالغ", pickup: "خليج أبحر", amount: 450, currency: "SAR" });
+    expect(email.html).toContain("رحلة بحرية في جدة");
+    expect(email.html).toContain("خليج أبحر");
+    expect(email.html).toContain("ر.س.");
+    expect(email.html).not.toContain("travelers in Hurghada");
   });
 
   it("escapes customer-controlled values", () => {
