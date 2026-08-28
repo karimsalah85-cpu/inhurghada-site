@@ -4,7 +4,6 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  CalendarDays,
   ChevronDown,
   CircleMinus,
   CirclePlus,
@@ -25,6 +24,7 @@ import { marinaTransferOptions } from "@/data/speedboat-booking";
 import type { DestinationSlug } from "@/lib/destinations";
 import { isOperatingDate, nextDepartures, nextOperatingDate, type FulfillmentType } from "@/lib/tour-booking";
 import ShareTripButton from "@/components/share/ShareTripButton";
+import BookableDatePicker from "@/components/booking/BookableDatePicker";
 
 type ParticipantPricing = { adults: number; youth?: number; infants?: number };
 type PackageOption = { id: string; label: string; price: number };
@@ -298,7 +298,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
       <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-slate-500">{tr("From", "Ab", "От")} {originalPrice && Number(originalPrice) > adultPrice ? <span className="mr-2 text-sm text-slate-400 line-through">{formatPrice(originalPrice, currency)}</span> : null}<span className="text-2xl font-black text-slate-950">{formatPrice(String(adultPrice), currency)}</span> / {priceUnit || tr("person", "Person", "человека")}</p><p className="mt-1 text-sm font-medium text-emerald-700">{meetingPointProduct ? (ar ? "سعر واضح · نقطة التجمع موضحة قبل الحجز" : "Clear local price · meeting point shown before booking") : tr("Clear local price · pickup confirmed after booking", "Klarer lokaler Preis · Abholung nach Buchung bestätigt", "Понятная местная цена · трансфер подтверждается после бронирования")}</p></div><ShieldCheck className="text-emerald-600" /></div>
       {step === "select" ? <>
         <div className="mt-6 space-y-4">
-          <label className="block text-sm font-bold text-slate-700">{tr("Date", "Datum", "Дата")} <RequiredMark/><div className="relative mt-1"><CalendarDays className="absolute left-3 top-3 text-slate-400" size={18}/><input required type="date" min={minimumDate} value={date} onChange={(event) => { setDate(event.target.value); trackEvent("date_selected", { item_id: tourSlug, date: event.target.value }); }} className="w-full rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></div></label>
+          <div className="block text-sm font-bold text-slate-700">{tr("Date", "Datum", "Дата")} <RequiredMark/><BookableDatePicker value={date} minimumDate={minimumDate} operatingWeekdays={operatingWeekdays} locale={language} onChange={(selectedDate) => { setDate(selectedDate); trackEvent("date_selected", { item_id: tourSlug, date: selectedDate }); }}/></div>
           {operatingWeekdays?.length ? <div className="flex flex-wrap gap-2" aria-label={ar ? "المواعيد القادمة" : "Next departures"}>{upcomingDepartures.map((departure) => <button key={departure} type="button" onClick={() => setDate(departure)} className={`rounded-full border px-3 py-2 text-xs font-bold ${date === departure ? "border-blue-700 bg-blue-700 text-white" : "border-slate-300 bg-white text-slate-700"}`}>{new Intl.DateTimeFormat(ar ? "ar-SA" : "en-SA", { weekday: "short", month: "short", day: "numeric", timeZone: "Asia/Riyadh" }).format(new Date(`${departure}T12:00:00Z`))}</button>)}</div> : null}
           {availability?.managed ? <p className={`rounded-xl p-3 text-sm font-bold ${unavailable ? "bg-rose-50 text-rose-800" : "bg-emerald-50 text-emerald-800"}`}>{unavailable ? tr("Sold out or not enough places for this group.", "Ausverkauft oder nicht genügend Plätze für diese Gruppe.", "Нет мест или недостаточно мест для этой группы.") : remainingPlaces === 9999 ? tr("Available", "Verfügbar", "Доступно") : `${remainingPlaces} ${tr("places remaining", "Plätze verfügbar", "мест осталось")}`}</p> : null}
           <label className="block text-sm font-bold text-slate-700">{tr("Time", "Uhrzeit", "Время")} <RequiredMark/><div className="relative mt-1"><Clock3 className="absolute left-3 top-3 text-slate-400" size={18}/><select required value={time} onChange={(event) => setTime(event.target.value)} className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-10 py-3 font-medium text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100">{times.map((option) => <option key={option}>{option === "Time confirmed by WhatsApp" ? tr(option, "Uhrzeit wird per WhatsApp bestätigt", "Время подтверждается в WhatsApp") : option}</option>)}</select><ChevronDown className="absolute right-3 top-3 text-slate-400" size={18}/></div></label>
