@@ -213,7 +213,7 @@ export default function Navbar() {
         <div
           id="mobile-navigation"
           aria-label={ui.mobileNav}
-          className="flex max-h-[calc(100vh-68px)] flex-col gap-2 overflow-y-auto border-t border-slate-200 bg-white px-6 py-5 shadow-xl xl:hidden"
+          className="flex max-h-[calc(100dvh-68px-6rem-env(safe-area-inset-bottom))] scroll-pb-5 flex-col gap-2 overflow-y-auto overscroll-contain border-t border-slate-200 bg-white px-6 py-5 shadow-xl xl:hidden"
         >
 
 
