@@ -84,9 +84,9 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Know before you go","Wichtige Informationen","Важная информация","معلومات مهمة","出行须知")}</p>
           <ul className="mt-6 space-y-4">
             {(tour.notes ?? []).map((item) => (
-              <li key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <li key={item} className="flex min-w-0 items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
                 <CalendarDays className="mt-0.5 shrink-0 text-cyan-700" size={18} />
-                <span>{item}</span>
+                <span className="min-w-0 break-words [overflow-wrap:anywhere]">{item}</span>
               </li>
             ))}
           </ul>
