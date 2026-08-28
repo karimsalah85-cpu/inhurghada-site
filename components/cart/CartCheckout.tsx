@@ -55,6 +55,7 @@ export default function CartCheckout() {
   const cartCurrencies = [...new Set(items.map((item) => item.currency))];
   const cartCurrency = cartCurrencies[0] || "USD";
   const cartDestinations = [...new Set(items.map((item) => item.destinationSlug))];
+  const pickupOptional = cartDestinations.length === 1 && cartDestinations[0] === "jeddah";
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -156,7 +157,13 @@ export default function CartCheckout() {
           <RequiredInput label={tr("Full name", "Vollständiger Name", "Полное имя", "الاسم الكامل")} value={name} onChange={setName} autoComplete="name"/>
           <RequiredInput label={tr("Email", "E-Mail", "Электронная почта", "البريد الإلكتروني")} value={email} onChange={setEmail} type="email" autoComplete="email"/>
           <RequiredInput label={tr("WhatsApp number", "WhatsApp-Nummer", "Номер WhatsApp", "رقم واتساب")} value={phone} onChange={setPhone} type="tel" autoComplete="tel"/>
-          <RequiredInput label={tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} value={hotel} onChange={setHotel}/>
+          {pickupOptional ? (
+            <label className="block text-sm font-bold text-slate-800">
+              {tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} <span className="font-normal text-slate-500">({tr("optional", "optional", "необязательно", "اختياري")})</span>
+              <input value={hotel} onChange={(event) => setHotel(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal text-slate-950 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
+              <span className="mt-1 block text-xs font-normal text-slate-500">{tr("Meeting details are confirmed by WhatsApp.", "Treffpunktdetails werden per WhatsApp bestätigt.", "Детали места встречи подтверждаются в WhatsApp.", "يتم تأكيد تفاصيل نقطة التجمع عبر واتساب.")}</span>
+            </label>
+          ) : <RequiredInput label={tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} value={hotel} onChange={setHotel}/>}
           {requiresDivingLicense ? <Confirmation checked={divingConfirmed} onChange={setDivingConfirmed} text={tr("Every diver has a valid diving license and will bring proof.", "Jeder Taucher besitzt einen gültigen Tauchschein und bringt den Nachweis mit.", "У каждого дайвера есть действующий сертификат, который он возьмёт с собой.", "يحمل كل غواص رخصة غوص سارية وسيحضر إثباتها.")}/> : null}
           {requiresQuadMinimumAge ? <Confirmation checked={quadConfirmed} onChange={setQuadConfirmed} text={tr("Every quad participant is at least 9 years old.", "Alle Quad-Teilnehmer sind mindestens 9 Jahre alt.", "Всем участникам тура на квадроциклах не менее 9 лет.", "عمر كل مشارك في رحلة الكواد 9 سنوات على الأقل.")}/> : null}
           <label className="block text-sm font-bold text-slate-800">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal text-slate-950 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/></label>

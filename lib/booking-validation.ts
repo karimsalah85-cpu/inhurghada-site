@@ -1,4 +1,5 @@
 import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
+import { tours } from "@/data/tours";
 
 type BookingInput = Record<string, unknown>;
 
@@ -97,6 +98,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   const customerEmail = text(body.customerEmail, 254).toLowerCase();
   const hotel = text(body.hotel, 200);
   const type: "tour" | "transfer" = body.type === "transfer" ? "transfer" : "tour";
+  const tourSlug = text(body.tourSlug, 80);
   const date = text(body.date, 10);
   const time = text(body.time, 5);
   const idempotencyKey = text(body.idempotencyKey, 64).toLowerCase();
@@ -105,7 +107,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     return { error: "A valid booking attempt key is required." as const };
   }
 
-  if (customerName.length < 2 || !phonePattern.test(phone) || !hotel) return { error: "Enter a valid name, phone number, and pickup location." as const };
+  if (customerName.length < 2 || !phonePattern.test(phone)) return { error: "Enter a valid name and phone number." as const };
   if (!customerEmail || !emailPattern.test(customerEmail)) return { error: "Enter a valid email address." as const };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Choose a valid booking date." as const };
   if (date) {
@@ -116,7 +118,12 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (type === "transfer" && !isTransferLeadTimeValid(date, time, now)) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
-  const tourSlug = text(body.tourSlug, 80);
+  const selectedCartItems = cartItems(body.cartItems);
+  const isSaudiTour = (slug: string) => tours.some((tour) => tour.slug === slug && tour.destinationSlug === "jeddah");
+  const pickupOptional = type === "tour" && (tourSlug === "multi-trip"
+    ? selectedCartItems.length > 0 && selectedCartItems.every((item) => isSaudiTour(item.tourSlug))
+    : isSaudiTour(tourSlug));
+  if (!hotel && !pickupOptional) return { error: "Enter a pickup location." as const };
   if (type === "tour") {
     const schedule = isMarsaAlamTourSlug(tourSlug) ? marsaAlamTourSchedules[tourSlug] : undefined;
     if (schedule) {
@@ -135,7 +142,6 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     const nextDay = tomorrow.toISOString().slice(0, 10);
     if (date <= cairo.date || (date === nextDay && cairo.time >= "15:00")) return { error: "After 3:00 PM, private half-day speedboat trips require at least two days' notice." as const };
   }
-  const selectedCartItems = cartItems(body.cartItems);
   if (tourSlug === "multi-trip") {
     if (selectedCartItems.length < 1) return { error: "Add at least one trip to your cart." as const };
     const todayInCairo = cairoDateTimeParts(now).date;

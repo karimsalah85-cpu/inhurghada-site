@@ -28,6 +28,36 @@ describe("booking input validation", () => {
     expect(validateBookingInput({ ...valid, customerEmail: "bad" }).error).toBeDefined();
   });
 
+  it("allows Saudi tour bookings without a pickup location", () => {
+    const result = validateBookingInput({ ...valid, tourSlug: "basic-diver-jeddah", tourName: "SSI Basic Diver", hotel: "" });
+    expect(result.error).toBeUndefined();
+    expect(result.data?.hotel).toBe("");
+  });
+
+  it("allows Saudi-only cart bookings without a pickup location", () => {
+    const result = validateBookingInput({
+      ...valid,
+      tourSlug: "multi-trip",
+      hotel: "",
+      cartItems: [{ tourSlug: "jeddah-yacht-sunset-cruise", date: "2099-01-01", time: "17:00", adults: 1, youth: 0, infants: 0 }],
+    });
+    expect(result.error).toBeUndefined();
+  });
+
+  it("still requires pickup for Egypt tours, mixed carts, and transfers", () => {
+    expect(validateBookingInput({ ...valid, tourSlug: "orange-bay", hotel: "" }).error).toMatch(/pickup/i);
+    expect(validateBookingInput({
+      ...valid,
+      tourSlug: "multi-trip",
+      hotel: "",
+      cartItems: [
+        { tourSlug: "jeddah-yacht-sunset-cruise", date: "2099-01-01", time: "17:00", adults: 1, youth: 0, infants: 0 },
+        { tourSlug: "orange-bay", date: "2099-01-02", time: "08:00", adults: 1, youth: 0, infants: 0 },
+      ],
+    }).error).toMatch(/pickup/i);
+    expect(validateBookingInput({ ...valid, type: "transfer", hotel: "", time: "23:00" }).error).toMatch(/pickup/i);
+  });
+
   it("rejects malformed and past dates", () => {
     expect(validateBookingInput({ ...valid, date: "tomorrow" }).error).toBeDefined();
     expect(validateBookingInput({ ...valid, date: "2020-01-01" }).error).toMatch(/future/i);
