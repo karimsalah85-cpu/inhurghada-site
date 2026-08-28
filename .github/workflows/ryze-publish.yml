@@ -1,0 +1,44 @@
+name: Ryze publish
+
+on:
+  push:
+    branches:
+      - main
+      - ryze/publishing-setup
+    paths:
+      - "blog/data/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ryze-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Convert Ryze articles
+        run: node scripts/ryze-convert.mjs
+
+      - name: Commit generated blog data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ryze-blog-posts.ts public/images/ryze-blog
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git commit -m "Publish Ryze articles [skip ci]"
+          git push
