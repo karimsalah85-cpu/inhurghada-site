@@ -10,14 +10,14 @@ const quarantinedTourismImages = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
-  // pdfkit resolves its built-in AFM fonts through the "#standard-fonts/*"
-  // subpath import and createInvoicePdf reads the embedded Noto TTFs via a
-  // process.cwd()-relative path — @vercel/nft can trace neither, so both must
-  // be pinned into the serverless bundle for every route that renders a PDF.
+  // createInvoicePdf reads the embedded Noto TTFs through a process.cwd()
+  // relative path that @vercel/nft cannot trace, so pin the font directory into
+  // the serverless bundle for every route that renders a PDF. (PDFKit's own
+  // "#standard-fonts/*" AFM imports are sidestepped in code via `font: ""`.)
   outputFileTracingIncludes: {
-    "/api/bookings": ["./node_modules/pdfkit/js/standard-fonts/**", "./assets/fonts/**"],
-    "/api/invoices/*": ["./node_modules/pdfkit/js/standard-fonts/**", "./assets/fonts/**"],
-    "/api/admin/bookings/**": ["./node_modules/pdfkit/js/standard-fonts/**", "./assets/fonts/**"],
+    "/api/bookings": ["./assets/fonts/**/*"],
+    "/api/invoices/*": ["./assets/fonts/**/*"],
+    "/api/admin/bookings/**": ["./assets/fonts/**/*"],
   },
   async redirects() {
     return [

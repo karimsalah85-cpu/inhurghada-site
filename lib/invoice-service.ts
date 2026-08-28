@@ -159,7 +159,11 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const font = path.join(process.cwd(), "assets/fonts", locale === "ar" ? "NotoSansArabic.ttf" : locale === "zh" ? "NotoSansSC.ttf" : "NotoSans.ttf");
 
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 0, autoFirstPage: false, info: { Title: `${t.confirmation} - ${invoice.reference}`, Author: "Daily Red Sea" } });
+    // font: "" stops PDFKit's constructor from eagerly loading its built-in
+    // Helvetica AFM through the "#standard-fonts/*" subpath import, which is not
+    // resolvable once the route is bundled for serverless. Every text run below
+    // sets the embedded "Noto" face explicitly, so no default font is needed.
+    const doc = new PDFDocument({ size: "A4", margin: 0, autoFirstPage: false, font: "", info: { Title: `${t.confirmation} - ${invoice.reference}`, Author: "Daily Red Sea" } });
     const chunks: Buffer[] = [];
     doc.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
