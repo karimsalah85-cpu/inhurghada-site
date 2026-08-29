@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import { useTripReviews } from "@/components/tours/TripReviewsContext";
 import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
 import TourItinerary from "@/components/tours/TourItinerary";
 import { speedboatTerms } from "@/data/speedboat-booking";
-
-type ApprovedReview = { customer_name: string; rating: number; body: string; created_at: string };
-type TripReviewsPayload = { average: number; count: number; reviews: ApprovedReview[] };
 
 export default function TourDetails({ tour }: { tour: Tour }) {
   const { formatPrice, language } = useSiteSettings();
@@ -18,20 +15,12 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const ar = language === "ar";
   const pl = language === "pl";
   const zh = language === "zh";
-  const [liveReviews, setLiveReviews] = useState<TripReviewsPayload | null>(null);
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch(`/api/reviews?tour_slug=${encodeURIComponent(tour.slug)}`, { cache: "no-store", signal: controller.signal })
-      .then((response) => response.ok ? response.json() as Promise<TripReviewsPayload> : null)
-      .then((payload) => setLiveReviews(payload))
-      .catch((error: unknown) => { if ((error as { name?: string }).name !== "AbortError") setLiveReviews(null); });
-    return () => controller.abort();
-  }, [tour.slug]);
-  const hasLiveReviews = Boolean(liveReviews && liveReviews.count > 0);
+  const liveReviews = useTripReviews();
+  const hasLiveReviews = liveReviews.count > 0;
   const staticReviewCount = Number(tour.reviews);
   const hasReviews = hasLiveReviews || (Number.isFinite(staticReviewCount) && staticReviewCount > 0);
-  const displayRating = hasLiveReviews ? liveReviews!.average : tour.rating;
-  const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie" };
+  const displayRating = hasLiveReviews ? liveReviews.average : tour.rating;
+  const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy." };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
 
@@ -141,15 +130,15 @@ export default function TourDetails({ tour }: { tour: Tour }) {
       <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Guest reviews</p>
-            <h2 className="mt-4 text-3xl font-bold text-slate-900">What guests say about this trip</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Guest reviews", "Gästebewertungen", "Отзывы гостей", "تقييمات الضيوف", "住客评价")}</p>
+            <h2 className="mt-4 text-3xl font-bold text-slate-900">{tr("What guests say about this trip", "Was Gäste über diesen Ausflug sagen", "Что гости говорят об этой поездке", "ماذا يقول الضيوف عن هذه الرحلة", "住客对此行程的评价")}</h2>
           </div>
-          <Link href="/reviews" className="rounded-full border border-cyan-200 px-5 py-2.5 text-sm font-black text-cyan-800 hover:bg-cyan-50">Leave a review</Link>
+          <Link href="/reviews" className="rounded-full border border-cyan-200 px-5 py-2.5 text-sm font-black text-cyan-800 hover:bg-cyan-50">{tr("Leave a review", "Bewertung abgeben", "Оставить отзыв", "أضف تقييمًا", "撰写评价")}</Link>
         </div>
-        {hasLiveReviews ? <div className="mt-8 grid gap-5 lg:grid-cols-3">{liveReviews!.reviews.slice(0, 6).map((review, index) => <article key={`${review.customer_name}-${index}`} className="flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-5">
+        {hasLiveReviews ? <div className="mt-8 grid gap-5 lg:grid-cols-3">{liveReviews.reviews.slice(0, 6).map((review, index) => <article key={`${review.customer_name}-${index}`} className="flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <div className="flex items-center justify-between gap-3"><span className="font-black text-slate-950">{review.customer_name}</span><div className="flex" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }, (_, star) => <Star key={star} size={15} className={star < review.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}/>)}</div></div>
           <p className="mt-4 line-clamp-6 flex-1 text-sm leading-6 text-slate-700">{review.body}</p>
-        </article>)}</div> : <p className="mt-6 text-sm leading-6 text-slate-500">No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.</p>}
+        </article>)}</div> : <p className="mt-6 text-sm leading-6 text-slate-500">{tr("No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.", "Für diesen Ausflug gibt es noch keine Gästebewertungen. Schon gebucht? Teile als Erster deine Erfahrung.", "Для этой поездки пока нет отзывов. Уже бронировали? Поделитесь впечатлениями первыми.", "لا توجد تقييمات لهذه الرحلة حتى الآن. هل حجزتها؟ كن أول من يشارك تجربته.", "此行程暂无住客评价。已预订？欢迎第一个分享您的体验。")}</p>}
       </section>
     </div>
   );

@@ -3,10 +3,21 @@ import "server-only";
 import { sendBookingEmail, sendWhatsAppMessage } from "@/lib/booking-service";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getGoogleAdsReport, googleAdsConfiguration } from "@/lib/google-ads";
+import { pickTemplate } from "@/lib/communication-template";
 
-type Template = { id: string; event_key: string; channel: "email" | "whatsapp"; subject: string | null; body: string };
-type Booking = { id: string; reference: string; customer_name: string; customer_email: string | null; phone: string; tour_name: string | null; date: string | null; hotel: string | null };
+type Template = { id: string; event_key: string; channel: "email" | "whatsapp"; subject: string | null; body: string; locale: string };
+type Booking = { id: string; reference: string; customer_name: string; customer_email: string | null; phone: string; tour_name: string | null; date: string | null; hotel: string | null; locale: string };
 type QueueItem = { id: string; recipient: string; channel: "email" | "whatsapp"; attempts: number; template_id: string | null; booking_id: string | null };
+
+// Localized post-trip review requests. Every other event stays English-only and
+// reaches non-English guests through pickTemplate's English fallback.
+const reviewRequestTemplates = [
+  { locale: "de", subject: "Wie war dein Ausflug mit Daily Red Sea?", email: "Hallo {{customer_name}},\n\nwir hoffen, {{tour_name}} hat dir gefallen. Teile deine Erfahrung: {{review_url}}\n\nVielen Dank,\nDaily Red Sea", whatsapp: "Hallo {{customer_name}}! Wir hoffen, {{tour_name}} hat dir gefallen. Wir freuen uns über dein Feedback: {{review_url}}" },
+  { locale: "ru", subject: "Как прошла ваша поездка с Daily Red Sea?", email: "Здравствуйте, {{customer_name}}!\n\nНадеемся, вам понравилось: {{tour_name}}. Поделитесь впечатлениями: {{review_url}}\n\nСпасибо,\nDaily Red Sea", whatsapp: "Здравствуйте, {{customer_name}}! Надеемся, вам понравилось: {{tour_name}}. Будем рады отзыву: {{review_url}}" },
+  { locale: "ar", subject: "كيف كانت رحلتك مع Daily Red Sea؟", email: "مرحباً {{customer_name}}،\n\nنأمل أن تكون قد استمتعت بـ {{tour_name}}. شاركنا تجربتك: {{review_url}}\n\nشكراً لك،\nDaily Red Sea", whatsapp: "مرحباً {{customer_name}}! نأمل أن تكون قد استمتعت بـ {{tour_name}}. يسعدنا سماع رأيك: {{review_url}}" },
+  { locale: "pl", subject: "Jak minęła Twoja wycieczka z Daily Red Sea?", email: "Dzień dobry {{customer_name}},\n\nmamy nadzieję, że {{tour_name}} się podobała. Podziel się opinią: {{review_url}}\n\nDziękujemy,\nDaily Red Sea", whatsapp: "Dzień dobry {{customer_name}}! Mamy nadzieję, że {{tour_name}} się podobała. Chętnie poznamy Twoją opinię: {{review_url}}" },
+  { locale: "zh", subject: "您的 Daily Red Sea 行程体验如何？", email: "您好 {{customer_name}}，\n\n希望您喜欢{{tour_name}}。欢迎分享您的体验：{{review_url}}\n\n谢谢，\nDaily Red Sea", whatsapp: "您好 {{customer_name}}！希望您喜欢{{tour_name}}。期待您的反馈：{{review_url}}" },
+];
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const dateOnly = (date: Date) => date.toISOString().slice(0, 10);
@@ -65,23 +76,29 @@ export async function runAdminAutomation() {
     { name: "Pickup reminder WhatsApp", channel: "whatsapp", event_key: "pickup_reminder", locale: "en", subject: null, body: "Hello {{customer_name}}! A reminder that {{tour_name}} is tomorrow ({{date}}). We will confirm your pickup at {{hotel}}. Reference: {{booking_reference}}." },
     { name: "Review request email", channel: "email", event_key: "review_request", locale: "en", subject: "How was your Daily Red Sea trip?", body: "Hello {{customer_name}},\n\nWe hope you enjoyed {{tour_name}}. Please share your experience: {{review_url}}\n\nThank you,\nDaily Red Sea" },
     { name: "Review request WhatsApp", channel: "whatsapp", event_key: "review_request", locale: "en", subject: null, body: "Hello {{customer_name}}! We hope you enjoyed {{tour_name}}. We would love your feedback: {{review_url}}" },
+    ...reviewRequestTemplates.flatMap((entry) => [
+      { name: `Review request email (${entry.locale})`, channel: "email", event_key: "review_request", locale: entry.locale, subject: entry.subject, body: entry.email },
+      { name: `Review request WhatsApp (${entry.locale})`, channel: "whatsapp", event_key: "review_request", locale: entry.locale, subject: null, body: entry.whatsapp },
+    ]),
   ], { onConflict: "event_key,channel,locale", ignoreDuplicates: true });
   if (seedError) throw seedError;
 
   const [{ data: templates, error: templateError }, { data: pickupBookings, error: pickupError }, { data: reviewBookings, error: reviewError }] = await Promise.all([
-    supabase.from("communication_templates").select("id,event_key,channel,subject,body").eq("active", true).in("event_key", ["pickup_reminder", "review_request"]),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel").eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel").eq("status", "completed").eq("date", dateOnly(yesterday)),
+    supabase.from("communication_templates").select("id,event_key,channel,subject,body,locale").eq("active", true).in("event_key", ["pickup_reminder", "review_request"]),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").eq("status", "completed").eq("date", dateOnly(yesterday)),
   ]);
   if (templateError || pickupError || reviewError) throw templateError || pickupError || reviewError;
 
   const typedTemplates = (templates || []) as Template[];
   const queueRows: Array<Record<string, unknown>> = [];
   for (const [eventKey, bookings] of [["pickup_reminder", pickupBookings || []], ["review_request", reviewBookings || []]] as const) {
-    for (const template of typedTemplates.filter((item) => item.event_key === eventKey)) {
-      for (const booking of bookings as Booking[]) {
-        const recipient = template.channel === "email" ? booking.customer_email : booking.phone;
-        if (recipient) queueRows.push({ booking_id: booking.id, template_id: template.id, channel: template.channel, recipient, scheduled_for: now.toISOString() });
+    for (const booking of bookings as Booking[]) {
+      for (const channel of ["email", "whatsapp"] as const) {
+        const template = pickTemplate(typedTemplates, eventKey, channel, booking.locale || "en");
+        if (!template) continue;
+        const recipient = channel === "email" ? booking.customer_email : booking.phone;
+        if (recipient) queueRows.push({ booking_id: booking.id, template_id: template.id, channel, recipient, scheduled_for: now.toISOString() });
       }
     }
   }

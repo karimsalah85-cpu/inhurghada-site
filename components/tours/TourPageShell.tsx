@@ -11,9 +11,11 @@ import { localePath, type Locale } from "@/lib/i18n";
 import { localizeTour } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
 import TourGallery from "@/components/tours/TourGallery";
-import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
+import { whatsappUrl } from "@/lib/contact";
 import { categoryLabels } from "@/lib/tour-categories";
 import ShareTripButton from "@/components/share/ShareTripButton";
+import { TripReviewsProvider } from "@/components/tours/TripReviewsContext";
+import TripRatingBadge from "@/components/tours/TripRatingBadge";
 
 export default function TourPageShell({ tour, locale = "en", relatedTourCandidates = tours }: { tour: Tour; locale?: Locale; relatedTourCandidates?: Tour[] }) {
   const de = locale === "de";
@@ -47,7 +49,6 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
   const islandTripsHref = localePath(locale, "/hurghada/island-trips");
   const islandTripsLabel = categoryLabels[locale]["island-trips"];
   const reviewCount = Number(tour.reviews);
-  const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
   const transferService = tour.slug === "hurghada-airport-transfer" ? "airport" : tour.slug === "senzo-transfer" ? "senzo" : null;
   // Only show galleries curated for this exact product. Category fallbacks can
   // misrepresent the actual boat, destination, vehicle, or activity.
@@ -98,6 +99,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
   return (
+    <TripReviewsProvider tourSlug={tour.slug}>
     <main className="min-h-screen bg-slate-50">
       <TourViewTracker title={tour.title} price={tour.price} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
@@ -105,7 +107,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
         <nav aria-label="Breadcrumb" className="mb-5 text-sm text-slate-500"><Link href={homeHref} className="hover:text-cyan-700">{breadcrumbLabels.home}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationHref} className="hover:text-cyan-700">{destination?.name || "Hurghada"}</Link>{isOrangeBay ? <><span className="px-2" aria-hidden="true">/</span><Link href={islandTripsHref} className="hover:text-cyan-700">{islandTripsLabel}</Link></> : null}<span className="px-2" aria-hidden="true">/</span><span className="text-slate-700" aria-current="page">{tour.title}</span></nav>
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-700 sm:tracking-[0.28em]">{destination?.name || "Hurghada"} · {ui.experience}</p>
         <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tour.title}</h1>
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600">{hasReviews ? <><span>★ {tour.rating}</span><span>{reviewCount} {ui.reviews}</span><span>•</span></> : null}<span>{tour.location}</span><span>•</span><span>{tour.duration}</span>{tour.slug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={locale} tourSlug={tour.slug}/> : null}</div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium text-slate-600"><TripRatingBadge fallbackRating={tour.rating} fallbackCount={reviewCount} label={ui.reviews} /><span>{tour.location}</span><span>•</span><span>{tour.duration}</span>{tour.slug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={locale} tourSlug={tour.slug}/> : null}</div>
         <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} imageAlt={tour.imageAlt} galleryImageAlts={tour.galleryImageAlts} imageFocalPoint={tour.imageFocalPoint} galleryImageFocalPoints={tour.galleryImageFocalPoints} locale={locale} />
       </section>
 
@@ -149,7 +151,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8"><div className="rounded-3xl bg-cyan-950 p-8 text-white sm:flex sm:items-center sm:justify-between sm:gap-8"><div><p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">{ui.reviewEyebrow}</p><h2 className="mt-3 text-3xl font-black">{ui.reviewTitle}</h2><p className="mt-3 max-w-2xl text-slate-300">{ui.reviewText}</p></div><a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex shrink-0 rounded-full bg-white px-6 py-3 font-bold text-cyan-950 sm:mt-0">{ui.reviewCta}</a></div></section>
+      <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8"><div className="rounded-3xl bg-cyan-950 p-8 text-white sm:flex sm:items-center sm:justify-between sm:gap-8"><div><p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">{ui.reviewEyebrow}</p><h2 className="mt-3 text-3xl font-black">{ui.reviewTitle}</h2><p className="mt-3 max-w-2xl text-slate-300">{ui.reviewText}</p></div><Link href="/reviews" className="mt-6 inline-flex shrink-0 rounded-full bg-white px-6 py-3 font-bold text-cyan-950 sm:mt-0">{ui.reviewCta}</Link></div></section>
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">{ui.before}</p><h2 className="mt-3 text-3xl font-bold text-slate-900">{ui.faq}</h2><div className="mt-6 divide-y divide-slate-200">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-slate-900">{faq.question}</summary><p className="mt-3 leading-7 text-slate-600">{faq.answer}</p></details>)}</div></div>
@@ -157,5 +159,6 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
         </div>
       </section>
     </main>
+    </TripReviewsProvider>
   );
 }
