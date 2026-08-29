@@ -115,6 +115,7 @@ async function main() {
   const sitemap = await sitemapResponse.text();
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => decodeHtml(match[1]));
   const posts = [];
+  const failures = [];
 
   for (const url of urls) {
     const slug = new URL(url).pathname.replace(/^\/+|\/+$/g, "");
@@ -137,8 +138,14 @@ async function main() {
       });
       console.log(`Synced ${slug}`);
     } catch (error) {
+      failures.push(`${slug}: ${error.message}`);
       console.warn(`Skipped ${slug}: ${error.message}`);
     }
+  }
+
+  // Never replace the live article set with a partial migration.
+  if (failures.length) {
+    throw new Error(`Hosted sync failed for ${failures.length} article(s): ${failures.join("; ")}`);
   }
 
   posts.sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)));
