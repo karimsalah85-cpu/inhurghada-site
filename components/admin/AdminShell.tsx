@@ -10,6 +10,7 @@ type NavGroup = { label: string; items: NavItem[] };
 const groups: NavGroup[] = [
   { label: "Catalog & bookings", items: [
     { href: "/admin/trips", label: "Trips & listings", permissions: ["content"] },
+    { href: "/admin/reviews", label: "Reviews", permissions: ["content"] },
     { href: "/admin/bookings", label: "Bookings", permissions: ["bookings", "reports"] },
     { href: "/admin/customers", label: "Customers", permissions: ["bookings", "operations"] },
   ] },

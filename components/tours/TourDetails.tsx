@@ -1,10 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
-import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Ticket, TriangleAlert } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
 import TourItinerary from "@/components/tours/TourItinerary";
 import { speedboatTerms } from "@/data/speedboat-booking";
+
+type ApprovedReview = { customer_name: string; rating: number; body: string; created_at: string };
+type TripReviewsPayload = { average: number; count: number; reviews: ApprovedReview[] };
 
 export default function TourDetails({ tour }: { tour: Tour }) {
   const { formatPrice, language } = useSiteSettings();
@@ -13,8 +18,19 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const ar = language === "ar";
   const pl = language === "pl";
   const zh = language === "zh";
-  const reviewCount = Number(tour.reviews);
-  const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
+  const [liveReviews, setLiveReviews] = useState<TripReviewsPayload | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`/api/reviews?tour_slug=${encodeURIComponent(tour.slug)}`, { cache: "no-store", signal: controller.signal })
+      .then((response) => response.ok ? response.json() as Promise<TripReviewsPayload> : null)
+      .then((payload) => setLiveReviews(payload))
+      .catch((error: unknown) => { if ((error as { name?: string }).name !== "AbortError") setLiveReviews(null); });
+    return () => controller.abort();
+  }, [tour.slug]);
+  const hasLiveReviews = Boolean(liveReviews && liveReviews.count > 0);
+  const staticReviewCount = Number(tour.reviews);
+  const hasReviews = hasLiveReviews || (Number.isFinite(staticReviewCount) && staticReviewCount > 0);
+  const displayRating = hasLiveReviews ? liveReviews!.average : tour.rating;
   const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
@@ -32,7 +48,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
           {hasReviews ? <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Sparkles size={16} /> {tr("Rating","Bewertung","Рейтинг","التقييم","评分")}</div>
-            <p className="mt-3 text-xl font-semibold text-slate-900">{tour.rating} / 5</p>
+            <p className="mt-3 text-xl font-semibold text-slate-900">{displayRating} / 5</p>
           </div> : null}
           <div className="rounded-2xl bg-slate-50 p-4">
             <div className="flex items-center gap-2 text-cyan-700"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
@@ -121,6 +137,20 @@ export default function TourDetails({ tour }: { tour: Tour }) {
       {tour.showSpeedboatTerms ? <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Terms &amp; Conditions</p><ul className="mt-6 space-y-3">{speedboatTerms.map((item) => <li key={item} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-700"><BadgeCheck className="mt-0.5 shrink-0 text-cyan-700" size={18}/><span>{item}</span></li>)}</ul></section> : null}
 
       {tour.notSuitableFor?.length || tour.whatToBring?.length ? <div className="grid gap-8 lg:grid-cols-2"><div className="rounded-3xl border border-rose-200 bg-rose-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-rose-700"><TriangleAlert size={18}/>{tr("Not suitable for", "Nicht geeignet für", "Не подходит для", "غير مناسب لـ", "不适合")}</p><ul className="mt-5 space-y-3">{tour.notSuitableFor?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-800">{tr("What to bring", "Mitzubringen", "Что взять с собой", "ماذا تحضر", "携带物品")}</p><ul className="mt-5 grid gap-3 sm:grid-cols-2">{tour.whatToBring?.map((item)=><li key={item} className="rounded-xl bg-white p-4 text-sm text-slate-700">{item}</li>)}</ul></div></div> : null}
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Guest reviews</p>
+            <h2 className="mt-4 text-3xl font-bold text-slate-900">What guests say about this trip</h2>
+          </div>
+          <Link href="/reviews" className="rounded-full border border-cyan-200 px-5 py-2.5 text-sm font-black text-cyan-800 hover:bg-cyan-50">Leave a review</Link>
+        </div>
+        {hasLiveReviews ? <div className="mt-8 grid gap-5 lg:grid-cols-3">{liveReviews!.reviews.slice(0, 6).map((review, index) => <article key={`${review.customer_name}-${index}`} className="flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="flex items-center justify-between gap-3"><span className="font-black text-slate-950">{review.customer_name}</span><div className="flex" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }, (_, star) => <Star key={star} size={15} className={star < review.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}/>)}</div></div>
+          <p className="mt-4 line-clamp-6 flex-1 text-sm leading-6 text-slate-700">{review.body}</p>
+        </article>)}</div> : <p className="mt-6 text-sm leading-6 text-slate-500">No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.</p>}
+      </section>
     </div>
   );
 }
