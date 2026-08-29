@@ -13,9 +13,9 @@ const copy = {
   zh: { reference: "预订编号", email: "预订时使用的邮箱", emailPlaceholder: "you@example.com", rating: "您的评分", ratingGroup: "满分 5 分", review: "您的评价", reviewPlaceholder: "向其他旅客分享您的行程体验……", saveError: "无法保存您的评价。", retryError: "无法保存您的评价，请重试。", submitting: "提交中……", submit: "提交评价", note: "只有已完成的预订才能提交评价，评价会经我们团队审核后公开显示。", doneTitle: "感谢您的评价！", doneBody: "您的评价已提交，经我们团队审核通过后会显示在行程页面。" },
 };
 
-export default function TripReviewForm({ initialReference = "", initialEmail = "" }: { initialReference?: string; initialEmail?: string }) {
+export default function TripReviewForm({ initialReference = "", initialEmail = "", locale }: { initialReference?: string; initialEmail?: string; locale?: string }) {
   const { language } = useSiteSettings();
-  const t = copy[language] ?? copy.en;
+  const t = copy[(locale as keyof typeof copy) || language] ?? copy.en;
   const [reference, setReference] = useState(initialReference);
   const [email, setEmail] = useState(initialEmail);
   const [rating, setRating] = useState(5);

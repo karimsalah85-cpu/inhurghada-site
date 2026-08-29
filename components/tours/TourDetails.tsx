@@ -133,7 +133,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{tr("Guest reviews", "Gästebewertungen", "Отзывы гостей", "تقييمات الضيوف", "住客评价")}</p>
             <h2 className="mt-4 text-3xl font-bold text-slate-900">{tr("What guests say about this trip", "Was Gäste über diesen Ausflug sagen", "Что гости говорят об этой поездке", "ماذا يقول الضيوف عن هذه الرحلة", "住客对此行程的评价")}</h2>
           </div>
-          <Link href="/reviews" className="rounded-full border border-cyan-200 px-5 py-2.5 text-sm font-black text-cyan-800 hover:bg-cyan-50">{tr("Leave a review", "Bewertung abgeben", "Оставить отзыв", "أضف تقييمًا", "撰写评价")}</Link>
+          <Link href={`/reviews?lang=${language}`} className="rounded-full border border-cyan-200 px-5 py-2.5 text-sm font-black text-cyan-800 hover:bg-cyan-50">{tr("Leave a review", "Bewertung abgeben", "Оставить отзыв", "أضف تقييمًا", "撰写评价")}</Link>
         </div>
         {hasLiveReviews ? <div className="mt-8 grid gap-5 lg:grid-cols-3">{liveReviews.reviews.slice(0, 6).map((review, index) => <article key={`${review.customer_name}-${index}`} className="flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <div className="flex items-center justify-between gap-3"><span className="font-black text-slate-950">{review.customer_name}</span><div className="flex" aria-label={`${review.rating} out of 5 stars`}>{Array.from({ length: 5 }, (_, star) => <Star key={star} size={15} className={star < review.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}/>)}</div></div>

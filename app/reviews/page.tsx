@@ -21,9 +21,11 @@ const copy = {
   zh: { eyebrow: "行程后反馈", title: "评价您的 Daily Red Sea 行程", intro: "感谢您与我们同行。您的真实反馈能帮助其他客人，也帮助我们的团队改进每一次体验。", rateHeading: "评价您预订的行程", rateNote: "该评价由我们的团队审核，通过后会显示在对应行程页面。仅限已完成预订的客人提交。", googleHeading: "想用 Google？", googleCta: "撰写 Google 评价", googleNote: "评价将根据 Google 政策直接提交至 Google。Daily Red Sea 无法编辑您的评价。", back: "返回行程列表" },
 };
 
-export default async function ReviewsPage({ searchParams }: { searchParams: Promise<{ ref?: string; email?: string }> }) {
+export default async function ReviewsPage({ searchParams }: { searchParams: Promise<{ ref?: string; email?: string; lang?: string }> }) {
   const params = await searchParams;
-  const requested = (await headers()).get("x-daily-red-sea-locale") || "en";
+  // This route has no /<locale> path prefix, so the proxy always reports "en".
+  // A ?lang= hint (set on review links and in the review-request email) wins.
+  const requested = params.lang || (await headers()).get("x-daily-red-sea-locale") || "en";
   const locale = (["en", "ar", "de", "ru", "pl", "zh"].includes(requested) ? requested : "en") as keyof typeof copy;
   const t = copy[locale];
   const rtl = locale === "ar";
@@ -39,7 +41,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
         <div>
           <h2 className="font-black text-slate-950">{t.rateHeading}</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">{t.rateNote}</p>
-          <div className="mt-4"><TripReviewForm initialReference={params.ref || ""} initialEmail={params.email || ""} /></div>
+          <div className="mt-4"><TripReviewForm initialReference={params.ref || ""} initialEmail={params.email || ""} locale={locale} /></div>
         </div>
         <div className="border-t border-slate-100 pt-8">
           <h2 className="font-black text-slate-950">{t.googleHeading}</h2>

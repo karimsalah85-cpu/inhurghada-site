@@ -24,9 +24,10 @@ const dateOnly = (date: Date) => date.toISOString().slice(0, 10);
 
 function render(value: string, booking: Booking) {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://dailyredsea.com";
-  const reviewUrl = booking.customer_email
-    ? `${site}/reviews?ref=${encodeURIComponent(booking.reference)}&email=${encodeURIComponent(booking.customer_email)}`
-    : `${site}/reviews`;
+  const reviewQuery = new URLSearchParams({ lang: booking.locale || "en" });
+  if (booking.reference) reviewQuery.set("ref", booking.reference);
+  if (booking.customer_email) reviewQuery.set("email", booking.customer_email);
+  const reviewUrl = `${site}/reviews?${reviewQuery.toString()}`;
   const replacements: Record<string, string> = {
     customer_name: booking.customer_name,
     booking_reference: booking.reference,
