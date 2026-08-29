@@ -113,14 +113,14 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           <div className="mt-6 space-y-4">
             {[{ name: tour.packageName ?? tour.title, description: tour.packageDescription ?? tour.description, price: tour.packagePrice ?? tour.price, label: tour.packageLabel }, ...(tour.additionalPackages ?? [])].map((pkg) => (
               <div key={pkg.name} className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1 basis-40">
                     <h3 className="text-xl font-bold text-slate-900">{pkg.name}</h3>
                     <p className="mt-2 text-sm leading-7 text-slate-600">{pkg.description}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-500">{tour.bookingMode === "inquiry" ? tr("Quotation", "Angebot", "Предложение", "عرض سعر", "报价") : tr("Starting from", "Ab", "От", "ابتداءً من", "起价")}</p>
-                    <p className="text-2xl font-bold text-cyan-700">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(pkg.price, tour.currency)}</p>
+                  <div className="shrink-0 text-right">
+                    <p className="whitespace-nowrap text-sm text-slate-500">{tour.bookingMode === "inquiry" ? tr("Quotation", "Angebot", "Предложение", "عرض سعر", "报价") : tr("Starting from", "Ab", "От", "ابتداءً من", "起价")}</p>
+                    <p className="whitespace-nowrap text-2xl font-bold text-cyan-700">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(pkg.price, tour.currency)}</p>
                   </div>
                 </div>
                 <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-cyan-700">
