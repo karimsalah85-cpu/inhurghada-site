@@ -31,15 +31,13 @@ jobs:
         with:
           node-version: 24
 
-      - name: Convert GitHub-published Ryze articles
-        if: github.event_name == 'push'
-        run: node scripts/ryze-convert.mjs
-
-      - name: Sync existing Ryze-hosted articles
-        if: github.event_name != 'push'
+      - name: Restore existing Ryze-hosted articles
         env:
           RYZE_HOSTED_URL: https://dailyredsea.byryze.com
         run: node scripts/ryze-hosted-sync.mjs
+
+      - name: Merge GitHub-published Ryze articles
+        run: node scripts/ryze-convert.mjs
 
       - name: Commit generated blog data
         run: |
