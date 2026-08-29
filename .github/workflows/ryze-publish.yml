@@ -50,5 +50,5 @@ jobs:
             echo "No generated changes"
             exit 0
           fi
-          git commit -m "Publish Ryze articles [skip ci]"
+          git commit -m "Publish Ryze articles"
           git push
