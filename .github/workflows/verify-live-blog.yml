@@ -1,0 +1,24 @@
+name: Verify live blog
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify every live blog page
+        env:
+          SITE_URL: https://dailyredsea.com
+          MINIMUM_BLOG_POSTS: 149
+        run: node scripts/verify-live-blog.mjs
