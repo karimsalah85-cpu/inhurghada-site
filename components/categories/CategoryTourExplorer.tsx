@@ -129,7 +129,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
                   {tour.badge ? <span className="absolute start-4 top-4 rounded-full bg-brand-navy px-3 py-2 text-xs font-bold text-white">{localizeProductBadge(locale, tour.badge)}</span> : null}
                 </div>
                 <div className="p-6">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-700">{tour.category || "Hurghada experience"}</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-700">{tour.category || "Red Sea experience"}</p>
                   <h2 className="mt-2 line-clamp-2 text-xl font-black text-slate-950">{tour.title}</h2>
                   <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600 sm:line-clamp-3">{tour.description}</p>
                   <div className="mt-5 grid gap-2 text-sm text-slate-600">

@@ -55,7 +55,7 @@ function HomeContent() {
     "Red Sea excursions FAQ": { ar: "الأسئلة الشائعة عن رحلات البحر الأحمر", pl: "FAQ o wycieczkach nad Morzem Czerwonym", zh: "红海旅游常见问题" },
     "Start planning": { ar: "ابدأ التخطيط", pl: "Zacznij planować", zh: "开始规划" },
     "Ready for your Red Sea adventure?": { ar: "هل أنت مستعد لمغامرة البحر الأحمر؟", pl: "Gotowy na przygodę nad Morzem Czerwonym?", zh: "准备好开启红海之旅了吗？" },
-    "Tours, excursions and private transfers for unforgettable days in Hurghada.": { ar: "رحلات وتجارب وتنقلات خاصة لأيام لا تُنسى في الغردقة.", pl: "Wycieczki i prywatne transfery na niezapomniane dni w Hurghadzie.", zh: "赫尔格达难忘旅程的旅游项目与私人接送。" },
+    "Tours, excursions and private transfers for unforgettable days on the Red Sea.": { ar: "رحلات وجولات وتنقلات خاصة لأيام لا تُنسى على البحر الأحمر.", pl: "Wycieczki, rejsy i prywatne transfery na niezapomniane dni nad Morzem Czerwonym.", zh: "游览、行程和私人接送，让您在红海度过难忘的日子。" },
     "Explore": { ar: "استكشف", pl: "Odkrywaj", zh: "探索" },
     "Need help?": { ar: "تحتاج إلى مساعدة؟", pl: "Potrzebujesz pomocy?", zh: "需要帮助？" },
     "Chat on WhatsApp": { ar: "تحدث عبر واتساب", pl: "Napisz na WhatsApp", zh: "通过 WhatsApp 联系" },
@@ -601,7 +601,7 @@ text-blue-600
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <p className="text-xl font-bold text-white">Daily Red Sea</p>
-            <p className="mt-3 max-w-sm leading-relaxed">{tr("Tours, excursions and private transfers for unforgettable days in Hurghada.","Ausflüge und Privattransfers für unvergessliche Tage in Hurghada.","Экскурсии и частные трансферы для незабываемого отдыха в Хургаде.")}</p>
+            <p className="mt-3 max-w-sm leading-relaxed">{tr("Tours, excursions and private transfers for unforgettable days on the Red Sea.","Ausflüge und Privattransfers für unvergessliche Tage am Roten Meer.","Экскурсии и частные трансферы для незабываемого отдыха на Красном море.")}</p>
             <SocialLinks className="mt-5" dark />
           </div>
           <div>

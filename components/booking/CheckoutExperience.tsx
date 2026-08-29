@@ -52,7 +52,7 @@ const COPY: Record<Language, Copy> = {
   en: {
     eyebrow: "Checkout",
     heroTitle: "Your booking journey, beautifully organized",
-    heroText: "Review your trip details, confirm your date and pickup, and continue with a smooth, premium booking flow designed for Hurghada tours and transfers.",
+    heroText: "Review your trip details, confirm your date and pickup, and continue with a smooth, premium booking flow designed for Red Sea tours and transfers.",
     bookingReadyEyebrow: "Booking ready",
     noBookingEyebrow: "No booking in progress",
     bookingHeading: (reference) => `Booking ${reference}`,
@@ -101,7 +101,7 @@ const COPY: Record<Language, Copy> = {
   ar: {
     eyebrow: "إتمام الحجز",
     heroTitle: "رحلة حجزك، منظمة بعناية",
-    heroText: "راجع تفاصيل رحلتك، وأكّد التاريخ ووقت الاستلام، وتابع عملية حجز سلسة ومميزة مصممة خصيصًا لرحلات وتنقلات الغردقة.",
+    heroText: "راجع تفاصيل رحلتك، وأكّد التاريخ ووقت الاستلام، وتابع عملية حجز سلسة ومميزة مصممة خصيصًا لرحلات وتنقلات البحر الأحمر.",
     bookingReadyEyebrow: "الحجز جاهز",
     noBookingEyebrow: "لا يوجد حجز قيد التنفيذ",
     bookingHeading: (reference) => `الحجز رقم ${reference}`,
@@ -150,7 +150,7 @@ const COPY: Record<Language, Copy> = {
   de: {
     eyebrow: "Kasse",
     heroTitle: "Deine Buchungsreise, wunderbar organisiert",
-    heroText: "Überprüfe deine Reisedetails, bestätige Datum und Abholung und fahre mit einem reibungslosen, erstklassigen Buchungsablauf für Ausflüge und Transfers in Hurghada fort.",
+    heroText: "Überprüfe deine Reisedetails, bestätige Datum und Abholung und fahre mit einem reibungslosen, erstklassigen Buchungsablauf für Ausflüge und Transfers am Roten Meer fort.",
     bookingReadyEyebrow: "Buchung bereit",
     noBookingEyebrow: "Keine laufende Buchung",
     bookingHeading: (reference) => `Buchung ${reference}`,
@@ -199,7 +199,7 @@ const COPY: Record<Language, Copy> = {
   ru: {
     eyebrow: "Оформление",
     heroTitle: "Ваше бронирование — организовано безупречно",
-    heroText: "Проверьте детали поездки, подтвердите дату и место встречи и продолжите с удобным премиальным оформлением бронирования для туров и трансферов в Хургаде.",
+    heroText: "Проверьте детали поездки, подтвердите дату и место встречи и продолжите с удобным премиальным оформлением бронирования для туров и трансферов на Красном море.",
     bookingReadyEyebrow: "Бронирование готово",
     noBookingEyebrow: "Нет активного бронирования",
     bookingHeading: (reference) => `Бронирование ${reference}`,
@@ -248,7 +248,7 @@ const COPY: Record<Language, Copy> = {
   pl: {
     eyebrow: "Finalizacja",
     heroTitle: "Twoja podróż rezerwacyjna, zorganizowana bez zarzutu",
-    heroText: "Sprawdź szczegóły swojej wycieczki, potwierdź datę i miejsce odbioru i kontynuuj płynny, komfortowy proces rezerwacji stworzony dla wycieczek i transferów w Hurghadzie.",
+    heroText: "Sprawdź szczegóły swojej wycieczki, potwierdź datę i miejsce odbioru i kontynuuj płynny, komfortowy proces rezerwacji stworzony dla wycieczek i transferów nad Morzem Czerwonym.",
     bookingReadyEyebrow: "Rezerwacja gotowa",
     noBookingEyebrow: "Brak trwającej rezerwacji",
     bookingHeading: (reference) => `Rezerwacja ${reference}`,
@@ -297,7 +297,7 @@ const COPY: Record<Language, Copy> = {
   zh: {
     eyebrow: "结算",
     heroTitle: "您的预订之旅，井然有序",
-    heroText: "查看行程详情，确认日期与接送安排，继续体验为赫尔格达旅游和接送服务量身打造的顺畅、优质预订流程。",
+    heroText: "查看行程详情，确认日期与接送安排，继续体验为红海旅游和接送服务量身打造的顺畅、优质预订流程。",
     bookingReadyEyebrow: "预订就绪",
     noBookingEyebrow: "暂无进行中的预订",
     bookingHeading: (reference) => `预订 ${reference}`,

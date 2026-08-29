@@ -14,7 +14,7 @@ export default function NotFound() {
         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">Error 404</p>
         <h1 className="mt-4 text-4xl font-black text-slate-950">This page is not available</h1>
         <p className="mt-4 leading-7 text-slate-600">
-          The link may be outdated, or the page may have moved. Explore our current Hurghada tours and transfers instead.
+          The link may be outdated, or the page may have moved. Explore our current Red Sea tours and transfers instead.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/" className="rounded-full bg-cyan-700 px-5 py-3 font-bold text-white hover:bg-cyan-800">Explore tours</Link>
