@@ -12,13 +12,17 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => (
 const dateOnly = (date: Date) => date.toISOString().slice(0, 10);
 
 function render(value: string, booking: Booking) {
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://dailyredsea.com";
+  const reviewUrl = booking.customer_email
+    ? `${site}/reviews?ref=${encodeURIComponent(booking.reference)}&email=${encodeURIComponent(booking.customer_email)}`
+    : `${site}/reviews`;
   const replacements: Record<string, string> = {
     customer_name: booking.customer_name,
     booking_reference: booking.reference,
     tour_name: booking.tour_name || "your Daily Red Sea trip",
     date: booking.date || "",
     hotel: booking.hotel || "",
-    review_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://dailyredsea.com"}/reviews`,
+    review_url: reviewUrl,
   };
   return value.replace(/{{\s*([a-z_]+)\s*}}/g, (_, key: string) => replacements[key] ?? "");
 }
