@@ -129,8 +129,8 @@ async function main() {
     if (error?.code !== "ENOENT") throw error;
   }
 
-  // The hosted sync runs first. Preserve those migrated posts, then let
-  // GitHub-published JSON files add new posts or replace matching slugs.
+  // Preserve the migrated archive, then merge newly published JSON by slug.
+  // This guarantees that publishing one article cannot remove older posts.
   const postsBySlug = new Map((await readGeneratedPosts()).map((post) => [post.slug, post]));
   for (const file of files) {
     const article = JSON.parse(await readFile(path.join(inputDir, file), "utf8"));
