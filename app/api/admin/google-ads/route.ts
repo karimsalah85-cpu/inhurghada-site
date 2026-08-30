@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuthorization } from "@/lib/admin-permission";
-import { getGoogleAdsReport, googleAdsConfiguration } from "@/lib/google-ads";
+import { getGoogleAdsReport, googleAdsConfiguration, isDeveloperTokenNotApproved, GOOGLE_ADS_PENDING_APPROVAL_MESSAGE } from "@/lib/google-ads";
 
 export const runtime = "nodejs";
 
@@ -18,6 +18,12 @@ export async function GET(request: NextRequest) {
   try {
     return NextResponse.json(await getGoogleAdsReport(from, to), { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
+    // A token still restricted to Test Accounts is an expected pending-approval
+    // state, not a server fault: return 200 with a clear one-line status so the
+    // admin page shows a calm notice instead of a red error box.
+    if (isDeveloperTokenNotApproved(error)) {
+      return NextResponse.json({ configured: true, pendingApproval: true, message: GOOGLE_ADS_PENDING_APPROVAL_MESSAGE }, { headers: { "Cache-Control": "private, no-store" } });
+    }
     return NextResponse.json({ error: error instanceof Error ? error.message : "Google Ads reporting failed." }, { status: 502, headers: { "Cache-Control": "private, no-store" } });
   }
 }

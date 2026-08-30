@@ -112,6 +112,16 @@ type GoogleAdsErrorPayload = {
 
 type GoogleAdsStreamBatch = { results?: GoogleAdsRow[] } & GoogleAdsErrorPayload;
 
+// Shown on the admin page (and used to keep the daily cron quiet) when Google
+// has not yet promoted the developer token past Test Account access. This is an
+// account-level approval step in the Google Ads API Center, not a code bug.
+export const GOOGLE_ADS_PENDING_APPROVAL_MESSAGE =
+  "Google Ads: pending Google approval — apply for Basic Access in the Google Ads API Center.";
+
+export function isDeveloperTokenNotApproved(error: unknown): boolean {
+  return error instanceof Error && error.message.includes("DEVELOPER_TOKEN_NOT_APPROVED");
+}
+
 export function googleAdsErrorMessage(payload: GoogleAdsErrorPayload, status: number, requestId: string | null) {
   const error = payload.error;
   const specific = error?.details

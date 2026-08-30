@@ -28,6 +28,7 @@ import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
 import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
 import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
+import ServerHitsPanel from "@/components/admin/ServerHitsPanel";
 import TopServicesPanel from "@/components/admin/TopServicesPanel";
 import { countDistinctCustomers } from "@/lib/customer-count";
 import {
@@ -928,6 +929,7 @@ export default function AdminDashboard({
           </div>
           <TopServicesPanel range={analyticsRange} />
           <GoogleAnalyticsPanel />
+          <ServerHitsPanel />
           <GoogleAdsPanel range={analyticsRange} />
         </section>
       ) : null}

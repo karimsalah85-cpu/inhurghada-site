@@ -2,7 +2,7 @@ import "server-only";
 
 import { sendBookingEmail, sendWhatsAppMessage } from "@/lib/booking-service";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
-import { getGoogleAdsReport, googleAdsConfiguration } from "@/lib/google-ads";
+import { getGoogleAdsReport, googleAdsConfiguration, isDeveloperTokenNotApproved } from "@/lib/google-ads";
 import { pickTemplate } from "@/lib/communication-template";
 
 type Template = { id: string; event_key: string; channel: "email" | "whatsapp"; subject: string | null; body: string; locale: string };
@@ -136,6 +136,7 @@ export async function runAdminAutomation() {
   }
 
   let googleAdsSpendImported = 0;
+  let googleAdsStatus: "ok" | "pending_approval" | "not_configured" | "error" = "not_configured";
   if (googleAdsConfiguration().configured) {
     try {
       const reportDate = dateOnly(yesterday);
@@ -145,10 +146,22 @@ export async function runAdminAutomation() {
         if (error) throw error;
         googleAdsSpendImported = report.totals.cost;
       }
-    } catch (error) { console.error("Google Ads expense import failed", error); }
+      googleAdsStatus = "ok";
+    } catch (error) {
+      // The developer token is still restricted to Test Accounts — a Google
+      // account-level approval step, not a fault of this run. Log it quietly so
+      // it stops surfacing as an unhandled error every morning.
+      if (isDeveloperTokenNotApproved(error)) {
+        googleAdsStatus = "pending_approval";
+        console.info("Google Ads spend import skipped: developer token pending Basic Access approval (DEVELOPER_TOKEN_NOT_APPROVED). Apply in the Google Ads API Center.");
+      } else {
+        googleAdsStatus = "error";
+        console.error("Google Ads expense import failed", error);
+      }
+    }
   }
 
   await addHealthChecks(supabase);
   await checkManagedBackups(supabase);
-  return { published: published?.length || 0, considered: queueRows.length, sent, failed, googleAdsSpendImported };
+  return { published: published?.length || 0, considered: queueRows.length, sent, failed, googleAdsSpendImported, googleAdsStatus };
 }

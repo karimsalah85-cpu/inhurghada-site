@@ -1,8 +1,23 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/proxy";
 import { canonicalAliasTarget, isKnownApplicationPath } from "@/lib/public-routes";
+import { recordServerHit } from "@/lib/server-hit-counter";
 
-export async function proxy(request: NextRequest) {
+// A raw, consent-independent page-view counter. Counts one hit per real
+// public document navigation (not prefetches, assets, API calls, or the admin
+// area) so /admin/analytics can compare it against the GA4 numbers.
+function isCountableNavigation(request: NextRequest, pathname: string) {
+  if (request.method !== "GET") return false;
+  if (pathname.startsWith("/api") || pathname.startsWith("/admin") || pathname.startsWith("/_next")) return false;
+  if (pathname.includes(".")) return false; // robots.txt, sitemap.xml, icons, etc.
+  const headers = request.headers;
+  if (headers.get("next-router-prefetch") || headers.get("x-middleware-prefetch")) return false;
+  if (headers.get("purpose") === "prefetch" || (headers.get("sec-purpose") || "").includes("prefetch")) return false;
+  const wantsHtml = headers.get("sec-fetch-dest") === "document" || (headers.get("accept") || "").includes("text/html");
+  return wantsHtml;
+}
+
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const pathname = request.nextUrl.pathname;
   const previewAuthRoutes = new Set(["/api/admin/login", "/api/admin/logout", "/api/admin/forgot-password"]);
   if (process.env.VERCEL_ENV === "preview" && pathname.startsWith("/api/admin/") && !previewAuthRoutes.has(pathname) && !["GET", "HEAD", "OPTIONS"].includes(request.method)) {
@@ -16,6 +31,8 @@ export async function proxy(request: NextRequest) {
       { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" } },
     );
   }
+  if (isCountableNavigation(request, pathname)) event.waitUntil(recordServerHit());
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (url && serviceKey && !pathname.startsWith("/api/") && !pathname.startsWith("/admin")) {
