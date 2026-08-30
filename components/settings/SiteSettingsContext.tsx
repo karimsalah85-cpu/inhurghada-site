@@ -104,6 +104,12 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
   }, [publicSettings]);
 
   useEffect(() => {
+    const requestedCurrency = new URLSearchParams(window.location.search).get("currency")?.toUpperCase() as Currency | undefined;
+    if (requestedCurrency && currencies.includes(requestedCurrency)) {
+      const update = window.setTimeout(() => setCurrency(requestedCurrency), 0);
+      return () => window.clearTimeout(update);
+    }
+
     const savedCurrency = window.localStorage.getItem("daily-red-sea-currency") as Currency | null;
     if (!savedCurrency || !currencies.includes(savedCurrency)) return;
     const update = window.setTimeout(() => setCurrency(savedCurrency), 0);
