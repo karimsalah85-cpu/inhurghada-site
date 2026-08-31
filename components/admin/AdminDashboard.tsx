@@ -26,6 +26,7 @@ import {
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
+import { notifyAdminBookingsChanged } from "@/lib/admin-booking-events";
 import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
 import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
 import ServerHitsPanel from "@/components/admin/ServerHitsPanel";
@@ -371,6 +372,7 @@ export default function AdminDashboard({
           ? items.map((item) => (item.id === id ? result.booking : item))
           : items.filter((item) => item.id !== id),
       );
+      notifyAdminBookingsChanged();
       feedback(
         result.notification.attempted
           ? result.notification.sent
@@ -430,6 +432,7 @@ export default function AdminDashboard({
       });
       setBookings((items) => [result.booking, ...items]);
       if (matchesBookingView(result.booking)) setVisibleBookings((items) => [result.booking, ...items]);
+      notifyAdminBookingsChanged();
       form.reset();
       setShowManualBooking(false);
       feedback(`Manual booking ${result.booking.reference} created.`);
@@ -474,6 +477,7 @@ export default function AdminDashboard({
         next.delete(id);
         return next;
       });
+      notifyAdminBookingsChanged();
       feedback(`Booking ${reference} deleted.`);
       router.refresh();
     } catch (reason) {
@@ -559,6 +563,7 @@ export default function AdminDashboard({
           .map((booking) => changed.get(booking.id) || booking)
           .filter(matchesBookingView),
       );
+      notifyAdminBookingsChanged();
       const emailNote = result.notifications.attempted
         ? ` ${result.notifications.sent} of ${result.notifications.attempted} customer emails sent automatically.`
         : " No customer status changed.";
