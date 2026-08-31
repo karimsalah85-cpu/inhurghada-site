@@ -187,7 +187,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     duration: "5 Hours",
 
     description:
-      "Experience the desert by quad bike, camel ride and Bedouin village visit.",
+      "Leave Hurghada for a five-hour desert safari with a quad-bike ride, camel ride and Bedouin village visit. The afternoon pickup time is confirmed by WhatsApp.",
 
     highlights: [
       "Quad bike",
@@ -199,6 +199,21 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     availableTimes: ["Afternoon - exact pickup confirmed by WhatsApp"],
     category: "Desert Safari",
     badge: "Most Popular",
+    included: ["Hotel pickup", "Quad-bike ride", "Camel ride", "Bedouin village visit", "Bedouin tea"],
+    notIncluded: ["Personal expenses", "Scarf and goggles if required"],
+    notes: ["The exact afternoon pickup time is confirmed by WhatsApp.", "Follow the guide's safety briefing throughout the quad-bike ride.", "Bring closed shoes, sunglasses and sun protection."],
+    packageName: "Hurghada Desert Safari Adventure",
+    packageDescription: "A five-hour desert experience combining a quad-bike ride, camel ride and Bedouin village visit.",
+    packagePrice: "30",
+    packageLabel: "Per adult",
+    whatToBring: ["Closed shoes", "Sunglasses", "Sun protection", "Cash for personal expenses"],
+    seoTitle: "Hurghada Desert Safari with Quad Bike and Camel Ride",
+    metaDescription: "Book a five-hour Hurghada desert safari with quad biking, a camel ride, Bedouin village visit, hotel pickup and local WhatsApp support.",
+    faqs: [
+      { question: "What activities are included in the desert safari?", answer: "The published package includes a quad-bike ride, camel ride, Bedouin village visit and Bedouin tea." },
+      { question: "What time is hotel pickup?", answer: "Pickup is in the afternoon. Daily Red Sea confirms the exact time by WhatsApp after booking." },
+      { question: "What should I wear for the safari?", answer: "Wear closed shoes and comfortable clothing, and bring sunglasses and sun protection." },
+    ],
 
   },
 
@@ -352,7 +367,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   {
     slug: "full-day-diving", title: "Full Day Scuba Diving Trip", image: "/images/placeholders/sea-activity.svg", price: "55", rating: "4.8", reviews: "New", location: "Hurghada, Egypt", duration: "8 Hours", category: "Diving", badge: "Premium",
     seoTitle: "Full Day Scuba Diving Trip in Hurghada | 2 Guided Red Sea Dives", metaDescription: "Discover the Red Sea with two guided dives from Hurghada, lunch onboard, soft drinks and hotel transfers.",
-    description: "Discover the incredible underwater world of the Red Sea with two guided dives. Dive locations are selected by the captain according to weather and sea conditions.", highlights: ["Two guided dives", "Professional instructor", "Lunch onboard", "Soft drinks", "Hotel transfers", "Equipment available"], included: ["Hotel transfers", "Boat trip", "Professional instructor", "Lunch", "Soft drinks"], notIncluded: ["Diving equipment rental - available for $30", "Personal expenses"], notes: ["A valid scuba diving license is required for every diver and proof must be brought on the trip.", "Equipment is not included in the base price.", "Dive sites depend on weather and sea conditions."], packageName: "Two guided Red Sea dives", packageDescription: "A full-day boat trip with two guided dives. A valid diving license is required; equipment can be added when booking.", packagePrice: "55", packageLabel: "Per person", participantPricing: { adults: 55, youth: 55 }, availableTimes: ["08:00"],
+    description: "Join a full-day Red Sea boat trip for certified divers with two guided dives at sites selected for the day's weather and sea conditions. Lunch, soft drinks and Hurghada hotel transfers are included.", highlights: ["Two guided dives", "Professional instructor", "Lunch onboard", "Soft drinks", "Hotel transfers", "Equipment available"], included: ["Hotel transfers", "Boat trip", "Two guided dives", "Professional instructor", "Lunch", "Soft drinks"], notIncluded: ["Diving equipment rental - available for $30", "Personal expenses"], notes: ["A valid scuba diving license is required for every diver and proof must be brought on the trip.", "Equipment is not included in the base price.", "Dive sites depend on weather and sea conditions."], packageName: "Two guided Red Sea dives", packageDescription: "A full-day boat trip with two guided dives for certified divers. Equipment can be added when booking.", packagePrice: "55", packageLabel: "Per person", participantPricing: { adults: 55, youth: 55 }, availableTimes: ["08:00"], whatToBring: ["Valid diving certification", "Passport or photo ID", "Swimwear", "Towel", "Sun protection"], notSuitableFor: ["Guests without a valid scuba-diving certification"], faqs: [{ question: "Do I need a diving certification?", answer: "Yes. This trip is for certified divers, and every diver must bring proof of a valid scuba-diving certification." }, { question: "Is diving equipment included?", answer: "No. Equipment is not included in the base price and is available to rent for $30." }, { question: "Which dive sites will we visit?", answer: "The captain selects suitable Red Sea dive sites according to the day's weather and sea conditions." }, { question: "Are lunch and hotel transfers included?", answer: "Yes. The published package includes lunch, soft drinks and Hurghada hotel transfers." }],
   },
   {
     slug: "quad-safari-morning", title: "Morning Quad Bike Safari", image: "/images/placeholders/sea-activity.svg", price: "20", rating: "4.7", reviews: "New", location: "Hurghada Desert", duration: "5 Hours", category: "Desert Safari", badge: "Best Value",
