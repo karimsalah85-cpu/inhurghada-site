@@ -51,5 +51,8 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Static files must bypass the application route allowlist. In particular,
+  // the invoice reader loads same-origin .mjs, .js, .wasm and .gz assets from
+  // /public/vendor; intercepting them here turns valid files into custom 404s.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
