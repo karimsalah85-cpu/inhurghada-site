@@ -41,6 +41,7 @@ import {
   type AdminRole,
 } from "@/lib/admin-auth";
 import BookingDetailPanel from "@/components/admin/BookingDetailPanel";
+import ExpenseInvoiceInbox from "@/components/admin/ExpenseInvoiceInbox";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
 type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -1066,6 +1067,17 @@ export default function AdminDashboard({
       ) : null}
 
       <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
+        {mode === "finance" && can("finance") ? (
+          <ExpenseInvoiceInbox
+            suppliers={suppliers}
+            salesPeople={salesPeople}
+            bookings={bookings}
+            onPosted={(expense) =>
+              setExpenses((items) => [expense as unknown as Expense, ...items])
+            }
+            onFeedback={feedback}
+          />
+        ) : null}
         {mode === "bookings" && can("bookings") ? (
           <section
             id="bookings"

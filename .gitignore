@@ -49,3 +49,9 @@ supabase/.temp/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vendored OCR runtime (regenerated from node_modules by scripts/vendor-ocr-assets.mjs);
+# the committed language data under lang/ is the exception.
+/public/vendor/tesseract/core/
+/public/vendor/tesseract/worker.min.js
+/public/vendor/pdf/
