@@ -444,8 +444,8 @@ export default function BookingPortal() {
   return (
     <main dir={language === "ar" ? "rtl" : "ltr"} className="bg-slate-50">
       <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-[url('/images/placeholders/sea-activity.svg')] bg-cover bg-center opacity-35" />
-        <div className="absolute inset-0 bg-slate-950/80" />
+        <div className="absolute inset-0 bg-[url('/images/booking-portal-hero-v2.jpg')] bg-cover bg-[center_right]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/45" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6 py-24 lg:px-8 lg:py-32">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">{copy.eyebrow}</p>

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     .order("date", { ascending: false });
 
   if (ids.length) query = query.in("id", ids);
-  else query = query.gte("date", from).lte("date", to);
+  else query = query.is("archived_at", null).gte("date", from).lte("date", to);
 
   if (trip !== "all") query = query.eq("tour_name", trip);
   if (status !== "all") query = query.eq("status", status);

@@ -22,6 +22,7 @@ type AdminSearchParams = {
   expense_sort?: string;
   range?: string;
   panel?: string;
+  archive?: string;
 };
 
 const bookingStatuses = [
@@ -33,6 +34,7 @@ const bookingStatuses = [
 ] as const;
 const paymentStatuses = ["all", "unpaid", "paid", "refunded"] as const;
 const bookingTypes = ["all", "tour", "transfer"] as const;
+const archiveFilters = ["active", "archived", "all"] as const;
 
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -113,6 +115,8 @@ export default async function AdminPage({
     [7, 30, 90].includes(requestedRange) ? requestedRange : 30
   ) as 7 | 30 | 90;
   const requestedPanel = first(params.panel);
+  const archiveValue = first(params.archive);
+  const archive = archiveFilters.includes(archiveValue as (typeof archiveFilters)[number]) ? archiveValue! : "active";
   const controlPanel = (
     [
       "content",
@@ -159,6 +163,7 @@ export default async function AdminPage({
     if (expenseSort !== "none") canonical.set("expense_sort", expenseSort);
     if (analyticsRange !== 30) canonical.set("range", String(analyticsRange));
     if (controlPanel !== "content") canonical.set("panel", controlPanel);
+    if (archive !== "active") canonical.set("archive", archive);
     const workspacePath =
       workspace === "overview" ? "/admin" : `/admin/${workspace}`;
     redirect(`${workspacePath}?${canonical.toString()}`);
@@ -210,6 +215,8 @@ export default async function AdminPage({
     bookingListQuery = bookingListQuery.is("tour_name", null);
   else if (service !== "all")
     bookingListQuery = bookingListQuery.eq("tour_name", service);
+  if (archive === "active") bookingListQuery = bookingListQuery.is("archived_at", null);
+  else if (archive === "archived") bookingListQuery = bookingListQuery.not("archived_at", "is", null);
 
   const [
     { data: bookings, error: bookingsError },
@@ -222,6 +229,7 @@ export default async function AdminPage({
       ? supabase
           .from("bookings")
           .select("*")
+          .is("archived_at", null)
           .order("created_at", { ascending: false })
       : Promise.resolve({ data: [], error: null }),
     canBookings ? bookingListQuery : Promise.resolve({ data: [], error: null }),
@@ -304,6 +312,7 @@ export default async function AdminPage({
     search,
     supplier,
     expense_sort: expenseSort,
+    archive,
   };
 
   const migrationPending = Boolean(suppliersError || salesPeopleError);

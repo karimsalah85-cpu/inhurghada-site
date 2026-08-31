@@ -4,6 +4,8 @@ import { type FormEvent, type ReactNode, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  Archive,
+  ArchiveRestore,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -66,6 +68,7 @@ type Booking = {
   expense_total?: number;
   expense_by_currency?: Record<string, number>;
   supplier_name?: string | null;
+  archived_at?: string | null;
 };
 type BookingView = {
   month: string;
@@ -76,6 +79,7 @@ type BookingView = {
   search: string;
   supplier: string;
   expense_sort: string;
+  archive: string;
 };
 type Expense = {
   id: string;
@@ -325,6 +329,11 @@ export default function AdminDashboard({
     const matchesService =
       bookingView.service === "all" ||
       (booking.tour_name || "Transfer") === bookingView.service;
+    const matchesArchive =
+      bookingView.archive === "all" ||
+      (bookingView.archive === "archived"
+        ? Boolean(booking.archived_at)
+        : !booking.archived_at);
     const searchable = [
       booking.reference,
       booking.customer_name,
@@ -343,6 +352,7 @@ export default function AdminDashboard({
       matchesPayment &&
       matchesType &&
       matchesService &&
+      matchesArchive &&
       (!bookingView.search ||
         searchable.includes(bookingView.search.toLowerCase()))
     );
@@ -491,6 +501,40 @@ export default function AdminDashboard({
     }
   }
 
+  async function setBookingArchived(booking: Booking, archived: boolean) {
+    setBusyId(booking.id);
+    setError("");
+    try {
+      const result = await api<{ booking: Booking }>(
+        `/api/admin/bookings/${booking.id}`,
+        { method: "PATCH", body: JSON.stringify({ archived }) },
+      );
+      setBookings((items) =>
+        items.map((item) =>
+          item.id === booking.id ? result.booking : item,
+        ),
+      );
+      setVisibleBookings((items) =>
+        matchesBookingView(result.booking)
+          ? items.map((item) =>
+              item.id === booking.id ? result.booking : item,
+            )
+          : items.filter((item) => item.id !== booking.id),
+      );
+      notifyAdminBookingsChanged();
+      feedback(`${booking.reference} ${archived ? "archived" : "restored"}.`);
+      router.refresh();
+    } catch (reason) {
+      setError(
+        reason instanceof Error
+          ? reason.message
+          : `Could not ${archived ? "archive" : "restore"} the booking.`,
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   function toggleBooking(id: string) {
     setSelected((items) => {
       const next = new Set(items);
@@ -522,6 +566,7 @@ export default function AdminDashboard({
     if (next.supplier !== "all") params.set("supplier", next.supplier);
     if (next.expense_sort !== "none")
       params.set("expense_sort", next.expense_sort);
+    if (next.archive !== "active") params.set("archive", next.archive);
     return `/admin/bookings?${params.toString()}`;
   }
 
@@ -1165,6 +1210,16 @@ export default function AdminDashboard({
                   <option key={service}>{service}</option>
                 ))}
               </select>
+              <select
+                aria-label="Booking archive filter"
+                name="archive"
+                defaultValue={bookingView.archive}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium"
+              >
+                <option value="active">Active bookings</option>
+                <option value="archived">Archived bookings</option>
+                <option value="all">Active and archived</option>
+              </select>
               {can("finance") ? (
                 <>
                   <select
@@ -1204,6 +1259,7 @@ export default function AdminDashboard({
                     type: "all",
                     service: "all",
                     search: "",
+                    archive: "active",
                   })}
                   className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold"
                 >
@@ -1463,6 +1519,22 @@ export default function AdminDashboard({
                             Details, supplier & expenses
                           </button>
                           <button
+                            type="button"
+                            aria-label={`${booking.archived_at ? "Restore" : "Archive"} ${booking.reference}`}
+                            title={booking.archived_at ? "Restore booking" : "Archive booking"}
+                            disabled={busyId === booking.id}
+                            onClick={() =>
+                              setBookingArchived(booking, !booking.archived_at)
+                            }
+                            className="rounded-lg p-2 text-slate-400 hover:bg-amber-50 hover:text-amber-700 disabled:opacity-40"
+                          >
+                            {booking.archived_at ? (
+                              <ArchiveRestore size={17} />
+                            ) : (
+                              <Archive size={17} />
+                            )}
+                          </button>
+                          <button
                             aria-label={`Delete ${booking.reference}`}
                             title="Delete permanently"
                             disabled={busyId === booking.id}
@@ -1622,6 +1694,21 @@ export default function AdminDashboard({
                     >
                       <Download size={14} /> Internal report
                     </a>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setBookingArchived(booking, !booking.archived_at)
+                      }
+                      disabled={busyId === booking.id}
+                      className="inline-flex items-center gap-2 text-xs font-bold text-amber-700 disabled:opacity-40"
+                    >
+                      {booking.archived_at ? (
+                        <ArchiveRestore size={14} />
+                      ) : (
+                        <Archive size={14} />
+                      )}
+                      {booking.archived_at ? "Restore booking" : "Archive booking"}
+                    </button>
                     <button
                       type="button"
                       onClick={() =>

@@ -27,10 +27,11 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   if (!authorized) return json({ error: "Unauthorized." }, 401);
   const { supabase, user } = authorized;
 
-  const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown; sales_person_id?: unknown } | null;
-  const update: { status?: string; payment_status?: string; sales_person_id?: string | null; sales_commission_percent?: number | null } = {};
+  const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown; sales_person_id?: unknown; archived?: unknown } | null;
+  const update: { status?: string; payment_status?: string; sales_person_id?: string | null; sales_commission_percent?: number | null; archived_at?: string | null } = {};
   if (typeof body?.status === "string" && bookingStatuses.has(body.status)) update.status = body.status;
   if (typeof body?.payment_status === "string" && paymentStatuses.has(body.payment_status)) update.payment_status = body.payment_status;
+  if (typeof body?.archived === "boolean") update.archived_at = body.archived ? new Date().toISOString() : null;
   if (body && Object.hasOwn(body, "sales_person_id")) {
     if (body.sales_person_id === null || body.sales_person_id === "") {
       update.sales_person_id = null;

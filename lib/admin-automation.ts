@@ -86,8 +86,8 @@ export async function runAdminAutomation() {
 
   const [{ data: templates, error: templateError }, { data: pickupBookings, error: pickupError }, { data: reviewBookings, error: reviewError }] = await Promise.all([
     supabase.from("communication_templates").select("id,event_key,channel,subject,body,locale").eq("active", true).in("event_key", ["pickup_reminder", "review_request"]),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").eq("status", "completed").eq("date", dateOnly(yesterday)),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").is("archived_at", null).eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").is("archived_at", null).eq("status", "completed").eq("date", dateOnly(yesterday)),
   ]);
   if (templateError || pickupError || reviewError) throw templateError || pickupError || reviewError;
 

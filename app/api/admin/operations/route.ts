@@ -17,7 +17,7 @@ export async function GET() {
   const results = await Promise.all([
     supabase.from("tour_availability").select("*").order("service_date").limit(500),
     supabase.from("booking_assignments").select("*").order("pickup_time").limit(500),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,tour_slug,date,guests,adults,youth,infants,amount,currency,status,payment_status,created_at").order("date").limit(1000),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,tour_slug,date,guests,adults,youth,infants,amount,currency,status,payment_status,created_at").is("archived_at", null).order("date").limit(1000),
     supabase.from("admin_customer_summary").select("*").order("last_booking_at", { ascending: false }).limit(500),
     supabase.from("customer_profiles").select("*").limit(500),
     supabase.from("suppliers").select("*").order("name"),

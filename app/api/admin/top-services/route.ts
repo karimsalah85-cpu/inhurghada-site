@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const currentTo = iso(new Date(start.getTime() + (range - 1) * day));
   const previousFrom = iso(new Date(start.getTime() - range * day));
   const previousTo = iso(new Date(start.getTime() - day));
-  const { data, error } = await supabase.from("bookings").select("tour_name,date,status").eq("status", "confirmed").gte("date", previousFrom).lte("date", currentTo);
+  const { data, error } = await supabase.from("bookings").select("tour_name,date,status").is("archived_at", null).eq("status", "confirmed").gte("date", previousFrom).lte("date", currentTo);
   if (error) return NextResponse.json({ error: "Could not load service rankings." }, { status: 500 });
   const rows = data || [];
   const services = rankTopServices(rows.filter((row) => row.date && row.date >= currentFrom), rows.filter((row) => row.date && row.date <= previousTo));
