@@ -18,6 +18,7 @@ import {
   ListChecks,
   LogOut,
   Mail,
+  Pencil,
   Plus,
   Search,
   Send,
@@ -235,6 +236,7 @@ export default function AdminDashboard({
           { key: "other", label: "Other", is_system: true },
         ],
   );
+  const [editingType, setEditingType] = useState<{ key: string; label: string } | null>(null);
   const [suppliers, setSuppliers] = useState(initialSuppliers);
   const [salesPeople, setSalesPeople] = useState(initialSalesPeople);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -347,6 +349,32 @@ export default function AdminDashboard({
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Could not add the expense type.");
       return null;
+    }
+  }
+
+  async function renameExpenseType(key: string, label: string) {
+    if (label.trim().length < 2) return;
+    try {
+      const result = await api<{ type: ExpenseType }>(`/api/admin/expense-types/${key}`, {
+        method: "PATCH",
+        body: JSON.stringify({ label: label.trim() }),
+      });
+      setExpenseTypes((items) => items.map((item) => (item.key === key ? result.type : item)));
+      setEditingType(null);
+      feedback("Expense type renamed.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not rename the expense type.");
+    }
+  }
+
+  async function deleteExpenseType(type: ExpenseType) {
+    if (!window.confirm(`Remove expense type “${type.label}”? Past expenses keep their label.`)) return;
+    try {
+      await api(`/api/admin/expense-types/${type.key}`, { method: "DELETE" });
+      setExpenseTypes((items) => items.filter((item) => item.key !== type.key));
+      feedback("Expense type removed.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not remove the expense type.");
     }
   }
 
@@ -2018,6 +2046,94 @@ export default function AdminDashboard({
               </p>
             )}
           </aside>
+        ) : null}
+        {mode === "finance" && can("finance") ? (
+          <section className="rounded-3xl bg-white p-6 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-black">Expense types</h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Categories offered in every expense dropdown. Built-in types cannot be changed.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={addExpenseType}
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+              >
+                ＋ Add type
+              </button>
+            </div>
+            <ul className="mt-4 divide-y">
+              {expenseTypes.map((type) => (
+                <li
+                  key={type.key}
+                  className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                >
+                  {editingType?.key === type.key ? (
+                    <form
+                      className="flex flex-1 items-center gap-2"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        renameExpenseType(type.key, editingType.label);
+                      }}
+                    >
+                      <input
+                        autoFocus
+                        maxLength={80}
+                        value={editingType.label}
+                        onChange={(event) =>
+                          setEditingType({ key: type.key, label: event.target.value })
+                        }
+                        className="flex-1 rounded-lg border border-slate-200 p-2 font-normal"
+                      />
+                      <button className="rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white">
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingType(null)}
+                        className="text-xs font-semibold text-slate-500"
+                      >
+                        Cancel
+                      </button>
+                    </form>
+                  ) : (
+                    <>
+                      <span className="font-medium">
+                        {type.label}
+                        {type.is_system ? (
+                          <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500">
+                            built-in
+                          </span>
+                        ) : null}
+                      </span>
+                      {!type.is_system ? (
+                        <span className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            aria-label={`Rename ${type.label}`}
+                            onClick={() => setEditingType({ key: type.key, label: type.label })}
+                            className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Remove ${type.label}`}
+                            onClick={() => deleteExpenseType(type)}
+                            className="rounded p-1 text-slate-400 hover:bg-rose-100 hover:text-rose-700"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
       </div>
 
