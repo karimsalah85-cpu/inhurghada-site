@@ -64,7 +64,7 @@ const confirmationCopy = {
     steps: "Bewahre diese Bestätigung auf. Wir bestätigen die endgültige Verfügbarkeit und die Abhol- oder Treffpunktdetails per WhatsApp. Zeige bei Rückfragen deine Buchungsnummer.",
     thanks: "Vielen Dank, dass du Daily Red Sea gewählt hast.", policy: "Stornierungs- und Erstattungsbedingungen",
     policyParagraphs: [
-      "Es gelten die Stornierungsbedingungen auf der Seite der gebuchten Aktivität. Wenn dort keine andere Frist angegeben ist, storniere mindestens 24 Stunden vor der geplanten Abholzeit, um eine vollständige Erstattung zu erhalten. Bei Barzahlung vor Ort fällt dann keine Gebühr an.",
+      "Es gelten die Stornierungsbedingungen auf der Seite der gebuchten Aktivität. Wenn dort keine andere Frist angegeben ist, storniere mindestens 48 Stunden vor der geplanten Abholzeit, um eine vollständige Erstattung zu erhalten. Bei Barzahlung vor Ort fällt dann keine Gebühr an.",
       "Bei späteren Stornierungen, Verspätung oder Nichterscheinen besteht kein Erstattungsanspruch, da lokale Anbieter Plätze reservieren und Kosten tragen. Für private Touren, Boote mit begrenzter Kapazität und Erlebnisse von Drittanbietern können längere Fristen oder besondere Bedingungen gelten, wenn diese vor der Buchung angegeben wurden.",
       "Wenn Daily Red Sea oder der lokale Anbieter wegen Wetter, Sicherheit, zu geringer Teilnehmerzahl oder betrieblichen Gründen storniert, kannst du zwischen einer vollständigen Erstattung und einem verfügbaren Ersatztermin oder einer alternativen Aktivität wählen.",
       "Für eine Stornierung oder Änderung kontaktiere Daily Red Sea so früh wie möglich per WhatsApp und gib deine Buchungsnummer an. Genehmigte Karten- oder Online-Erstattungen erfolgen über die ursprüngliche Zahlungsmethode; Buchungen mit Barzahlung vor Ort werden nicht belastet.",
@@ -78,7 +78,7 @@ const confirmationCopy = {
     steps: "Сохраните это подтверждение. Мы подтвердим наличие мест и детали трансфера или места встречи в WhatsApp. При обращении назовите номер бронирования.",
     thanks: "Спасибо, что выбрали Daily Red Sea.", policy: "Условия отмены и возврата",
     policyParagraphs: [
-      "К бронированию применяются условия отмены, указанные на странице выбранной экскурсии. Если другой срок не указан, отмените бронирование не менее чем за 24 часа до запланированного времени трансфера, чтобы получить полный возврат. При оплате наличными на месте плата не взимается.",
+      "К бронированию применяются условия отмены, указанные на странице выбранной экскурсии. Если другой срок не указан, отмените бронирование не менее чем за 48 часов до запланированного времени трансфера, чтобы получить полный возврат. При оплате наличными на месте плата не взимается.",
       "При поздней отмене, опоздании или неявке возврат не производится, поскольку местные поставщики резервируют места и несут расходы. Для частных туров, судов с ограниченной вместимостью и услуг сторонних операторов могут действовать более длительные сроки или особые условия, если они были указаны до бронирования.",
       "Если Daily Red Sea или местный поставщик отменяет поездку из-за погоды, безопасности, недостаточного числа участников или операционных причин, вы можете выбрать полный возврат либо доступную альтернативную дату или экскурсию.",
       "Для отмены или изменения как можно раньше свяжитесь с Daily Red Sea в WhatsApp и укажите номер бронирования. Одобренные возвраты по карте или онлайн-платежу выполняются тем же способом; бронирования с оплатой наличными на месте не списываются.",
@@ -92,7 +92,7 @@ const confirmationCopy = {
     steps: "احتفظ بهذا التأكيد. سنؤكد التوفر النهائي وتفاصيل الاستلام أو نقطة التجمع عبر واتساب. أظهر رقم الحجز عند الطلب.",
     thanks: "شكراً لاختيارك ديلي رد سي.", policy: "سياسة الإلغاء واسترداد المبلغ",
     policyParagraphs: [
-      "تسري شروط الإلغاء الموضحة في صفحة النشاط على هذا الحجز. إذا لم تذكر الصفحة مهلة مختلفة، يرجى الإلغاء قبل موعد الاستلام المحدد بـ 24 ساعة على الأقل لاسترداد المبلغ بالكامل، أو لتجنب أي رسوم في الحجوزات التي يتم دفعها نقداً عند الوصول.",
+      "تسري شروط الإلغاء الموضحة في صفحة النشاط على هذا الحجز. إذا لم تذكر الصفحة مهلة مختلفة، يرجى الإلغاء قبل موعد الاستلام المحدد بـ 48 ساعة على الأقل لاسترداد المبلغ بالكامل، أو لتجنب أي رسوم في الحجوزات التي يتم دفعها نقداً عند الوصول.",
       "لا يمكن استرداد المبلغ عند الإلغاء بعد انتهاء المهلة المحددة أو التأخر أو عدم الحضور، لأن مقدمي الخدمة المحليين يحجزون السعة ويتحملون التكاليف. قد تتطلب الجولات الخاصة والقوارب محدودة السعة وتجارب الجهات الخارجية مهلة أطول أو تكون غير قابلة للاسترداد إذا تم توضيح ذلك قبل الحجز.",
       "إذا ألغت ديلي رد سي أو الجهة المحلية الرحلة بسبب الطقس أو السلامة أو عدم اكتمال العدد أو أسباب تشغيلية، يمكنك اختيار استرداد المبلغ بالكامل أو اختيار موعد أو نشاط بديل متاح.",
       "لطلب الإلغاء أو التعديل، تواصل مع ديلي رد سي عبر واتساب في أقرب وقت ممكن واذكر رقم الحجز. تتم إعادة المبالغ المعتمدة للبطاقات أو المدفوعات الإلكترونية إلى وسيلة الدفع الأصلية، ولا يتم تحصيل رسوم الحجوزات المدفوعة نقداً عند الوصول.",
@@ -106,7 +106,7 @@ const confirmationCopy = {
     steps: "Zachowaj to potwierdzenie. Ostateczną dostępność oraz szczegóły odbioru lub miejsca spotkania potwierdzimy przez WhatsApp. Przy kontakcie podaj numer rezerwacji.",
     thanks: "Dziękujemy za wybranie Daily Red Sea.", policy: "Zasady anulowania i zwrotów",
     policyParagraphs: [
-      "Do rezerwacji mają zastosowanie zasady anulowania podane na stronie wybranej atrakcji. Jeśli nie wskazano innego terminu, anuluj co najmniej 24 godziny przed planowanym odbiorem, aby otrzymać pełny zwrot. W przypadku płatności gotówką na miejscu opłata nie zostanie pobrana.",
+      "Do rezerwacji mają zastosowanie zasady anulowania podane na stronie wybranej atrakcji. Jeśli nie wskazano innego terminu, anuluj co najmniej 48 godzin przed planowanym odbiorem, aby otrzymać pełny zwrot. W przypadku płatności gotówką na miejscu opłata nie zostanie pobrana.",
       "Anulowanie po wymaganym terminie, spóźnienie lub niepojawienie się nie podlega zwrotowi, ponieważ lokalni dostawcy rezerwują miejsca i ponoszą koszty. Prywatne wycieczki, łodzie z ograniczoną liczbą miejsc i usługi firm trzecich mogą wymagać dłuższego terminu lub mieć szczególne warunki, jeśli podano je przed rezerwacją.",
       "Jeśli Daily Red Sea lub lokalny dostawca odwoła wycieczkę z powodu pogody, bezpieczeństwa, niewystarczającej liczby uczestników lub przyczyn operacyjnych, możesz wybrać pełny zwrot albo dostępny termin lub atrakcję zastępczą.",
       "Aby anulować lub zmienić rezerwację, skontaktuj się z Daily Red Sea przez WhatsApp jak najwcześniej i podaj numer rezerwacji. Zatwierdzone zwroty kartą lub płatności online są realizowane pierwotną metodą; rezerwacje płatne gotówką na miejscu nie są obciążane.",
@@ -120,7 +120,7 @@ const confirmationCopy = {
     steps: "请保留此确认单。我们会通过 WhatsApp 确认最终名额以及接送或集合地点详情。需要时请出示预订编号。",
     thanks: "感谢您选择 Daily Red Sea。", policy: "取消与退款政策",
     policyParagraphs: [
-      "本预订适用活动页面所列的取消条款。如页面未注明其他时限，请至少在计划接送时间前 24 小时取消，以获得全额退款；到场现金支付的预订不会产生费用。",
+      "本预订适用活动页面所列的取消条款。如页面未注明其他时限，请至少在计划接送时间前 48 小时取消，以获得全额退款；到场现金支付的预订不会产生费用。",
       "超过适用时限后取消、迟到或未到场均不予退款，因为当地供应商已预留名额并产生成本。私人行程、名额有限的船只及第三方体验可能需要更长的提前通知，或适用预订前已明确说明的特殊条款。",
       "若 Daily Red Sea 或当地供应商因天气、安全、人数不足或运营原因取消，您可选择全额退款，或选择可用的替代日期或活动。",
       "如需取消或更改，请尽早通过 WhatsApp 联系 Daily Red Sea 并提供预订编号。已批准的银行卡或在线付款退款将退回原支付方式；到场现金支付的预订不会被扣款。",
