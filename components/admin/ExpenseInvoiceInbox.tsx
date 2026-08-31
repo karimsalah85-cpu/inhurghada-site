@@ -8,16 +8,7 @@ import { parseInvoiceText } from "@/lib/expense-invoice-parsing";
 
 const BUCKET = "expense-invoices";
 
-const expenseOptions: [string, string][] = [
-  ["google_ads", "Google Ads"],
-  ["subscriptions", "Subscriptions"],
-  ["supplier_per_trip", "Supplier per trip"],
-  ["sales_commission", "Sales person commission"],
-  ["fuel", "Fuel"],
-  ["guide_fees", "Guide fees"],
-  ["boat_costs", "Boat costs"],
-  ["other", "Other"],
-];
+const ADD_EXPENSE_TYPE = "__add_expense_type__";
 
 type Supplier = { id: string; name: string };
 type SalesPerson = { id: string; name: string };
@@ -84,12 +75,16 @@ export default function ExpenseInvoiceInbox({
   suppliers,
   salesPeople,
   bookings,
+  expenseTypes,
+  onAddType,
   onPosted,
   onFeedback,
 }: {
   suppliers: Supplier[];
   salesPeople: SalesPerson[];
   bookings: BookingRef[];
+  expenseTypes: { key: string; label: string }[];
+  onAddType: () => Promise<string | null>;
   onPosted: (expense: { id: string }) => void;
   onFeedback: (message: string) => void;
 }) {
@@ -369,14 +364,27 @@ export default function ExpenseInvoiceInbox({
                       Expense type
                       <select
                         value={draft.expense_type}
-                        onChange={(event) => patchDraft(invoice.id, { expense_type: event.target.value })}
+                        onChange={async (event) => {
+                          const value = event.target.value;
+                          if (value === ADD_EXPENSE_TYPE) {
+                            const created = await onAddType();
+                            if (created) patchDraft(invoice.id, { expense_type: created });
+                            return;
+                          }
+                          patchDraft(invoice.id, { expense_type: value });
+                        }}
                         className="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 font-normal"
                       >
-                        {expenseOptions.map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
+                        {expenseTypes.map((type) => (
+                          <option key={type.key} value={type.key}>
+                            {type.label}
                           </option>
                         ))}
+                        {draft.expense_type &&
+                        !expenseTypes.some((type) => type.key === draft.expense_type) ? (
+                          <option value={draft.expense_type}>{draft.expense_type}</option>
+                        ) : null}
+                        <option value={ADD_EXPENSE_TYPE}>＋ Add expense type…</option>
                       </select>
                     </label>
                     <label className="block text-xs font-semibold">

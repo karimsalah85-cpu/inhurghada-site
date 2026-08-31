@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, type ReactNode, useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -28,7 +28,7 @@ import {
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
-import { notifyAdminBookingsChanged } from "@/lib/admin-booking-events";
+import { notifyAdminBookingsChanged, subscribeToAdminBookingChanges } from "@/lib/admin-booking-events";
 import GoogleAdsPanel from "@/components/admin/GoogleAdsPanel";
 import GoogleAnalyticsPanel from "@/components/admin/GoogleAnalyticsPanel";
 import ServerHitsPanel from "@/components/admin/ServerHitsPanel";
@@ -93,6 +93,7 @@ type Expense = {
   supplier_id?: string | null;
   sales_person_id?: string | null;
   booking_id?: string | null;
+  bookings?: { status?: string | null; reference?: string | null } | null;
 };
 type Supplier = {
   id: string;
@@ -112,16 +113,9 @@ type SalesPerson = {
 };
 type PartnerType = "supplier" | "sales_person";
 
-const expenseOptions = [
-  ["google_ads", "Google Ads"],
-  ["subscriptions", "Subscriptions"],
-  ["supplier_per_trip", "Supplier per trip"],
-  ["sales_commission", "Sales person commission"],
-  ["fuel", "Fuel"],
-  ["guide_fees", "Guide fees"],
-  ["boat_costs", "Boat costs"],
-  ["other", "Other"],
-] as const;
+const ADD_EXPENSE_TYPE = "__add_expense_type__";
+
+type ExpenseType = { key: string; label: string; is_system?: boolean };
 
 const money = (amount: number, currency = "USD") =>
   new Intl.NumberFormat("en", { style: "currency", currency }).format(amount);
@@ -167,6 +161,7 @@ export default function AdminDashboard({
   initialVisibleBookings,
   bookingView,
   initialExpenses,
+  initialExpenseTypes = [],
   initialSuppliers,
   initialSalesPeople,
   migrationPending = false,
@@ -200,6 +195,7 @@ export default function AdminDashboard({
   initialVisibleBookings: Booking[];
   bookingView: BookingView;
   initialExpenses: Expense[];
+  initialExpenseTypes?: ExpenseType[];
   initialSuppliers: Supplier[];
   initialSalesPeople: SalesPerson[];
   migrationPending?: boolean;
@@ -225,6 +221,20 @@ export default function AdminDashboard({
     initialVisibleBookings,
   );
   const [expenses, setExpenses] = useState(initialExpenses);
+  const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>(
+    initialExpenseTypes.length
+      ? initialExpenseTypes
+      : [
+          { key: "google_ads", label: "Google Ads", is_system: true },
+          { key: "subscriptions", label: "Subscriptions", is_system: true },
+          { key: "supplier_per_trip", label: "Supplier per trip", is_system: true },
+          { key: "sales_commission", label: "Sales person commission", is_system: true },
+          { key: "fuel", label: "Fuel", is_system: true },
+          { key: "guide_fees", label: "Guide fees", is_system: true },
+          { key: "boat_costs", label: "Boat costs", is_system: true },
+          { key: "other", label: "Other", is_system: true },
+        ],
+  );
   const [suppliers, setSuppliers] = useState(initialSuppliers);
   const [salesPeople, setSalesPeople] = useState(initialSalesPeople);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -309,6 +319,35 @@ export default function AdminDashboard({
     setNotice(message);
     setError("");
     window.setTimeout(() => setNotice(""), 3500);
+  }
+
+  useEffect(
+    () => subscribeToAdminBookingChanges(() => router.refresh()),
+    [router],
+  );
+
+  const expenseOptions = expenseTypes.map((type) => [type.key, type.label] as const);
+  const typeLabel = (key: string | undefined | null) =>
+    expenseTypes.find((type) => type.key === key)?.label || key || "Other";
+
+  /** Prompts for a label, creates the expense type, and returns its new key. */
+  async function addExpenseType(): Promise<string | null> {
+    const label = window.prompt("Name the new expense type")?.trim();
+    if (!label || label.length < 2) return null;
+    try {
+      const result = await api<{ type: ExpenseType }>("/api/admin/expense-types", {
+        method: "POST",
+        body: JSON.stringify({ label }),
+      });
+      setExpenseTypes((items) =>
+        items.some((item) => item.key === result.type.key) ? items : [...items, result.type],
+      );
+      feedback(`Added expense type “${result.type.label}”.`);
+      return result.type.key;
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not add the expense type.");
+      return null;
+    }
   }
 
   function matchesBookingView(booking: Booking) {
@@ -1019,59 +1058,67 @@ export default function AdminDashboard({
         </div>
       ) : null}
 
-      {mode === "finance" && can("finance") && visibleBookings.length ? (
-        <div className="mt-8 overflow-x-auto rounded-3xl bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-xl font-black">Booking costs and margins</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Linked expenses and supplier fulfillment for the filtered booking
-            view.
-          </p>
-          <table className="mt-5 w-full min-w-[680px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="p-3">Booking</th>
-                <th className="p-3">Supplier</th>
-                <th className="p-3">Revenue</th>
-                <th className="p-3">Expenses</th>
-                <th className="p-3">Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleBookings.map((booking) => (
-                <tr key={`finance-${booking.id}`} className="border-t">
-                  <td className="p-3 font-mono font-bold text-blue-700">
-                    {booking.reference}
-                  </td>
-                  <td className="p-3">
-                    {booking.supplier_name || "Unassigned"}
-                  </td>
-                  <td className="p-3">
-                    {money(Number(booking.amount), booking.currency)}
-                  </td>
-                  <td className="p-3">
-                    {moneyBreakdown(booking.expense_by_currency || {})}
-                  </td>
-                  <td className="p-3 font-bold text-emerald-700">
-                    {moneyBreakdown({
-                      ...Object.fromEntries(
-                        Object.keys(booking.expense_by_currency || {}).map((currency) => [currency, -(booking.expense_by_currency?.[currency] || 0)]),
-                      ),
-                      [booking.currency]: Number(booking.amount) - (booking.expense_by_currency?.[booking.currency] || 0),
-                    })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {mode === "finance" && can("finance") ? (
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+          <Metric
+            icon={<UsersRound size={18} />}
+            label="Customers"
+            value={String(metrics.customers)}
+            note="Distinct booking contacts"
+            tone="blue"
+          />
+          <Metric
+            icon={<CircleDollarSign size={18} />}
+            label="Booked revenue"
+            value={moneyBreakdown(metrics.projectedByCurrency)}
+            note="Active bookings"
+            tone="emerald"
+          />
+          <Metric
+            icon={<WalletCards size={18} />}
+            label="Cash collected"
+            value={moneyBreakdown(metrics.collectedByCurrency)}
+            note="Marked paid"
+            tone="emerald"
+          />
+          <Metric
+            icon={<CalendarDays size={18} />}
+            label="Outstanding"
+            value={moneyBreakdown(metrics.outstandingByCurrency)}
+            note="Expected cash"
+            tone="amber"
+          />
+          <Metric
+            icon={<ClipboardList size={18} />}
+            label="Expenses"
+            value={moneyBreakdown(metrics.expenseByCurrency)}
+            note="Recorded costs"
+            tone="rose"
+          />
+          <Metric
+            icon={<CheckCircle2 size={18} />}
+            label="Cash profit"
+            value={moneyBreakdown(metrics.profitByCurrency)}
+            note="Collected minus expenses"
+            tone="slate"
+          />
         </div>
       ) : null}
 
-      <div className="mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]">
+      <div
+        className={
+          mode === "finance"
+            ? "mt-10 space-y-8"
+            : "mt-10 grid gap-8 xl:grid-cols-[1.7fr_0.8fr]"
+        }
+      >
         {mode === "finance" && can("finance") ? (
           <ExpenseInvoiceInbox
             suppliers={suppliers}
             salesPeople={salesPeople}
             bookings={bookings}
+            expenseTypes={expenseTypes}
+            onAddType={addExpenseType}
             onPosted={(expense) =>
               setExpenses((items) => [expense as unknown as Expense, ...items])
             }
@@ -1761,16 +1808,25 @@ export default function AdminDashboard({
                 Expense type
                 <select
                   value={expense.expense_type}
-                  onChange={(event) =>
+                  onChange={async (event) => {
+                    const value = event.target.value;
+                    if (value === ADD_EXPENSE_TYPE) {
+                      const created = await addExpenseType();
+                      if (created)
+                        setExpense((current) => ({
+                          ...current,
+                          expense_type: created,
+                          description: typeLabel(created),
+                        }));
+                      return;
+                    }
                     setExpense({
                       ...expense,
-                      expense_type: event.target.value,
+                      expense_type: value,
                       description:
-                        expenseOptions.find(
-                          ([value]) => value === event.target.value,
-                        )?.[1] || expense.description,
-                    })
-                  }
+                        expenseOptions.find(([key]) => key === value)?.[1] || expense.description,
+                    });
+                  }}
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
                 >
                   {expenseOptions.map(([value, label]) => (
@@ -1778,6 +1834,7 @@ export default function AdminDashboard({
                       {label}
                     </option>
                   ))}
+                  <option value={ADD_EXPENSE_TYPE}>＋ Add expense type…</option>
                 </select>
               </label>
               <label className="block text-sm font-semibold">
@@ -1928,13 +1985,14 @@ export default function AdminDashboard({
                       <div>
                         <p className="font-medium">{item.description}</p>
                         <p className="text-xs text-slate-500">
-                          {expenseOptions.find(
-                            ([value]) => value === item.expense_type,
-                          )?.[1] ||
-                            item.category ||
-                            "Other"}{" "}
-                          · {item.expense_date}
+                          {typeLabel(item.expense_type) || item.category || "Other"} ·{" "}
+                          {item.expense_date}
                         </p>
+                        {item.bookings?.status === "cancelled" ? (
+                          <p className="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                            Review — booking {item.bookings.reference || ""} cancelled
+                          </p>
+                        ) : null}
                       </div>
                       <div className="flex items-center gap-2">
                         <p className="font-semibold">
@@ -1962,6 +2020,82 @@ export default function AdminDashboard({
           </aside>
         ) : null}
       </div>
+
+      {mode === "finance" && can("finance") && visibleBookings.length ? (
+        <div className="mt-8 overflow-x-auto rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+          <h2 className="text-xl font-black">Booking costs and margins</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Linked expenses and supplier fulfillment for the filtered booking
+            view. Change a status here and every figure on this page updates.
+          </p>
+          <table className="mt-5 w-full min-w-[820px] text-left text-sm">
+            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+              <tr>
+                <th className="p-3">Booking</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Supplier</th>
+                <th className="p-3">Revenue</th>
+                <th className="p-3">Expenses</th>
+                <th className="p-3">Margin</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleBookings.map((booking) => (
+                <tr key={`finance-${booking.id}`} className="border-t align-top">
+                  <td className="p-3 font-mono font-bold text-blue-700">
+                    {booking.reference}
+                  </td>
+                  <td className="w-44 p-3">
+                    <div className="grid gap-2">
+                      <StatusSelect
+                        value={booking.status}
+                        disabled={busyId === booking.id}
+                        onChange={(value) =>
+                          updateBooking(booking.id, { status: value as Status })
+                        }
+                        options={["new", "confirmed", "completed", "cancelled"]}
+                      />
+                      <StatusSelect
+                        value={booking.payment_status}
+                        disabled={busyId === booking.id}
+                        onChange={(value) =>
+                          updateBooking(booking.id, {
+                            payment_status: value as PaymentStatus,
+                          })
+                        }
+                        options={["unpaid", "paid", "refunded"]}
+                      />
+                    </div>
+                  </td>
+                  <td className="p-3">
+                    {booking.supplier_name || "Unassigned"}
+                  </td>
+                  <td className="p-3">
+                    {money(Number(booking.amount), booking.currency)}
+                  </td>
+                  <td className="p-3">
+                    {moneyBreakdown(booking.expense_by_currency || {})}
+                    {booking.status === "cancelled" &&
+                    Object.keys(booking.expense_by_currency || {}).length ? (
+                      <span className="mt-1 block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                        Review — booking cancelled
+                      </span>
+                    ) : null}
+                  </td>
+                  <td className="p-3 font-bold text-emerald-700">
+                    {moneyBreakdown({
+                      ...Object.fromEntries(
+                        Object.keys(booking.expense_by_currency || {}).map((currency) => [currency, -(booking.expense_by_currency?.[currency] || 0)]),
+                      ),
+                      [booking.currency]: Number(booking.amount) - (booking.expense_by_currency?.[booking.currency] || 0),
+                    })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
 
       {mode === "trips" && can("content") ? (
         <AdminControlCenter initialTab="content" variant="trips" />

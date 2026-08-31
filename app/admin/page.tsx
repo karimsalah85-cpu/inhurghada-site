@@ -224,6 +224,7 @@ export default async function AdminPage({
     { data: expenses, error: expensesError },
     { data: suppliers, error: suppliersError },
     { data: salesPeople, error: salesPeopleError },
+    { data: expenseTypes },
   ] = await Promise.all([
     canBookings
       ? supabase
@@ -236,7 +237,7 @@ export default async function AdminPage({
     canFinance
       ? supabase
           .from("expenses")
-          .select("*")
+          .select("*, bookings(status,reference)")
           .order("expense_date", { ascending: false })
       : Promise.resolve({ data: [], error: null }),
     canSuppliers
@@ -244,6 +245,14 @@ export default async function AdminPage({
       : Promise.resolve({ data: [], error: null }),
     canFinance
       ? supabase.from("sales_people").select("*").order("name")
+      : Promise.resolve({ data: [], error: null }),
+    canFinance
+      ? supabase
+          .from("expense_types")
+          .select("*")
+          .order("is_system", { ascending: false })
+          .order("sort_order", { ascending: true })
+          .order("label", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
   ]);
   const error =
@@ -417,6 +426,7 @@ export default async function AdminPage({
             initialVisibleBookings={visibleBookingsWithCosts}
             bookingView={bookingView}
             initialExpenses={expenses || []}
+            initialExpenseTypes={expenseTypes || []}
             initialSuppliers={suppliers || []}
             initialSalesPeople={salesPeople || []}
             migrationPending={migrationPending}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuthorization } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
-import { insertExpense, normalizeExpensePayload } from "@/lib/admin-expense-write";
+import { insertExpense, loadExpenseTypeKeys, normalizeExpensePayload } from "@/lib/admin-expense-write";
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   if (!allowed) return json({ error: "Expense-editing permission required." }, 403);
 
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-  const normalized = normalizeExpensePayload(body);
+  const normalized = normalizeExpensePayload(body, await loadExpenseTypeKeys(supabase));
   if ("error" in normalized) return json({ error: normalized.error }, normalized.status);
 
   const result = await insertExpense(supabase, normalized.value);

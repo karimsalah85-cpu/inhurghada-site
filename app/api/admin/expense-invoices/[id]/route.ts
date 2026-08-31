@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuthorization } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { insertExpense, normalizeExpensePayload } from "@/lib/admin-expense-write";
+import { insertExpense, loadExpenseTypeKeys, normalizeExpensePayload } from "@/lib/admin-expense-write";
 
 const BUCKET = "expense-invoices";
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   if (action === "post") {
-    const normalized = normalizeExpensePayload(body);
+    const normalized = normalizeExpensePayload(body, await loadExpenseTypeKeys(supabase));
     if ("error" in normalized) return json({ error: normalized.error }, normalized.status);
 
     const result = await insertExpense(supabase, normalized.value);

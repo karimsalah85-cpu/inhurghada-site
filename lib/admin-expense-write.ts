@@ -1,31 +1,43 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export const expenseTypes = new Set([
-  "google_ads",
-  "subscriptions",
-  "supplier_per_trip",
-  "sales_commission",
-  "fuel",
-  "guide_fees",
-  "boat_costs",
-  "other",
-]);
+/** Built-in expense types. Admins can add more via the expense_types table. */
+export const DEFAULT_EXPENSE_TYPES: { key: string; label: string }[] = [
+  { key: "google_ads", label: "Google Ads" },
+  { key: "subscriptions", label: "Subscriptions" },
+  { key: "supplier_per_trip", label: "Supplier per trip" },
+  { key: "sales_commission", label: "Sales person commission" },
+  { key: "fuel", label: "Fuel" },
+  { key: "guide_fees", label: "Guide fees" },
+  { key: "boat_costs", label: "Boat costs" },
+  { key: "other", label: "Other" },
+];
+
+export const expenseTypes = new Set(DEFAULT_EXPENSE_TYPES.map((type) => type.key));
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function expenseOptionsLabel(type: string) {
-  return (
-    ({
-      google_ads: "Google Ads",
-      subscriptions: "Subscriptions",
-      supplier_per_trip: "Supplier per trip",
-      sales_commission: "Sales person commission",
-      fuel: "Fuel",
-      guide_fees: "Guide fees",
-      boat_costs: "Boat costs",
-      other: "Other",
-    }) as Record<string, string>
-  )[type] || "Other";
+  return DEFAULT_EXPENSE_TYPES.find((entry) => entry.key === type)?.label || "Other";
+}
+
+/** Turns a free-typed label into a stable expense_type key. */
+export function slugifyExpenseType(label: string): string {
+  return String(label || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
+}
+
+/**
+ * The set of expense_type keys accepted for a write: the admin-editable table,
+ * or the built-in defaults when the table is missing / unreadable.
+ */
+export async function loadExpenseTypeKeys(supabase: SupabaseClient): Promise<Set<string>> {
+  const { data, error } = await supabase.from("expense_types").select("key");
+  if (error || !data?.length) return new Set(expenseTypes);
+  return new Set(data.map((row) => String(row.key)));
 }
 
 export type NormalizedExpense = {
@@ -46,6 +58,7 @@ export type NormalizedExpense = {
  */
 export function normalizeExpensePayload(
   body: Record<string, unknown> | null,
+  allowedTypes: Set<string> = expenseTypes,
 ): { value: NormalizedExpense } | { error: string; status: number } {
   const description = String(body?.description || "").trim().slice(0, 200);
   const category = String(body?.category || "").trim().slice(0, 80);
@@ -54,7 +67,7 @@ export function normalizeExpensePayload(
   const currency = /^[A-Z]{3}$/.test(String(body?.currency || "USD").toUpperCase())
     ? String(body?.currency || "USD").toUpperCase()
     : "USD";
-  const expenseType = expenseTypes.has(String(body?.expense_type)) ? String(body?.expense_type) : "other";
+  const expenseType = allowedTypes.has(String(body?.expense_type)) ? String(body?.expense_type) : "other";
   const supplierId =
     typeof body?.supplier_id === "string" && uuidPattern.test(body.supplier_id) ? body.supplier_id : null;
   const salesPersonId =
