@@ -80,7 +80,7 @@ export default function Navbar() {
         <Link
           href={localePath(language)}
           onClick={closeMenu}
-          className="flex shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100"
+          className="hidden shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100 xl:flex"
           aria-label={ui.home}
         >
           <Image
@@ -173,6 +173,13 @@ export default function Navbar() {
 
         {/* Mobile Button */}
 
+        <SettingsSelectors
+          currency={currency}
+          language={language}
+          pathname={pathname}
+          setCurrency={setCurrency}
+          mobile
+        />
 
         <button
           ref={menuButtonRef}
@@ -293,15 +300,6 @@ export default function Navbar() {
             {t("whatsappBooking")}
           </a>
 
-          <SettingsSelectors
-            currency={currency}
-            language={language}
-            pathname={pathname}
-            setCurrency={setCurrency}
-            onLanguageSelect={closeMenu}
-            mobile
-          />
-
         </div>
 
       )}
@@ -329,24 +327,51 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-medium outline-none focus:border-cyan-500"
+    ? "min-w-0 appearance-none bg-transparent py-2 pr-5 text-sm font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 sm:text-base"
     : "rounded-xl border-0 bg-transparent px-2 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
 
+  if (mobile) {
+    return (
+      <div className="flex min-w-0 items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white px-2 shadow-sm xl:hidden">
+        <div className="relative flex min-w-0 items-center gap-1 pl-1 pr-2 sm:gap-1.5 sm:px-3">
+          <span aria-hidden="true" className="text-sm font-black text-slate-800 sm:text-base">{currencySymbol(currency)}</span>
+          <label className="sr-only" htmlFor="mobile-currency">{publicInterfaceCopy[language].currency}</label>
+          <select id="mobile-currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
+            {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+          <ChevronDown aria-hidden="true" size={14} className="pointer-events-none absolute right-2 text-slate-700 sm:right-3" />
+        </div>
+        <div className="min-w-0 pl-2 sm:pl-3">
+          <LanguageDropdown language={language} pathname={pathname} mobile />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={mobile ? "grid gap-3 rounded-2xl bg-slate-50 p-3" : "flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm"}>
+    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
       <LanguageDropdown
         language={language}
         pathname={pathname}
         mobile={mobile}
         onLanguageSelect={onLanguageSelect}
       />
-      <div className={mobile ? "" : "flex items-center border-l border-slate-200 pl-1"}>
-        <label className="sr-only" htmlFor={mobile ? "mobile-currency" : "currency"}>{publicInterfaceCopy[language].currency}</label>
-        <select id={mobile ? "mobile-currency" : "currency"} value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className={mobile ? "mt-2 block text-center text-[10px] font-medium text-slate-400 hover:text-slate-600" : "rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600"}>{mobile ? publicInterfaceCopy[language].ratesBy : publicInterfaceCopy[language].rates}</a>
+      <div className="flex items-center border-l border-slate-200 pl-1">
+        <label className="sr-only" htmlFor="currency">{publicInterfaceCopy[language].currency}</label>
+        <select id="currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className="rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600">{publicInterfaceCopy[language].rates}</a>
       </div>
     </div>
   );
+}
+
+function currencySymbol(currency: (typeof currencies)[number]) {
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    maximumFractionDigits: 0,
+  }).formatToParts(0).find((part) => part.type === "currency")?.value ?? currency;
 }
 
 function LanguageDropdown({
@@ -420,7 +445,7 @@ function LanguageDropdown({
         aria-label="Choose site language"
         hidden={!open}
         className={mobile
-          ? "mt-2 grid grid-cols-2 gap-1"
+          ? "absolute end-0 top-full z-20 mt-2 grid min-w-44 grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"
           : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"}
       >
         {languages.map((item, index) => {
