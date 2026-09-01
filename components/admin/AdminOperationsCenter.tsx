@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CalendarDays, ChevronLeft, ChevronRight, CircleDollarSign, ExternalLink, MessageSquareText, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
 import { subscribeToAdminBookingChanges } from "@/lib/admin-booking-events";
+import CategoryBarChart from "@/components/admin/CategoryBarChart";
+import ProfitLossChart from "@/components/admin/ProfitLossChart";
 
 type Row = Record<string, unknown>;
-type Data = { configured: false; migration: string } | { configured: true; availability: Row[]; assignments: Row[]; bookings: Row[]; customers: Row[]; profiles: Row[]; suppliers: Row[]; supplierPrices: Row[]; supplierPayments: Row[]; supplierPerformance: Row[]; messages: Row[]; seo: Row[]; backups: Row[]; bookingProfit: Row[]; profitByTour: Row[]; profitByMonth: Row[] };
+type Data = { configured: false; migration: string } | { configured: true; availability: Row[]; assignments: Row[]; bookings: Row[]; customers: Row[]; profiles: Row[]; suppliers: Row[]; supplierPrices: Row[]; supplierPayments: Row[]; supplierPerformance: Row[]; messages: Row[]; seo: Row[]; backups: Row[]; bookingProfit: Row[]; profitByTour: Row[]; profitByMonth: Row[]; incomeByType: Row[]; expensesByType: Row[] };
 type Tab = "calendar" | "customers" | "finance" | "suppliers" | "communications" | "security";
 const money = (value: unknown, currency = "USD") => new Intl.NumberFormat("en", { style: "currency", currency }).format(Number(value || 0));
 // Never blend different currencies into one number — each currency present gets its own money() call, joined.
@@ -69,7 +71,35 @@ function ProfitPanel({data}:{data:Extract<Data,{configured:true}>}) {
   const profitByCurrency = sumByCurrency(data.bookingProfit.map(item=>({amount:item.profit,currency:item.currency})));
   const outstandingBookings = data.bookings.filter(i=>i.payment_status==="unpaid"&&i.status!=="cancelled");
   const outstandingByCurrency = sumByCurrency(outstandingBookings.map(i=>({amount:i.amount,currency:i.currency})));
-  return <div className="mt-5"><div className="grid gap-3 sm:grid-cols-3"><Metric icon={<CircleDollarSign/>} label="Real booking profit" value={moneyBreakdown(profitByCurrency)}/><Metric label="Bookings costed" value={String(data.bookingProfit.filter(i=>Number(i.costs)>0).length)}/><Metric label="Outstanding" value={moneyBreakdown(outstandingByCurrency)}/></div><div className="mt-6 grid gap-6 lg:grid-cols-2"><SummaryTable title="Profit by tour" rows={data.profitByTour}/><SummaryTable title="Profit by month" rows={data.profitByMonth}/></div><SummaryTable title="Profit per booking" rows={data.bookingProfit.slice().reverse().slice(0,100)} labelKey="reference"/></div>;
+
+  // Charts show one currency at a time — mixing currencies on one axis would misstate the numbers.
+  // Default to whichever currency has the most booked revenue.
+  const currencies = [...new Set([...data.profitByMonth, ...data.incomeByType, ...data.expensesByType].map(row=>String(row.currency||"USD")))].sort();
+  const [currency, setCurrency] = useState(() => {
+    const revenueByCurrency = sumByCurrency(data.bookingProfit.map(item=>({amount:item.revenue,currency:item.currency})));
+    return Object.entries(revenueByCurrency).sort(([,a],[,b])=>b-a)[0]?.[0] || currencies[0] || "USD";
+  });
+  const activeCurrency = currencies.includes(currency) ? currency : (currencies[0] || "USD");
+  const fmt = (value: number) => money(value, activeCurrency);
+  const incomeItems = data.incomeByType.filter(row=>String(row.currency||"USD")===activeCurrency).map(row=>({label:String(row.label),value:Number(row.amount||0)}));
+  const expenseItems = data.expensesByType.filter(row=>String(row.currency||"USD")===activeCurrency).map(row=>({label:String(row.label),value:Number(row.amount||0)}));
+  const monthRows = data.profitByMonth.filter(row=>String(row.currency||"USD")===activeCurrency).map(row=>({month:String(row.label),revenue:Number(row.revenue||0),costs:Number(row.costs||0),profit:Number(row.profit||0)}));
+
+  return <div className="mt-5">
+    <div className="grid gap-3 sm:grid-cols-3"><Metric icon={<CircleDollarSign/>} label="Real booking profit" value={moneyBreakdown(profitByCurrency)}/><Metric label="Bookings costed" value={String(data.bookingProfit.filter(i=>Number(i.costs)>0).length)}/><Metric label="Outstanding" value={moneyBreakdown(outstandingByCurrency)}/></div>
+
+    {currencies.length ? <div className="mt-8 flex items-center justify-between gap-3"><h3 className="text-lg font-black">Statistics</h3>{currencies.length > 1 ? <label className="text-xs font-bold text-slate-600">Currency<select value={activeCurrency} onChange={e=>setCurrency(e.target.value)} className="ml-2 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm">{currencies.map(code=><option key={code} value={code}>{code}</option>)}</select></label> : null}</div> : null}
+
+    <div className="mt-4 grid gap-6 lg:grid-cols-2">
+      <div className="rounded-2xl border p-4"><h4 className="font-black">Income by type</h4><p className="mt-1 text-xs text-slate-500">Active booking revenue, tour vs. transfer, in {activeCurrency}.</p><div className="mt-4"><CategoryBarChart items={incomeItems} color="#2563eb" formatValue={fmt}/></div></div>
+      <div className="rounded-2xl border p-4"><h4 className="font-black">Expenses by type</h4><p className="mt-1 text-xs text-slate-500">Recorded costs by category, in {activeCurrency}.</p><div className="mt-4"><CategoryBarChart items={expenseItems} color="#e34948" formatValue={fmt}/></div></div>
+    </div>
+
+    <div className="mt-6 rounded-2xl border p-4"><h4 className="font-black">Profit &amp; loss by month</h4><p className="mt-1 text-xs text-slate-500">Revenue and expenses per month, in {activeCurrency}. The number above each pair is that month&apos;s profit or loss.</p><div className="mt-4"><ProfitLossChart rows={monthRows} formatValue={fmt}/></div></div>
+
+    <div className="mt-6 grid gap-6 lg:grid-cols-2"><SummaryTable title="Profit by tour" rows={data.profitByTour}/><SummaryTable title="Profit by month" rows={data.profitByMonth}/></div>
+    <SummaryTable title="Profit per booking" rows={data.bookingProfit.slice().reverse().slice(0,100)} labelKey="reference"/>
+  </div>;
 }
 function SummaryTable({title,rows,labelKey="label"}:{title:string;rows:Row[];labelKey?:string}) {return <div className="mt-5 overflow-x-auto rounded-2xl border p-4"><h3 className="font-black">{title}</h3><table className="mt-3 min-w-full text-sm"><thead><tr className="border-b text-left"><th className="p-2">Item</th><th>Revenue</th><th>Costs</th><th>Profit</th></tr></thead><tbody>{rows.map((row,index)=>{const currency=String(row.currency||"USD");return <tr key={`${row[labelKey]}-${currency}-${index}`} className="border-b"><td className="p-2 font-bold">{String(row[labelKey])}{row.currency?<span className="ml-1.5 text-xs font-normal text-slate-400">{currency}</span>:null}</td><td>{money(row.revenue,currency)}</td><td>{money(row.costs,currency)}{row.otherCurrencyCosts&&Object.keys(row.otherCurrencyCosts as Record<string,number>).length?<span className="mt-0.5 block text-[11px] font-semibold text-amber-700">+{moneyBreakdown(row.otherCurrencyCosts as Record<string,number>)} in other currencies</span>:null}</td><td className={Number(row.profit)<0?"text-rose-700":"text-emerald-700"}>{money(row.profit,currency)}</td></tr>;})}</tbody></table></div>}
 

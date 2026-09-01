@@ -17,13 +17,14 @@ export async function GET() {
   const results = await Promise.all([
     supabase.from("tour_availability").select("*").order("service_date").limit(500),
     supabase.from("booking_assignments").select("*").order("pickup_time").limit(500),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,tour_slug,date,guests,adults,youth,infants,amount,currency,status,payment_status,created_at").is("archived_at", null).order("date").limit(1000),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,tour_slug,type,date,guests,adults,youth,infants,amount,currency,status,payment_status,created_at").is("archived_at", null).order("date").limit(1000),
     supabase.from("admin_customer_summary").select("*").order("last_booking_at", { ascending: false }).limit(500),
     supabase.from("customer_profiles").select("*").limit(500),
     supabase.from("suppliers").select("*").order("name"),
     supabase.from("supplier_prices").select("*").order("valid_from", { ascending: false }).limit(500),
     supabase.from("supplier_payments").select("*").order("due_date").limit(500),
     supabase.from("expenses").select("id,booking_id,amount,currency,expense_date,expense_type,supplier_id,external_reference").limit(2000),
+    supabase.from("expense_types").select("key,label"),
     supabase.from("communication_messages").select("*").order("occurred_at", { ascending: false }).limit(500),
     supabase.from("seo_checks").select("*").order("checked_at", { ascending: false }).limit(200),
     supabase.from("backup_checks").select("*").order("checked_at", { ascending: false }).limit(50),
@@ -32,7 +33,8 @@ export async function GET() {
   if (migrationError) return json({ configured: false, migration: "202608010002_complete_admin_operations.sql" });
   const error = results.find((result) => result.error)?.error;
   if (error) return json({ error: error.message }, 500);
-  const [availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPayments, expenses, messages, seo, backups] = results.map((result) => result.data || []);
+  const [availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPayments, expenses, expenseTypes, messages, seo, backups] = results.map((result) => result.data || []);
+  const expenseTypeLabel = new Map(expenseTypes.map((type) => [type.key, type.label]));
   // Costs are tracked per currency: an expense or assignment can be recorded in a different
   // currency than the booking it's linked to, so they must never be summed together blindly.
   const costsByBookingByCurrency = new Map<string, Record<string, number>>();
@@ -65,7 +67,23 @@ export async function GET() {
   }, {}));
   const bookingMap = new Map(bookings.map((booking) => [booking.id, booking]));
   const supplierPerformance = suppliers.map((supplier) => { const work = assignments.filter((assignment) => assignment.supplier_id === supplier.id); const linked = work.map((assignment) => bookingMap.get(assignment.booking_id)).filter(Boolean); return { supplier_id: supplier.id, assigned: work.length, completed: work.filter((assignment) => assignment.status === "completed").length, cancelled: linked.filter((booking) => booking?.status === "cancelled").length, completion_rate: work.length ? work.filter((assignment) => assignment.status === "completed").length / work.length * 100 : 0 }; });
-  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPayments, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month") });
+
+  // Income by booking type (tour vs transfer) and expenses by type — grouped by label AND
+  // currency for the same reason as profitByTour/Month: never blend different currencies.
+  const groupByCurrency = <T,>(rows: T[], labelOf: (row: T) => string, currencyOf: (row: T) => string, amountOf: (row: T) => number) =>
+    Object.values(rows.reduce<Record<string, { label: string; currency: string; amount: number }>>((totals, row) => {
+      const label = labelOf(row);
+      const currency = currencyOf(row) || "USD";
+      const key = `${label}::${currency}`;
+      totals[key] ||= { label, currency, amount: 0 };
+      totals[key].amount += amountOf(row);
+      return totals;
+    }, {}));
+  const activeBookings = bookings.filter((booking) => booking.status !== "cancelled" && booking.payment_status !== "refunded");
+  const incomeByType = groupByCurrency(activeBookings, (booking) => booking.type === "transfer" ? "Transfer" : "Tour", (booking) => booking.currency, (booking) => Number(booking.amount || 0));
+  const expensesByType = groupByCurrency(expenses, (expense) => expenseTypeLabel.get(expense.expense_type) || expense.expense_type || "Other", (expense) => expense.currency, (expense) => Number(expense.amount || 0));
+
+  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPayments, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType });
 }
 
 export async function POST(request: NextRequest) {

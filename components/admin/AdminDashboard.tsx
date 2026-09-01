@@ -238,6 +238,7 @@ export default function AdminDashboard({
   const [expense, setExpense] = useState({
     description: "",
     amount: "",
+    currency: "USD",
     category: "",
     date: today(),
     expense_type: "other",
@@ -245,6 +246,7 @@ export default function AdminDashboard({
     sales_person_id: "",
     booking_id: "",
   });
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [partnerType, setPartnerType] = useState<PartnerType>("supplier");
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
   const [partner, setPartner] = useState({
@@ -734,27 +736,60 @@ export default function AdminDashboard({
     return `/api/admin/reports?format=${format}&from=1900-01-01&to=2999-12-31&trip=all&status=all&payment=all&ids=${id}`;
   }
 
+  function resetExpenseForm() {
+    setExpense({
+      description: "",
+      amount: "",
+      currency: "USD",
+      category: "",
+      date: today(),
+      expense_type: "other",
+      supplier_id: "",
+      sales_person_id: "",
+      booking_id: "",
+    });
+    setEditingExpenseId(null);
+  }
+
+  function startEditExpense(item: Expense) {
+    setEditingExpenseId(item.id);
+    setExpense({
+      description: item.description,
+      amount: String(item.amount),
+      currency: item.currency || "USD",
+      category: item.category || "",
+      date: item.expense_date,
+      expense_type: item.expense_type || "other",
+      supplier_id: item.supplier_id || "",
+      sales_person_id: item.sales_person_id || "",
+      booking_id: item.booking_id || "",
+    });
+    document.getElementById("expenses")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   async function addExpense(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusyId("expense");
     setError("");
     try {
-      const result = await api<{ expense: Expense; warning?: string }>(
-        "/api/admin/expenses",
-        { method: "POST", body: JSON.stringify(expense) },
-      );
-      setExpenses((items) => [result.expense, ...items]);
-      setExpense({
-        description: "",
-        amount: "",
-        category: "",
-        date: today(),
-        expense_type: "other",
-        supplier_id: "",
-        sales_person_id: "",
-        booking_id: "",
-      });
-      feedback(result.warning || "Expense saved.");
+      if (editingExpenseId) {
+        const result = await api<{ expense: Expense }>(
+          `/api/admin/expenses/${editingExpenseId}`,
+          { method: "PATCH", body: JSON.stringify(expense) },
+        );
+        setExpenses((items) =>
+          items.map((item) => (item.id === editingExpenseId ? result.expense : item)),
+        );
+        feedback("Expense updated.");
+      } else {
+        const result = await api<{ expense: Expense; warning?: string }>(
+          "/api/admin/expenses",
+          { method: "POST", body: JSON.stringify(expense) },
+        );
+        setExpenses((items) => [result.expense, ...items]);
+        feedback(result.warning || "Expense saved.");
+      }
+      resetExpenseForm();
       router.refresh();
     } catch (reason) {
       setError(
@@ -1910,9 +1945,16 @@ export default function AdminDashboard({
               sales person, or booking.
             </p>
             <form className="mt-6 space-y-4" onSubmit={addExpense}>
+              {editingExpenseId ? (
+                <div className="flex items-center justify-between rounded-xl bg-cyan-50 p-3 text-xs font-bold text-cyan-950">
+                  <span>Editing an existing expense. Type, supplier/sales person, and booking link can&apos;t be changed here — delete and re-add to change those.</span>
+                  <button type="button" onClick={resetExpenseForm} className="ml-3 shrink-0 underline">Cancel</button>
+                </div>
+              ) : null}
               <label className="block text-sm font-semibold">
                 Expense type
                 <select
+                  disabled={Boolean(editingExpenseId)}
                   value={expense.expense_type}
                   onChange={async (event) => {
                     const value = event.target.value;
@@ -1933,7 +1975,7 @@ export default function AdminDashboard({
                         expenseOptions.find(([key]) => key === value)?.[1] || expense.description,
                     });
                   }}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal disabled:bg-slate-100 disabled:text-slate-400"
                 >
                   {expenseOptions.map(([value, label]) => (
                     <option key={value} value={value}>
@@ -1956,23 +1998,37 @@ export default function AdminDashboard({
                   placeholder="What was paid for?"
                 />
               </label>
-              <label className="block text-sm font-semibold">
-                Amount (USD)
-                <input
-                  required
-                  type="number"
-                  min="0.01"
-                  max="1000000"
-                  step="0.01"
-                  value={expense.amount}
-                  onChange={(event) =>
-                    setExpense({ ...expense, amount: event.target.value })
-                  }
-                  className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal"
-                  placeholder="0.00"
-                />
-              </label>
-              {expense.expense_type === "supplier_per_trip" ? (
+              <div className="grid grid-cols-[1fr_auto] gap-3">
+                <label className="block text-sm font-semibold">
+                  Amount
+                  <input
+                    required
+                    type="number"
+                    min="0.01"
+                    max="1000000"
+                    step="0.01"
+                    value={expense.amount}
+                    onChange={(event) =>
+                      setExpense({ ...expense, amount: event.target.value })
+                    }
+                    className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal"
+                    placeholder="0.00"
+                  />
+                </label>
+                <label className="block text-sm font-semibold">
+                  Currency
+                  <select
+                    value={expense.currency}
+                    onChange={(event) => setExpense({ ...expense, currency: event.target.value })}
+                    className="mt-1 rounded-xl border border-slate-200 bg-white p-3 font-normal"
+                  >
+                    {["USD", "EUR", "GBP", "EGP", "SAR"].map((code) => (
+                      <option key={code}>{code}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {!editingExpenseId && expense.expense_type === "supplier_per_trip" ? (
                 <label className="block text-sm font-semibold">
                   Supplier
                   <select
@@ -1995,7 +2051,7 @@ export default function AdminDashboard({
                   </select>
                 </label>
               ) : null}
-              {expense.expense_type === "sales_commission" ? (
+              {!editingExpenseId && expense.expense_type === "sales_commission" ? (
                 <label className="block text-sm font-semibold">
                   Sales person
                   <select
@@ -2018,7 +2074,7 @@ export default function AdminDashboard({
                   </select>
                 </label>
               ) : null}
-              {["supplier_per_trip", "sales_commission"].includes(
+              {!editingExpenseId && ["supplier_per_trip", "sales_commission"].includes(
                 expense.expense_type,
               ) ? (
                 <label className="block text-sm font-semibold">
@@ -2071,7 +2127,7 @@ export default function AdminDashboard({
                 disabled={busyId === "expense"}
                 className="w-full rounded-xl bg-slate-900 py-3 font-bold text-white hover:bg-slate-700 disabled:opacity-60"
               >
-                {busyId === "expense" ? "Saving…" : "Save expense"}
+                {busyId === "expense" ? "Saving…" : editingExpenseId ? "Update expense" : "Save expense"}
               </button>
             </form>
             {expenses.length ? (
@@ -2084,9 +2140,11 @@ export default function AdminDashboard({
                 </div>
                 <div className="mt-3 space-y-3">
                   {expenses.slice(0, 8).map((item) => (
-                    <div
+                    <button
+                      type="button"
                       key={item.id}
-                      className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3 text-sm"
+                      onClick={() => startEditExpense(item)}
+                      className={`flex w-full items-start justify-between gap-3 rounded-xl p-3 text-left text-sm transition hover:bg-cyan-50 ${editingExpenseId === item.id ? "bg-cyan-50 ring-1 ring-cyan-300" : "bg-slate-50"}`}
                     >
                       <div>
                         <p className="font-medium">{item.description}</p>
@@ -2104,17 +2162,27 @@ export default function AdminDashboard({
                         <p className="font-semibold">
                           {money(Number(item.amount), item.currency)}
                         </p>
-                        <button
-                          type="button"
+                        <span
+                          role="button"
+                          tabIndex={0}
                           aria-label={`Delete expense ${item.description}`}
-                          onClick={() => deleteExpense(item)}
-                          disabled={busyId === `expense-${item.id}`}
-                          className="rounded p-1 text-slate-400 hover:bg-rose-100 hover:text-rose-700 disabled:opacity-40"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            deleteExpense(item);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              deleteExpense(item);
+                            }
+                          }}
+                          className={`rounded p-1 text-slate-400 hover:bg-rose-100 hover:text-rose-700 ${busyId === `expense-${item.id}` ? "pointer-events-none opacity-40" : ""}`}
                         >
                           <Trash2 size={15} />
-                        </button>
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -2547,6 +2615,17 @@ export default function AdminDashboard({
             expenses={expenses}
           />
         </section>
+      ) : null}
+      {mode === "suppliers" && can("operations") ? (
+        <div id="staff" className="scroll-mt-6">
+          <AdminControlCenter
+            initialTab="staff"
+            variant="content"
+            compact
+            title="Staff"
+            description="Guides, drivers, crew, and operations staff you assign to bookings. Not the same as sales people above, or admin login accounts (see Users & roles)."
+          />
+        </div>
       ) : null}
       {mode === "reports" && can("reports") ? (
         <div id="reports" className="scroll-mt-6">

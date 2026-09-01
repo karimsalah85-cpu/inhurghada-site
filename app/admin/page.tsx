@@ -403,7 +403,7 @@ export default async function AdminPage({
     customers: ["Customers", "Manage customer notes and operational context."],
     suppliers: [
       "Suppliers",
-      "Manage suppliers, sales contacts, and performance.",
+      "Manage suppliers, sales contacts, staff, and performance.",
     ],
     operations: [
       "Operations",
