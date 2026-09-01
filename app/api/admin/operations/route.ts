@@ -33,12 +33,36 @@ export async function GET() {
   const error = results.find((result) => result.error)?.error;
   if (error) return json({ error: error.message }, 500);
   const [availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPayments, expenses, messages, seo, backups] = results.map((result) => result.data || []);
-  const expenseByBooking = new Map<string, number>();
-  for (const expense of expenses) if (expense.booking_id) expenseByBooking.set(expense.booking_id, (expenseByBooking.get(expense.booking_id) || 0) + Number(expense.amount || 0));
-  const assignmentByBooking = new Map<string, number>();
-  for (const assignment of assignments) assignmentByBooking.set(assignment.booking_id, (assignmentByBooking.get(assignment.booking_id) || 0) + Number(assignment.internal_cost || 0));
-  const bookingProfit = bookings.map((booking) => ({ id: booking.id, reference: booking.reference, tour: booking.tour_name || "Transfer", month: (booking.date || booking.created_at).slice(0, 7), currency: booking.currency, revenue: booking.status === "cancelled" || booking.payment_status === "refunded" ? 0 : Number(booking.amount || 0), costs: (expenseByBooking.get(booking.id) || 0) + (assignmentByBooking.get(booking.id) || 0) })).map((item) => ({ ...item, profit: item.revenue - item.costs }));
-  const summarize = (key: "tour" | "month") => Object.values(bookingProfit.reduce<Record<string, { label: string; revenue: number; costs: number; profit: number }>>((totals, item) => { const label = item[key]; totals[label] ||= { label, revenue: 0, costs: 0, profit: 0 }; totals[label].revenue += item.revenue; totals[label].costs += item.costs; totals[label].profit += item.profit; return totals; }, {}));
+  // Costs are tracked per currency: an expense or assignment can be recorded in a different
+  // currency than the booking it's linked to, so they must never be summed together blindly.
+  const costsByBookingByCurrency = new Map<string, Record<string, number>>();
+  const addCost = (bookingId: string | null | undefined, currency: string | null | undefined, amount: unknown) => {
+    if (!bookingId) return;
+    const byCurrency = costsByBookingByCurrency.get(bookingId) || {};
+    const key = currency || "USD";
+    byCurrency[key] = (byCurrency[key] || 0) + Number(amount || 0);
+    costsByBookingByCurrency.set(bookingId, byCurrency);
+  };
+  for (const expense of expenses) addCost(expense.booking_id, expense.currency, expense.amount);
+  for (const assignment of assignments) addCost(assignment.booking_id, assignment.currency, assignment.internal_cost);
+  const bookingProfit = bookings.map((booking) => {
+    const costsByCurrency = costsByBookingByCurrency.get(booking.id) || {};
+    const costs = costsByCurrency[booking.currency] || 0;
+    const otherCurrencyCosts = Object.fromEntries(Object.entries(costsByCurrency).filter(([currency]) => currency !== booking.currency));
+    const revenue = booking.status === "cancelled" || booking.payment_status === "refunded" ? 0 : Number(booking.amount || 0);
+    return { id: booking.id, reference: booking.reference, tour: booking.tour_name || "Transfer", month: (booking.date || booking.created_at).slice(0, 7), currency: booking.currency, revenue, costs, otherCurrencyCosts, profit: revenue - costs };
+  });
+  // Grouped by label AND currency, so a tour or month sold in more than one currency
+  // produces one row per currency rather than adding incompatible totals together.
+  const summarize = (key: "tour" | "month") => Object.values(bookingProfit.reduce<Record<string, { label: string; currency: string; revenue: number; costs: number; profit: number }>>((totals, item) => {
+    const label = item[key];
+    const groupKey = `${label}::${item.currency}`;
+    totals[groupKey] ||= { label, currency: item.currency, revenue: 0, costs: 0, profit: 0 };
+    totals[groupKey].revenue += item.revenue;
+    totals[groupKey].costs += item.costs;
+    totals[groupKey].profit += item.profit;
+    return totals;
+  }, {}));
   const bookingMap = new Map(bookings.map((booking) => [booking.id, booking]));
   const supplierPerformance = suppliers.map((supplier) => { const work = assignments.filter((assignment) => assignment.supplier_id === supplier.id); const linked = work.map((assignment) => bookingMap.get(assignment.booking_id)).filter(Boolean); return { supplier_id: supplier.id, assigned: work.length, completed: work.filter((assignment) => assignment.status === "completed").length, cancelled: linked.filter((booking) => booking?.status === "cancelled").length, completion_rate: work.length ? work.filter((assignment) => assignment.status === "completed").length / work.length * 100 : 0 }; });
   return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPayments, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month") });
