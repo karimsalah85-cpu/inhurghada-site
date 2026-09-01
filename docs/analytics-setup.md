@@ -21,6 +21,8 @@ NEXT_PUBLIC_GOOGLE_ADS_EMAIL_CONVERSION_LABEL=email_label
 
 The protected admin dashboard can retrieve live campaign reporting separately from browser conversion tracking. Add these server-only variables in Vercel; never prefix them with `NEXT_PUBLIC_`:
 
+Daily Red Sea's developer token has Google Ads API Basic Access under the **Advertiser** company type and **internal reporting** tool type. The integration is therefore limited to employees or an authorized consultant and to reporting operations only. Do not add API features that create, edit, pause, remove, or publish campaigns. Basic Access is limited to 15,000 operations per day.
+
 ```bash
 GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
 GOOGLE_ADS_CUSTOMER_ID=1234567890
