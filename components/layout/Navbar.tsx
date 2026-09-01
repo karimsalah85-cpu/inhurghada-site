@@ -76,7 +76,7 @@ export default function Navbar() {
 
         {/* Mobile Header */}
 
-        <div className="flex w-full items-center gap-2 xl:hidden">
+        <div className="flex w-full items-center justify-between gap-1 xl:hidden">
           <Link
             href={localePath(language)}
             onClick={closeMenu}
@@ -89,7 +89,7 @@ export default function Navbar() {
               width={633}
               height={98}
               priority
-              className="h-auto w-[clamp(96px,28vw,132px)]"
+              className="h-auto w-[clamp(106px,33vw,142px)]"
             />
           </Link>
 
@@ -104,12 +104,12 @@ export default function Navbar() {
           <button
             ref={menuButtonRef}
             onClick={() => setOpen((current) => !current)}
-            className="shrink-0 rounded-2xl border border-slate-200 bg-slate-50 p-2.5 text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-slate-800 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
             aria-label={open ? ui.closeMenu : ui.openMenu}
             aria-expanded={open}
             aria-controls="mobile-navigation"
           >
-            {open ? <X size={28}/> : <Menu size={28}/>}
+            {open ? <X size={30}/> : <Menu size={30}/>}
           </button>
         </div>
 
@@ -327,18 +327,18 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "h-11 w-full appearance-none bg-transparent py-2 pl-2 pr-6 text-xs font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:pl-3 min-[360px]:pr-8 min-[360px]:text-sm"
+    ? "h-11 w-full appearance-none bg-transparent py-2 pl-2 pr-5 text-xs font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:pr-6 min-[360px]:text-sm"
     : "rounded-xl border-0 bg-transparent px-2 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
 
   if (mobile) {
     return (
-      <div className="grid min-w-0 flex-1 grid-cols-2 divide-x divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-sm xl:hidden">
+      <div className="grid w-[clamp(128px,41vw,176px)] flex-none grid-cols-[47%_53%] divide-x divide-slate-200 rounded-full border border-slate-200 bg-white p-1 shadow-sm xl:hidden">
         <div className="relative min-w-0" dir="ltr">
           <label className="sr-only" htmlFor="mobile-currency">{publicInterfaceCopy[language].currency}</label>
           <select id="mobile-currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
             {currencies.map((item) => <option key={item} value={item}>{currencySymbol(item)} {item}</option>)}
           </select>
-          <ChevronDown aria-hidden="true" size={14} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 min-[360px]:right-3" />
+          <ChevronDown aria-hidden="true" size={14} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-600" />
         </div>
         <div className="min-w-0">
           <LanguageDropdown language={language} pathname={pathname} mobile />
@@ -432,7 +432,7 @@ function LanguageDropdown({
           }
         }}
         className={mobile
-          ? "flex h-11 w-full items-center justify-between gap-1 rounded-xl bg-white px-2 text-xs font-semibold text-slate-800 shadow-sm outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:gap-2 min-[360px]:px-4 min-[360px]:text-sm"
+          ? "flex h-11 w-full items-center justify-between gap-1 rounded-full bg-slate-100 px-2 text-xs font-bold text-blue-700 outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:gap-2 min-[360px]:px-3 min-[360px]:text-sm"
           : "flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
       >
         <span lang={currentLanguage.code}>{currentLanguage.label}</span>
@@ -444,7 +444,7 @@ function LanguageDropdown({
         aria-label="Choose site language"
         hidden={!open}
         className={mobile
-          ? "absolute end-0 top-full z-20 mt-2 grid min-w-44 grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"
+          ? "absolute end-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl"
           : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"}
       >
         {languages.map((item, index) => {
@@ -461,7 +461,7 @@ function LanguageDropdown({
                 setOpen(false);
                 onLanguageSelect?.();
               }}
-              className={`rounded-lg px-3 py-2 text-sm outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 ${active ? "bg-cyan-50 font-bold text-cyan-900" : "text-slate-700"}`}
+              className={`rounded-xl px-4 py-3 text-sm outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 ${active ? "bg-cyan-50 font-bold text-blue-700" : "font-semibold text-slate-700"}`}
             >
               {item.label}
             </Link>
