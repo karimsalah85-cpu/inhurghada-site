@@ -68,7 +68,7 @@ export default function Navbar() {
         max-w-7xl
         items-center
         justify-between
-        px-5
+        px-2.5
         py-2.5
         sm:px-8
         "
@@ -80,7 +80,7 @@ export default function Navbar() {
         <Link
           href={localePath(language)}
           onClick={closeMenu}
-          className="hidden shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100 xl:flex"
+          className="flex shrink-0 items-center rounded-xl py-1 transition hover:bg-slate-100 xl:rounded-2xl xl:px-2 xl:py-1.5"
           aria-label={ui.home}
         >
           <Image
@@ -89,7 +89,7 @@ export default function Navbar() {
             width={633}
             height={98}
             priority
-            className="h-auto w-[180px] sm:w-[220px]"
+            className="h-auto w-[104px] sm:w-[140px] xl:w-[220px]"
           />
         </Link>
 
@@ -173,37 +173,26 @@ export default function Navbar() {
 
         {/* Mobile Button */}
 
-        <SettingsSelectors
-          currency={currency}
-          language={language}
-          pathname={pathname}
-          setCurrency={setCurrency}
-          mobile
-        />
+        <div className="flex min-w-0 items-center gap-1.5 xl:hidden sm:gap-2.5">
+          <SettingsSelectors
+            currency={currency}
+            language={language}
+            pathname={pathname}
+            setCurrency={setCurrency}
+            mobile
+          />
 
-        <button
-          ref={menuButtonRef}
-          onClick={() => setOpen((current) => !current)}
-          className="
-          rounded-xl
-          border border-slate-200
-          bg-slate-50
-          p-2.5
-          text-slate-800
-          xl:hidden
-          "
-          aria-label={open ? ui.closeMenu : ui.openMenu}
-          aria-expanded={open}
-          aria-controls="mobile-navigation"
-        >
-
-          {open ? (
-            <X size={30}/>
-          ) : (
-            <Menu size={30}/>
-          )}
-
-        </button>
+          <button
+            ref={menuButtonRef}
+            onClick={() => setOpen((current) => !current)}
+            className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-800 sm:p-2.5"
+            aria-label={open ? ui.closeMenu : ui.openMenu}
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+          >
+            {open ? <X size={26}/> : <Menu size={26}/>}
+          </button>
+        </div>
 
 
       </div>
@@ -327,21 +316,21 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "min-w-0 appearance-none bg-transparent py-2 pr-5 text-sm font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 sm:text-base"
+    ? "w-[42px] appearance-none bg-transparent py-2 pr-3 text-xs font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 sm:w-[48px] sm:pr-4 sm:text-sm"
     : "rounded-xl border-0 bg-transparent px-2 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
 
   if (mobile) {
     return (
-      <div className="flex min-w-0 items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white px-2 shadow-sm xl:hidden">
-        <div className="relative flex min-w-0 items-center gap-1 pl-1 pr-2 sm:gap-1.5 sm:px-3">
-          <span aria-hidden="true" className="text-sm font-black text-slate-800 sm:text-base">{currencySymbol(currency)}</span>
+      <div className="flex min-w-0 items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white px-1 shadow-sm xl:hidden sm:px-1.5">
+        <div className="relative flex min-w-0 items-center gap-0.5 pl-1 pr-1.5 sm:gap-1 sm:px-2">
+          <span aria-hidden="true" className="text-xs font-black text-slate-800 sm:text-sm">{currencySymbol(currency)}</span>
           <label className="sr-only" htmlFor="mobile-currency">{publicInterfaceCopy[language].currency}</label>
           <select id="mobile-currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
             {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
-          <ChevronDown aria-hidden="true" size={14} className="pointer-events-none absolute right-2 text-slate-700 sm:right-3" />
+          <ChevronDown aria-hidden="true" size={12} className="pointer-events-none absolute right-1 text-slate-700 sm:right-2" />
         </div>
-        <div className="min-w-0 pl-2 sm:pl-3">
+        <div className="min-w-0 pl-1 sm:pl-1.5">
           <LanguageDropdown language={language} pathname={pathname} mobile />
         </div>
       </div>
@@ -433,11 +422,11 @@ function LanguageDropdown({
           }
         }}
         className={mobile
-          ? "flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-700 outline-none transition hover:border-cyan-300 focus-visible:ring-2 focus-visible:ring-cyan-500"
+          ? "flex w-full items-center justify-between gap-0.5 rounded-xl border border-slate-200 bg-white px-1.5 py-2 text-xs font-medium text-slate-700 outline-none transition hover:border-cyan-300 focus-visible:ring-2 focus-visible:ring-cyan-500 sm:gap-1 sm:px-2 sm:text-sm"
           : "flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
       >
         <span lang={currentLanguage.code}>{currentLanguage.label}</span>
-        <ChevronDown aria-hidden="true" size={16} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown aria-hidden="true" size={mobile ? 12 : 16} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       <nav
