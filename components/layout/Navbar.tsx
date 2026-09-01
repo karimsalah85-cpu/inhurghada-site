@@ -68,11 +68,50 @@ export default function Navbar() {
         max-w-7xl
         items-center
         justify-between
-        px-2.5
+        px-3
         py-2.5
         sm:px-8
         "
       >
+
+        {/* Mobile Header */}
+
+        <div className="flex w-full items-center gap-2 xl:hidden">
+          <Link
+            href={localePath(language)}
+            onClick={closeMenu}
+            className="flex shrink-0 items-center rounded-xl py-1 transition hover:bg-slate-100"
+            aria-label={ui.home}
+          >
+            <Image
+              src="/brand/dailyredsea-wordmark.svg?v=coral-2"
+              alt="dailyredsea.com"
+              width={633}
+              height={98}
+              priority
+              className="h-auto w-[clamp(96px,28vw,132px)]"
+            />
+          </Link>
+
+          <SettingsSelectors
+            currency={currency}
+            language={language}
+            pathname={pathname}
+            setCurrency={setCurrency}
+            mobile
+          />
+
+          <button
+            ref={menuButtonRef}
+            onClick={() => setOpen((current) => !current)}
+            className="shrink-0 rounded-2xl border border-slate-200 bg-slate-50 p-2.5 text-slate-800 shadow-sm transition hover:border-cyan-300 hover:bg-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+            aria-label={open ? ui.closeMenu : ui.openMenu}
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+          >
+            {open ? <X size={28}/> : <Menu size={28}/>}
+          </button>
+        </div>
 
 
         {/* Logo */}
@@ -80,7 +119,7 @@ export default function Navbar() {
         <Link
           href={localePath(language)}
           onClick={closeMenu}
-          className="flex shrink-0 items-center rounded-xl py-1 transition hover:bg-slate-100 xl:rounded-2xl xl:px-2 xl:py-1.5"
+          className="hidden shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100 xl:flex"
           aria-label={ui.home}
         >
           <Image
@@ -89,7 +128,7 @@ export default function Navbar() {
             width={633}
             height={98}
             priority
-            className="h-auto w-[104px] sm:w-[140px] xl:w-[220px]"
+            className="h-auto w-[220px]"
           />
         </Link>
 
@@ -166,34 +205,6 @@ export default function Navbar() {
           />
 
         </div>
-
-
-
-
-
-        {/* Mobile Button */}
-
-        <div className="flex min-w-0 items-center gap-1.5 xl:hidden sm:gap-2.5">
-          <SettingsSelectors
-            currency={currency}
-            language={language}
-            pathname={pathname}
-            setCurrency={setCurrency}
-            mobile
-          />
-
-          <button
-            ref={menuButtonRef}
-            onClick={() => setOpen((current) => !current)}
-            className="rounded-xl border border-slate-200 bg-slate-50 p-2 text-slate-800 sm:p-2.5"
-            aria-label={open ? ui.closeMenu : ui.openMenu}
-            aria-expanded={open}
-            aria-controls="mobile-navigation"
-          >
-            {open ? <X size={26}/> : <Menu size={26}/>}
-          </button>
-        </div>
-
 
       </div>
 
@@ -316,21 +327,20 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "w-[42px] appearance-none bg-transparent py-2 pr-3 text-xs font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 sm:w-[48px] sm:pr-4 sm:text-sm"
+    ? "h-11 w-full appearance-none bg-transparent py-2 pl-2 pr-6 text-xs font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:pl-3 min-[360px]:pr-8 min-[360px]:text-sm"
     : "rounded-xl border-0 bg-transparent px-2 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
 
   if (mobile) {
     return (
-      <div className="flex min-w-0 items-center divide-x divide-slate-200 rounded-full border border-slate-200 bg-white px-1 shadow-sm xl:hidden sm:px-1.5">
-        <div className="relative flex min-w-0 items-center gap-0.5 pl-1 pr-1.5 sm:gap-1 sm:px-2">
-          <span aria-hidden="true" className="text-xs font-black text-slate-800 sm:text-sm">{currencySymbol(currency)}</span>
+      <div className="grid min-w-0 flex-1 grid-cols-2 divide-x divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-sm xl:hidden">
+        <div className="relative min-w-0" dir="ltr">
           <label className="sr-only" htmlFor="mobile-currency">{publicInterfaceCopy[language].currency}</label>
           <select id="mobile-currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
-            {currencies.map((item) => <option key={item} value={item}>{item}</option>)}
+            {currencies.map((item) => <option key={item} value={item}>{currencySymbol(item)} {item}</option>)}
           </select>
-          <ChevronDown aria-hidden="true" size={12} className="pointer-events-none absolute right-1 text-slate-700 sm:right-2" />
+          <ChevronDown aria-hidden="true" size={14} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 min-[360px]:right-3" />
         </div>
-        <div className="min-w-0 pl-1 sm:pl-1.5">
+        <div className="min-w-0">
           <LanguageDropdown language={language} pathname={pathname} mobile />
         </div>
       </div>
@@ -422,11 +432,11 @@ function LanguageDropdown({
           }
         }}
         className={mobile
-          ? "flex w-full items-center justify-between gap-0.5 rounded-xl border border-slate-200 bg-white px-1.5 py-2 text-xs font-medium text-slate-700 outline-none transition hover:border-cyan-300 focus-visible:ring-2 focus-visible:ring-cyan-500 sm:gap-1 sm:px-2 sm:text-sm"
+          ? "flex h-11 w-full items-center justify-between gap-1 rounded-xl bg-white px-2 text-xs font-semibold text-slate-800 shadow-sm outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:gap-2 min-[360px]:px-4 min-[360px]:text-sm"
           : "flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
       >
         <span lang={currentLanguage.code}>{currentLanguage.label}</span>
-        <ChevronDown aria-hidden="true" size={mobile ? 12 : 16} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown aria-hidden="true" size={mobile ? 14 : 16} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       <nav
