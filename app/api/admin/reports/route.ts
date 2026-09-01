@@ -21,6 +21,7 @@ type ReportRow = {
   Supplier: unknown;
   Expenses: number;
   Margin: number;
+  "Other currency costs": unknown;
 };
 
 export async function GET(request: NextRequest) {
@@ -41,10 +42,12 @@ export async function GET(request: NextRequest) {
   if (!datePattern.test(from) || !datePattern.test(to) || from > to || trip.length > 200 || ids.length > 100 || ids.some((id) => !uuidPattern.test(id)) || !["all", "new", "confirmed", "completed", "cancelled"].includes(status) || !["all", "unpaid", "paid", "refunded"].includes(payment)) {
     return NextResponse.json({ error: "Invalid report filters." }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
   }
+  const reportRowLimit = 10000;
   let query = supabase
     .from("bookings")
     .select("id,reference,tour_name,date,guests,status,payment_status,amount,currency,created_at,phone,customer_email")
-    .order("date", { ascending: false });
+    .order("date", { ascending: false })
+    .limit(reportRowLimit);
 
   if (ids.length) query = query.in("id", ids);
   else query = query.is("archived_at", null).gte("date", from).lte("date", to);
@@ -57,13 +60,17 @@ export async function GET(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: "Could not generate report." }, { status: 500 });
   }
+  const rowsMayBeTruncated = (data?.length || 0) >= reportRowLimit;
 
   const bookingIds = (data || []).map(item => item.id).filter(Boolean);
   const { data: expenseRows } = bookingIds.length ? await supabase.from("expenses").select("booking_id,amount,currency,supplier_id,suppliers(name)").in("booking_id", bookingIds) : { data: [] };
-  const linkedExpenses = new Map<string, { total: number; suppliers: Set<string> }>();
-  for (const expense of expenseRows || []) { if (!expense.booking_id) continue; const summary = linkedExpenses.get(expense.booking_id) || { total: 0, suppliers: new Set<string>() }; summary.total += Number(expense.amount || 0); const relation = expense.suppliers as unknown as { name?: string } | Array<{ name?: string }> | null; const supplier = Array.isArray(relation) ? relation[0]?.name : relation?.name; if (supplier) summary.suppliers.add(supplier); linkedExpenses.set(expense.booking_id, summary); }
+  const linkedExpenses = new Map<string, { byCurrency: Record<string, number>; suppliers: Set<string> }>();
+  for (const expense of expenseRows || []) { if (!expense.booking_id) continue; const summary = linkedExpenses.get(expense.booking_id) || { byCurrency: {}, suppliers: new Set<string>() }; const currency = expense.currency || "USD"; summary.byCurrency[currency] = (summary.byCurrency[currency] || 0) + Number(expense.amount || 0); const relation = expense.suppliers as unknown as { name?: string } | Array<{ name?: string }> | null; const supplier = Array.isArray(relation) ? relation[0]?.name : relation?.name; if (supplier) summary.suppliers.add(supplier); linkedExpenses.set(expense.booking_id, summary); }
   const rows: ReportRow[] = (data || []).map((item) => {
-    const costs = linkedExpenses.get(item.id) || { total: 0, suppliers: new Set<string>() };
+    const costs = linkedExpenses.get(item.id) || { byCurrency: {}, suppliers: new Set<string>() };
+    const bookingCurrency = item.currency || "USD";
+    const sameCurrencyExpenses = costs.byCurrency[bookingCurrency] || 0;
+    const otherCurrencyEntries = Object.entries(costs.byCurrency).filter(([currency]) => currency !== bookingCurrency);
     return ({
     Reference: safeCell(item.reference),
     Trip: safeCell(item.tour_name || "Private transfer"),
@@ -74,8 +81,9 @@ export async function GET(request: NextRequest) {
     Amount: Number(item.amount || 0),
     Currency: item.currency,
     Supplier: safeCell([...costs.suppliers].join(", ") || "Unassigned"),
-    Expenses: costs.total,
-    Margin: Number(item.amount || 0) - costs.total,
+    Expenses: sameCurrencyExpenses,
+    Margin: Number(item.amount || 0) - sameCurrencyExpenses,
+    "Other currency costs": safeCell(otherCurrencyEntries.length ? otherCurrencyEntries.map(([currency, amount]) => `${amount.toFixed(2)} ${currency}`).join(" + ") : ""),
   }); });
   const active = rows.filter((item) => item.Status !== "cancelled" && item.Payment !== "refunded");
   const customers = countDistinctCustomers((data || []).filter((item) => item.status !== "cancelled" && item.payment_status !== "refunded"));
@@ -97,6 +105,9 @@ export async function GET(request: NextRequest) {
       "Revenue (excluding cancelled)",
       revenueLabel,
     ],
+    ...(rowsMayBeTruncated
+      ? [["Warning", `This report hit its ${reportRowLimit}-row safety limit — narrow the date range to confirm totals are complete.`]]
+      : []),
   ];
 
   if (format === "xlsx") {
@@ -110,7 +121,7 @@ export async function GET(request: NextRequest) {
     summarySheet.getRow(1).font = { bold: true, size: 16 };
 
     const detailsSheet = workbook.addWorksheet("Detailed data");
-    detailsSheet.columns = Object.keys(rows[0] || { Reference: "", Trip: "", "Service date": "", People: 0, Status: "", Payment: "", Amount: 0, Currency: "" }).map((header) => ({ header, key: header, width: header === "Trip" ? 34 : 18 }));
+    detailsSheet.columns = Object.keys(rows[0] || { Reference: "", Trip: "", "Service date": "", People: 0, Status: "", Payment: "", Amount: 0, Currency: "", Supplier: "", Expenses: 0, Margin: 0, "Other currency costs": "" }).map((header) => ({ header, key: header, width: header === "Trip" ? 34 : header === "Other currency costs" ? 26 : 18 }));
     detailsSheet.addRows(rows);
     detailsSheet.getRow(1).font = { bold: true };
     detailsSheet.views = [{ state: "frozen", ySplit: 1 }];

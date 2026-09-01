@@ -60,6 +60,8 @@ export type Tour = {
   faqs?: { question: string; answer: string }[];
   /** Inquiry tours are listed publicly but cannot be checked out until a verified price is configured. */
   bookingMode?: "direct" | "inquiry";
+  /** Verified, contractually-fixed pricing/schedule that the admin CMS must never override, even if an editor sets these fields. */
+  pricingLockedToCode?: boolean;
   boatOptions?: BoatOption[];
   entrancePricing?: { adults: number; youth: number };
   bookingExtras?: BookingExtra[];
@@ -712,6 +714,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     slug: "jeddah-yacht-sunset-cruise",
     listingStatus: "active",
     destinationSlug: "jeddah",
+    pricingLockedToCode: true,
     currency: "SAR",
     title: "Jeddah Yacht Sunset Cruise on Shorouk Sat",
     image: "/images/owned/jeddah-yacht-sunset-cruise.jpg",

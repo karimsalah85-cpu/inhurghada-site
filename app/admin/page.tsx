@@ -199,12 +199,19 @@ export default async function AdminPage({
       ? (user?.app_metadata?.admin_role as AdminRole)
       : "operator";
 
+  // Generous but bounded row caps: PostgREST silently truncates unbounded queries at its
+  // own default limit, which would otherwise corrupt stats with no indication in the UI.
+  const bookingsRowLimit = 5000;
+  const expensesRowLimit = 5000;
+  const partnersRowLimit = 2000;
+
   let bookingListQuery = supabase
     .from("bookings")
     .select("*")
     .gte("date", `${month}-01`)
     .lt("date", `${nextMonth(month)}-01`)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(bookingsRowLimit);
   if (status !== "all")
     bookingListQuery = bookingListQuery.eq("status", status);
   if (payment !== "all")
@@ -232,6 +239,7 @@ export default async function AdminPage({
           .select("*")
           .is("archived_at", null)
           .order("created_at", { ascending: false })
+          .limit(bookingsRowLimit)
       : Promise.resolve({ data: [], error: null }),
     canBookings ? bookingListQuery : Promise.resolve({ data: [], error: null }),
     canFinance
@@ -239,12 +247,13 @@ export default async function AdminPage({
           .from("expenses")
           .select("*, bookings(status,reference)")
           .order("expense_date", { ascending: false })
+          .limit(expensesRowLimit)
       : Promise.resolve({ data: [], error: null }),
     canSuppliers
-      ? supabase.from("suppliers").select("*").order("name")
+      ? supabase.from("suppliers").select("*").order("name").limit(partnersRowLimit)
       : Promise.resolve({ data: [], error: null }),
     canFinance
-      ? supabase.from("sales_people").select("*").order("name")
+      ? supabase.from("sales_people").select("*").order("name").limit(partnersRowLimit)
       : Promise.resolve({ data: [], error: null }),
     canFinance
       ? supabase
@@ -255,6 +264,12 @@ export default async function AdminPage({
           .order("label", { ascending: true })
       : Promise.resolve({ data: [], error: null }),
   ]);
+  const rowsMayBeTruncated = Boolean(
+    (bookings && bookings.length >= bookingsRowLimit) ||
+      (expenses && expenses.length >= expensesRowLimit) ||
+      (suppliers && suppliers.length >= partnersRowLimit) ||
+      (salesPeople && salesPeople.length >= partnersRowLimit),
+  );
   const error =
     bookingsError?.message ||
     bookingListError?.message ||
@@ -371,19 +386,19 @@ export default async function AdminPage({
     finance: ["Finance", "Booking margins, expenses, and business costs."],
     trips: [
       "Trips & listings",
-      "Control which trips are active, paused, or unlisted.",
+      "Toggle a trip active, paused, or unlisted — or open one to edit its full content.",
     ],
     content: [
       "Trip content",
-      "Manage live content, media, capacity, staff, and assignments.",
+      "The full editor: content, pricing, media, capacity, staff, assignments, settings, and redirects for every record.",
     ],
     policies: [
       "Terms & policies",
-      "Manage published policy and configuration records.",
+      "Legal-category site settings only — cancellation rules and similar published text.",
     ],
     currency: [
       "Currency settings",
-      "Manage currency and site configuration records.",
+      "Currency-category site settings only — manual exchange-rate overrides.",
     ],
     customers: ["Customers", "Manage customer notes and operational context."],
     suppliers: [
@@ -430,6 +445,7 @@ export default async function AdminPage({
             initialSuppliers={suppliers || []}
             initialSalesPeople={salesPeople || []}
             migrationPending={migrationPending}
+            rowsMayBeTruncated={rowsMayBeTruncated}
             permissions={permissions}
             currentRole={role}
             isOwner={isAdminOwner(user)}

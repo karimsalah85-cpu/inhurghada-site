@@ -25,7 +25,7 @@ function objectBody(row: ContentRow) {
 }
 
 export function codeControlledTourFields(fallback: Tour | undefined) {
-  if (!fallback) return {};
+  if (!fallback?.pricingLockedToCode && !fallback?.boatOptions?.length) return {};
   return {
     ...(fallback.boatOptions?.length ? { boatOptions: fallback.boatOptions } : {}),
     price: fallback.price,

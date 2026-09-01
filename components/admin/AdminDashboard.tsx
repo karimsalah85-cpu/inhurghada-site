@@ -166,6 +166,7 @@ export default function AdminDashboard({
   initialSuppliers,
   initialSalesPeople,
   migrationPending = false,
+  rowsMayBeTruncated = false,
   permissions,
   currentRole,
   isOwner,
@@ -200,6 +201,7 @@ export default function AdminDashboard({
   initialSuppliers: Supplier[];
   initialSalesPeople: SalesPerson[];
   migrationPending?: boolean;
+  rowsMayBeTruncated?: boolean;
   permissions: AdminPermission[];
   currentRole: AdminRole;
   isOwner: boolean;
@@ -258,6 +260,7 @@ export default function AdminDashboard({
     booking_id: "",
   });
   const [partnerType, setPartnerType] = useState<PartnerType>("supplier");
+  const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
   const [partner, setPartner] = useState({
     name: "",
     contact_name: "",
@@ -304,6 +307,46 @@ export default function AdminDashboard({
       customers: countDistinctCustomers(bookings),
     };
   }, [bookings, expenses]);
+
+  const financeMetrics = useMemo(() => {
+    const monthStart = `${bookingView.month}-01`;
+    const nextMonthDate = new Date(`${bookingView.month}-01T00:00:00Z`);
+    nextMonthDate.setUTCMonth(nextMonthDate.getUTCMonth() + 1);
+    const nextMonthStart = nextMonthDate.toISOString().slice(0, 10);
+    const monthBookings = bookings.filter(
+      (booking) => booking.date && booking.date >= monthStart && booking.date < nextMonthStart,
+    );
+    const monthExpenses = expenses.filter(
+      (expense) => expense.expense_date && expense.expense_date >= monthStart && expense.expense_date < nextMonthStart,
+    );
+    const active = monthBookings.filter(
+      (booking) => booking.status !== "cancelled" && booking.payment_status !== "refunded",
+    );
+    const projectedByCurrency = sumByCurrency(active);
+    const collectedByCurrency = sumByCurrency(
+      monthBookings.filter((booking) => booking.payment_status === "paid"),
+    );
+    const expenseByCurrency = sumByCurrency(monthExpenses);
+    const currenciesInPlay = new Set([
+      ...Object.keys(projectedByCurrency),
+      ...Object.keys(collectedByCurrency),
+      ...Object.keys(expenseByCurrency),
+    ]);
+    const outstandingByCurrency: Record<string, number> = {};
+    const profitByCurrency: Record<string, number> = {};
+    for (const currency of currenciesInPlay) {
+      outstandingByCurrency[currency] = (projectedByCurrency[currency] || 0) - (collectedByCurrency[currency] || 0);
+      profitByCurrency[currency] = (collectedByCurrency[currency] || 0) - (expenseByCurrency[currency] || 0);
+    }
+    return {
+      projectedByCurrency,
+      collectedByCurrency,
+      outstandingByCurrency,
+      expenseByCurrency,
+      profitByCurrency,
+      customers: countDistinctCustomers(monthBookings),
+    };
+  }, [bookings, expenses, bookingView.month]);
 
   const services = useMemo(
     () =>
@@ -760,47 +803,76 @@ export default function AdminDashboard({
     }
   }
 
+  function resetPartnerForm() {
+    setPartner({
+      name: "",
+      contact_name: "",
+      phone: "",
+      email: "",
+      commission_percent: "",
+      notes: "",
+    });
+    setEditingPartnerId(null);
+  }
+
+  function startEditPartner(type: PartnerType, item: Supplier | SalesPerson) {
+    setPartnerType(type);
+    setEditingPartnerId(item.id);
+    setPartner({
+      name: item.name,
+      contact_name: (item as Supplier).contact_name || "",
+      phone: item.phone || "",
+      email: item.email || "",
+      commission_percent:
+        (item as SalesPerson).commission_percent != null
+          ? String((item as SalesPerson).commission_percent)
+          : "",
+      notes: item.notes || "",
+    });
+  }
+
   async function addPartner(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusyId("partner");
     setError("");
     try {
-      const result = await api<{
-        partner: Supplier | SalesPerson;
-        type: PartnerType;
-      }>("/api/admin/partners", {
-        method: "POST",
-        body: JSON.stringify({ ...partner, type: partnerType }),
-      });
+      const result = editingPartnerId
+        ? await api<{ partner: Supplier | SalesPerson; type: PartnerType }>(
+            `/api/admin/partners/${partnerType}/${editingPartnerId}`,
+            { method: "PATCH", body: JSON.stringify(partner) },
+          )
+        : await api<{ partner: Supplier | SalesPerson; type: PartnerType }>(
+            "/api/admin/partners",
+            {
+              method: "POST",
+              body: JSON.stringify({ ...partner, type: partnerType }),
+            },
+          );
       if (result.type === "supplier")
         setSuppliers((items) =>
-          [...items, result.partner as Supplier].sort((a, b) =>
-            a.name.localeCompare(b.name),
-          ),
+          [
+            ...items.filter((item) => item.id !== result.partner.id),
+            result.partner as Supplier,
+          ].sort((a, b) => a.name.localeCompare(b.name)),
         );
       else
         setSalesPeople((items) =>
-          [...items, result.partner as SalesPerson].sort((a, b) =>
-            a.name.localeCompare(b.name),
-          ),
+          [
+            ...items.filter((item) => item.id !== result.partner.id),
+            result.partner as SalesPerson,
+          ].sort((a, b) => a.name.localeCompare(b.name)),
         );
-      setPartner({
-        name: "",
-        contact_name: "",
-        phone: "",
-        email: "",
-        commission_percent: "",
-        notes: "",
-      });
+      const wasEditing = Boolean(editingPartnerId);
+      resetPartnerForm();
       feedback(
-        `${partnerType === "supplier" ? "Supplier" : "Sales person"} created.`,
+        `${partnerType === "supplier" ? "Supplier" : "Sales person"} ${wasEditing ? "updated" : "created"}.`,
       );
       router.refresh();
     } catch (reason) {
       setError(
         reason instanceof Error
           ? reason.message
-          : "Could not create this record.",
+          : "Could not save this record.",
       );
     } finally {
       setBusyId(null);
@@ -854,7 +926,8 @@ export default function AdminDashboard({
     const pending = bookings.filter((item) => item.status === "new");
     return (
       <div className="mt-7 space-y-6">
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">All-time totals · not scoped to a month</p>
+        <div className="-mt-3 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           <Metric
             icon={<UsersRound size={18} />}
             label="Customers"
@@ -1085,51 +1158,70 @@ export default function AdminDashboard({
           </p>
         </div>
       ) : null}
+      {rowsMayBeTruncated ? (
+        <div
+          role="alert"
+          className="mt-6 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"
+        >
+          <p className="font-black">Some records may be missing from this view</p>
+          <p className="mt-1 leading-6">
+            One or more record lists hit their safety row limit. Totals,
+            counts, and exports on this page may be incomplete. Narrow your
+            filters (a smaller date range or month) to see all matching
+            records, or ask for pagination to be added.
+          </p>
+        </div>
+      ) : null}
 
       {mode === "finance" && can("finance") ? (
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          <Metric
-            icon={<UsersRound size={18} />}
-            label="Customers"
-            value={String(metrics.customers)}
-            note="Distinct booking contacts"
-            tone="blue"
-          />
-          <Metric
-            icon={<CircleDollarSign size={18} />}
-            label="Booked revenue"
-            value={moneyBreakdown(metrics.projectedByCurrency)}
-            note="Active bookings"
-            tone="emerald"
-          />
-          <Metric
-            icon={<WalletCards size={18} />}
-            label="Cash collected"
-            value={moneyBreakdown(metrics.collectedByCurrency)}
-            note="Marked paid"
-            tone="emerald"
-          />
-          <Metric
-            icon={<CalendarDays size={18} />}
-            label="Outstanding"
-            value={moneyBreakdown(metrics.outstandingByCurrency)}
-            note="Expected cash"
-            tone="amber"
-          />
-          <Metric
-            icon={<ClipboardList size={18} />}
-            label="Expenses"
-            value={moneyBreakdown(metrics.expenseByCurrency)}
-            note="Recorded costs"
-            tone="rose"
-          />
-          <Metric
-            icon={<CheckCircle2 size={18} />}
-            label="Cash profit"
-            value={moneyBreakdown(metrics.profitByCurrency)}
-            note="Collected minus expenses"
-            tone="slate"
-          />
+        <div className="mt-8">
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {new Intl.DateTimeFormat("en", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${bookingView.month}-01T00:00:00Z`))} · scoped to the month selected below
+          </p>
+          <div className="mt-3 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+            <Metric
+              icon={<UsersRound size={18} />}
+              label="Customers"
+              value={String(financeMetrics.customers)}
+              note="Distinct booking contacts"
+              tone="blue"
+            />
+            <Metric
+              icon={<CircleDollarSign size={18} />}
+              label="Booked revenue"
+              value={moneyBreakdown(financeMetrics.projectedByCurrency)}
+              note="Active bookings"
+              tone="emerald"
+            />
+            <Metric
+              icon={<WalletCards size={18} />}
+              label="Cash collected"
+              value={moneyBreakdown(financeMetrics.collectedByCurrency)}
+              note="Marked paid"
+              tone="emerald"
+            />
+            <Metric
+              icon={<CalendarDays size={18} />}
+              label="Outstanding"
+              value={moneyBreakdown(financeMetrics.outstandingByCurrency)}
+              note="Expected cash"
+              tone="amber"
+            />
+            <Metric
+              icon={<ClipboardList size={18} />}
+              label="Expenses"
+              value={moneyBreakdown(financeMetrics.expenseByCurrency)}
+              note="Recorded costs"
+              tone="rose"
+            />
+            <Metric
+              icon={<CheckCircle2 size={18} />}
+              label="Cash profit"
+              value={moneyBreakdown(financeMetrics.profitByCurrency)}
+              note="Collected minus expenses"
+              tone="slate"
+            />
+          </div>
         </div>
       ) : null}
 
@@ -2138,78 +2230,125 @@ export default function AdminDashboard({
       </div>
 
       {mode === "finance" && can("finance") && visibleBookings.length ? (
-        <div className="mt-8 overflow-x-auto rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+        <div className="mt-8 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
           <h2 className="text-xl font-black">Booking costs and margins</h2>
           <p className="mt-1 text-sm text-slate-500">
             Linked expenses and supplier fulfillment for the filtered booking
             view. Change a status here and every figure on this page updates.
           </p>
-          <table className="mt-5 w-full min-w-[820px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th className="p-3">Booking</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Supplier</th>
-                <th className="p-3">Revenue</th>
-                <th className="p-3">Expenses</th>
-                <th className="p-3">Margin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleBookings.map((booking) => (
-                <tr key={`finance-${booking.id}`} className="border-t align-top">
-                  <td className="p-3 font-mono font-bold text-blue-700">
-                    {booking.reference}
-                  </td>
-                  <td className="w-44 p-3">
-                    <div className="grid gap-2">
-                      <StatusSelect
-                        value={booking.status}
-                        disabled={busyId === booking.id}
-                        onChange={(value) =>
-                          updateBooking(booking.id, { status: value as Status })
-                        }
-                        options={["new", "confirmed", "completed", "cancelled"]}
-                      />
-                      <StatusSelect
-                        value={booking.payment_status}
-                        disabled={busyId === booking.id}
-                        onChange={(value) =>
-                          updateBooking(booking.id, {
-                            payment_status: value as PaymentStatus,
-                          })
-                        }
-                        options={["unpaid", "paid", "refunded"]}
-                      />
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    {booking.supplier_name || "Unassigned"}
-                  </td>
-                  <td className="p-3">
-                    {money(Number(booking.amount), booking.currency)}
-                  </td>
-                  <td className="p-3">
-                    {moneyBreakdown(booking.expense_by_currency || {})}
-                    {booking.status === "cancelled" &&
-                    Object.keys(booking.expense_by_currency || {}).length ? (
-                      <span className="mt-1 block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">
-                        Review — booking cancelled
-                      </span>
-                    ) : null}
-                  </td>
-                  <td className="p-3 font-bold text-emerald-700">
-                    {moneyBreakdown({
-                      ...Object.fromEntries(
-                        Object.keys(booking.expense_by_currency || {}).map((currency) => [currency, -(booking.expense_by_currency?.[currency] || 0)]),
-                      ),
-                      [booking.currency]: Number(booking.amount) - (booking.expense_by_currency?.[booking.currency] || 0),
-                    })}
-                  </td>
+          <div className="mt-5 hidden overflow-x-auto lg:block">
+            <table className="w-full min-w-[820px] text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="p-3">Booking</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Supplier</th>
+                  <th className="p-3">Revenue</th>
+                  <th className="p-3">Expenses</th>
+                  <th className="p-3">Margin</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibleBookings.map((booking) => (
+                  <tr key={`finance-${booking.id}`} className="border-t align-top">
+                    <td className="p-3 font-mono font-bold text-blue-700">
+                      {booking.reference}
+                    </td>
+                    <td className="w-44 p-3">
+                      <div className="grid gap-2">
+                        <StatusSelect
+                          value={booking.status}
+                          disabled={busyId === booking.id}
+                          onChange={(value) =>
+                            updateBooking(booking.id, { status: value as Status })
+                          }
+                          options={["new", "confirmed", "completed", "cancelled"]}
+                        />
+                        <StatusSelect
+                          value={booking.payment_status}
+                          disabled={busyId === booking.id}
+                          onChange={(value) =>
+                            updateBooking(booking.id, {
+                              payment_status: value as PaymentStatus,
+                            })
+                          }
+                          options={["unpaid", "paid", "refunded"]}
+                        />
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      {booking.supplier_name || "Unassigned"}
+                    </td>
+                    <td className="p-3">
+                      {money(Number(booking.amount), booking.currency)}
+                    </td>
+                    <td className="p-3">
+                      {moneyBreakdown(booking.expense_by_currency || {})}
+                      {booking.status === "cancelled" &&
+                      Object.keys(booking.expense_by_currency || {}).length ? (
+                        <span className="mt-1 block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">
+                          Review — booking cancelled
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="p-3 font-bold text-emerald-700">
+                      {moneyBreakdown({
+                        ...Object.fromEntries(
+                          Object.keys(booking.expense_by_currency || {}).map((currency) => [currency, -(booking.expense_by_currency?.[currency] || 0)]),
+                        ),
+                        [booking.currency]: Number(booking.amount) - (booking.expense_by_currency?.[booking.currency] || 0),
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-5 space-y-4 lg:hidden">
+            {visibleBookings.map((booking) => {
+              const margin = moneyBreakdown({
+                ...Object.fromEntries(
+                  Object.keys(booking.expense_by_currency || {}).map((currency) => [currency, -(booking.expense_by_currency?.[currency] || 0)]),
+                ),
+                [booking.currency]: Number(booking.amount) - (booking.expense_by_currency?.[booking.currency] || 0),
+              });
+              return (
+                <article key={`finance-${booking.id}`} className="rounded-2xl border border-slate-200 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-mono text-sm font-bold text-blue-700">{booking.reference}</p>
+                      <p className="mt-1 text-sm text-slate-600">{booking.supplier_name || "Unassigned supplier"}</p>
+                    </div>
+                    <p className="font-black">{money(Number(booking.amount), booking.currency)}</p>
+                  </div>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    <StatusSelect
+                      value={booking.status}
+                      disabled={busyId === booking.id}
+                      onChange={(value) => updateBooking(booking.id, { status: value as Status })}
+                      options={["new", "confirmed", "completed", "cancelled"]}
+                    />
+                    <StatusSelect
+                      value={booking.payment_status}
+                      disabled={busyId === booking.id}
+                      onChange={(value) => updateBooking(booking.id, { payment_status: value as PaymentStatus })}
+                      options={["unpaid", "paid", "refunded"]}
+                    />
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span className="text-slate-500">
+                      Expenses: {moneyBreakdown(booking.expense_by_currency || {})}
+                      {booking.status === "cancelled" && Object.keys(booking.expense_by_currency || {}).length ? (
+                        <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">Review — cancelled</span>
+                      ) : null}
+                    </span>
+                    <span className="font-bold text-emerald-700">Margin: {margin}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       ) : null}
 
@@ -2224,10 +2363,10 @@ export default function AdminDashboard({
         />
       ) : null}
       {mode === "policies" && can("settings") ? (
-        <AdminControlCenter initialTab="settings" variant="content" />
+        <AdminControlCenter initialTab="settings" variant="content" settingsCategory="legal" />
       ) : null}
       {mode === "currency" && (can("finance") || can("settings")) ? (
-        <AdminControlCenter initialTab="settings" variant="content" />
+        <AdminControlCenter initialTab="settings" variant="content" settingsCategory="currency" />
       ) : null}
       {mode === "customers" &&
       (can("bookings") || can("operations")) ? (
@@ -2260,10 +2399,11 @@ export default function AdminDashboard({
                 Record type
                 <select
                   value={partnerType}
+                  disabled={Boolean(editingPartnerId)}
                   onChange={(event) =>
                     setPartnerType(event.target.value as PartnerType)
                   }
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal disabled:bg-slate-100 disabled:text-slate-400"
                 >
                   <option value="supplier">Supplier</option>
                   <option value="sales_person">Sales person</option>
@@ -2353,14 +2493,27 @@ export default function AdminDashboard({
                   className="mt-1 min-h-24 w-full rounded-xl border border-slate-200 p-3 font-normal"
                 />
               </label>
-              <button
-                disabled={busyId === "partner"}
-                className="w-full rounded-xl bg-cyan-700 py-3 font-bold text-white hover:bg-cyan-800 disabled:opacity-60"
-              >
-                {busyId === "partner"
-                  ? "Saving…"
-                  : `Create ${partnerType === "supplier" ? "supplier" : "sales person"}`}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  disabled={busyId === "partner"}
+                  className="w-full rounded-xl bg-cyan-700 py-3 font-bold text-white hover:bg-cyan-800 disabled:opacity-60"
+                >
+                  {busyId === "partner"
+                    ? "Saving…"
+                    : editingPartnerId
+                      ? `Update ${partnerType === "supplier" ? "supplier" : "sales person"}`
+                      : `Create ${partnerType === "supplier" ? "supplier" : "sales person"}`}
+                </button>
+                {editingPartnerId ? (
+                  <button
+                    type="button"
+                    onClick={resetPartnerForm}
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-600"
+                  >
+                    Cancel
+                  </button>
+                ) : null}
+              </div>
             </form>
             <div className="grid gap-6 md:grid-cols-2">
               <PartnerList
@@ -2376,6 +2529,10 @@ export default function AdminDashboard({
                     "No contact details",
                 }))}
                 busyId={busyId}
+                onEdit={(id) => {
+                  const item = suppliers.find((entry) => entry.id === id);
+                  if (item) startEditPartner("supplier", item);
+                }}
                 onDelete={(id, name) => deletePartner("supplier", id, name)}
               />
               <PartnerList
@@ -2390,6 +2547,10 @@ export default function AdminDashboard({
                       : item.phone || item.email || "No commission set",
                 }))}
                 busyId={busyId}
+                onEdit={(id) => {
+                  const item = salesPeople.find((entry) => entry.id === id);
+                  if (item) startEditPartner("sales_person", item);
+                }}
                 onDelete={(id, name) => deletePartner("sales_person", id, name)}
               />
             </div>
@@ -2472,6 +2633,8 @@ function SalesPerformancePanel({
         <p className="mt-1 text-sm text-slate-500">
           Active assigned bookings and commission based on the rate saved when
           each booking is assigned. Record commission payments in Expenses.
+          All figures below are all-time (not scoped to the month filter
+          above) so Outstanding always reflects the full unpaid balance.
         </p>
       </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200">
@@ -2575,12 +2738,14 @@ function PartnerList({
   empty,
   items,
   busyId,
+  onEdit,
   onDelete,
 }: {
   title: string;
   empty: string;
   items: { id: string; name: string; detail: string }[];
   busyId: string | null;
+  onEdit: (id: string) => void;
   onDelete: (id: string, name: string) => void;
 }) {
   return (
@@ -2602,15 +2767,25 @@ function PartnerList({
                 <p className="font-bold text-slate-900">{item.name}</p>
                 <p className="mt-1 text-xs text-slate-500">{item.detail}</p>
               </div>
-              <button
-                type="button"
-                aria-label={`Delete ${item.name}`}
-                onClick={() => onDelete(item.id, item.name)}
-                disabled={busyId === `partner-${item.id}`}
-                className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40"
-              >
-                <Trash2 size={16} />
-              </button>
+              <div className="flex shrink-0">
+                <button
+                  type="button"
+                  aria-label={`Edit ${item.name}`}
+                  onClick={() => onEdit(item.id)}
+                  className="rounded-lg p-2 text-slate-500 hover:bg-cyan-50 hover:text-cyan-700"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${item.name}`}
+                  onClick={() => onDelete(item.id, item.name)}
+                  disabled={busyId === `partner-${item.id}`}
+                  className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </article>
           ))}
         </div>

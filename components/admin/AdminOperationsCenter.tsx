@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { CalendarDays, ChevronLeft, ChevronRight, CircleDollarSign, ExternalLink, MessageSquareText, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
 import { subscribeToAdminBookingChanges } from "@/lib/admin-booking-events";
 
@@ -11,8 +12,17 @@ type Tab = "calendar" | "customers" | "finance" | "suppliers" | "communications"
 const money = (value: unknown, currency = "USD") => new Intl.NumberFormat("en", { style: "currency", currency }).format(Number(value || 0));
 const iso = (date: Date) => date.toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 
+const validTabs: Tab[] = ["calendar", "customers", "finance", "suppliers", "communications", "security"];
+
 export default function AdminOperationsCenter() {
-  const [data, setData] = useState<Data | null>(null); const [tab, setTab] = useState<Tab>("calendar"); const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [notice, setNotice] = useState("");
+  const requestedTab = useSearchParams().get("tab");
+  const initialTab = (validTabs as string[]).includes(requestedTab || "") ? (requestedTab as Tab) : "calendar";
+  const [data, setData] = useState<Data | null>(null); const [tab, setTab] = useState<Tab>(initialTab); const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [notice, setNotice] = useState("");
+  const [syncedTab, setSyncedTab] = useState(requestedTab);
+  if (requestedTab !== syncedTab) {
+    setSyncedTab(requestedTab);
+    if ((validTabs as string[]).includes(requestedTab || "")) setTab(requestedTab as Tab);
+  }
   const load = useCallback(async (silent = false) => { if (!silent) setBusy(true); setError(""); try { const response = await fetch("/api/admin/operations", { cache: "no-store" }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Could not load operations."); setData(result); } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load operations."); } finally { if (!silent) setBusy(false); } }, []);
   useEffect(() => {
     const initial = window.setTimeout(() => { void load(); }, 0);
