@@ -17,6 +17,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { resource, id } = await context.params;
   if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
+  if (resource === "settings" && id === "currency_rates") return NextResponse.json({ error: "Currency rates are managed automatically." }, { status: 404 });
   if (!(await hasLivePermission(supabase, user, permissions[resource as keyof typeof tables]))) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
   const table = tables[resource as keyof typeof tables];
   const key = resource === "settings" ? "key" : "id";
@@ -67,6 +68,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   if (!isAuthorizedAdmin(user)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { resource, id } = await context.params;
   if (!Object.hasOwn(tables, resource)) return NextResponse.json({ error: "Unknown resource." }, { status: 400 });
+  if (resource === "settings" && id === "currency_rates") return NextResponse.json({ error: "Currency rates are managed automatically." }, { status: 404 });
   if (!(await hasLivePermission(supabase, user, permissions[resource as keyof typeof tables]))) return NextResponse.json({error:"Your role cannot manage this resource."},{status:403});
   const table = tables[resource as keyof typeof tables];
   const key = resource === "settings" ? "key" : "id";

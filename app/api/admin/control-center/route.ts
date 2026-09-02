@@ -49,7 +49,7 @@ export async function GET() {
     canOperations ? supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canOperations ? supabase.from("communication_templates").select("*").order("name").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canOperations ? supabase.from("communication_queue").select("*").order("scheduled_for", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
-    canSettings ? supabase.from("site_settings").select("*").order("category").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    canSettings ? supabase.from("site_settings").select("*").neq("key", "currency_rates").order("category").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canContent ? supabase.from("redirect_rules").select("*").order("source_path").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     supabase.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(50),
     supabase.from("system_health_checks").select("*").order("checked_at", { ascending: false }).limit(20),
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
     if (!record.recipient || !["email", "whatsapp"].includes(String(record.channel))) return json({ error: "Enter a recipient and channel." }, 400);
   } else if (resource === "settings") {
     const key = text(body.key, 120).toLowerCase();
+    if (key === "currency_rates") return json({ error: "Currency rates are managed automatically." }, 400);
     const rawValue: unknown = body.value;
     let value: unknown = rawValue;
     if (typeof rawValue === "string") { try { value = JSON.parse(rawValue); } catch { value = rawValue.trim(); } }
