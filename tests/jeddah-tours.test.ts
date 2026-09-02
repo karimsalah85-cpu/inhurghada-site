@@ -18,7 +18,8 @@ describe("Jeddah destination", () => {
     const listing = tours.find((tour) => tour.slug === "basic-diver-jeddah");
 
     expect(destination).toMatchObject({ status: "live", defaultCurrency: "SAR", country: "Saudi Arabia" });
-    expect(listing).toMatchObject({ destinationSlug: "jeddah", currency: "SAR", price: "468", originalPrice: "550", listingStatus: "active" });
+    expect(listing).toMatchObject({ destinationSlug: "jeddah", currency: "USD", price: "140.25", originalPrice: "165", participantPricing: { adults: 140.25 }, packagePrice: "140.25", pricingLockedToCode: true, listingStatus: "active" });
+    expect(Number(listing?.price)).toBe(Number(listing?.originalPrice) * 0.85);
     expect(listing?.availableTimes).toEqual(["10:15 AM", "11:00 AM", "12:00 AM"]);
   });
 

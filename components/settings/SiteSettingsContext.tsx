@@ -20,9 +20,9 @@ export type Currency = (typeof currencies)[number];
 
 const exchangeRates: Record<Currency, number> = {
   USD: 1,
-  EUR: 0.876691,
-  GBP: 0.747063,
-  EGP: 51.008475,
+  EUR: 0.862503,
+  GBP: 0.739407,
+  EGP: 50.924246,
   SAR: 3.75,
 };
 

@@ -247,7 +247,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["الضيوف ذوو الحالات الطبية التي تجعل الغوص غير آمن", "الضيوف الذين يخططون للسفر جواً خلال 24 ساعة بعد التجربة"],
     whatToBring: ["منشفة", "ملابس جافة للتغيير", "واقي شمس", "ملابس سباحة", "هوية سارية", "أي موافقة طبية مطلوبة"],
     packageName: "غوص تجريبي SSI Basic Diver", packageDescription: "أول تجربة غوص لنصف يوم تشمل النظرية والتدريب في مياه محصورة والمعدات وغطسة في المياه المفتوحة بإشراف مدرب.", packageLabel: "للشخص", ageBands: { adults: "المشارك", children: "تواصل معنا لتأكيد الحد الأدنى للعمر", infants: "غير ينطبق" },
-    seoTitle: "جرّب الغوص في جدة | SSI Basic Diver", metaDescription: "احجز تجربة غوص SSI Basic Diver في جدة: نظرية ومهارات مياه محصورة ومعدات وغطسة مفتوحة لمدة 30-45 دقيقة، الآن 468 ريال سعودي (بدلاً من 550).",
+    seoTitle: "جرّب الغوص في جدة | SSI Basic Diver", metaDescription: "احجز تجربة غوص SSI Basic Diver في جدة: نظرية ومهارات مياه محصورة ومعدات وغطسة مفتوحة لمدة 30-45 دقيقة، الآن 140.25 دولارًا أمريكيًا (بدلاً من 165).",
   },
   "jeddah-yacht-sunset-cruise": {
     title: "جولة يخت شروق سات وقت الغروب في جدة",
@@ -578,7 +578,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Gäste mit Erkrankungen, die Gerätetauchen unsicher machen", "Gäste, die innerhalb von 24 Stunden nach dem Erlebnis fliegen möchten"],
     whatToBring: ["Handtuch", "Trockene Wechselkleidung", "Sonnenschutz", "Badebekleidung", "Gültiger Ausweis", "Erforderliche ärztliche Freigabe"],
     packageName: "SSI Basic Diver – Schnuppertauchen", packageDescription: "Ein halbtägiges erstes Taucherlebnis mit Theorie, Training im begrenzten Wasser, Ausrüstung und einem vom Instruktor geleiteten Freiwassertauchgang.", packageLabel: "Pro Person", ageBands: { adults: "Teilnehmer", children: "Kontaktiere uns zur Bestätigung des Mindestalters", infants: "Nicht zutreffend" },
-    seoTitle: "Schnuppertauchen in Jeddah | SSI Basic Diver", metaDescription: "Buche ein SSI-Basic-Diver-Schnuppertauchen in Jeddah: Theorie, Übungen im begrenzten Wasser, Ausrüstung und ein 30–45-minütiger Freiwassertauchgang, jetzt SAR 468 (statt SAR 550).",
+    seoTitle: "Schnuppertauchen in Jeddah | SSI Basic Diver", metaDescription: "Buche ein SSI-Basic-Diver-Schnuppertauchen in Jeddah: Theorie, Übungen im begrenzten Wasser, Ausrüstung und ein 30–45-minütiger Freiwassertauchgang, jetzt 140,25 USD (statt 165 USD).",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "Bootstour für zertifizierte Taucher — Zwei geführte Tauchgänge", location: "Al-Haddad Scuba Shop, Jeddah", duration: "6–8 Stunden", category: "Tauchen",
@@ -910,7 +910,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Гости с заболеваниями, делающими дайвинг небезопасным", "Гости, планирующие лететь самолётом в течение 24 часов после мероприятия"],
     whatToBring: ["Полотенце", "Сухая сменная одежда", "Солнцезащита", "Купальный костюм", "Действительное удостоверение личности", "Необходимое медицинское разрешение"],
     packageName: "SSI Basic Diver — пробное погружение", packageDescription: "Первое погружение на полдня с теорией, тренировкой в закрытой воде, снаряжением и погружением в открытой воде под руководством инструктора.", packageLabel: "На человека", ageBands: { adults: "Участник", children: "Свяжитесь с нами для подтверждения минимального возраста", infants: "Не применяется" },
-    seoTitle: "Пробное погружение в Джидде | SSI Basic Diver", metaDescription: "Забронируйте пробное погружение SSI Basic Diver в Джидде: теория, навыки в закрытой воде, снаряжение и погружение в открытой воде на 30–45 минут, теперь 468 SAR (раньше 550 SAR).",
+    seoTitle: "Пробное погружение в Джидде | SSI Basic Diver", metaDescription: "Забронируйте пробное погружение SSI Basic Diver в Джидде: теория, навыки в закрытой воде, снаряжение и погружение в открытой воде на 30–45 минут, теперь 140,25 USD (раньше 165 USD).",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "Поездка на катере для сертифицированных дайверов — два погружения с гидом", location: "Al-Haddad Scuba Shop, Джидда", duration: "6-8 часов", category: "Дайвинг",
@@ -1227,7 +1227,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["有使潜水不安全的健康状况的客人", "计划在体验后24小时内乘飞机的客人"],
     whatToBring: ["毛巾", "干净换洗衣物", "防晒用品", "泳装", "有效身份证件", "任何所需的医疗许可"],
     packageName: "SSI Basic Diver——体验潜水", packageDescription: "半天的初次潜水体验，包含理论、封闭水域训练、装备及教练带领的开放水域潜水。", packageLabel: "每人", ageBands: { adults: "参与者", children: "请联系我们确认最低年龄", infants: "不适用" },
-    seoTitle: "吉达体验潜水 | SSI Basic Diver", metaDescription: "在吉达预订SSI Basic Diver体验潜水：理论、封闭水域技巧、装备及30-45分钟开放水域潜水，现价468沙特里亚尔（原价550）。",
+    seoTitle: "吉达体验潜水 | SSI Basic Diver", metaDescription: "在吉达预订SSI Basic Diver体验潜水：理论、封闭水域技巧、装备及30-45分钟开放水域潜水，现价140.25美元（原价165美元）。",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "认证潜水员快艇潜水之旅 — 两次向导潜水", location: "吉达 Al-Haddad 潜水店", duration: "6-8小时", category: "潜水",
@@ -1497,7 +1497,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     notSuitableFor: ["Goście ze schorzeniami czyniącymi nurkowanie niebezpiecznym", "Goście planujący lot samolotem w ciągu 24 godzin po doświadczeniu"],
     whatToBring: ["Ręcznik", "Suche ubranie na zmianę", "Ochrona przeciwsłoneczna", "Strój kąpielowy", "Ważny dokument tożsamości", "Wszelkie wymagane zaświadczenie lekarskie"],
     packageName: "SSI Basic Diver – nurkowanie próbne", packageDescription: "Półdniowe pierwsze doświadczenie nurkowe z teorią, treningiem w wodzie ograniczonej, sprzętem i nurkowaniem na wodach otwartych pod okiem instruktora.", packageLabel: "Za osobę", ageBands: { adults: "Uczestnik", children: "Skontaktuj się z nami, aby potwierdzić minimalny wiek", infants: "Nie dotyczy" },
-    seoTitle: "Nurkowanie próbne w Dżuddzie | SSI Basic Diver", metaDescription: "Zarezerwuj nurkowanie próbne SSI Basic Diver w Dżuddzie: teoria, umiejętności w wodzie ograniczonej, sprzęt i 30–45-minutowe nurkowanie na wodach otwartych, teraz 468 SAR (wcześniej 550 SAR).",
+    seoTitle: "Nurkowanie próbne w Dżuddzie | SSI Basic Diver", metaDescription: "Zarezerwuj nurkowanie próbne SSI Basic Diver w Dżuddzie: teoria, umiejętności w wodzie ograniczonej, sprzęt i 30–45-minutowe nurkowanie na wodach otwartych, teraz 140,25 USD (wcześniej 165 USD).",
   },
   "certified-diver-boat-trip-jeddah": {
     title: "Rejs łodzią dla nurków certyfikowanych — dwa nurkowania z przewodnikiem", location: "Al-Haddad Scuba Shop, Dżudda", duration: "6-8 godzin", category: "Nurkowanie",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const fallbackRates = { USD: 1, EUR: 0.876691, GBP: 0.747063, EGP: 51.008475, SAR: 3.75 };
+const fallbackRates = { USD: 1, EUR: 0.862503, GBP: 0.739407, EGP: 50.924246, SAR: 3.75 };
 
 export async function GET() {
   try {
