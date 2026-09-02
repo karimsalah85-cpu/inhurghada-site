@@ -97,13 +97,6 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
   const [rates, setRates] = useState<Record<Currency, number>>(exchangeRates);
 
   useEffect(() => {
-    const configuredRates = publicSettings.currency_rates;
-    if (!configuredRates || typeof configuredRates !== "object" || Array.isArray(configuredRates)) return;
-    const timeout = window.setTimeout(() => setRates((current) => ({ ...current, ...(configuredRates as Partial<Record<Currency, number>>) })), 0);
-    return () => window.clearTimeout(timeout);
-  }, [publicSettings]);
-
-  useEffect(() => {
     const requestedCurrency = new URLSearchParams(window.location.search).get("currency")?.toUpperCase() as Currency | undefined;
     if (requestedCurrency && currencies.includes(requestedCurrency)) {
       const update = window.setTimeout(() => setCurrency(requestedCurrency), 0);
@@ -122,6 +115,7 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
 
   useEffect(() => {
     const controller = new AbortController();
+    const configuredRates = publicSettings.currency_rates;
     fetch("/api/exchange-rates", { signal: controller.signal })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Rate request failed")))
       .then((data: { rates?: Partial<Record<Currency, number>> }) => {
@@ -129,10 +123,13 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
+        if (configuredRates && typeof configuredRates === "object" && !Array.isArray(configuredRates)) {
+          setRates((current) => ({ ...current, ...(configuredRates as Partial<Record<Currency, number>>) }));
+        }
         console.warn("Using cached currency rates", error);
       });
     return () => controller.abort();
-  }, []);
+  }, [publicSettings]);
 
   useEffect(() => {
     document.documentElement.lang = language;
