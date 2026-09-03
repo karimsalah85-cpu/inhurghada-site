@@ -9,12 +9,12 @@ import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath } from "@/lib/i18n";
 
 const copyByLocale = {
-  en: { title: "Saved trips", empty: "No saved trips yet. Tap the heart on any trip to keep it here.", clear: "Clear all", close: "Close saved trips", remove: "Remove", from: "From" },
-  ar: { title: "الرحلات المحفوظة", empty: "لا توجد رحلات محفوظة بعد. اضغط على القلب في أي رحلة لحفظها هنا.", clear: "مسح الكل", close: "إغلاق الرحلات المحفوظة", remove: "إزالة", from: "ابتداءً من" },
-  de: { title: "Gespeicherte Trips", empty: "Noch keine gespeicherten Trips. Tippe bei einem Trip auf das Herz, um ihn hier zu behalten.", clear: "Alle löschen", close: "Gespeicherte Trips schließen", remove: "Entfernen", from: "Ab" },
-  ru: { title: "Сохранённые поездки", empty: "Сохранённых поездок пока нет. Нажмите на сердечко у любой поездки, чтобы сохранить её здесь.", clear: "Очистить всё", close: "Закрыть сохранённые поездки", remove: "Удалить", from: "От" },
-  pl: { title: "Zapisane wycieczki", empty: "Nie masz jeszcze zapisanych wycieczek. Kliknij serce przy dowolnej wycieczce, aby ją tu zachować.", clear: "Wyczyść wszystko", close: "Zamknij zapisane wycieczki", remove: "Usuń", from: "Od" },
-  zh: { title: "收藏的行程", empty: "还没有收藏的行程。点击任意行程上的爱心即可收藏到这里。", clear: "全部清除", close: "关闭收藏的行程", remove: "移除", from: "起价" },
+  en: { title: "Saved trips", device: "Saved on this device", empty: "No saved trips yet. Tap the heart on any trip to keep it here.", clear: "Clear all", close: "Close saved trips", remove: "Remove", from: "From" },
+  ar: { title: "الرحلات المحفوظة", device: "محفوظة على هذا الجهاز", empty: "لا توجد رحلات محفوظة بعد. اضغط على القلب في أي رحلة لحفظها هنا.", clear: "مسح الكل", close: "إغلاق الرحلات المحفوظة", remove: "إزالة", from: "ابتداءً من" },
+  de: { title: "Gespeicherte Trips", device: "Auf diesem Gerät gespeichert", empty: "Noch keine gespeicherten Trips. Tippe bei einem Trip auf das Herz, um ihn hier zu behalten.", clear: "Alle löschen", close: "Gespeicherte Trips schließen", remove: "Entfernen", from: "Ab" },
+  ru: { title: "Сохранённые поездки", device: "Сохранено на этом устройстве", empty: "Сохранённых поездок пока нет. Нажмите на сердечко у любой поездки, чтобы сохранить её здесь.", clear: "Очистить всё", close: "Закрыть сохранённые поездки", remove: "Удалить", from: "От" },
+  pl: { title: "Zapisane wycieczki", device: "Zapisane na tym urządzeniu", empty: "Nie masz jeszcze zapisanych wycieczek. Kliknij serce przy dowolnej wycieczce, aby ją tu zachować.", clear: "Wyczyść wszystko", close: "Zamknij zapisane wycieczki", remove: "Usuń", from: "Od" },
+  zh: { title: "收藏的行程", device: "已保存到此设备", empty: "还没有收藏的行程。点击任意行程上的爱心即可收藏到这里。", clear: "全部清除", close: "关闭收藏的行程", remove: "移除", from: "起价" },
 } as const;
 
 export default function SavedTripsPanel() {
@@ -47,6 +47,7 @@ export default function SavedTripsPanel() {
             <X size={22} />
           </button>
         </div>
+        <p className="border-b border-slate-100 bg-slate-50 px-5 py-2 text-xs font-medium text-slate-500">{copy.device}</p>
 
         {items.length === 0 ? (
           <p className="px-5 py-12 text-center text-slate-500">{copy.empty}</p>
