@@ -8,6 +8,7 @@ import Image from "next/image";
 import Hero from "@/components/home/Hero";
 import TourCard from "@/components/cards/TourCard";
 import MobileTourCarousel from "@/components/home/MobileTourCarousel";
+import ContinuePlanningRail from "@/components/favourites/ContinuePlanningRail";
 
 import { BadgeCheck, MessageCircle, ShieldCheck, Headphones, ArrowRight, Car, Search } from "lucide-react";
 
@@ -183,6 +184,8 @@ function HomeContent() {
           </div>
         </div>
       </section>
+
+      <ContinuePlanningRail />
 
       <section
  ref={toursSection}

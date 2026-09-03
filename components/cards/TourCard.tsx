@@ -72,7 +72,7 @@ export default function TourCard({
     <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition duration-300 has-[a:focus-visible]:ring-4 has-[a:focus-visible]:ring-cyan-300 md:hover:-translate-y-2 md:hover:shadow-2xl">
       <div className="absolute end-4 top-4 z-20 flex items-center gap-2">
         <ShareTripButton locale={language} tourSlug={tourSlug} tourTitle={title} destination={destination} compact />
-        <FavouriteButton item={{ slug: tourSlug, title, image, location, price, priceUnit, bookingMode, badge, category }} compact />
+        <FavouriteButton item={{ slug: tourSlug, title, image, location, price, originalPrice, rating, reviews, duration, description, priceUnit, availableTime, bookingMode, entrancePrice, currency, destination, badge, category }} compact />
       </div>
       <Link href={link} className="group flex flex-1 flex-col outline-none">
         <div className="relative h-44 overflow-hidden sm:h-64">

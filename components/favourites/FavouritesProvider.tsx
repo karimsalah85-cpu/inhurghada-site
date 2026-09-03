@@ -1,16 +1,32 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { Currency } from "@/components/settings/SiteSettingsContext";
+import type { DestinationSlug } from "@/lib/destinations";
 
-/** Everything the saved-trips panel needs to render a card without re-fetching tour data. */
+/**
+ * A snapshot of a tour at the moment it was saved — enough to render a full
+ * TourCard on the homepage rail and in the panel without re-fetching. It is a
+ * point-in-time copy held in the visitor's browser, so a price or title that
+ * changes later only refreshes once they reopen the tour.
+ */
 export type FavouriteItem = {
   slug: string;
   title: string;
   image: string;
   location: string;
   price: string;
+  originalPrice?: string;
+  rating?: string;
+  reviews?: string;
+  duration?: string;
+  description?: string;
   priceUnit?: string;
+  availableTime?: string;
   bookingMode?: "direct" | "inquiry";
+  entrancePrice?: number;
+  currency?: Currency;
+  destination?: DestinationSlug;
   badge?: string;
   category?: string;
 };
