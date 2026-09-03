@@ -30,6 +30,7 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
     zh: ["关闭图库", "上一张图片", "下一张图片", "放大图片", "图库图片"],
   }[locale];
   const [closeLabel, previousLabel, nextLabel, openLabel, galleryImageLabel] = copy;
+  const rtl = locale === "ar";
 
   const selectPrevious = useCallback(() => setSelectedIndex((current) => current === null ? null : (current - 1 + imageCount) % imageCount), [imageCount]);
   const selectNext = useCallback(() => setSelectedIndex((current) => current === null ? null : (current + 1) % imageCount), [imageCount]);
@@ -40,15 +41,15 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
     document.body.style.overflow = "hidden";
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setSelectedIndex(null);
-      if (event.key === "ArrowLeft") selectPrevious();
-      if (event.key === "ArrowRight") selectNext();
+      if (event.key === "ArrowLeft") (rtl ? selectNext : selectPrevious)();
+      if (event.key === "ArrowRight") (rtl ? selectPrevious : selectNext)();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [selectNext, selectPrevious, selectedIndex]);
+  }, [rtl, selectNext, selectPrevious, selectedIndex]);
 
   const galleryButton = (image: string, index: number, primary = false) => (
     <button
@@ -60,7 +61,7 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
     >
       <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — ${galleryImageLabel} ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" style={{ objectPosition: `${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.x ?? 0.5) * 100}% ${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.y ?? 0.5) * 100}%` }} priority={primary} />
       <ImageWatermark prominent={primary} />
-      <span className="absolute right-3 top-3 rounded-full bg-slate-950/70 p-2 text-white shadow-lg backdrop-blur-sm">
+      <span className="absolute end-3 top-3 rounded-full bg-slate-950/70 p-2 text-white shadow-lg backdrop-blur-sm">
         <Expand size={18} aria-hidden="true" />
       </span>
     </button>
@@ -77,19 +78,19 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
 
       {selectedIndex !== null ? (
         <div role="dialog" aria-modal="true" aria-label={`${title} gallery`} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 p-3 sm:p-8" onClick={() => setSelectedIndex(null)}>
-          <button type="button" onClick={() => setSelectedIndex(null)} aria-label={closeLabel} className="absolute right-4 top-4 z-20 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25">
+          <button type="button" onClick={() => setSelectedIndex(null)} aria-label={closeLabel} className="absolute end-4 top-4 z-20 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25">
             <X size={28} />
           </button>
-          <button type="button" onClick={(event) => { event.stopPropagation(); selectPrevious(); }} aria-label={previousLabel} className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25 sm:left-6">
-            <ChevronLeft size={30} />
+          <button type="button" onClick={(event) => { event.stopPropagation(); selectPrevious(); }} aria-label={previousLabel} className="absolute start-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25 sm:start-6">
+            {rtl ? <ChevronRight size={30} /> : <ChevronLeft size={30} />}
           </button>
           <div className="relative h-[82vh] w-[86vw] max-w-6xl" onClick={(event) => event.stopPropagation()}>
             <Image src={images[selectedIndex]} alt={selectedIndex === 0 ? imageAlt || title : galleryImageAlts[selectedIndex - 1] || `${title} — gallery image ${selectedIndex + 1}`} fill sizes="100vw" className="object-contain" priority />
           </div>
-          <button type="button" onClick={(event) => { event.stopPropagation(); selectNext(); }} aria-label={nextLabel} className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25 sm:right-6">
-            <ChevronRight size={30} />
+          <button type="button" onClick={(event) => { event.stopPropagation(); selectNext(); }} aria-label={nextLabel} className="absolute end-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25 sm:end-6">
+            {rtl ? <ChevronLeft size={30} /> : <ChevronRight size={30} />}
           </button>
-          <p className="absolute bottom-4 rounded-full bg-black/50 px-4 py-2 text-sm font-semibold text-white">{selectedIndex + 1} / {imageCount}</p>
+          <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2 text-sm font-semibold text-white">{selectedIndex + 1} / {imageCount}</p>
         </div>
       ) : null}
     </>
