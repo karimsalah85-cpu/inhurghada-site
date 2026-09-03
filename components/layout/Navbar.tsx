@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Menu, ShoppingCart, X } from "lucide-react";
+import { ChevronDown, Heart, Menu, ShoppingCart, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -10,8 +10,11 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath, localeSwitchPath } from "@/lib/i18n";
 import { useCart } from "@/components/cart/CartProvider";
+import { useFavourites } from "@/components/favourites/FavouritesProvider";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 import { destinations } from "@/lib/destinations";
+
+const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظة", de: "Gespeicherte Trips", ru: "Сохранённые поездки", pl: "Zapisane wycieczki", zh: "收藏的行程" } as const;
 
 
 export default function Navbar() {
@@ -22,6 +25,8 @@ export default function Navbar() {
   const { currency, language, setCurrency, t } = useSiteSettings();
   const pathname = usePathname();
   const { items } = useCart();
+  const { count: savedCount, openPanel: openSavedTrips } = useFavourites();
+  const savedTripsLabel = savedTripsLabels[language];
   const ui = publicInterfaceCopy[language];
   const destinationsLabel = language === "ar" ? "الوجهات" : language === "de" ? "Reiseziele" : language === "ru" ? "Направления" : language === "pl" ? "Kierunki" : language === "zh" ? "目的地" : "Destinations";
 
@@ -192,6 +197,11 @@ export default function Navbar() {
             {language === "ar" ? "خطط لرحلتك" : language === "de" ? "Reise planen" : language === "ru" ? "Спланировать" : language === "pl" ? "Zaplanuj podróż" : language === "zh" ? "规划行程" : "Plan your trip"}
           </Link>
 
+          <button type="button" onClick={openSavedTrips} aria-label={savedCount ? `${savedTripsLabel} (${savedCount})` : savedTripsLabel} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-brand-orange-cta hover:text-brand-orange-cta">
+            <Heart size={22} />
+            {savedCount ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange-cta px-1 text-xs font-bold text-white">{savedCount}</span> : null}
+          </button>
+
           <Link href={localePath(language, "/cart")} aria-label={`${items.length} ${ui.cart}`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
             <ShoppingCart size={22} />
             {items.length ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-xs font-bold text-white">{items.length}</span> : null}
@@ -267,6 +277,14 @@ export default function Navbar() {
           <MobileLink href={localePath(language, "/cart")} close={closeMenu}>
             <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "pl" ? "Koszyk wycieczek" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
           </MobileLink>
+
+          <button
+            type="button"
+            onClick={() => { closeMenu(); openSavedTrips(); }}
+            className="rounded-xl px-3 py-3 text-left text-base font-semibold text-slate-800 transition hover:bg-brand-navy-tint hover:text-brand-navy"
+          >
+            <span className="flex items-center justify-between"><span>{savedTripsLabel}</span><span className="rounded-full bg-brand-orange-soft px-2 py-0.5 text-sm font-bold text-brand-orange-cta">{savedCount}</span></span>
+          </button>
 
           <MobileLink
             href={localePath(language, "/about")}
