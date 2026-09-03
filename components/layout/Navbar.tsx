@@ -84,7 +84,7 @@ export default function Navbar() {
             aria-label={ui.home}
           >
             <Image
-              src="/brand/dailyredsea-wordmark.svg?v=coral-2"
+              src="/brand/dailyredsea-wordmark.svg?v=coral-3"
               alt="dailyredsea.com"
               width={633}
               height={98}
@@ -123,7 +123,7 @@ export default function Navbar() {
           aria-label={ui.home}
         >
           <Image
-            src="/brand/dailyredsea-wordmark.svg?v=coral-2"
+            src="/brand/dailyredsea-wordmark.svg?v=coral-3"
             alt="dailyredsea.com"
             width={633}
             height={98}
