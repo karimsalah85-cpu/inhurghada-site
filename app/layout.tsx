@@ -8,6 +8,7 @@ import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { defaultDescription, defaultSocialImage, siteName, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import CartProvider from "@/components/cart/CartProvider";
+import FavouritesProvider from "@/components/favourites/FavouritesProvider";
 import PublicSiteChrome from "@/components/layout/PublicSiteChrome";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
@@ -85,11 +86,13 @@ export default async function RootLayout({
       <body>
         <SiteSettingsProvider initialLanguage={documentLocale as "en" | "ar" | "de" | "ru" | "pl" | "zh"}>
           <CartProvider>
-            <OrganizationSchema />
-            <AnalyticsProvider />
-            <PublicSiteChrome />
-            <a href="#main-content" className="skip-link">{publicInterfaceCopy[documentLocale as keyof typeof publicInterfaceCopy].skip}</a>
-            <div id="main-content" tabIndex={-1}>{children}</div>
+            <FavouritesProvider>
+              <OrganizationSchema />
+              <AnalyticsProvider />
+              <PublicSiteChrome />
+              <a href="#main-content" className="skip-link">{publicInterfaceCopy[documentLocale as keyof typeof publicInterfaceCopy].skip}</a>
+              <div id="main-content" tabIndex={-1}>{children}</div>
+            </FavouritesProvider>
           </CartProvider>
         </SiteSettingsProvider>
       </body>

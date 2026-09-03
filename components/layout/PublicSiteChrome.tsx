@@ -5,6 +5,7 @@ import BottomNav from "@/components/layout/BottomNav";
 import Navbar from "@/components/layout/Navbar";
 import SiteAnnouncement from "@/components/layout/SiteAnnouncement";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import SavedTripsPanel from "@/components/favourites/SavedTripsPanel";
 
 export default function PublicSiteChrome() {
   const pathname = usePathname();
@@ -15,5 +16,6 @@ export default function PublicSiteChrome() {
     <Navbar />
     <WhatsAppButton />
     <BottomNav />
+    <SavedTripsPanel />
   </>;
 }

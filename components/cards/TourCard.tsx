@@ -4,6 +4,7 @@ import { Clock, MapPin, ShieldCheck, Star } from "lucide-react";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import ImageWatermark from "@/components/media/ImageWatermark";
 import ShareTripButton from "@/components/share/ShareTripButton";
+import FavouriteButton from "@/components/favourites/FavouriteButton";
 import { localizeProductBadge } from "@/lib/public-interface-i18n";
 import type { Currency } from "@/components/settings/SiteSettingsContext";
 import type { DestinationSlug } from "@/lib/destinations";
@@ -69,8 +70,9 @@ export default function TourCard({
 
   return (
     <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition duration-300 has-[a:focus-visible]:ring-4 has-[a:focus-visible]:ring-cyan-300 md:hover:-translate-y-2 md:hover:shadow-2xl">
-      <div className="absolute end-4 top-4 z-20">
+      <div className="absolute end-4 top-4 z-20 flex items-center gap-2">
         <ShareTripButton locale={language} tourSlug={tourSlug} tourTitle={title} destination={destination} compact />
+        <FavouriteButton item={{ slug: tourSlug, title, image, location, price, priceUnit, bookingMode, badge, category }} compact />
       </div>
       <Link href={link} className="group flex flex-1 flex-col outline-none">
         <div className="relative h-44 overflow-hidden sm:h-64">
