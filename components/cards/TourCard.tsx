@@ -79,7 +79,7 @@ export default function TourCard({
           <Image src={image} alt={title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
           <ImageWatermark />
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-          {hasReviews ? <div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-sm shadow"><Star size={16} className="fill-yellow-400 text-yellow-400" /><span className="font-semibold">{rating} · {reviewCount}</span></div> : null}
+          {hasReviews ? <div className="absolute start-4 top-4 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-sm shadow"><Star size={16} className="fill-yellow-400 text-yellow-400" /><span className="font-semibold">{rating} · {reviewCount}</span></div> : null}
           <div className="absolute bottom-4 start-4 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-brand-navy px-4 py-2 text-sm font-semibold text-white">{localizeProductBadge(language, badge ?? "Best Seller")}</span>
             {category ? <span className="rounded-full bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800">{category}</span> : null}
