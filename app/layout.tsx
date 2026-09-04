@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Manrope, Noto_Kufi_Arabic } from "next/font/google";
 import "./globals.css";
 
 import { SiteSettingsProvider } from "@/components/settings/SiteSettingsContext";
@@ -11,6 +12,18 @@ import CartProvider from "@/components/cart/CartProvider";
 import FavouritesProvider from "@/components/favourites/FavouritesProvider";
 import PublicSiteChrome from "@/components/layout/PublicSiteChrome";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+const notoKufiArabic = Noto_Kufi_Arabic({
+  subsets: ["arabic"],
+  variable: "--font-noto-kufi-arabic",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -80,7 +93,7 @@ export default async function RootLayout({
     <html
       lang={documentLocale}
       dir={documentLocale === "ar" ? "rtl" : "ltr"}
-      className="h-full antialiased"
+      className={`h-full antialiased ${manrope.variable} ${notoKufiArabic.variable}`}
     >
 
       <body>

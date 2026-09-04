@@ -35,43 +35,43 @@ export default function SavedTripsPanel() {
 
   return (
     <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={copy.title}>
-      <button type="button" aria-label={copy.close} onClick={closePanel} className="absolute inset-0 h-full w-full bg-slate-950/40 backdrop-blur-sm" />
+      <button type="button" aria-label={copy.close} onClick={closePanel} className="absolute inset-0 h-full w-full bg-ink/40 backdrop-blur-sm" />
       <div className="absolute end-0 top-0 flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
             <Heart size={20} className="fill-brand-orange-cta text-brand-orange-cta" />
             {copy.title}
-            {items.length ? <span className="rounded-full bg-slate-100 px-2 py-0.5 text-sm font-bold text-slate-700">{items.length}</span> : null}
+            {items.length ? <span className="rounded-full bg-surface-muted px-2 py-0.5 text-sm font-bold text-ink">{items.length}</span> : null}
           </h2>
-          <button type="button" onClick={closePanel} aria-label={copy.close} className="rounded-xl p-2 text-slate-600 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500">
+          <button type="button" onClick={closePanel} aria-label={copy.close} className="rounded-xl p-2 text-muted transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean">
             <X size={22} />
           </button>
         </div>
-        <p className="border-b border-slate-100 bg-slate-50 px-5 py-2 text-xs font-medium text-slate-500">{copy.device}</p>
+        <p className="border-b border-surface-muted bg-surface-muted px-5 py-2 text-xs font-medium text-muted">{copy.device}</p>
 
         {items.length === 0 ? (
-          <p className="px-5 py-12 text-center text-slate-500">{copy.empty}</p>
+          <p className="px-5 py-12 text-center text-muted">{copy.empty}</p>
         ) : (
           <>
-            <ul className="flex-1 divide-y divide-slate-100 overflow-y-auto">
+            <ul className="flex-1 divide-y divide-surface-muted overflow-y-auto">
               {items.map((item) => (
                 <li key={item.slug} className="flex gap-3 p-4">
-                  <Link href={localePath(language, `/tours/${item.slug}`)} onClick={closePanel} className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                  <Link href={localePath(language, `/tours/${item.slug}`)} onClick={closePanel} className="relative h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-surface-muted">
                     <Image src={item.image} alt={item.title} fill sizes="96px" className="object-cover" />
                   </Link>
                   <div className="min-w-0 flex-1">
-                    <Link href={localePath(language, `/tours/${item.slug}`)} onClick={closePanel} className="line-clamp-2 font-semibold text-slate-900 hover:text-blue-700">{item.title}</Link>
-                    <p className="mt-0.5 truncate text-sm text-slate-500">{item.location}</p>
-                    {item.bookingMode === "inquiry" ? null : <p className="mt-1 text-sm font-bold text-blue-700">{copy.from} {formatPrice(item.price)}</p>}
+                    <Link href={localePath(language, `/tours/${item.slug}`)} onClick={closePanel} className="line-clamp-2 font-semibold text-ink hover:text-ocean-dark">{item.title}</Link>
+                    <p className="mt-0.5 truncate text-sm text-muted">{item.location}</p>
+                    {item.bookingMode === "inquiry" ? null : <p className="mt-1 text-sm font-bold text-ink">{copy.from} {formatPrice(item.price)}</p>}
                   </div>
-                  <button type="button" onClick={() => remove(item.slug)} aria-label={`${copy.remove} — ${item.title}`} className="h-fit rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500">
+                  <button type="button" onClick={() => remove(item.slug)} aria-label={`${copy.remove} — ${item.title}`} className="h-fit rounded-lg p-2 text-muted transition hover:bg-surface-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean">
                     <X size={18} />
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="border-t border-slate-200 p-4">
-              <button type="button" onClick={clear} className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">{copy.clear}</button>
+            <div className="border-t border-line p-4">
+              <button type="button" onClick={clear} className="w-full rounded-xl border border-line py-2.5 text-sm font-semibold text-muted transition hover:bg-surface-muted">{copy.clear}</button>
             </div>
           </>
         )}

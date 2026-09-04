@@ -31,9 +31,9 @@ export async function ToursPage({ locale = "en", searchParams }: ToursPageProps 
     .map((tour) => localizeTour(tour, locale));
   const text = copy[locale];
   const schema = { "@context": "https://schema.org", "@type": "ItemList", name: text.title, numberOfItems: tours.length, itemListElement: tours.map((tour, index) => ({ "@type": "ListItem", position: index + 1, name: tour.title, url: absoluteUrl(localePath(locale, `/tours/${tour.slug}`)) })) };
-  return <main className="min-h-screen bg-slate-50">
+  return <main className="min-h-screen bg-surface-muted">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
-    <section className="bg-slate-950 px-6 pb-16 pt-32 text-white sm:px-8"><div className="mx-auto max-w-7xl"><p className="font-bold uppercase tracking-[0.24em] text-cyan-300">{text.eyebrow}</p><h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{text.title}</h1><p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">{text.description}</p></div></section>
+    <section className="bg-ink px-6 pb-16 pt-32 text-white sm:px-8"><div className="mx-auto max-w-7xl"><p className="font-bold uppercase tracking-[0.24em] text-ocean-soft">{text.eyebrow}</p><h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{text.title}</h1><p className="mt-6 max-w-3xl text-lg leading-8 text-line">{text.description}</p></div></section>
     <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8"><CategoryTourExplorer tours={tours} locale={locale} initialQuery={filters?.search || ""} /></section>
   </main>;
 }

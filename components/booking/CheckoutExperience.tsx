@@ -412,16 +412,16 @@ function CheckoutContent({ status, booking, sessionId }: { status: string | null
       : null;
 
   return (
-    <main dir={language === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-slate-50">
-      <section className="relative overflow-hidden bg-slate-950 text-white">
+    <main dir={language === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-surface-muted">
+      <section className="relative overflow-hidden bg-ink text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(6,182,212,0.25),_transparent_40%)]" />
         <div className="absolute inset-0 bg-[url('/images/placeholders/sea-activity.svg')] bg-cover bg-center opacity-20" />
-        <div className="absolute inset-0 bg-slate-950/80" />
+        <div className="absolute inset-0 bg-ink/80" />
         <div className="relative mx-auto max-w-7xl px-6 py-24 lg:px-8 lg:py-32">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">{copy.eyebrow}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-soft">{copy.eyebrow}</p>
             <h1 className="mt-4 text-4xl font-black sm:text-5xl">{copy.heroTitle}</h1>
-            <p className="mt-6 text-lg leading-8 text-slate-200">
+            <p className="mt-6 text-lg leading-8 text-line">
               {copy.heroText}
             </p>
           </div>
@@ -430,22 +430,22 @@ function CheckoutContent({ status, booking, sessionId }: { status: string | null
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_80px_-30px_rgba(15,23,42,0.35)] sm:p-10">
+          <div className="rounded-[2rem] border border-line bg-white p-8 shadow-[0_20px_80px_-30px_rgba(15,23,42,0.35)] sm:p-10">
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-cyan-100 p-3 text-cyan-700">
+              <div className="rounded-2xl bg-ocean-tint p-3 text-ocean-dark">
                 <Ticket size={22} />
               </div>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{bookingDetails ? copy.bookingReadyEyebrow : copy.noBookingEyebrow}</p>
-                <h2 className="text-3xl font-bold text-slate-900">{bookingDetails ? copy.bookingHeading(bookingDetails.reference) : copy.noBookingHeading}</h2>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{bookingDetails ? copy.bookingReadyEyebrow : copy.noBookingEyebrow}</p>
+                <h2 className="text-3xl font-bold text-ink">{bookingDetails ? copy.bookingHeading(bookingDetails.reference) : copy.noBookingHeading}</h2>
               </div>
             </div>
 
             {confirmationMessage ? (
               <div className="mb-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-left">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">{copy.bookingStatusEyebrow}</p>
-                <h3 className="mt-2 text-xl font-bold text-slate-900">{status === "success" ? copy.paymentConfirmedHeading : copy.paymentCancelledHeading}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-700">{confirmationMessage}</p>
+                <h3 className="mt-2 text-xl font-bold text-ink">{status === "success" ? copy.paymentConfirmedHeading : copy.paymentCancelledHeading}</h3>
+                <p className="mt-3 text-sm leading-7 text-ink">{confirmationMessage}</p>
                 {status === "success" && booking && sessionId ? (
                   <a
                     href={`/api/invoices/${encodeURIComponent(booking)}?session_id=${encodeURIComponent(sessionId)}`}
@@ -458,32 +458,32 @@ function CheckoutContent({ status, booking, sessionId }: { status: string | null
             ) : null}
 
             {bookingDetails ? (
-              <div className="mt-8 rounded-3xl border border-cyan-200 bg-cyan-50 p-8 text-left">
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">{copy.reservationSnapshotEyebrow}</p>
+              <div className="mt-8 rounded-3xl border border-ocean-soft bg-ocean-tint p-8 text-left">
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ocean-dark">{copy.reservationSnapshotEyebrow}</p>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div><p className="text-sm text-slate-500">{copy.guestLabel}</p><p className="font-semibold text-slate-900">{bookingDetails.customerName}</p></div>
-                  <div><p className="text-sm text-slate-500">{copy.phoneLabel}</p><p className="font-semibold text-slate-900">{bookingDetails.phone}</p></div>
-                  <div><p className="text-sm text-slate-500">{copy.statusLabel}</p><p className="font-semibold text-slate-900">{bookingDetails.status}</p></div>
-                  <div><p className="text-sm text-slate-500">{copy.amountLabel}</p><p className="font-semibold text-slate-900">{bookingDetails.amount ? `${bookingDetails.amount} ${bookingDetails.currency?.toUpperCase() || "USD"}` : copy.toBeConfirmed}</p></div>
+                  <div><p className="text-sm text-muted">{copy.guestLabel}</p><p className="font-semibold text-ink">{bookingDetails.customerName}</p></div>
+                  <div><p className="text-sm text-muted">{copy.phoneLabel}</p><p className="font-semibold text-ink">{bookingDetails.phone}</p></div>
+                  <div><p className="text-sm text-muted">{copy.statusLabel}</p><p className="font-semibold text-ink">{bookingDetails.status}</p></div>
+                  <div><p className="text-sm text-muted">{copy.amountLabel}</p><p className="font-semibold text-ink">{bookingDetails.amount ? `${bookingDetails.amount} ${bookingDetails.currency?.toUpperCase() || "USD"}` : copy.toBeConfirmed}</p></div>
                 </div>
-                {bookingDetails.date ? <p className="mt-4 text-sm text-slate-700"><span className="font-semibold">{copy.dateLabel}</span> {bookingDetails.date}</p> : null}
-                {bookingDetails.hotel ? <p className="mt-2 text-sm text-slate-700"><span className="font-semibold">{copy.pickupLabel}</span> {bookingDetails.hotel}</p> : null}
+                {bookingDetails.date ? <p className="mt-4 text-sm text-ink"><span className="font-semibold">{copy.dateLabel}</span> {bookingDetails.date}</p> : null}
+                {bookingDetails.hotel ? <p className="mt-2 text-sm text-ink"><span className="font-semibold">{copy.pickupLabel}</span> {bookingDetails.hotel}</p> : null}
               </div>
             ) : (
-              <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700">
+              <div className="mt-8 rounded-3xl border border-line bg-surface-muted p-8 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-ocean-tint text-ocean-dark">
                   <Sparkles size={28} />
                 </div>
-                <h3 className="mt-6 text-2xl font-bold text-slate-900">{copy.reservationAppearHeading}</h3>
-                <p className="mt-4 text-lg leading-8 text-slate-600">
+                <h3 className="mt-6 text-2xl font-bold text-ink">{copy.reservationAppearHeading}</h3>
+                <p className="mt-4 text-lg leading-8 text-muted">
                   {copy.reservationAppearText}
                 </p>
                 {bookingError ? <p className="mt-4 text-sm text-rose-600">{bookingError}</p> : null}
                 <div className="mt-8 flex flex-wrap justify-center gap-4">
-                  <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-700">
+                  <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 font-semibold text-white transition hover:brightness-125">
                     {copy.browseTours} <ArrowRight size={16} />
                   </Link>
-                  <Link href="/booking" className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:border-cyan-400 hover:text-cyan-700">
+                  <Link href="/booking" className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-6 py-3 font-semibold text-ink transition hover:border-ocean hover:text-ocean-dark">
                     {copy.manageBooking} <MessageCircle size={16} />
                   </Link>
                 </div>
@@ -492,57 +492,57 @@ function CheckoutContent({ status, booking, sessionId }: { status: string | null
           </div>
 
           <div className="space-y-8">
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="rounded-[2rem] border border-line bg-white p-8 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="rounded-2xl bg-emerald-100 p-3 text-emerald-700">
                   <CalendarRange size={20} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">{copy.howItWorksEyebrow}</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{copy.simpleCheckoutHeading}</h3>
+                  <h3 className="text-2xl font-bold text-ink">{copy.simpleCheckoutHeading}</h3>
                 </div>
               </div>
               <ul className="mt-8 space-y-4">
                 {copy.steps.map((step, index) => (
-                  <li key={step} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-100 font-semibold text-cyan-700">{index + 1}</span>
+                  <li key={step} className="flex items-start gap-3 rounded-2xl border border-line bg-surface-muted p-4 text-sm text-ink">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ocean-tint font-semibold text-ocean-dark">{index + 1}</span>
                     <span>{step}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="rounded-[2rem] border border-line bg-white p-8 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="rounded-2xl bg-violet-100 p-3 text-violet-700">
+                <div className="rounded-2xl bg-ocean-soft p-3 text-ocean-dark">
                   <ShieldCheck size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-violet-700">{copy.whyChooseEyebrow}</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{copy.secureEffortlessHeading}</h3>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ocean-dark">{copy.whyChooseEyebrow}</p>
+                  <h3 className="text-2xl font-bold text-ink">{copy.secureEffortlessHeading}</h3>
                 </div>
               </div>
               <div className="mt-8 grid gap-4">
                 {copy.perks.map((perk) => (
-                  <div key={perk} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <BadgeCheck className="shrink-0 text-cyan-700" size={18} />
-                    <span className="text-sm font-medium text-slate-700">{perk}</span>
+                  <div key={perk} className="flex items-center gap-3 rounded-2xl border border-line bg-surface-muted p-4">
+                    <BadgeCheck className="shrink-0 text-ocean-dark" size={18} />
+                    <span className="text-sm font-medium text-ink">{perk}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-slate-200 bg-slate-900 p-8 text-white shadow-sm">
+            <div className="rounded-[2rem] border border-line bg-ink p-8 text-white shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="rounded-2xl bg-white/10 p-3 text-cyan-300">
+                <div className="rounded-2xl bg-white/10 p-3 text-ocean-soft">
                   <CreditCard size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">{copy.paymentOptionsEyebrow}</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ocean-soft">{copy.paymentOptionsEyebrow}</p>
                   <h3 className="text-2xl font-bold">{copy.bookNowPayArrivalHeading}</h3>
                 </div>
               </div>
-              <p className="mt-5 text-sm leading-7 text-slate-300">
+              <p className="mt-5 text-sm leading-7 text-line">
                 {copy.paymentOptionsText}
               </p>
             </div>

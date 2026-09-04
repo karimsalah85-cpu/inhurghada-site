@@ -59,16 +59,16 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
 
   return (
     <>
-      <div className="rounded-3xl border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur sm:p-4">
+      <div className="rounded-3xl border border-line bg-white/95 p-3 shadow-sm backdrop-blur sm:p-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-        <label className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4">
-          <Search size={19} className="text-cyan-700" />
+        <label className="flex items-center gap-3 rounded-2xl bg-surface-muted px-4">
+          <Search size={19} className="text-ocean-dark" />
           <span className="sr-only">{copy.search}</span>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={copy.search} className="min-h-12 w-full min-w-0 bg-transparent outline-none" />
         </label>
         <label>
           <span className="sr-only">{copy.sort}</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+          <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} className="min-h-12 w-full rounded-2xl border border-line bg-white px-4 font-semibold text-ink">
             <option value="featured">{copy.featured}</option>
             <option value="price-low">{copy.low}</option>
             <option value="price-high">{copy.high}</option>
@@ -77,14 +77,14 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
       </div>
 
       <div className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
-        <button type="button" onClick={() => setCategory("all")} className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-bold transition ${category === "all" ? "border-cyan-700 bg-cyan-700 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-cyan-400 hover:text-cyan-700"}`} aria-pressed={category === "all"}>{copy.allCategories}</button>
-        {categories.map((value) => <button key={value} type="button" onClick={() => setCategory(value)} className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-bold transition ${category === value ? "border-cyan-700 bg-cyan-700 text-white" : "border-slate-200 bg-white text-slate-700 hover:border-cyan-400 hover:text-cyan-700"}`} aria-pressed={category === value}>{value}</button>)}
+        <button type="button" onClick={() => setCategory("all")} className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-bold transition ${category === "all" ? "border-ocean-dark bg-ocean-dark text-white" : "border-line bg-white text-ink hover:border-ocean hover:text-ocean-dark"}`} aria-pressed={category === "all"}>{copy.allCategories}</button>
+        {categories.map((value) => <button key={value} type="button" onClick={() => setCategory(value)} className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-bold transition ${category === value ? "border-ocean-dark bg-ocean-dark text-white" : "border-line bg-white text-ink hover:border-ocean hover:text-ocean-dark"}`} aria-pressed={category === value}>{value}</button>)}
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <label>
           <span className="sr-only">{copy.locationLabel}</span>
-          <select value={location} onChange={(event) => setLocation(event.target.value as typeof location)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+          <select value={location} onChange={(event) => setLocation(event.target.value as typeof location)} className="min-h-12 w-full rounded-2xl border border-line bg-white px-4 font-semibold text-ink">
             <option value="all">{copy.allLocations}</option>
             <option value="hurghada">{copy.hurghada}</option>
             <option value="marsa-alam">{copy.marsaAlam}</option>
@@ -93,14 +93,14 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
         </label>
         <label>
           <span className="sr-only">{copy.categoryLabel}</span>
-          <select value={category} onChange={(event) => setCategory(event.target.value)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+          <select value={category} onChange={(event) => setCategory(event.target.value)} className="min-h-12 w-full rounded-2xl border border-line bg-white px-4 font-semibold text-ink">
             <option value="all">{copy.allCategories}</option>
             {categories.map((value) => <option key={value} value={value}>{value}</option>)}
           </select>
         </label>
         <label>
           <span className="sr-only">{copy.priceLabel}</span>
-          <select value={priceBand} onChange={(event) => setPriceBand(event.target.value as PriceBand)} className="min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 font-semibold text-slate-700">
+          <select value={priceBand} onChange={(event) => setPriceBand(event.target.value as PriceBand)} className="min-h-12 w-full rounded-2xl border border-line bg-white px-4 font-semibold text-ink">
             <option value="all">{copy.allPrices}</option>
             <option value="under-25">{copy.priceUnder25}</option>
             <option value="25-50">{copy.price25to50}</option>
@@ -110,15 +110,15 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
         </label>
       </div>
       </div>
-      {hasActiveFilters ? <button type="button" onClick={resetFilters} className="mt-3 text-sm font-bold text-cyan-700 underline underline-offset-4">{copy.reset}</button> : null}
+      {hasActiveFilters ? <button type="button" onClick={resetFilters} className="mt-3 text-sm font-bold text-ocean-dark underline underline-offset-4">{copy.reset}</button> : null}
 
-      <p className="mt-6 text-sm font-semibold text-slate-500" aria-live="polite">{visibleTours.length} {visibleTours.length === 1 ? copy.experience : copy.experiences}</p>
+      <p className="mt-6 text-sm font-semibold text-muted" aria-live="polite">{visibleTours.length} {visibleTours.length === 1 ? copy.experience : copy.experiences}</p>
       <div className="mt-5 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
         {visibleTours.map((tour) => {
           const reviewCount = Number(tour.reviews);
           const hasReviews = Number.isFinite(reviewCount) && reviewCount > 0;
           return (
-            <article key={tour.slug} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+            <article key={tour.slug} className="relative overflow-hidden rounded-3xl border border-line bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
               <div className="absolute end-4 top-4 z-20">
                 <ShareTripButton locale={locale} tourSlug={tour.slug} tourTitle={tour.title} destination={tour.destinationSlug || "hurghada"} compact />
               </div>
@@ -129,17 +129,17 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
                   {tour.badge ? <span className="absolute start-4 top-4 rounded-full bg-brand-navy px-3 py-2 text-xs font-bold text-white">{localizeProductBadge(locale, tour.badge)}</span> : null}
                 </div>
                 <div className="p-6">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-700">{tour.category || "Red Sea experience"}</p>
-                  <h2 className="mt-2 line-clamp-2 text-xl font-black text-slate-950">{tour.title}</h2>
-                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600 sm:line-clamp-3">{tour.description}</p>
-                  <div className="mt-5 grid gap-2 text-sm text-slate-600">
-                    <span className="flex items-center gap-2"><Clock size={17} className="text-cyan-700" />{tour.duration}</span>
-                    <span className="flex items-center gap-2"><MapPin size={17} className="text-cyan-700" />{tour.location}</span>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-ocean-dark">{tour.category || "Red Sea experience"}</p>
+                  <h2 className="mt-2 line-clamp-2 text-xl font-black text-ink">{tour.title}</h2>
+                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted sm:line-clamp-3">{tour.description}</p>
+                  <div className="mt-5 grid gap-2 text-sm text-muted">
+                    <span className="flex items-center gap-2"><Clock size={17} className="text-ocean-dark" />{tour.duration}</span>
+                    <span className="flex items-center gap-2"><MapPin size={17} className="text-ocean-dark" />{tour.location}</span>
                     <span className="flex items-center gap-2"><ShieldCheck size={17} className="text-emerald-600" />{tour.bookingMode === "inquiry" ? copy.inquiryAssurance : copy.assurance}</span>
                   </div>
                   <div className="mt-6 flex flex-col items-stretch gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div>{tour.bookingMode === "inquiry" ? <><p className="text-xs text-slate-500">{copy.quotation}</p><p className="text-xl font-black text-blue-700">{copy.request}</p></> : <><p className="text-xs text-slate-500">{copy.from}</p>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <p className="text-xs font-bold text-slate-400 line-through">{formatPrice(tour.originalPrice, tour.currency)}</p> : null}<p className="text-2xl font-black text-blue-700">{formatPrice(tour.price, tour.currency)}</p><p className="text-xs text-slate-500">{tour.priceUnit || copy.perPerson}</p>{tour.entrancePricing ? <p className="mt-2 text-xs font-bold text-amber-700">+ {copy.entrance} {formatPrice(String(tour.entrancePricing.adults))}/{copy.person}</p> : null}</>}</div>
-                    <span className={`rounded-xl px-4 py-3 text-center text-sm font-bold text-white ${tour.bookingMode === "inquiry" ? "bg-blue-700" : "bg-brand-orange-cta"}`}>{tour.bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
+                    <div>{tour.bookingMode === "inquiry" ? <><p className="text-xs text-muted">{copy.quotation}</p><p className="text-xl font-black text-ink">{copy.request}</p></> : <><p className="text-xs text-muted">{copy.from}</p>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <p className="text-xs font-bold text-muted line-through">{formatPrice(tour.originalPrice, tour.currency)}</p> : null}<p className="text-2xl font-black text-ink">{formatPrice(tour.price, tour.currency)}</p><p className="text-xs text-muted">{tour.priceUnit || copy.perPerson}</p>{tour.entrancePricing ? <p className="mt-2 text-xs font-bold text-ocean-dark">+ {copy.entrance} {formatPrice(String(tour.entrancePricing.adults))}/{copy.person}</p> : null}</>}</div>
+                    <span className={`rounded-xl px-4 py-3 text-center text-sm font-bold text-white ${tour.bookingMode === "inquiry" ? "bg-ocean-dark" : "bg-brand-orange-cta"}`}>{tour.bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
                   </div>
                   {hasReviews ? <p className="mt-4 text-xs font-semibold text-amber-600">★ {tour.rating} · {reviewCount} {copy.reviews}</p> : null}
                 </div>
@@ -148,7 +148,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
           );
         })}
       </div>
-      {!visibleTours.length ? <div className="mt-8 rounded-3xl border border-dashed border-slate-300 p-10 text-center text-slate-600">{copy.empty}</div> : null}
+      {!visibleTours.length ? <div className="mt-8 rounded-3xl border border-dashed border-line p-10 text-center text-muted">{copy.empty}</div> : null}
     </>
   );
 }

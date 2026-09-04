@@ -442,25 +442,25 @@ export default function BookingPortal() {
       : copy.guideOrDriverFallback;
 
   return (
-    <main dir={language === "ar" ? "rtl" : "ltr"} className="bg-slate-50">
-      <section className="relative overflow-hidden bg-slate-950 text-white">
+    <main dir={language === "ar" ? "rtl" : "ltr"} className="bg-surface-muted">
+      <section className="relative overflow-hidden bg-ink text-white">
         <div className="absolute inset-0 bg-[url('/images/booking-portal-hero-v2.jpg')] bg-cover bg-[center_right]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/45" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/45" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-6 py-24 lg:px-8 lg:py-32">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">{copy.eyebrow}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-soft">{copy.eyebrow}</p>
             <h1 className="mt-4 text-4xl font-black sm:text-5xl">
               {copy.heroTitle}
             </h1>
-            <p className="mt-6 text-lg leading-8 text-slate-200">
+            <p className="mt-6 text-lg leading-8 text-line">
               {copy.heroText}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm">
-                <ShieldCheck size={16} className="text-cyan-300" /> {copy.secureBadge}
+                <ShieldCheck size={16} className="text-ocean-soft" /> {copy.secureBadge}
               </div>
               <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm">
-                <Clock3 size={16} className="text-cyan-300" /> {copy.supportBadge}
+                <Clock3 size={16} className="text-ocean-soft" /> {copy.supportBadge}
               </div>
             </div>
           </div>
@@ -468,21 +468,21 @@ export default function BookingPortal() {
           <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="rounded-3xl border border-white/10 bg-white/10 p-8 backdrop-blur">
               <h2 className="text-2xl font-bold">{copy.findHeading}</h2>
-              <p className="mt-3 text-slate-300">
+              <p className="mt-3 text-line">
                 {copy.findText}
               </p>
               <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-                <label className="block text-sm font-medium text-slate-200">
+                <label className="block text-sm font-medium text-line">
                   {copy.refLabel}
                   <input
                     value={reference}
                     onChange={(event) => setReference(event.target.value)}
                     placeholder="DRS-20260722-A1B2C3"
                     required
-                    className="mt-2 w-full rounded-xl border border-white/20 bg-slate-950/50 px-4 py-3 text-white outline-none focus:border-cyan-400"
+                    className="mt-2 w-full rounded-xl border border-white/20 bg-ink/50 px-4 py-3 text-white outline-none focus:border-ocean"
                   />
                 </label>
-                <label className="block text-sm font-medium text-slate-200">
+                <label className="block text-sm font-medium text-line">
                   {copy.emailLabel}
                   <input
                     type="email"
@@ -490,56 +490,56 @@ export default function BookingPortal() {
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="mt-2 w-full rounded-xl border border-white/20 bg-slate-950/50 px-4 py-3 text-white outline-none focus:border-cyan-400"
+                    className="mt-2 w-full rounded-xl border border-white/20 bg-ink/50 px-4 py-3 text-white outline-none focus:border-ocean"
                   />
                 </label>
-                <button type="submit" disabled={isLoading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70">
+                <button type="submit" disabled={isLoading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-5 py-3 font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70">
                   <Ticket size={18} /> {isLoading ? copy.searching : copy.findButton}
                 </button>
-                <p className="text-sm text-slate-300">{copy.helperText}</p>
+                <p className="text-sm text-line">{copy.helperText}</p>
               </form>
               {status ? (
-                <div className="mt-5 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
+                <div className="mt-5 rounded-2xl border border-ocean/30 bg-ocean/10 p-4 text-sm text-ocean-tint">
                   {status}
                 </div>
               ) : null}
 
               {booking ? (
-                <div className="mt-5 rounded-2xl border border-white/20 bg-slate-950/40 p-4 text-sm text-slate-100">
+                <div className="mt-5 rounded-2xl border border-white/20 bg-ink/40 p-4 text-sm text-surface-muted">
                   <p className="font-semibold text-white">{copy.bookingDetailsHeading}</p>
                   <div className="mt-3 space-y-2">
-                    <p><span className="text-slate-400">{copy.referenceLabel}</span> {booking.reference}</p>
-                    <p><span className="text-slate-400">{copy.guestLabel}</span> {booking.customerName}</p>
-                    <p><span className="text-slate-400">{copy.phoneLabel}</span> {booking.phone}</p>
-                    <p><span className="text-slate-400">{copy.statusLabel}</span> {booking.status}</p>
-                    {booking.date ? <p><span className="text-slate-400">{copy.dateLabel}</span> {booking.date}</p> : null}
-                    {booking.hotel ? <p><span className="text-slate-400">{copy.pickupLabel}</span> {booking.hotel}</p> : null}
-                    {booking.assignedPersonName ? <p><span className="text-slate-400">{copy.assignedLabel(assignedRoleLabel)}</span> {booking.assignedPersonName}</p> : null}
+                    <p><span className="text-muted">{copy.referenceLabel}</span> {booking.reference}</p>
+                    <p><span className="text-muted">{copy.guestLabel}</span> {booking.customerName}</p>
+                    <p><span className="text-muted">{copy.phoneLabel}</span> {booking.phone}</p>
+                    <p><span className="text-muted">{copy.statusLabel}</span> {booking.status}</p>
+                    {booking.date ? <p><span className="text-muted">{copy.dateLabel}</span> {booking.date}</p> : null}
+                    {booking.hotel ? <p><span className="text-muted">{copy.pickupLabel}</span> {booking.hotel}</p> : null}
+                    {booking.assignedPersonName ? <p><span className="text-muted">{copy.assignedLabel(assignedRoleLabel)}</span> {booking.assignedPersonName}</p> : null}
                   </div>
                 </div>
               ) : null}
             </div>
 
-            <div className="rounded-3xl border border-white/10 bg-white p-8 text-slate-900 shadow-2xl">
+            <div className="rounded-3xl border border-white/10 bg-white p-8 text-ink shadow-2xl">
               <div className="flex items-center gap-3">
-                <div className="rounded-2xl bg-cyan-100 p-3 text-cyan-700">
+                <div className="rounded-2xl bg-ocean-tint p-3 text-ocean-dark">
                   <Smartphone size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">{copy.needHelpEyebrow}</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-ocean-dark">{copy.needHelpEyebrow}</p>
                   <h2 className="text-2xl font-bold">{copy.talkToTeamHeading}</h2>
                 </div>
               </div>
               <div className="mt-8 space-y-4">
-                <a href={whatsappUrl("Hi Daily Red Sea, I need help with my booking")} onClick={() => trackEvent("whatsapp_click", { placement: "booking_portal" })} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-400">
-                  <span className="flex items-center gap-3 font-semibold text-slate-900"><MessageCircle className="text-green-600" /> {copy.whatsappSupport}</span>
-                  <span className="text-sm text-slate-500">{copy.fastestReply}</span>
+                <a href={whatsappUrl("Hi Daily Red Sea, I need help with my booking")} onClick={() => trackEvent("whatsapp_click", { placement: "booking_portal" })} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-2xl border border-line bg-surface-muted px-4 py-4 transition hover:border-ocean">
+                  <span className="flex items-center gap-3 font-semibold text-ink"><MessageCircle className="text-green-600" /> {copy.whatsappSupport}</span>
+                  <span className="text-sm text-muted">{copy.fastestReply}</span>
                 </a>
-                <a href={`mailto:${contactEmail}`} onClick={() => trackEvent("email_click", { placement: "booking_portal" })} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-400">
-                  <span className="flex items-center gap-3 font-semibold text-slate-900"><CalendarRange className="text-cyan-700" /> {copy.emailUs}</span>
-                  <span className="text-sm text-slate-500">{contactEmail}</span>
+                <a href={`mailto:${contactEmail}`} onClick={() => trackEvent("email_click", { placement: "booking_portal" })} className="flex items-center justify-between rounded-2xl border border-line bg-surface-muted px-4 py-4 transition hover:border-ocean">
+                  <span className="flex items-center gap-3 font-semibold text-ink"><CalendarRange className="text-ocean-dark" /> {copy.emailUs}</span>
+                  <span className="text-sm text-muted">{contactEmail}</span>
                 </a>
-                <a href={`tel:+${whatsappNumber}`} onClick={() => trackEvent("phone_click", { placement: "booking_portal" })} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-cyan-400"><span className="flex items-center gap-3 font-semibold text-slate-900"><Smartphone className="text-cyan-700" /> {copy.callUs}</span><span className="text-sm text-slate-500">{displayPhoneNumber}</span></a>
+                <a href={`tel:+${whatsappNumber}`} onClick={() => trackEvent("phone_click", { placement: "booking_portal" })} className="flex items-center justify-between rounded-2xl border border-line bg-surface-muted px-4 py-4 transition hover:border-ocean"><span className="flex items-center gap-3 font-semibold text-ink"><Smartphone className="text-ocean-dark" /> {copy.callUs}</span><span className="text-sm text-muted">{displayPhoneNumber}</span></a>
               </div>
             </div>
           </div>
@@ -547,19 +547,19 @@ export default function BookingPortal() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{copy.whatYouCanDoEyebrow}</p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">{copy.everythingHeading}</h2>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{copy.whatYouCanDoEyebrow}</p>
+            <h2 className="mt-3 text-3xl font-bold text-ink">{copy.everythingHeading}</h2>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {copy.actions.map((action) => (
-              <div key={action.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700">
+              <div key={action.title} className="rounded-2xl border border-line bg-surface-muted p-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ocean-tint text-ocean-dark">
                   <CheckCircle2 size={20} />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-slate-900">{action.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{action.description}</p>
+                <h3 className="mt-5 text-xl font-semibold text-ink">{action.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-muted">{action.description}</p>
               </div>
             ))}
           </div>
@@ -568,24 +568,24 @@ export default function BookingPortal() {
 
       <section className="mx-auto max-w-7xl px-6 pb-24 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{copy.secureSimpleEyebrow}</p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">{copy.infoProtectedHeading}</h2>
-            <p className="mt-5 text-lg leading-8 text-slate-600">
+          <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{copy.secureSimpleEyebrow}</p>
+            <h2 className="mt-3 text-3xl font-bold text-ink">{copy.infoProtectedHeading}</h2>
+            <p className="mt-5 text-lg leading-8 text-muted">
               {copy.infoProtectedText}
             </p>
-            <div className="mt-8 flex items-center gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-              <ShieldCheck className="text-cyan-700" /> {copy.encryptedBadge}
+            <div className="mt-8 flex items-center gap-3 rounded-2xl bg-surface-muted p-4 text-sm text-muted">
+              <ShieldCheck className="text-ocean-dark" /> {copy.encryptedBadge}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{copy.faqEyebrow}</p>
+          <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{copy.faqEyebrow}</p>
             <div className="mt-6 space-y-4">
               {copy.faqs.map((faq) => (
-                <details key={faq.question} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <summary className="cursor-pointer font-semibold text-slate-900">{faq.question}</summary>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{faq.answer}</p>
+                <details key={faq.question} className="rounded-2xl border border-line bg-surface-muted p-4">
+                  <summary className="cursor-pointer font-semibold text-ink">{faq.question}</summary>
+                  <p className="mt-3 text-sm leading-7 text-muted">{faq.answer}</p>
                 </details>
               ))}
             </div>
@@ -593,13 +593,13 @@ export default function BookingPortal() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-600">
+      <footer className="border-t border-line bg-white px-6 py-12 text-center text-sm text-muted">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-3">
-          <Link href="/" className="font-semibold text-cyan-700">{copy.footerHome}</Link>
+          <Link href="/" className="font-semibold text-ocean-dark">{copy.footerHome}</Link>
           <span>•</span>
-          <Link href="/transfers" className="font-semibold text-cyan-700">{copy.footerTransfers}</Link>
+          <Link href="/transfers" className="font-semibold text-ocean-dark">{copy.footerTransfers}</Link>
           <span>•</span>
-          <Link href="/booking" className="font-semibold text-cyan-700">{copy.footerBookingPortal}</Link>
+          <Link href="/booking" className="font-semibold text-ocean-dark">{copy.footerBookingPortal}</Link>
         </div>
       </footer>
     </main>

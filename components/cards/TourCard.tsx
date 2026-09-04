@@ -69,7 +69,7 @@ export default function TourCard({
   const discountPct = hasDiscount ? Math.round((1 - Number(price) / Number(originalPrice)) * 100) : 0;
 
   return (
-    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg transition duration-300 has-[a:focus-visible]:ring-4 has-[a:focus-visible]:ring-cyan-300 md:hover:-translate-y-2 md:hover:shadow-2xl">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-lg transition duration-300 has-[a:focus-visible]:ring-4 has-[a:focus-visible]:ring-ocean-soft md:hover:-translate-y-2 md:hover:shadow-2xl">
       <div className="absolute end-4 top-4 z-20 flex items-center gap-2">
         <ShareTripButton locale={language} tourSlug={tourSlug} tourTitle={title} destination={destination} compact />
         <FavouriteButton item={{ slug: tourSlug, title, image, location, price, originalPrice, rating, reviews, duration, description, priceUnit, availableTime, bookingMode, entrancePrice, currency, destination, badge, category }} compact />
@@ -82,26 +82,26 @@ export default function TourCard({
           {hasReviews ? <div className="absolute start-4 top-4 flex items-center gap-1 rounded-full bg-white px-3 py-2 text-sm shadow"><Star size={16} className="fill-yellow-400 text-yellow-400" /><span className="font-semibold">{rating} · {reviewCount}</span></div> : null}
           <div className="absolute bottom-4 start-4 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-brand-navy px-4 py-2 text-sm font-semibold text-white">{localizeProductBadge(language, badge ?? "Best Seller")}</span>
-            {category ? <span className="rounded-full bg-white/95 px-3 py-2 text-sm font-semibold text-slate-800">{category}</span> : null}
-            {hasDiscount ? <span className="rounded-full bg-slate-900 px-3 py-2 text-sm font-bold text-white">-{discountPct}%</span> : null}
+            {category ? <span className="rounded-full bg-white/95 px-3 py-2 text-sm font-semibold text-ink">{category}</span> : null}
+            {hasDiscount ? <span className="rounded-full bg-ink px-3 py-2 text-sm font-bold text-white">-{discountPct}%</span> : null}
           </div>
         </div>
         <div className="flex flex-1 flex-col p-4 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{category || copy.fallback}</p>
-          <h3 className="mt-1.5 line-clamp-2 text-xl font-bold leading-tight text-slate-900 sm:mt-2 sm:text-2xl">{title}</h3>
-          <div className="mt-2 flex items-center gap-2 text-sm text-slate-600 sm:mt-3 sm:text-base"><MapPin size={17} /><span>{location}</span></div>
-          <p className="mt-2.5 line-clamp-2 text-sm leading-6 text-slate-600 sm:mt-4 sm:line-clamp-3 sm:text-base sm:leading-relaxed">{description}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-ocean-dark">{category || copy.fallback}</p>
+          <h3 className="mt-1.5 line-clamp-2 text-xl font-bold leading-tight text-ink sm:mt-2 sm:text-2xl">{title}</h3>
+          <div className="mt-2 flex items-center gap-2 text-sm text-muted sm:mt-3 sm:text-base"><MapPin size={17} /><span>{location}</span></div>
+          <p className="mt-2.5 line-clamp-2 text-sm leading-6 text-muted sm:mt-4 sm:line-clamp-3 sm:text-base sm:leading-relaxed">{description}</p>
           <p className="mt-3 min-h-[1.25rem] text-sm font-semibold sm:mt-4">
             {hasReviews
-              ? <span className="inline-flex items-center gap-1.5 text-slate-700"><Star size={15} className="fill-yellow-400 text-yellow-400" />{rating} · {reviewCount} {copy.reviews}</span>
+              ? <span className="inline-flex items-center gap-1.5 text-ink"><Star size={15} className="fill-yellow-400 text-yellow-400" />{rating} · {reviewCount} {copy.reviews}</span>
               : <span className="text-brand-orange-cta">{copy.newTour}</span>}
           </p>
-          <div className="mt-2 flex items-center gap-2 text-sm text-slate-600 sm:text-base"><Clock size={17} /><span>{t("everyDay")} · {duration}</span></div>
-          {availableTime ? <p className="mt-2 text-xs text-slate-600 sm:text-sm">{copy.pickup}: {availableTime}</p> : null}
+          <div className="mt-2 flex items-center gap-2 text-sm text-muted sm:text-base"><Clock size={17} /><span>{t("everyDay")} · {duration}</span></div>
+          {availableTime ? <p className="mt-2 text-xs text-muted sm:text-sm">{copy.pickup}: {availableTime}</p> : null}
           <p className="mt-2 flex items-center gap-2 text-xs font-medium text-emerald-700 sm:text-sm"><ShieldCheck size={16} />{bookingMode === "inquiry" ? copy.inquiry : copy.clear}</p>
-          <div className="mt-4 flex items-end justify-between gap-3 border-t border-slate-200 pt-4 sm:mt-6 sm:gap-4">
-            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-slate-500">{copy.quotation}</p><p className="text-xl font-bold text-blue-700">{copy.request}</p></> : <><p className="text-sm text-slate-500">{copy.from}</p>{hasDiscount ? <p className="text-sm font-semibold text-slate-500 line-through">{formatPrice(originalPrice as string, currency)}</p> : null}<p className="text-3xl font-bold text-blue-700">{formatPrice(price, currency)}</p><p className="mt-1 text-xs text-slate-500">{priceUnit || copy.perPerson}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-amber-700">+ {copy.entrance} {formatPrice(String(entrancePrice), currency)}/{copy.person}</p> : null}</>}</div>
-            <span className={`rounded-xl px-3 py-2.5 text-sm font-semibold text-white transition sm:px-4 sm:py-3 sm:text-base ${bookingMode === "inquiry" ? "bg-blue-700 group-hover:bg-blue-800" : "bg-brand-orange-cta group-hover:brightness-90"}`}>{bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
+          <div className="mt-4 flex items-end justify-between gap-3 border-t border-line pt-4 sm:mt-6 sm:gap-4">
+            <div>{bookingMode === "inquiry" ? <><p className="text-sm text-muted">{copy.quotation}</p><p className="text-xl font-bold text-ink">{copy.request}</p></> : <><p className="text-sm text-muted">{copy.from}</p>{hasDiscount ? <p className="text-sm font-semibold text-muted line-through">{formatPrice(originalPrice as string, currency)}</p> : null}<p className="text-3xl font-bold text-ink">{formatPrice(price, currency)}</p><p className="mt-1 text-xs text-muted">{priceUnit || copy.perPerson}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-ocean-dark">+ {copy.entrance} {formatPrice(String(entrancePrice), currency)}/{copy.person}</p> : null}</>}</div>
+            <span className={`rounded-xl px-3 py-2.5 text-sm font-semibold text-white transition sm:px-4 sm:py-3 sm:text-base ${bookingMode === "inquiry" ? "bg-ocean-dark group-hover:brightness-90" : "bg-brand-orange-cta group-hover:brightness-90"}`}>{bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
           </div>
         </div>
       </Link>

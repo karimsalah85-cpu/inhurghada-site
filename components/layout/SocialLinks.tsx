@@ -16,8 +16,8 @@ export default function SocialLinks({
   const liveFacebookUrl = setting<string>("facebook_url", facebookUrl);
   const liveInstagramUrl = setting<string>("instagram_url", instagramUrl);
   const linkClass = dark
-    ? "border-white/15 bg-white/10 text-white hover:border-cyan-300 hover:bg-white/20"
-    : "border-slate-200 bg-white text-slate-700 hover:border-cyan-500 hover:text-cyan-700";
+    ? "border-white/15 bg-white/10 text-white hover:border-ocean-soft hover:bg-white/20"
+    : "border-line bg-white text-ink hover:border-ocean hover:text-ocean-dark";
 
   return (
     <div aria-label={copy.follow} className={`flex items-center gap-2 ${className}`}>

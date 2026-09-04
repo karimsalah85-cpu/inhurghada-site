@@ -44,7 +44,7 @@ export default function BottomNav() {
       aria-label={navLabel}
       className="
       fixed inset-x-0 bottom-0 z-50
-      border-t border-slate-200/80 bg-white/95 backdrop-blur-xl
+      border-t border-line/80 bg-white/95 backdrop-blur-xl
       pb-[env(safe-area-inset-bottom)]
       shadow-[0_-10px_40px_-20px_rgba(15,23,42,0.45)]
       xl:hidden
@@ -108,7 +108,7 @@ function BottomNavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${active ? "text-brand-navy" : "text-slate-600"}`}
+      className={`flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${active ? "text-brand-navy" : "text-muted"}`}
     >
       {icon}
       <span>{label}</span>

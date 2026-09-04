@@ -2,27 +2,59 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #17252b;
+  --font-primary: var(--font-manrope), "Segoe UI", Arial, sans-serif;
+}
+
+/* layout.tsx sets dir="rtl" for Arabic; swap the primary typeface there. */
+html[dir="rtl"] {
+  --font-primary: var(--font-noto-kufi-arabic), var(--font-manrope), Tahoma, Arial, sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-brand-navy: #0d3b78;
-  --color-brand-navy-soft: #e8eef7;
-  --color-brand-navy-tint: #f4f7fb;
-  --color-brand-orange: #ff3300;
-  --color-brand-orange-cta: #e2380f;
-  --color-brand-orange-soft: #ffebe6;
-  --color-brand-orange-tint: #fff7f5;
-  --font-sans: Arial, Helvetica, sans-serif;
+
+  /* Red Sea palette */
+  --color-primary: #073b4c;
+  --color-primary-dark: #063443;
+  --color-primary-soft: #ebeff1;
+  --color-primary-tint: #f5f7f8;
+
+  --color-cta: #f05a47;
+  --color-cta-dark: #ce4d3d;
+  --color-cta-soft: #feefed;
+  --color-cta-tint: #fef7f6;
+
+  --color-ocean: #087e8b;
+  --color-ocean-dark: #076c78;
+  --color-ocean-soft: #e6f2f3;
+  --color-ocean-tint: #f3f9f9;
+
+  --color-sand: #f7f3ec;
+
+  --color-ink: #17252b;
+  --color-muted: #66767d;
+  --color-line: #e2e8e8;
+  --color-surface-muted: #f1f4f4;
+
+  /* Legacy brand tokens, repointed to the Red Sea palette so existing usages pick it up. */
+  --color-brand-navy: #073b4c;
+  --color-brand-navy-soft: #ebeff1;
+  --color-brand-navy-tint: #f5f7f8;
+  --color-brand-orange: #f05a47;
+  --color-brand-orange-cta: #f05a47;
+  --color-brand-orange-soft: #feefed;
+  --color-brand-orange-tint: #fef7f6;
+
+  --font-sans: var(--font-primary);
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-primary);
   text-rendering: optimizeLegibility;
 }
 
@@ -39,10 +71,10 @@ p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
   overflow-wrap: anywhere;
 }
 
-::selection { background: #a5f3fc; color: #082f49; }
+::selection { background: #d9eef0; color: #073b4c; }
 
 :focus-visible {
-  outline: 3px solid #0891b2;
+  outline: 3px solid #087e8b;
   outline-offset: 3px;
 }
 
@@ -53,7 +85,7 @@ p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
   z-index: 200;
   transform: translateY(-200%);
   border-radius: 0.5rem;
-  background: #082f49;
+  background: #073b4c;
   padding: 0.75rem 1rem;
   color: white;
   font-weight: 700;

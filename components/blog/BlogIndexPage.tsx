@@ -65,9 +65,9 @@ export async function LocalizedBlogIndex({ locale = "en" }: { locale?: BlogLocal
   const posts = [...blogPosts].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
   return (
     <main className="mx-auto max-w-5xl px-6 py-20">
-      <p className="font-bold text-cyan-700">{copy.eyebrow}</p>
+      <p className="font-bold text-ocean-dark">{copy.eyebrow}</p>
       <h1 className="mt-3 text-4xl font-black sm:text-5xl">{copy.heading}</h1>
-      <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+      <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">
         {copy.subtitle}
       </p>
       <div className="mt-12 grid gap-6 sm:grid-cols-2">
@@ -75,15 +75,15 @@ export async function LocalizedBlogIndex({ locale = "en" }: { locale?: BlogLocal
           <Link
             key={post.slug}
             href={localePath(locale, `/blog/${post.slug}`)}
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-cyan-400"
+            className="rounded-3xl border border-line bg-white p-6 shadow-sm transition hover:border-ocean"
           >
-            <div className="relative -mx-6 -mt-6 mb-5 h-52 overflow-hidden rounded-t-3xl bg-slate-100">
+            <div className="relative -mx-6 -mt-6 mb-5 h-52 overflow-hidden rounded-t-3xl bg-surface-muted">
               <Image src={post.heroImage} alt={post.title} fill sizes="(max-width: 640px) 100vw, 50vw" className="object-cover" />
             </div>
-            <p className="text-sm text-slate-500">{new Date(post.publishedAt).toLocaleDateString(copy.dateLocale, { year: "numeric", month: "long", day: "numeric" })}</p>
+            <p className="text-sm text-muted">{new Date(post.publishedAt).toLocaleDateString(copy.dateLocale, { year: "numeric", month: "long", day: "numeric" })}</p>
             <h2 className="mt-2 text-xl font-black">{post.title}</h2>
-            <p className="mt-3 leading-7 text-slate-600">{post.metaDescription}</p>
-            <span className="mt-4 inline-block font-bold text-blue-700">{copy.readMore}</span>
+            <p className="mt-3 leading-7 text-muted">{post.metaDescription}</p>
+            <span className="mt-4 inline-block font-bold text-ocean-dark">{copy.readMore}</span>
           </Link>
         ))}
       </div>

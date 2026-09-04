@@ -29,26 +29,26 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
   const locale = (["en", "ar", "de", "ru", "pl", "zh"].includes(requested) ? requested : "en") as keyof typeof copy;
   const t = copy[locale];
   const rtl = locale === "ar";
-  return <main dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-slate-50 px-6 pb-20 pt-32">
+  return <main dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-surface-muted px-6 pb-20 pt-32">
     <GoogleReviews className="mx-auto mb-10 max-w-6xl" />
     <section className="mx-auto max-w-3xl overflow-hidden rounded-3xl bg-white shadow-xl">
-      <div className="bg-slate-950 p-8 text-white sm:p-12">
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">{t.eyebrow}</p>
+      <div className="bg-ink p-8 text-white sm:p-12">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-ocean-soft">{t.eyebrow}</p>
         <h1 className="mt-4 text-4xl font-black sm:text-5xl">{t.title}</h1>
-        <p className="mt-4 max-w-2xl leading-7 text-slate-300">{t.intro}</p>
+        <p className="mt-4 max-w-2xl leading-7 text-line">{t.intro}</p>
       </div>
       <div className="space-y-8 p-8 sm:p-12">
         <div>
-          <h2 className="font-black text-slate-950">{t.rateHeading}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{t.rateNote}</p>
+          <h2 className="font-black text-ink">{t.rateHeading}</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">{t.rateNote}</p>
           <div className="mt-4"><TripReviewForm initialReference={params.ref || ""} initialEmail={params.email || ""} locale={locale} /></div>
         </div>
-        <div className="border-t border-slate-100 pt-8">
-          <h2 className="font-black text-slate-950">{t.googleHeading}</h2>
-          <a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-6 py-4 text-lg font-black text-white hover:bg-blue-800"><MessageSquareText size={21}/>{t.googleCta}</a>
-          <div className="mt-3 flex items-start gap-3 text-sm leading-6 text-slate-600"><ShieldCheck className="mt-0.5 shrink-0 text-emerald-600" size={19}/><p>{t.googleNote}</p></div>
+        <div className="border-t border-surface-muted pt-8">
+          <h2 className="font-black text-ink">{t.googleHeading}</h2>
+          <a href={googleReviewUrl} target="_blank" rel="noopener noreferrer" className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-ocean-dark px-6 py-4 text-lg font-black text-white hover:brightness-90"><MessageSquareText size={21}/>{t.googleCta}</a>
+          <div className="mt-3 flex items-start gap-3 text-sm leading-6 text-muted"><ShieldCheck className="mt-0.5 shrink-0 text-emerald-600" size={19}/><p>{t.googleNote}</p></div>
         </div>
-        <Link href="/#tours" className="block text-center font-bold text-cyan-800 hover:underline">{t.back}</Link>
+        <Link href="/#tours" className="block text-center font-bold text-ocean-dark hover:underline">{t.back}</Link>
       </div>
     </section>
   </main>;
