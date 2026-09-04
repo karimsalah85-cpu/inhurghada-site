@@ -9,7 +9,7 @@ const quarantinedTourismImages = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  images: { formats: ["image/avif", "image/webp"] },
+  images: { formats: ["image/avif", "image/webp"], qualities: [75, 78] },
   // createInvoicePdf reads the embedded Noto TTFs through a process.cwd()
   // relative path that @vercel/nft cannot trace, so pin the font directory into
   // the serverless bundle for every route that renders a PDF. (PDFKit's own

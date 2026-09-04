@@ -33,8 +33,8 @@ export default function MobileTourCarousel({ children, label }: { children: Reac
 
   return (
     <div aria-label={label} aria-roledescription="carousel">
-      <div ref={trackRef} onScroll={updateActiveCard} className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-8 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3">
-        {items.map((item, index) => <div key={index} className="min-w-[calc(100%-1.5rem)] snap-center md:min-w-0">{item}</div>)}
+      <div ref={trackRef} onScroll={updateActiveCard} className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:flex-wrap md:justify-center md:gap-8 md:overflow-visible md:px-0 md:pb-0">
+        {items.map((item, index) => <div key={index} className="min-w-[calc(100%-1.5rem)] snap-center md:min-w-0 md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.3334rem)]">{item}</div>)}
       </div>
       {items.length > 1 ? <div className="mt-3 flex items-center justify-center gap-4 md:hidden">
         <button type="button" onClick={() => goTo(activeIndex - 1)} disabled={activeIndex === 0} aria-label="Previous tour" className="inline-flex size-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm disabled:opacity-35"><ChevronLeft size={20} /></button>
