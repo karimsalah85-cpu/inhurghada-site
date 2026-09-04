@@ -94,7 +94,7 @@ export default function Navbar() {
               width={633}
               height={98}
               priority
-              className="h-auto w-[clamp(106px,33vw,142px)]"
+              className="h-auto w-[clamp(120px,38vw,164px)]"
             />
           </Link>
 
@@ -133,7 +133,7 @@ export default function Navbar() {
             width={633}
             height={98}
             priority
-            className="h-auto w-[220px]"
+            className="h-auto w-[264px]"
           />
         </Link>
 
@@ -171,6 +171,10 @@ export default function Navbar() {
 
           <NavLink href={localePath(language, "/transfers")} active={pathname === localePath(language, "/transfers")}>
             {t("transfers")}
+          </NavLink>
+
+          <NavLink href={localePath(language, "/booking")} active={pathname === localePath(language, "/booking")}>
+            {t("booking")}
           </NavLink>
 
           </div>
@@ -345,18 +349,18 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "h-11 w-full appearance-none bg-transparent py-2 pl-2 pr-5 text-xs font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:pr-6 min-[360px]:text-sm"
-    : "rounded-xl border-0 bg-transparent px-2 py-2 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
+    ? "h-8 w-full appearance-none bg-transparent py-1 pl-1.5 pr-4 text-[10px] font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:pr-5 min-[360px]:text-xs"
+    : "rounded-xl border-0 bg-transparent px-1.5 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
 
   if (mobile) {
     return (
-      <div className="grid w-[clamp(128px,41vw,176px)] flex-none grid-cols-[47%_53%] divide-x divide-slate-200 rounded-full border border-slate-200 bg-white p-1 shadow-sm xl:hidden">
+      <div className="grid w-[clamp(116px,36vw,152px)] flex-none grid-cols-[47%_53%] divide-x divide-slate-200 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm xl:hidden">
         <div className="relative min-w-0" dir="ltr">
           <label className="sr-only" htmlFor="mobile-currency">{publicInterfaceCopy[language].currency}</label>
           <select id="mobile-currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
             {currencies.map((item) => <option key={item} value={item}>{currencySymbol(item)} {item}</option>)}
           </select>
-          <ChevronDown aria-hidden="true" size={14} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-600" />
+          <ChevronDown aria-hidden="true" size={11} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-600" />
         </div>
         <div className="min-w-0">
           <LanguageDropdown language={language} pathname={pathname} mobile />
@@ -366,7 +370,7 @@ function SettingsSelectors({
   }
 
   return (
-    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-0.5 shadow-sm">
       <LanguageDropdown
         language={language}
         pathname={pathname}
@@ -376,7 +380,7 @@ function SettingsSelectors({
       <div className="flex items-center border-l border-slate-200 pl-1">
         <label className="sr-only" htmlFor="currency">{publicInterfaceCopy[language].currency}</label>
         <select id="currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className="rounded-lg px-1.5 py-2 text-[9px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600">{publicInterfaceCopy[language].rates}</a>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className="rounded-lg px-1 py-1.5 text-[8px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600">{publicInterfaceCopy[language].rates}</a>
       </div>
     </div>
   );
@@ -450,11 +454,11 @@ function LanguageDropdown({
           }
         }}
         className={mobile
-          ? "flex h-11 w-full items-center justify-between gap-1 rounded-full bg-slate-100 px-2 text-xs font-bold text-blue-700 outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:gap-2 min-[360px]:px-3 min-[360px]:text-sm"
-          : "flex items-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
+          ? "flex h-8 w-full items-center justify-between gap-1 rounded-full bg-slate-100 px-1.5 text-[10px] font-bold text-blue-700 outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:gap-1.5 min-[360px]:px-2 min-[360px]:text-xs"
+          : "flex items-center gap-1 rounded-xl px-1.5 py-1.5 text-xs font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
       >
         <span lang={currentLanguage.code}>{currentLanguage.label}</span>
-        <ChevronDown aria-hidden="true" size={mobile ? 14 : 16} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown aria-hidden="true" size={mobile ? 11 : 13} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       <nav
