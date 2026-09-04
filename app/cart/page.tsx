@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function CartPage() {
-  return <main className="min-h-screen bg-slate-50"><CartCheckout/></main>;
+  return <main className="min-h-screen bg-surface-muted"><CartCheckout/></main>;
 }

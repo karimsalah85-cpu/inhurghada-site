@@ -182,24 +182,24 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
 function Paragraph({ children }: { children: string }) {
   const separator = children.indexOf(":");
   if (separator < 0) return <p className="leading-8">{children}</p>;
-  return <p className="leading-8"><strong className="text-slate-900">{children.slice(0, separator + 1)}</strong>{children.slice(separator + 1)}</p>;
+  return <p className="leading-8"><strong className="text-ink">{children.slice(0, separator + 1)}</strong>{children.slice(separator + 1)}</p>;
 }
 
 export default function TermsConditionsPage({ locale = "en" }: { locale?: Locale }) {
   const content = copy[locale];
   return (
     <main className="mx-auto max-w-5xl px-6 py-24 lg:px-8">
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm sm:p-12">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">{content.legal}</p>
-        <h1 className="mt-4 text-4xl font-black text-slate-900">{content.title}</h1>
-        <p className="mt-6 text-lg leading-8 text-slate-600">{content.intro}</p>
-        <div className="mt-10 space-y-7 text-slate-700">
+      <div className="rounded-[2rem] border border-line bg-white p-8 shadow-sm sm:p-12">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{content.legal}</p>
+        <h1 className="mt-4 text-4xl font-black text-ink">{content.title}</h1>
+        <p className="mt-6 text-lg leading-8 text-muted">{content.intro}</p>
+        <div className="mt-10 space-y-7 text-ink">
           {content.sections.map((section) => <section key={section.title} id={section.id} className={section.id ? "scroll-mt-28" : undefined}>
-            <h2 className="text-xl font-bold text-slate-900">{section.title}</h2>
+            <h2 className="text-xl font-bold text-ink">{section.title}</h2>
             <div className="mt-3 space-y-3">{section.paragraphs.map((paragraph) => <Paragraph key={paragraph}>{paragraph}</Paragraph>)}</div>
           </section>)}
         </div>
-        <Link href={localePath(locale)} className="mt-10 inline-flex text-sm font-semibold text-cyan-700">← {content.back}</Link>
+        <Link href={localePath(locale)} className="mt-10 inline-flex text-sm font-semibold text-ocean-dark">← {content.back}</Link>
       </div>
     </main>
   );

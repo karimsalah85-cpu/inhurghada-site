@@ -132,44 +132,44 @@ export default function CartCheckout() {
   }
 
   if (!items.length) {
-    return <section className="mx-auto max-w-3xl px-6 pb-24 pt-32 text-center"><ShoppingCart className="mx-auto text-slate-300" size={64}/><h1 className="mt-6 text-4xl font-black text-slate-950">{tr("Your trip cart is empty", "Dein Reisewarenkorb ist leer", "Корзина поездок пуста", "سلة الرحلات فارغة")}</h1><p className="mt-4 text-slate-600">{tr("Choose a tour, select its date and travelers, then add it to your cart.", "Wähle einen Ausflug, Datum und Reisende und füge ihn zum Warenkorb hinzu.", "Выберите экскурсию, дату и гостей, затем добавьте её в корзину.", "اختر رحلة وتاريخها وعدد المسافرين ثم أضفها إلى السلة.")}</p><Link href={localePath(language, "/tours")} className="mt-8 inline-flex rounded-xl bg-blue-700 px-6 py-4 font-bold text-white">{tr("Explore tours", "Ausflüge entdecken", "Смотреть экскурсии", "استكشف الرحلات")}</Link></section>;
+    return <section className="mx-auto max-w-3xl px-6 pb-24 pt-32 text-center"><ShoppingCart className="mx-auto text-line" size={64}/><h1 className="mt-6 text-4xl font-black text-ink">{tr("Your trip cart is empty", "Dein Reisewarenkorb ist leer", "Корзина поездок пуста", "سلة الرحلات فارغة")}</h1><p className="mt-4 text-muted">{tr("Choose a tour, select its date and travelers, then add it to your cart.", "Wähle einen Ausflug, Datum und Reisende und füge ihn zum Warenkorb hinzu.", "Выберите экскурсию, дату и гостей, затем добавьте её в корзину.", "اختر رحلة وتاريخها وعدد المسافرين ثم أضفها إلى السلة.")}</p><Link href={localePath(language, "/tours")} className="mt-8 inline-flex rounded-xl bg-ocean-dark px-6 py-4 font-bold text-white">{tr("Explore tours", "Ausflüge entdecken", "Смотреть экскурсии", "استكشف الرحلات")}</Link></section>;
   }
 
   return (
     <section className="mx-auto max-w-7xl px-6 pb-24 pt-32">
-      <p className="font-semibold uppercase tracking-[0.24em] text-blue-600">{tr("Multi-trip booking", "Mehrere Ausflüge buchen", "Бронирование нескольких поездок", "حجز رحلات متعددة")}</p>
-      <h1 className="mt-3 text-4xl font-black text-slate-950 sm:text-5xl">{tr("Your trip cart", "Dein Reisewarenkorb", "Корзина поездок", "سلة الرحلات")}</h1>
+      <p className="font-semibold uppercase tracking-[0.24em] text-ocean">{tr("Multi-trip booking", "Mehrere Ausflüge buchen", "Бронирование нескольких поездок", "حجز رحلات متعددة")}</p>
+      <h1 className="mt-3 text-4xl font-black text-ink sm:text-5xl">{tr("Your trip cart", "Dein Reisewarenkorb", "Корзина поездок", "سلة الرحلات")}</h1>
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">
           {items.map((item) => {
             const tour = tours.find((entry) => entry.slug === item.tourSlug);
-            return <article key={item.id} className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[140px_1fr_auto] sm:items-center">
+            return <article key={item.id} className="grid gap-4 rounded-3xl border border-line bg-white p-4 shadow-sm sm:grid-cols-[140px_1fr_auto] sm:items-center">
               <div className="relative h-28 overflow-hidden rounded-2xl"><Image src={tour?.image || "/images/placeholders/sea-activity.svg"} alt="" fill sizes="140px" className="object-cover"/></div>
-              <div><h2 className="font-black text-slate-950">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-slate-600"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-slate-600">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-blue-700">{formatPrice(String(item.subtotal), item.currency)}</p></div>
+              <div><h2 className="font-black text-ink">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-muted"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-muted">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-ink">{formatPrice(String(item.subtotal), item.currency)}</p></div>
               <div className="flex items-center gap-2">{item.tourSlug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={language} tourSlug={item.tourSlug} date={item.date} compact/> : null}<button type="button" onClick={() => removeItem(item.id)} aria-label={tr("Remove trip", "Ausflug entfernen", "Удалить поездку", "حذف الرحلة")} className="rounded-xl border border-rose-200 p-3 text-rose-600 hover:bg-rose-50"><Trash2 size={19}/></button></div>
             </article>;
           })}
-          <div className="flex items-center justify-between rounded-2xl bg-slate-950 p-6 text-white"><span className="font-bold">{tr("Combined total", "Gesamtpreis", "Общая сумма", "المجموع الكلي")}</span><strong className="text-3xl">{formatPrice(String(total), cartCurrency)}</strong></div>
+          <div className="flex items-center justify-between rounded-2xl bg-ink p-6 text-white"><span className="font-bold">{tr("Combined total", "Gesamtpreis", "Общая сумма", "المجموع الكلي")}</span><strong className="text-3xl">{formatPrice(String(total), cartCurrency)}</strong></div>
         </div>
-        <form onSubmit={submit} className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
-          <h2 className="text-2xl font-black text-slate-950">{tr("Complete one booking", "Eine Buchung abschließen", "Оформить одно бронирование", "إكمال حجز واحد")}</h2>
-          <p className="text-sm leading-6 text-slate-600">{tr("All trips will use one booking reference, email and PDF summary.", "Alle Ausflüge erhalten eine gemeinsame Buchungsnummer, E-Mail und PDF-Übersicht.", "Для всех поездок будет один номер бронирования, письмо и PDF.", "ستحصل جميع الرحلات على رقم حجز واحد ورسالة بريد وملخص PDF واحد.")}</p>
+        <form onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-white p-6 shadow-xl sm:p-8">
+          <h2 className="text-2xl font-black text-ink">{tr("Complete one booking", "Eine Buchung abschließen", "Оформить одно бронирование", "إكمال حجز واحد")}</h2>
+          <p className="text-sm leading-6 text-muted">{tr("All trips will use one booking reference, email and PDF summary.", "Alle Ausflüge erhalten eine gemeinsame Buchungsnummer, E-Mail und PDF-Übersicht.", "Для всех поездок будет один номер бронирования, письмо и PDF.", "ستحصل جميع الرحلات على رقم حجز واحد ورسالة بريد وملخص PDF واحد.")}</p>
           <RequiredInput label={tr("Full name", "Vollständiger Name", "Полное имя", "الاسم الكامل")} value={name} onChange={setName} autoComplete="name"/>
           <RequiredInput label={tr("Email", "E-Mail", "Электронная почта", "البريد الإلكتروني")} value={email} onChange={setEmail} type="email" autoComplete="email"/>
           <RequiredInput label={tr("WhatsApp number", "WhatsApp-Nummer", "Номер WhatsApp", "رقم واتساب")} value={phone} onChange={setPhone} type="tel" autoComplete="tel"/>
           {pickupOptional ? (
-            <label className="block text-sm font-bold text-slate-800">
-              {tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} <span className="font-normal text-slate-500">({tr("optional", "optional", "необязательно", "اختياري")})</span>
-              <input value={hotel} onChange={(event) => setHotel(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal text-slate-950 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/>
-              <span className="mt-1 block text-xs font-normal text-slate-500">{tr("Meeting details are confirmed by WhatsApp.", "Treffpunktdetails werden per WhatsApp bestätigt.", "Детали места встречи подтверждаются в WhatsApp.", "يتم تأكيد تفاصيل نقطة التجمع عبر واتساب.")}</span>
+            <label className="block text-sm font-bold text-ink">
+              {tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} <span className="font-normal text-muted">({tr("optional", "optional", "необязательно", "اختياري")})</span>
+              <input value={hotel} onChange={(event) => setHotel(event.target.value)} className="mt-1 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-ocean-tint"/>
+              <span className="mt-1 block text-xs font-normal text-muted">{tr("Meeting details are confirmed by WhatsApp.", "Treffpunktdetails werden per WhatsApp bestätigt.", "Детали места встречи подтверждаются в WhatsApp.", "يتم تأكيد تفاصيل نقطة التجمع عبر واتساب.")}</span>
             </label>
           ) : <RequiredInput label={tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} value={hotel} onChange={setHotel}/>}
           {requiresDivingLicense ? <Confirmation checked={divingConfirmed} onChange={setDivingConfirmed} text={tr("Every diver has a valid diving license and will bring proof.", "Jeder Taucher besitzt einen gültigen Tauchschein und bringt den Nachweis mit.", "У каждого дайвера есть действующий сертификат, который он возьмёт с собой.", "يحمل كل غواص رخصة غوص سارية وسيحضر إثباتها.")}/> : null}
           {requiresQuadMinimumAge ? <Confirmation checked={quadConfirmed} onChange={setQuadConfirmed} text={tr("Every quad participant is at least 9 years old.", "Alle Quad-Teilnehmer sind mindestens 9 Jahre alt.", "Всем участникам тура на квадроциклах не менее 9 лет.", "عمر كل مشارك في رحلة الكواد 9 سنوات على الأقل.")}/> : null}
-          <label className="block text-sm font-bold text-slate-800">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal text-slate-950 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/></label>
-          <p className="text-xs leading-5 text-slate-500">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-blue-700 underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
+          <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-ocean-tint"/></label>
+          <p className="text-xs leading-5 text-muted">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-ocean-dark underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
           {error ? <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p> : null}
-          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-700 py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(total), cartCurrency)}`} <MessageCircle size={18}/></button>
+          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(total), cartCurrency)}`} <MessageCircle size={18}/></button>
         </form>
       </div>
     </section>
@@ -177,7 +177,7 @@ export default function CartCheckout() {
 }
 
 function RequiredInput({ label, value, onChange, type = "text", autoComplete }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string }) {
-  return <label className="block text-sm font-bold text-slate-800">{label} <span className="text-rose-600">*</span><input required type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 font-normal text-slate-950 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"/></label>;
+  return <label className="block text-sm font-bold text-ink">{label} <span className="text-rose-600">*</span><input required type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} className="mt-1 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-ocean-tint"/></label>;
 }
 
 function Confirmation({ checked, onChange, text }: { checked: boolean; onChange: (value: boolean) => void; text: string }) {

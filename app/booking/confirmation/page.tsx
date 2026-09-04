@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function BookingConfirmationPage() {
-  return <Suspense fallback={<main className="min-h-screen bg-slate-50" />}><BookingConfirmation /></Suspense>;
+  return <Suspense fallback={<main className="min-h-screen bg-surface-muted" />}><BookingConfirmation /></Suspense>;
 }

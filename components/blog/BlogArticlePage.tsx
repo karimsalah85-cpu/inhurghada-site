@@ -95,40 +95,40 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
   };
 
   return (
-    <main className="bg-slate-50 pb-20">
+    <main className="bg-surface-muted pb-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <article className="mx-auto max-w-3xl px-6 py-16">
-        <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+        <nav aria-label="Breadcrumb" className="text-sm text-muted">
           <Link href={localePath(locale)}>{copy.home}</Link>
           <span className="px-2">/</span>
           <Link href={localePath(locale, "/blog")}>{copy.blog}</Link>
         </nav>
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-6 text-sm text-muted">
           {new Date(post.publishedAt).toLocaleDateString(copy.dateLocale, { year: "numeric", month: "long", day: "numeric" })}
         </p>
         <h1 className="mt-3 text-4xl font-black sm:text-5xl">{post.title}</h1>
         <div className="relative mt-8 h-72 overflow-hidden rounded-[2rem]">
           <Image src={post.heroImage} alt={post.title} fill sizes="(max-width: 1024px) 100vw, 800px" className="object-cover" priority />
         </div>
-        <p className="mt-8 text-lg leading-8 text-slate-700">{post.intro}</p>
+        <p className="mt-8 text-lg leading-8 text-ink">{post.intro}</p>
         {post.sections.map((section) => (
           <section key={section.heading} className="mt-10">
             <h2 className="text-2xl font-black">{section.heading}</h2>
             {section.body.map((paragraph, index) => (
-              <p key={index} className="mt-4 leading-8 text-slate-700">{paragraph}</p>
+              <p key={index} className="mt-4 leading-8 text-ink">{paragraph}</p>
             ))}
           </section>
         ))}
 
         {relatedTours.length > 0 && (
-          <section className="mt-12 rounded-3xl border border-cyan-200 bg-cyan-50 p-6">
-            <h2 className="text-xl font-black text-cyan-950">{copy.bookExperience}</h2>
+          <section className="mt-12 rounded-3xl border border-ocean-soft bg-ocean-tint p-6">
+            <h2 className="text-xl font-black text-ocean-dark">{copy.bookExperience}</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {relatedTours.map((tour) => (
                 <Link key={tour.slug} href={localePath(locale, `/tours/${tour.slug}`)} className="rounded-2xl bg-white p-4 shadow-sm">
                   <p className="font-bold">{tour.title}</p>
-                  <p className="mt-1 text-sm text-slate-600">{copy.from} {tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-1 line-through text-slate-400">${tour.originalPrice}</span> : null}${tour.price} {copy.perPerson}</p>
-                  <span className="mt-2 inline-block text-sm font-bold text-blue-700">{copy.viewDetails}</span>
+                  <p className="mt-1 text-sm text-muted">{copy.from} {tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-1 line-through text-muted">${tour.originalPrice}</span> : null}${tour.price} {copy.perPerson}</p>
+                  <span className="mt-2 inline-block text-sm font-bold text-ocean-dark">{copy.viewDetails}</span>
                 </Link>
               ))}
             </div>
@@ -141,7 +141,7 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
             {post.faqs.map((faq) => (
               <div key={faq.question} className="rounded-2xl bg-white p-5 shadow-sm">
                 <p className="font-bold">{faq.question}</p>
-                <p className="mt-2 leading-7 text-slate-600">{faq.answer}</p>
+                <p className="mt-2 leading-7 text-muted">{faq.answer}</p>
               </div>
             ))}
           </div>

@@ -31,11 +31,11 @@ export default function ContinuePlanningRail() {
         <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.22em] text-brand-orange-cta">{copy.eyebrow}</p>
-            <h2 id="continue-planning-title" className="mt-2 text-3xl font-black text-slate-950 sm:text-4xl">{copy.title}</h2>
+            <h2 id="continue-planning-title" className="mt-2 text-3xl font-black text-ink sm:text-4xl">{copy.title}</h2>
           </div>
           <div className="flex items-center gap-4">
-            <button type="button" onClick={openPanel} className="font-bold text-blue-700 hover:text-blue-900">{copy.open} →</button>
-            <button type="button" onClick={clear} className="text-sm font-semibold text-slate-500 hover:text-slate-800">{copy.clear}</button>
+            <button type="button" onClick={openPanel} className="font-bold text-ocean-dark hover:text-primary">{copy.open} →</button>
+            <button type="button" onClick={clear} className="text-sm font-semibold text-muted hover:text-ink">{copy.clear}</button>
           </div>
         </div>
         <MobileTourCarousel label={copy.title}>

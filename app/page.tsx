@@ -150,33 +150,33 @@ function HomeContent() {
 
       <Hero />
 
-      <section aria-label="Booking benefits" className="border-b border-slate-200 bg-white px-5 py-5 sm:px-8">
+      <section aria-label="Booking benefits" className="border-b border-line bg-white px-5 py-5 sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-3">
-          {[tr("Clear prices before you book", "Klare Preise vor der Buchung", "Понятные цены до бронирования", "أسعار واضحة قبل الحجز", "Jasne ceny przed rezerwacją", "预订前价格透明"), tr("Hotel pickup where available", "Hotelabholung, wo verfügbar", "Трансфер из отеля, где доступно", "الاستلام من الفندق عند توفره", "Odbiór z hotelu, gdy dostępny", "可提供酒店接送"), tr("Local help on WhatsApp", "Lokale Hilfe per WhatsApp", "Местная помощь в WhatsApp", "مساعدة محلية عبر واتساب", "Lokalna pomoc na WhatsApp", "WhatsApp 本地协助")].map((item) => <div key={item} className="flex items-center gap-3 text-sm font-bold text-slate-700"><BadgeCheck className="shrink-0 text-emerald-600" size={20}/>{item}</div>)}
+          {[tr("Clear prices before you book", "Klare Preise vor der Buchung", "Понятные цены до бронирования", "أسعار واضحة قبل الحجز", "Jasne ceny przed rezerwacją", "预订前价格透明"), tr("Hotel pickup where available", "Hotelabholung, wo verfügbar", "Трансфер из отеля, где доступно", "الاستلام من الفندق عند توفره", "Odbiór z hotelu, gdy dostępny", "可提供酒店接送"), tr("Local help on WhatsApp", "Lokale Hilfe per WhatsApp", "Местная помощь в WhatsApp", "مساعدة محلية عبر واتساب", "Lokalna pomoc na WhatsApp", "WhatsApp 本地协助")].map((item) => <div key={item} className="flex items-center gap-3 text-sm font-bold text-ink"><BadgeCheck className="shrink-0 text-emerald-600" size={20}/>{item}</div>)}
         </div>
       </section>
 
       <section className="bg-white px-6 py-20 sm:px-8 sm:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-cyan-700">{de ? "Reiseziele am Roten Meer" : ru ? "Направления Красного моря" : ar ? "وجهات البحر الأحمر" : pl ? "Destynacje nad Morzem Czerwonym" : zh ? "红海目的地" : "Red Sea destinations"}</p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">{de ? "Wähle dein Reiseziel" : ru ? "Выберите направление" : ar ? "اختر وجهتك للاستكشاف" : pl ? "Wybierz kierunek podróży" : zh ? "选择您想探索的目的地" : "Choose where you want to explore"}</h2>
-            <p className="mt-4 text-lg leading-8 text-slate-600">{de ? "Entdecke getrennte Ausflugskataloge für Hurghada und Marsa Alam mit eigenen Preisen, Abholgebieten und Buchungsbedingungen." : ru ? "Выбирайте отдельные каталоги Хургады и Марса-Алама с собственными ценами, зонами трансфера и условиями бронирования." : ar ? "استكشف كتالوجات منفصلة للغردقة ومرسى علم مع أسعار ومناطق استلام وشروط حجز خاصة بكل وجهة." : pl ? "Odkryj osobne katalogi Hurghady i Marsa Alam z własnymi cenami, strefami odbioru i zasadami rezerwacji." : zh ? "探索赫尔格达和马萨阿拉姆的独立行程目录，各自提供专属价格、接送区域和预订条件。" : "Explore separate Hurghada, Marsa Alam and Jeddah catalogues with destination-specific prices, pickup areas and booking conditions."}</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{de ? "Reiseziele am Roten Meer" : ru ? "Направления Красного моря" : ar ? "وجهات البحر الأحمر" : pl ? "Destynacje nad Morzem Czerwonym" : zh ? "红海目的地" : "Red Sea destinations"}</p>
+            <h2 className="mt-3 text-4xl font-black text-ink">{de ? "Wähle dein Reiseziel" : ru ? "Выберите направление" : ar ? "اختر وجهتك للاستكشاف" : pl ? "Wybierz kierunek podróży" : zh ? "选择您想探索的目的地" : "Choose where you want to explore"}</h2>
+            <p className="mt-4 text-lg leading-8 text-muted">{de ? "Entdecke getrennte Ausflugskataloge für Hurghada und Marsa Alam mit eigenen Preisen, Abholgebieten und Buchungsbedingungen." : ru ? "Выбирайте отдельные каталоги Хургады и Марса-Алама с собственными ценами, зонами трансфера и условиями бронирования." : ar ? "استكشف كتالوجات منفصلة للغردقة ومرسى علم مع أسعار ومناطق استلام وشروط حجز خاصة بكل وجهة." : pl ? "Odkryj osobne katalogi Hurghady i Marsa Alam z własnymi cenami, strefami odbioru i zasadami rezerwacji." : zh ? "探索赫尔格达和马萨阿拉姆的独立行程目录，各自提供专属价格、接送区域和预订条件。" : "Explore separate Hurghada, Marsa Alam and Jeddah catalogues with destination-specific prices, pickup areas and booking conditions."}</p>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {destinations.map((destination) => (
-              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group relative min-h-[410px] overflow-hidden rounded-[2rem] border border-slate-200 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-cyan-400">
+              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group relative min-h-[410px] overflow-hidden rounded-[2rem] border border-line shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-ocean">
                 <Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-7 text-white">
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="text-3xl font-black">{destination.name}</h3>
                     {destination.status === "coming-soon" ? <span className="rounded-full bg-brand-orange-soft px-3 py-1 text-xs font-black uppercase tracking-wide text-brand-orange-cta">{de ? "Demnächst" : ru ? "Скоро" : ar ? "قريباً" : pl ? "Wkrótce" : zh ? "即将推出" : "Coming soon"}</span> : <span className="rounded-full bg-brand-navy-soft px-3 py-1 text-xs font-black uppercase tracking-wide text-brand-navy">{de ? "Jetzt verfügbar" : ru ? "Доступно сейчас" : ar ? "متاح الآن" : pl ? "Dostępne teraz" : zh ? "现已开放" : "Available now"}</span>}
                   </div>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-200">{destination.slug === "hurghada" ? (de ? "Ausflüge am Roten Meer, Transfers und lokale Erlebnisse" : ru ? "Экскурсии, трансферы и местные впечатления на Красном море" : ar ? "رحلات البحر الأحمر والتنقلات والتجارب المحلية" : pl ? "Wycieczki nad Morzem Czerwonym, transfery i lokalne atrakcje" : zh ? "红海旅游、接送和本地体验" : "Red Sea tours, transfers, and local experiences") : destination.slug === "jeddah" ? (de ? "Tauchen und Küstenerlebnisse in Jeddah" : ru ? "Дайвинг и прибрежные впечатления в Джидде" : ar ? "غوص وتجارب ساحلية في جدة" : pl ? "Nurkowanie i nadmorskie atrakcje w Dżuddzie" : zh ? "吉达的红海潜水与海岸体验" : "Red Sea diving and coastal experiences in Jeddah") : (de ? "Unberührte Riffe, Wüstenlandschaften und Abenteuer im südlichen Roten Meer" : ru ? "Нетронутые рифы, пустынные пейзажи и приключения на юге Красного моря" : ar ? "شعاب نقية ومناظر صحراوية ومغامرات جنوب البحر الأحمر" : pl ? "Dziewicze rafy, pustynne krajobrazy i przygody na południu Morza Czerwonego" : zh ? "原始珊瑚礁、沙漠景观和红海南部探险" : "Untouched reefs, desert landscapes, and southern Red Sea adventures")}</p>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-line">{destination.slug === "hurghada" ? (de ? "Ausflüge am Roten Meer, Transfers und lokale Erlebnisse" : ru ? "Экскурсии, трансферы и местные впечатления на Красном море" : ar ? "رحلات البحر الأحمر والتنقلات والتجارب المحلية" : pl ? "Wycieczki nad Morzem Czerwonym, transfery i lokalne atrakcje" : zh ? "红海旅游、接送和本地体验" : "Red Sea tours, transfers, and local experiences") : destination.slug === "jeddah" ? (de ? "Tauchen und Küstenerlebnisse in Jeddah" : ru ? "Дайвинг и прибрежные впечатления в Джидде" : ar ? "غوص وتجارب ساحلية في جدة" : pl ? "Nurkowanie i nadmorskie atrakcje w Dżuddzie" : zh ? "吉达的红海潜水与海岸体验" : "Red Sea diving and coastal experiences in Jeddah") : (de ? "Unberührte Riffe, Wüstenlandschaften und Abenteuer im südlichen Roten Meer" : ru ? "Нетронутые рифы, пустынные пейзажи и приключения на юге Красного моря" : ar ? "شعاب نقية ومناظر صحراوية ومغامرات جنوب البحر الأحمر" : pl ? "Dziewicze rafy, pustynne krajobrazy i przygody na południu Morza Czerwonego" : zh ? "原始珊瑚礁、沙漠景观和红海南部探险" : "Untouched reefs, desert landscapes, and southern Red Sea adventures")}</p>
                   <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/20 pt-4">
-                    <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">{destinationDetails[destination.slug].signature}</p><p className="mt-1 text-sm text-slate-200">{displayTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).length} {t("tours").toLowerCase()} · {tr("from", "ab", "от", "من", "od", "起价")} {destinationDetails[destination.slug].startingPrice}</p></div>
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-blue-800 transition group-hover:translate-x-1"><ArrowRight size={19}/></span>
+                    <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-ocean-soft">{destinationDetails[destination.slug].signature}</p><p className="mt-1 text-sm text-line">{displayTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).length} {t("tours").toLowerCase()} · {tr("from", "ab", "от", "من", "od", "起价")} {destinationDetails[destination.slug].startingPrice}</p></div>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-ocean-dark transition group-hover:translate-x-1"><ArrowRight size={19}/></span>
                   </div>
                 </div>
               </Link>
@@ -222,7 +222,7 @@ function HomeContent() {
               mt-5
               max-w-3xl
               text-lg
-              text-gray-600
+              text-muted
             ">
               {t("popularToursDescription")}
             </p>
@@ -253,7 +253,7 @@ function HomeContent() {
               gap-3
               rounded-2xl
               border
-              bg-gray-50
+              bg-surface-muted
               px-5
               py-4
               shadow-sm
@@ -261,7 +261,7 @@ function HomeContent() {
 
 
               <Search
-                className="text-blue-600"
+                className="text-ocean"
               />
 
 <input
@@ -311,7 +311,7 @@ function HomeContent() {
             rounded-3xl
             border
             bg-gradient-to-r
-            from-slate-50
+            from-surface-muted
             to-white
             p-6
             sm:p-12
@@ -343,14 +343,14 @@ function HomeContent() {
                 <div className="
                   shrink-0
                   rounded-2xl
-                  bg-blue-100
+                  bg-ocean-tint
                   p-4
                 ">
 
 
                   <Car
                     size={34}
-                    className="text-blue-600"
+                    className="text-ocean"
                   />
 
 
@@ -366,7 +366,7 @@ function HomeContent() {
                     font-semibold
                     uppercase
                     tracking-[0.35em]
-                    text-blue-600
+                    text-ocean
                   ">
                     {de ? "Transfers" : ru ? "Трансферы" : ar ? "التنقلات" : pl ? "Transfery" : zh ? "接送服务" : "Transfers"}
                   </p>
@@ -390,7 +390,7 @@ function HomeContent() {
 
                   <p className="
                     mt-4
-                    text-gray-600
+                    text-muted
                   ">
                     {de ? "Private Transfers zwischen dem Flughafen Hurghada und den Hotels am Roten Meer." : ru ? "Частные трансферы между аэропортом Хургады и отелями Красного моря." : ar ? "تنقلات خاصة بين مطار الغردقة وفنادق البحر الأحمر." : pl ? "Prywatne przejazdy między lotniskiem w Hurghadzie a hotelami nad Morzem Czerwonym." : zh ? "赫尔格达机场与红海酒店之间的私人接送。" : "Private transfers between Hurghada Airport and Red Sea hotels."}
                   </p>
@@ -410,13 +410,13 @@ function HomeContent() {
                 href={`${localePath(language, "/transfers")}#book-transfer`}
                 className="
                 rounded-xl
-                bg-blue-600
+                bg-ocean
                 px-8
                 py-4
                 text-center
                 font-semibold
                 text-white
-                hover:bg-blue-700
+                hover:bg-ocean-dark
                 sm:w-auto
                 "
               >
@@ -444,10 +444,10 @@ function HomeContent() {
 className="
 mb-8
 rounded-2xl
-bg-blue-50
+bg-ocean-tint
 p-4
 text-center
-text-gray-700
+text-ink
 "
 >
 
@@ -456,7 +456,7 @@ text-gray-700
 <span className="
 mx-2
 font-bold
-text-blue-600
+text-ocean
 ">
 
 {filteredTours.length}
@@ -470,7 +470,7 @@ text-blue-600
 <span className="
 ml-2
 font-bold
-text-blue-600
+text-ocean
 ">
 
 {displaySearch}
@@ -488,8 +488,8 @@ text-blue-600
             if (!destinationTours.length) return null;
             return <section key={destination.slug} aria-labelledby={`home-${destination.slug}-title`}>
               <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                <div><p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-700">{destination.country} · {destination.region}</p><h3 id={`home-${destination.slug}-title`} className="mt-2 text-3xl font-black text-slate-950">{destination.name}</h3><p className="mt-2 max-w-2xl text-slate-600">{destination.tagline}</p></div>
-                <Link href={localePath(language, `/destinations/${destination.slug}`)} className="font-bold text-blue-700 hover:text-blue-900">{t("viewAllTours")} →</Link>
+                <div><p className="text-sm font-black uppercase tracking-[0.22em] text-ocean-dark">{destination.country} · {destination.region}</p><h3 id={`home-${destination.slug}-title`} className="mt-2 text-3xl font-black text-ink">{destination.name}</h3><p className="mt-2 max-w-2xl text-muted">{destination.tagline}</p></div>
+                <Link href={localePath(language, `/destinations/${destination.slug}`)} className="font-bold text-ocean-dark hover:text-primary">{t("viewAllTours")} →</Link>
               </div>
               <MobileTourCarousel label={`${destination.name} tours`}>
               {destinationTours.map((tour: Tour)=>(
@@ -542,7 +542,7 @@ text-blue-600
                 py-20
                 text-center
                 text-2xl
-                text-gray-500
+                text-muted
               ">
 
                 {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : ar ? "لم يتم العثور على رحلات مناسبة" : pl ? "Nie znaleziono pasujących wycieczek" : zh ? "未找到符合条件的旅游项目" : "No tours found"}
@@ -565,42 +565,42 @@ text-blue-600
 
       </section>
 
-      <section className="bg-slate-950 px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">{tr("Why Daily Red Sea", "Warum Daily Red Sea?", "Почему Daily Red Sea")}</p><h2 className="mt-4 text-4xl font-black">{tr("Local knowledge, easy booking, clear support.", "Lokale Erfahrung, einfache Buchung, klare Unterstützung.", "Местные знания, простое бронирование и понятная поддержка.")}</h2><p className="mt-5 leading-7 text-slate-300">{tr("We help you choose the right experience for your Red Sea destination with direct local support before your day begins.", "Wir helfen dir mit direkter lokaler Betreuung, das passende Erlebnis für dein Reiseziel am Roten Meer zu finden.", "Мы поможем выбрать подходящую поездку для вашего курорта на Красном море и поддержим вас до её начала.", "نساعدك في اختيار التجربة المناسبة لوجهتك في البحر الأحمر مع دعم محلي مباشر قبل بدء يومك.", "Pomagamy wybrać właściwą atrakcję dla Twojego miejsca nad Morzem Czerwonym i zapewniamy lokalne wsparcie przed wyjazdem.", "我们帮助您为红海目的地选择合适的体验，并在出发前提供直接的本地支持。")}</p></div>{[
+      <section className="bg-ink px-6 py-20 text-white sm:px-8"><div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-3"><div><p className="text-sm font-semibold uppercase tracking-[0.24em] text-ocean-soft">{tr("Why Daily Red Sea", "Warum Daily Red Sea?", "Почему Daily Red Sea")}</p><h2 className="mt-4 text-4xl font-black">{tr("Local knowledge, easy booking, clear support.", "Lokale Erfahrung, einfache Buchung, klare Unterstützung.", "Местные знания, простое бронирование и понятная поддержка.")}</h2><p className="mt-5 leading-7 text-line">{tr("We help you choose the right experience for your Red Sea destination with direct local support before your day begins.", "Wir helfen dir mit direkter lokaler Betreuung, das passende Erlebnis für dein Reiseziel am Roten Meer zu finden.", "Мы поможем выбрать подходящую поездку для вашего курорта на Красном море и поддержим вас до её начала.", "نساعدك في اختيار التجربة المناسبة لوجهتك في البحر الأحمر مع دعم محلي مباشر قبل بدء يومك.", "Pomagamy wybrać właściwą atrakcję dla Twojego miejsca nad Morzem Czerwonym i zapewniamy lokalne wsparcie przed wyjazdem.", "我们帮助您为红海目的地选择合适的体验，并在出发前提供直接的本地支持。")}</p></div>{[
         {icon:ShieldCheck,title:tr("Trusted local partners","Vertrauenswürdige lokale Partner","Надёжные местные партнёры","شركاء محليون موثوقون","Zaufani lokalni partnerzy","值得信赖的本地合作伙伴"),text:tr("Carefully selected crews, guides and drivers.","Sorgfältig ausgewählte Crews, Reiseführer und Fahrer.","Тщательно отобранные команды, гиды и водители.")},
         {icon:MessageCircle,title:tr("Easy WhatsApp booking","Einfache WhatsApp-Buchung","Простое бронирование в WhatsApp","حجز سهل عبر واتساب","Łatwa rezerwacja przez WhatsApp","轻松通过 WhatsApp 预订"),text:tr("Fast help for pickup, changes and questions.","Schnelle Hilfe bei Abholung, Änderungen und Fragen.","Быстрая помощь с трансфером, изменениями и вопросами.")},
         {icon:Headphones,title:tr("Helpful support","Hilfreiche Betreuung","Заботливая поддержка","دعم مفيد","Pomocne wsparcie","贴心支持"),text:tr("Clear communication before your tour.","Klare Kommunikation vor deinem Ausflug.","Понятное общение перед экскурсией.")},
-      ].map(({icon:Icon,title,text}) => <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6"><Icon className="text-cyan-300"/><h3 className="mt-5 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-slate-300">{text}</p></div>)}</div></section>
+      ].map(({icon:Icon,title,text}) => <div key={title} className="rounded-3xl border border-white/10 bg-white/5 p-6"><Icon className="text-ocean-soft"/><h3 className="mt-5 text-xl font-bold">{title}</h3><p className="mt-3 leading-7 text-line">{text}</p></div>)}</div></section>
       <section className="bg-white px-6 pt-20 pb-32 sm:px-8 sm:pb-36"><div className="mx-auto max-w-6xl"><GoogleReviews /></div></section>
 
       <HurghadaTravelGuide />
 
-      <section className="bg-slate-50 px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-blue-600">{tr("Helpful answers","Hilfreiche Antworten","Полезные ответы")}</p><h2 className="mt-3 text-center text-4xl font-black text-slate-900">{tr("Red Sea excursions FAQ","FAQ zu Ausflügen am Roten Meer","Вопросы об экскурсиях на Красном море")}</h2><div className="mt-8 divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white px-6">{(de ? [["Wie buche ich einen Ausflug?","Wähle einen Ausflug, Datum und Reisende und sende deine Buchung. Die Details bestätigen wir per WhatsApp."],["Ist die Hotelabholung verfügbar?","Viele Ausflüge beinhalten oder bieten eine Hotelabholung. Prüfe die Ausflugsdetails und gib dein Hotel bei der Buchung an."],["Wann bezahle ich?","Barzahlung bei Ankunft wird vor der Bestätigung klar angezeigt. Gesamtpreis und Zahlungsstatus stehen auch in der PDF-Bestätigung."],["Kann ich meine Buchung ändern?","Kontaktiere uns so früh wie möglich per WhatsApp. Wir prüfen die Verfügbarkeit und helfen dir."]] : ru ? [["Как забронировать экскурсию?","Выберите экскурсию, дату и гостей, затем отправьте заявку. Детали мы подтвердим в WhatsApp."],["Есть ли трансфер из отеля?","Многие экскурсии включают или предлагают трансфер. Проверьте описание и укажите отель при бронировании."],["Когда оплачивать?","Оплата наличными по прибытии ясно указывается перед подтверждением. Сумма и статус оплаты также есть в PDF."],["Можно изменить бронирование?","Свяжитесь с нами в WhatsApp как можно раньше. Мы проверим наличие мест и поможем."]] : ar ? [["كيف أحجز رحلة؟","اختر رحلة وحدد التاريخ وعدد المسافرين ثم أرسل طلب الحجز. سنؤكد لك التفاصيل العملية عبر واتساب."],["هل الاستلام من الفندق متاح؟","تتضمن أو تقدم العديد من رحلاتنا خدمة الاستلام من الفندق. تحقق من تفاصيل الرحلة وأضف اسم فندقك عند الحجز."],["متى أدفع؟","يتم توضيح حجوزات الدفع النقدي عند الوصول بشكل واضح قبل التأكيد. يظهر إجمالي المبلغ وحالة الدفع أيضًا في تأكيد الحجز بصيغة PDF."],["هل يمكنني تغيير حجزي؟","تواصل معنا عبر واتساب في أقرب وقت ممكن. سنتحقق من التوفر ونساعدك قدر الإمكان."]] : pl ? [["Jak zarezerwować wycieczkę?","Wybierz wycieczkę, datę i liczbę uczestników, a następnie wyślij rezerwację. Szczegóły potwierdzimy z Tobą na WhatsApp."],["Czy dostępny jest odbiór z hotelu?","Wiele naszych wycieczek zawiera lub oferuje odbiór z hotelu. Sprawdź szczegóły wycieczki i podaj nazwę hotelu podczas rezerwacji."],["Kiedy płacę?","Rezerwacje z płatnością gotówką na miejscu są wyraźnie oznaczone przed potwierdzeniem. Łączna kwota i status płatności widoczne są także w potwierdzeniu PDF."],["Czy mogę zmienić rezerwację?","Skontaktuj się z nami na WhatsApp jak najwcześniej. Sprawdzimy dostępność i pomożemy, jeśli to możliwe."]] : zh ? [["如何预订旅游项目？","选择行程、日期和出行人数，然后提交预订。我们会通过 WhatsApp 与您确认具体细节。"],["是否提供酒店接送？","许多行程包含或提供酒店接送服务。请查看行程详情，并在预订时填写您的酒店名称。"],["何时付款？","到店现付的预订会在确认前清楚标明。总价和付款状态也会显示在您的 PDF 确认单中。"],["我可以更改预订吗？","请尽早通过 WhatsApp 联系我们，我们会为您查询可用性并尽力提供帮助。"]] : [["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]]).map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-slate-900">{question}</summary><p className="mt-3 leading-7 text-slate-600">{answer}</p></details>)}</div></div></section>
+      <section className="bg-surface-muted px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-ocean">{tr("Helpful answers","Hilfreiche Antworten","Полезные ответы")}</p><h2 className="mt-3 text-center text-4xl font-black text-ink">{tr("Red Sea excursions FAQ","FAQ zu Ausflügen am Roten Meer","Вопросы об экскурсиях на Красном море")}</h2><div className="mt-8 divide-y divide-line rounded-3xl border border-line bg-white px-6">{(de ? [["Wie buche ich einen Ausflug?","Wähle einen Ausflug, Datum und Reisende und sende deine Buchung. Die Details bestätigen wir per WhatsApp."],["Ist die Hotelabholung verfügbar?","Viele Ausflüge beinhalten oder bieten eine Hotelabholung. Prüfe die Ausflugsdetails und gib dein Hotel bei der Buchung an."],["Wann bezahle ich?","Barzahlung bei Ankunft wird vor der Bestätigung klar angezeigt. Gesamtpreis und Zahlungsstatus stehen auch in der PDF-Bestätigung."],["Kann ich meine Buchung ändern?","Kontaktiere uns so früh wie möglich per WhatsApp. Wir prüfen die Verfügbarkeit und helfen dir."]] : ru ? [["Как забронировать экскурсию?","Выберите экскурсию, дату и гостей, затем отправьте заявку. Детали мы подтвердим в WhatsApp."],["Есть ли трансфер из отеля?","Многие экскурсии включают или предлагают трансфер. Проверьте описание и укажите отель при бронировании."],["Когда оплачивать?","Оплата наличными по прибытии ясно указывается перед подтверждением. Сумма и статус оплаты также есть в PDF."],["Можно изменить бронирование?","Свяжитесь с нами в WhatsApp как можно раньше. Мы проверим наличие мест и поможем."]] : ar ? [["كيف أحجز رحلة؟","اختر رحلة وحدد التاريخ وعدد المسافرين ثم أرسل طلب الحجز. سنؤكد لك التفاصيل العملية عبر واتساب."],["هل الاستلام من الفندق متاح؟","تتضمن أو تقدم العديد من رحلاتنا خدمة الاستلام من الفندق. تحقق من تفاصيل الرحلة وأضف اسم فندقك عند الحجز."],["متى أدفع؟","يتم توضيح حجوزات الدفع النقدي عند الوصول بشكل واضح قبل التأكيد. يظهر إجمالي المبلغ وحالة الدفع أيضًا في تأكيد الحجز بصيغة PDF."],["هل يمكنني تغيير حجزي؟","تواصل معنا عبر واتساب في أقرب وقت ممكن. سنتحقق من التوفر ونساعدك قدر الإمكان."]] : pl ? [["Jak zarezerwować wycieczkę?","Wybierz wycieczkę, datę i liczbę uczestników, a następnie wyślij rezerwację. Szczegóły potwierdzimy z Tobą na WhatsApp."],["Czy dostępny jest odbiór z hotelu?","Wiele naszych wycieczek zawiera lub oferuje odbiór z hotelu. Sprawdź szczegóły wycieczki i podaj nazwę hotelu podczas rezerwacji."],["Kiedy płacę?","Rezerwacje z płatnością gotówką na miejscu są wyraźnie oznaczone przed potwierdzeniem. Łączna kwota i status płatności widoczne są także w potwierdzeniu PDF."],["Czy mogę zmienić rezerwację?","Skontaktuj się z nami na WhatsApp jak najwcześniej. Sprawdzimy dostępność i pomożemy, jeśli to możliwe."]] : zh ? [["如何预订旅游项目？","选择行程、日期和出行人数，然后提交预订。我们会通过 WhatsApp 与您确认具体细节。"],["是否提供酒店接送？","许多行程包含或提供酒店接送服务。请查看行程详情，并在预订时填写您的酒店名称。"],["何时付款？","到店现付的预订会在确认前清楚标明。总价和付款状态也会显示在您的 PDF 确认单中。"],["我可以更改预订吗？","请尽早通过 WhatsApp 联系我们，我们会为您查询可用性并尽力提供帮助。"]] : [["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]]).map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-ink">{question}</summary><p className="mt-3 leading-7 text-muted">{answer}</p></details>)}</div></div></section>
 
       {language === "en" && (
-        <section className="border-t border-slate-200 bg-white px-6 py-16 sm:px-8">
+        <section className="border-t border-line bg-white px-6 py-16 sm:px-8">
           <div className="mx-auto max-w-7xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-cyan-700">Plan with local answers</p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-950">Red Sea guides before you book</h2>
-            <p className="mt-3 max-w-2xl leading-7 text-slate-600">Clear, practical answers on choosing the right Red Sea trip, written for first-time visitors.</p>
+            <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">Plan with local answers</p>
+            <h2 className="mt-3 text-3xl font-bold text-ink">Red Sea guides before you book</h2>
+            <p className="mt-3 max-w-2xl leading-7 text-muted">Clear, practical answers on choosing the right Red Sea trip, written for first-time visitors.</p>
             <div className="mt-7 grid gap-4 md:grid-cols-3">
-              <Link href="/blog/best-snorkeling-tours-in-hurghada-for-beginners" className="rounded-2xl border border-slate-200 p-5 transition hover:border-cyan-500 hover:bg-cyan-50"><p className="font-bold text-slate-950">Best snorkeling tours for beginners</p><p className="mt-2 text-sm leading-6 text-slate-600">Choose reef time, island time or a wildlife-focused day.</p></Link>
-              <Link href="/tours/full-day-diving" className="rounded-2xl border border-slate-200 p-5 transition hover:border-cyan-500 hover:bg-cyan-50"><p className="font-bold text-slate-950">Full-day scuba diving in Hurghada</p><p className="mt-2 text-sm leading-6 text-slate-600">Two guided dives, lunch and hotel transfer for certified divers.</p></Link>
-              <Link href="/blog/budget-scuba-diving-courses-for-backpackers-in-hurghada" className="rounded-2xl border border-slate-200 p-5 transition hover:border-cyan-500 hover:bg-cyan-50"><p className="font-bold text-slate-950">Hurghada diving guide</p><p className="mt-2 text-sm leading-6 text-slate-600">Know the license and equipment requirements before booking.</p></Link>
+              <Link href="/blog/best-snorkeling-tours-in-hurghada-for-beginners" className="rounded-2xl border border-line p-5 transition hover:border-ocean hover:bg-ocean-tint"><p className="font-bold text-ink">Best snorkeling tours for beginners</p><p className="mt-2 text-sm leading-6 text-muted">Choose reef time, island time or a wildlife-focused day.</p></Link>
+              <Link href="/tours/full-day-diving" className="rounded-2xl border border-line p-5 transition hover:border-ocean hover:bg-ocean-tint"><p className="font-bold text-ink">Full-day scuba diving in Hurghada</p><p className="mt-2 text-sm leading-6 text-muted">Two guided dives, lunch and hotel transfer for certified divers.</p></Link>
+              <Link href="/blog/budget-scuba-diving-courses-for-backpackers-in-hurghada" className="rounded-2xl border border-line p-5 transition hover:border-ocean hover:bg-ocean-tint"><p className="font-bold text-ink">Hurghada diving guide</p><p className="mt-2 text-sm leading-6 text-muted">Know the license and equipment requirements before booking.</p></Link>
             </div>
           </div>
         </section>
       )}
 
-      <section className="bg-blue-600 px-6 py-20 text-center text-white sm:px-8">
+      <section className="bg-ocean px-6 py-20 text-center text-white sm:px-8">
         <div className="mx-auto max-w-3xl">
-          <p className="font-semibold uppercase tracking-[0.24em] text-blue-100">{tr("Start planning","Jetzt planen","Начните планировать")}</p>
+          <p className="font-semibold uppercase tracking-[0.24em] text-ocean-tint">{tr("Start planning","Jetzt planen","Начните планировать")}</p>
           <h2 className="mt-4 text-4xl font-bold">{tr("Ready for your Red Sea adventure?","Bereit für dein Abenteuer am Roten Meer?","Готовы к приключению на Красном море?")}</h2>
-          <p className="mt-5 text-lg text-blue-100">{tr("Message our local team and we’ll help you find the right tour for your stay.","Schreibe unserem lokalen Team – wir helfen dir, den passenden Ausflug zu finden.","Напишите нашей местной команде, и мы поможем выбрать экскурсию.","راسل فريقنا المحلي وسنساعدك في اختيار الرحلة المناسبة لإقامتك.","Napisz do naszego lokalnego zespołu, a pomożemy Ci znaleźć odpowiednią wycieczkę na czas pobytu.","联系我们的本地团队，我们将帮您找到适合此次行程的旅游项目。")}</p>
-          <a href={whatsappUrl(tr("Hello Daily Red Sea, I would like help planning my trip.","Hallo Daily Red Sea, ich möchte Hilfe bei der Reiseplanung.","Здравствуйте! Помогите мне спланировать поездку.","مرحبًا Daily Red Sea، أرغب في المساعدة في تخطيط رحلتي.","Dzień dobry Daily Red Sea, poproszę o pomoc w zaplanowaniu mojej podróży.","您好 Daily Red Sea，我想请你们协助规划我的行程。"))} onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-blue-700 transition hover:bg-blue-50">{tr("Plan on WhatsApp","Über WhatsApp planen","Спланировать в WhatsApp","خطط عبر واتساب","Planuj przez WhatsApp","通过 WhatsApp 规划")}</a>
+          <p className="mt-5 text-lg text-ocean-tint">{tr("Message our local team and we’ll help you find the right tour for your stay.","Schreibe unserem lokalen Team – wir helfen dir, den passenden Ausflug zu finden.","Напишите нашей местной команде, и мы поможем выбрать экскурсию.","راسل فريقنا المحلي وسنساعدك في اختيار الرحلة المناسبة لإقامتك.","Napisz do naszego lokalnego zespołu, a pomożemy Ci znaleźć odpowiednią wycieczkę na czas pobytu.","联系我们的本地团队，我们将帮您找到适合此次行程的旅游项目。")}</p>
+          <a href={whatsappUrl(tr("Hello Daily Red Sea, I would like help planning my trip.","Hallo Daily Red Sea, ich möchte Hilfe bei der Reiseplanung.","Здравствуйте! Помогите мне спланировать поездку.","مرحبًا Daily Red Sea، أرغب في المساعدة في تخطيط رحلتي.","Dzień dobry Daily Red Sea, poproszę o pomoc w zaplanowaniu mojej podróży.","您好 Daily Red Sea，我想请你们协助规划我的行程。"))} onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-ocean-dark transition hover:bg-ocean-tint">{tr("Plan on WhatsApp","Über WhatsApp planen","Спланировать в WhatsApp","خطط عبر واتساب","Planuj przez WhatsApp","通过 WhatsApp 规划")}</a>
         </div>
       </section>
 
-      <footer className="bg-slate-950 px-6 py-12 text-slate-300 sm:px-8">
+      <footer className="bg-ink px-6 py-12 text-line sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <p className="text-xl font-bold text-white">Daily Red Sea</p>
@@ -630,7 +630,7 @@ text-blue-600
             </div>
           </div>
         </div>
-        <p className="mx-auto mt-10 max-w-7xl border-t border-slate-800 pt-6 text-sm">© {new Date().getFullYear()} Daily Red Sea. {tr("All rights reserved.","Alle Rechte vorbehalten.","Все права защищены.")}</p>
+        <p className="mx-auto mt-10 max-w-7xl border-t border-ink pt-6 text-sm">© {new Date().getFullYear()} Daily Red Sea. {tr("All rights reserved.","Alle Rechte vorbehalten.","Все права защищены.")}</p>
       </footer>
 
 

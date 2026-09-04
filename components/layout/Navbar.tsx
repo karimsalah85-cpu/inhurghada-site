@@ -58,7 +58,7 @@ export default function Navbar() {
       left-0
       z-50
       w-full
-      border-b border-slate-200/80
+      border-b border-line/80
       bg-white/95
       backdrop-blur-xl
       shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]
@@ -85,7 +85,7 @@ export default function Navbar() {
           <Link
             href={localePath(language)}
             onClick={closeMenu}
-            className="flex shrink-0 items-center rounded-xl py-1 transition hover:bg-slate-100"
+            className="flex shrink-0 items-center rounded-xl py-1 transition hover:bg-surface-muted"
             aria-label={ui.home}
           >
             <Image
@@ -109,7 +109,7 @@ export default function Navbar() {
           <button
             ref={menuButtonRef}
             onClick={() => setOpen((current) => !current)}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-slate-800 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-ink transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean"
             aria-label={open ? ui.closeMenu : ui.openMenu}
             aria-expanded={open}
             aria-controls="mobile-navigation"
@@ -124,7 +124,7 @@ export default function Navbar() {
         <Link
           href={localePath(language)}
           onClick={closeMenu}
-          className="hidden shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-slate-100 xl:flex"
+          className="hidden shrink-0 items-center rounded-2xl px-2 py-1.5 transition hover:bg-surface-muted xl:flex"
           aria-label={ui.home}
         >
           <Image
@@ -151,7 +151,7 @@ export default function Navbar() {
           "
         >
 
-          <div className="flex items-center gap-1 rounded-2xl bg-slate-100/80 p-1">
+          <div className="flex items-center gap-1 rounded-2xl bg-surface-muted/80 p-1">
           <NavLink href={localePath(language)} active={pathname === localePath(language)}>
             {t("home")}
           </NavLink>
@@ -162,9 +162,9 @@ export default function Navbar() {
           </NavLink>
 
           <details className="group relative">
-            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-slate-700 hover:bg-brand-navy-tint hover:text-brand-navy">{destinationsLabel} <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
-            <div className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-              {destinations.filter((destination) => destination.status === "live").map((destination) => <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="block rounded-xl px-4 py-3 font-semibold text-slate-700 hover:bg-brand-navy-tint hover:text-brand-navy">{destination.name}</Link>)}
+            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-ink hover:bg-brand-navy-tint hover:text-brand-navy">{destinationsLabel} <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
+            <div className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-line bg-white p-2 shadow-xl">
+              {destinations.filter((destination) => destination.status === "live").map((destination) => <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="block rounded-xl px-4 py-3 font-semibold text-ink hover:bg-brand-navy-tint hover:text-brand-navy">{destination.name}</Link>)}
             </div>
           </details>
 
@@ -185,30 +185,29 @@ export default function Navbar() {
             href={localePath(language, "/booking")}
             className="
             rounded-full
-            bg-gradient-to-r from-cyan-600 to-blue-700
+            bg-gradient-to-r from-cta to-cta-dark
             whitespace-nowrap
             px-5
             py-2.5
             font-semibold
             text-white
-            shadow-lg shadow-cyan-500/20
+            shadow-lg shadow-cta/20
             transition
             hover:scale-[1.02]
-            hover:from-cyan-500
-            hover:to-blue-800
+            hover:brightness-105
             "
           >
             {language === "ar" ? "خطط لرحلتك" : language === "de" ? "Reise planen" : language === "ru" ? "Спланировать" : language === "pl" ? "Zaplanuj podróż" : language === "zh" ? "规划行程" : "Plan your trip"}
           </Link>
 
-          <button type="button" onClick={openSavedTrips} aria-label={savedCount ? `${savedTripsLabel} (${savedCount})` : savedTripsLabel} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-brand-orange-cta hover:text-brand-orange-cta">
+          <button type="button" onClick={openSavedTrips} aria-label={savedCount ? `${savedTripsLabel} (${savedCount})` : savedTripsLabel} className="relative rounded-xl border border-line bg-white p-2.5 text-ink shadow-sm transition hover:border-brand-orange-cta hover:text-brand-orange-cta">
             <Heart size={22} />
             {savedCount ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-orange-cta px-1 text-xs font-bold text-white">{savedCount}</span> : null}
           </button>
 
-          <Link href={localePath(language, "/cart")} aria-label={`${items.length} ${ui.cart}`} className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
+          <Link href={localePath(language, "/cart")} aria-label={`${items.length} ${ui.cart}`} className="relative rounded-xl border border-line bg-white p-2.5 text-ink shadow-sm transition hover:border-ocean-soft hover:text-ocean-dark">
             <ShoppingCart size={22} />
-            {items.length ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-700 px-1 text-xs font-bold text-white">{items.length}</span> : null}
+            {items.length ? <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-ocean-dark px-1 text-xs font-bold text-white">{items.length}</span> : null}
           </Link>
 
           <SettingsSelectors
@@ -234,7 +233,7 @@ export default function Navbar() {
         <div
           id="mobile-navigation"
           aria-label={ui.mobileNav}
-          className="flex max-h-[calc(100dvh-68px-6rem-env(safe-area-inset-bottom))] scroll-pb-5 flex-col gap-2 overflow-y-auto overscroll-contain border-t border-slate-200 bg-white px-6 py-5 shadow-xl xl:hidden"
+          className="flex max-h-[calc(100dvh-68px-6rem-env(safe-area-inset-bottom))] scroll-pb-5 flex-col gap-2 overflow-y-auto overscroll-contain border-t border-line bg-white px-6 py-5 shadow-xl xl:hidden"
         >
 
 
@@ -253,7 +252,7 @@ export default function Navbar() {
             {t("tours")}
           </MobileLink>
 
-          <p className="px-4 pt-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">{destinationsLabel}</p>
+          <p className="px-4 pt-2 text-xs font-black uppercase tracking-[0.2em] text-muted">{destinationsLabel}</p>
           {destinations.filter((destination) => destination.status === "live").map((destination) => <MobileLink key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} close={closeMenu}><span>{destination.name}</span></MobileLink>)}
 
 
@@ -279,13 +278,13 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink href={localePath(language, "/cart")} close={closeMenu}>
-            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "pl" ? "Koszyk wycieczek" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-blue-100 px-2 py-0.5 text-sm font-bold text-blue-800">{items.length}</span></span>
+            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "pl" ? "Koszyk wycieczek" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-ocean-tint px-2 py-0.5 text-sm font-bold text-ocean-dark">{items.length}</span></span>
           </MobileLink>
 
           <button
             type="button"
             onClick={() => { closeMenu(); openSavedTrips(); }}
-            className="rounded-xl px-3 py-3 text-left text-base font-semibold text-slate-800 transition hover:bg-brand-navy-tint hover:text-brand-navy"
+            className="rounded-xl px-3 py-3 text-left text-base font-semibold text-ink transition hover:bg-brand-navy-tint hover:text-brand-navy"
           >
             <span className="flex items-center justify-between"><span>{savedTripsLabel}</span><span className="rounded-full bg-brand-orange-soft px-2 py-0.5 text-sm font-bold text-brand-orange-cta">{savedCount}</span></span>
           </button>
@@ -349,18 +348,18 @@ function SettingsSelectors({
   mobile?: boolean;
 }) {
   const selectClass = mobile
-    ? "h-8 w-full appearance-none bg-transparent py-1 pl-1.5 pr-4 text-[10px] font-bold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:pr-5 min-[360px]:text-xs"
-    : "rounded-xl border-0 bg-transparent px-1.5 py-1.5 text-xs font-medium text-slate-700 outline-none focus:ring-2 focus:ring-cyan-500";
+    ? "h-8 w-full appearance-none bg-transparent py-1 pl-1.5 pr-4 text-[10px] font-bold text-ink outline-none focus-visible:ring-2 focus-visible:ring-ocean min-[360px]:pr-5 min-[360px]:text-xs"
+    : "rounded-xl border-0 bg-transparent px-1.5 py-1.5 text-xs font-medium text-ink outline-none focus:ring-2 focus:ring-ocean";
 
   if (mobile) {
     return (
-      <div className="grid w-[clamp(116px,36vw,152px)] flex-none grid-cols-[47%_53%] divide-x divide-slate-200 rounded-full border border-slate-200 bg-white p-0.5 shadow-sm xl:hidden">
+      <div className="grid w-[clamp(116px,36vw,152px)] flex-none grid-cols-[47%_53%] divide-x divide-line rounded-full border border-line bg-white p-0.5 shadow-sm xl:hidden">
         <div className="relative min-w-0" dir="ltr">
           <label className="sr-only" htmlFor="mobile-currency">{publicInterfaceCopy[language].currency}</label>
           <select id="mobile-currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>
             {currencies.map((item) => <option key={item} value={item}>{currencySymbol(item)} {item}</option>)}
           </select>
-          <ChevronDown aria-hidden="true" size={11} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-600" />
+          <ChevronDown aria-hidden="true" size={11} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-muted" />
         </div>
         <div className="min-w-0">
           <LanguageDropdown language={language} pathname={pathname} mobile />
@@ -370,17 +369,17 @@ function SettingsSelectors({
   }
 
   return (
-    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-0.5 shadow-sm">
+    <div className="flex items-center gap-1 rounded-2xl border border-line bg-white p-0.5 shadow-sm">
       <LanguageDropdown
         language={language}
         pathname={pathname}
         mobile={mobile}
         onLanguageSelect={onLanguageSelect}
       />
-      <div className="flex items-center border-l border-slate-200 pl-1">
+      <div className="flex items-center border-l border-line pl-1">
         <label className="sr-only" htmlFor="currency">{publicInterfaceCopy[language].currency}</label>
         <select id="currency" value={currency} onChange={(event) => setCurrency(event.target.value as typeof currency)} className={selectClass}>{currencies.map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className="rounded-lg px-1 py-1.5 text-[8px] font-bold uppercase tracking-wide text-slate-400 hover:bg-slate-50 hover:text-slate-600">{publicInterfaceCopy[language].rates}</a>
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noreferrer" title={publicInterfaceCopy[language].ratesBy} className="rounded-lg px-1 py-1.5 text-[8px] font-bold uppercase tracking-wide text-muted hover:bg-surface-muted hover:text-ink">{publicInterfaceCopy[language].rates}</a>
       </div>
     </div>
   );
@@ -454,8 +453,8 @@ function LanguageDropdown({
           }
         }}
         className={mobile
-          ? "flex h-8 w-full items-center justify-between gap-1 rounded-full bg-slate-100 px-1.5 text-[10px] font-bold text-blue-700 outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 min-[360px]:gap-1.5 min-[360px]:px-2 min-[360px]:text-xs"
-          : "flex items-center gap-1 rounded-xl px-1.5 py-1.5 text-xs font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-cyan-500"}
+          ? "flex h-8 w-full items-center justify-between gap-1 rounded-full bg-surface-muted px-1.5 text-[10px] font-bold text-ocean-dark outline-none transition hover:bg-ocean-tint focus-visible:ring-2 focus-visible:ring-ocean min-[360px]:gap-1.5 min-[360px]:px-2 min-[360px]:text-xs"
+          : "flex items-center gap-1 rounded-xl px-1.5 py-1.5 text-xs font-medium text-ink outline-none transition hover:bg-surface-muted focus-visible:ring-2 focus-visible:ring-ocean"}
       >
         <span lang={currentLanguage.code}>{currentLanguage.label}</span>
         <ChevronDown aria-hidden="true" size={mobile ? 11 : 13} className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -466,8 +465,8 @@ function LanguageDropdown({
         aria-label="Choose site language"
         hidden={!open}
         className={mobile
-          ? "absolute end-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl"
-          : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl"}
+          ? "absolute end-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-2xl border border-line bg-white p-2 shadow-xl"
+          : "absolute right-0 top-full z-20 mt-2 grid min-w-40 gap-1 rounded-xl border border-line bg-white p-2 shadow-xl"}
       >
         {languages.map((item, index) => {
           const active = item.code === language;
@@ -483,7 +482,7 @@ function LanguageDropdown({
                 setOpen(false);
                 onLanguageSelect?.();
               }}
-              className={`rounded-xl px-4 py-3 text-sm outline-none transition hover:bg-cyan-50 focus-visible:ring-2 focus-visible:ring-cyan-500 ${active ? "bg-cyan-50 font-bold text-blue-700" : "font-semibold text-slate-700"}`}
+              className={`rounded-xl px-4 py-3 text-sm outline-none transition hover:bg-ocean-tint focus-visible:ring-2 focus-visible:ring-ocean ${active ? "bg-ocean-tint font-bold text-ocean-dark" : "font-semibold text-ink"}`}
             >
               {item.label}
             </Link>
@@ -512,7 +511,7 @@ function NavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition ${active ? "bg-white text-brand-navy shadow-sm" : "text-slate-700 hover:bg-brand-navy-tint hover:text-brand-navy"}`}
+      className={`whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold transition ${active ? "bg-white text-brand-navy shadow-sm" : "text-ink hover:bg-brand-navy-tint hover:text-brand-navy"}`}
     >
 
       {children}
@@ -545,7 +544,7 @@ function MobileLink({
       href={href}
       ref={linkRef}
       onClick={close}
-      className="rounded-xl px-3 py-3 text-base font-semibold text-slate-800 transition hover:bg-brand-navy-tint hover:text-brand-navy"
+      className="rounded-xl px-3 py-3 text-base font-semibold text-ink transition hover:bg-brand-navy-tint hover:text-brand-navy"
     >
 
       {children}

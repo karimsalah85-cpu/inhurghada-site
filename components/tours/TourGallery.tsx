@@ -57,11 +57,11 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
       type="button"
       onClick={() => setSelectedIndex(index)}
       aria-label={`${openLabel}: ${title} ${index + 1}`}
-      className={`group relative overflow-hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400 ${primary ? "aspect-[4/3] sm:aspect-auto sm:min-h-64" : "aspect-[4/3] sm:aspect-auto"}`}
+      className={`group relative overflow-hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean ${primary ? "aspect-[4/3] sm:aspect-auto sm:min-h-64" : "aspect-[4/3] sm:aspect-auto"}`}
     >
       <Image src={image} alt={primary ? imageAlt || title : galleryImageAlts[index - 1] || `${title} — ${galleryImageLabel} ${index + 1}`} fill sizes={primary ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"} className="object-cover transition duration-300 group-hover:scale-105" style={{ objectPosition: `${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.x ?? 0.5) * 100}% ${((primary ? imageFocalPoint : galleryImageFocalPoints[index - 1])?.y ?? 0.5) * 100}%` }} priority={primary} />
       <ImageWatermark prominent={primary} />
-      <span className="absolute end-3 top-3 rounded-full bg-slate-950/70 p-2 text-white shadow-lg backdrop-blur-sm">
+      <span className="absolute end-3 top-3 rounded-full bg-ink/70 p-2 text-white shadow-lg backdrop-blur-sm">
         <Expand size={18} aria-hidden="true" />
       </span>
     </button>
@@ -77,7 +77,7 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
       </div>
 
       {selectedIndex !== null ? (
-        <div role="dialog" aria-modal="true" aria-label={`${title} gallery`} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 p-3 sm:p-8" onClick={() => setSelectedIndex(null)}>
+        <div role="dialog" aria-modal="true" aria-label={`${title} gallery`} className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-3 sm:p-8" onClick={() => setSelectedIndex(null)}>
           <button type="button" onClick={() => setSelectedIndex(null)} aria-label={closeLabel} className="absolute end-4 top-4 z-20 rounded-full bg-white/15 p-3 text-white backdrop-blur-sm transition hover:bg-white/25">
             <X size={28} />
           </button>

@@ -37,11 +37,11 @@ export default function MobileTourCarousel({ children, label }: { children: Reac
         {items.map((item, index) => <div key={index} className="min-w-[calc(100%-1.5rem)] snap-center md:min-w-0">{item}</div>)}
       </div>
       {items.length > 1 ? <div className="mt-3 flex items-center justify-center gap-4 md:hidden">
-        <button type="button" onClick={() => goTo(activeIndex - 1)} disabled={activeIndex === 0} aria-label="Previous tour" className="inline-flex size-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm disabled:opacity-35"><ChevronLeft size={20} /></button>
+        <button type="button" onClick={() => goTo(activeIndex - 1)} disabled={activeIndex === 0} aria-label="Previous tour" className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm disabled:opacity-35"><ChevronLeft size={20} /></button>
         <div className="flex gap-2" aria-label={`Tour ${activeIndex + 1} of ${items.length}`}>
-          {items.map((_, index) => <button key={index} type="button" onClick={() => goTo(index)} aria-label={`Go to tour ${index + 1}`} aria-current={index === activeIndex ? "true" : undefined} className={`size-2.5 rounded-full transition ${index === activeIndex ? "bg-blue-700" : "bg-slate-300"}`} />)}
+          {items.map((_, index) => <button key={index} type="button" onClick={() => goTo(index)} aria-label={`Go to tour ${index + 1}`} aria-current={index === activeIndex ? "true" : undefined} className={`size-2.5 rounded-full transition ${index === activeIndex ? "bg-ocean-dark" : "bg-line"}`} />)}
         </div>
-        <button type="button" onClick={() => goTo(activeIndex + 1)} disabled={activeIndex === items.length - 1} aria-label="Next tour" className="inline-flex size-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 shadow-sm disabled:opacity-35"><ChevronRight size={20} /></button>
+        <button type="button" onClick={() => goTo(activeIndex + 1)} disabled={activeIndex === items.length - 1} aria-label="Next tour" className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-white text-ink shadow-sm disabled:opacity-35"><ChevronRight size={20} /></button>
       </div> : null}
     </div>
   );
