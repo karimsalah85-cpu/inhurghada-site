@@ -19,7 +19,7 @@ import { googleReviewUrl, whatsappUrl } from "@/lib/contact";
 import HurghadaTravelGuide from "@/components/home/HurghadaTravelGuide";
 import SocialLinks from "@/components/layout/SocialLinks";
 import { localePath } from "@/lib/i18n";
-import { localizeTourArabic, localizeTourChinese, localizeTourGerman, localizeTourPolish, localizeTourRussian } from "@/lib/tour-localization";
+import { localizeTour } from "@/lib/tour-localization";
 import { filterTours } from "@/lib/tour-search";
 import GoogleReviews from "@/components/reviews/GoogleReviews";
 import { destinations } from "@/lib/destinations";
@@ -121,7 +121,7 @@ function HomeContent() {
   const [liveTours, setLiveTours] = useState<Tour[]>(tours);
   useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
   const publicTours = applyTourCollectionMediaSafety(liveTours.filter((tour) => tour.listingStatus !== "unlisted" && tour.listingStatus !== "paused"), language);
-  const displayTours = de ? publicTours.map(localizeTourGerman) : ru ? publicTours.map(localizeTourRussian) : ar ? publicTours.map(localizeTourArabic) : pl ? publicTours.map(localizeTourPolish) : zh ? publicTours.map(localizeTourChinese) : publicTours;
+  const displayTours = publicTours.map((tour) => localizeTour(tour, language));
   const filteredTours = filterTours(displayTours, search);
   const displaySearch = search.replace(/,/g, ", ");
 
@@ -136,6 +136,23 @@ function HomeContent() {
     hurghada: { signature: tr("Islands, reefs & desert", "Inseln, Riffe & Wüste", "Острова, рифы и пустыня", "الجزر والشعاب والصحراء", "Wyspy, rafy i pustynia", "海岛、珊瑚礁与沙漠"), startingPrice: "$8" },
     "marsa-alam": { signature: tr("Wild reefs & marine life", "Wilde Riffe & Meeresleben", "Дикие рифы и морская жизнь", "شعاب بكر وحياة بحرية", "Dzikie rafy i życie morskie", "原生态珊瑚礁与海洋生物"), startingPrice: "€45" },
     jeddah: { signature: tr("Coastal diving", "Tauchen an der Küste", "Прибрежный дайвинг", "غوص ساحلي", "Nurkowanie przybrzeżne", "滨海潜水"), startingPrice: "SAR 300" },
+  };
+  const destinationLocaleCopy: Record<string, { country: string; region: string; tagline: string }> = {
+    hurghada: {
+      country: tr("Egypt", "Ägypten", "Египет", "مصر", "Egipt", "埃及"),
+      region: tr("Red Sea Governorate", "Gouvernement Rotes Meer", "Мухафаза Красное море", "محافظة البحر الأحمر", "Muhafaza Morza Czerwonego", "红海省"),
+      tagline: tr("Red Sea tours, transfers, and local experiences", "Ausflüge am Roten Meer, Transfers und lokale Erlebnisse", "Экскурсии, трансферы и местные впечатления на Красном море", "رحلات البحر الأحمر والتنقلات والتجارب المحلية", "Wycieczki nad Morzem Czerwonym, transfery i lokalne atrakcje", "红海旅游、接送和本地体验"),
+    },
+    "marsa-alam": {
+      country: tr("Egypt", "Ägypten", "Египет", "مصر", "Egipt", "埃及"),
+      region: tr("Red Sea Governorate", "Gouvernement Rotes Meer", "Мухафаза Красное море", "محافظة البحر الأحمر", "Muhafaza Morza Czerwonego", "红海省"),
+      tagline: tr("Untouched reefs, desert landscapes, and southern Red Sea adventures", "Unberührte Riffe, Wüstenlandschaften und Abenteuer im südlichen Roten Meer", "Нетронутые рифы, пустынные пейзажи и приключения на юге Красного моря", "شعاب نقية ومناظر صحراوية ومغامرات جنوب البحر الأحمر", "Dziewicze rafy, pustynne krajobrazy i przygody na południu Morza Czerwonego", "原始珊瑚礁、沙漠景观和红海南部探险"),
+    },
+    jeddah: {
+      country: tr("Saudi Arabia", "Saudi-Arabien", "Саудовская Аравия", "المملكة العربية السعودية", "Arabia Saudyjska", "沙特阿拉伯"),
+      region: tr("Makkah Province", "Provinz Mekka", "Провинция Мекка", "منطقة مكة المكرمة", "Prowincja Mekka", "麦加省"),
+      tagline: tr("Red Sea diving and coastal experiences in Jeddah", "Tauchen und Küstenerlebnisse in Jeddah", "Дайвинг и прибрежные впечатления в Джидде", "غوص وتجارب ساحلية في جدة", "Nurkowanie i nadmorskie atrakcje w Dżuddzie", "吉达的红海潜水与海岸体验"),
+    },
   };
 
 
@@ -488,7 +505,7 @@ text-ocean
             if (!destinationTours.length) return null;
             return <section key={destination.slug} aria-labelledby={`home-${destination.slug}-title`}>
               <div className="mb-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                <div><p className="text-sm font-black uppercase tracking-[0.22em] text-ocean-dark">{destination.country} · {destination.region}</p><h3 id={`home-${destination.slug}-title`} className="mt-2 text-3xl font-black text-ink">{destination.name}</h3><p className="mt-2 max-w-2xl text-muted">{destination.tagline}</p></div>
+                <div><p className="text-sm font-black uppercase tracking-[0.22em] text-ocean-dark">{destinationLocaleCopy[destination.slug].country} · {destinationLocaleCopy[destination.slug].region}</p><h3 id={`home-${destination.slug}-title`} className="mt-2 text-3xl font-black text-ink">{destination.name}</h3><p className="mt-2 max-w-2xl text-muted">{destinationLocaleCopy[destination.slug].tagline}</p></div>
                 <Link href={localePath(language, `/destinations/${destination.slug}`)} className="font-bold text-ocean-dark hover:text-primary">{t("viewAllTours")} →</Link>
               </div>
               <MobileTourCarousel label={`${destination.name} tours`}>
