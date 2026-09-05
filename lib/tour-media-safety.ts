@@ -168,7 +168,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "royal-seascope-submarine": ownedMedia.glassBottomBoat,
   "hurghada-airport-transfer": ownedMedia.airport,
   "senzo-transfer": ownedMedia.senzo, "dolphin-house-snorkeling": ownedMedia.dolphin,
-  "horse-riding-sea-desert": { image: "/images/hurghada-island-family-sunset.jpeg", alt: localizedAlt("Guests enjoying a Red Sea island sunset") }, "sahl-hasheesh-horse-riding": categoryMedia.horse,
+  "horse-riding-sea-desert": categoryMedia.horse, "sahl-hasheesh-horse-riding": categoryMedia.horse,
   "cairo-giza-day-trip-bus": ownedMedia.cairo, "cairo-day-trip-flight": ownedMedia.cairo,
   "el-gouna-city-boat-tour": categoryMedia.elGouna, "turkish-bath-spa": { image: "/images/owned/turkish-hammam-spa.jpg", alt: localizedAlt("Guest relaxing during a Turkish hammam and spa treatment") },
   "dolphin-house-marsa-alam": ownedMedia.dolphin,

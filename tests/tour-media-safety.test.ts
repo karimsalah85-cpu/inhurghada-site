@@ -16,10 +16,9 @@ describe("tour media safety", () => {
     expect(tours.find((item) => item.slug === "luxor-private-day-trip")?.image).toBe("/images/owned/luxor-branded.jpg");
     expect(tours.find((item) => item.slug === "royal-seascope-submarine")?.image).toBe("/images/owned/hurghada-glass-bottom-boat.jpg");
 
-    expect(tours.find((item) => item.slug === "horse-riding-sea-desert")?.image).toBe("/images/hurghada-island-family-sunset.jpeg");
     expect(tours.find((item) => item.slug === "turkish-bath-spa")?.image).toBe("/images/owned/turkish-hammam-spa.jpg");
 
-    for (const slug of ["sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour"]) {
+    for (const slug of ["horse-riding-sea-desert", "sahl-hasheesh-horse-riding", "el-gouna-city-boat-tour"]) {
       expect(tours.find((item) => item.slug === slug)?.image).toMatch(/^\/images\/placeholders\/.+\.svg$/);
     }
   });
@@ -80,7 +79,7 @@ describe("tour media safety", () => {
   });
 
   it("publishes only approved repository photography or original placeholders", () => {
-    const restoredImages = new Set(["/images/hurghada-island-family-sunset.jpeg", "/images/hero.jpg"]);
+    const restoredImages = new Set(["/images/hero.jpg"]);
     for (const tour of tours) {
       expect(tour.image.match(/^\/images\/(owned\/.+\.(jpg|png)|placeholders\/.+\.svg)$/) || restoredImages.has(tour.image)).toBeTruthy();
       for (const image of tour.galleryImages || []) expect(image).toMatch(/^\/images\/owned\/.+\.jpg$/);
