@@ -1568,7 +1568,14 @@ const magawishSpeedboatTranslations: Partial<Record<Locale, Partial<Tour>>> = {
 };
 
 export function localizeTour(tour: Tour, locale: Locale): Tour {
-  if (tour.destinationSlug === "marsa-alam") return applyTourMediaSafety(localizeMarsaAlamTour(tour, locale), locale);
+  // Media selection (lib/tour-media-safety.ts) falls back to matching English
+  // category/title keywords for tours with no explicit slug mapping. Run it
+  // against the original English tour so translated category/title text from
+  // the locale overrides below can't make that keyword match fail and fall
+  // through to the generic placeholder.
+  const { image, imageAlt, imageFocalPoint, galleryImages, galleryImageAlts, galleryImageFocalPoints } = applyTourMediaSafety(tour, locale);
+  const mediaFields = { image, imageAlt, imageFocalPoint, galleryImages, galleryImageAlts, galleryImageFocalPoints };
+  if (tour.destinationSlug === "marsa-alam") return { ...localizeMarsaAlamTour(tour, locale), ...mediaFields };
   const base = locale === "de" ? localizeTourGerman(tour)
     : locale === "ru" ? localizeTourRussian(tour)
     : locale === "ar" ? localizeTourArabic(tour)
@@ -1576,5 +1583,5 @@ export function localizeTour(tour: Tour, locale: Locale): Tour {
     : locale === "pl" ? localizeTourPolish(tour)
     : tour;
   const withMagawish = tour.slug === "magawish-speedboat" ? { ...base, ...magawishSpeedboatTranslations[locale] } : base;
-  return applyTourMediaSafety(localizeSnorkelingBoatTrip(withMagawish, locale), locale);
+  return { ...localizeSnorkelingBoatTrip(withMagawish, locale), ...mediaFields };
 }
