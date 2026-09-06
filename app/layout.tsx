@@ -70,9 +70,17 @@ export const metadata: Metadata = {
     description: defaultDescription,
     images: [defaultSocialImage],
   },
+  // `app/favicon.ico` (file convention) already emits the canonical
+  // <link rel="icon" href="/favicon.ico" sizes="any">, so it is intentionally
+  // not repeated here. Apple touch icons must be PNG — Safari/iOS ignore SVG,
+  // which is why history/bookmarks previously fell back to a generic tile.
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg" }],
+    icon: [
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
   },
 };
 
