@@ -59,7 +59,7 @@ export default function Navbar() {
       z-50
       w-full
       border-b border-line/80
-      bg-white/95
+      bg-white/75
       backdrop-blur-xl
       shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]
       "
