@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { useTripReviews } from "@/components/tours/TripReviewsContext";
-import { BadgeCheck, CalendarDays, Clock3, Compass, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock3, Compass, MapPin, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
 import TourItinerary from "@/components/tours/TourItinerary";
 import { speedboatTerms } from "@/data/speedboat-booking";
 
@@ -20,9 +20,13 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const staticReviewCount = Number(tour.reviews);
   const hasReviews = hasLiveReviews || (Number.isFinite(staticReviewCount) && staticReviewCount > 0);
   const displayRating = hasLiveReviews ? liveReviews.average : tour.rating;
-  const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy." };
+  const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
+  const startTime = tour.availableTimes?.find((slot) => /^\d{1,2}:\d{2}/.test(slot));
+  const pickupFact = tour.fulfillmentType === "meeting_point"
+    ? tour.departureMarina || tr("Meeting point", "Treffpunkt", "Место встречи", "نقطة اللقاء", "集合点")
+    : tr("Hotel pickup", "Hotelabholung", "Трансфер из отеля", "الاستلام من الفندق", "酒店接送");
 
   return (
     <div className="space-y-8">
@@ -30,7 +34,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Description","Beschreibung","Описание","الوصف","项目介绍")}</p>
         <h2 className="mt-4 text-3xl font-bold text-ink">{tr("About this tour","Über diesen Ausflug","Об этой экскурсии","عن هذه الرحلة","关于此行程")}</h2>
         <p className="mt-6 text-lg leading-8 text-muted">{tour.description}</p>
-        <div className={`mt-8 grid gap-4 ${hasReviews ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl bg-surface-muted p-4">
             <div className="flex items-center gap-2 text-ocean-dark"><Clock3 size={16} /> {tr("Duration","Dauer","Продолжительность","المدة","时长")}</div>
             <p className="mt-3 text-xl font-semibold text-ink">{tour.duration}</p>
@@ -42,6 +46,14 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           <div className="rounded-2xl bg-surface-muted p-4">
             <div className="flex items-center gap-2 text-ocean-dark"><Ticket size={16} /> {tr("Price","Preis","Цена","السعر","价格")}</div>
             <p className="mt-3 text-xl font-semibold text-ink">{tour.bookingMode === "inquiry" ? tr("Price on request", "Preis auf Anfrage", "Цена по запросу", "السعر عند الطلب", "价格需咨询") : <>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-2 text-base text-muted line-through">{displayPrice(tour.originalPrice)}</span> : null}{displayPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</>}</p>
+          </div>
+          {startTime ? <div className="rounded-2xl bg-surface-muted p-4">
+            <div className="flex items-center gap-2 text-ocean-dark"><Clock3 size={16} /> {tr("Start time","Startzeit","Время начала","وقت البدء","出发时间")}</div>
+            <p className="mt-3 text-xl font-semibold text-ink">{startTime}</p>
+          </div> : null}
+          <div className="rounded-2xl bg-surface-muted p-4">
+            <div className="flex items-center gap-2 text-ocean-dark"><MapPin size={16} /> {tr("Pickup","Abholung","Трансфер","الاستلام","接送")}</div>
+            <p className="mt-3 text-xl font-semibold text-ink">{pickupFact}</p>
           </div>
         </div>
       </div>

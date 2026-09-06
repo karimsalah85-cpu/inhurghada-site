@@ -61,4 +61,19 @@ describe("validatePhoneNumber", () => {
     const result = validatePhoneNumber("+20 (10) 123-4567-8");
     expect(result.valid).toBe(true);
   });
+
+  it.each([
+    // Right length and an allowed operator prefix for Egypt, so isValid()
+    // alone would pass these — the pattern guard is what rejects them.
+    ["+201111111111"],
+    ["+201212121212"],
+    ["01111111111"],
+  ])("rejects repeating / patterned digits %s", (input) => {
+    const result = validatePhoneNumber(input, "EG");
+    expect(result.valid).toBe(false);
+  });
+
+  it("rejects a strictly sequential number", () => {
+    expect(validatePhoneNumber("+201234567890", "EG").valid).toBe(false);
+  });
 });

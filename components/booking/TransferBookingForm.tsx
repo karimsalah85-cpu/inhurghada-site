@@ -9,6 +9,7 @@ import Link from "next/link";
 import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { isTransferLeadTimeValid, minimumTransferSlot } from "@/lib/booking-validation";
+import PhoneNumberInput from "@/components/booking/PhoneNumberInput";
 import { validatePhoneNumber } from "@/lib/phone";
 
 const areas = ["Hurghada Airport", "Hurghada Hotels", "Senzo Mall", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"];
@@ -222,7 +223,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         <Field required icon={<Car />} label={tr("Travel bags", "Reisekoffer", "Дорожные чемоданы")}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
         <Field icon={<Plane />} label={tr("Flight number (optional)", "Flugnummer (optional)", "Номер рейса (необязательно)")}><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="MS 045" /></Field>
         <Field required icon={<User />} label={tr("Your name", "Dein Name", "Ваше имя")}><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
-        <Field required icon={<Phone />} label={tr("WhatsApp number", "WhatsApp-Nummer", "Номер WhatsApp")}><input type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" required /><p className="mt-2 text-xs leading-5 text-muted">{tr("We'll use this number for booking confirmation and pickup details.", "Wir verwenden diese Nummer für die Buchungsbestätigung und Abholdetails.", "Мы используем этот номер для подтверждения бронирования и деталей трансфера.")}</p></Field>
+        <Field required icon={<Phone />} label={tr("WhatsApp number", "WhatsApp-Nummer", "Номер WhatsApp")}><PhoneNumberInput defaultCountry="EG" value={phone} onChange={(next) => setPhone(next)} language={language} required ariaLabel={tr("WhatsApp number", "WhatsApp-Nummer", "Номер WhatsApp")} /><p className="mt-2 text-xs leading-5 text-muted">{tr("We'll use this number for booking confirmation and pickup details.", "Wir verwenden diese Nummer für die Buchungsbestätigung und Abholdetails.", "Мы используем этот номер для подтверждения бронирования и деталей трансфера.")}</p></Field>
         <Field required icon={<MessageCircle />} label={tr("Email address", "E-Mail-Adresse", "Электронная почта")}><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required /></Field>
       </div>
 

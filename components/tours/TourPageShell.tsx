@@ -16,6 +16,7 @@ import { categoryLabels } from "@/lib/tour-categories";
 import ShareTripButton from "@/components/share/ShareTripButton";
 import { TripReviewsProvider } from "@/components/tours/TripReviewsContext";
 import TripRatingBadge from "@/components/tours/TripRatingBadge";
+import RelatedExperiences from "@/components/tours/RelatedExperiences";
 
 export default function TourPageShell({ tour, locale = "en", relatedTourCandidates = tours }: { tour: Tour; locale?: Locale; relatedTourCandidates?: Tour[] }) {
   const de = locale === "de";
@@ -157,11 +158,20 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
       </section>
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8"><div className="rounded-3xl bg-ocean-dark p-8 text-white sm:flex sm:items-center sm:justify-between sm:gap-8"><div><p className="text-sm font-bold uppercase tracking-[0.25em] text-ocean-soft">{ui.reviewEyebrow}</p><h2 className="mt-3 text-3xl font-black">{ui.reviewTitle}</h2><p className="mt-3 max-w-2xl text-line">{ui.reviewText}</p></div><Link href={`/reviews?lang=${locale}`} className="mt-6 inline-flex shrink-0 rounded-full bg-white px-6 py-3 font-bold text-ocean-dark sm:mt-0">{ui.reviewCta}</Link></div></section>
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="rounded-3xl border border-line bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-ocean-dark">{ui.before}</p><h2 className="mt-3 text-3xl font-bold text-ink">{ui.faq}</h2><div className="mt-6 divide-y divide-line">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-ink">{faq.question}</summary><p className="mt-3 leading-7 text-muted">{faq.answer}</p></details>)}</div></div>
-          <div className="rounded-3xl bg-ink p-8 text-white"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-ocean-soft">{ui.more}</p><h2 className="mt-3 text-3xl font-bold">{ui.related} · {destination?.name || "Hurghada"}</h2><p className="mt-4 leading-7 text-line">{ui.relatedText}</p><div className="mt-6 space-y-3">{relatedTours.map((item) => { const format = (value: string) => new Intl.NumberFormat(locale, { style: "currency", currency: item.currency || "USD" }).format(Number(value)); return <Link key={item.slug} href={localePath(locale, `/tours/${item.slug}`)} className="flex items-center justify-between rounded-2xl border border-white/15 px-4 py-3 text-sm font-semibold hover:border-ocean-soft hover:text-ocean-soft"><span>{item.title}</span><span>{ui.from} {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? <span className="mr-1 text-muted line-through">{format(item.originalPrice)}</span> : null}{format(item.price)}</span></Link>; })}</div><Link href={toursHref} className="mt-7 inline-flex rounded-full bg-ocean px-5 py-3 font-bold text-white hover:brightness-110">{ui.all}</Link></div>
-        </div>
+        <div className="rounded-3xl border border-line bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-ocean-dark">{ui.before}</p><h2 className="mt-3 text-3xl font-bold text-ink">{ui.faq}</h2><div className="mt-6 divide-y divide-line">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-ink">{faq.question}</summary><p className="mt-3 leading-7 text-muted">{faq.answer}</p></details>)}</div></div>
       </section>
+      {relatedTours.length ? (
+        <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
+          <RelatedExperiences
+            tours={relatedTours}
+            locale={locale}
+            heading={`${ui.related} · ${destination?.name || "Hurghada"}`}
+            viewAllLabel={ui.all}
+            viewAllHref={toursHref}
+            fromLabel={ui.from}
+          />
+        </section>
+      ) : null}
     </main>
     </TripReviewsProvider>
   );
