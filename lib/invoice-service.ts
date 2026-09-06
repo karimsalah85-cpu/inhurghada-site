@@ -1,5 +1,6 @@
 import { getCancellationPolicyParagraphs } from "@/lib/pdf-policy";
 import { bookingLocale } from "@/lib/booking-communications-i18n";
+import { drawPdfBrandMark } from "@/lib/pdf-logo";
 import type { Locale } from "@/lib/i18n";
 import PDFDocument from "pdfkit";
 import path from "node:path";
@@ -155,11 +156,14 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
     doc.on("error", reject);
     doc.registerFont("Noto", font);
 
+    const rtlDigits = (value: string) => /\p{Script=Arabic}/u.test(value) ? value.replace(/[0-9][0-9:./-]*/g, (part) => [...part].reverse().join("")) : value;
+    // Non-breaking spaces keep short RTL labels/values from wrapping mid-phrase, but
+    // they also disable word-wrap entirely, so long free text (like a pickup address)
+    // must skip this and use rtlWrappableText below instead.
+    const rtlText = (value: string) => rtl ? rtlDigits(value).replaceAll(" ", "\u00a0") : value;
+    const rtlWrappableText = (value: string) => rtl ? rtlDigits(value) : value;
     const write = (value: string, x: number, y: number, width: number, size = 10, color = "#0d3b78", align: "left" | "right" | "center" = rtl ? "right" : "left") => {
-      const renderedValue = rtl
-        ? (/\p{Script=Arabic}/u.test(value) ? value.replace(/[0-9][0-9:./-]*/g, (part) => [...part].reverse().join("")) : value).replaceAll(" ", "\u00a0")
-        : value;
-      doc.font("Noto").fontSize(size).fillColor(color).text(renderedValue, x, y, { width, align, lineGap: 2 });
+      doc.font("Noto").fontSize(size).fillColor(color).text(rtlText(value), x, y, { width, align, lineGap: 2 });
     };
     const labelValue = (label: string, value: string, x: number, y: number, width: number) => {
       write(label, x, y, width, 8, "#64748b");
@@ -172,10 +176,9 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
     addBackground();
     doc.rect(0, 0, 595.28, 158).fill("#0d3b78");
     doc.rect(0, 158, 595.28, 5).fill("#ff3300");
-    write("DAILY RED SEA", 48, 36, 499, 22, "#ffffff", rtl ? "right" : "left");
-    write("dailyredsea.com", 48, 67, 499, 10, "#dbeafe", rtl ? "right" : "left");
-    write(t.confirmation, 48, 99, 320, 18, "#ffffff", rtl ? "right" : "left");
-    write(`${t.issued}: ${issuedDate}`, 48, 128, 320, 9, "#dbeafe", rtl ? "right" : "left");
+    drawPdfBrandMark(doc, { pageWidth: 595.28, margin: 48, y: 32, width: 170, rtl });
+    write(t.confirmation, 48, 76, 320, 18, "#ffffff", rtl ? "right" : "left");
+    write(`${t.issued}: ${issuedDate}`, 48, 104, 320, 9, "#dbeafe", rtl ? "right" : "left");
     doc.roundedRect(405, 95, 142, 38, 8).fill("#166534");
     write(t.cash, 417, 106, 118, 9, "#dcfce7", "center");
 
@@ -189,28 +192,51 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
     labelValue("WhatsApp", invoice.customerPhone || t.pending, 300, 312, 230);
     labelValue("Email", invoice.customerEmail || t.pending, 64, 350, 467);
 
-    card(48, 411, 499, 190);
-    write(t.experience, 64, 428, 467, 10, "#0d3b78");
-    write(invoice.itemName || "Daily Red Sea", 64, 457, 467, 14, "#0f172a");
+    // The pickup / meeting-point field is free text and can run long, so its
+    // height is measured and the experience card (and everything stacked below
+    // it) grows to fit, up to a safety cap enforced with an ellipsis, so long
+    // text can never bleed into the orange total block below.
+    const experienceCardTop = 411;
+    const pickupLabel = t.pickup;
+    const pickupValue = invoice.hotel || t.pending;
+    const pickupX = 300;
+    const pickupWidth = 247;
+    const pickupValueY = experienceCardTop + 143 + 15;
+    const pickupBaselineBudget = 601 - pickupValueY; // vertical room the original fixed-height design allotted
+    const pickupMaxExtra = 40;
+    const pickupFullHeight = doc.font("Noto").fontSize(10).heightOfString(rtlWrappableText(pickupValue), { width: pickupWidth, lineGap: 2 });
+    const pickupExtra = Math.min(Math.max(0, pickupFullHeight - pickupBaselineBudget), pickupMaxExtra);
+    const experienceCardHeight = 190 + pickupExtra;
+
+    card(48, experienceCardTop, 499, experienceCardHeight);
+    write(t.experience, 64, experienceCardTop + 17, 467, 10, "#0d3b78");
+    write(invoice.itemName || "Daily Red Sea", 64, experienceCardTop + 46, 467, 14, "#0f172a");
     if (invoice.tripLines?.length) {
-      write(invoice.tripLines.slice(0, 4).join("\n"), 64, 486, 467, 8.5, "#475569");
+      write(invoice.tripLines.slice(0, 4).join("\n"), 64, experienceCardTop + 75, 467, 8.5, "#475569");
     } else {
-      labelValue(t.date, invoice.date || t.pending, 64, 505, 210);
-      labelValue(t.time, invoice.time || t.pending, 300, 505, 230);
+      labelValue(t.date, invoice.date || t.pending, 64, experienceCardTop + 94, 210);
+      labelValue(t.time, invoice.time || t.pending, 300, experienceCardTop + 94, 230);
     }
-    labelValue(t.travelers, invoice.travelerSummary || `${quantity}`, 64, 554, 210);
-    labelValue(t.pickup, invoice.hotel || t.pending, 300, 554, 230);
+    labelValue(t.travelers, invoice.travelerSummary || `${quantity}`, 64, experienceCardTop + 143, 210);
+    write(pickupLabel, pickupX, experienceCardTop + 143, pickupWidth, 8, "#64748b");
+    doc.font("Noto").fontSize(10).fillColor("#0f172a").text(rtlWrappableText(pickupValue), pickupX, pickupValueY, {
+      width: pickupWidth, align: rtl ? "right" : "left", lineGap: 2,
+      height: pickupBaselineBudget + pickupExtra, ellipsis: true,
+    });
 
-    doc.roundedRect(48, 621, 499, 76, 10).fill("#e2380f");
-    write(t.total, 64, 638, 210, 9, "#ffebe6");
-    write(money, 64, 657, 210, 22, "#ffffff");
-    write(t.paymentNote, 295, 646, 235, 9, "#ffffff");
+    const totalBoxY = experienceCardTop + experienceCardHeight + 12;
+    doc.roundedRect(48, totalBoxY, 499, 76, 10).fill("#e2380f");
+    write(t.total, 64, totalBoxY + 17, 210, 9, "#ffebe6");
+    write(money, 64, totalBoxY + 36, 210, 22, "#ffffff");
+    write(t.paymentNote, 295, totalBoxY + 25, 235, 9, "#ffffff");
 
-    card(48, 717, 499, 73);
-    write(t.next, 64, 732, 467, 9, "#0d3b78");
-    write(t.steps, 64, 751, 467, 8.5, "#475569");
-    write(`Daily Red Sea | ${invoice.reference} | dailyredsea.com`, 48, 810, 310, 8, "#64748b", "left");
-    write(t.thanks, 340, 810, 207, 8, "#64748b");
+    const nextCardY = totalBoxY + 76 + 12;
+    card(48, nextCardY, 499, 73);
+    write(t.next, 64, nextCardY + 15, 467, 9, "#0d3b78");
+    write(t.steps, 64, nextCardY + 34, 467, 8.5, "#475569");
+    const footerY = nextCardY + 73 + 10;
+    write(`Daily Red Sea | ${invoice.reference} | dailyredsea.com`, 48, footerY, 310, 8, "#64748b", "left");
+    write(t.thanks, 340, footerY, 207, 8, "#64748b");
 
     doc.addPage();
     addBackground();
@@ -352,11 +378,14 @@ export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<B
     doc.on("error", reject);
     doc.registerFont("Noto", notoFontPath(locale));
 
+    const rtlDigits = (value: string) => /\p{Script=Arabic}/u.test(value) ? value.replace(/[0-9][0-9:./-]*/g, (part) => [...part].reverse().join("")) : value;
+    // Non-breaking spaces keep short RTL labels/values from wrapping mid-phrase, but
+    // they also disable word-wrap entirely, so long free text (like a pickup address)
+    // must skip this and use rtlWrappableText below instead.
+    const rtlText = (value: string) => rtl ? rtlDigits(value).replaceAll(" ", "\u00a0") : value;
+    const rtlWrappableText = (value: string) => rtl ? rtlDigits(value) : value;
     const write = (value: string, x: number, y: number, width: number, size = 10, color = "#0f172a", align: "left" | "right" | "center" = rtl ? "right" : "left") => {
-      const rendered = rtl
-        ? (/\p{Script=Arabic}/u.test(value) ? value.replace(/[0-9][0-9:./-]*/g, (part) => [...part].reverse().join("")) : value).replaceAll(" ", "\u00a0")
-        : value;
-      doc.font("Noto").fontSize(size).fillColor(color).text(rendered, x, y, { width, align, lineGap: 2 });
+      doc.font("Noto").fontSize(size).fillColor(color).text(rtlText(value), x, y, { width, align, lineGap: 2 });
     };
     const labelValue = (label: string, value: string, x: number, y: number, width: number) => {
       write(label, x, y, width, 8, "#64748b");
@@ -374,10 +403,9 @@ export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<B
     doc.rect(0, 0, 595.28, 841.89).fill("#f1f5f9");
     doc.rect(0, 0, 595.28, 150).fill("#0d3b78");
     doc.rect(0, 150, 595.28, 5).fill("#ff3300");
-    write("DAILY RED SEA", 48, 34, 499, 22, "#ffffff", rtl ? "right" : "left");
-    write("dailyredsea.com", 48, 65, 499, 10, "#dbeafe", rtl ? "right" : "left");
-    write(t.statusUpdate, 48, 95, 460, 17, "#ffffff", rtl ? "right" : "left");
-    write(`${t.generated}: ${generatedDate}`, 48, 123, 460, 9, "#dbeafe", rtl ? "right" : "left");
+    drawPdfBrandMark(doc, { pageWidth: 595.28, margin: 48, y: 30, width: 170, rtl });
+    write(t.statusUpdate, 48, 76, 460, 17, "#ffffff", rtl ? "right" : "left");
+    write(`${t.generated}: ${generatedDate}`, 48, 104, 460, 9, "#dbeafe", rtl ? "right" : "left");
 
     card(48, 175, 499, 66);
     write(t.reference, 64, 188, 467, 8, "#64748b");
@@ -395,25 +423,46 @@ export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<B
     labelValue("WhatsApp", booking.customerPhone || t.pending, 300, 432, 231);
     labelValue("Email", booking.customerEmail || t.pending, 64, 470, 467);
 
-    card(48, 523, 499, 150);
-    write(t.bookingDetails, 64, 538, 467, 10, "#0d3b78");
-    write(booking.itemName || "Daily Red Sea", 64, 562, 467, 12.5, "#0f172a");
-    labelValue(t.date, booking.date || t.pending, 64, 596, 220);
-    labelValue(t.travelers, booking.travelers || t.pending, 300, 596, 231);
-    labelValue(t.pickup, booking.pickup || t.pending, 64, 634, booking.assignedPersonName ? 220 : 467);
-    if (booking.assignedPersonName) labelValue(assignedLabel, booking.assignedPersonName, 300, 634, 231);
+    // The pickup / meeting-point field is free text and can run long, so its
+    // height is measured and the booking-details card (and everything stacked
+    // below it) grows to fit, up to a safety cap enforced with an ellipsis, so
+    // long text can never bleed into the navy total block below.
+    const detailsCardTop = 523;
+    const pickupLabel = t.pickup;
+    const pickupValue = booking.pickup || t.pending;
+    const pickupWidth = booking.assignedPersonName ? 290 : 467;
+    const pickupValueY = detailsCardTop + 111 + 14;
+    const pickupBaselineBudget = detailsCardTop + 150 - pickupValueY; // vertical room the original fixed-height design allotted
+    const pickupMaxExtra = 8;
+    const pickupFullHeight = doc.font("Noto").fontSize(10.5).heightOfString(rtlWrappableText(pickupValue), { width: pickupWidth, lineGap: 2 });
+    const pickupExtra = Math.min(Math.max(0, pickupFullHeight - pickupBaselineBudget), pickupMaxExtra);
+    const detailsCardHeight = 150 + pickupExtra;
 
-    doc.roundedRect(48, 689, 499, 74, 10).fill("#0d3b78");
-    write(t.total, 64, 705, 220, 9, "#dbeafe");
-    write(money, 64, 722, 260, 20, "#ffffff");
-    write(paymentNote, 300, 713, 231, 9, "#dbeafe");
+    card(48, detailsCardTop, 499, detailsCardHeight);
+    write(t.bookingDetails, 64, detailsCardTop + 15, 467, 10, "#0d3b78");
+    write(booking.itemName || "Daily Red Sea", 64, detailsCardTop + 39, 467, 12.5, "#0f172a");
+    labelValue(t.date, booking.date || t.pending, 64, detailsCardTop + 73, 220);
+    labelValue(t.travelers, booking.travelers || t.pending, 300, detailsCardTop + 73, 231);
+    write(pickupLabel, 64, detailsCardTop + 111, pickupWidth, 8, "#64748b");
+    doc.font("Noto").fontSize(10.5).fillColor("#0f172a").text(rtlWrappableText(pickupValue), 64, pickupValueY, {
+      width: pickupWidth, align: rtl ? "right" : "left", lineGap: 2,
+      height: pickupBaselineBudget + pickupExtra, ellipsis: true,
+    });
+    if (booking.assignedPersonName) labelValue(assignedLabel, booking.assignedPersonName, 370, detailsCardTop + 111, 161);
 
-    write(t.help, 48, 779, 499, 9, "#0d3b78");
-    write(t.helpBody, 48, 795, 499, 8.5, "#475569");
-    write(t.policyLine, 48, 815, 499, 8, "#64748b");
+    const totalBoxY = detailsCardTop + detailsCardHeight + 8;
+    doc.roundedRect(48, totalBoxY, 499, 74, 10).fill("#0d3b78");
+    write(t.total, 64, totalBoxY + 16, 220, 9, "#dbeafe");
+    write(money, 64, totalBoxY + 33, 260, 20, "#ffffff");
+    write(paymentNote, 300, totalBoxY + 24, 231, 9, "#dbeafe");
+
+    const helpY = totalBoxY + 74 + 10;
+    write(t.help, 48, helpY, 499, 9, "#0d3b78");
+    write(t.helpBody, 48, helpY + 16, 499, 8.5, "#475569");
+    write(t.policyLine, 48, helpY + 36, 499, 8, "#64748b");
     // Left-aligned in every locale: a bare brand/reference string that bidi
     // reordering would scramble if it inherited the RTL run.
-    write(`Daily Red Sea | ${booking.reference} | dailyredsea.com/terms-conditions`, 48, 828, 499, 7.5, "#94a3b8", "left");
+    write(`Daily Red Sea | ${booking.reference} | dailyredsea.com/terms-conditions`, 48, helpY + 49, 499, 7.5, "#94a3b8", "left");
 
     doc.end();
   });

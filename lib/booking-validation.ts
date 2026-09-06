@@ -1,10 +1,10 @@
 import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
 import { tours } from "@/data/tours";
+import { validatePhoneNumber } from "@/lib/phone";
 
 type BookingInput = Record<string, unknown>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const phonePattern = /^[+\d][\d\s()-]{6,24}$/;
 
 function text(value: unknown, maxLength: number) {
   return String(value ?? "").trim().slice(0, maxLength);
@@ -94,7 +94,6 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (text(body.website, 200)) return { spam: true as const };
 
   const customerName = text(body.customerName, 100);
-  const phone = text(body.phone, 30);
   const customerEmail = text(body.customerEmail, 254).toLowerCase();
   const hotel = text(body.hotel, 200);
   const type: "tour" | "transfer" = body.type === "transfer" ? "transfer" : "tour";
@@ -107,7 +106,16 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     return { error: "A valid booking attempt key is required." as const };
   }
 
-  if (customerName.length < 2 || !phonePattern.test(phone)) return { error: "Enter a valid name and phone number." as const };
+  const selectedCartItems = cartItems(body.cartItems);
+  const isSaudiTour = (slug: string) => tours.some((tour) => tour.slug === slug && tour.destinationSlug === "jeddah");
+  // Local numbers (no "+" prefix) are assumed to be from the destination's own
+  // country; an explicit "+" country code in the input always overrides this.
+  const phoneCountryHint = (tourSlug === "multi-trip" ? selectedCartItems.some((item) => isSaudiTour(item.tourSlug)) : isSaudiTour(tourSlug)) ? "SA" : "EG";
+  const phoneResult = validatePhoneNumber(body.phone, phoneCountryHint);
+
+  if (customerName.length < 2) return { error: "Enter a valid name." as const };
+  if (!phoneResult.valid) return { error: phoneResult.message };
+  const phone = phoneResult.e164;
   if (!customerEmail || !emailPattern.test(customerEmail)) return { error: "Enter a valid email address." as const };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Choose a valid booking date." as const };
   if (date) {
@@ -118,8 +126,6 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (type === "transfer" && !isTransferLeadTimeValid(date, time, now)) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
-  const selectedCartItems = cartItems(body.cartItems);
-  const isSaudiTour = (slug: string) => tours.some((tour) => tour.slug === slug && tour.destinationSlug === "jeddah");
   const pickupOptional = type === "tour" && (tourSlug === "multi-trip"
     ? selectedCartItems.length > 0 && selectedCartItems.every((item) => isSaudiTour(item.tourSlug))
     : isSaudiTour(tourSlug));

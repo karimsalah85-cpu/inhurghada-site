@@ -8,11 +8,11 @@ import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath, type Locale } from "@/lib/i18n";
-import { tours } from "@/data/tours";
+import { tours, type Tour } from "@/data/tours";
 
 const tourBrowsingRoots = ["/tours", "/destinations", "/hurghada", "/marsa-alam", "/jeddah"];
 
-/** The tour slug when the current page is a tour's own detail page, so Plan can become a direct booking CTA. */
+/** The tour slug when the current page is a tour's own detail page, so the generic nav can hand off to the booking bar. */
 function currentTourSlug(pathname: string, language: Locale) {
   const withoutLocale = language === "en" ? pathname : pathname.replace(new RegExp(`^/${language}(?=/|$)`), "");
   return withoutLocale.match(/^\/tours\/([^/]+)\/?$/)?.[1] ?? null;
@@ -21,7 +21,7 @@ function currentTourSlug(pathname: string, language: Locale) {
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { language, t, formatPrice } = useSiteSettings();
+  const { language, t } = useSiteSettings();
   const [isPlanOpen, setIsPlanOpen] = useState(false);
 
   const homeHref = localePath(language);
@@ -35,6 +35,10 @@ export default function BottomNav() {
 
   const focusedTourSlug = currentTourSlug(pathname, language);
   const focusedTour = focusedTourSlug ? tours.find((tour) => tour.slug === focusedTourSlug) : null;
+
+  // High booking-intent pages get a dedicated price + Book Now bar instead of
+  // the generic nav, so the two never stack or compete for attention.
+  if (focusedTour) return <TourBookingBar tour={focusedTour} pathname={pathname} />;
 
   const navLabel = t("quickNavigation");
 
@@ -56,42 +60,31 @@ export default function BottomNav() {
 
           <div className="flex flex-col items-center">
             <div className="relative -mt-8 h-14 w-14">
-              {focusedTour ? (
-                <Link
-                  href={`${pathname}#book`}
-                  onClick={() => trackEvent("booking_start", { placement: "bottom_nav", tour_slug: focusedTourSlug || undefined })}
-                  aria-label={`${t("bookThisTrip")} · ${t("from")} ${formatPrice(focusedTour.price, focusedTour.currency)}`}
-                  className="
-                  relative flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-full
-                  bg-brand-orange-cta
-                  text-white shadow-lg shadow-brand-orange-cta/30
-                  ring-4 ring-white
-                  transition active:scale-95
-                  "
-                >
-                  <Calendar size={18} aria-hidden="true" />
-                  <span className="text-[10px] font-black leading-none">{formatPrice(focusedTour.price, focusedTour.currency)}</span>
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsPlanOpen(true)}
-                  aria-haspopup="dialog"
-                  aria-expanded={isPlanOpen}
-                  aria-label={t("planYourTrip")}
-                  className="
-                  relative flex h-14 w-14 items-center justify-center rounded-full
-                  bg-brand-orange-cta
-                  text-white shadow-lg shadow-brand-orange-cta/30
-                  ring-4 ring-white
-                  transition active:scale-95
-                  "
-                >
-                  <Search size={24} aria-hidden="true" />
-                </button>
-              )}
+              {!isPlanOpen ? (
+                <>
+                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "0s" }} />
+                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "0.87s" }} />
+                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "1.73s" }} />
+                </>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setIsPlanOpen((current) => !current)}
+                aria-haspopup="dialog"
+                aria-expanded={isPlanOpen}
+                aria-label={t("planYourTrip")}
+                className={`
+                relative flex h-14 w-14 items-center justify-center rounded-full
+                bg-brand-orange-cta
+                text-white shadow-lg shadow-brand-orange-cta/30
+                transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.94]
+                ${isPlanOpen ? "ring-4 ring-brand-orange-cta/50" : "bottom-nav-plan-pulse ring-4 ring-white"}
+                `}
+              >
+                {isPlanOpen ? <X size={24} aria-hidden="true" /> : <Search size={24} aria-hidden="true" />}
+              </button>
             </div>
-            <span className="mt-1 text-[11px] font-semibold text-muted">{t("plan")}</span>
+            <span className={`mt-1 text-[11px] font-semibold ${isPlanOpen ? "text-brand-navy" : "text-muted"}`}>{t("plan")}</span>
           </div>
 
           <BottomNavLink href={bookingHref} active={isMyTrips} icon={<Ticket size={22} />} label={t("myTrips")} />
@@ -112,6 +105,49 @@ export default function BottomNav() {
 
       <PlanSheet open={isPlanOpen} onClose={() => setIsPlanOpen(false)} onSearch={(params) => router.push(`${toursHref}?${params.toString()}`)} />
     </>
+  );
+}
+
+/** Compact, conversion-focused bottom bar for tour/experience detail pages: real price, a direct Book Now CTA, and WhatsApp, in place of the generic nav so the two never overlap. */
+function TourBookingBar({ tour, pathname }: { tour: Tour; pathname: string }) {
+  const { t, formatPrice } = useSiteSettings();
+
+  return (
+    <nav
+      aria-label={t("booking")}
+      className="
+      fixed inset-x-0 bottom-0 z-50
+      border-t border-line/80 bg-white/95 backdrop-blur-xl
+      pb-[env(safe-area-inset-bottom)]
+      shadow-[0_-10px_40px_-20px_rgba(15,23,42,0.45)]
+      xl:hidden
+      "
+    >
+      <div className="flex items-center gap-3 px-4 py-2.5">
+        <div className="flex shrink-0 flex-col leading-tight">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-muted">{t("from")}</span>
+          <span className="text-lg font-black text-ink">{formatPrice(tour.price, tour.currency)}</span>
+        </div>
+        <Link
+          href={`${pathname}#book`}
+          onClick={() => trackEvent("booking_start", { placement: "bottom_nav", tour_slug: tour.slug })}
+          className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-brand-orange-cta px-4 font-bold text-white shadow-lg shadow-brand-orange-cta/30 transition active:scale-[0.97]"
+        >
+          <Calendar size={18} aria-hidden="true" />
+          {t("bookThisTrip")}
+        </Link>
+        <a
+          href={whatsappUrl(`Hi! I'm interested in booking ${tour.title}.`)}
+          onClick={() => trackEvent("whatsapp_click", { placement: "tour_booking_bar" })}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-600 text-white shadow-md shadow-green-600/30 transition active:scale-95"
+        >
+          <MessageCircle size={22} aria-hidden="true" />
+        </a>
+      </div>
+    </nav>
   );
 }
 
