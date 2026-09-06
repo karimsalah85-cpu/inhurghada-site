@@ -90,7 +90,7 @@ export default function TourCard({
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-ocean-dark">{category || copy.fallback}</p>
           <h3 className="mt-1.5 line-clamp-2 text-xl font-bold leading-tight text-ink sm:mt-2 sm:text-2xl">{title}</h3>
           <div className="mt-2 flex items-center gap-2 text-sm text-muted sm:mt-3 sm:text-base"><MapPin size={17} /><span>{location}</span></div>
-          <p className="mt-2.5 line-clamp-2 text-sm leading-6 text-muted sm:mt-4 sm:line-clamp-3 sm:text-base sm:leading-relaxed">{description}</p>
+          <p className="mt-2 line-clamp-1 text-sm leading-6 text-muted sm:mt-4 sm:line-clamp-3 sm:text-base sm:leading-relaxed">{description}</p>
           <p className="mt-3 min-h-[1.25rem] text-sm font-semibold sm:mt-4">
             {hasReviews
               ? <span className="inline-flex items-center gap-1.5 text-ink"><Star size={15} className="fill-yellow-400 text-yellow-400" />{rating} · {reviewCount} {copy.reviews}</span>
