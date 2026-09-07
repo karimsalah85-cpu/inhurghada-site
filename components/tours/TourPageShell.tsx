@@ -80,9 +80,17 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     { question: de ? "Wann bezahle ich?" : "When do I pay?", answer: de ? "Du kannst online reservieren und bei Ankunft bar bezahlen, sofern bei der Buchung keine andere Zahlungsart angezeigt wird." : "You can reserve online and pay cash on arrival unless a different payment option is clearly shown during booking." },
     { question: de ? "Was soll ich mitbringen?" : "What should I bring?", answer: de ? "Bringe deine Buchungsnummer, bequeme Kleidung und alle Dinge mit, die im Abschnitt mit den wichtigen Informationen genannt werden." : "Bring your booking reference, comfortable clothing, and any items listed in the important information section for this experience." },
   ];
+  const airportTransferFaqs = locale === "en" && tour.slug === "hurghada-airport-transfer" ? [
+    { question: "How much is a private transfer from Hurghada Airport?", answer: "The booking form shows a $20 one-way base fare within Hurghada. Makadi Bay, Soma Bay, El Gouna and Sahl Hasheesh add $7 to the base fare." },
+    { question: "How early should I book a Hurghada Airport transfer?", answer: "Book at least one hour before pickup. For an airport arrival, send your flight and contact details early enough for the local team to confirm the pickup on WhatsApp." },
+    { question: "Where will the driver meet me?", answer: "Daily Red Sea confirms the exact pickup details with you on WhatsApp after booking, using the phone number entered in the booking form." },
+    { question: "What vehicle is used for a Hurghada Airport transfer?", answer: "One or two passengers travel in a small car with space for up to two bags. Groups of more than two passengers receive a larger vehicle, with a maximum of two bags per person." },
+    { question: "Can I book a transfer to Makadi Bay, Soma Bay, El Gouna or Sahl Hasheesh?", answer: "Yes. All four resort zones are available from Hurghada Airport for the displayed Hurghada base fare plus a $7 zone supplement." },
+    { question: "When do I pay for the airport transfer?", answer: "You can reserve online and pay cash on arrival unless the booking page clearly shows a different payment option." },
+  ] : undefined;
   // Localized catalogue FAQs are more useful than generic fallbacks. Keep the
   // fallback only for products that do not yet have verified, translated Q&A.
-  const faqs = tour.faqs?.length ? tour.faqs : fallbackFaqs;
+  const faqs = airportTransferFaqs ?? (tour.faqs?.length ? tour.faqs : fallbackFaqs);
   const sourceTour = tours.find((item) => item.slug === tour.slug) || tour;
   const relatedTours = relatedTourCandidates.filter((item) => item.slug !== tour.slug && item.listingStatus !== "paused" && item.listingStatus !== "unlisted" && (item.destinationSlug || "hurghada") === (sourceTour.destinationSlug || "hurghada") && (item.category === sourceTour.category || item.location === sourceTour.location)).slice(0, 3).map((item) => localizeTour(item, locale));
   const tourUrl = absoluteUrl(localePath(locale, `/tours/${tour.slug}`));
