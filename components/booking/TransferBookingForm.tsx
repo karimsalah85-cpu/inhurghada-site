@@ -67,7 +67,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
     : zh
     ? `包含 ${area} 的 7 美元附加费。`
     : `Includes the $7 supplement for ${area}.`;
-  const [service, setService] = useState<TransferService>(initialService);
+  const [service] = useState<TransferService>(initialService);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -109,19 +109,6 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       : pickup === "Senzo Mall" || dropoff === "Senzo Mall";
   }, [dropoff, pickup, service]);
   const minimumSlot = minimumTransferSlot();
-
-  function changeService(nextService: TransferService) {
-    setService(nextService);
-    if (nextService === "airport") {
-      setPickup("Hurghada Airport");
-      setDropoff("Hurghada Hotels");
-      setTravelBags("1");
-    } else {
-      setPickup("Hurghada Hotels");
-      setDropoff("Senzo Mall");
-      setTravelBags("0");
-    }
-  }
 
   async function submitTransfer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -220,12 +207,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
       <div className="flex items-start gap-4">
         <div className="rounded-xl bg-ocean-tint p-3 text-ocean-dark"><Car /></div>
-        <div><h2 className="text-2xl font-bold text-ink">{tr("Book a private transfer", "Privaten Transfer buchen", "Забронировать частный трансфер")}</h2><p className="mt-1 text-sm text-muted">{tr("Choose your service and see the fixed one-way fare instantly.", "Wähle den Service und sieh sofort den festen Preis für eine einfache Fahrt.", "Выберите услугу и сразу узнайте фиксированную цену поездки в одну сторону.")}</p></div>
-      </div>
-
-      <div className="mt-7 grid gap-3 sm:grid-cols-2">
-        <button type="button" onClick={() => changeService("airport")} className={`rounded-2xl border p-4 text-left transition ${service === "airport" ? "border-ocean bg-ocean-tint ring-2 ring-ocean-tint" : "border-line hover:border-ocean-soft"}`}><span className="block font-bold text-ink">{tr("Airport transfer", "Flughafentransfer", "Трансфер из аэропорта")}</span><span className="mt-1 block text-sm text-muted">$20 {tr("one way within Hurghada", "einfache Fahrt innerhalb Hurghadas", "в одну сторону по Хургаде")}</span></button>
-        <button type="button" onClick={() => changeService("senzo")} className={`rounded-2xl border p-4 text-left transition ${service === "senzo" ? "border-ocean bg-ocean-tint ring-2 ring-ocean-tint" : "border-line hover:border-ocean-soft"}`}><span className="block font-bold text-ink">{tr("Senzo Mall transfer", "Senzo-Mall-Transfer", "Трансфер в Senzo Mall")}</span><span className="mt-1 block text-sm text-muted">$10 {tr("one way within Hurghada", "einfache Fahrt innerhalb Hurghadas", "в одну сторону по Хургаде")}</span></button>
+        <div><h2 className="text-2xl font-bold text-ink">{tr("Book a private Senzo Mall transfer", "Privaten Senzo-Mall-Transfer buchen", "Забронировать частный трансфер в Senzo Mall", "احجز توصيلاً خاصاً إلى سنزو مول", "Zarezerwuj prywatny transfer do Senzo Mall", "预订私人 Senzo Mall 接送")}</h2><p className="mt-1 text-sm text-muted">{tr("Priced per vehicle by group size — see your fare before you book.", "Preis pro Fahrzeug nach Gruppengröße – sieh deinen Preis vor der Buchung.", "Цена за автомобиль в зависимости от размера группы — узнайте её до бронирования.", "السعر لكل مركبة حسب حجم المجموعة — اطّلع على السعر قبل الحجز.", "Cena za pojazd zależnie od liczby osób — poznaj ją przed rezerwacją.", "价格按车辆和人数计算——预订前即可查看。")}</p></div>
       </div>
 
       <div className="mt-7 grid gap-4 sm:grid-cols-2">

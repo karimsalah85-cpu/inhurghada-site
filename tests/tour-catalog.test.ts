@@ -112,6 +112,17 @@ describe("displayed 'from' price stays consistent with the booking engine", () =
     expect(bookable.length).toBeGreaterThan(20);
   });
 
+  it("locks the per-vehicle transfer pricing to code so the CMS cannot revert it", () => {
+    for (const slug of ["hurghada-airport-transfer", "senzo-transfer"]) {
+      const transfer = tours.find((tour) => tour.slug === slug);
+      expect(transfer, slug).toBeDefined();
+      expect(transfer?.pricingLockedToCode).toBe(true);
+      expect(transfer?.priceUnit).toBe("per vehicle");
+      expect(transfer?.pricingMode).toBe("per-booking");
+      expect(Number(transfer?.price)).toBe(15);
+    }
+  });
+
   for (const tour of bookable) {
     it(`keeps ${tour.slug} card price aligned with its pricing model`, () => {
       const displayed = Number(tour.price);
