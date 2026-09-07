@@ -43,6 +43,23 @@ export function codeControlledTourFields(fallback: Tour | undefined) {
     fulfillmentType: fallback.fulfillmentType,
     departureMarina: fallback.departureMarina,
     bookingMode: fallback.bookingMode,
+    // Per-vehicle transfers price, size the vehicle and describe their rules
+    // dynamically. The CMS must not pin stale "$10 / Maximum 4 passengers" prose
+    // over them, so the customer-facing copy stays code-controlled too.
+    ...(fallback.priceUnit === "per vehicle"
+      ? {
+          description: fallback.description,
+          notes: fallback.notes,
+          highlights: fallback.highlights,
+          included: fallback.included,
+          notIncluded: fallback.notIncluded,
+          packageName: fallback.packageName,
+          packageDescription: fallback.packageDescription,
+          packageLabel: fallback.packageLabel,
+          seoTitle: fallback.seoTitle,
+          metaDescription: fallback.metaDescription,
+        }
+      : {}),
   } satisfies Partial<Tour>;
 }
 

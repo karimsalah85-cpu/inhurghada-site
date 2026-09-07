@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
 import { halfDayBoatOptions } from "@/data/speedboat-booking";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
+import { codeControlledTourFields } from "@/lib/live-content";
 
 describe("tour catalog publication safety", () => {
   it("keeps slugs unique", () => {
@@ -120,7 +121,18 @@ describe("displayed 'from' price stays consistent with the booking engine", () =
       expect(transfer?.priceUnit).toBe("per vehicle");
       expect(transfer?.pricingMode).toBe("per-booking");
       expect(Number(transfer?.price)).toBe(15);
+      expect(transfer?.description).toMatch(/per vehicle/i);
+      expect(transfer?.description).not.toMatch(/fixed \$?(10|20)\b/i);
+      expect(transfer?.notes?.some((note) => /maximum 4 passengers/i.test(note))).toBe(false);
     }
+  });
+
+  it("keeps per-vehicle transfer prose out of CMS overrides", () => {
+    const transfer = tours.find((tour) => tour.slug === "senzo-transfer");
+    const controlled = codeControlledTourFields(transfer) as Record<string, unknown>;
+    expect(controlled.description).toBe(transfer?.description);
+    expect(controlled.notes).toBe(transfer?.notes);
+    expect(controlled.seoTitle).toBe(transfer?.seoTitle);
   });
 
   for (const tour of bookable) {
