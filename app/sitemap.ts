@@ -5,6 +5,10 @@ import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
 
+// Published articles are loaded from the live content store. Metadata routes are
+// static by default, so force a fresh read whenever a crawler requests the sitemap.
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [tours, posts] = await Promise.all([getLiveTours(), getLiveBlogPosts()]);
   const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
