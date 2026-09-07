@@ -1,6 +1,7 @@
 import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
 import { tours } from "@/data/tours";
 import { validatePhoneNumber } from "@/lib/phone";
+import { parseTransferRequest, type ParsedTransferRequest } from "@/lib/transfer-request";
 
 type BookingInput = Record<string, unknown>;
 
@@ -126,6 +127,16 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   if (type === "transfer" && !isTransferLeadTimeValid(date, time, now)) {
     return { error: "Transfer bookings require at least 1 hour to arrange. Choose a later pickup time." as const };
   }
+
+  let transfer: ParsedTransferRequest | undefined;
+  if (type === "transfer" && body.transferProduct === "airport-v2") {
+    const parsed = parseTransferRequest(body);
+    if ("error" in parsed) return { error: parsed.error };
+    transfer = parsed.data;
+    if (transfer.tripType === "round_trip" && !isTransferLeadTimeValid(transfer.returnDate, transfer.returnTime, now)) {
+      return { error: "The return transfer also needs at least 1 hour of notice. Choose a later return pickup time." as const };
+    }
+  }
   const pickupOptional = type === "tour" && (tourSlug === "multi-trip"
     ? selectedCartItems.length > 0 && selectedCartItems.every((item) => isSaudiTour(item.tourSlug))
     : isSaudiTour(tourSlug));
@@ -201,6 +212,8 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       dropoff: text(body.dropoff, 80),
       passengers: number(body.passengers),
       travelBags: number(body.travelBags),
+      transferProduct: transfer ? "airport-v2" as const : undefined,
+      transfer,
     },
   };
 }
