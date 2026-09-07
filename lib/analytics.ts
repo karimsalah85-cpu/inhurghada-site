@@ -20,7 +20,14 @@ export type AnalyticsEventName =
   | "add_to_cart"
   | "checkout_started"
   | "checkout_validation_error"
-  | "empty_checkout_recovery";
+  | "empty_checkout_recovery"
+  | "transfer_quote_started"
+  | "transfer_route_selected"
+  | "transfer_passengers_changed"
+  | "transfer_vehicle_allocated"
+  | "transfer_quote_generated"
+  | "transfer_manual_quote_requested"
+  | "transfer_booking_submitted";
 
 export type AnalyticsEventData = Record<string, string | number | boolean | undefined>;
 
