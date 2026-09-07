@@ -21,6 +21,8 @@ import { bookingRequestHash } from "@/lib/booking-idempotency";
 import { bookingLocale, buildCustomerConfirmationEmail } from "@/lib/booking-communications-i18n";
 import { tours } from "@/data/tours";
 import { localizeTour } from "@/lib/tour-localization";
+import { calculateTransferQuote, type TransferQuote } from "@/lib/transfer-quote";
+import type { ParsedTransferRequest } from "@/lib/transfer-request";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -84,12 +86,16 @@ export async function POST(request: NextRequest) {
     const locale = bookingLocale(body.locale);
     const sourceTour = body.tourSlug ? tours.find((tour) => tour.slug === body.tourSlug) : undefined;
     const localizedTour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
+    const transferQuote = body.transfer ? calculateTransferQuote(body.transfer.quoteInput) : undefined;
+    const transferSummary = body.transfer ? buildTransferSummary(body.transfer, transferQuote, guestSummary, price) : undefined;
     const localizedGuestSummary = bookingType === "tour"
       ? formatTravelerSummary(body.adults, body.youth, body.infants, locale)
+      : body.transfer
+      ? guestSummary
       : formatPassengerSummary(body.passengers, locale);
     const pickupOrMeetingPoint = hotel || localizedTour?.departureMarina || localizedTour?.location || "";
     const localizedItemName = bookingType === "transfer"
-      ? localizedTransferName(body.service, locale)
+      ? (body.transfer ? tourName : localizedTransferName(body.service, locale))
       : body.tourSlug === "multi-trip"
         ? localizedMultiTripName(locale)
         : localizedTour?.title || tourName;
@@ -99,7 +105,7 @@ export async function POST(request: NextRequest) {
       return `${index + 1}. ${title} - ${item.date} - ${currencySymbol}${item.amount.toFixed(2)}`;
     });
     const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: ${currencySymbol}${item.amount.toFixed(2)}`).join("\n\n");
-    const bookingNotes = [tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
+    const bookingNotes = [transferSummary, tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
 
@@ -245,6 +251,47 @@ function formatTravelerSummary(adults: number, youth: number, infants: number, l
 function formatPassengerSummary(passengers: number, locale: string) {
   const label = { en: "passenger", de: "Fahrgäste", ru: "пассажиров", ar: "مسافر", pl: "pasażerów", zh: "位乘客" }[locale] || "passenger";
   return `${passengers} ${label}${locale === "en" && passengers !== 1 ? "s" : ""}`;
+}
+
+const TRANSFER_ZONE_NAMES: Record<string, string> = {
+  hurghada_city: "Hurghada City", el_ahyaa: "El Ahyaa / North Hurghada", sahl_hasheesh: "Sahl Hasheesh",
+  makadi_bay: "Makadi Bay", el_gouna: "El Gouna", soma_bay: "Soma Bay", safaga: "Safaga",
+  el_quseir: "El Quseir", port_ghalib: "Port Ghalib", marsa_alam: "Marsa Alam",
+};
+const TRANSFER_VEHICLE_NAMES: Record<string, string> = {
+  sedan: "Private Sedan", suv: "Private SUV", minivan: "Private Minivan", hiace: "Private Hiace / Van", minibus: "Private Minibus",
+};
+
+function buildTransferSummary(transfer: ParsedTransferRequest, quote: TransferQuote | undefined, guestSummary: string, price: string) {
+  const zoneName = transfer.zone ? TRANSFER_ZONE_NAMES[transfer.zone] : "your accommodation";
+  const journey = transfer.direction === "hotel_to_airport"
+    ? `${zoneName} → Hurghada Airport`
+    : transfer.direction === "hotel_to_hotel"
+    ? `${transfer.pickupPlaceText || "Hotel"} → ${transfer.dropoffPlaceText || "Hotel"}`
+    : `Hurghada Airport → ${zoneName}`;
+  const passengers = `${transfer.adults} adults` + (transfer.children ? ` · ${transfer.children} children` : "") + (transfer.infants ? ` · ${transfer.infants} infants` : "") + ` (Total: ${transfer.adults + transfer.children + transfer.infants})`;
+  const luggage = [`${transfer.largeBags} large suitcases`, `${transfer.cabinBags} cabin bags`]
+    .concat(transfer.oversizedItems.map((item) => `${item.quantity}× ${item.type.replace(/_/g, " ")}${item.note ? ` (${item.note})` : ""}`))
+    .join(" · ");
+  const seats = Object.entries(transfer.childSeats).map(([type, count]) => `${count} ${type} seat`).join(" · ") || "none";
+  const vehicles = quote && !quote.requiresManualConfirmation
+    ? quote.allocatedVehicles.map((entry) => `${entry.count}× ${TRANSFER_VEHICLE_NAMES[entry.vehicleClass] ?? entry.vehicleClass}`).join(" + ") + ` (${quote.vehicleCount} vehicle${quote.vehicleCount === 1 ? "" : "s"})`
+    : "Quote requested — vehicle and fare to be confirmed by the team";
+  const lines = [
+    "PRIVATE AIRPORT TRANSFER",
+    `Journey: ${journey}${transfer.tripType === "round_trip" ? " (round trip)" : " (one way)"}`,
+    `Passengers: ${passengers}`,
+    `Luggage: ${luggage}`,
+    `Child seats: ${seats}`,
+    transfer.wheelchair !== "none" ? `Wheelchair: ${transfer.wheelchair.replace(/_/g, " ")}` : "",
+    `Vehicle: ${vehicles}`,
+    `Price: ${quote && quote.requiresManualConfirmation ? "Quote requested" : `${price}`}`,
+    transfer.flightNumber ? `Flight: ${transfer.flightNumber}` : "",
+    transfer.tripType === "round_trip" ? `Return: ${transfer.returnDate} ${transfer.returnTime}${transfer.returnFlightNumber ? ` · flight ${transfer.returnFlightNumber}` : ""}` : "",
+    transfer.hotelName ? `Hotel: ${transfer.hotelName}` : "",
+    `Group summary: ${guestSummary}`,
+  ];
+  return lines.filter(Boolean).join("\n");
 }
 
 function localizedTransferName(service: string, locale: string) {
