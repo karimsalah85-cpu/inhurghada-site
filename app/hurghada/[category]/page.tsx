@@ -52,16 +52,20 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
   const pageUrl = absoluteUrl(localePath(locale, `/hurghada/${category.slug}`));
   const buyerGuide = locale === "en" ? ({
     "island-trips": {
-      title: "Compare Hurghada island trips",
-      intro: "Choose by travel style, not only by the island name. Every option below links to trips with current duration, inclusions and booking details.",
+      title: "Compare Hurghada island boat trips",
+      intro: "The four main choices combine Red Sea cruising, snorkeling and beach time differently. Compare the island experience first, then check the live price, pickup zone and inclusions on the trip page.",
       options: [
-        { title: "Relaxed beach day", text: "Choose Orange Bay or Mahmya when beach time, swimming and a full-day boat experience matter most." },
-        { title: "Private and flexible", text: "Choose a private speedboat when you want a shorter journey, a smaller group and more control over timing." },
-        { title: "Snorkeling focused", text: "Choose a reef or Dolphin House itinerary when time in the water matters more than an extended island stay." },
+        { title: "Orange Bay", text: "A full-day yacht trip combining reef snorkeling, lunch onboard and beach time on Orange Bay. It is the broad all-round option for a first Hurghada boat day." },
+        { title: "Mahmya Island", text: "A premium beach-focused day inside Giftun Island National Park, with white sand, clear water and more emphasis on relaxing ashore." },
+        { title: "Paradise or Hula Hula", text: "Both mix a yacht cruise, snorkeling, lunch and island time. Hula Hula is listed as an eight-hour trip with about one hour on the island." },
       ],
       questions: [
-        { q: "Which Hurghada island trip is best for families?", a: "A full-day boat trip with hotel pickup, lunch, shaded seating and clearly stated child pricing is usually the easiest family option. Check each trip's age guidance before booking." },
-        { q: "Are snorkeling equipment and hotel pickup included?", a: "Inclusions vary by trip. Each Daily Red Sea listing states whether equipment, lunch, drinks, island entry and pickup are included before you book." },
+        { q: "What are the best island boat trip options from Hurghada?", a: "Daily Red Sea currently lists Orange Bay, Mahmya Island, Paradise Island and Hula Hula Island. Orange Bay is the all-round yacht, snorkeling and beach day; Mahmya is the premium beach choice; Paradise and Hula Hula combine snorkeling, lunch and island time." },
+        { q: "Which Hurghada island trip is best for families?", a: "A full-day boat trip with hotel pickup, lunch, shaded seating and clearly stated child pricing is usually the easiest family option. Check the age guidance and pickup details on the individual trip before booking." },
+        { q: "What is the difference between Orange Bay and Mahmya Island?", a: "Orange Bay combines a yacht cruise, reef snorkeling, lunch and beach time in one full-day itinerary. Mahmya is positioned as the more premium beach day inside Giftun Island National Park." },
+        { q: "How long is a Hurghada island boat trip?", a: "Most island options are sold as full-day experiences. Hula Hula is listed as eight hours with about one hour on the island; check each live trip page for the current departure, return and pickup details." },
+        { q: "Are snorkeling equipment, lunch and hotel pickup included?", a: "Inclusions vary by trip. Each Daily Red Sea listing states whether snorkeling equipment, lunch, drinks, island entry and pickup are included before you send a booking request." },
+        { q: "Which island trip gives me the most beach time?", a: "Choose Mahmya when a premium white-sand beach day matters most. Choose Orange Bay when you want a more even mix of yacht cruising, reef snorkeling, lunch and island time." },
       ],
     },
     "diving-snorkeling": {
