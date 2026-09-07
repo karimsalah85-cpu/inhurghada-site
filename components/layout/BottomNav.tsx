@@ -95,7 +95,7 @@ export default function BottomNav() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp"
-            className="flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold text-green-600"
+            className="flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold text-green-700"
           >
             <MessageCircle size={20} aria-hidden="true" />
             <span>WhatsApp</span>

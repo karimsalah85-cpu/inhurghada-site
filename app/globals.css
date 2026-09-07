@@ -34,7 +34,8 @@ html[dir="rtl"] {
   --color-sand: #f7f3ec;
 
   --color-ink: #17252b;
-  --color-muted: #66767d;
+  /* Darkened from #66767d to clear WCAG AA (4.5:1) on white AND on --surface-muted. */
+  --color-muted: #5a6a71;
   --color-line: #e2e8e8;
   --color-surface-muted: #f1f4f4;
 
