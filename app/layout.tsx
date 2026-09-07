@@ -70,10 +70,13 @@ export const metadata: Metadata = {
     description: defaultDescription,
     images: [defaultSocialImage],
   },
-  // Keep a stable, high-resolution PNG favicon explicitly discoverable by
-  // search crawlers. The file convention also emits app/favicon.ico.
+  // Icons are declared here explicitly and served from /public with stable,
+  // query-string-free URLs. `/favicon.ico` is NOT an app/ file convention (that
+  // appends a per-content ?hash); it is a plain public/ asset. The high-res
+  // /icon-192.png is what Google prefers for the search-result favicon.
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
       { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
       { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },

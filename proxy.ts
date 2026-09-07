@@ -1,6 +1,6 @@
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { updateSession } from "@/utils/supabase/proxy";
-import { canonicalAliasTarget, isKnownApplicationPath } from "@/lib/public-routes";
+import { canonicalAliasTarget, isKnownApplicationPath, isStaticAssetPath } from "@/lib/public-routes";
 import { recordServerHit } from "@/lib/server-hit-counter";
 
 // A raw, consent-independent page-view counter. Counts one hit per real
@@ -19,6 +19,9 @@ function isCountableNavigation(request: NextRequest, pathname: string) {
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   const pathname = request.nextUrl.pathname;
+  // Real static assets and framework metadata routes: serve as-is, skipping the
+  // redirect lookup, auth-cookie refresh and soft-404 guard below.
+  if (isStaticAssetPath(pathname)) return NextResponse.next();
   const previewAuthRoutes = new Set(["/api/admin/login", "/api/admin/logout", "/api/admin/forgot-password"]);
   if (process.env.VERCEL_ENV === "preview" && pathname.startsWith("/api/admin/") && !previewAuthRoutes.has(pathname) && !["GET", "HEAD", "OPTIONS"].includes(request.method)) {
     return NextResponse.json({ error: "Administration changes are disabled in this preview until an isolated test database is configured." }, { status: 503, headers: { "Cache-Control": "private, no-store" } });
@@ -51,8 +54,9 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
 }
 
 export const config = {
-  // Static files must bypass the application route allowlist. In particular,
-  // the invoice reader loads same-origin .mjs, .js, .wasm and .gz assets from
-  // /public/vendor; intercepting them here turns valid files into custom 404s.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  // Run for everything except Next's build output. Requests that carry a file
+  // extension now reach the proxy too, so `isStaticAssetPath` can pass the real
+  // /public assets straight through while unknown `/whatever.ext` paths get a
+  // clean 404 instead of a 200 HTML shell (soft 404).
+  matcher: ["/((?!_next/static|_next/image).*)"],
 };

@@ -7,7 +7,28 @@ const publicRouteRoots = new Set([
   "terms-conditions", "tours", "transfers",
 ]);
 
-const publicFiles = new Set(["/favicon.ico", "/llms.txt", "/robots.txt", "/sitemap.xml"]);
+const publicFiles = new Set(["/favicon.ico", "/llms.txt", "/robots.txt", "/sitemap.xml", "/manifest.webmanifest"]);
+
+/**
+ * Real files served from `/public` and framework metadata routes. The proxy lets
+ * these through untouched — no redirects, no auth-cookie refresh, no soft-404
+ * guard. Anything NOT listed here that carries a file extension is treated as a
+ * missing resource and gets a clean 404 (see isKnownApplicationPath), so we never
+ * serve a 200 HTML shell for `/whatever.png`.
+ */
+const staticAssetFiles = new Set([
+  "/favicon.ico", "/favicon-16x16.png", "/favicon-32x32.png",
+  "/icon.svg", "/icon-192.png", "/icon-512.png", "/icon-512-maskable.png",
+  "/apple-touch-icon.png", "/og-image.svg", "/llms.txt",
+  "/file.svg", "/globe.svg", "/next.svg", "/vercel.svg", "/window.svg",
+  "/robots.txt", "/sitemap.xml", "/manifest.webmanifest",
+]);
+
+export function isStaticAssetPath(pathname: string) {
+  return staticAssetFiles.has(pathname)
+    || /^\/(?:images|brand|vendor)\//.test(pathname)
+    || pathname.startsWith("/.well-known/");
+}
 
 /** Rejects unknown catch-all roots before Next.js starts streaming a soft-404 response. */
 export function isKnownApplicationPath(pathname: string) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonicalAliasTarget, isKnownApplicationPath } from "@/lib/public-routes";
+import { canonicalAliasTarget, isKnownApplicationPath, isStaticAssetPath } from "@/lib/public-routes";
 
 describe("public route guard", () => {
   it("allows known public and localized route roots", () => {
@@ -29,6 +29,25 @@ describe("public route guard", () => {
     expect(isKnownApplicationPath("/de/definitely-not-real")).toBe(false);
     expect(isKnownApplicationPath("/transfers/not-real")).toBe(false);
     expect(isKnownApplicationPath("/de/transfers/not-real")).toBe(false);
+  });
+
+  it("passes real /public assets and metadata routes straight through", () => {
+    for (const asset of [
+      "/favicon.ico", "/icon-192.png", "/icon-512.png", "/icon.svg",
+      "/favicon-16x16.png", "/favicon-32x32.png", "/apple-touch-icon.png",
+      "/og-image.svg", "/llms.txt", "/robots.txt", "/sitemap.xml", "/manifest.webmanifest",
+      "/images/owned/hurghada-airport-flight.png", "/brand/dailyredsea-wordmark-white.png",
+      "/vendor/pdfjs/pdf.mjs", "/.well-known/security.txt",
+    ]) {
+      expect(isStaticAssetPath(asset), asset).toBe(true);
+    }
+  });
+
+  it("treats unknown extensioned paths as missing resources, never static assets", () => {
+    for (const missing of ["/apple-icon.png", "/apple-touch-icon-precomposed.png", "/nonexistent.png", "/random.json", "/foo.txt", "/wp-login.php"]) {
+      expect(isStaticAssetPath(missing), missing).toBe(false);
+      expect(isKnownApplicationPath(missing), missing).toBe(false);
+    }
   });
 
   it("resolves canonical aliases without losing the locale", () => {
