@@ -28,6 +28,31 @@ export type ConsentPreferences = { analytics: boolean; marketing: boolean };
 
 export const consentStorageKey = "daily-red-sea-cookie-consent";
 
+const attributionStorageKey = "daily-red-sea-attribution";
+const attributionKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"] as const;
+let landingAttribution: AnalyticsEventData = {};
+
+export function captureLandingAttribution(preferences: ConsentPreferences | null = null) {
+  if (typeof window === "undefined") return;
+  const params = new URLSearchParams(window.location.search);
+  const current = Object.fromEntries(attributionKeys.flatMap((key) => {
+    const value = params.get(key)?.trim();
+    return value ? [[key, value]] : [];
+  }));
+  if (Object.keys(current).length) landingAttribution = current;
+  if (preferences?.analytics || preferences?.marketing) {
+    try {
+      if (!Object.keys(landingAttribution).length) {
+        landingAttribution = JSON.parse(window.sessionStorage.getItem(attributionStorageKey) || "{}") as AnalyticsEventData;
+      } else {
+        window.sessionStorage.setItem(attributionStorageKey, JSON.stringify(landingAttribution));
+      }
+    } catch {
+      // Attribution persistence is optional; event delivery must continue.
+    }
+  }
+}
+
 declare global {
   interface Window {
     dataLayer?: unknown[];
@@ -94,7 +119,10 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
   if (typeof window === "undefined") return;
 
   const id = eventId();
-  const cleanData = Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
+  const cleanData = {
+    ...landingAttribution,
+    ...Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined)),
+  };
   const gtag = ensureGoogleTag();
   gtag("event", event, { ...cleanData, event_id: id });
 
