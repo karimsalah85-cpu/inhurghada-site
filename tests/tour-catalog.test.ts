@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
 import { halfDayBoatOptions } from "@/data/speedboat-booking";
+import { calculateBookingPrice } from "@/lib/booking-pricing";
 
 describe("tour catalog publication safety", () => {
   it("keeps slugs unique", () => {
@@ -98,4 +99,56 @@ describe("tour catalog publication safety", () => {
     ]);
     expect(tours.find((tour) => tour.slug === "hula-hula-speedboat")?.requiresMarinaTransferChoice).not.toBe(true);
   });
+});
+
+describe("displayed 'from' price stays consistent with the booking engine", () => {
+  // TourCard, favourites and the TouristTrip JSON-LD Offer all render `tour.price`
+  // directly, while checkout totals come from calculateBookingPrice(). These must
+  // never drift apart: the price a visitor sees on a card must be reachable in the
+  // booking flow for the advertised baseline party.
+  const bookable = tours.filter((tour) => tour.bookingMode !== "inquiry" && tour.slug !== "multi-trip");
+
+  it("covers a meaningful share of the catalog", () => {
+    expect(bookable.length).toBeGreaterThan(20);
+  });
+
+  for (const tour of bookable) {
+    it(`keeps ${tour.slug} card price aligned with its pricing model`, () => {
+      const displayed = Number(tour.price);
+      expect(Number.isFinite(displayed)).toBe(true);
+      expect(displayed).toBeGreaterThan(0);
+
+      if (tour.boatOptions?.length) {
+        // Private-boat products advertise the first (smallest) boat as the "from" price.
+        expect(displayed).toBe(Number(tour.boatOptions[0].price));
+        return;
+      }
+
+      if (tour.participantPricing) {
+        expect(displayed).toBe(tour.participantPricing.adults);
+      }
+
+      const listable = !tour.listingStatus || tour.listingStatus === "active";
+      if (listable && !tour.entrancePricing) {
+        // Entrance-fee tours split the surcharge into a separate line on the card,
+        // so the engine total for one adult only matches when there is no entrance fee.
+        // Paused/unlisted tours are refused by the engine by design, so skip them here.
+        const result = calculateBookingPrice({
+          type: "tour",
+          tourName: tour.title,
+          tourSlug: tour.slug,
+          adults: 1,
+          youth: 0,
+          infants: 0,
+          service: "",
+          pickup: "",
+          dropoff: "",
+          passengers: 0,
+          travelBags: 0,
+        });
+        expect(result.error).toBeUndefined();
+        expect(result.data?.amount).toBe(displayed);
+      }
+    });
+  }
 });
