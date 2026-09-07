@@ -138,7 +138,7 @@ export default function AirportTransferPolicy({ locale = "en" }: { locale?: Loca
   return (
     <section aria-labelledby="airport-transfer-policy-title" className="border-t border-line bg-white px-6 py-16 sm:py-20">
       <div className="mx-auto max-w-4xl">
-        <p className="font-semibold uppercase tracking-[0.24em] text-ocean">{content.intro}</p>
+        <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{content.intro}</p>
         <h2 id="airport-transfer-policy-title" className="mt-3 text-3xl font-bold text-ink sm:text-4xl">{content.title}</h2>
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {content.clauses.map((clause) => (

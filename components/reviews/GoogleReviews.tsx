@@ -36,7 +36,7 @@ export default function GoogleReviews({ className = "" }: { className?: string }
 
   return <section className={`rounded-[2rem] border border-ocean-tint bg-white p-7 shadow-sm sm:p-10 ${className}`}>
     <div className="flex flex-wrap items-end justify-between gap-5">
-      <div><p className="font-bold uppercase tracking-[0.24em] text-ocean">{labels.eyebrow}</p><h2 className="mt-3 text-3xl font-black text-ink sm:text-4xl">{labels.title}</h2></div>
+      <div><p className="font-bold uppercase tracking-[0.24em] text-ocean-dark">{labels.eyebrow}</p><h2 className="mt-3 text-3xl font-black text-ink sm:text-4xl">{labels.title}</h2></div>
       {data ? <a href={data.placeUri} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-2xl border border-line px-5 py-3 font-black text-ink hover:bg-surface-muted"><span className="text-2xl text-amber-500">★</span><span>{data.rating.toFixed(1)} <small className="block font-medium text-muted">{data.reviewCount.toLocaleString()} reviews</small></span></a> : null}
     </div>
 

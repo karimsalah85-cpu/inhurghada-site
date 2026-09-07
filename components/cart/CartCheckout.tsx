@@ -143,7 +143,7 @@ export default function CartCheckout() {
 
   return (
     <section className="mx-auto max-w-7xl px-6 pb-24 pt-32">
-      <p className="font-semibold uppercase tracking-[0.24em] text-ocean">{tr("Multi-trip booking", "Mehrere Ausflüge buchen", "Бронирование нескольких поездок", "حجز رحلات متعددة")}</p>
+      <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{tr("Multi-trip booking", "Mehrere Ausflüge buchen", "Бронирование нескольких поездок", "حجز رحلات متعددة")}</p>
       <h1 className="mt-3 text-4xl font-black text-ink sm:text-5xl">{tr("Your trip cart", "Dein Reisewarenkorb", "Корзина поездок", "سلة الرحلات")}</h1>
       <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4">

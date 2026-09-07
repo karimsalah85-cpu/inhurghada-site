@@ -21,8 +21,11 @@ html[dir="rtl"] {
   --color-primary-soft: #ebeff1;
   --color-primary-tint: #f5f7f8;
 
-  --color-cta: #f05a47;
-  --color-cta-dark: #ce4d3d;
+  /* Darkened from #f05a47 (3.35:1 white-on-orange) to #cb4133 so CTA buttons and
+     the orange "new"/badge text clear WCAG AA (4.5:1) on white and vice versa.
+     The pale -soft / -tint background tokens are unchanged. */
+  --color-cta: #cb4133;
+  --color-cta-dark: #a83a2c;
   --color-cta-soft: #feefed;
   --color-cta-tint: #fef7f6;
 
@@ -43,8 +46,8 @@ html[dir="rtl"] {
   --color-brand-navy: #073b4c;
   --color-brand-navy-soft: #ebeff1;
   --color-brand-navy-tint: #f5f7f8;
-  --color-brand-orange: #f05a47;
-  --color-brand-orange-cta: #f05a47;
+  --color-brand-orange: #cb4133;
+  --color-brand-orange-cta: #cb4133;
   --color-brand-orange-soft: #feefed;
   --color-brand-orange-tint: #fef7f6;
 
