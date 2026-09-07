@@ -116,6 +116,20 @@ export const ZONE_LABEL_KEYS: Record<TransferZoneKey, string> = {
 
 export const TRANSFER_ZONE_KEYS = Object.keys(ROUTE_PRICING) as TransferZoneKey[];
 
+/**
+ * Senzo Mall shuttle. Short-haul hotel <-> mall within Hurghada; priced per
+ * vehicle by passenger count using the same structure as the Hurghada-city
+ * airport column. Travel bags are not carried on this service.
+ */
+export const SENZO_MALL_FARE: Record<TransferVehicleClass, number | null> = {
+  sedan: 15,
+  suv: 18,
+  minivan: 20,
+  hiace: 30,
+  minibus: 40,
+};
+export const SENZO_RESORT_SUPPLEMENT = 7;
+
 export function lowestVehicleFare(): number {
   let lowest = Number.POSITIVE_INFINITY;
   for (const zone of TRANSFER_ZONE_KEYS) {

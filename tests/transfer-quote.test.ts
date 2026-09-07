@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateTransferQuote, allocateVehicles, type TransferQuoteInput } from "@/lib/transfer-quote";
+import { calculateTransferQuote, calculateSenzoQuote, allocateVehicles, type TransferQuoteInput } from "@/lib/transfer-quote";
 import { ROUTE_PRICING, VEHICLE_CLASSES, enabledVehicleClasses, lowestVehicleFare } from "@/lib/transfer-config";
 import { validateBookingInput } from "@/lib/booking-validation";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
@@ -246,6 +246,44 @@ describe("server authority: a client-sent price cannot change the fare", () => {
     if (!("data" in pricing) || !pricing.data) throw new Error("pricing failed");
     expect(pricing.data.amount).toBe(0);
     expect(pricing.data.price.toLowerCase()).toContain("quote");
+  });
+});
+
+describe("Senzo Mall shuttle: passenger count drives vehicle and price", () => {
+  it("1-3 passengers -> private sedan at the Senzo sedan fare", () => {
+    for (const passengers of [1, 2, 3]) {
+      const quote = calculateSenzoQuote({ passengers });
+      expect(quote.ok).toBe(true);
+      expect(quote.allocatedVehicles).toEqual([{ vehicleClass: "sedan", labelKey: VEHICLE_CLASSES.sedan.labelKey, count: 1 }]);
+      expect(quote.total).toBe(15);
+    }
+  });
+
+  it("4-10 passengers -> private van at the Senzo hiace fare", () => {
+    for (const passengers of [4, 7, 10]) {
+      const quote = calculateSenzoQuote({ passengers });
+      expect(quote.allocatedVehicles).toEqual([{ vehicleClass: "hiace", labelKey: VEHICLE_CLASSES.hiace.labelKey, count: 1 }]);
+      expect(quote.total).toBe(30);
+    }
+  });
+
+  it("11+ passengers -> two vehicles, summed from the real allocation", () => {
+    const quote = calculateSenzoQuote({ passengers: 12 });
+    expect(quote.vehicleCount).toBe(2);
+    expect(quote.total).toBe(30 + 15);
+  });
+
+  it("adds the resort supplement once and rejects travel bags", () => {
+    expect(calculateSenzoQuote({ passengers: 2, resortZone: true }).total).toBe(22);
+    expect(calculateSenzoQuote({ passengers: 2, travelBags: 1 }).ok).toBe(false);
+    expect(calculateSenzoQuote({ passengers: 2, travelBags: 1 }).reason).toBe("bags_not_allowed");
+  });
+
+  it("returns a no-price group_exceeds_fleet result beyond the ceiling", () => {
+    const quote = calculateSenzoQuote({ passengers: 40 });
+    expect(quote.ok).toBe(false);
+    expect(quote.reason).toBe("group_exceeds_fleet");
+    expect(quote.total).toBe(0);
   });
 });
 

@@ -1,5 +1,5 @@
 import { tours } from "@/data/tours";
-import { calculateTransferQuote } from "@/lib/transfer-quote";
+import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
 
 type PricingInput = {
@@ -133,19 +133,40 @@ export function calculateBookingPrice(input: PricingInput) {
   if (isAirport && input.pickup !== "Hurghada Airport" && input.dropoff !== "Hurghada Airport") {
     return { error: "Airport transfers must start or finish at Hurghada Airport." as const };
   }
-  if (isSenzo && input.pickup !== "Senzo Mall" && input.dropoff !== "Senzo Mall") {
-    return { error: "Senzo transfers must start or finish at Senzo Mall." as const };
+
+  const resortZone = resortZones.has(input.pickup) || resortZones.has(input.dropoff);
+
+  if (isSenzo) {
+    if (input.pickup !== "Senzo Mall" && input.dropoff !== "Senzo Mall") {
+      return { error: "Senzo transfers must start or finish at Senzo Mall." as const };
+    }
+    const quote = calculateSenzoQuote({ passengers: input.passengers, travelBags: input.travelBags, resortZone });
+    if (!quote.ok) {
+      if (quote.reason === "bags_not_allowed") return { error: "Travel bags are not carried on the Senzo Mall transfer." as const };
+      if (quote.reason === "group_exceeds_fleet") return { error: "Message us on WhatsApp to arrange a Senzo transfer for a group this size." as const };
+      return { error: "Enter a valid number of passengers." as const };
+    }
+    const vehicleSummary = quote.allocatedVehicles
+      .map((entry) => `${entry.count}× ${VEHICLE_NAMES[entry.vehicleClass] ?? entry.vehicleClass}`)
+      .join(" + ");
+    return {
+      data: {
+        amount: quote.total,
+        guests: input.passengers,
+        guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"} · ${vehicleSummary}`,
+        tourName: "Senzo Mall one-way transfer",
+        price: `$${quote.total.toFixed(2)} total — private vehicle${quote.vehicleCount === 1 ? "" : "s"}, not per person`,
+        currency: "USD" as const,
+      },
+    };
   }
-  if (isSenzo && (input.passengers > 4 || input.travelBags !== 0)) {
-    return { error: "Senzo transfers allow up to 4 passengers and no travel bags." as const };
-  }
+
   if (isAirport && input.travelBags > (input.passengers <= 2 ? 2 : input.passengers * 2)) {
     return { error: "The selected vehicle cannot carry that many travel bags." as const };
   }
 
-  const amount = (isAirport ? 20 : 10) + (resortZones.has(input.pickup) || resortZones.has(input.dropoff) ? 7 : 0);
-  const tourName = isAirport ? "Hurghada Airport one-way transfer" : "Senzo Mall one-way transfer";
-  return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName, price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
+  const amount = 20 + (resortZone ? 7 : 0);
+  return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName: "Hurghada Airport one-way transfer", price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
 }
 
 const ZONE_NAMES: Record<string, string> = {

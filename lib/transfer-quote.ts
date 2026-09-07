@@ -21,6 +21,8 @@ import {
   OVERSIZED_MANUAL_CONFIRMATION_THRESHOLD,
   PRICING_VERSION,
   ROUTE_PRICING,
+  SENZO_MALL_FARE,
+  SENZO_RESORT_SUPPLEMENT,
   TRANSFER_CURRENCY,
   VEHICLE_CLASSES,
   ZONE_LABEL_KEYS,
@@ -337,5 +339,73 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
     requiresManualConfirmation: false,
     reason: null,
     warnings,
+  };
+}
+
+// --- Senzo Mall shuttle -----------------------------------------------------
+
+export type SenzoQuote = {
+  ok: boolean;
+  currency: typeof TRANSFER_CURRENCY;
+  passengers: number;
+  allocatedVehicles: { vehicleClass: TransferVehicleClass; labelKey: string; count: number }[];
+  vehicleCount: number;
+  vehiclesSubtotal: number;
+  resortSupplement: number;
+  total: number;
+  reason: "bags_not_allowed" | "group_exceeds_fleet" | "invalid_passengers" | null;
+};
+
+/**
+ * Per-vehicle fare for the short-haul Senzo Mall shuttle. Passenger count drives
+ * the vehicle (and therefore the price) through the same allocator as the airport
+ * transfer; no luggage is carried. A resort-zone pickup/drop-off adds the flat
+ * supplement.
+ */
+export function calculateSenzoQuote(input: { passengers: number; travelBags?: number; resortZone?: boolean }): SenzoQuote {
+  const passengers = Math.floor(Number(input.passengers));
+  const base = (reason: SenzoQuote["reason"]): SenzoQuote => ({
+    ok: false,
+    currency: TRANSFER_CURRENCY,
+    passengers: Number.isFinite(passengers) ? Math.max(passengers, 0) : 0,
+    allocatedVehicles: [],
+    vehicleCount: 0,
+    vehiclesSubtotal: 0,
+    resortSupplement: 0,
+    total: 0,
+    reason,
+  });
+
+  if (!Number.isFinite(passengers) || passengers < 1) return base("invalid_passengers");
+  if (Number(input.travelBags ?? 0) > 0) return base("bags_not_allowed");
+
+  const allocation = allocateVehicles({ passengers, largeBagUnits: 0, cabinBags: 0 });
+  if (!allocation) return base("group_exceeds_fleet");
+
+  const legVehicles = allocation.map((vehicleClass) => ({
+    vehicleClass,
+    labelKey: VEHICLE_CLASSES[vehicleClass].labelKey,
+    fare: SENZO_MALL_FARE[vehicleClass] ?? 0,
+  }));
+  const vehiclesSubtotal = round2(legVehicles.reduce((sum, vehicle) => sum + vehicle.fare, 0));
+  const resortSupplement = input.resortZone ? SENZO_RESORT_SUPPLEMENT : 0;
+
+  const grouped = new Map<TransferVehicleClass, { labelKey: string; count: number }>();
+  for (const vehicle of legVehicles) {
+    const existing = grouped.get(vehicle.vehicleClass);
+    if (existing) existing.count += 1;
+    else grouped.set(vehicle.vehicleClass, { labelKey: vehicle.labelKey, count: 1 });
+  }
+
+  return {
+    ok: true,
+    currency: TRANSFER_CURRENCY,
+    passengers,
+    allocatedVehicles: [...grouped.entries()].map(([vehicleClass, value]) => ({ vehicleClass, labelKey: value.labelKey, count: value.count })),
+    vehicleCount: legVehicles.length,
+    vehiclesSubtotal,
+    resortSupplement,
+    total: round2(vehiclesSubtotal + resortSupplement),
+    reason: null,
   };
 }

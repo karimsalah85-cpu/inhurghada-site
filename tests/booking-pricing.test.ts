@@ -43,11 +43,19 @@ describe("authoritative booking pricing", () => {
     expect(calculateBookingPrice({ ...transfer, passengers: 3, travelBags: 6 }).data?.amount).toBe(20);
   });
 
-  it("enforces Senzo passenger and luggage rules", () => {
-    const senzo = { ...transfer, service: "senzo", pickup: "Hurghada Hotels", dropoff: "Senzo Mall", passengers: 4, travelBags: 0 };
-    expect(calculateBookingPrice(senzo).data?.amount).toBe(10);
-    expect(calculateBookingPrice({ ...senzo, passengers: 5 }).error).toMatch(/up to 4/i);
-    expect(calculateBookingPrice({ ...senzo, travelBags: 1 }).error).toMatch(/no travel bags/i);
+  it("sizes the Senzo Mall vehicle and price by passenger count", () => {
+    const senzo = { ...transfer, service: "senzo", pickup: "Hurghada Hotels", dropoff: "Senzo Mall", passengers: 2, travelBags: 0 };
+    expect(calculateBookingPrice(senzo).data?.amount).toBe(15); // 1-3 → private sedan
+    expect(calculateBookingPrice({ ...senzo, passengers: 3 }).data?.amount).toBe(15);
+    expect(calculateBookingPrice({ ...senzo, passengers: 4 }).data?.amount).toBe(30); // 4+ → private van
+    expect(calculateBookingPrice({ ...senzo, passengers: 8 }).data?.amount).toBe(30);
+    expect(calculateBookingPrice({ ...senzo, passengers: 2 }).data?.guestSummary).toMatch(/sedan/i);
+  });
+
+  it("adds the Senzo resort supplement and still rejects travel bags", () => {
+    const senzo = { ...transfer, service: "senzo", pickup: "Soma Bay", dropoff: "Senzo Mall", passengers: 2, travelBags: 0 };
+    expect(calculateBookingPrice(senzo).data?.amount).toBe(22); // 15 sedan + 7 resort
+    expect(calculateBookingPrice({ ...senzo, travelBags: 1 }).error).toMatch(/bags/i);
   });
 
   it("prices the private Luxor day trip from the server-side catalog", () => {

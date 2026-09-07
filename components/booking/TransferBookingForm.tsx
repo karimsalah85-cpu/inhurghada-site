@@ -11,6 +11,7 @@ import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { isTransferLeadTimeValid, minimumTransferSlot } from "@/lib/booking-validation";
 import PhoneNumberInput from "@/components/booking/PhoneNumberInput";
 import { validatePhoneNumber } from "@/lib/phone";
+import { calculateSenzoQuote } from "@/lib/transfer-quote";
 
 const areas = ["Hurghada Airport", "Hurghada Hotels", "Senzo Mall", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"];
 const resortZones = new Set(["Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay"]);
@@ -47,7 +48,14 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const ar = language === "ar";
   const pl = language === "pl";
   const zh = language === "zh";
-  const tr = (en: string, deText: string, ruText: string, arText = arabicTransferCopy[en] || en) => de ? deText : ru ? ruText : ar ? arText : pl ? polishTransferCopy[en] || en : zh ? chineseTransferCopy[en] || en : en;
+  const tr = (
+    en: string,
+    deText: string,
+    ruText: string,
+    arText = arabicTransferCopy[en] || en,
+    plText = polishTransferCopy[en] || en,
+    zhText = chineseTransferCopy[en] || en,
+  ) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
   const resortSupplementText = (area: string) => de
     ? `Enthält den Zuschlag von $7 für ${area}.`
     : ru
@@ -76,10 +84,23 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const [website, setWebsite] = useState("");
   const passengerCount = Math.max(1, Number.parseInt(passengers, 10) || 1);
   const bagCount = Math.max(0, Number.parseInt(travelBags, 10) || 0);
-  const baseFare = service === "airport" ? 20 : 10;
   const resortSupplement = resortZones.has(pickup) || resortZones.has(dropoff) ? 7 : 0;
-  const total = baseFare + resortSupplement;
-  const vehicle = service === "airport" ? (passengerCount <= 2 ? tr("Small car", "Kleinwagen", "Легковой автомобиль") : tr("Larger vehicle", "Größeres Fahrzeug", "Автомобиль повышенной вместимости")) : tr("Private car", "Privatwagen", "Частный автомобиль");
+  const senzoQuote = useMemo(
+    () => (service === "senzo" ? calculateSenzoQuote({ passengers: passengerCount, travelBags: 0, resortZone: resortSupplement > 0 }) : null),
+    [service, passengerCount, resortSupplement],
+  );
+  const total = service === "senzo" ? senzoQuote?.total ?? 0 : 20 + resortSupplement;
+  const senzoVehicleLabel = (() => {
+    if (!senzoQuote?.ok) return "";
+    if (senzoQuote.vehicleCount > 1) return tr("2 private vehicles", "2 Privatfahrzeuge", "2 частных автомобиля");
+    const cls = senzoQuote.allocatedVehicles[0]?.vehicleClass;
+    return cls === "hiace"
+      ? tr("Private van (up to 10)", "Privater Van (bis zu 10)", "Частный микроавтобус (до 10)")
+      : tr("Private car (up to 3)", "Privatwagen (bis zu 3)", "Частный автомобиль (до 3)");
+  })();
+  const vehicle = service === "airport"
+    ? (passengerCount <= 2 ? tr("Small car", "Kleinwagen", "Легковой автомобиль") : tr("Larger vehicle", "Größeres Fahrzeug", "Автомобиль повышенной вместимости"))
+    : senzoVehicleLabel || tr("Private car", "Privatwagen", "Частный автомобиль");
   const serviceAreas = service === "airport" ? areas.filter((area) => area !== "Senzo Mall") : areas.filter((area) => area !== "Hurghada Airport");
   const routeIsValid = useMemo(() => {
     if (pickup === dropoff) return false;
@@ -98,7 +119,6 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
     } else {
       setPickup("Hurghada Hotels");
       setDropoff("Senzo Mall");
-      setPassengers((value) => String(Math.min(Number(value) || 1, 4)));
       setTravelBags("0");
     }
   }
@@ -114,12 +134,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       alert(tr("We need at least 1 hour to arrange your transfer. Please choose a later pickup time.", "Wir benötigen mindestens 1 Stunde, um deinen Transfer zu organisieren. Bitte wähle eine spätere Abholzeit.", "Нам требуется не менее 1 часа для организации трансфера. Выберите более позднее время."));
       return;
     }
-    if (service === "senzo" && passengerCount > 4) {
-      alert(tr("Senzo Mall transfers allow a maximum of 4 passengers.", "Senzo-Mall-Transfers sind für maximal 4 Fahrgäste möglich.", "Трансфер в Senzo Mall рассчитан максимум на 4 пассажиров.", "توصيلات سنزو مول متاحة لحد أقصى 4 ركاب."));
-      return;
-    }
-    if (service === "senzo" && bagCount > 0) {
-      alert(tr("Senzo Mall transfers do not allow travel bags.", "Bei Senzo-Mall-Transfers sind keine Reisekoffer erlaubt.", "Трансфер в Senzo Mall не предусматривает провоз чемоданов.", "لا يُسمح بحقائب السفر في توصيلات سنزو مول."));
+    if (service === "senzo" && !senzoQuote?.ok) {
+      alert(tr("Message us on WhatsApp to arrange a Senzo transfer for a group this size.", "Schreib uns auf WhatsApp, um einen Senzo-Transfer für eine Gruppe dieser Größe zu vereinbaren.", "Напишите нам в WhatsApp, чтобы организовать трансфер в Senzo Mall для группы такого размера.", "راسلنا على واتساب لترتيب توصيلة سنزو مول لمجموعة بهذا الحجم."));
       return;
     }
     if (service === "airport" && passengerCount <= 2 && bagCount > 2) {
@@ -160,7 +176,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
           date,
           time,
           hotel: `${pickup}: ${pickupDetails.trim()} → ${dropoff}`,
-          message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} (${resortSupplement ? `$${baseFare} base + $7 resort supplement` : `$${baseFare} base`})\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
+          message: `Service: ${serviceName}\nFare: $${total.toFixed(2)} total${resortSupplement ? " (includes $7 resort supplement)" : ""}\nVehicle: ${vehicle}\nTravel bags: ${bagCount}\nNotes: ${notes.trim() || "None"}\nPassengers: ${passengers}\nFlight: ${flight.trim() || "Not provided"}\nTime: ${time}`,
           service,
           pickup,
           dropoff,
@@ -219,7 +235,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         <Field required icon={<Hotel />} label={tr("Drop-off location", "Zielort", "Место назначения")}><select value={dropoff} onChange={(event) => setDropoff(event.target.value)} required>{serviceAreas.map((area) => <option key={area}>{area}</option>)}</select></Field>
         <Field required icon={<CalendarDays />} label={tr("Transfer date", "Transferdatum", "Дата трансфера")}><input type="date" value={date} onChange={(event) => setDate(event.target.value)} min={minimumSlot.date} required /></Field>
         <Field required icon={<Clock3 />} label={tr("Pickup time", "Abholzeit", "Время подачи")}><input type="time" value={time} onChange={(event) => setTime(event.target.value)} min={date === minimumSlot.date ? minimumSlot.time : undefined} required /><p className="mt-2 text-xs leading-5 text-amber-700">{tr("Please book at least 1 hour before pickup.", "Bitte mindestens 1 Stunde Vorlaufzeit einplanen.", "Бронируйте минимум за 1 час до подачи.")}</p></Field>
-        <Field required icon={<Users />} label={`${tr("Passengers", "Fahrgäste", "Пассажиры")}${service === "senzo" ? tr(" (maximum 4)", " (maximal 4)", " (максимум 4)") : ""}`}><input type="number" min="1" max={service === "senzo" ? 4 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
+        <Field required icon={<Users />} label={tr("Passengers", "Fahrgäste", "Пассажиры")}><input type="number" min="1" max={service === "senzo" ? 20 : undefined} step="1" value={passengers} onChange={(event) => setPassengers(event.target.value)} required /></Field>
         <Field required icon={<Car />} label={tr("Travel bags", "Reisekoffer", "Дорожные чемоданы")}><input type="number" min="0" max={service === "senzo" ? 0 : passengerCount <= 2 ? 2 : passengerCount * 2} step="1" value={travelBags} onChange={(event) => setTravelBags(event.target.value)} disabled={service === "senzo"} required /></Field>
         <Field icon={<Plane />} label={tr("Flight number (optional)", "Flugnummer (optional)", "Номер рейса (необязательно)")}><input type="text" value={flight} onChange={(event) => setFlight(event.target.value)} placeholder="MS 045" /></Field>
         <Field required icon={<User />} label={tr("Your name", "Dein Name", "Ваше имя")}><input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></Field>
@@ -229,7 +245,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
 
       <div className="mt-5 rounded-2xl border border-ocean-soft bg-ocean-tint p-5">
         <div className="flex items-start justify-between gap-5"><div><p className="font-bold text-ink">{service === "airport" ? tr("Airport one-way fare", "Flughafen – einfache Fahrt", "Тариф в одну сторону из аэропорта") : tr("Senzo Mall one-way fare", "Senzo Mall – einfache Fahrt", "Тариф в одну сторону до Senzo Mall")}</p><p className="mt-1 text-sm leading-6 text-muted">{resortSupplement ? resortSupplementText(resortZones.has(pickup) ? pickup : dropoff) : tr("Hurghada base zone—no supplement.", "Hurghada-Basiszone – kein Zuschlag.", "Базовая зона Хургады — без надбавки.")}</p></div><p className="text-3xl font-black text-ocean-dark">${total.toFixed(2)}</p></div>
-        <div className="mt-4 border-t border-line pt-4 text-sm text-ink"><p><strong>{tr("Vehicle:", "Fahrzeug:", "Автомобиль:")}</strong> {vehicle}</p>{service === "airport" ? <p className="mt-1">{tr("1–2 passengers: small car, maximum 2 bags. More than 2 passengers: larger vehicle, maximum 2 bags per person.", "1–2 Fahrgäste: Kleinwagen, maximal 2 Koffer. Mehr als 2 Fahrgäste: größeres Fahrzeug, maximal 2 Koffer pro Person.", "1–2 пассажира: легковой автомобиль, максимум 2 чемодана. Более 2 пассажиров: автомобиль повышенной вместимости, максимум 2 чемодана на человека.")}</p> : <p className="mt-1">{tr("Maximum 4 passengers. Travel bags are not accepted.", "Maximal 4 Fahrgäste. Reisekoffer sind nicht erlaubt.", "Максимум 4 пассажира. Провоз чемоданов не предусмотрен.")}</p>}</div>
+        <div className="mt-4 border-t border-line pt-4 text-sm text-ink"><p><strong>{tr("Vehicle:", "Fahrzeug:", "Автомобиль:")}</strong> {vehicle}</p>{service === "airport" ? <p className="mt-1">{tr("1–2 passengers: small car, maximum 2 bags. More than 2 passengers: larger vehicle, maximum 2 bags per person.", "1–2 Fahrgäste: Kleinwagen, maximal 2 Koffer. Mehr als 2 Fahrgäste: größeres Fahrzeug, maximal 2 Koffer pro Person.", "1–2 пассажира: легковой автомобиль, максимум 2 чемодана. Более 2 пассажиров: автомобиль повышенной вместимости, максимум 2 чемодана на человека.")}</p> : <p className="mt-1">{tr("Price is per vehicle, not per person. 1–3 passengers travel by private car, 4–10 by private van. Travel bags are not carried on this service.", "Der Preis gilt pro Fahrzeug, nicht pro Person. 1–3 Fahrgäste im Privatwagen, 4–10 im privaten Van. Reisekoffer werden auf dieser Fahrt nicht mitgeführt.", "Цена за автомобиль, а не за человека. 1–3 пассажира — частный автомобиль, 4–10 — микроавтобус. Багаж на этом рейсе не перевозится.", "السعر لكل مركبة وليس لكل شخص. 1-3 ركاب بسيارة خاصة، و4-10 بميكروباص خاص. لا تُنقل حقائب السفر في هذه الخدمة.", "Cena jest za pojazd, nie za osobę. 1–3 pasażerów jedzie prywatnym samochodem, 4–10 prywatnym vanem. Bagaż podróżny nie jest przewożony na tej trasie.", "价格按车辆计算，而非按人。1–3 位乘客乘坐私家车，4–10 位乘坐私人面包车。此服务不携带旅行行李。")}</p>}</div>
       </div>
 
       <label className="mt-4 block text-sm font-medium text-ink" htmlFor="transfer-notes">{tr("Notes (optional)", "Hinweise (optional)", "Примечания (необязательно)")}</label>
