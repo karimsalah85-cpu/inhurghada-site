@@ -172,3 +172,53 @@ export function parseTransferRequest(body: Record<string, unknown>): { data: Par
 export function quoteTransferRequest(parsed: ParsedTransferRequest): TransferQuote {
   return calculateTransferQuote(parsed.quoteInput);
 }
+
+/**
+ * Structured snapshot for `bookings.transfer_details`. Ready for use once the
+ * migration in 20260907123500_transfer_booking_details.sql is applied and the
+ * reserve RPC call passes `p_transfer_details`; until then the same information
+ * is written into `bookings.notes` by the booking API.
+ */
+export function buildTransferDetails(transfer: ParsedTransferRequest, quote: TransferQuote | undefined, amount: number) {
+  const priced = quote && !quote.requiresManualConfirmation ? quote : undefined;
+  return {
+    pricing_version: quote?.pricingVersion ?? null,
+    currency: "USD",
+    trip_type: transfer.tripType,
+    direction: transfer.direction,
+    zone: transfer.zone,
+    zone_resolved_from: transfer.zoneResolvedFrom,
+    passengers: {
+      adults: transfer.adults,
+      children: transfer.children,
+      infants: transfer.infants,
+      total: transfer.adults + transfer.children + transfer.infants,
+    },
+    luggage: {
+      large_bags: transfer.largeBags,
+      cabin_bags: transfer.cabinBags,
+      effective_large_bag_units: quote?.effectiveLargeBagUnits ?? null,
+      oversized_items: transfer.oversizedItems,
+    },
+    child_seats: transfer.childSeats,
+    wheelchair: transfer.wheelchair,
+    hotel_name: transfer.hotelName || null,
+    flight_number: transfer.flightNumber || null,
+    return_leg:
+      transfer.tripType === "round_trip"
+        ? { date: transfer.returnDate || null, time: transfer.returnTime || null, flight_number: transfer.returnFlightNumber || null }
+        : null,
+    allocated_vehicles: priced ? priced.allocatedVehicles.map((entry) => ({ vehicle_class: entry.vehicleClass, count: entry.count })) : [],
+    vehicle_count: priced?.vehicleCount ?? 0,
+    requires_manual_confirmation: quote?.requiresManualConfirmation ?? true,
+    manual_reason: quote?.reason ?? null,
+    fare: {
+      leg_subtotal: priced?.legSubtotal ?? 0,
+      subtotal: priced?.subtotal ?? 0,
+      extras: priced?.extras ?? 0,
+      total: priced?.total ?? 0,
+      persisted_amount: amount,
+    },
+    warnings: quote?.warnings ?? [],
+  };
+}

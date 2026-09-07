@@ -109,8 +109,6 @@ export async function POST(request: NextRequest) {
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
 
-    const transferDetails = body.transfer ? buildTransferDetails(body.transfer, transferQuote, calculatedAmount) : null;
-
     const proposedReference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomBytes(3).toString("hex").toUpperCase()}`;
     const supabase = createRequiredAdminClient();
     const { idempotencyKey, ...materialRequest } = body;
@@ -137,7 +135,6 @@ export async function POST(request: NextRequest) {
       p_currency: currency,
       p_locale: body.locale,
       p_items: body.tourSlug === "multi-trip" ? body.cartItems.map((item) => ({ tour_slug: item.tourSlug, date: item.date, time: item.time, places: item.adults + item.youth + item.infants })) : null,
-      ...(body.transfer ? { p_transfer_details: transferDetails } : {}),
     });
     if (bookingError) {
       console.error("Booking database save failed", bookingError);
@@ -295,45 +292,6 @@ function buildTransferSummary(transfer: ParsedTransferRequest, quote: TransferQu
     `Group summary: ${guestSummary}`,
   ];
   return lines.filter(Boolean).join("\n");
-}
-
-function buildTransferDetails(transfer: ParsedTransferRequest, quote: TransferQuote | undefined, amount: number) {
-  return {
-    pricing_version: quote?.pricingVersion ?? null,
-    currency: "USD",
-    trip_type: transfer.tripType,
-    direction: transfer.direction,
-    zone: transfer.zone,
-    zone_resolved_from: transfer.zoneResolvedFrom,
-    passengers: { adults: transfer.adults, children: transfer.children, infants: transfer.infants, total: transfer.adults + transfer.children + transfer.infants },
-    luggage: {
-      large_bags: transfer.largeBags,
-      cabin_bags: transfer.cabinBags,
-      effective_large_bag_units: quote?.effectiveLargeBagUnits ?? null,
-      oversized_items: transfer.oversizedItems,
-    },
-    child_seats: transfer.childSeats,
-    wheelchair: transfer.wheelchair,
-    hotel_name: transfer.hotelName || null,
-    flight_number: transfer.flightNumber || null,
-    return_leg: transfer.tripType === "round_trip"
-      ? { date: transfer.returnDate || null, time: transfer.returnTime || null, flight_number: transfer.returnFlightNumber || null }
-      : null,
-    allocated_vehicles: quote && !quote.requiresManualConfirmation
-      ? quote.allocatedVehicles.map((entry) => ({ vehicle_class: entry.vehicleClass, count: entry.count }))
-      : [],
-    vehicle_count: quote && !quote.requiresManualConfirmation ? quote.vehicleCount : 0,
-    requires_manual_confirmation: quote?.requiresManualConfirmation ?? true,
-    manual_reason: quote?.reason ?? null,
-    fare: {
-      leg_subtotal: quote && !quote.requiresManualConfirmation ? quote.legSubtotal : 0,
-      subtotal: quote && !quote.requiresManualConfirmation ? quote.subtotal : 0,
-      extras: quote && !quote.requiresManualConfirmation ? quote.extras : 0,
-      total: quote && !quote.requiresManualConfirmation ? quote.total : 0,
-      persisted_amount: amount,
-    },
-    warnings: quote?.warnings ?? [],
-  };
 }
 
 function localizedTransferName(service: string, locale: string) {

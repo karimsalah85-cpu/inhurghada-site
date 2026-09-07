@@ -12,10 +12,12 @@
 -- function signatures are dropped and recreated because PostgreSQL identifies
 -- functions by their full argument list.
 --
--- Deploy ordering: apply this migration before/with the code that passes
--- p_transfer_details. Tour bookings never send it and are unaffected either way;
--- only the (new, no existing traffic) per-vehicle transfer path needs the new
--- signature.
+-- Deploy ordering: this migration is safe to apply at any time (it is purely
+-- additive and every existing caller keeps working via the default argument).
+-- The application does NOT yet pass p_transfer_details — the booking route
+-- intentionally does not branch on RPC error codes, so the code switch to send
+-- it is a one-line follow-up made AFTER this migration is confirmed applied.
+-- Until then the same information is persisted human-readably in bookings.notes.
 
 alter table public.bookings
   add column if not exists transfer_details jsonb;
