@@ -173,7 +173,7 @@ function HomeContent() {
         </div>
       </section>
 
-      <section className="bg-white px-6 pb-10 pt-20 sm:px-8 sm:py-24">
+      <section className="bg-white px-6 pb-6 pt-20 sm:px-8 sm:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
             <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{de ? "Reiseziele am Roten Meer" : ru ? "Направления Красного моря" : ar ? "وجهات البحر الأحمر" : pl ? "Destynacje nad Morzem Czerwonym" : zh ? "红海目的地" : "Red Sea destinations"}</p>
@@ -207,7 +207,7 @@ function HomeContent() {
       <section
  ref={toursSection}
  id="tours"
- className="bg-white pb-20 pt-10 sm:py-24"
+ className="bg-white pb-20 pt-4 sm:py-24"
 >
 
 
