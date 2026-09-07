@@ -1,4 +1,6 @@
 import { tours } from "@/data/tours";
+import { calculateTransferQuote } from "@/lib/transfer-quote";
+import type { ParsedTransferRequest } from "@/lib/transfer-request";
 
 type PricingInput = {
   type: "tour" | "transfer";
@@ -9,6 +11,8 @@ type PricingInput = {
   extraQuantities?: Record<string, number>;
   transferRequired?: boolean;
   transferArea?: string;
+  /** Present for the per-vehicle airport transfer product; absent for legacy `service` transfers. */
+  transfer?: ParsedTransferRequest;
   adults: number;
   youth: number;
   infants: number;
@@ -112,6 +116,10 @@ export function calculateBookingPrice(input: PricingInput) {
     return { data: { ...result.data, price: `${result.data.currency === "EUR" ? "€" : "$"}${result.data.amount.toFixed(2)} total` } };
   }
 
+  if (input.transfer) {
+    return priceAirportTransfer(input.transfer);
+  }
+
   if (!wholeNumber(input.passengers, 1, 30) || !wholeNumber(input.travelBags, 0, 60)) {
     return { error: "Enter valid passenger and bag counts." as const };
   }
@@ -138,4 +146,79 @@ export function calculateBookingPrice(input: PricingInput) {
   const amount = (isAirport ? 20 : 10) + (resortZones.has(input.pickup) || resortZones.has(input.dropoff) ? 7 : 0);
   const tourName = isAirport ? "Hurghada Airport one-way transfer" : "Senzo Mall one-way transfer";
   return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName, price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
+}
+
+const ZONE_NAMES: Record<string, string> = {
+  hurghada_city: "Hurghada City",
+  el_ahyaa: "El Ahyaa / North Hurghada",
+  sahl_hasheesh: "Sahl Hasheesh",
+  makadi_bay: "Makadi Bay",
+  el_gouna: "El Gouna",
+  soma_bay: "Soma Bay",
+  safaga: "Safaga",
+  el_quseir: "El Quseir",
+  port_ghalib: "Port Ghalib",
+  marsa_alam: "Marsa Alam",
+};
+
+const VEHICLE_NAMES: Record<string, string> = {
+  sedan: "Private Sedan",
+  suv: "Private SUV",
+  minivan: "Private Minivan",
+  hiace: "Private Hiace / Van",
+  minibus: "Private Minibus",
+};
+
+function transferJourneyName(request: ParsedTransferRequest) {
+  const zoneName = request.zone ? ZONE_NAMES[request.zone] : "your accommodation";
+  const airportSide = "Hurghada Airport";
+  const label = request.direction === "hotel_to_airport"
+    ? `${zoneName} → ${airportSide}`
+    : request.direction === "hotel_to_hotel"
+    ? `${request.pickupPlaceText || "Hotel"} → ${request.dropoffPlaceText || "Hotel"}`
+    : `${airportSide} → ${zoneName}`;
+  return `Private airport transfer: ${label}${request.tripType === "round_trip" ? " (round trip)" : ""}`;
+}
+
+/**
+ * Authoritative fare for the per-vehicle airport transfer product. The browser
+ * shows a live quote from the same `calculateTransferQuote`; this recomputes it
+ * from the parsed inputs so a tampered payload cannot change the total.
+ */
+export function priceAirportTransfer(request: ParsedTransferRequest) {
+  const quote = calculateTransferQuote(request.quoteInput);
+  const tourName = transferJourneyName(request);
+  const passengerBits = [
+    `${request.adults} adult${request.adults === 1 ? "" : "s"}`,
+    request.children ? `${request.children} child${request.children === 1 ? "" : "ren"}` : "",
+    request.infants ? `${request.infants} infant${request.infants === 1 ? "" : "s"}` : "",
+  ].filter(Boolean).join(" · ");
+
+  if (quote.requiresManualConfirmation) {
+    return {
+      data: {
+        amount: 0,
+        guests: quote.totalPassengers,
+        guestSummary: `${passengerBits} · quote on request`,
+        tourName,
+        price: "Quote requested — our team will confirm the vehicle and fare",
+        currency: "USD" as const,
+      },
+    };
+  }
+
+  const vehicleSummary = quote.allocatedVehicles
+    .map((entry) => `${entry.count}× ${VEHICLE_NAMES[entry.vehicleClass] ?? entry.vehicleClass}`)
+    .join(" + ");
+
+  return {
+    data: {
+      amount: quote.total,
+      guests: quote.totalPassengers,
+      guestSummary: `${passengerBits} · ${vehicleSummary}`,
+      tourName,
+      price: `$${quote.total.toFixed(2)} total — private vehicle${quote.vehicleCount === 1 ? "" : "s"}, not per person`,
+      currency: "USD" as const,
+    },
+  };
 }
