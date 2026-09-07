@@ -18,11 +18,14 @@ export async function POST(request: NextRequest) {
     if (!eventName || typeof body.eventId !== "string") return NextResponse.json({ error: "Unsupported event." }, { status: 400 });
     const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
     const source = body.data && typeof body.data === "object" ? body.data as Record<string, unknown> : {};
-    const customData = Object.fromEntries(Object.entries(source).filter(([key, value]) => ["item_name", "value", "currency", "booking_type", "placement", "transaction_id"].includes(key) && ["string", "number", "boolean"].includes(typeof value)));
+    const eventTime = Math.floor(Date.now() / 1000);
+    const fbclid = typeof source.fbclid === "string" ? source.fbclid.trim() : "";
+    const fbc = request.cookies.get("_fbc")?.value || (fbclid ? `fb.1.${eventTime * 1000}.${fbclid}` : undefined);
+    const customData = Object.fromEntries(Object.entries(source).filter(([key, value]) => ["item_name", "value", "currency", "booking_type", "placement", "transaction_id", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"].includes(key) && ["string", "number", "boolean"].includes(typeof value)));
     const response = await fetch(`https://graph.facebook.com/${apiVersion}/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data: [{ event_name: eventName, event_time: Math.floor(Date.now() / 1000), event_id: body.eventId, event_source_url: request.headers.get("referer") || "https://dailyredsea.com", action_source: "website", user_data: { client_ip_address: forwarded, client_user_agent: request.headers.get("user-agent") || undefined, fbp: request.cookies.get("_fbp")?.value, fbc: request.cookies.get("_fbc")?.value }, custom_data: customData }] }),
+      body: JSON.stringify({ data: [{ event_name: eventName, event_time: eventTime, event_id: body.eventId, event_source_url: request.headers.get("referer") || "https://dailyredsea.com", action_source: "website", user_data: { client_ip_address: forwarded, client_user_agent: request.headers.get("user-agent") || undefined, fbp: request.cookies.get("_fbp")?.value, fbc }, custom_data: customData }] }),
     });
     if (!response.ok) console.error("Meta Conversions API request failed", response.status);
   } catch (error) {
