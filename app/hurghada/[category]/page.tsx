@@ -66,15 +66,19 @@ export default async function TourCategoryPage({ params, locale = "en" }: PagePr
     },
     "diving-snorkeling": {
       title: "Choose the right Red Sea experience",
-      intro: "Compare snorkeling and diving by experience level, time in the water and certification requirements.",
+      intro: "Daily Red Sea offers three clear starting points: guided snorkeling with no certification, instructor-led first dives, and two-dive boat days for certified divers.",
       options: [
-        { title: "First-time snorkelers", text: "Start with a guided full-day snorkeling boat trip with equipment, lunch and multiple reef stops." },
-        { title: "First-time divers", text: "Choose an introductory dive led by an instructor; no previous certification should be assumed unless the listing says otherwise." },
-        { title: "Certified divers", text: "Choose a two-dive day and check the equipment, certification and recent-diving requirements shown on the tour page." },
+        { title: "First-time snorkelers", text: "The full-day snorkeling trip runs for eight hours with a briefing, equipment, lunch and reef stops selected for the day's sea conditions." },
+        { title: "First-time divers", text: "The beginner scuba experience is a full-day introduction under direct instructor supervision. Previous certification is not required." },
+        { title: "Certified divers", text: "The full-day scuba trip includes two guided dives. The captain chooses suitable Red Sea sites according to weather and sea conditions." },
       ],
       questions: [
-        { q: "Can beginners snorkel in Hurghada?", a: "Yes. Guided trips provide a briefing and flotation equipment, but guests should always tell the crew their swimming confidence and follow sea-condition advice." },
-        { q: "When is snorkeling best in Hurghada?", a: "Trips operate throughout the year. The captain selects suitable reef stops for the day's wind, visibility and sea conditions." },
+        { q: "Can beginners snorkel in Hurghada?", a: "Yes. The guided full-day trip includes a safety briefing and snorkeling equipment. Tell the crew your swimming confidence before entering the water and follow their advice on the day's conditions." },
+        { q: "Do I need a diving certificate?", a: "Not for snorkeling or the beginner scuba experience. Certified-diver trips require the certification and recent-diving history stated on the individual tour page." },
+        { q: "How long are Hurghada snorkeling and diving trips?", a: "The full-day snorkeling and full-day scuba trips are listed as eight hours. The Dolphin House snorkeling trip is listed as five hours, while open-water courses run for three days." },
+        { q: "What is included in a Hurghada snorkeling trip?", a: "The full-day snorkeling listing includes the boat trip, snorkeling equipment, lunch and guided reef stops. Check the individual trip before booking because pickup zones and other inclusions can vary." },
+        { q: "When is snorkeling best in Hurghada?", a: "Trips operate throughout the year. The captain selects suitable reef stops for the day's wind, visibility and sea conditions rather than promising one fixed reef in every forecast." },
+        { q: "Should I choose a PADI or SSI open-water course?", a: "Both Daily Red Sea options run for three days and combine theory, water-skills practice and supervised Red Sea dives. Certification is awarded only after all required knowledge and water skills are completed." },
       ],
     },
   } as Record<string, { title: string; intro: string; options: Array<{ title: string; text: string }>; questions: Array<{ q: string; a: string }> }>)[category.slug] : undefined;
