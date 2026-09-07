@@ -55,17 +55,21 @@ Do not expose `META_CONVERSIONS_API_ACCESS_TOKEN` in any `NEXT_PUBLIC_` variable
 | `page_view` | each client-side route view after analytics consent | Pixel base `PageView` | none |
 | `tour_view` | tour detail page | `ViewContent` | optional |
 | `search` | home tour search | none | none |
-| `booking_start` | customer moves to booking details / submits transfer | `InitiateCheckout` | optional |
-| `booking_complete` | booking API responds successfully | `Lead` | booking conversion |
+| `booking_start` | booking navigation, customer moves to details, or request submission | `InitiateCheckout` (existing mapping) | none recommended for bidding |
+| `checkout_started` | validated tour selection moves to checkout; also emits GA4 `begin_checkout` | none | optional |
+| `booking_complete` | booking API responds successfully; also emits GA4 `generate_lead` | `Lead` | booking lead conversion |
 | `whatsapp_click` | WhatsApp CTA | `Contact` | WhatsApp conversion |
 | `phone_click` | call CTA | `Contact` | phone conversion |
 | `email_click` | email CTA | `Contact` | email conversion |
 
-Cash-on-arrival requests are intentionally sent as leads, not purchases. Mark a paid booking from the admin workflow only after payment is collected; do not configure `booking_complete` as a revenue purchase in Meta or Google Ads.
+Cash-on-arrival requests are intentionally sent as leads, not purchases. The browser retains `booking_complete` for internal reports and also emits GA4 `generate_lead`. Its value describes the requested booking, not collected revenue. Never sum both events as separate leads. The actual tour checkout transition emits `checkout_started` plus GA4 `begin_checkout`; `booking_start` also occurs on navigation clicks and must not be mapped to GA4 checkout entry.
+
+No browser `purchase` is emitted on request submission. A paid-sale integration must be implemented separately from trusted payment records, with transaction-ID deduplication and actual amount/currency; marking a booking paid in admin does not by itself prove a purchase event was delivered. Before deployment, coordinate GA4/Google Ads mappings: remove any external rule that converts `booking_complete` into `purchase`, use one lead action for bidding, and verify the selected primary conversion. Existing purchase imports will not receive these lead events automatically. Review the legacy `/cart/cart` action definition; the current cart is `/cart` and direct tour checkout is inline. Do not treat a cart page view as checkout completion.
 
 ## Validation
 
-- In GA4 DebugView, accept Analytics and check `page_view`, `tour_view`, `search`, `booking_start`, and `booking_complete`.
+- Run `npx vitest run tests/booking-tracking.test.ts` to check lead semantics, checkout mapping, consent, Google Ads labels, and Meta browser/server event identity.
+- In a test environment, check GA4 DebugView for `checkout_started` + `begin_checkout` when entering tour checkout, then `booking_complete` + `generate_lead` after a successful unpaid request. Verify no `purchase` event appears. A booking navigation click must not emit `begin_checkout`.
 - Use Google Tag Assistant to verify the Consent Mode v2 state and prevent duplicate GA4 tags.
 - Use Meta Events Manager Test Events to verify Pixel and Conversions API events deduplicate by `event_id`.
 - Use Google Ads Tag Diagnostics to verify each configured click/booking conversion.
