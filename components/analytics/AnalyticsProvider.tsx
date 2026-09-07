@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { consentStorageKey, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
+import { captureLandingAttribution, consentStorageKey, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 
@@ -21,6 +21,7 @@ export default function AnalyticsProvider() {
   useEffect(() => {
     let stored: ConsentPreferences | null = null;
     try { stored = JSON.parse(localStorage.getItem(consentStorageKey) || "null"); } catch { stored = null; }
+    captureLandingAttribution(stored);
     const timeout = window.setTimeout(() => setPreferences(stored), 0);
     return () => window.clearTimeout(timeout);
   }, []);
@@ -30,14 +31,21 @@ export default function AnalyticsProvider() {
       isInitialPath.current = false;
       return;
     }
-    if (gaId) window.gtag?.("config", gaId, { page_path: pathname });
+    if (gaId) window.gtag?.("config", gaId, {
+      page_path: `${pathname}${window.location.search}`,
+      page_location: window.location.href,
+    });
   }, [pathname]);
 
   useEffect(() => {
     if (!preferences) return;
+    captureLandingAttribution(preferences);
     updateGoogleConsent(preferences);
     if (preferences.analytics && gaId && !hasConfiguredAfterConsent.current) {
-      window.gtag?.("config", gaId, { page_path: pathname });
+      window.gtag?.("config", gaId, {
+        page_path: `${pathname}${window.location.search}`,
+        page_location: window.location.href,
+      });
       hasConfiguredAfterConsent.current = true;
     }
     if (preferences.analytics && gtmId) {
