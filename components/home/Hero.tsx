@@ -19,14 +19,18 @@ const { props: { srcSet: desktopHeroSrcSet } } = getImageProps({
   width: 1672,
   height: 941,
   quality: 78,
+  priority: true,
 });
 
+// `priority` drops loading="lazy" and sets fetchpriority="high" — the hero is
+// the LCP element, so it must start downloading immediately, not after layout.
 const { props: { srcSet: mobileHeroSrcSet, ...mobileHeroProps } } = getImageProps({
   ...heroImageCommon,
   src: "/images/hero-egypt-red-sea-mobile.jpg",
   width: 941,
   height: 1672,
   quality: 78,
+  priority: true,
 });
 
 export default function Hero() {
@@ -118,10 +122,13 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-[600px] overflow-hidden sm:min-h-[700px]">
+      {/* React 19 hoists these to <head> so the LCP hero is discovered before the CSS/JS parse finishes. */}
+      <link rel="preload" as="image" imageSrcSet={mobileHeroSrcSet} imageSizes="100vw" media="(max-width: 639px)" fetchPriority="high" />
+      <link rel="preload" as="image" imageSrcSet={desktopHeroSrcSet} imageSizes="100vw" media="(min-width: 640px)" fetchPriority="high" />
       <picture className="absolute inset-0 block">
         <source media="(min-width: 640px)" srcSet={desktopHeroSrcSet} />
         <source media="(max-width: 639px)" srcSet={mobileHeroSrcSet} />
-        <img {...mobileHeroProps} alt={heroImageCommon.alt} fetchPriority="high" className="h-full w-full object-cover" />
+        <img {...mobileHeroProps} alt={heroImageCommon.alt} fetchPriority="high" loading="eager" className="h-full w-full object-cover" />
       </picture>
       <ImageWatermark prominent />
       <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/65 to-ink/10 sm:via-ink/55" />
