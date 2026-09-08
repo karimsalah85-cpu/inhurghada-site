@@ -50,18 +50,19 @@ export default function BottomNav() {
       <nav
         aria-label={navLabel}
         className={`
-        fixed inset-x-2 bottom-0 z-50 xl:hidden
-        rounded-t-3xl border border-b-0 border-white/60
-        bg-[linear-gradient(180deg,rgba(235,245,247,0.5),rgba(248,251,252,0.72))]
-        backdrop-blur-2xl backdrop-saturate-[1.8] backdrop-brightness-[1.05]
-        pb-[env(safe-area-inset-bottom)]
-        shadow-[inset_0_1.5px_0_rgba(255,255,255,0.75),inset_0_-1px_0_rgba(255,255,255,0.25),0_-14px_48px_-24px_rgba(15,23,42,0.55)]
+        fixed inset-x-3 z-50 xl:hidden
+        bottom-[calc(0.6rem+env(safe-area-inset-bottom))]
+        rounded-[1.9rem] border border-white/70
+        bg-[linear-gradient(160deg,rgba(255,255,255,0.34),rgba(230,244,246,0.46))]
+        backdrop-blur-2xl backdrop-saturate-[1.9] backdrop-brightness-[1.12]
+        shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_-10px_22px_-14px_rgba(255,255,255,0.55),0_18px_52px_-16px_rgba(15,23,42,0.42)]
+        [&_span]:[text-shadow:0_1px_2px_rgba(255,255,255,0.55)]
         transition-transform duration-300 ease-out
         motion-reduce:transition-none
-        ${collapsed ? "translate-y-[calc(100%+2.5rem)]" : "translate-y-0"}
+        ${collapsed ? "translate-y-[calc(100%+1.5rem)]" : "translate-y-0"}
         `}
       >
-        <div className="grid grid-cols-5 items-end px-1 pb-1.5 pt-2">
+        <div className="grid grid-cols-5 items-end px-2 pb-1.5 pt-2">
           <BottomNavLink href={toursHref} active={isExplore} icon={<Compass size={22} />} label={t("explore")} />
           <BottomNavLink href={transfersHref} active={isTransfers} icon={<Car size={22} />} label={t("transfers")} />
 
@@ -123,12 +124,13 @@ function TourBookingBar({ tour, pathname }: { tour: Tour; pathname: string }) {
     <nav
       aria-label={t("booking")}
       className="
-      fixed inset-x-2 bottom-0 z-50 xl:hidden
-      rounded-t-3xl border border-b-0 border-white/60
-      bg-[linear-gradient(180deg,rgba(240,247,248,0.82),rgba(250,252,253,0.92))]
-      backdrop-blur-2xl backdrop-saturate-[1.6]
-      pb-[env(safe-area-inset-bottom)]
-      shadow-[inset_0_1.5px_0_rgba(255,255,255,0.8),0_-14px_48px_-22px_rgba(15,23,42,0.5)]
+      fixed inset-x-3 z-50 xl:hidden
+      bottom-[calc(0.6rem+env(safe-area-inset-bottom))]
+      rounded-[1.9rem] border border-white/70
+      bg-[linear-gradient(160deg,rgba(255,255,255,0.5),rgba(236,246,248,0.62))]
+      backdrop-blur-2xl backdrop-saturate-[1.7] backdrop-brightness-[1.08]
+      shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_52px_-16px_rgba(15,23,42,0.42)]
+      [&_span]:[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]
       "
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
