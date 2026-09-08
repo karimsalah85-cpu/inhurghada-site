@@ -104,61 +104,42 @@ p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
   }
 }
 
-.mobile-glass-nav {
-  /* Opaque fallback; one small, static backdrop surface on capable browsers. */
-  background: #f4f8fa;
-  border: 1px solid rgb(255 255 255 / 85%);
-  border-bottom: 0;
-  border-radius: 24px 24px 0 0;
-  box-shadow: inset 0 1px 0 #fff, 0 -6px 24px -12px rgb(7 59 76 / 22%);
-}
-
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .mobile-glass-nav {
-    background: linear-gradient(160deg, rgb(255 255 255 / 88%), rgb(235 246 249 / 82%));
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
-}
-
-/* Keep small labels readable even when dark photography scrolls underneath. */
-.mobile-glass-nav .text-muted { color: #35464f; }
-.mobile-glass-nav .text-green-700 { color: #12612f; }
-
-@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
-  .mobile-glass-nav {
-    background: #f4f8fa;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}
-
-/* Keeps page content clear of the fixed mobile bottom navigation (BottomNav is xl:hidden). */
-@media (max-width: 1279.98px) {
-  #main-content {
-    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
-  }
-}
-
-/* Single-surface preview; no stacked rims or experimental SVG filtering. */
+/* Sea-glass preview: one surface, one rim, no idle animation. */
 .mobile-glass-nav {
   inset-inline: 10px;
   bottom: calc(10px + env(safe-area-inset-bottom));
   padding-bottom: 2px;
-  border: 1px solid rgb(255 255 255 / 65%);
+  border: 1px solid #91cdd3;
   border-radius: 30px;
-  background: #edf6f8;
-  box-shadow: 0 5px 18px rgb(7 59 76 / 14%);
+  background: #eff8f9;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 95%), 0 5px 18px rgb(7 59 76 / 14%);
 }
 @supports ((backdrop-filter: blur(3px)) or (-webkit-backdrop-filter: blur(3px))) {
   .mobile-glass-nav {
-    background: rgb(239 249 251 / 76%);
+    background: linear-gradient(175deg, rgb(255 255 255 / 90%) 0%, rgb(239 249 250 / 85%) 48%, rgb(207 237 240 / 88%) 100%);
     -webkit-backdrop-filter: blur(3px);
     backdrop-filter: blur(3px);
   }
 }
+/* A reflection appears only during a press, then fades. It never captures taps. */
+.mobile-glass-nav::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 15%, rgb(255 255 255 / 42%) 43%, transparent 68%);
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+.mobile-glass-nav:active::after { opacity: 1; }
+.mobile-glass-nav .text-muted { color: #35464f; }
+.mobile-glass-nav .text-green-700 { color: #12612f; }
 @media (max-width: 1279.98px) {
   #main-content { padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-glass-nav::after { display: none; }
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
   .mobile-glass-nav {
@@ -166,4 +147,5 @@ p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+  .mobile-glass-nav::after { display: none; }
 }
