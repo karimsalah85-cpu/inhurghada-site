@@ -139,29 +139,3 @@ p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
   }
 }
-
-/* BottomNav's raised Plan button: a gentle breathing scale plus the original
-   waves-of-rings glow behind it, so it reads as the primary call to action
-   without feeling like it demands interaction. Both pause automatically for
-   prefers-reduced-motion, and the breathing scale also pauses on press so the
-   tap feedback below is never fighting the idle loop. */
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes bottom-nav-plan-breathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-  .bottom-nav-plan-pulse {
-    animation: bottom-nav-plan-breathe 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-  .bottom-nav-plan-pulse:active {
-    animation-play-state: paused;
-  }
-
-  @keyframes bottom-nav-ring {
-    0% { transform: scale(0.9); opacity: 0.5; }
-    100% { transform: scale(1.9); opacity: 0; }
-  }
-  .bottom-nav-ring {
-    animation: bottom-nav-ring 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
-  }
-}

@@ -64,13 +64,6 @@ export default function BottomNav() {
 
           <div className="flex flex-col items-center">
             <div className="relative -mt-8 h-14 w-14">
-              {!isPlanOpen ? (
-                <>
-                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "0s" }} />
-                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "0.87s" }} />
-                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "1.73s" }} />
-                </>
-              ) : null}
               <button
                 type="button"
                 onClick={() => setIsPlanOpen((current) => !current)}
@@ -82,7 +75,7 @@ export default function BottomNav() {
                 bg-brand-orange-cta
                 text-white shadow-lg shadow-brand-orange-cta/30
                 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.94]
-                ${isPlanOpen ? "ring-4 ring-brand-orange-cta/50" : "bottom-nav-plan-pulse ring-4 ring-white"}
+                ${isPlanOpen ? "ring-4 ring-brand-orange-cta/50" : "ring-4 ring-white"}
                 `}
               >
                 {isPlanOpen ? <X size={24} aria-hidden="true" /> : <Search size={24} aria-hidden="true" />}
