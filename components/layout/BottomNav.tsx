@@ -51,10 +51,11 @@ export default function BottomNav() {
         aria-label={navLabel}
         className={`
         fixed inset-x-2 bottom-0 z-50 xl:hidden
-        rounded-t-3xl border border-b-0 border-white/55
-        bg-white/70 backdrop-blur-2xl backdrop-saturate-150
+        rounded-t-3xl border border-b-0 border-white/60
+        bg-[linear-gradient(180deg,rgba(235,245,247,0.5),rgba(248,251,252,0.72))]
+        backdrop-blur-2xl backdrop-saturate-[1.8] backdrop-brightness-[1.05]
         pb-[env(safe-area-inset-bottom)]
-        shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_-12px_44px_-24px_rgba(15,23,42,0.55)]
+        shadow-[inset_0_1.5px_0_rgba(255,255,255,0.75),inset_0_-1px_0_rgba(255,255,255,0.25),0_-14px_48px_-24px_rgba(15,23,42,0.55)]
         transition-transform duration-300 ease-out
         motion-reduce:transition-none
         ${collapsed ? "translate-y-[calc(100%+2.5rem)]" : "translate-y-0"}
@@ -123,10 +124,11 @@ function TourBookingBar({ tour, pathname }: { tour: Tour; pathname: string }) {
       aria-label={t("booking")}
       className="
       fixed inset-x-2 bottom-0 z-50 xl:hidden
-      rounded-t-3xl border border-b-0 border-white/55
-      bg-white/90 backdrop-blur-2xl backdrop-saturate-150
+      rounded-t-3xl border border-b-0 border-white/60
+      bg-[linear-gradient(180deg,rgba(240,247,248,0.82),rgba(250,252,253,0.92))]
+      backdrop-blur-2xl backdrop-saturate-[1.6]
       pb-[env(safe-area-inset-bottom)]
-      shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_-12px_44px_-22px_rgba(15,23,42,0.5)]
+      shadow-[inset_0_1.5px_0_rgba(255,255,255,0.8),0_-14px_48px_-22px_rgba(15,23,42,0.5)]
       "
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
