@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const metaEvents: Record<string, string> = { tour_view: "ViewContent", booking_start: "InitiateCheckout", booking_complete: "Lead", whatsapp_click: "Contact", phone_click: "Contact", email_click: "Contact" };
+import { toMetaEvent } from "@/lib/meta-events";
 
 export async function POST(request: NextRequest) {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid origin." }, { status: 403 });
     }
     const body = await request.json();
-    const eventName = metaEvents[String(body.event)];
+    const eventName = toMetaEvent(String(body.event), body.data && typeof body.data === "object" ? body.data : {});
     if (!eventName || typeof body.eventId !== "string") return NextResponse.json({ error: "Unsupported event." }, { status: 400 });
     const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
     const source = body.data && typeof body.data === "object" ? body.data as Record<string, unknown> : {};

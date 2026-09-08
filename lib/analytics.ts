@@ -1,3 +1,5 @@
+import { toMetaEvent } from "@/lib/meta-events";
+
 export type AnalyticsEventName =
   | "page_view"
   | "tour_view"
@@ -91,13 +93,6 @@ function ensureGoogleTag(): NonNullable<Window["gtag"]> {
   return window.gtag;
 }
 
-function toMetaEvent(event: AnalyticsEventName) {
-  if (event === "tour_view") return "ViewContent";
-  if (event === "booking_start") return "InitiateCheckout";
-  if (event === "booking_complete") return "Lead";
-  if (["whatsapp_click", "phone_click", "email_click"].includes(event)) return "Contact";
-  return null;
-}
 
 function adsLabel(event: AnalyticsEventName) {
   const labels: Partial<Record<AnalyticsEventName, string | undefined>> = {
@@ -146,7 +141,7 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
 
   if (!preferences?.marketing) return;
 
-  const metaEvent = toMetaEvent(event);
+  const metaEvent = toMetaEvent(event, cleanData);
   if (metaEvent && window.fbq) {
     window.fbq("track", metaEvent, cleanData, { eventID: id });
     void fetch("/api/analytics/meta", {

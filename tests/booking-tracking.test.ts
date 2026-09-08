@@ -44,6 +44,28 @@ describe("booking tracking semantics", () => {
     expect(gtag.mock.calls.some((call) => call[1] === "purchase")).toBe(false);
   });
 
+  it("does not send Meta checkout for navigation or duplicate tour booking_start", () => {
+    vi.stubGlobal("window", { gtag, fbq, localStorage: { getItem: () => JSON.stringify({ analytics: true, marketing: true }) } });
+    trackEvent("booking_start", { placement: "bottom_nav" });
+    expect(fbq).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    trackEvent("checkout_started", { value: 25, currency: "USD" });
+    trackEvent("booking_start", { booking_type: "tour", value: 25, currency: "USD" });
+    expect(fbq).toHaveBeenCalledTimes(1);
+    expect(fbq).toHaveBeenCalledWith("track", "InitiateCheckout", expect.any(Object), expect.any(Object));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const payload = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string);
+    expect(payload.event).toBe("checkout_started");
+    expect(payload.eventId).toBe(fbq.mock.calls[0][3].eventID);
+  });
+
+  it("preserves checkout tracking for validated legacy transfer submissions", () => {
+    vi.stubGlobal("window", { gtag, fbq, localStorage: { getItem: () => JSON.stringify({ analytics: true, marketing: true }) } });
+    trackEvent("booking_start", { booking_type: "transfer", value: 25, currency: "USD" });
+    expect(fbq).toHaveBeenCalledWith("track", "InitiateCheckout", expect.any(Object), expect.any(Object));
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it("does not throw during server rendering", () => {
     vi.stubGlobal("window", undefined);
     expect(() => trackEvent("booking_complete")).not.toThrow();

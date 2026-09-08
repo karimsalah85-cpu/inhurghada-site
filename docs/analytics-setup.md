@@ -55,8 +55,8 @@ Do not expose `META_CONVERSIONS_API_ACCESS_TOKEN` in any `NEXT_PUBLIC_` variable
 | `page_view` | each client-side route view after analytics consent | Pixel base `PageView` | none |
 | `tour_view` | tour detail page | `ViewContent` | optional |
 | `search` | home tour search | none | none |
-| `booking_start` | booking navigation, customer moves to details, or request submission | `InitiateCheckout` (existing mapping) | none recommended for bidding |
-| `checkout_started` | validated tour selection moves to checkout; also emits GA4 `begin_checkout` | none | optional |
+| `booking_start` | booking navigation, customer moves to details, or request submission | `InitiateCheckout` only for validated transfer submissions; otherwise none | none recommended for bidding |
+| `checkout_started` | validated tour selection moves to checkout; also emits GA4 `begin_checkout` | `InitiateCheckout` | optional |
 | `booking_complete` | booking API responds successfully; also emits GA4 `generate_lead` | `Lead` | booking lead conversion |
 | `whatsapp_click` | WhatsApp CTA | `Contact` | WhatsApp conversion |
 | `phone_click` | call CTA | `Contact` | phone conversion |
@@ -73,3 +73,7 @@ No browser `purchase` is emitted on request submission. A paid-sale integration 
 - Use Google Tag Assistant to verify the Consent Mode v2 state and prevent duplicate GA4 tags.
 - Use Meta Events Manager Test Events to verify Pixel and Conversions API events deduplicate by `event_id`.
 - Use Google Ads Tag Diagnostics to verify each configured click/booking conversion.
+
+## Meta checkout semantics (7 September 2026)
+
+Browser and server share `lib/meta-events.ts`. Tour `checkout_started` maps to `InitiateCheckout`; the accompanying legacy `booking_start` does not emit a second Meta event. Navigation `booking_start` is not checkout. Validated transfer submissions retain their legacy `booking_start` mapping when `booking_type` is `transfer`. Unpaid `booking_complete` remains `Lead`, never `Purchase`. Historical checkout counts before this correction may include navigation clicks.
