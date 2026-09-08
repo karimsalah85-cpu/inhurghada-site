@@ -59,7 +59,9 @@ export default function Navbar() {
       className={`fixed left-0 top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${
         solid
           ? "border-line/80 bg-white/85 backdrop-blur-xl shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]"
-          : "border-transparent bg-white/60 backdrop-blur-md shadow-none"
+          : // Over the hero: a top-weighted white fade so the bar melts into the
+            // image with no hard edge, while the logo/controls keep enough backing.
+            "border-transparent bg-gradient-to-b from-white/80 via-white/45 to-white/0 backdrop-blur-[6px] shadow-none"
       }`}
     >
 
