@@ -44,11 +44,16 @@ export function useHideOnScrollDown({ minScroll = 120, revealNearBottom = 140 } 
 
     let frame = 0;
     let lastY = window.scrollY;
+    // Cache the page height so the scroll handler never reads layout mid-scroll
+    // (that would force a synchronous reflow on every frame).
+    let maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const measure = () => {
+      maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    };
     const read = () => {
       frame = 0;
       const y = Math.max(0, window.scrollY);
-      const doc = document.documentElement;
-      const nearBottom = y + window.innerHeight >= doc.scrollHeight - revealNearBottom;
+      const nearBottom = y >= maxScroll - revealNearBottom;
       if (y < minScroll || nearBottom) setHidden(false);
       else if (y > lastY + 6) setHidden(true);
       else if (y < lastY - 6) setHidden(false);
@@ -58,8 +63,12 @@ export function useHideOnScrollDown({ minScroll = 120, revealNearBottom = 140 } 
       if (!frame) frame = window.requestAnimationFrame(read);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure, { passive: true });
+    const remeasure = window.setInterval(measure, 2000);
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+      window.clearInterval(remeasure);
       window.cancelAnimationFrame(frame);
     };
   }, [minScroll, revealNearBottom]);
