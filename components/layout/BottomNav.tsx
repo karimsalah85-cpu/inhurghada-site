@@ -9,7 +9,6 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath, type Locale } from "@/lib/i18n";
 import { tours, type Tour } from "@/data/tours";
-import { useHideOnScrollDown } from "@/components/layout/scroll-chrome";
 
 const tourBrowsingRoots = ["/tours", "/destinations", "/hurghada", "/marsa-alam", "/jeddah"];
 
@@ -24,8 +23,6 @@ export default function BottomNav() {
   const router = useRouter();
   const { language, t } = useSiteSettings();
   const [isPlanOpen, setIsPlanOpen] = useState(false);
-  // Slide the bar away while reading down the page; the Plan sheet always pins it back.
-  const collapsed = useHideOnScrollDown() && !isPlanOpen;
 
   const homeHref = localePath(language);
   const toursHref = localePath(language, "/tours");
@@ -53,9 +50,6 @@ export default function BottomNav() {
         fixed inset-x-0 bottom-0 z-50 xl:hidden
         mobile-glass-nav
         pb-[env(safe-area-inset-bottom)]
-        transition-transform duration-300 ease-out
-        motion-reduce:transition-none
-        ${collapsed ? "translate-y-[calc(100%+2.5rem)]" : "translate-y-0"}
         `}
       >
         <div className="grid grid-cols-5 items-end px-1 pb-1.5 pt-2">
@@ -64,6 +58,13 @@ export default function BottomNav() {
 
           <div className="flex flex-col items-center">
             <div className="relative -mt-8 h-14 w-14">
+              {!isPlanOpen ? (
+                <>
+                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "0s" }} />
+                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "0.87s" }} />
+                  <span aria-hidden="true" className="bottom-nav-ring absolute inset-0 rounded-full bg-brand-orange-cta/40" style={{ animationDelay: "1.73s" }} />
+                </>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setIsPlanOpen((current) => !current)}
@@ -75,7 +76,7 @@ export default function BottomNav() {
                 bg-brand-orange-cta
                 text-white shadow-lg shadow-brand-orange-cta/30
                 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.94]
-                ${isPlanOpen ? "ring-4 ring-brand-orange-cta/50" : "ring-4 ring-white"}
+                ${isPlanOpen ? "ring-4 ring-brand-orange-cta/50" : "bottom-nav-plan-pulse ring-4 ring-white"}
                 `}
               >
                 {isPlanOpen ? <X size={24} aria-hidden="true" /> : <Search size={24} aria-hidden="true" />}
@@ -92,7 +93,7 @@ export default function BottomNav() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp"
-            className="flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold text-green-700"
+            className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean text-green-700"
           >
             <MessageCircle size={20} aria-hidden="true" />
             <span>WhatsApp</span>
@@ -161,7 +162,7 @@ function BottomNavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${active ? "text-brand-navy" : "text-muted"}`}
+      className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean transition ${active ? "text-brand-navy" : "text-muted"}`}
     >
       {icon}
       {active ? <span aria-hidden="true" className="-mb-1 h-1 w-1 rounded-full bg-brand-navy" /> : null}
@@ -212,10 +213,10 @@ function PlanSheet({
   return (
     <div className="fixed inset-0 z-[90] flex items-end xl:hidden" role="dialog" aria-modal="true" aria-labelledby={headingId}>
       <div className="absolute inset-0 bg-ink/50" onClick={onClose} aria-hidden="true" />
-      <div className="relative w-full rounded-t-3xl bg-white p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl">
+      <div className="relative max-h-[100dvh] w-full overflow-y-auto overscroll-contain rounded-t-3xl bg-white p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl">
         <div className="flex items-center justify-between">
           <h2 id={headingId} className="text-lg font-black text-ink">{t("planYourTrip")}</h2>
-          <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Close" className="rounded-full border border-line p-2 text-muted transition hover:text-ink">
+          <button ref={closeButtonRef} type="button" onClick={onClose} aria-label="Close" className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-line p-2 text-muted transition hover:text-ink focus-visible:outline-2 focus-visible:outline-ocean">
             <X size={18} />
           </button>
         </div>
