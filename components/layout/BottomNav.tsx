@@ -52,31 +52,22 @@ export default function BottomNav() {
         pb-[env(safe-area-inset-bottom)]
         `}
       >
-        <div className="grid grid-cols-5 items-end px-1 pb-1.5 pt-2">
+        <div className="grid grid-cols-5 items-center px-1 pb-1.5 pt-2">
           <BottomNavLink href={toursHref} active={isExplore} icon={<Compass size={22} />} label={t("explore")} />
           <BottomNavLink href={transfersHref} active={isTransfers} icon={<Car size={22} />} label={t("transfers")} />
 
-          <div className="flex flex-col items-center">
-            <div className="relative -mt-8 h-14 w-14">
-              <button
-                type="button"
-                onClick={() => setIsPlanOpen((current) => !current)}
-                aria-haspopup="dialog"
-                aria-expanded={isPlanOpen}
-                aria-label={t("planYourTrip")}
-                className={`
-                relative flex h-14 w-14 items-center justify-center rounded-full
-                bg-brand-orange-cta
-                text-white shadow-lg shadow-brand-orange-cta/30
-                transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.94]
-                ${isPlanOpen ? "ring-4 ring-brand-orange-cta/50" : "ring-4 ring-white"}
-                `}
-              >
-                {isPlanOpen ? <X size={24} aria-hidden="true" /> : <Search size={24} aria-hidden="true" />}
-              </button>
-            </div>
-            <span className={`mt-1 text-[11px] font-semibold ${isPlanOpen ? "text-brand-navy" : "text-muted"}`}>{t("plan")}</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsPlanOpen((current) => !current)}
+            aria-haspopup="dialog"
+            aria-expanded={isPlanOpen}
+            aria-label={t("planYourTrip")}
+            className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean ${isPlanOpen ? "text-brand-navy" : "text-muted"}`}
+          >
+            {isPlanOpen ? <X size={22} aria-hidden="true" /> : <Search size={22} aria-hidden="true" />}
+            <span aria-hidden="true" className={`-mb-1 h-1 w-1 rounded-full bg-brand-navy ${isPlanOpen ? "" : "invisible"}`} />
+            <span>{t("plan")}</span>
+          </button>
 
           <BottomNavLink href={bookingHref} active={isMyTrips} icon={<Ticket size={22} />} label={t("myTrips")} />
 
@@ -86,9 +77,10 @@ export default function BottomNav() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="WhatsApp"
-            className="flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold text-green-700"
+            className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean text-green-700"
           >
-            <MessageCircle size={20} aria-hidden="true" />
+            <MessageCircle size={22} aria-hidden="true" />
+            <span aria-hidden="true" className="invisible -mb-1 h-1 w-1" />
             <span>WhatsApp</span>
           </a>
         </div>
@@ -155,10 +147,10 @@ function BottomNavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center gap-1 rounded-xl py-1 text-[11px] font-semibold transition ${active ? "text-brand-navy" : "text-muted"}`}
+      className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl py-1 text-[11px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean transition ${active ? "text-brand-navy" : "text-muted"}`}
     >
       {icon}
-      {active ? <span aria-hidden="true" className="-mb-1 h-1 w-1 rounded-full bg-brand-navy" /> : null}
+      <span aria-hidden="true" className={`-mb-1 h-1 w-1 rounded-full bg-brand-navy ${active ? "" : "invisible"}`} />
       <span>{label}</span>
     </Link>
   );
