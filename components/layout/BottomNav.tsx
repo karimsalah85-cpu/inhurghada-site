@@ -9,6 +9,7 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath, type Locale } from "@/lib/i18n";
 import { tours, type Tour } from "@/data/tours";
+import { useHideOnScrollDown } from "@/components/layout/scroll-chrome";
 
 const tourBrowsingRoots = ["/tours", "/destinations", "/hurghada", "/marsa-alam", "/jeddah"];
 
@@ -23,6 +24,8 @@ export default function BottomNav() {
   const router = useRouter();
   const { language, t } = useSiteSettings();
   const [isPlanOpen, setIsPlanOpen] = useState(false);
+  // Slide the bar away while reading down the page; the Plan sheet always pins it back.
+  const collapsed = useHideOnScrollDown() && !isPlanOpen;
 
   const homeHref = localePath(language);
   const toursHref = localePath(language, "/tours");
@@ -46,13 +49,15 @@ export default function BottomNav() {
     <>
       <nav
         aria-label={navLabel}
-        className="
-        fixed inset-x-0 bottom-0 z-50
-        border-t border-line/80 bg-white/75 backdrop-blur-xl
+        className={`
+        fixed inset-x-0 bottom-0 z-50 xl:hidden
+        border-t border-line/60 bg-white/70 backdrop-blur-2xl
         pb-[env(safe-area-inset-bottom)]
-        shadow-[0_-10px_40px_-20px_rgba(15,23,42,0.45)]
-        xl:hidden
-        "
+        shadow-[0_-8px_32px_-24px_rgba(15,23,42,0.5)]
+        transition-transform duration-300 ease-out
+        motion-reduce:transition-none
+        ${collapsed ? "translate-y-[calc(100%+2.5rem)]" : "translate-y-0"}
+        `}
       >
         <div className="grid grid-cols-5 items-end px-1 pb-1.5 pt-2">
           <BottomNavLink href={toursHref} active={isExplore} icon={<Compass size={22} />} label={t("explore")} />

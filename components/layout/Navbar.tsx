@@ -13,6 +13,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { useFavourites } from "@/components/favourites/FavouritesProvider";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 import { destinations } from "@/lib/destinations";
+import { useScrolledPast } from "@/components/layout/scroll-chrome";
 
 const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظة", de: "Gespeicherte Trips", ru: "Сохранённые поездки", pl: "Zapisane wycieczki", zh: "收藏的行程" } as const;
 
@@ -20,6 +21,9 @@ const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظ
 export default function Navbar() {
 
   const [open, setOpen] = useState(false);
+  const scrolled = useScrolledPast(24);
+  // Solid once scrolled, or whenever the mobile menu is open so its panel reads.
+  const solid = scrolled || open;
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
   const { currency, language, setCurrency, t } = useSiteSettings();
@@ -52,17 +56,11 @@ export default function Navbar() {
   return (
 
     <nav
-      className="
-      fixed
-      top-0
-      left-0
-      z-50
-      w-full
-      border-b border-line/80
-      bg-white/75
-      backdrop-blur-xl
-      shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]
-      "
+      className={`fixed left-0 top-0 z-50 w-full border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${
+        solid
+          ? "border-line/80 bg-white/85 backdrop-blur-xl shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]"
+          : "border-transparent bg-white/60 backdrop-blur-md shadow-none"
+      }`}
     >
 
 
