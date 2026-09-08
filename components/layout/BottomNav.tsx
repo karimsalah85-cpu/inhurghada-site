@@ -41,12 +41,13 @@ export default function BottomNav() {
 
   // High booking-intent pages get a dedicated price + Book Now bar instead of
   // the generic nav, so the two never stack or compete for attention.
-  if (focusedTour) return <TourBookingBar tour={focusedTour} pathname={pathname} />;
+  if (focusedTour) return <><WaterLens /><TourBookingBar tour={focusedTour} pathname={pathname} /></>;
 
   const navLabel = t("quickNavigation");
 
   return (
     <>
+      <WaterLens />
       <nav
         aria-label={navLabel}
         className={`
@@ -259,5 +260,19 @@ function PlanField({ icon: Icon, label, children }: { icon: typeof MapPin; label
         <span className="mt-0.5 block">{children}</span>
       </span>
     </label>
+  );
+}
+
+/** Preview only: a static displacement surface; text and controls stay unfiltered. */
+function WaterLens() {
+  return (
+    <svg aria-hidden="true" width="0" height="0" style={{ position: "absolute", pointerEvents: "none" }}>
+      <defs>
+        <filter id="water-lens" x="-15%" y="-30%" width="130%" height="160%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.035" numOctaves="1" seed="7" result="ripples" />
+          <feDisplacementMap in="SourceGraphic" in2="ripples" scale="16" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
   );
 }
