@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Manrope, Noto_Kufi_Arabic } from "next/font/google";
 import "./globals.css";
 
@@ -88,32 +87,38 @@ export const metadata: Metadata = {
 
 
 
-export default async function RootLayout({
+// No `headers()` / `cookies()` here on purpose: reading a request header would opt
+// every page into dynamic SSR (Cache-Control: no-store, no CDN cache, no bf-cache).
+// The document starts as en/ltr; the inline script below and SiteSettingsProvider
+// (which reads the pathname on the client) set lang/dir before first paint for the
+// localized routes.
+const localeDirScript = `(function(){try{var s=location.pathname.split('/')[1];var rtl=s==='ar';var l=['ar','de','ru','pl','zh'].indexOf(s)>-1?s:'en';var e=document.documentElement;e.lang=l;e.dir=rtl?'rtl':'ltr';}catch(_){}})();`;
+
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-
-  const requestedLocale = (await headers()).get("x-daily-red-sea-locale") || "en";
-  const documentLocale = ["en", "ar", "de", "ru", "pl", "zh"].includes(requestedLocale) ? requestedLocale : "en";
-
   return (
 
     <html
-      lang={documentLocale}
-      dir={documentLocale === "ar" ? "rtl" : "ltr"}
+      lang="en"
+      dir="ltr"
       className={`h-full antialiased ${manrope.variable} ${notoKufiArabic.variable}`}
     >
 
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: localeDirScript }} />
+      </head>
+
       <body>
-        <SiteSettingsProvider initialLanguage={documentLocale as "en" | "ar" | "de" | "ru" | "pl" | "zh"}>
+        <SiteSettingsProvider>
           <CartProvider>
             <FavouritesProvider>
               <OrganizationSchema />
               <AnalyticsProvider />
               <PublicSiteChrome />
-              <a href="#main-content" className="skip-link">{publicInterfaceCopy[documentLocale as keyof typeof publicInterfaceCopy].skip}</a>
+              <a href="#main-content" className="skip-link">{publicInterfaceCopy.en.skip}</a>
               <div id="main-content" tabIndex={-1}>{children}</div>
             </FavouritesProvider>
           </CartProvider>
