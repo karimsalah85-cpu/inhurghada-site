@@ -9,7 +9,6 @@ import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath, type Locale } from "@/lib/i18n";
 import { tours, type Tour } from "@/data/tours";
-import { useHideOnScrollDown } from "@/components/layout/scroll-chrome";
 
 const tourBrowsingRoots = ["/tours", "/destinations", "/hurghada", "/marsa-alam", "/jeddah"];
 
@@ -24,8 +23,6 @@ export default function BottomNav() {
   const router = useRouter();
   const { language, t } = useSiteSettings();
   const [isPlanOpen, setIsPlanOpen] = useState(false);
-  // Slide the bar away while reading down the page; the Plan sheet always pins it back.
-  const collapsed = useHideOnScrollDown() && !isPlanOpen;
 
   const homeHref = localePath(language);
   const toursHref = localePath(language, "/tours");
@@ -53,9 +50,6 @@ export default function BottomNav() {
         fixed inset-x-0 bottom-0 z-50 xl:hidden
         mobile-glass-nav
         pb-[env(safe-area-inset-bottom)]
-        transition-transform duration-300 ease-out
-        motion-reduce:transition-none
-        ${collapsed ? "translate-y-[calc(100%+2.5rem)]" : "translate-y-0"}
         `}
       >
         <div className="grid grid-cols-5 items-end px-1 pb-1.5 pt-2">

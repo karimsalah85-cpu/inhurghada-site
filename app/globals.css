@@ -149,16 +149,3 @@ p, li, h1, h2, h3, h4, summary, dd, dt, figcaption, blockquote {
   }
   .mobile-glass-nav::after { display: none; }
 }
-
-/* Device experiment: keep the surface constant and vary only its edge distance. */
-@media (max-width: 1279.98px) {
-  html[data-safari-toolbar-test] .mobile-glass-nav {
-    bottom: calc(var(--safari-test-gap, 0px) + env(safe-area-inset-bottom));
-    transform: none;
-    translate: none;
-    transition: none;
-  }
-  html[data-safari-toolbar-test] #main-content {
-    padding-bottom: calc(6.5rem + 48px + env(safe-area-inset-bottom));
-  }
-}
