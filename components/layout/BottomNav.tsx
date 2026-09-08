@@ -50,10 +50,11 @@ export default function BottomNav() {
       <nav
         aria-label={navLabel}
         className={`
-        fixed inset-x-0 bottom-0 z-50 xl:hidden
-        border-t border-line/60 bg-white/70 backdrop-blur-2xl
+        fixed inset-x-2 bottom-0 z-50 xl:hidden
+        rounded-t-3xl border border-b-0 border-white/55
+        bg-white/70 backdrop-blur-2xl backdrop-saturate-150
         pb-[env(safe-area-inset-bottom)]
-        shadow-[0_-8px_32px_-24px_rgba(15,23,42,0.5)]
+        shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_-12px_44px_-24px_rgba(15,23,42,0.55)]
         transition-transform duration-300 ease-out
         motion-reduce:transition-none
         ${collapsed ? "translate-y-[calc(100%+2.5rem)]" : "translate-y-0"}
@@ -121,11 +122,11 @@ function TourBookingBar({ tour, pathname }: { tour: Tour; pathname: string }) {
     <nav
       aria-label={t("booking")}
       className="
-      fixed inset-x-0 bottom-0 z-50
-      border-t border-line/80 bg-white/95 backdrop-blur-xl
+      fixed inset-x-2 bottom-0 z-50 xl:hidden
+      rounded-t-3xl border border-b-0 border-white/55
+      bg-white/90 backdrop-blur-2xl backdrop-saturate-150
       pb-[env(safe-area-inset-bottom)]
-      shadow-[0_-10px_40px_-20px_rgba(15,23,42,0.45)]
-      xl:hidden
+      shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_-12px_44px_-22px_rgba(15,23,42,0.5)]
       "
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
