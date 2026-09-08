@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Hero from "@/components/home/Hero";
+import SafariToolbarPreview from "@/components/home/SafariToolbarPreview";
 import TourCard from "@/components/cards/TourCard";
 import MobileTourCarousel from "@/components/home/MobileTourCarousel";
 import ContinuePlanningRail from "@/components/favourites/ContinuePlanningRail";
@@ -179,6 +180,7 @@ function HomeContent() {
 
 
       <Hero />
+      <SafariToolbarPreview />
 
       <section aria-label="Booking benefits" className="border-b border-line bg-white px-5 py-5 sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-3">
