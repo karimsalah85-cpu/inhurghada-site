@@ -18,7 +18,7 @@ const { props: { srcSet: desktopHeroSrcSet } } = getImageProps({
   src: "/images/hero-egypt-red-sea.jpg",
   width: 1672,
   height: 941,
-  quality: 78,
+  quality: 62,
   priority: true,
 });
 
@@ -29,7 +29,7 @@ const { props: { srcSet: mobileHeroSrcSet, ...mobileHeroProps } } = getImageProp
   src: "/images/hero-egypt-red-sea-mobile.jpg",
   width: 941,
   height: 1672,
-  quality: 78,
+  quality: 62,
   priority: true,
 });
 
