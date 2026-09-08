@@ -9,7 +9,7 @@ const quarantinedTourismImages = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  images: { formats: ["image/avif", "image/webp"] },
+  images: { formats: ["image/avif", "image/webp"], qualities: [62, 75] },
   // createInvoicePdf reads the embedded Noto TTFs and the brand wordmark PNG
   // through process.cwd()-relative paths that @vercel/nft cannot trace, so pin
   // both into the serverless bundle for every route that renders a PDF.

@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
+import { getImageProps } from "next/image";
 import { Manrope, Noto_Kufi_Arabic } from "next/font/google";
 import "./globals.css";
+
+// The homepage hero is the mobile LCP element and uses a manual <picture> for
+// art direction, so getImageProps/priority can't auto-preload it. Emit the
+// preload here, in the server-rendered <head>, scoped to the mobile source.
+const { props: heroMobile } = getImageProps({
+  alt: "",
+  src: "/images/hero-egypt-red-sea-mobile.jpg",
+  width: 941,
+  height: 1672,
+  quality: 62,
+  sizes: "100vw",
+});
 
 import { SiteSettingsProvider } from "@/components/settings/SiteSettingsContext";
 import OrganizationSchema from "@/components/seo/OrganizationSchema";
@@ -109,6 +122,14 @@ export default function RootLayout({
 
       <head>
         <script dangerouslySetInnerHTML={{ __html: localeDirScript }} />
+        <link
+          rel="preload"
+          as="image"
+          fetchPriority="high"
+          media="(max-width: 639px)"
+          imageSrcSet={heroMobile.srcSet}
+          imageSizes="100vw"
+        />
       </head>
 
       <body>
