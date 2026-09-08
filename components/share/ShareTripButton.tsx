@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Check, Copy, Mail, Share2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import type { Locale } from "@/lib/i18n";
 import { buildTripShareUrl, isSharedTripUrl, tripShareText, whatsappShareUrl } from "@/lib/share-trip";
 import { trackEvent } from "@/lib/analytics";
@@ -10,11 +9,16 @@ import { trackEvent } from "@/lib/analytics";
 const trackedSharedLinks = new Set<string>();
 
 export default function ShareTripButton({ locale, tourSlug, tourTitle, destination, date, compact = false }: { locale: Locale; tourSlug: string; tourTitle?: string; destination?: string; date?: string; compact?: boolean }) {
-  const params = useSearchParams();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Read the current-URL date on the client only (the initializer is skipped
+  // during SSR). useSearchParams() would opt every page that renders a tour card
+  // out of static prerendering.
+  const [urlDate] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("date"),
+  );
   const ar = locale === "ar";
-  const selectedDate = date || params.get("date") || undefined;
+  const selectedDate = date || urlDate || undefined;
   const url = typeof window === "undefined" ? "" : buildTripShareUrl(window.location.origin, locale, tourSlug, selectedDate);
   const text = tripShareText(locale, tourTitle);
   const shareTitle = tourTitle || (ar ? "رحلة غروب جدة" : "Jeddah sunset cruise");

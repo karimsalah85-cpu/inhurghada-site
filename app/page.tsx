@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -26,6 +26,12 @@ import { destinations } from "@/lib/destinations";
 import { applyTourCollectionMediaSafety } from "@/lib/tour-media-safety";
 
 
+
+function readUrlQuery(): { search: string; date: string | null; guests: string | null } {
+  if (typeof window === "undefined") return { search: "", date: null, guests: null };
+  const params = new URLSearchParams(window.location.search);
+  return { search: params.get("search") ?? "", date: params.get("date"), guests: params.get("guests") };
+}
 
 export default function Home() {
   return (
@@ -64,12 +70,22 @@ function HomeContent() {
     "All rights reserved.": { ar: "جميع الحقوق محفوظة.", pl: "Wszelkie prawa zastrzeżone.", zh: "版权所有。" },
   };
   const tr = (en: string, deText: string, ruText: string, arText = sharedLocaleCopy[en]?.ar || en, plText = sharedLocaleCopy[en]?.pl || en, zhText = sharedLocaleCopy[en]?.zh || en) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const urlSearch = searchParams.get("search") ?? "";
-  const [search, setSearch] = useState(urlSearch);
-  const lastWrittenSearch = useRef(urlSearch);
   const toursSection = useRef<HTMLDivElement>(null);
+
+  // URL query params are read on the client only. Using next/navigation's
+  // useSearchParams here would opt this whole page out of static prerendering
+  // (it would ship a blank Suspense fallback and render everything after hydrate).
+  const [urlQuery, setUrlQuery] = useState<{ search: string; date: string | null; guests: string | null }>(readUrlQuery);
+  useEffect(() => {
+    const sync = () => setUrlQuery(readUrlQuery());
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
+  }, []);
+  const urlSearch = urlQuery.search;
+
+  const [search, setSearch] = useState("");
+  const lastWrittenSearch = useRef("");
 
   useEffect(() => {
     if (urlSearch === lastWrittenSearch.current) return;
@@ -82,7 +98,7 @@ function HomeContent() {
     if (normalizedSearch === urlSearch) return;
 
     const timeoutId = window.setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(window.location.search);
       if (normalizedSearch) params.set("search", normalizedSearch);
       else params.delete("search");
       lastWrittenSearch.current = normalizedSearch;
@@ -92,7 +108,7 @@ function HomeContent() {
     }, 350);
 
     return () => window.clearTimeout(timeoutId);
-  }, [homePath, router, search, searchParams, urlSearch]);
+  }, [homePath, router, search, urlSearch]);
 
   useEffect(() => {
     if (!search.trim()) return;
@@ -105,11 +121,8 @@ function HomeContent() {
   }, [search]);
 
   const bookingQuery = new URLSearchParams();
-  const date = searchParams.get("date");
-  const guests = searchParams.get("guests");
-
-  if (date) bookingQuery.set("date", date);
-  if (guests) bookingQuery.set("guests", guests);
+  if (urlQuery.date) bookingQuery.set("date", urlQuery.date);
+  if (urlQuery.guests) bookingQuery.set("guests", urlQuery.guests);
 
   const bookingQueryString = bookingQuery.toString();
 
