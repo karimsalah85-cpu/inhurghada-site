@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { localeFromPathname, localeSwitchPath } from "@/lib/i18n";
+import { fetchSiteContent } from "@/lib/site-content-client";
 
 export const languages = [
   { code: "en", label: "English" },
@@ -89,9 +90,9 @@ export function SiteSettingsProvider({ children, initialLanguage = "en" }: { chi
   const [publicSettings, setPublicSettings] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/site-content", { signal: controller.signal }).then((response) => response.ok ? response.json() : null).then((data) => { if (data?.settings && typeof data.settings === "object") setPublicSettings(data.settings); }).catch(() => undefined);
-    return () => controller.abort();
+    let active = true;
+    fetchSiteContent().then((data) => { if (active && data?.settings && typeof data.settings === "object") setPublicSettings(data.settings); });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {

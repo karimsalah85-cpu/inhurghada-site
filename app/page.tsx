@@ -24,6 +24,7 @@ import { filterTours } from "@/lib/tour-search";
 import GoogleReviews from "@/components/reviews/GoogleReviews";
 import { destinations } from "@/lib/destinations";
 import { applyTourCollectionMediaSafety } from "@/lib/tour-media-safety";
+import { fetchSiteContent } from "@/lib/site-content-client";
 
 
 
@@ -132,7 +133,7 @@ function HomeContent() {
 
 
   const [liveTours, setLiveTours] = useState<Tour[]>(tours);
-  useEffect(() => { let active = true; fetch("/api/site-content").then((response) => response.ok ? response.json() : null).then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }).catch(() => undefined); return () => { active = false; }; }, []);
+  useEffect(() => { let active = true; fetchSiteContent().then((data) => { if (active && Array.isArray(data?.tours)) setLiveTours(data.tours); }); return () => { active = false; }; }, []);
   const publicTours = applyTourCollectionMediaSafety(liveTours.filter((tour) => tour.listingStatus !== "unlisted" && tour.listingStatus !== "paused"), language);
   const displayTours = publicTours.map((tour) => localizeTour(tour, language));
   const filteredTours = filterTours(displayTours, search);
