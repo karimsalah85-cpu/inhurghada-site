@@ -56,12 +56,12 @@ export default function Navbar() {
   return (
 
     <nav
-      className={`fixed left-0 top-0 z-50 w-full border-b backdrop-blur-lg transition-[background-color,border-color,box-shadow] duration-300 ${
+      className={`fixed left-0 top-0 z-50 w-full border-0 backdrop-blur-lg transition-[background-color,box-shadow] duration-300 ${
         solid
-          ? "border-line/80 bg-white/90 shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]"
+          ? "bg-white/90 shadow-[0_10px_40px_-20px_rgba(15,23,42,0.45)]"
           : // Over the hero: a top-weighted white fade so the bar melts into the
             // image with no hard edge, while the logo/controls keep enough backing.
-            "border-transparent bg-gradient-to-b from-white/80 via-white/50 to-white/10 shadow-none"
+            "bg-gradient-to-b from-white/80 via-white/50 to-white/10 shadow-none"
       }`}
     >
 
