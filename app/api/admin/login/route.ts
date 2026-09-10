@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitShared } from "@/lib/rate-limit";
 import { createClient } from "@/utils/supabase/server";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
   const forwardedFor = request.headers.get("x-forwarded-for");
   const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
-  const attempt = rateLimit(`admin-login:${clientIp}`, 8, 15 * 60 * 1000);
+  const attempt = await rateLimitShared(`admin-login:${clientIp}`, 8, 15 * 60 * 1000);
 
   if (!attempt.allowed) {
     return NextResponse.json(

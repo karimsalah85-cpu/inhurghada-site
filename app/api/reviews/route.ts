@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitShared } from "@/lib/rate-limit";
 import { validateReviewSubmission } from "@/lib/review-validation";
 
 function json(body: unknown, status = 200, extraHeaders?: Record<string, string>) {
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const limit = rateLimit(`review:${clientAddress}`);
+  const limit = await rateLimitShared(`review:${clientAddress}`);
   if (!limit.allowed) return json({ error: "Too many attempts. Please try again shortly." }, 429, { "Retry-After": String(limit.retryAfterSeconds) });
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;

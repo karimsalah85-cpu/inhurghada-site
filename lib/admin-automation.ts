@@ -163,5 +163,10 @@ export async function runAdminAutomation() {
 
   await addHealthChecks(supabase);
   await checkManagedBackups(supabase);
+  // Housekeeping: drop rate-limit windows that elapsed over a day ago. Best
+  // effort — a failure here (e.g. the migration not yet applied) must not fail
+  // the automation run.
+  const { error: pruneError } = await supabase.rpc("prune_rate_limit_hits");
+  if (pruneError) console.info("Rate-limit prune skipped", pruneError.message);
   return { published: published?.length || 0, considered: queueRows.length, sent, failed, googleAdsSpendImported, googleAdsStatus };
 }

@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import Image from "@/components/media/WatermarkedImage";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { tours as fallbackTours } from "@/data/tours";
 import { blogPosts as fallbackBlogPosts } from "@/data/blog-posts";
 import { getLiveTours, getLiveBlogPosts } from "@/lib/live-content";
-import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales, type Locale } from "@/lib/i18n";
+import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales } from "@/lib/i18n";
 import {
   defaultSocialImage,
   localizedDefaultDescriptions,
@@ -38,28 +36,6 @@ import { destinations, getDestination, type DestinationSlug } from "@/lib/destin
 import { destinationCopyByLocale } from "@/lib/destination-i18n";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
-
-const tourTitles: Partial<Record<Locale, Record<string, string>>> = {
-  ar: {
-    "orange-bay": "رحلة أورانج باي البحرية والسنوركلينج", safari: "مغامرة سفاري الصحراء", "professional-underwater-photographer": "مصور محترف تحت الماء", "mahmya-island": "رحلة جزيرة المحمية", "full-day-snorkeling": "رحلة سنوركلينج ليوم كامل", "full-day-diving": "رحلة غوص ليوم كامل", "quad-safari-morning": "سفاري كواد صباحي", "quad-safari-sunset": "سفاري كواد وقت الغروب", "hurghada-airport-transfer": "توصيل خاص من مطار الغردقة", "senzo-transfer": "توصيل خاص من وإلى سنزو مول", "luxor-private-day-trip": "رحلة خاصة إلى الأقصر من الغردقة",
-  },
-  de: {
-    "orange-bay": "Orange Bay Bootstour mit Schnorcheln", safari: "Wüstensafari-Abenteuer", "professional-underwater-photographer": "Professioneller Unterwasserfotograf", "mahmya-island": "Mahmya Island Bootstour", "full-day-snorkeling": "Ganztägige Schnorcheltour", "full-day-diving": "Ganztägige Tauchtour", "quad-safari-morning": "Quad-Safari am Morgen", "quad-safari-sunset": "Quad-Safari bei Sonnenuntergang", "hurghada-airport-transfer": "Privater Flughafentransfer Hurghada", "senzo-transfer": "Privater Transfer zur Senzo Mall", "luxor-private-day-trip": "Privater Tagesausflug nach Luxor ab Hurghada",
-  },
-  ru: {
-    "orange-bay": "Морская прогулка на Orange Bay со сноркелингом", safari: "Сафари в пустыне", "professional-underwater-photographer": "Профессиональный подводный фотограф", "mahmya-island": "Морская прогулка на остров Махмея", "full-day-snorkeling": "Сноркелинг на весь день", "full-day-diving": "Дайвинг на весь день", "quad-safari-morning": "Утреннее сафари на квадроциклах", "quad-safari-sunset": "Сафари на квадроциклах на закате", "hurghada-airport-transfer": "Частный трансфер из аэропорта Хургады", "senzo-transfer": "Частный трансфер в Senzo Mall", "luxor-private-day-trip": "Индивидуальная поездка в Луксор из Хургады",
-  },
-  pl: {
-    "orange-bay": "Rejs na Orange Bay ze snorkelingiem", safari: "Pustynne safari", "professional-underwater-photographer": "Profesjonalny fotograf podwodny", "mahmya-island": "Rejs na wyspę Mahmya", "full-day-snorkeling": "Całodniowy snorkeling", "full-day-diving": "Całodniowe nurkowanie", "quad-safari-morning": "Poranne safari na quadach", "quad-safari-sunset": "Safari na quadach o zachodzie słońca", "hurghada-airport-transfer": "Prywatny transfer z lotniska w Hurghadzie", "senzo-transfer": "Prywatny transfer do Senzo Mall", "luxor-private-day-trip": "Prywatna wycieczka do Luksoru z Hurghady",
-  },
-  zh: {
-    "orange-bay": "橙湾浮潜游船之旅", safari: "沙漠探险", "professional-underwater-photographer": "专业水下摄影师", "mahmya-island": "马赫米亚岛游船之旅", "full-day-snorkeling": "全天浮潜之旅", "full-day-diving": "全天深潜之旅", "quad-safari-morning": "清晨四轮摩托沙漠探险", "quad-safari-sunset": "日落四轮摩托沙漠探险", "hurghada-airport-transfer": "赫尔格达机场私人接送", "senzo-transfer": "Senzo Mall 私人接送", "luxor-private-day-trip": "从赫尔格达出发的卢克索私人一日游",
-  },
-};
-
-function localizedTourTitle(locale: Locale, slug: string, fallback: string) {
-  return tourTitles[locale]?.[slug] || fallback;
-}
 
 function findPublicTour(liveTours: typeof fallbackTours, slug: string) {
   return liveTours.find((tour) => tour.slug === slug)
@@ -152,7 +128,6 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (!isLocale(rawLocale)) notFound();
   const locale = rawLocale;
   if (locale === "en") redirect(path.length ? `/${path.join("/")}` : "/");
-  const dictionary = dictionaries[locale];
   const kind = pageKind(path);
   if (!kind) notFound();
   const tours = await getLiveTours(locale);
@@ -164,130 +139,28 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (kind === "blog") return <div dir={direction}><LocalizedBlogIndex locale={locale} /></div>;
   if (kind === "blog-post") return <div dir={direction}><LocalizedBlogArticle params={Promise.resolve({ slug: path[1] })} locale={locale} /></div>;
 
-  if (locale === "de") {
-    if (kind === "home") return <HomePage />;
-    if (kind === "tour") {
-      const tour = findPublicTour(tours, path[1]);
-      if (!tour) notFound();
-      return <TourPageShell locale="de" tour={localizeTour(tour, "de")} />;
-    }
-    if (kind === "category") return <TourCategoryPage locale="de" params={Promise.resolve({ category: path[1] })} />;
-    if (kind === "transfers") return <TransfersPage locale="de" />;
-    if (kind === "booking") return <BookingPage />;
-    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
-    if (kind === "checkout") return <CheckoutPage />;
-    if (kind === "cart") return <CartPage />;
-    if (kind === "about") return <AboutPage locale="de" />;
-    if (kind === "contact") return <ContactPage locale="de" />;
-    if (kind === "faq") return <FaqPage locale="de" />;
-    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="de" />;
-    if (kind === "terms-conditions") return <TermsConditionsPage locale="de" />;
-  }
-
-  if (locale === "ru") {
-    if (kind === "home") return <HomePage />;
-    if (kind === "tour") {
-      const tour = findPublicTour(tours, path[1]);
-      if (!tour) notFound();
-      return <TourPageShell locale="ru" tour={localizeTour(tour, "ru")} />;
-    }
-    if (kind === "category") return <TourCategoryPage locale="ru" params={Promise.resolve({ category: path[1] })} />;
-    if (kind === "transfers") return <TransfersPage locale="ru" />;
-    if (kind === "booking") return <BookingPage />;
-    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
-    if (kind === "checkout") return <CheckoutPage />;
-    if (kind === "cart") return <CartPage />;
-    if (kind === "about") return <AboutPage locale="ru" />;
-    if (kind === "contact") return <ContactPage locale="ru" />;
-    if (kind === "faq") return <FaqPage locale="ru" />;
-    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="ru" />;
-    if (kind === "terms-conditions") return <TermsConditionsPage locale="ru" />;
-  }
-
-  if (locale === "ar") {
-    if (kind === "home") return <HomePage />;
-    if (kind === "tour") {
-      const tour = findPublicTour(tours, path[1]);
-      if (!tour) notFound();
-      return <TourPageShell locale="ar" tour={localizeTour(tour, "ar")} />;
-    }
-    if (kind === "category") return <TourCategoryPage locale="ar" params={Promise.resolve({ category: path[1] })} />;
-    if (kind === "transfers") return <TransfersPage locale="ar" />;
-    if (kind === "booking") return <BookingPage />;
-    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
-    if (kind === "checkout") return <CheckoutPage />;
-    if (kind === "cart") return <CartPage />;
-    if (kind === "about") return <AboutPage locale="ar" />;
-    if (kind === "contact") return <ContactPage locale="ar" />;
-    if (kind === "faq") return <FaqPage locale="ar" />;
-    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="ar" />;
-    if (kind === "terms-conditions") return <TermsConditionsPage locale="ar" />;
-  }
-
-  if (locale === "pl") {
-    if (kind === "home") return <HomePage />;
-    if (kind === "tour") {
-      const tour = findPublicTour(tours, path[1]);
-      if (!tour) notFound();
-      return <TourPageShell locale="pl" tour={localizeTour(tour, "pl")} />;
-    }
-    if (kind === "category") return <TourCategoryPage locale="pl" params={Promise.resolve({ category: path[1] })} />;
-    if (kind === "transfers") return <TransfersPage locale="pl" />;
-    if (kind === "booking") return <BookingPage />;
-    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
-    if (kind === "checkout") return <CheckoutPage />;
-    if (kind === "cart") return <CartPage />;
-    if (kind === "about") return <AboutPage locale="pl" />;
-    if (kind === "contact") return <ContactPage locale="pl" />;
-    if (kind === "faq") return <FaqPage locale="pl" />;
-    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="pl" />;
-    if (kind === "terms-conditions") return <TermsConditionsPage locale="pl" />;
-  }
-
-  if (locale === "zh") {
-    if (kind === "home") return <HomePage />;
-    if (kind === "tour") {
-      const tour = findPublicTour(tours, path[1]);
-      if (!tour) notFound();
-      return <TourPageShell locale="zh" tour={localizeTour(tour, "zh")} />;
-    }
-    if (kind === "category") return <TourCategoryPage locale="zh" params={Promise.resolve({ category: path[1] })} />;
-    if (kind === "booking") return <BookingPage />;
-    if (kind === "booking/confirmation") return <BookingConfirmationPage />;
-    if (kind === "checkout") return <CheckoutPage />;
-    if (kind === "cart") return <CartPage />;
-    if (kind === "transfers") return <TransfersPage locale="zh" />;
-    if (kind === "about") return <AboutPage locale="zh" />;
-    if (kind === "contact") return <ContactPage locale="zh" />;
-    if (kind === "faq") return <FaqPage locale="zh" />;
-    if (kind === "privacy-policy") return <PrivacyPolicyPage locale="zh" />;
-    if (kind === "terms-conditions") return <TermsConditionsPage locale="zh" />;
-  }
+  // Every non-English locale renders the same component per page kind; only the
+  // `locale` prop differs. Keep this dispatch data-free so a new page type is
+  // added once, not once per language.
+  if (kind === "home") return <HomePage />;
 
   if (kind === "tour") {
-    const tour = tours.find((item) => item.slug === path[1]);
+    const tour = findPublicTour(tours, path[1]);
     if (!tour) notFound();
     return <TourPageShell locale={locale} tour={localizeTour(tour, locale)} />;
   }
 
+  if (kind === "category") return <TourCategoryPage locale={locale} params={Promise.resolve({ category: path[1] })} />;
+  if (kind === "transfers") return <TransfersPage locale={locale} />;
+  if (kind === "booking") return <BookingPage />;
   if (kind === "booking/confirmation") return <BookingConfirmationPage />;
+  if (kind === "checkout") return <CheckoutPage />;
   if (kind === "cart") return <CartPage />;
+  if (kind === "about") return <AboutPage locale={locale} />;
+  if (kind === "contact") return <ContactPage locale={locale} />;
+  if (kind === "faq") return <FaqPage locale={locale} />;
+  if (kind === "privacy-policy") return <PrivacyPolicyPage locale={locale} />;
+  if (kind === "terms-conditions") return <TermsConditionsPage locale={locale} />;
 
-  if (kind === "home") return <Shell locale={locale}><main dir={direction}><section className="bg-ink px-6 py-24 text-white"><div className="mx-auto max-w-5xl"><p className="font-bold text-ocean-soft">Daily Red Sea · Hurghada</p><h1 className="mt-4 max-w-4xl text-4xl font-black sm:text-6xl">{dictionary.heroTitle}</h1><p className="mt-6 max-w-3xl text-lg leading-8 text-line">{dictionary.heroDescription}</p><Link href={`${localePath(locale)}#tours`} className="mt-8 inline-block rounded-full bg-ocean px-7 py-4 font-bold text-white">{dictionary.bookNow}</Link></div></section><section className="bg-surface-muted px-6 py-16"><div className="mx-auto max-w-7xl"><h2 className="text-3xl font-black">{dictionary.tours}</h2><div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{tourCategories.map((category) => <Link key={category.slug} href={localePath(locale, `/hurghada/${category.slug}`)} className="rounded-3xl border border-line bg-white p-6 shadow-sm transition hover:border-ocean"><h3 className="text-xl font-black">{categoryLabels[locale][category.slug]}</h3><p className="mt-3 leading-7 text-muted">{dictionary.siteDescription}</p><span className="mt-5 inline-block font-bold text-ink">{dictionary.tours} →</span></Link>)}</div></div></section><section id="tours" className="mx-auto max-w-7xl px-6 py-20"><h2 className="text-3xl font-black">{dictionary.popularTours}</h2><div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{tours.map((tour) => <Link key={tour.slug} href={localePath(locale, `/tours/${tour.slug}`)} className="overflow-hidden rounded-3xl border bg-white shadow-sm"><div className="relative h-48"><Image src={tour.image} alt={localizedTourTitle(locale, tour.slug, tour.title)} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" /></div><div className="p-6"><p className="text-sm font-semibold text-ocean-dark">{tour.duration}</p><h3 className="mt-2 text-xl font-bold">{localizedTourTitle(locale, tour.slug, tour.title)}</h3><p className="mt-4 font-black text-ink">{dictionary.from} {tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-2 text-muted line-through">${tour.originalPrice}</span> : null}${tour.price} · {dictionary.perPerson}</p></div></Link>)}</div></section><section className="bg-surface-muted px-6 py-20"><div className="mx-auto max-w-5xl"><h2 className="text-3xl font-black">{dictionary.whyTitle}</h2><p className="mt-5 text-lg text-muted">{dictionary.whyText}</p><div className="mt-8 grid gap-4 sm:grid-cols-3">{[dictionary.cash, dictionary.support, dictionary.local].map((item) => <div key={item} className="rounded-2xl bg-white p-5 font-bold">{item}</div>)}</div><div className="mt-8 flex flex-wrap gap-3"><Link href={localePath(locale, "/about")} className="rounded-full border px-6 py-3 font-bold">{dictionary.about}</Link><Link href={localePath(locale, "/contact")} className="rounded-full bg-ink px-6 py-3 font-bold text-white">{dictionary.contact}</Link></div></div></section></main></Shell>;
-
-  const content =
-    kind === "booking" ? [dictionary.bookingTitle, dictionary.bookingText]
-      : kind === "checkout" ? [dictionary.checkoutTitle, dictionary.checkoutText]
-        : kind === "transfers" ? [dictionary.transfersTitle, dictionary.transfersText]
-          : kind === "privacy-policy" ? [dictionary.privacyTitle, dictionary.privacyText]
-            : kind === "terms-conditions" ? [dictionary.termsTitle, dictionary.termsText]
-              : kind === "about" ? [`${dictionary.about} Daily Red Sea`, dictionary.whyText]
-                : kind === "contact" ? [dictionary.contact, dictionary.bookingText]
-                  : [`${dictionary.tours} FAQ`, dictionary.siteDescription];
-  const legal = kind === "privacy-policy" || kind === "terms-conditions";
-  return <Shell locale={locale}><main dir={direction} className="mx-auto max-w-4xl px-6 py-24"><h1 className="text-4xl font-black">{content[0]}</h1><p className="mt-6 text-lg leading-9 text-muted">{content[1]}</p>{legal ? <p className="mt-8 rounded-2xl bg-amber-50 p-5 text-sm text-amber-950">{dictionary.legalNotice}</p> : null}<div className="mt-9 flex flex-wrap gap-4"><a href="https://wa.me/201030809150" className="rounded-full bg-green-600 px-7 py-4 font-bold text-white">{kind === "booking" || kind === "checkout" ? dictionary.bookingCta : dictionary.contact}</a><Link href={localePath(locale)} className="rounded-full border px-7 py-4 font-bold">{dictionary.backHome}</Link></div></main></Shell>;
-}
-
-function Shell({ locale, children }: { locale: Locale; children: React.ReactNode }) {
-  return <div data-locale={locale} lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} className="min-h-screen bg-white pt-20 text-ink">{children}</div>;
+  notFound();
 }

@@ -10,7 +10,7 @@ import {
   sendWhatsAppMessage,
 } from "@/lib/booking-service";
 import { createInvoicePdf } from "@/lib/invoice-service";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimitShared } from "@/lib/rate-limit";
 import { validateBookingInput } from "@/lib/booking-validation";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const clientAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const limit = rateLimit(`booking:${clientAddress}`);
+    const limit = await rateLimitShared(`booking:${clientAddress}`);
     if (!limit.allowed) return bookingJson({ success: false, error: "Too many booking attempts. Please try again shortly." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
 
     const origin = request.headers.get("origin");

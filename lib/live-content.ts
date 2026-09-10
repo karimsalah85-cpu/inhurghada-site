@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { blogPosts, type BlogPost } from "@/data/blog-posts";
 import { tours, type Tour } from "@/data/tours";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -107,7 +108,7 @@ async function applyTourMedia(tourRows: Tour[], locale = "en") {
   }
 }
 
-export async function getLiveTours(locale: Locale = "en"): Promise<Tour[]> {
+export const getLiveTours = cache(async function getLiveTours(locale: Locale = "en"): Promise<Tour[]> {
   const rows = await contentRows("tour");
   const locallyUnlistedSlugs = new Set(tours.filter((tour) => tour.listingStatus === "unlisted").map((tour) => tour.slug));
   const listedTours = tours.filter((tour) => tour.listingStatus !== "unlisted");
@@ -120,7 +121,7 @@ export async function getLiveTours(locale: Locale = "en"): Promise<Tour[]> {
     return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || ""), ...codeControlledTourFields(fallback) } as Tour];
   }));
   return applyTourCollectionMediaSafety(await applyTourMedia([...listedTours.filter((tour) => !managedSlugs.has(tour.slug)), ...overrides.values()], locale), locale);
-}
+});
 
 export async function getUnavailableTrip(slugs: string[]): Promise<{ slug: string; status: TripListingStatus } | null> {
   const uniqueSlugs = [...new Set(slugs.filter(Boolean))];
@@ -170,7 +171,7 @@ function resolveBlogHeroImages(posts: BlogPost[]): BlogPost[] {
   });
 }
 
-export async function getLiveBlogPosts(): Promise<BlogPost[]> {
+export const getLiveBlogPosts = cache(async function getLiveBlogPosts(): Promise<BlogPost[]> {
   const rows = await contentRows("blog");
   if (!rows.length) return resolveBlogHeroImages(blogPosts);
   const managedSlugs = new Set(rows.map((row) => row.slug));
@@ -180,7 +181,7 @@ export async function getLiveBlogPosts(): Promise<BlogPost[]> {
     return [row.slug, { ...fallback, ...body, slug: row.slug, title: row.title, metaDescription: row.seo_description || row.excerpt || String(body.metaDescription || ""), publishedAt: row.published_at || row.publish_at || String(body.publishedAt || new Date().toISOString()), heroImage: fallback?.heroImage || row.featured_image || String(body.heroImage || "/images/placeholders/island-trip.svg"), relatedTourSlugs: Array.isArray(body.relatedTourSlugs) ? body.relatedTourSlugs as string[] : fallback?.relatedTourSlugs || [], intro: String(body.intro || row.excerpt || ""), sections: Array.isArray(body.sections) ? body.sections as BlogPost["sections"] : fallback?.sections || [], faqs: Array.isArray(body.faqs) ? body.faqs as BlogPost["faqs"] : fallback?.faqs || [] } as BlogPost];
   }));
   return resolveBlogHeroImages([...blogPosts.filter((post) => !managedSlugs.has(post.slug)), ...overrides.values()]);
-}
+});
 
 function applyBlogMediaSafety(post: BlogPost): BlogPost {
   if (post.heroImage && !post.heroImage.startsWith("/images/placeholders/")) return post;
@@ -193,10 +194,10 @@ function applyBlogMediaSafety(post: BlogPost): BlogPost {
   return { ...post, heroImage };
 }
 
-export async function getPublicSiteSettings(): Promise<Record<string, unknown>> {
+export const getPublicSiteSettings = cache(async function getPublicSiteSettings(): Promise<Record<string, unknown>> {
   const client = createAdminClient();
   if (!client) return {};
   const { data, error } = await client.from("site_settings").select("key,value").eq("public", true);
   if (error) { console.error("Could not load public site settings", error.message); return {}; }
   return Object.fromEntries((data || []).map((row) => [row.key, row.value]));
-}
+});
