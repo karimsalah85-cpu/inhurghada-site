@@ -602,6 +602,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     currency: "USD",
     title: "SSI Basic Diver — Try Scuba Diving",
     image: "/images/owned/basic-diver-jeddah.jpg",
+    imageFocalPoint: { x: 0.2, y: 0.5 },
     price: "140.25",
     originalPrice: "165",
     priceUnit: "per person",

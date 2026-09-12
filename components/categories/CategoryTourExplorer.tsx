@@ -124,7 +124,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
               </div>
               <Link href={localePath(locale, `/tours/${tour.slug}`)} className="group block">
                 <div className="relative h-56 overflow-hidden">
-                  <Image src={tour.image} alt={tour.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
+                  <Image src={tour.image} alt={tour.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" style={{ objectPosition: `${(tour.imageFocalPoint?.x ?? 0.5) * 100}% ${(tour.imageFocalPoint?.y ?? 0.5) * 100}%` }} />
                   <ImageWatermark />
                   {tour.badge ? <span className="absolute start-4 top-4 rounded-full bg-brand-navy px-3 py-2 text-xs font-bold text-white">{localizeProductBadge(locale, tour.badge)}</span> : null}
                 </div>
