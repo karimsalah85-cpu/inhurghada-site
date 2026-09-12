@@ -187,7 +187,7 @@ function HomeContent() {
         </div>
       </section>
 
-      <section className="bg-white px-6 pb-6 pt-20 sm:px-8 sm:py-24">
+      <section className="bg-white px-6 pb-6 pt-10 sm:px-8 sm:pb-14 sm:pt-14">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
             <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{de ? "Reiseziele am Roten Meer" : ru ? "Направления Красного моря" : ar ? "وجهات البحر الأحمر" : pl ? "Destynacje nad Morzem Czerwonym" : zh ? "红海目的地" : "Red Sea destinations"}</p>
