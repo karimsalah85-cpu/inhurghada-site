@@ -99,9 +99,9 @@ export default function TourCard({
           <div className="mt-2 flex items-center gap-2 text-sm text-muted sm:text-base"><Clock size={17} /><span>{t("everyDay")} · {duration}</span></div>
           {availableTime ? <p className="mt-2 text-xs text-muted sm:text-sm">{copy.pickup}: {availableTime}</p> : null}
           <p className="mt-2 flex items-center gap-2 text-xs font-medium text-emerald-700 sm:text-sm"><ShieldCheck size={16} />{bookingMode === "inquiry" ? copy.inquiry : copy.clear}</p>
-          <div className="mt-4 flex items-end justify-between gap-3 border-t border-line pt-4 sm:mt-6 sm:gap-4">
+          <div className="mt-4 flex flex-col items-stretch gap-3 border-t border-line pt-4 sm:mt-6 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
             <div>{bookingMode === "inquiry" ? <><p className="text-sm text-muted">{copy.quotation}</p><p className="text-xl font-bold text-ink">{copy.request}</p></> : <><p className="text-sm text-muted">{copy.from}</p>{hasDiscount ? <p className="text-sm font-semibold text-muted line-through">{formatPrice(originalPrice as string, currency)}</p> : null}<p className="text-3xl font-bold text-ink">{formatPrice(price, currency)}</p><p className="mt-1 text-xs text-muted">{priceUnit || copy.perPerson}</p>{entrancePrice !== undefined ? <p className="mt-2 text-xs font-bold text-ocean-dark">+ {copy.entrance} {formatPrice(String(entrancePrice), currency)}/{copy.person}</p> : null}</>}</div>
-            <span className={`rounded-xl px-3 py-2.5 text-sm font-semibold text-white transition sm:px-4 sm:py-3 sm:text-base ${bookingMode === "inquiry" ? "bg-ocean-dark group-hover:brightness-90" : "bg-brand-orange-cta group-hover:brightness-90"}`}>{bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
+            <span className={`rounded-xl px-3 py-2.5 text-center text-sm font-semibold text-white transition sm:px-4 sm:py-3 sm:text-base ${bookingMode === "inquiry" ? "bg-ocean-dark group-hover:brightness-90" : "bg-brand-orange-cta group-hover:brightness-90"}`}>{bookingMode === "inquiry" ? copy.inquire : copy.book}</span>
           </div>
         </div>
       </Link>
