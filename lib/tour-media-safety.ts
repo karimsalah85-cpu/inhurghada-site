@@ -120,7 +120,7 @@ const categoryMedia: Record<string, SafeMedia> = {
 };
 
 const mediaBySlug: Record<string, SafeMedia> = {
-  "basic-diver-jeddah": { image: "/images/owned/basic-diver-jeddah.jpg", alt: localizedAlt("SSI Basic Diver course artwork showing scuba divers underwater") },
+  "basic-diver-jeddah": { image: "/images/owned/basic-diver-jeddah.jpg", alt: localizedAlt("SSI Basic Diver course artwork showing scuba divers underwater"), focal: { x: 0.2, y: 0.5 } },
   "certified-diver-boat-trip-jeddah": { image: "/images/owned/certified-diver-boat-trip-jeddah.jpg", alt: localizedAlt("Certified scuba divers geared up on a boat before a guided dive trip in Jeddah") },
   "jeddah-yacht-sunset-cruise": {
     image: "/images/owned/jeddah-yacht-sunset-cruise.jpg",
