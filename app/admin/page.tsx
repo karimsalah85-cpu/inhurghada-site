@@ -23,6 +23,7 @@ type AdminSearchParams = {
   range?: string;
   panel?: string;
   archive?: string;
+  tab?: string;
 };
 
 const bookingStatuses = [
@@ -115,6 +116,10 @@ export default async function AdminPage({
     [7, 30, 90].includes(requestedRange) ? requestedRange : 30
   ) as 7 | 30 | 90;
   const requestedPanel = first(params.panel);
+  const requestedTab = first(params.tab);
+  const operationsTab = ["calendar", "customers", "finance", "suppliers", "communications", "security"].includes(requestedTab || "")
+    ? requestedTab
+    : undefined;
   const archiveValue = first(params.archive);
   const archive = archiveFilters.includes(archiveValue as (typeof archiveFilters)[number]) ? archiveValue! : "active";
   const controlPanel = (
@@ -164,6 +169,7 @@ export default async function AdminPage({
     if (analyticsRange !== 30) canonical.set("range", String(analyticsRange));
     if (controlPanel !== "content") canonical.set("panel", controlPanel);
     if (archive !== "active") canonical.set("archive", archive);
+    if (workspace === "operations" && operationsTab) canonical.set("tab", operationsTab);
     const workspacePath =
       workspace === "overview" ? "/admin" : `/admin/${workspace}`;
     redirect(`${workspacePath}?${canonical.toString()}`);
@@ -204,6 +210,9 @@ export default async function AdminPage({
   const bookingsRowLimit = 5000;
   const expensesRowLimit = 5000;
   const partnersRowLimit = 2000;
+  // These workspaces own their data loading; unrelated ledger failures must not
+  // block the content editor, settings, customer notebook, or operations tools.
+  const needsDashboardData = ["overview", "bookings", "finance", "suppliers", "reports"].includes(workspace);
 
   let bookingListQuery = supabase
     .from("bookings")
@@ -233,7 +242,7 @@ export default async function AdminPage({
     { data: salesPeople, error: salesPeopleError },
     { data: expenseTypes },
   ] = await Promise.all([
-    canBookings
+    needsDashboardData && canBookings
       ? supabase
           .from("bookings")
           .select("*")
@@ -241,21 +250,21 @@ export default async function AdminPage({
           .order("created_at", { ascending: false })
           .limit(bookingsRowLimit)
       : Promise.resolve({ data: [], error: null }),
-    canBookings ? bookingListQuery : Promise.resolve({ data: [], error: null }),
-    canFinance
+    needsDashboardData && canBookings ? bookingListQuery : Promise.resolve({ data: [], error: null }),
+    needsDashboardData && canFinance
       ? supabase
           .from("expenses")
           .select("*, bookings(status,reference)")
           .order("expense_date", { ascending: false })
           .limit(expensesRowLimit)
       : Promise.resolve({ data: [], error: null }),
-    canSuppliers
+    needsDashboardData && canSuppliers
       ? supabase.from("suppliers").select("*").order("name").limit(partnersRowLimit)
       : Promise.resolve({ data: [], error: null }),
-    canFinance
+    needsDashboardData && canFinance
       ? supabase.from("sales_people").select("*").order("name").limit(partnersRowLimit)
       : Promise.resolve({ data: [], error: null }),
-    canFinance
+    needsDashboardData && canFinance
       ? supabase
           .from("expense_types")
           .select("*")
@@ -266,6 +275,7 @@ export default async function AdminPage({
   ]);
   const rowsMayBeTruncated = Boolean(
     (bookings && bookings.length >= bookingsRowLimit) ||
+      (bookingList && bookingList.length >= bookingsRowLimit) ||
       (expenses && expenses.length >= expensesRowLimit) ||
       (suppliers && suppliers.length >= partnersRowLimit) ||
       (salesPeople && salesPeople.length >= partnersRowLimit),
@@ -340,7 +350,7 @@ export default async function AdminPage({
   };
 
   const migrationPending = Boolean(suppliersError || salesPeopleError);
-  const { data: tripStatusAudits } = (await permissionChecks.content)
+  const { data: tripStatusAudits } = workspace === "overview" && (await permissionChecks.content)
     ? await supabase
         .from("admin_audit_log")
         .select("id,resource_id,after_data,created_at")

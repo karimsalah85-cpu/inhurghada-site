@@ -28,13 +28,15 @@ const iso = (date: Date) => date.toLocaleDateString("en-CA", { timeZone: "Africa
 const validTabs: Tab[] = ["calendar", "customers", "finance", "suppliers", "communications", "security"];
 
 export default function AdminOperationsCenter() {
-  const requestedTab = useSearchParams().get("tab");
-  const initialTab = (validTabs as string[]).includes(requestedTab || "") ? (requestedTab as Tab) : "calendar";
-  const [data, setData] = useState<Data | null>(null); const [tab, setTab] = useState<Tab>(initialTab); const [busy, setBusy] = useState(false); const [error, setError] = useState(""); const [notice, setNotice] = useState("");
-  const [syncedTab, setSyncedTab] = useState(requestedTab);
-  if (requestedTab !== syncedTab) {
-    setSyncedTab(requestedTab);
-    if ((validTabs as string[]).includes(requestedTab || "")) setTab(requestedTab as Tab);
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const tab: Tab = (validTabs as string[]).includes(requestedTab || "") ? (requestedTab as Tab) : "calendar";
+  const [data, setData] = useState<Data | null>(null); const [busy, setBusy] = useState(true); const [error, setError] = useState(""); const [notice, setNotice] = useState("");
+  function selectTab(nextTab: Tab) {
+    if (nextTab === tab) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", nextTab);
+    window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
   }
   const load = useCallback(async (silent = false) => { if (!silent) setBusy(true); setError(""); try { const response = await fetch("/api/admin/operations", { cache: "no-store" }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Could not load operations."); setData(result); } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load operations."); } finally { if (!silent) setBusy(false); } }, []);
   useEffect(() => {
@@ -47,11 +49,38 @@ export default function AdminOperationsCenter() {
     return () => { window.clearTimeout(initial); window.clearInterval(interval); unsubscribe(); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
   }, [load]);
   async function save(payload: Row) { setBusy(true); setError(""); setNotice(""); try { const response = await fetch("/api/admin/operations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || "Could not save."); setNotice("Saved successfully."); await load(); } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not save."); } finally { setBusy(false); } }
-  const tabs: Array<[Tab, string]> = [["calendar", "Booking calendar"], ["customers", "Customers"], ["finance", "Profit"], ["suppliers", "Supplier ledger"], ["communications", "Conversations"], ["security", "SEO & backups"]];
-  return <section className="mt-8 rounded-3xl bg-white p-5 shadow-sm sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm font-bold uppercase tracking-[.2em] text-cyan-700">Complete operations</p><h2 className="mt-2 text-2xl font-black">Calendar, CRM, profit and accountability</h2></div><button onClick={() => { void load(); }} disabled={busy} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold"><RefreshCw size={16} className={busy ? "animate-spin" : ""}/>Refresh</button></div>
-    {error ? <p className="mt-4 rounded-xl bg-rose-50 p-4 text-sm font-bold text-rose-800">{error}</p> : null}{notice ? <p className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm font-bold text-emerald-800">{notice}</p> : null}
+  const tabGroups: Array<{ label: string; items: Array<[Tab, string]> }> = [
+    { label: "Daily operations", items: [["calendar", "Booking calendar"], ["customers", "Customers"], ["communications", "Conversations"]] },
+    { label: "Financial records", items: [["finance", "Profit"], ["suppliers", "Supplier ledger"]] },
+    { label: "System checks", items: [["security", "SEO & backups"]] },
+  ];
+  const descriptions: Record<Tab, string> = {
+    calendar: "Plan departures, check available places and open bookings for follow-up.",
+    customers: "Review customer history and maintain preferences for future bookings.",
+    communications: "Review customer conversations and prepare follow-up messages.",
+    finance: "Review booking revenue, recorded costs and profit by currency.",
+    suppliers: "Manage supplier pricing, payment records and contact details.",
+    security: "Review SEO checks and backup records.",
+  };
+  return <section className="mt-8 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div><p className="text-sm font-bold uppercase tracking-[.2em] text-cyan-700">Operations workspace</p><h2 className="mt-2 text-2xl font-black">Plan, serve and follow up</h2></div>
+      <button type="button" onClick={() => { void load(); }} disabled={busy} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50"><RefreshCw size={16} aria-hidden="true" className={busy ? "animate-spin" : ""}/>Refresh</button>
+    </div>
+    {error ? <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-4 text-sm font-bold text-rose-800">{error}</p> : null}
+    {notice ? <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm font-bold text-emerald-800">{notice}</p> : null}
+    {busy && !data ? <p role="status" className="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-600"><RefreshCw size={16} aria-hidden="true" className="animate-spin"/>Loading operations…</p> : null}
     {!busy && data?.configured === false ? <div className="mt-5 rounded-2xl bg-amber-50 p-5 text-sm text-amber-950"><p className="font-black">One database upgrade is required</p><p className="mt-2">Run <code>{data.migration}</code> in Supabase SQL Editor, then refresh.</p></div> : null}
-    {data?.configured ? <><div className="mt-6 flex gap-2 overflow-x-auto pb-2">{tabs.map(([key,label]) => <button key={key} onClick={() => setTab(key)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${tab === key ? "bg-slate-950 text-white" : "bg-slate-100"}`}>{label}</button>)}</div>{tab === "calendar" ? <CalendarPanel data={data}/> : tab === "customers" ? <CustomersPanel data={data} save={save}/> : tab === "finance" ? <ProfitPanel data={data}/> : tab === "suppliers" ? <SuppliersPanel data={data} save={save}/> : tab === "communications" ? <CommunicationsPanel data={data} save={save}/> : <SecurityPanel data={data} save={save}/>}</> : null}
+    {data?.configured ? <>
+      <nav aria-label="Operations sections" className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 xl:grid-cols-[1.5fr_1fr_.8fr]">
+        {tabGroups.map((group) => <div key={group.label}>
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">{group.label}</p>
+          <div className="flex flex-wrap gap-2">{group.items.map(([key, label]) => <button type="button" key={key} onClick={() => selectTab(key)} aria-pressed={tab === key} className={`rounded-lg px-3 py-2.5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700 ${tab === key ? "bg-slate-950 text-white" : "bg-white text-slate-700 hover:bg-slate-200"}`}>{label}</button>)}</div>
+        </div>)}
+      </nav>
+      <p className="mt-4 text-sm text-slate-600">{descriptions[tab]}</p>
+      {tab === "calendar" ? <CalendarPanel data={data}/> : tab === "customers" ? <CustomersPanel data={data} save={save}/> : tab === "finance" ? <ProfitPanel data={data}/> : tab === "suppliers" ? <SuppliersPanel data={data} save={save}/> : tab === "communications" ? <CommunicationsPanel data={data} save={save}/> : <SecurityPanel data={data} save={save}/>}
+    </> : null}
   </section>;
 }
 

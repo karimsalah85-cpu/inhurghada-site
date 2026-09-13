@@ -26,6 +26,7 @@ import {
   UsersRound,
   WalletCards,
 } from "lucide-react";
+import AdminOverview from "@/components/admin/AdminOverview";
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
@@ -265,36 +266,31 @@ export default function AdminDashboard({
     effectivePermissions.includes(permission);
 
   const metrics = useMemo(() => {
-    const active = bookings.filter(
+    const active = initialBookings.filter(
       (booking) =>
         booking.status !== "cancelled" && booking.payment_status !== "refunded",
     );
     const projectedByCurrency = sumByCurrency(active);
     const collectedByCurrency = sumByCurrency(
-      bookings.filter((booking) => booking.payment_status === "paid"),
+      initialBookings.filter((booking) => booking.payment_status === "paid"),
     );
-    const expenseByCurrency = sumByCurrency(expenses);
+    const expenseByCurrency = sumByCurrency(initialExpenses);
     const currenciesInPlay = new Set([
       ...Object.keys(projectedByCurrency),
       ...Object.keys(collectedByCurrency),
       ...Object.keys(expenseByCurrency),
     ]);
-    const outstandingByCurrency: Record<string, number> = {};
     const profitByCurrency: Record<string, number> = {};
     for (const currency of currenciesInPlay) {
-      outstandingByCurrency[currency] = (projectedByCurrency[currency] || 0) - (collectedByCurrency[currency] || 0);
       profitByCurrency[currency] = (collectedByCurrency[currency] || 0) - (expenseByCurrency[currency] || 0);
     }
     return {
       projectedByCurrency,
       collectedByCurrency,
-      outstandingByCurrency,
       expenseByCurrency,
       profitByCurrency,
-      activeCount: active.length,
-      customers: countDistinctCustomers(bookings),
     };
-  }, [bookings, expenses]);
+  }, [initialBookings, initialExpenses]);
 
   const financeMetrics = useMemo(() => {
     const monthStart = `${bookingView.month}-01`;
@@ -320,10 +316,9 @@ export default function AdminDashboard({
       ...Object.keys(collectedByCurrency),
       ...Object.keys(expenseByCurrency),
     ]);
-    const outstandingByCurrency: Record<string, number> = {};
+    const outstandingByCurrency = sumByCurrency(active.filter((booking) => booking.payment_status === "unpaid"));
     const profitByCurrency: Record<string, number> = {};
     for (const currency of currenciesInPlay) {
-      outstandingByCurrency[currency] = (projectedByCurrency[currency] || 0) - (collectedByCurrency[currency] || 0);
       profitByCurrency[currency] = (collectedByCurrency[currency] || 0) - (expenseByCurrency[currency] || 0);
     }
     return {
@@ -937,139 +932,23 @@ export default function AdminDashboard({
   }
 
   if (mode === "overview") {
-    const upcoming = bookings
-      .filter(
-        (item) =>
-          item.status !== "cancelled" && item.date && item.date >= today(),
-      )
-      .sort((a, b) => String(a.date).localeCompare(String(b.date)))
-      .slice(0, 6);
-    const pending = bookings.filter((item) => item.status === "new");
-    return (
-      <div className="mt-7 space-y-6">
-        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">All-time totals · not scoped to a month</p>
-        <div className="-mt-3 grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-          <Metric
-            icon={<UsersRound size={18} />}
-            label="Customers"
-            value={String(metrics.customers)}
-            note="Distinct booking contacts"
-            tone="blue"
-          />
-          <Metric
-            icon={<CircleDollarSign size={18} />}
-            label="Booked revenue"
-            value={moneyBreakdown(metrics.projectedByCurrency)}
-            note="Active bookings"
-            tone="emerald"
-          />
-          <Metric
-            icon={<WalletCards size={18} />}
-            label="Cash collected"
-            value={moneyBreakdown(metrics.collectedByCurrency)}
-            note="Marked paid"
-            tone="emerald"
-          />
-          <Metric
-            icon={<CalendarDays size={18} />}
-            label="Outstanding"
-            value={moneyBreakdown(metrics.outstandingByCurrency)}
-            note="Expected cash"
-            tone="amber"
-          />
-          <Metric
-            icon={<ClipboardList size={18} />}
-            label="Expenses"
-            value={moneyBreakdown(metrics.expenseByCurrency)}
-            note="Recorded costs"
-            tone="rose"
-          />
-          <Metric
-            icon={<CheckCircle2 size={18} />}
-            label="Cash profit"
-            value={moneyBreakdown(metrics.profitByCurrency)}
-            note="Collected minus expenses"
-            tone="slate"
-          />
-        </div>
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex justify-between">
-            <div>
-              <h2 className="text-xl font-black">Upcoming bookings</h2>
-              <p className="text-sm text-slate-500">
-                Open a booking to assign its supplier and add or edit expenses.
-              </p>
-            </div>
-            <Link href="/admin/bookings" className="font-bold text-blue-700">
-              Manage all
-            </Link>
-          </div>
-          <div className="mt-4 divide-y">
-            {upcoming.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setExpandedId(item.id)}
-                className="flex w-full justify-between py-3 text-left"
-              >
-                <span>
-                  <b className="font-mono text-blue-700">{item.reference}</b>
-                  <span className="ml-3">{item.tour_name || "Transfer"}</span>
-                </span>
-                <span className="text-slate-500">{item.date}</span>
-              </button>
-            ))}
-            {!upcoming.length ? (
-              <p className="py-5 text-slate-500">No upcoming bookings.</p>
-            ) : null}
-          </div>
-        </section>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black">Pending confirmations</h2>
-            <div className="mt-3 space-y-2">
-              {pending.slice(0, 5).map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setExpandedId(item.id)}
-                  className="block"
-                >
-                  <b>{item.reference}</b> · {item.customer_name}
-                </button>
-              ))}
-              {!pending.length ? (
-                <p className="text-slate-500">Nothing pending.</p>
-              ) : null}
-            </div>
-          </section>
-          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black">Recent trip-status changes</h2>
-            <div className="mt-3 space-y-2">
-              {initialTripStatusChanges.map((item) => (
-                <p key={item.id}>
-                  <b>{item.title}</b> ·{" "}
-                  <span className="capitalize">
-                    {item.listing_status === "active"
-                      ? "reactivated"
-                      : item.listing_status}
-                  </span>
-                </p>
-              ))}
-              {!initialTripStatusChanges.length ? (
-                <p className="text-slate-500">
-                  No recent trip visibility changes.
-                </p>
-              ) : null}
-            </div>
-          </section>
-        </div>
-        {expandedId ? (
-          <BookingDetailPanel
-            booking={bookings.find((item) => item.id === expandedId)!}
-            onClose={() => setExpandedId(null)}
-          />
-        ) : null}
-      </div>
-    );
+    return <>
+      <AdminOverview
+        bookings={initialBookings}
+        permissions={permissions}
+        day={today()}
+        metrics={metrics}
+        rowsMayBeTruncated={rowsMayBeTruncated}
+        tripChanges={initialTripStatusChanges}
+        onOpenBooking={setExpandedId}
+      />
+      {expandedId && initialBookings.find((item) => item.id === expandedId) ? (
+        <BookingDetailPanel
+          booking={initialBookings.find((item) => item.id === expandedId)!}
+          onClose={() => setExpandedId(null)}
+        />
+      ) : null}
+    </>;
   }
 
   return (
