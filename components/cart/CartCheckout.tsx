@@ -96,7 +96,7 @@ export default function CartCheckout() {
             quadMinimumAgeConfirmed: item.requiresQuadMinimumAge ? quadConfirmed : true,
           })),
         };
-  const promo = usePromoCode(bookingInput, total, language);
+  const promo = usePromoCode(bookingInput, total, language, () => (idempotencyKey.current ||= crypto.randomUUID()));
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

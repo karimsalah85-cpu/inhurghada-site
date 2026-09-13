@@ -273,7 +273,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
           quadMinimumAgeConfirmed,
           website,
         };
-  const promo = usePromoCode(bookingInput, total, language);
+  const promo = usePromoCode(bookingInput, total, language, () => (idempotencyKey.current ||= crypto.randomUUID()));
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

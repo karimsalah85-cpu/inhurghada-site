@@ -10,7 +10,7 @@ const labels = {
   zh: ["优惠码", "应用", "移除", "优惠", "正在验证…", "请在确认前应用或移除优惠码。", "请填写预订信息，然后应用优惠码。"],
 };
 type Quote = { code: string; subtotal: number; discount: number; total: number; currency: string };
-export function usePromoCode(input: Record<string, unknown>, subtotal: number, locale: Locale) {
+export function usePromoCode(input: Record<string, unknown>, subtotal: number, locale: Locale, getIdempotencyKey: () => string) {
   const [code, setCode] = useState("");
   const [saved, setSaved] = useState<{ key: string; quote: Quote } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -23,7 +23,7 @@ export function usePromoCode(input: Record<string, unknown>, subtotal: number, l
     const attempt = ++generation.current;
     setBusy(true); setError(""); setSaved(null);
     try {
-      const response = await fetch("/api/promo-codes/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, promoCode: code }) });
+      const response = await fetch("/api/promo-codes/quote", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...input, idempotencyKey: getIdempotencyKey(), promoCode: code }) });
       const result = await response.json();
       if (!response.ok || !result.quote) throw new Error(result.error || "Could not apply promo code.");
       if (attempt === generation.current) { setCode(result.quote.code); setSaved({ key, quote: result.quote }); }
