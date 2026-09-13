@@ -1,3 +1,4 @@
+import { normalizePromoCode } from "@/lib/promo-codes";
 import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
 import { tours } from "@/data/tours";
 import { validatePhoneNumber } from "@/lib/phone";
@@ -101,6 +102,11 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   const tourSlug = text(body.tourSlug, 80);
   const date = text(body.date, 10);
   const time = text(body.time, 5);
+  let promoCode: string | undefined;
+  if (body.promoCode != null && body.promoCode !== "") {
+    try { promoCode = normalizePromoCode(body.promoCode); }
+    catch { return { error: "Enter a valid promo code." as const }; }
+  }
   const idempotencyKey = text(body.idempotencyKey, 64).toLowerCase();
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(idempotencyKey)) {
@@ -180,6 +186,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   return {
     data: {
       idempotencyKey,
+      ...(promoCode ? { promoCode } : {}),
       type,
       locale: ["en", "ar", "de", "ru", "pl", "zh"].includes(String(body.locale)) ? String(body.locale) : "en",
       customerName,

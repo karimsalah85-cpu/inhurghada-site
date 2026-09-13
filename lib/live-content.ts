@@ -8,12 +8,12 @@ import { applyTourCollectionMediaSafety } from "@/lib/tour-media-safety";
 import type { Locale } from "@/lib/i18n";
 
 export type TripListingStatus = "active" | "paused" | "unlisted";
-type ContentRow = { slug: string; status: "draft" | "scheduled" | "published" | "archived"; listing_status: TripListingStatus; title: string; excerpt: string | null; body: unknown; seo_title: string | null; seo_description: string | null; featured_image: string | null; published_at: string | null; publish_at: string | null };
+type ContentRow = { trip_id?: string | null; slug: string; status: "draft" | "scheduled" | "published" | "archived"; listing_status: TripListingStatus; title: string; excerpt: string | null; body: unknown; seo_title: string | null; seo_description: string | null; featured_image: string | null; published_at: string | null; publish_at: string | null };
 
 async function contentRows(contentType: "tour" | "blog") {
   const client = createAdminClient();
   if (!client) return [];
-  const { data, error } = await client.from("content_items").select("slug,status,listing_status,title,excerpt,body,seo_title,seo_description,featured_image,published_at,publish_at").eq("content_type", contentType).eq("locale", "en");
+  const { data, error } = await client.from("content_items").select("slug,trip_id,status,listing_status,title,excerpt,body,seo_title,seo_description,featured_image,published_at,publish_at").eq("content_type", contentType).eq("locale", "en");
   if (error) {
     console.error(`Could not load live ${contentType} content`, error.message);
     return [];
@@ -118,7 +118,7 @@ export const getLiveTours = cache(async function getLiveTours(locale: Locale = "
   const overrides = new Map(publicRows.filter((row) => row.status === "published" && row.listing_status !== "unlisted").map((row) => {
     const fallback = tours.find((tour) => tour.slug === row.slug);
     const body = objectBody(row);
-    return [row.slug, { ...fallback, ...body, slug: row.slug, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || ""), ...codeControlledTourFields(fallback) } as Tour];
+    return [row.slug, { ...fallback, ...body, slug: row.slug, tripId: row.trip_id || undefined, listingStatus: row.listing_status || "active", title: row.title, description: row.excerpt || String(body.description || fallback?.description || ""), image: row.featured_image || String(body.image || fallback?.image || "/images/placeholders/island-trip.svg"), seoTitle: row.seo_title || String(body.seoTitle || ""), metaDescription: row.seo_description || String(body.metaDescription || ""), price: String(body.price || fallback?.price || "0"), rating: String(body.rating || fallback?.rating || "5.0"), location: String(body.location || fallback?.location || "Hurghada, Egypt"), duration: String(body.duration || fallback?.duration || ""), ...codeControlledTourFields(fallback) } as Tour];
   }));
   return applyTourCollectionMediaSafety(await applyTourMedia([...listedTours.filter((tour) => !managedSlugs.has(tour.slug)), ...overrides.values()], locale), locale);
 });

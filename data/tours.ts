@@ -7,6 +7,8 @@ import type { DestinationSlug } from "@/lib/destinations";
 
 export type Tour = {
   slug: string;
+  /** Admin-assigned reference shared by every language of this trip. */
+  tripId?: string;
   /** Commercial visibility is managed separately from the CMS publishing workflow. */
   listingStatus?: "active" | "paused" | "unlisted";
   /** Destination ownership keeps tours ready for expansion beyond Hurghada. */

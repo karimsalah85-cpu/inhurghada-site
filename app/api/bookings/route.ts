@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       return `${index + 1}. ${title} - ${item.date} - ${currencySymbol}${item.amount.toFixed(2)}`;
     });
     const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: ${currencySymbol}${item.amount.toFixed(2)}`).join("\n\n");
-    const bookingNotes = [transferSummary, tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
+    let bookingNotes = [transferSummary, tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
 
@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
     const supabase = createRequiredAdminClient();
     const { idempotencyKey, ...materialRequest } = body;
     const requestHash = bookingRequestHash(materialRequest);
-    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_idempotent", {
+    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_with_promo", {
+      p_promo_code: body.promoCode || null,
       p_idempotency_key: idempotencyKey,
       p_request_hash: requestHash,
       p_reference: proposedReference,
@@ -139,14 +140,16 @@ export async function POST(request: NextRequest) {
     if (bookingError) {
       console.error("Booking database save failed", bookingError);
       const conflictMessage = /different booking details/i.test(bookingError.message || "") ? bookingError.message : null;
-      const capacityMessage = /sold out|places remain|capacity|unavailable/i.test(bookingError.message || "") ? bookingError.message : null;
+      const capacityMessage = /promo code|sold out|places remain|capacity|unavailable/i.test(bookingError.message || "") ? bookingError.message : null;
       return bookingJson({ success: false, error: conflictMessage || capacityMessage || "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: conflictMessage ? 409 : capacityMessage ? 409 : 503 });
     }
-    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string }; replayed?: boolean } | null;
+    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string; promo_code?: string; discount_amount?: number | string; trip_id?: string }; replayed?: boolean } | null;
     const bookingId = persisted?.booking?.id;
     const reference = persisted?.booking?.reference;
     if (!bookingId || !reference) return bookingJson({ success: false, error: "We could not confirm the saved booking." }, { status: 503 });
     const amount = Number(persisted.booking?.amount ?? calculatedAmount);
+    const settledPrice = `${currencySymbol}${amount.toFixed(2)} total`;
+    bookingNotes = [bookingNotes, persisted?.booking?.trip_id ? `Trip ID: ${persisted.booking.trip_id}` : "", persisted?.booking?.promo_code ? `Promo code: ${persisted.booking.promo_code} · Discount: ${currencySymbol}${Number(persisted.booking.discount_amount || 0).toFixed(2)}` : ""].filter(Boolean).join("\n");
     const message = buildBookingMessage({
       reference,
       customerName,
@@ -154,7 +157,7 @@ export async function POST(request: NextRequest) {
       tourName,
       location: body.location,
       duration: body.duration,
-      price,
+      price: settledPrice,
       date: body.date,
       guests: guestSummary,
       hotel,
@@ -195,7 +198,7 @@ export async function POST(request: NextRequest) {
       tourName,
       location: body.location,
       duration: body.duration,
-      price,
+      price: settledPrice,
       date: body.date,
       guests: guestSummary,
       hotel,

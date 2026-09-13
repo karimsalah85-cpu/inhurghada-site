@@ -1,5 +1,7 @@
 "use client";
 
+import PromoCodeField, { usePromoCode } from "@/components/booking/PromoCodeField";
+
 import { type FormEvent, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -61,32 +63,15 @@ export default function CartCheckout() {
   const pickupOptional = cartDestinations.length === 1 && cartDestinations[0] === "jeddah";
   const phoneCountryHint = pickupOptional ? "SA" : "EG";
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!items.length) return;
-    if (cartCurrencies.length > 1) return setError("Please book trips in different settlement currencies separately.");
-    if (requiresDivingLicense && !divingConfirmed) return setError(tr("Confirm that every diver has a valid diving license.", "Bestätige, dass jeder Taucher einen gültigen Tauchschein besitzt.", "Подтвердите наличие действующего сертификата у каждого дайвера.", "أكد أن كل غواص يحمل رخصة غوص سارية."));
-    if (requiresQuadMinimumAge && !quadConfirmed) return setError(tr("Confirm that every quad participant is at least 9 years old.", "Bestätige, dass alle Quad-Teilnehmer mindestens 9 Jahre alt sind.", "Подтвердите, что всем участникам тура на квадроциклах не менее 9 лет.", "أكد أن عمر كل مشارك في رحلة الكواد لا يقل عن 9 سنوات."));
-    const phoneCheck = validatePhoneNumber(phone, phoneCountryHint);
-    if (!phoneCheck.valid) return setError(tr("Please enter a valid WhatsApp phone number including the country code.", "Bitte gib eine gültige WhatsApp-Telefonnummer inklusive Landesvorwahl ein.", "Пожалуйста, введите действительный номер WhatsApp с кодом страны.", "يرجى إدخال رقم واتساب صحيح مع رمز الدولة."));
-    setSubmitting(true);
-    setError("");
-    try {
-      idempotencyKey.current ||= crypto.randomUUID();
-      const firstItem = items[0];
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
+  const bookingInput = {
           type: "tour",
           locale: language,
           customerName: name.trim(),
           customerEmail: email.trim(),
-          phone: phoneCheck.e164,
+          phone,
           hotel: hotel.trim(),
-          date: firstItem.date,
-          time: firstItem.time,
+          date: items[0]?.date,
+          time: items[0]?.time,
           tourName: `Multi-trip booking (${items.length})`,
           tourSlug: "multi-trip",
           location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : slug === "jeddah" ? "Jeddah" : "Hurghada").join(" and "),
@@ -110,11 +95,30 @@ export default function CartCheckout() {
             divingLicenseConfirmed: item.requiresDivingLicense ? divingConfirmed : true,
             quadMinimumAgeConfirmed: item.requiresQuadMinimumAge ? quadConfirmed : true,
           })),
-        }),
+        };
+  const promo = usePromoCode(bookingInput, total, language);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (promo.busy || promo.needsApply) { setError(promo.message); return; }
+    if (!items.length) return;
+    if (cartCurrencies.length > 1) return setError("Please book trips in different settlement currencies separately.");
+    if (requiresDivingLicense && !divingConfirmed) return setError(tr("Confirm that every diver has a valid diving license.", "Bestätige, dass jeder Taucher einen gültigen Tauchschein besitzt.", "Подтвердите наличие действующего сертификата у каждого дайвера.", "أكد أن كل غواص يحمل رخصة غوص سارية."));
+    if (requiresQuadMinimumAge && !quadConfirmed) return setError(tr("Confirm that every quad participant is at least 9 years old.", "Bestätige, dass alle Quad-Teilnehmer mindestens 9 Jahre alt sind.", "Подтвердите, что всем участникам тура на квадроциклах не менее 9 лет.", "أكد أن عمر كل مشارك في رحلة الكواد لا يقل عن 9 سنوات."));
+    const phoneCheck = validatePhoneNumber(phone, phoneCountryHint);
+    if (!phoneCheck.valid) return setError(tr("Please enter a valid WhatsApp phone number including the country code.", "Bitte gib eine gültige WhatsApp-Telefonnummer inklusive Landesvorwahl ein.", "Пожалуйста, введите действительный номер WhatsApp с кодом страны.", "يرجى إدخال رقم واتساب صحيح مع رمز الدولة."));
+    setSubmitting(true);
+    setError("");
+    try {
+      idempotencyKey.current ||= crypto.randomUUID();
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...bookingInput, idempotencyKey: idempotencyKey.current, phone: phoneCheck.e164, promoCode: promo.quote?.code }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Cart booking failed.");
-      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency: cartCurrencies[0] || "USD", item_name: "Multi-trip cart", booking_type: "tour" });
+      trackEvent("booking_complete", { transaction_id: data.reference, value: Number(data.booking.amount), currency: cartCurrencies[0] || "USD", item_name: "Multi-trip cart", booking_type: "tour" });
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
         reference: data.reference,
@@ -123,7 +127,7 @@ export default function CartCheckout() {
         date: items.map((item) => item.date).join(", "),
         time: tr("Multiple times", "Mehrere Uhrzeiten", "Несколько времён", "مواعيد متعددة"),
         travelers: tr("See the attached trip summary", "Siehe beigefügte Reiseübersicht", "См. приложенную сводку", "راجع ملخص الرحلات المرفق"),
-        total: formatPrice(String(total), cartCurrency),
+        total: formatPrice(String(data.booking.amount), cartCurrency),
         customerEmailSent: Boolean(data.customerEmailSent),
         whatsappSent: Boolean(data.whatsappSent),
         bookingConfirmationPdf: String(data.bookingConfirmationPdf || ""),
@@ -155,7 +159,7 @@ export default function CartCheckout() {
               <div className="flex items-center gap-2">{item.tourSlug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={language} tourSlug={item.tourSlug} date={item.date} compact/> : null}<button type="button" onClick={() => removeItem(item.id)} aria-label={tr("Remove trip", "Ausflug entfernen", "Удалить поездку", "حذف الرحلة")} className="rounded-xl border border-rose-200 p-3 text-rose-600 hover:bg-rose-50"><Trash2 size={19}/></button></div>
             </article>;
           })}
-          <div className="flex items-center justify-between rounded-2xl bg-ink p-6 text-white"><span className="font-bold">{tr("Combined total", "Gesamtpreis", "Общая сумма", "المجموع الكلي")}</span><strong className="text-3xl">{formatPrice(String(total), cartCurrency)}</strong></div>
+          <div className="flex items-center justify-between rounded-2xl bg-ink p-6 text-white"><span className="font-bold">{tr("Combined total", "Gesamtpreis", "Общая сумма", "المجموع الكلي")}</span><strong className="text-3xl">{formatPrice(String(promo.total), cartCurrency)}</strong></div>
         </div>
         <form onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-white p-6 shadow-xl sm:p-8">
           <h2 className="text-2xl font-black text-ink">{tr("Complete one booking", "Eine Buchung abschließen", "Оформить одно бронирование", "إكمال حجز واحد")}</h2>
@@ -178,7 +182,8 @@ export default function CartCheckout() {
           <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-ocean-tint"/></label>
           <p className="text-xs leading-5 text-muted">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-ocean-dark underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
           {error ? <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p> : null}
-          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(total), cartCurrency)}`} <MessageCircle size={18}/></button>
+          <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
+          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(promo.total), cartCurrency)}`} <MessageCircle size={18}/></button>
         </form>
       </div>
     </section>

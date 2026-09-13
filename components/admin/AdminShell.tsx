@@ -20,6 +20,7 @@ const groups: NavGroup[] = [
     { href: "/admin/suppliers", label: "Suppliers", permissions: ["suppliers", "finance"] },
   ] },
   { label: "Trips & content", items: [
+    { href: "/admin/promo-codes", label: "Promo codes", permissions: ["content"] },
     { href: "/admin/trips", label: "Trips & listings", permissions: ["content"] },
     { href: "/admin/content", label: "Trip content", permissions: ["content"] },
     { href: "/admin/reviews", label: "Reviews", permissions: ["content"] },

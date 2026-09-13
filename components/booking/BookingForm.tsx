@@ -1,5 +1,7 @@
 "use client";
 
+import PromoCodeField, { usePromoCode } from "@/components/booking/PromoCodeField";
+
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -261,8 +263,21 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
       ? `${adults} взр.${youthPrice !== undefined ? ` · ${youth} дет.` : ""}${infantPrice !== undefined ? ` · ${infants} младен.` : ""}`
     : ar ? `${adults} بالغ${youthPrice !== undefined ? ` · ${youth} طفل` : ""}${infantPrice !== undefined ? ` · ${infants} رضيع` : ""}` : pl ? `${adults} dorosłych${youthPrice !== undefined ? ` · ${youth} dzieci` : ""}${infantPrice !== undefined ? ` · ${infants} niemowląt` : ""}` : zh ? `${adults} 位成人${youthPrice !== undefined ? ` · ${youth} 位儿童` : ""}${infantPrice !== undefined ? ` · ${infants} 位婴儿` : ""}` : `${adults} adult${adults === 1 ? "" : "s"}${youthPrice !== undefined ? ` · ${youth} youth` : ""}${infantPrice !== undefined ? ` · ${infants} infant${infants === 1 ? "" : "s"}` : ""}`;
 
+  const bookingInput = {
+          type: "tour", locale: language, customerName: name.trim(), phone, customerEmail: email.trim(),
+          tourName, tourSlug, extras: selectedExtras, selectedBoatOption, extraQuantities, transferRequired, transferArea, location: location || "Hurghada", duration: duration || "Please confirm",
+          price: `${formatPrice(String(total), currency)} total`, date, guests: travelerText, hotel,
+          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedBoat ? `\nBoat: ${selectedBoat.label}` : ""}${selectedPackage ? `\nPackage: ${selectedPackage.label}` : ""}${bookingExtras.some((option) => extraQuantities[option.id]) ? `\nQuantity extras: ${bookingExtras.filter((option) => extraQuantities[option.id]).map((option) => `${option.label} x${extraQuantities[option.id]}`).join(", ")}` : ""}${requiresMarinaTransferChoice ? `\nMarina transfer: ${transferRequired ? `Yes - ${transferArea}` : "No"}` : ""}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
+          adults, youth, infants,
+          divingLicenseConfirmed,
+          quadMinimumAgeConfirmed,
+          website,
+        };
+  const promo = usePromoCode(bookingInput, total, language);
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (promo.busy || promo.needsApply) { setError(promo.message); return; }
     if (!adults) { setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого.")); return; }
     if (boatOverCapacity) { setError(boatCapacityError(selectedBoat?.capacity)); return; }
     if (unavailableWeekday) { setError(tr("This excursion does not operate on the selected weekday. Choose another date.", "Dieser Ausflug findet am gewählten Wochentag nicht statt. Wähle ein anderes Datum.", "Экскурсия не проводится в выбранный день недели. Выберите другую дату.")); return; }
@@ -285,21 +300,11 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
       idempotencyKey.current ||= crypto.randomUUID();
       const response = await fetch("/api/bookings", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idempotencyKey: idempotencyKey.current,
-          type: "tour", locale: language, customerName: name.trim(), phone: phoneCheck.e164, customerEmail: email.trim(),
-          tourName, tourSlug, extras: selectedExtras, selectedBoatOption, extraQuantities, transferRequired, transferArea, location: location || "Hurghada", duration: duration || "Please confirm",
-          price: `${formatPrice(String(total), currency)} total`, date, guests: travelerText, hotel,
-          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedBoat ? `\nBoat: ${selectedBoat.label}` : ""}${selectedPackage ? `\nPackage: ${selectedPackage.label}` : ""}${bookingExtras.some((option) => extraQuantities[option.id]) ? `\nQuantity extras: ${bookingExtras.filter((option) => extraQuantities[option.id]).map((option) => `${option.label} x${extraQuantities[option.id]}`).join(", ")}` : ""}${requiresMarinaTransferChoice ? `\nMarina transfer: ${transferRequired ? `Yes - ${transferArea}` : "No"}` : ""}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
-          adults, youth, infants,
-          divingLicenseConfirmed,
-          quadMinimumAgeConfirmed,
-          website,
-        }),
+        body: JSON.stringify({ ...bookingInput, idempotencyKey: idempotencyKey.current, phone: phoneCheck.e164, promoCode: promo.quote?.code }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || bookingSubmissionFailedText);
-      trackEvent("booking_complete", { transaction_id: data.reference, value: total, currency, item_name: tourName, booking_type: "tour" });
+      trackEvent("booking_complete", { transaction_id: data.reference, value: Number(data.booking.amount), currency, item_name: tourName, booking_type: "tour" });
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
         reference: data.reference,
@@ -309,7 +314,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         date,
         time,
         travelers: travelerText,
-        total: formatPrice(String(total), currency),
+        total: formatPrice(String(data.booking.amount), currency),
         customerEmailSent: Boolean(data.customerEmailSent),
         whatsappSent: Boolean(data.whatsappSent),
         bookingConfirmationPdf: String(data.bookingConfirmationPdf || ""),
@@ -351,7 +356,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         {bookingExtras.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Optional add-ons", "Optionale Zusatzleistungen", "Дополнительные опции")}</legend>{bookingExtras.map((option) => <div key={option.id} className={`mt-2 rounded-xl bg-white px-3 transition ${(extraQuantities[option.id] || 0) > 0 ? "ring-2 ring-ocean-dark" : ""}`}><Counter label={option.label} description={`${formatPrice(option.price)} ${tr("per person", "pro Person", "за человека")}`} value={extraQuantities[option.id] || 0} onChange={(quantity) => setExtraQuantities((current) => ({ ...current, [option.id]: quantity }))}/></div>)}</fieldset> : null}
         {requiresMarinaTransferChoice ? <fieldset className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Do you require transfer to Hurghada marina?", "Benötigst du einen Transfer zum Jachthafen Hurghada?", "Нужен ли вам трансфер до марины Хургады?")}</legend><div className="mt-2 flex gap-5 text-sm"><label><input type="radio" name="marina-transfer" checked={!transferRequired} onChange={() => { setTransferRequired(false); setTransferArea(""); }} className="mr-2 accent-emerald-700"/>{tr("No", "Nein", "Нет")}</label><label><input type="radio" name="marina-transfer" checked={transferRequired} onChange={() => setTransferRequired(true)} className="mr-2 accent-emerald-700"/>{tr("Yes", "Ja", "Да")}</label></div>{transferRequired ? <select required value={transferArea} onChange={(event) => setTransferArea(event.target.value)} className="mt-3 w-full rounded-xl border border-emerald-200 bg-white p-3 text-sm"><option value="">{tr("Select pickup area", "Abholbereich auswählen", "Выберите зону трансфера")}</option>{marinaTransferOptions.map((area) => <option key={area}>{area}</option>)}</select> : null}<p className="mt-2 text-xs text-emerald-900">{tr("Transfer price is confirmed by WhatsApp for the selected area.", "Der Transferpreis für den gewählten Bereich wird per WhatsApp bestätigt.", "Стоимость трансфера для выбранной зоны будет подтверждена в WhatsApp.")}</p></fieldset> : null}
         {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Optional extras", "Optionale Extras", "Дополнительные опции")}</legend>{extraOptions.map((option) => { const selected = selectedExtras.includes(option.id); return <label key={option.id} className={`mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl border-2 bg-white p-3.5 text-sm transition ${selected ? "border-ocean-dark ring-2 ring-ocean-tint" : "border-transparent"}`}><span className="flex items-center gap-3"><input type="checkbox" checked={selected} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-5 w-5 shrink-0 accent-ocean-dark" />{de ? option.de : ru ? option.ru : zh ? option.zh : option.en}</span><strong className="shrink-0 text-ocean-dark">+{formatPrice(String(option.price * (option.charge === "adult" ? adults : 1)))}</strong></label>; })}</fieldset> : null}
-        <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-ink">{tr("Total", "Gesamtpreis", "Итого")}</p><p className="text-xs text-muted">{tr("Cash on arrival · no online payment", "Barzahlung bei Ankunft · keine Online-Zahlung", "Оплата наличными по прибытии · без онлайн-оплаты")}</p></div><p className="text-3xl font-black text-ink">{formatPrice(String(total), currency)}</p></div>
+        <div className="mt-5 flex items-end justify-between border-t pt-5"><div><p className="font-bold text-ink">{tr("Total", "Gesamtpreis", "Итого")}</p><p className="text-xs text-muted">{tr("Cash on arrival · no online payment", "Barzahlung bei Ankunft · keine Online-Zahlung", "Оплата наличными по прибытии · без онлайн-оплаты")}</p></div><p className="text-3xl font-black text-ink">{formatPrice(String(promo.total), currency)}</p></div>
         {unavailableWeekday ? <p role="alert" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900">{tr("This excursion does not operate on the selected weekday. Choose another date.", "Dieser Ausflug findet am gewählten Wochentag nicht statt. Wähle ein anderes Datum.", "Экскурсия не проводится в выбранный день недели. Выберите другую дату.")}</p> : null}
         <button disabled={unavailable || boatOverCapacity || unavailableWeekday} type="button" onClick={beginCheckout} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:cursor-not-allowed disabled:bg-muted">{unavailable ? tr("Sold out", "Ausverkauft", "Мест нет") : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
         <button type="button" onClick={() => {
@@ -365,7 +370,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         {error && <p role="alert" className="mt-3 text-center text-sm text-rose-600">{error}</p>}
       </> : <form onSubmit={submit} aria-busy={submitting} className="mt-6 space-y-4">
         <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-        <div className="rounded-2xl border border-surface-muted bg-surface-muted p-4"><p className="font-bold text-ink">{tourName}</p><p className="mt-1 text-sm text-muted">{date} {tr("at", "um", "в")} {time} · {travelerText}</p><p className="mt-2 font-black text-ink">{formatPrice(String(total), currency)} · {tr("Cash on arrival", "Barzahlung bei Ankunft", "оплата наличными по прибытии")}</p></div>
+        <div className="rounded-2xl border border-surface-muted bg-surface-muted p-4"><p className="font-bold text-ink">{tourName}</p><p className="mt-1 text-sm text-muted">{date} {tr("at", "um", "в")} {time} · {travelerText}</p><p className="mt-2 font-black text-ink">{formatPrice(String(promo.total), currency)} · {tr("Cash on arrival", "Barzahlung bei Ankunft", "оплата наличными по прибытии")}</p></div>
         <p className="border-b pb-2 text-lg font-black text-ink">{tr("Tell us about yourself", "Deine Angaben", "Ваши данные")}</p>
         <p className="text-xs text-muted"><RequiredMark/> {tr("Required field", "Pflichtfeld", "Обязательное поле")}</p>
         <label className="block text-sm font-bold text-ink">{tr("Full name", "Vollständiger Name", "Полное имя")} <RequiredMark/><input required value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" className="mt-1 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none placeholder:text-muted focus:border-ocean focus:ring-4 focus:ring-ocean-tint" placeholder={tr("Enter your full name", "Vollständigen Namen eingeben", "Введите имя и фамилию")} /></label>
@@ -388,7 +393,8 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания")} <span className="font-normal text-muted">({tr("optional", "optional", "необязательно")})</span><textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-20 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none placeholder:text-muted focus:border-ocean focus:ring-4 focus:ring-ocean-tint" placeholder={tr("Anything we should know?", "Gibt es etwas, das wir wissen sollten?", "Что нам нужно знать?")} /></label>
         <p className="rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">{tr("Before booking, please review our", "Bitte lies vor der Buchung unsere", "Перед бронированием ознакомьтесь с")} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{tr("cancellation policy", "Stornierungsbedingungen", "правилами отмены")}</Link>. {tr("By submitting, you agree to our terms and conditions.", "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu.", "Отправляя заявку, вы соглашаетесь с нашими условиями.")}</p>
         {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
-        <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:opacity-60">{submitting ? tr("Sending booking…", "Buchung wird gesendet…", "Отправка бронирования…") : `${tr("Confirm booking", "Buchung bestätigen", "Подтвердить бронирование")} · ${formatPrice(String(total), currency)}`} <MessageCircle size={18}/></button>
+        <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
+        <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:opacity-60">{submitting ? tr("Sending booking…", "Buchung wird gesendet…", "Отправка бронирования…") : `${tr("Confirm booking", "Buchung bestätigen", "Подтвердить бронирование")} · ${formatPrice(String(promo.total), currency)}`} <MessageCircle size={18}/></button>
         <button type="button" onClick={() => setStep("select")} className="w-full text-sm font-semibold text-muted hover:text-ocean-dark">← {tr("Change date or travelers", "Datum oder Reisende ändern", "Изменить дату или гостей")}</button>
         <p className="text-center text-xs leading-5 text-muted">{meetingPointProduct || pickupOptional ? (ar ? "تم إرسال طلبك؛ سيؤكد فريقنا التوفر النهائي وتفاصيل نقطة التجمع عبر واتساب." : "Your request is submitted; our team confirms final availability and meeting details by WhatsApp.") : tr("Your booking request is submitted now. You pay cash when you arrive; we confirm pickup via WhatsApp.", "Deine Buchungsanfrage wird jetzt gesendet. Du bezahlst bei Ankunft bar; wir bestätigen die Abholung per WhatsApp.", "Заявка отправляется сейчас. Оплата наличными по прибытии; трансфер мы подтвердим в WhatsApp.")}</p>
       </form>}

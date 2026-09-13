@@ -1,3 +1,4 @@
+import { normalizeTripId } from "@/lib/trip-id";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
@@ -77,6 +78,11 @@ export async function POST(request: NextRequest) {
   let record: Record<string, unknown>;
   if (resource === "content") {
     record = { content_type: text(body.content_type, 20), slug: text(body.slug, 160).toLowerCase(), locale: text(body.locale, 8) || "en", status: text(body.status, 20) || "draft", listing_status: text(body.listing_status, 20) || "active", title: text(body.title, 200), excerpt: text(body.excerpt, 500) || null, seo_title: text(body.seo_title, 200) || null, seo_description: text(body.seo_description, 500) || null, canonical_path: text(body.canonical_path, 250) || null, featured_image: text(body.featured_image, 500) || null, body: typeof body.body === "object" && body.body ? body.body : { content: text(body.body, 20_000) }, publish_at: body.publish_at || null, created_by: user!.id, updated_by: user!.id };
+    if (Object.hasOwn(body, "trip_id")) {
+      try { record.trip_id = normalizeTripId(body.trip_id); }
+      catch (error) { return json({ error: (error as Error).message }, 400); }
+      if (record.trip_id && (record.content_type !== "tour" || record.locale !== "en")) return json({ error: "Set the Trip ID on the English trip; it is shared across languages." }, 400);
+    }
     if (!record.title || !record.slug || !["tour", "blog", "page", "promotion"].includes(String(record.content_type))) return json({ error: "Enter a valid content type, title, and slug." }, 400);
   } else if (resource === "media") {
     record = { storage_path: text(body.storage_path || body.public_url, 500), public_url: text(body.public_url, 500) || null, file_name: text(body.file_name, 200), mime_type: text(body.mime_type, 100) || null, alt_text: text(body.alt_text, 300) || null, credit: text(body.credit, 200) || null, source_url: text(body.source_url, 1000) || null, creator: text(body.creator, 200) || null, license_type: text(body.license_type, 100) || null, license_url: text(body.license_url, 1000) || null, attribution_text: text(body.attribution_text, 500) || null, attribution_required: Boolean(body.attribution_required), rights_status: text(body.rights_status, 30) || "unverified", authenticity: text(body.authenticity, 30) || "unknown", focal_x: Number(body.focal_x ?? 0.5), focal_y: Number(body.focal_y ?? 0.5), created_by: user!.id };
