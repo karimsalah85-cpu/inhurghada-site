@@ -5,7 +5,7 @@ const route = readFileSync("app/api/bookings/route.ts", "utf8");
 
 describe("booking release safety", () => {
   it("fails closed when capacity reservation RPCs are unavailable", () => {
-    expect(route).toContain('supabase.rpc("reserve_booking_with_promo"');
+    expect(route).toContain('supabase.rpc("reserve_booking_with_pricing"');
     expect(route).not.toMatch(/PGRST202|42883/);
     expect(route).not.toMatch(/from\("bookings"\)\.insert/);
   });

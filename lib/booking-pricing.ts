@@ -1,6 +1,8 @@
 import { tours } from "@/data/tours";
 import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
+import { pricingLine, type BookingPricingSnapshot, type PricingLine } from "@/lib/booking-pricing-snapshot";
+import { EXTRAS_CONFIG, SENZO_MALL_FARE, type ChildSeatType } from "@/lib/transfer-config";
 
 type PricingInput = {
   type: "tour" | "transfer";
@@ -85,10 +87,34 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   const guestSummary = tour.pricingMode === "per-booking"
     ? `${guests} passenger${guests === 1 ? "" : "s"}${boat ? ` · ${boat.label}` : ""}`
     : `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
-  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD" } };
+  const lines: PricingLine[] = [];
+  if (boat || tour.pricingMode === "per-booking") {
+    lines.push(pricingLine("booking", 1, boat ? boat.price : pricing.adults, boat?.label));
+    if (boat && tour.entrancePricing) {
+      if (input.adults) lines.push(pricingLine("entrance", input.adults, tour.entrancePricing.adults, "Adults"));
+      if (input.youth) lines.push(pricingLine("entrance", input.youth, tour.entrancePricing.youth, "Children / youth"));
+    }
+  } else {
+    if (input.adults) lines.push(pricingLine("adults", input.adults, pricing.adults));
+    if (input.youth) lines.push(pricingLine("youth", input.youth, pricing.youth ?? pricing.adults));
+    if (input.infants) lines.push(pricingLine("infants", input.infants, pricing.infants ?? 0));
+  }
+  for (const id of selectedExtras) {
+    const option = extraPrices[id];
+    lines.push(pricingLine("extra", option.charge === "adult" ? input.adults : 1, option.price, id.replaceAll("-", " ")));
+  }
+  for (const [id, quantity] of Object.entries(quantities)) {
+    const extra = allowedQuantityExtras.get(id)!;
+    if (quantity) lines.push(pricingLine("extra", quantity, extra.price, extra.label));
+  }
+  const pricingSnapshot: BookingPricingSnapshot = {
+    version: 1, currency: tour.currency || "USD", subtotal: amount, pending: false,
+    trips: [{ name: tour.title, guests, participants: { adults: input.adults, youth: input.youth, infants: input.infants }, lines }],
+  };
+  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot } };
 }
 
-export function calculateBookingPrice(input: PricingInput) {
+function calculateBookingPriceInternal(input: PricingInput) {
   if (input.type === "tour") {
     if (input.tourSlug === "multi-trip") {
       if (!input.cartItems || input.cartItems.length < 1) return { error: "Add at least one valid trip." as const };
@@ -109,6 +135,10 @@ export function calculateBookingPrice(input: PricingInput) {
         tourName: `Multi-trip booking: ${pricedItems.map((item) => item.tourName).join(" + ")}`,
         price: `${currencies[0] === "EUR" ? "€" : "$"}${amount.toFixed(2)} combined total`, currency: currencies[0],
         items: pricedItems,
+        pricingSnapshot: {
+          version: 1, currency: currencies[0], subtotal: amount, pending: false,
+          trips: pricedItems.flatMap(item => item.pricingSnapshot.trips.map(trip => ({ ...trip, date: item.date, time: item.time }))),
+        } satisfies BookingPricingSnapshot,
       } };
     }
     const result = calculateTourItem(input);
@@ -167,6 +197,37 @@ export function calculateBookingPrice(input: PricingInput) {
 
   const amount = 20 + (resortZone ? 7 : 0);
   return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName: "Hurghada Airport one-way transfer", price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
+}
+
+export function calculateBookingPrice(input: PricingInput) {
+  const result = calculateBookingPriceInternal(input);
+  if (!result.data) return result;
+  if ("pricingSnapshot" in result.data && result.data.pricingSnapshot) return { data: { ...result.data, pricingSnapshot: result.data.pricingSnapshot }, error: undefined };
+  const data = result.data;
+  const request = input.transfer;
+  const quote = request ? calculateTransferQuote(request.quoteInput) : null;
+  const pending = quote?.requiresManualConfirmation ?? false;
+  const lines: PricingLine[] = [];
+  if (quote && !pending) {
+    const legs = request?.tripType === "round_trip" ? 2 : 1;
+    for (const vehicle of quote.legVehicles) lines.push(pricingLine("vehicle", legs, vehicle.legFare, VEHICLE_NAMES[vehicle.vehicleClass]));
+    for (const [seat, count] of Object.entries(request!.childSeats)) {
+      if (count) lines.push(pricingLine("extra", count * legs, EXTRAS_CONFIG.childSeatPrice[seat as ChildSeatType], `${seat} seat / leg`));
+    }
+  } else if (!pending && input.service === "senzo") {
+    const senzo = calculateSenzoQuote({ passengers: input.passengers, travelBags: input.travelBags, resortZone: resortZones.has(input.pickup) || resortZones.has(input.dropoff) });
+    for (const vehicle of senzo.allocatedVehicles) lines.push(pricingLine("vehicle", vehicle.count, SENZO_MALL_FARE[vehicle.vehicleClass]!, VEHICLE_NAMES[vehicle.vehicleClass]));
+    if (senzo.resortSupplement) lines.push(pricingLine("extra", 1, senzo.resortSupplement, "Resort transfer supplement"));
+  } else if (!pending) {
+    // Legacy fares are fixed per booking, not per passenger.
+    lines.push(pricingLine("booking", 1, data.amount));
+  }
+  const pricingSnapshot: BookingPricingSnapshot = {
+    version: 1, currency: data.currency, subtotal: data.amount, pending,
+    trips: [{ name: data.tourName, guests: data.guests,
+      participants: request ? { adults: request.adults, youth: request.children, infants: request.infants } : null, lines }],
+  };
+  return { data: { ...data, pricingSnapshot }, error: undefined };
 }
 
 const ZONE_NAMES: Record<string, string> = {

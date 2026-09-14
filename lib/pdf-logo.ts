@@ -25,6 +25,21 @@ function loadLogoBuffer(): Buffer | null {
 }
 
 /**
+ * PDFKit only dedupes repeated `doc.image()` calls when passed a string path;
+ * a raw Buffer re-embeds a brand-new (and asynchronously decoded) XObject on
+ * every call. A multi-page status PDF draws the brand mark once per page, so
+ * without this cache each page would race its own PNG decode, making the
+ * embedded object order (and so the rendered bytes) nondeterministic.
+ */
+const logoImageByDocument = new WeakMap<PDFKit.PDFDocument, unknown>();
+function openLogoImage(doc: PDFKit.PDFDocument, buffer: Buffer): unknown {
+  if (!logoImageByDocument.has(doc)) {
+    logoImageByDocument.set(doc, (doc as unknown as { openImage(src: Buffer): unknown }).openImage(buffer));
+  }
+  return logoImageByDocument.get(doc);
+}
+
+/**
  * Draws the Daily Red Sea wordmark into a PDFKit document header, right-aligned
  * for RTL locales and left-aligned otherwise. If the logo asset cannot be read
  * or fails to render, this falls back to the plain text brand name on the same
@@ -41,10 +56,11 @@ export function drawPdfBrandMark(
   const logo = loadLogoBuffer();
   if (logo) {
     try {
-      doc.image(logo, x, y, { width, height });
+      doc.image(openLogoImage(doc, logo) as Buffer, x, y, { width, height });
       return;
     } catch {
       // Corrupt or unreadable image data: fall through to the text fallback below.
+      logoImageByDocument.delete(doc);
     }
   }
   doc.font("Noto").fontSize(20).fillColor("#ffffff").text("DAILY RED SEA", x, y + height / 2 - 11, { width, align: rtl ? "right" : "left" });

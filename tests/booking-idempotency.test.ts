@@ -20,7 +20,7 @@ describe("durable booking idempotency source contract", () => {
   });
 
   it("calls one atomic reservation RPC and never restores direct inserts", () => {
-    expect(route).toContain('supabase.rpc("reserve_booking_with_promo"');
+    expect(route).toContain('supabase.rpc("reserve_booking_with_pricing"');
     expect(route).not.toMatch(/from\("bookings"\)\.insert/);
     expect(migration).toContain("created := public.reserve_booking(");
     expect(migration).toContain("created := public.reserve_multi_trip_booking(");

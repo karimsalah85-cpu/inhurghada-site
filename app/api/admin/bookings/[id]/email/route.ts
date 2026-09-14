@@ -18,7 +18,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
   const { data: booking, error } = await supabase
     .from("bookings")
-    .select("reference,customer_name,customer_email,phone,tour_name,date,guests,hotel,status,payment_status,amount,currency,locale")
+    .select("reference,customer_name,customer_email,phone,tour_name,date,guests,hotel,status,payment_status,amount,currency,locale,adults,youth,infants,subtotal,promo_code,discount_amount,pricing_snapshot,notes")
     .eq("id", id)
     .single();
   if (error || !booking) return json({ error: "Booking not found." }, 404);

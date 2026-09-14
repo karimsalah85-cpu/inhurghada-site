@@ -113,7 +113,8 @@ export async function POST(request: NextRequest) {
     const supabase = createRequiredAdminClient();
     const { idempotencyKey, ...materialRequest } = body;
     const requestHash = bookingRequestHash(materialRequest);
-    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_with_promo", {
+    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_with_pricing", {
+      p_pricing_snapshot: pricing.data.pricingSnapshot,
       p_promo_code: body.promoCode || null,
       p_idempotency_key: idempotencyKey,
       p_request_hash: requestHash,

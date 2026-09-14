@@ -10,6 +10,14 @@ export type StatusBooking = {
   tour_name: string | null;
   date: string | null;
   guests?: number | null;
+  adults?: number | null;
+  youth?: number | null;
+  infants?: number | null;
+  subtotal?: number | string | null;
+  discount_amount?: number | string | null;
+  promo_code?: string | null;
+  pricing_snapshot?: unknown;
+  notes?: string | null;
   hotel?: string | null;
   status?: string;
   payment_status?: string;
@@ -119,6 +127,13 @@ export async function buildBookingStatusPdfAttachment(booking: StatusBooking) {
     itemName: booking.tour_name || "Transfer",
     date: booking.date || undefined,
     travelers: booking.guests ? `${booking.guests} traveler${booking.guests === 1 ? "" : "s"}` : undefined,
+    guests: booking.guests,
+    participants: { adults: booking.adults, youth: booking.youth, infants: booking.infants },
+    subtotal: booking.subtotal == null ? null : Number(booking.subtotal),
+    discountAmount: booking.discount_amount == null ? null : Number(booking.discount_amount),
+    promoCode: booking.promo_code,
+    pricingSnapshot: booking.pricing_snapshot,
+    historicalNotes: booking.notes,
     pickup: booking.hotel || undefined,
     amount: Number(booking.amount || 0),
     currency: booking.currency || "USD",
