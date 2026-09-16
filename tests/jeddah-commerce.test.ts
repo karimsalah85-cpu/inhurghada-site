@@ -7,9 +7,9 @@ describe("Jeddah commerce authority", () => {
     const tour = tours.find((item) => item.slug === "jeddah-yacht-sunset-cruise");
     const controlled = codeControlledTourFields(tour);
     expect(controlled).toMatchObject({
-      currency: "SAR",
-      price: "102",
-      originalPrice: "120",
+      currency: "USD",
+      price: "30.40",
+      originalPrice: "32",
       fulfillmentType: "meeting_point",
       departureMarina: "Rixos Resort Gate 2, Obhur Bay",
       operatingWeekdays: [1, 3, 4],
