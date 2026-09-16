@@ -24,13 +24,13 @@ export default function FavouriteButton({ item, compact = false }: { item: Favou
     <button
       type="button"
       aria-pressed={saved}
-      aria-label={label}
+      aria-label={`${label}: ${item.title}`}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
         toggle(item);
       }}
-      className={`${compact ? "p-3" : "gap-2 px-4 py-3"} inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-white font-bold shadow-sm transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean-soft ${saved ? "text-brand-orange-cta" : "text-ink"}`}
+      className={`${compact ? "p-3" : "gap-2 px-4 py-3"} inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-line bg-white font-bold shadow-sm transition hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean-soft ${saved ? "text-brand-orange-cta" : "text-ink"}`}
     >
       <Heart size={18} className={saved ? "fill-current" : ""} />
       {compact ? <span className="sr-only">{label}</span> : <span>{label}</span>}

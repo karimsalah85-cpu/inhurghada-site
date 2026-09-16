@@ -13,6 +13,6 @@ export async function GET() {
   const [tours, settings] = await Promise.all([getLiveTours(), getPublicSiteSettings()]);
   return NextResponse.json(
     { tours, settings },
-    { headers: { "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300" } },
+    { headers: { "Cache-Control": "no-store" } },
   );
 }

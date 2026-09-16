@@ -115,6 +115,8 @@ export default function RootLayout({
   return (
 
     <html
+      // The early locale script intentionally updates only these document attributes.
+      suppressHydrationWarning
       lang="en"
       dir="ltr"
       className={`h-full antialiased ${manrope.variable} ${notoKufiArabic.variable}`}

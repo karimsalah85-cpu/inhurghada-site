@@ -4,6 +4,7 @@ import MobileTourCarousel from "@/components/home/MobileTourCarousel";
 import TourCard from "@/components/cards/TourCard";
 import { useFavourites } from "@/components/favourites/FavouritesProvider";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
+import type { Tour } from "@/data/tours";
 import { localePath } from "@/lib/i18n";
 
 const copyByLocale = {
@@ -15,14 +16,17 @@ const copyByLocale = {
   zh: { eyebrow: "已保存到此设备", title: "继续规划你的行程", open: "查看收藏的行程", clear: "清除" },
 } as const;
 
-export default function ContinuePlanningRail() {
+export default function ContinuePlanningRail({ tours }: { tours: Tour[] }) {
   const { items, openPanel, clear } = useFavourites();
   const { language } = useSiteSettings();
   const copy = copyByLocale[language];
 
-  // Only trips saved with the full card snapshot can render here; older saves
-  // still work in the panel and rejoin the rail once reopened.
-  const renderable = items.filter((item) => item.title && item.image && item.duration && item.rating);
+  // Saved identifiers resolve against the current localized catalogue, so old
+  // browser snapshots cannot reintroduce stale prices on the homepage.
+  const renderable = items.flatMap((item) => {
+    const tour = tours.find((tour) => tour.slug === item.slug);
+    return tour ? [tour] : [];
+  });
   if (renderable.length === 0) return null;
 
   return (
@@ -54,13 +58,13 @@ export default function ContinuePlanningRail() {
               badge={item.badge}
               reviews={item.reviews}
               category={item.category}
-              availableTime={item.availableTime}
+              included={item.included}
               priceUnit={item.priceUnit}
               bookingMode={item.bookingMode}
-              entrancePrice={item.entrancePrice}
+              entrancePrice={item.entrancePricing?.adults}
               currency={item.currency}
               tourSlug={item.slug}
-              destination={item.destination}
+              destination={item.destinationSlug}
             />
           ))}
         </MobileTourCarousel>

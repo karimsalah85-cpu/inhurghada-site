@@ -145,6 +145,7 @@ export function localizeSnorkelingBoatTrip(tour: Tour, locale: Locale): Tour {
     : "赫尔格达附近的游船、海滩与红海";
   const localizedAlt = `${translation.title} — ${altSuffix}`;
   const localizedText = {
+    duration: tour.duration, category: tour.category,
     title: translation.title || tour.title, description: translation.description || english.description || tour.description, packageName: translation.packageName,
     packageDescription: translation.packageDescription, packageLabel: translation.packageLabel,
     seoTitle: translation.seoTitle, metaDescription: translation.metaDescription, imageAlt: localizedAlt,

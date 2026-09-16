@@ -1,3 +1,4 @@
+import { getLiveTours } from "@/lib/live-content";
 import { NextRequest, NextResponse } from "next/server";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { validateBookingInput } from "@/lib/booking-validation";
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     const code = normalizePromoCode(input?.promoCode);
     const validation = validateBookingInput(input);
     if (!validation.data || validation.data.type !== "tour") return json({ error: validation.error || "Promo codes are available for trip bookings." }, 400);
-    const pricing = calculateBookingPrice(validation.data);
+    const pricing = calculateBookingPrice(validation.data, await getLiveTours());
     if (!pricing.data) return json({ error: pricing.error }, 400);
     const { data, error } = await createRequiredAdminClient().from("promo_codes").select("*").eq("code", code).maybeSingle();
     if (error) return json({ error: "Promo codes are temporarily unavailable." }, 503);

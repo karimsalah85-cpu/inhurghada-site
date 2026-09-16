@@ -14,7 +14,7 @@ let inFlight: Promise<SiteContent | null> | null = null;
  */
 export function fetchSiteContent(): Promise<SiteContent | null> {
   if (!inFlight) {
-    inFlight = fetch("/api/site-content")
+    inFlight = fetch("/api/site-content", { cache: "no-store" })
       .then((response) => (response.ok ? (response.json() as Promise<SiteContent>) : null))
       .catch(() => null)
       .finally(() => {

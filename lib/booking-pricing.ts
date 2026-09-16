@@ -1,4 +1,4 @@
-import { tours } from "@/data/tours";
+import { tours, type Tour } from "@/data/tours";
 import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
 import { pricingLine, type BookingPricingSnapshot, type PricingLine } from "@/lib/booking-pricing-snapshot";
@@ -45,8 +45,8 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
   return Number.isInteger(value) && value >= minimum && value <= maximum;
 }
 
-function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "extraQuantities" | "transferRequired" | "transferArea">) {
-  const tour = tours.find((item) => item.slug === input.tourSlug) || tours.find((item) => item.title === input.tourName);
+function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "extraQuantities" | "transferRequired" | "transferArea">, catalog: Tour[]) {
+  const tour = catalog.find((item) => item.slug === input.tourSlug) || catalog.find((item) => item.title === input.tourName);
   if (!tour) return { error: "Choose a valid tour." as const };
   if (tour.listingStatus === "paused" || tour.listingStatus === "unlisted") return { error: "This tour is not accepting bookings yet." as const };
   if (!wholeNumber(input.adults, 1, 30) || !wholeNumber(input.youth, 0, 30) || !wholeNumber(input.infants, 0, 10)) {
@@ -114,13 +114,13 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot } };
 }
 
-function calculateBookingPriceInternal(input: PricingInput) {
+function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[]) {
   if (input.type === "tour") {
     if (input.tourSlug === "multi-trip") {
       if (!input.cartItems || input.cartItems.length < 1) return { error: "Add at least one valid trip." as const };
       const pricedItems = [];
       for (const item of input.cartItems) {
-        const result = calculateTourItem({ ...item, tourName: "" });
+        const result = calculateTourItem({ ...item, tourName: "" }, catalog);
         if (!result.data) return { error: result.error };
         pricedItems.push({ ...result.data, date: item.date, time: item.time });
       }
@@ -141,7 +141,7 @@ function calculateBookingPriceInternal(input: PricingInput) {
         } satisfies BookingPricingSnapshot,
       } };
     }
-    const result = calculateTourItem(input);
+    const result = calculateTourItem(input, catalog);
     if (!result.data) return result;
     return { data: { ...result.data, price: `${result.data.currency === "EUR" ? "€" : "$"}${result.data.amount.toFixed(2)} total` } };
   }
@@ -199,8 +199,8 @@ function calculateBookingPriceInternal(input: PricingInput) {
   return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName: "Hurghada Airport one-way transfer", price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
 }
 
-export function calculateBookingPrice(input: PricingInput) {
-  const result = calculateBookingPriceInternal(input);
+export function calculateBookingPrice(input: PricingInput, catalog: Tour[] = tours) {
+  const result = calculateBookingPriceInternal(input, catalog);
   if (!result.data) return result;
   if ("pricingSnapshot" in result.data && result.data.pricingSnapshot) return { data: { ...result.data, pricingSnapshot: result.data.pricingSnapshot }, error: undefined };
   const data = result.data;

@@ -9,16 +9,21 @@ import { CalendarDays, MessageCircle, ShoppingCart, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart/CartProvider";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
-import { tours } from "@/data/tours";
+import type { Tour } from "@/data/tours";
+import { calculateBookingPrice } from "@/lib/booking-pricing";
 import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { trackEvent } from "@/lib/analytics";
 import ShareTripButton from "@/components/share/ShareTripButton";
 import { validatePhoneNumber } from "@/lib/phone";
 
-export default function CartCheckout() {
+export default function CartCheckout({ tours }: { tours: Tour[] }) {
   const idempotencyKey = useRef<string | null>(null);
-  const { items, removeItem, clearCart, total } = useCart();
+  const { items: savedItems, removeItem, clearCart } = useCart();
+  const quotes = savedItems.map((item) => calculateBookingPrice({ ...item, type: "tour", service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 }, tours));
+  const priceError = quotes.find((quote) => quote.error)?.error;
+  const items = savedItems.map((item, index) => ({ ...item, subtotal: quotes[index].data?.amount ?? item.subtotal, currency: tours.find((tour) => tour.slug === item.tourSlug)?.currency ?? "USD" }));
+  const total = items.reduce((sum, item) => sum + item.subtotal, 0);
   const { language, formatPrice } = useSiteSettings();
   const router = useRouter();
   const de = language === "de";
@@ -100,6 +105,7 @@ export default function CartCheckout() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (priceError) { setError(priceError); return; }
     if (promo.busy || promo.needsApply) { setError(promo.message); return; }
     if (!items.length) return;
     if (cartCurrencies.length > 1) return setError("Please book trips in different settlement currencies separately.");
@@ -183,7 +189,8 @@ export default function CartCheckout() {
           <p className="text-xs leading-5 text-muted">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-ocean-dark underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
           {error ? <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p> : null}
           <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
-          <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(promo.total), cartCurrency)}`} <MessageCircle size={18}/></button>
+          {priceError ? <p role="alert" className="text-sm text-rose-600">{priceError}</p> : null}
+          <button disabled={submitting || Boolean(priceError)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(promo.total), cartCurrency)}`} <MessageCircle size={18}/></button>
         </form>
       </div>
     </section>

@@ -13,7 +13,9 @@ import {
   siteUrl,
 } from "@/lib/seo";
 import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-categories";
-import HomePage from "@/app/page";
+import HomePage from "@/components/home/HomePage";
+
+export const dynamic = "force-dynamic";
 import TransfersPage from "@/app/transfers/page";
 import BookingPage from "@/app/booking/page";
 import CheckoutPage from "@/app/checkout/page";
@@ -142,7 +144,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   // Every non-English locale renders the same component per page kind; only the
   // `locale` prop differs. Keep this dispatch data-free so a new page type is
   // added once, not once per language.
-  if (kind === "home") return <HomePage />;
+  if (kind === "home") return <HomePage initialTours={tours} />;
 
   if (kind === "tour") {
     const tour = findPublicTour(tours, path[1]);

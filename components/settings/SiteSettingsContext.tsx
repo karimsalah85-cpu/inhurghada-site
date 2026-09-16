@@ -84,9 +84,9 @@ const translations: Record<Language, Record<string, string>> = {
 
 const SiteSettingsContext = createContext<SiteSettings | null>(null);
 
-export function SiteSettingsProvider({ children, initialLanguage = "en" }: { children: React.ReactNode; initialLanguage?: Language }) {
+export function SiteSettingsProvider({ children, initialLanguage }: { children: React.ReactNode; initialLanguage?: Language }) {
   const pathname = usePathname();
-  const [language, setLanguage] = useState<Language>(initialLanguage);
+  const [language, setLanguage] = useState<Language>(() => initialLanguage ?? localeFromPathname(pathname));
   const [publicSettings, setPublicSettings] = useState<Record<string, unknown>>({});
 
   useEffect(() => {

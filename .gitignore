@@ -40,6 +40,9 @@ yarn-error.log*
 # project-local developer tools
 .tools/
 
+# scratch agent report outputs
+/outputs/
+
 # local database backups
 /backups/
 

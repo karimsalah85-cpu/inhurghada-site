@@ -40,6 +40,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     title: "مغامرة سفاري في الصحراء", location: "صحراء الغردقة", duration: "5 ساعات", category: "سفاري صحراوي",
     description: "استمتع بقيادة الكواد وركوب الجمل وزيارة قرية بدوية وشاي بدوي في صحراء الغردقة.",
     highlights: ["قيادة كواد", "ركوب جمل", "قرية بدوية", "غروب الصحراء"],
+    included: ["الاستلام من الفندق", "ركوب الكواد", "ركوب الجمل", "زيارة قرية بدوية", "شاي بدوي"],
   },
   "quad-safari-morning": {
     title: "سفاري كواد صباحي", location: "صحراء الغردقة", duration: "5 ساعات", category: "سفاري صحراوي",
@@ -327,6 +328,7 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
     title: "Wüstensafari-Abenteuer", location: "Wüste bei Hurghada", duration: "5 Stunden", category: "Wüstensafari",
     description: "Erlebe die Wüste bei einer abwechslungsreichen Quad Tour Hurghada mit Kamelritt, Beduinendorf, Tee und eindrucksvoller Abendstimmung.",
     highlights: ["Quadfahrt", "Kamelritt", "Beduinentee", "Sonnenuntergang in der Wüste"], availableTimes: ["Nachmittags – genaue Abholung per WhatsApp"],
+    included: ["Hotelabholung", "Quadfahrt", "Kamelritt", "Besuch eines Beduinendorfs", "Beduinentee"],
   },
   "professional-underwater-photographer": {
     title: "Professioneller Unterwasserfotograf", location: "Hurghada, Ägypten", duration: "Ganzer Tag",
@@ -659,6 +661,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
     title: "Сафари в пустыне", location: "Пустыня Хургады", duration: "5 часов", category: "Сафари",
     description: "Отправьтесь в пустыню на квадроцикле, прокатитесь на верблюде, посетите бедуинскую деревню и насладитесь вечерними пейзажами.",
     highlights: ["Поездка на квадроцикле", "Катание на верблюде", "Бедуинский чай", "Закат в пустыне"], availableTimes: ["После обеда — точное время подтвердим в WhatsApp"],
+    included: ["Трансфер из отеля", "Поездка на квадроцикле", "Катание на верблюде", "Посещение бедуинской деревни", "Бедуинский чай"],
   },
   "professional-underwater-photographer": {
     title: "Профессиональный подводный фотограф", location: "Хургада, Египет", duration: "Целый день",
@@ -987,6 +990,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     title: "沙漠探险", location: "赫尔格达沙漠", duration: "5 小时", category: "沙漠探险",
     description: "驾驶四轮摩托穿越沙漠，体验骑骆驼、参观贝都因村落和品尝传统茶。",
     highlights: ["四轮摩托", "骑骆驼", "贝都因茶", "沙漠日落"], availableTimes: ["下午出发，准确接送时间通过 WhatsApp 确认"],
+    included: ["酒店接送", "四轮摩托骑行", "骑骆驼", "参观贝都因村落", "贝都因茶"],
   },
   "professional-underwater-photographer": {
     title: "专业水下摄影师", location: "埃及赫尔格达", duration: "全天", category: "摄影服务",
@@ -1303,7 +1307,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     title: "Pustynne safari", location: "Pustynia Hurghady", duration: "5 godzin",
     description: "Przeżyj pustynną przygodę na quadach, podczas przejażdżki na wielbłądzie i wizyty w wiosce Beduinów.",
     highlights: ["Przejażdżka quadem", "Jazda na wielbłądzie", "Herbata beduińska", "Zachód słońca na pustyni"],
-    included: ["Odbiór z hotelu", "Przejażdżka quadem", "Wizyta w wiosce Beduinów", "Herbata"],
+    included: ["Odbiór z hotelu", "Przejażdżka quadem", "Jazda na wielbłądzie", "Wizyta w wiosce Beduinów", "Herbata beduińska"],
     notes: ["Dokładną godzinę odbioru potwierdzimy przez WhatsApp.", "Załóż zakryte buty i zabierz okulary przeciwsłoneczne."],
     packageName: "Pustynne safari", packageDescription: "Jazda quadem, wielbłąd, wioska Beduinów i herbata.", packageLabel: "Za osobę", availableTimes: ["Popołudnie — godzina odbioru przez WhatsApp"],
   },

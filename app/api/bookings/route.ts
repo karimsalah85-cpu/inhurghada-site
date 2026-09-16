@@ -19,7 +19,7 @@ import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 import { bookingRequestHash } from "@/lib/booking-idempotency";
 import { bookingLocale, buildCustomerConfirmationEmail } from "@/lib/booking-communications-i18n";
-import { tours } from "@/data/tours";
+import { getLiveTours } from "@/lib/live-content";
 import { localizeTour } from "@/lib/tour-localization";
 import { calculateTransferQuote, type TransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
@@ -78,7 +78,8 @@ export async function POST(request: NextRequest) {
     const body = validation.data;
     const bookingType = body.type;
     const { customerName, phone, customerEmail, hotel } = body;
-    const pricing = calculateBookingPrice(body);
+    const tours = await getLiveTours();
+    const pricing = calculateBookingPrice(body, tours);
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
     const { amount: calculatedAmount, guests: guestCount, guestSummary, tourName, price, currency } = pricing.data;
     const tripItems = "items" in pricing.data ? pricing.data.items : undefined;

@@ -122,7 +122,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-ocean-dark sm:tracking-[0.28em]">{destination?.name || "Hurghada"} · {ui.experience}</p>
         <h1 className="mt-3 text-4xl font-black text-ink sm:text-5xl">{tour.title}</h1>
         {tour.tripId ? <p className="mt-2 text-sm text-muted">{{ en: "Trip ID", ar: "رقم الرحلة", de: "Reise-ID", ru: "Код экскурсии", pl: "ID wycieczki", zh: "行程编号" }[locale]}: <span dir="ltr" className="font-mono font-semibold">{tour.tripId}</span></p> : null}
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium text-muted"><TripRatingBadge fallbackRating={tour.rating} fallbackCount={reviewCount} label={ui.reviews} /><span>{tour.location}</span><span>•</span><span>{tour.duration}</span>{tour.slug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={locale} tourSlug={tour.slug}/> : null}</div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm font-medium text-muted"><TripRatingBadge fallbackRating={tour.rating} fallbackCount={reviewCount} label={ui.reviews} /><span>{tour.location}</span><span>•</span><span>{tour.duration}</span><ShareTripButton locale={locale} tourSlug={tour.slug} tourTitle={tour.title} destination={tour.destinationSlug} /></div>
         <TourGallery title={tour.title} mainImage={tour.image} galleryImages={galleryImages} imageAlt={tour.imageAlt} galleryImageAlts={tour.galleryImageAlts} imageFocalPoint={tour.imageFocalPoint} galleryImageFocalPoints={tour.galleryImageFocalPoints} locale={locale} />
       </section>
 
