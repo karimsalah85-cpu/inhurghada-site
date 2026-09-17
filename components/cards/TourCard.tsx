@@ -76,7 +76,7 @@ export default function TourCard({
         <FavouriteButton item={{ slug: tourSlug, title, image, location, price, originalPrice, rating, reviews, duration, description, priceUnit, availableTime, bookingMode, entrancePrice, currency, destination, badge, category }} compact />
       </div>
       <Link href={link} aria-label={title} className="group flex min-w-0 flex-1 flex-col outline-none">
-        <div className="relative h-24 shrink-0 overflow-hidden sm:h-44">
+        <div className="relative aspect-[8/5] w-full shrink-0 overflow-hidden">
           <Image src={image} alt={title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
           <ImageWatermark />
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
