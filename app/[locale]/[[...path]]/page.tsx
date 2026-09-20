@@ -30,12 +30,14 @@ import TourCategoryPage from "@/app/hurghada/[category]/page";
 import DestinationCategoryPage from "@/components/categories/DestinationCategoryPage";
 import { localizeTour } from "@/lib/tour-localization";
 import CartPage from "@/app/cart/page";
+import ReferralDashboard from "@/components/referral/ReferralDashboard";
 import { DestinationPage } from "@/components/pages/destinations/DestinationPage";
 import { LocalizedBlogIndex } from "@/components/blog/BlogIndexPage";
 import { LocalizedBlogArticle } from "@/components/blog/BlogArticlePage";
 import { ToursPage } from "@/components/pages/ToursPage";
 import { destinations, getDestination, type DestinationSlug } from "@/lib/destinations";
 import { destinationCopyByLocale } from "@/lib/destination-i18n";
+import { referralCopy } from "@/lib/referral-i18n";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -52,12 +54,12 @@ function pageKind(path: string[]) {
   if (path.length === 2 && path[0] === "destinations" && getDestination(path[1])) return "destination";
   if (path.length === 1 && path[0] === "blog") return "blog";
   if (path.length === 2 && path[0] === "blog") return "blog-post";
-  return ["booking", "booking/confirmation", "checkout", "cart", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq"].includes(path.join("/")) ? path.join("/") : null;
+  return ["booking", "booking/confirmation", "checkout", "cart", "transfers", "privacy-policy", "terms-conditions", "about", "contact", "faq", "referrals"].includes(path.join("/")) ? path.join("/") : null;
 }
 
 export async function generateStaticParams() {
   const destinationCategoryPaths = destinations.flatMap((destination) => tourCategories.filter((category) => category.slug !== "excursions" && fallbackTours.some((tour) => tour.destinationSlug === destination.slug && category.matches(tour))).map((category) => [destination.slug, category.slug]));
-  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...destinationCategoryPaths, ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
+  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ["referrals"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...destinationCategoryPaths, ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
   return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
 }
 
@@ -78,8 +80,10 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   if (kind === "blog-post" && !blogPost) notFound();
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认" }[locale];
-  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ` };
-  const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription };
+  const referralTitle = referralCopy[locale].heading;
+  const referralDescription = referralCopy[locale].tagline;
+  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ`, referrals: referralTitle };
+  const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription, referrals: referralDescription };
   const destinationCopy = kind === "destination" ? destinationCopyByLocale[path[1] as DestinationSlug]?.[locale] : undefined;
   const categoryDestination = category ? getDestination(path[0]) : undefined;
   const categoryDestinationName = locale === "ar" && categoryDestination?.slug === "jeddah" ? "جدة" : categoryDestination?.name || "Hurghada";
@@ -117,7 +121,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
     robots: tour?.listingStatus === "paused"
       ? { index: false, follow: true }
-      : kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart"
+      : kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" || kind === "referrals"
         ? { index: false, follow: false }
         : { index: true, follow: true },
     openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: tour?.image || blogPost?.heroImage || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage, alt: tour?.imageAlt || destinationCopy?.imageAlt || normalizedTitle }] },
@@ -158,6 +162,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   if (kind === "booking/confirmation") return <BookingConfirmationPage />;
   if (kind === "checkout") return <CheckoutPage />;
   if (kind === "cart") return <CartPage />;
+  if (kind === "referrals") return <ReferralDashboard locale={locale} />;
   if (kind === "about") return <AboutPage locale={locale} />;
   if (kind === "contact") return <ContactPage locale={locale} />;
   if (kind === "faq") return <FaqPage locale={locale} />;

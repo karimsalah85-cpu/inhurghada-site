@@ -57,6 +57,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: "booking", resource_identifier: id, summary_text: `Updated booking ${data.reference || id}`, before_value: existing, after_value: { ...data, actor: user?.email } });
   const changed = (update.status && update.status !== existing.status)
     || (update.payment_status && update.payment_status !== existing.payment_status);
+  if (update.status && update.status !== existing.status) {
+    const { error: referralError } = await supabase.rpc("sync_referral_reward_for_booking", { p_booking_id: id, p_new_status: update.status });
+    if (referralError) console.error("Referral reward sync failed", { bookingId: id, message: referralError.message });
+  }
   const customerAssignment = changed ? await getCustomerVisibleAssignment(supabase, id) : {};
   const notification = changed ? await sendBookingAndPaymentStatusNotification({ ...data, ...customerAssignment }) : null;
   return json({

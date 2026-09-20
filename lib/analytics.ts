@@ -29,7 +29,14 @@ export type AnalyticsEventName =
   | "transfer_vehicle_allocated"
   | "transfer_quote_generated"
   | "transfer_manual_quote_requested"
-  | "transfer_booking_submitted";
+  | "transfer_booking_submitted"
+  | "referral_link_opened"
+  | "referral_discount_applied"
+  | "referred_booking_created"
+  | "referral_qualified"
+  | "referral_reward_earned"
+  | "referral_reward_redeemed"
+  | "referral_shared";
 
 export type AnalyticsEventData = Record<string, string | number | boolean | undefined>;
 

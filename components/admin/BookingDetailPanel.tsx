@@ -6,7 +6,7 @@ type Booking={id:string;reference:string;customer_name:string;tour_name:string|n
 type Expense={id:string;description:string;amount:number|string;currency:string;expense_date:string;category:string|null};
 type Assignment={id:string;assignment_type:string;staff_member_id:string|null;supplier_id:string|null};
 type TransferDetails={pricing_version:string|null;trip_type:string;direction:string;zone:string|null;passengers:{adults:number;children:number;infants:number;total:number};luggage:{large_bags:number;cabin_bags:number;oversized_items:{type:string;quantity:number;note?:string}[]};child_seats:Record<string,number>;wheelchair:string;hotel_name:string|null;flight_number:string|null;return_leg:{date:string|null;time:string|null;flight_number:string|null}|null;allocated_vehicles:{vehicle_class:string;count:number}[];vehicle_count:number;requires_manual_confirmation:boolean;manual_reason:string|null;fare:{subtotal:number;extras:number;total:number;persisted_amount:number};warnings:string[]};
-type Detail={booking?:{transfer_details?:TransferDetails|null;pricing_snapshot?:unknown;subtotal?:number|string|null;discount_amount?:number|string|null;promo_code?:string|null;guests?:number|null;adults?:number|null;youth?:number|null;infants?:number|null};expenses:Expense[];assignments:Assignment[];staff:{id:string;name:string;staff_type:"guide"|"driver"}[];suppliers:{id:string;name:string;type?:string}[]};
+type Detail={booking?:{transfer_details?:TransferDetails|null;pricing_snapshot?:unknown;subtotal?:number|string|null;discount_amount?:number|string|null;promo_code?:string|null;guests?:number|null;adults?:number|null;youth?:number|null;infants?:number|null;referral_code?:string|null;referrer_customer_key?:string|null;referral_discount_percent?:number|string|null;referral_discount_amount?:number|string|null};expenses:Expense[];assignments:Assignment[];staff:{id:string;name:string;staff_type:"guide"|"driver"}[];suppliers:{id:string;name:string;type?:string}[]};
 const today=()=>new Date().toLocaleDateString("en-CA",{timeZone:"Africa/Cairo"});
 export default function BookingDetailPanel({booking,onClose}:{booking:Booking;onClose:()=>void}){
  const dialogRef = useRef<HTMLDialogElement>(null);
@@ -55,7 +55,8 @@ function PricingBlock({booking,amount,currency,money}:{booking?:Detail["booking"
  const snapshot=readPricingSnapshot(booking.pricing_snapshot,currency,subtotal) as BookingPricingSnapshot|null;
  const participants={adults:Number(booking.adults),youth:Number(booking.youth),infants:Number(booking.infants)};
  const hasParticipants=validParticipantCounts(participants,booking.guests??undefined);
- if(!snapshot&&!hasParticipants&&subtotal==null&&discount==null&&!booking.promo_code)return null;
+ const referralPercent=booking.referral_discount_percent==null?0:Number(booking.referral_discount_percent);
+ if(!snapshot&&!hasParticipants&&subtotal==null&&discount==null&&!booking.promo_code&&!booking.referral_code)return null;
  return <section className="rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-5">
   <b className="text-xs uppercase tracking-wider text-emerald-900">Pricing breakdown</b>
   {hasParticipants?<p className="mt-2 text-sm">{participants.adults} adults · {participants.youth} youth · {participants.infants} infants{booking.guests?` (guests: ${booking.guests})`:""}</p>:null}
@@ -68,6 +69,7 @@ function PricingBlock({booking,amount,currency,money}:{booking?:Detail["booking"
    <div className="rounded-xl bg-white p-3"><p className="text-xs text-slate-500">{booking.promo_code?`Promo: ${booking.promo_code}`:"Promo"}</p><b>{discount==null?"—":money(discount)}</b></div>
    <div className="rounded-xl bg-white p-3"><p className="text-xs text-slate-500">Total</p><b>{money(amount)}</b></div>
   </div>
+  {booking.referral_code?<div className="mt-3 rounded-xl bg-white p-3 text-sm"><b className="text-xs uppercase tracking-wider text-emerald-900">Referral</b><p className="mt-1">Code: <b>{booking.referral_code}</b>{booking.referrer_customer_key?<> · Referrer: <span className="font-mono text-xs">{booking.referrer_customer_key}</span></>:null}</p><p>Discount applied: {referralPercent>0?`${referralPercent}% · ${money(Number(booking.referral_discount_amount||0))}`:"Not applied (promo code used instead, or reward not yet earned)"}</p></div>:null}
  </section>;
 }
 

@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { captureLandingAttribution, consentStorageKey, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
+import { captureLandingAttribution, consentStorageKey, trackEvent, type ConsentPreferences, updateGoogleConsent } from "@/lib/analytics";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
+import { captureReferralAttribution } from "@/lib/referral-attribution";
 
 const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
@@ -22,6 +23,9 @@ export default function AnalyticsProvider() {
     let stored: ConsentPreferences | null = null;
     try { stored = JSON.parse(localStorage.getItem(consentStorageKey) || "null"); } catch { stored = null; }
     captureLandingAttribution(stored);
+    const hadReferral = new URLSearchParams(window.location.search).has("ref");
+    captureReferralAttribution();
+    if (hadReferral) trackEvent("referral_link_opened");
     const timeout = window.setTimeout(() => setPreferences(stored), 0);
     return () => window.clearTimeout(timeout);
   }, []);

@@ -119,7 +119,7 @@ export function localeFromPathname(pathname: string): Locale {
 
 const localizedRouteRoots = new Set([
   "about", "blog", "booking", "cart", "checkout", "contact", "destinations", "faq", "hurghada", "jeddah", "marsa-alam",
-  "privacy-policy", "terms-conditions", "tours", "transfers",
+  "privacy-policy", "terms-conditions", "tours", "transfers", "referrals",
 ]);
 
 /** Returns a canonical language-switch target without routing English through /en. */

@@ -107,6 +107,13 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     try { promoCode = normalizePromoCode(body.promoCode); }
     catch { return { error: "Enter a valid promo code." as const }; }
   }
+  let referralCode: string | undefined;
+  if (body.referralCode != null && body.referralCode !== "") {
+    const candidate = text(body.referralCode, 16).toUpperCase();
+    if (!/^DRS-[A-Z0-9]{6}$/.test(candidate)) return { error: "Enter a valid referral code." as const };
+    referralCode = candidate;
+  }
+  const redeemReferralUnits = Math.max(0, Math.min(3, Math.trunc(number(body.redeemReferralUnits))));
   const idempotencyKey = text(body.idempotencyKey, 64).toLowerCase();
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(idempotencyKey)) {
@@ -187,6 +194,8 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     data: {
       idempotencyKey,
       ...(promoCode ? { promoCode } : {}),
+      ...(referralCode ? { referralCode } : {}),
+      redeemReferralUnits,
       type,
       locale: ["en", "ar", "de", "ru", "pl", "zh"].includes(String(body.locale)) ? String(body.locale) : "en",
       customerName,

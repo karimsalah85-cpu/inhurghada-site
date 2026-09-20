@@ -40,6 +40,12 @@ export async function PATCH(request: NextRequest) {
       || (update.payment_status && update.payment_status !== before.payment_status)
     );
   });
+  if (update.status) {
+    await Promise.all(changed.map(async (booking) => {
+      const { error: referralError } = await supabase.rpc("sync_referral_reward_for_booking", { p_booking_id: booking.id, p_new_status: update.status });
+      if (referralError) console.error("Referral reward sync failed", { bookingId: booking.id, message: referralError.message });
+    }));
+  }
   const notifications = await Promise.all(changed.map((booking) => sendBookingAndPaymentStatusNotification(booking)));
   return json({
     bookings: data || [],

@@ -23,6 +23,8 @@ import { getLiveTours } from "@/lib/live-content";
 import { localizeTour } from "@/lib/tour-localization";
 import { calculateTransferQuote, type TransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
+import { referralCustomerKey } from "@/lib/referral";
+import { verifyRedemptionToken } from "@/lib/referral-server";
 
 function bookingJson(body: unknown, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -72,10 +74,20 @@ export async function POST(request: NextRequest) {
       return bookingJson({ success: false, error: "Invalid booking origin." }, { status: 403 });
     }
 
-    const validation = validateBookingInput(await request.json());
+    const rawBody = await request.json();
+    const validation = validateBookingInput(rawBody);
     if (validation.spam) return bookingJson({ success: true });
     if (!validation.data) return bookingJson({ success: false, error: validation.error }, { status: 400 });
     const body = validation.data;
+    // Redemption of a customer's own earned referral rewards requires proof of email/phone
+    // ownership (an OTP verified just before checkout); never trust a client-supplied flag alone.
+    const referralCustomer = referralCustomerKey(body.customerEmail, body.phone);
+    const referralVerificationToken = typeof (rawBody as Record<string, unknown>)?.referralVerificationToken === "string"
+      ? (rawBody as Record<string, unknown>).referralVerificationToken as string
+      : undefined;
+    const redeemReferralUnits = body.redeemReferralUnits > 0 && referralCustomer && verifyRedemptionToken(referralVerificationToken, referralCustomer)
+      ? body.redeemReferralUnits
+      : 0;
     const bookingType = body.type;
     const { customerName, phone, customerEmail, hotel } = body;
     const tours = await getLiveTours();
@@ -114,9 +126,11 @@ export async function POST(request: NextRequest) {
     const supabase = createRequiredAdminClient();
     const { idempotencyKey, ...materialRequest } = body;
     const requestHash = bookingRequestHash(materialRequest);
-    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_with_pricing", {
+    const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_with_referral", {
       p_pricing_snapshot: pricing.data.pricingSnapshot,
       p_promo_code: body.promoCode || null,
+      p_referral_code: body.referralCode || null,
+      p_redeem_units: redeemReferralUnits,
       p_idempotency_key: idempotencyKey,
       p_request_hash: requestHash,
       p_reference: proposedReference,
@@ -145,13 +159,20 @@ export async function POST(request: NextRequest) {
       const capacityMessage = /promo code|sold out|places remain|capacity|unavailable/i.test(bookingError.message || "") ? bookingError.message : null;
       return bookingJson({ success: false, error: conflictMessage || capacityMessage || "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: conflictMessage ? 409 : capacityMessage ? 409 : 503 });
     }
-    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string; promo_code?: string; discount_amount?: number | string; trip_id?: string }; replayed?: boolean } | null;
+    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string; promo_code?: string; discount_amount?: number | string; trip_id?: string; referral_code?: string; referral_discount_percent?: number | string; referral_discount_amount?: number | string }; replayed?: boolean } | null;
     const bookingId = persisted?.booking?.id;
     const reference = persisted?.booking?.reference;
     if (!bookingId || !reference) return bookingJson({ success: false, error: "We could not confirm the saved booking." }, { status: 503 });
     const amount = Number(persisted.booking?.amount ?? calculatedAmount);
     const settledPrice = `${currencySymbol}${amount.toFixed(2)} total`;
-    bookingNotes = [bookingNotes, persisted?.booking?.trip_id ? `Trip ID: ${persisted.booking.trip_id}` : "", persisted?.booking?.promo_code ? `Promo code: ${persisted.booking.promo_code} · Discount: ${currencySymbol}${Number(persisted.booking.discount_amount || 0).toFixed(2)}` : ""].filter(Boolean).join("\n");
+    const referralDiscountPercent = Number(persisted?.booking?.referral_discount_percent || 0);
+    const referralDiscountAmount = Number(persisted?.booking?.referral_discount_amount || 0);
+    bookingNotes = [
+      bookingNotes,
+      persisted?.booking?.trip_id ? `Trip ID: ${persisted.booking.trip_id}` : "",
+      persisted?.booking?.promo_code ? `Promo code: ${persisted.booking.promo_code} · Discount: ${currencySymbol}${Number(persisted.booking.discount_amount || 0).toFixed(2)}` : "",
+      referralDiscountPercent > 0 ? `Referral discount: ${referralDiscountPercent}% · ${currencySymbol}${referralDiscountAmount.toFixed(2)}` : "",
+    ].filter(Boolean).join("\n");
     const message = buildBookingMessage({
       reference,
       customerName,
@@ -233,6 +254,9 @@ export async function POST(request: NextRequest) {
       bookingConfirmationPdf: confirmationPdf.toString("base64"),
       paymentUrl: null,
       paymentStatus: "cash-on-arrival",
+      referralDiscountPercent,
+      referralDiscountAmount,
+      referralCode: persisted?.booking?.referral_code || null,
     });
   } catch (error) {
     console.error("Booking submission failed", error);
