@@ -425,16 +425,16 @@ export default async function AdminPage({
     ],
   };
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12">
+    <main className={workspace === "bookings" ? "min-h-screen bg-slate-50 px-4 py-5 sm:px-6" : "min-h-screen bg-slate-50 px-4 py-10 sm:px-6 sm:py-12"}>
       {workspace === "overview" ? <AdminLegacyHashRedirect /> : null}
-      <div className="mx-auto max-w-7xl">
+      <div className={workspace === "bookings" ? "mx-auto min-w-0" : "mx-auto max-w-7xl"}>
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">
           Operations
         </p>
-        <h1 className="mt-2 text-4xl font-black text-slate-900">
+        <h1 className={workspace === "bookings" ? "mt-1 text-2xl font-black text-slate-900" : "mt-2 text-4xl font-black text-slate-900"}>
           {titles[workspace][0]}
         </h1>
-        <p className="mt-2 text-slate-600">{titles[workspace][1]}</p>
+        {workspace !== "bookings" ? <p className="mt-2 text-slate-600">{titles[workspace][1]}</p> : null}
         {error ? (
           <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
             <p className="font-bold">

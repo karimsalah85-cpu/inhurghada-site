@@ -1,0 +1,18 @@
+@media (min-width: 1024px) {
+  .shell { display: grid; grid-template-columns: 72px minmax(0, 1fr); }
+  .shell[data-pinned="true"] { grid-template-columns: 260px minmax(0, 1fr); }
+  .rail { position: sticky; top: 0; height: 100dvh; z-index: 30; }
+  .sidebar { width: 72px; height: 100dvh; overflow-x: hidden; }
+  .label { display: none; }
+  /* Reserve heading/search height so items stay under the pointer on expansion. */
+  h2.label { display: block; visibility: hidden; white-space: nowrap; overflow: hidden; }
+  .search { visibility: hidden; }
+  .brand { font-size: 0; }
+  .brand::after { content: "DRS"; font-size: 14px; }
+  .shell[data-pinned="true"] .sidebar, .sidebar:hover, .sidebar:focus-within { width: 260px; box-shadow: 8px 0 24px #0206171a; }
+  .shell[data-pinned="true"] .label, .sidebar:hover .label, .sidebar:focus-within .label { display: inline; }
+  .shell[data-pinned="true"] .search, .sidebar:hover .search, .sidebar:focus-within .search { visibility: visible; }
+  .shell[data-pinned="true"] h2.label, .sidebar:hover h2.label, .sidebar:focus-within h2.label { display: block; visibility: visible; }
+  .shell[data-pinned="true"] .brand, .sidebar:hover .brand, .sidebar:focus-within .brand { font-size: 18px; white-space: nowrap; }
+  .shell[data-pinned="true"] .brand::after, .sidebar:hover .brand::after, .sidebar:focus-within .brand::after { content: none; }
+}
