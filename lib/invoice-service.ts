@@ -8,18 +8,19 @@ import { buildWhatsAppLink } from "@/lib/booking-service";
 import { pdfColors, pdfPage } from "@/lib/pdf/theme";
 import { createPdfDocument, renderPdfToBuffer } from "@/lib/pdf/render";
 import { renderQrCodePng } from "@/lib/pdf/qrcode";
+import { resolveHeroImage } from "@/lib/pdf/hero-image";
 import { PdfFlow, stampPdfFooters } from "@/lib/pdf/layout";
 import {
   pdfPageBackground,
-  drawPdfHeader,
+  drawPdfHero,
+  drawExperienceTicket,
+  drawPdfInfoItem,
+  drawPdfGuestDetails,
+  drawPdfWhatsAppPanel,
+  drawPdfPolicyRow,
   drawStatusBadge,
   drawPriceBlock,
-  drawTicketCard,
   drawQrCodeBlock,
-  drawCalloutCard,
-  drawSectionTitle,
-  drawInfoRow,
-  pdfCard,
   pdfWrite,
   pdfTextHeight,
   pdfLabelValue,
@@ -46,6 +47,8 @@ export type InvoiceData = {
   hotel?: string;
   tripLines?: string[];
   locale?: string;
+  /** Selects the PDF hero photo (see lib/pdf/hero-image.ts); falls back to a generic destination photo when absent/unknown. */
+  tourSlug?: string;
 };
 
 export type BookingStatusPdfData = {
@@ -83,6 +86,8 @@ const confirmationCopy = {
     steps: "Keep this confirmation. We will confirm final availability and meeting or pickup details by WhatsApp. Show your booking reference when requested.",
     thanks: "Thank you for choosing Daily Red Sea.", policy: "Cancellation and refund policy",
     policyParagraphs: getCancellationPolicyParagraphs(),
+    policyHeadings: ["Cancellation", "Late arrival & no-show", "Operator changes", "Guest responsibility", "Diving requirements"],
+    metaLabels: ["DATE", "DEPARTURE", "TRAVELERS", "MEETING POINT"],
   },
   de: {
     confirmation: "Buchungsbestätigung", issued: "Ausgestellt", cash: "Barzahlung vor Ort", reference: "Buchungsnummer",
@@ -97,6 +102,8 @@ const confirmationCopy = {
       "Wenn Daily Red Sea oder der lokale Anbieter wegen Wetter, Sicherheit, zu geringer Teilnehmerzahl oder betrieblichen Gründen storniert, kannst du zwischen einer vollständigen Erstattung und einem verfügbaren Ersatztermin oder einer alternativen Aktivität wählen.",
       "Für eine Stornierung oder Änderung kontaktiere Daily Red Sea so früh wie möglich per WhatsApp und gib deine Buchungsnummer an. Genehmigte Karten- oder Online-Erstattungen erfolgen über die ursprüngliche Zahlungsmethode; Buchungen mit Barzahlung vor Ort werden nicht belastet.",
     ],
+    policyHeadings: ["Stornierung", "Verspätung & Nichterscheinen", "Änderungen durch den Anbieter", "So stornierst oder änderst du"],
+    metaLabels: ["DATUM", "ABFAHRT", "REISENDE", "TREFFPUNKT"],
   },
   ru: {
     confirmation: "Подтверждение бронирования", issued: "Дата выдачи", cash: "Оплата наличными на месте", reference: "Номер бронирования",
@@ -111,6 +118,8 @@ const confirmationCopy = {
       "Если Daily Red Sea или местный поставщик отменяет поездку из-за погоды, безопасности, недостаточного числа участников или операционных причин, вы можете выбрать полный возврат либо доступную альтернативную дату или экскурсию.",
       "Для отмены или изменения как можно раньше свяжитесь с Daily Red Sea в WhatsApp и укажите номер бронирования. Одобренные возвраты по карте или онлайн-платежу выполняются тем же способом; бронирования с оплатой наличными на месте не списываются.",
     ],
+    policyHeadings: ["Отмена", "Опоздание и неявка", "Изменения от оператора", "Как отменить или изменить"],
+    metaLabels: ["ДАТА", "ОТПРАВЛЕНИЕ", "УЧАСТНИКИ", "МЕСТО ВСТРЕЧИ"],
   },
   ar: {
     confirmation: "تأكيد الحجز", issued: "تاريخ الإصدار", cash: "الدفع نقداً عند الوصول", reference: "رقم الحجز",
@@ -125,6 +134,8 @@ const confirmationCopy = {
       "إذا ألغت ديلي رد سي أو الجهة المحلية الرحلة بسبب الطقس أو السلامة أو عدم اكتمال العدد أو أسباب تشغيلية، يمكنك اختيار استرداد المبلغ بالكامل أو اختيار موعد أو نشاط بديل متاح.",
       "لطلب الإلغاء أو التعديل، تواصل مع ديلي رد سي عبر واتساب في أقرب وقت ممكن واذكر رقم الحجز. تتم إعادة المبالغ المعتمدة للبطاقات أو المدفوعات الإلكترونية إلى وسيلة الدفع الأصلية، ولا يتم تحصيل رسوم الحجوزات المدفوعة نقداً عند الوصول.",
     ],
+    policyHeadings: ["الإلغاء", "التأخر وعدم الحضور", "تغييرات المشغل", "كيفية الإلغاء أو التعديل"],
+    metaLabels: ["التاريخ", "المغادرة", "المسافرون", "نقطة التجمع"],
   },
   pl: {
     confirmation: "Potwierdzenie rezerwacji", issued: "Wystawiono", cash: "Płatność gotówką na miejscu", reference: "Numer rezerwacji",
@@ -139,6 +150,8 @@ const confirmationCopy = {
       "Jeśli Daily Red Sea lub lokalny dostawca odwoła wycieczkę z powodu pogody, bezpieczeństwa, niewystarczającej liczby uczestników lub przyczyn operacyjnych, możesz wybrać pełny zwrot albo dostępny termin lub atrakcję zastępczą.",
       "Aby anulować lub zmienić rezerwację, skontaktuj się z Daily Red Sea przez WhatsApp jak najwcześniej i podaj numer rezerwacji. Zatwierdzone zwroty kartą lub płatności online są realizowane pierwotną metodą; rezerwacje płatne gotówką na miejscu nie są obciążane.",
     ],
+    policyHeadings: ["Anulowanie", "Spóźnienie i brak stawiennictwa", "Zmiany operatora", "Jak anulować lub zmienić"],
+    metaLabels: ["DATA", "WYJAZD", "UCZESTNICY", "MIEJSCE ZBIÓRKI"],
   },
   zh: {
     confirmation: "预订确认单", issued: "签发日期", cash: "到场现金支付", reference: "预订编号",
@@ -153,6 +166,8 @@ const confirmationCopy = {
       "若 Daily Red Sea 或当地供应商因天气、安全、人数不足或运营原因取消，您可选择全额退款，或选择可用的替代日期或活动。",
       "如需取消或更改，请尽早通过 WhatsApp 联系 Daily Red Sea 并提供预订编号。已批准的银行卡或在线付款退款将退回原支付方式；到场现金支付的预订不会被扣款。",
     ],
+    policyHeadings: ["取消", "迟到和未到场", "运营商变更", "如何取消或更改"],
+    metaLabels: ["日期", "出发时间", "出行人数", "集合地点"],
   },
 } as const;
 
@@ -172,86 +187,97 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const issuedDate = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale, { day: "2-digit", month: "short", year: "numeric" }).format(invoice.issuedAt);
   const rtl = locale === "ar";
   const qrPng = await renderQrCodePng(buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${invoice.reference}`));
+  const heroImage = resolveHeroImage(invoice.tourSlug, invoice.itemName);
 
   const doc = createPdfDocument({ title: `${t.confirmation} - ${invoice.reference}`, locale, createdAt: invoice.issuedAt });
   const margin = pdfPage.margin;
   const contentWidth = pdfPage.width - margin * 2;
 
+  // --- Page 1: photographic hero + one dominant ticket + two supporting blocks ---
   doc.addPage();
   pdfPageBackground(doc);
-  const headerBottom = drawPdfHeader(doc, { variant: "hero", title: t.confirmation, subtitle: `${t.issued}: ${issuedDate}`, rtl });
-  drawStatusBadge(doc, t.cash, 405, 95, 142, 38, "positive", rtl);
+  const heroHeight = 235;
+  drawPdfHero(doc, { image: heroImage, height: heroHeight, title: t.confirmation, subtitle: `${t.issued}: ${issuedDate}  ·  ${invoice.reference}`, rtl });
 
-  // Ticket card: reference + QR stub. QR opens a pre-filled WhatsApp chat, so a
-  // guest who only has the printed/downloaded PDF can still reach support instantly.
-  const ticketY = headerBottom + 20;
-  const stubWidth = 150;
-  const ticketHeight = 92;
-  const ticket = drawTicketCard(doc, { x: margin, y: ticketY, width: contentWidth, height: ticketHeight, stubWidth, rtl });
-  pdfLabelValue(doc, t.reference, invoice.reference, ticket.infoX + 16, ticketY + 18, ticket.infoWidth - 32, { rtl });
-  pdfWrite(doc, t.keepReference, ticket.infoX + 16, ticketY + 56, ticket.infoWidth - 32, { size: 9, color: pdfColors.muted, rtl, wrap: true });
-  drawQrCodeBlock(doc, qrPng, ticket.stubX + stubWidth / 2 - 32, ticketY + 14, 64);
+  const ticketY = heroHeight + 24;
+  const ticketHeight = 300;
+  const ticket = drawExperienceTicket(doc, { x: margin, y: ticketY, width: contentWidth, height: ticketHeight, rtl });
+  const padLeft = 26;
+  const infoX = ticket.leftX + padLeft;
+  const infoWidth = ticket.leftWidth - padLeft * 2;
 
-  // Guest details.
-  const guestY = ticketY + ticketHeight + 20;
-  const guestHeight = 126;
-  pdfCard(doc, margin, guestY, contentWidth, guestHeight);
-  drawSectionTitle(doc, t.guest, margin + 16, guestY + 17, contentWidth - 32, rtl);
-  pdfLabelValue(doc, t.guestName, invoice.customerName || t.pending, margin + 16, guestY + 47, 210, { rtl });
-  pdfLabelValue(doc, "WhatsApp", invoice.customerPhone || t.pending, margin + 252, guestY + 47, 230, { rtl });
-  pdfLabelValue(doc, "Email", invoice.customerEmail || t.pending, margin + 16, guestY + 85, contentWidth - 32, { rtl });
+  pdfWrite(doc, "EXPERIENCE PASS", infoX, ticketY + 24, infoWidth, { size: 8.5, color: pdfColors.coral, rtl, bold: true, letterSpacing: 1.2 });
+  pdfWrite(doc, destinationCue(invoice.itemName), infoX, ticketY + 38, infoWidth, { size: 8, color: pdfColors.muted, rtl, letterSpacing: 0.6 });
+  const titleY = ticketY + 60;
+  pdfWrite(doc, invoice.itemName || "Daily Red Sea", infoX, titleY, infoWidth, { size: 17, color: pdfColors.navy, rtl, bold: true, lineGap: 2 });
+  const titleHeight = pdfTextHeight(doc, invoice.itemName || "Daily Red Sea", infoWidth, 17, rtl, 2);
 
-  // Experience details. The pickup/meeting-point field is free text and can run
-  // long, so its height is measured and the card grows to fit (capped, with an
-  // ellipsis), so long text can never bleed into the total block below.
-  const experienceY = guestY + guestHeight + 20;
-  const pickupLabel = t.pickup;
-  const pickupValue = invoice.hotel || t.pending;
-  const pickupX = margin + 252;
-  const pickupWidth = 231;
-  const pickupValueY = experienceY + 143 + 15;
-  const pickupBaselineBudget = 601 - (pickupValueY - experienceY - 190); // vertical room the original fixed-height design allotted
-  const pickupMaxExtra = 40;
-  const pickupFullHeight = pdfTextHeight(doc, pickupValue, pickupWidth, 10, rtl);
-  const pickupExtra = Math.min(Math.max(0, pickupFullHeight - pickupBaselineBudget), pickupMaxExtra);
-  const experienceHeight = 190 + pickupExtra;
-
-  pdfCard(doc, margin, experienceY, contentWidth, experienceHeight);
-  drawSectionTitle(doc, t.experience, margin + 16, experienceY + 17, contentWidth - 32, rtl);
-  pdfWrite(doc, invoice.itemName || "Daily Red Sea", margin + 16, experienceY + 46, contentWidth - 32, { size: 14, color: pdfColors.ink, rtl });
-  if (invoice.tripLines?.length) {
-    pdfWrite(doc, invoice.tripLines.slice(0, 4).join("\n"), margin + 16, experienceY + 75, contentWidth - 32, { size: 8.5, color: pdfColors.muted, rtl });
-  } else {
-    drawInfoRow(doc, t.date, invoice.date || t.pending, margin + 16, experienceY + 94, 210, rtl);
-    drawInfoRow(doc, t.time, invoice.time || t.pending, margin + 252, experienceY + 94, 230, rtl);
-  }
-  drawInfoRow(doc, t.travelers, invoice.travelerSummary || `${quantity}`, margin + 16, experienceY + 143, 210, rtl);
-  pdfWrite(doc, pickupLabel, pickupX, experienceY + 143, pickupWidth, { size: 8, color: pdfColors.muted, rtl });
-  doc.font("Noto").fontSize(10).fillColor(pdfColors.ink).text(pickupValue, pickupX, pickupValueY, {
-    width: pickupWidth, align: rtl ? "right" : "left", lineGap: 2,
-    height: pickupBaselineBudget + pickupExtra, ellipsis: true,
+  const metaY = titleY + titleHeight + 24;
+  const metaGap = 14;
+  const metaColWidth = (infoWidth - metaGap * 3) / 4;
+  const metaItems: { icon: "calendar" | "clock" | "people" | "pin"; label: string; value: string }[] = invoice.tripLines?.length
+    ? [{ icon: "calendar", label: t.metaLabels[0], value: invoice.tripLines[0] || t.pending }]
+    : [
+      { icon: "calendar", label: t.metaLabels[0], value: invoice.date || t.pending },
+      { icon: "clock", label: t.metaLabels[1], value: invoice.time || t.pending },
+      { icon: "people", label: t.metaLabels[2], value: invoice.travelerSummary || `${quantity}` },
+      { icon: "pin", label: t.metaLabels[3], value: invoice.hotel || t.pending },
+    ];
+  metaItems.forEach((item, index) => {
+    const colX = rtl ? infoX + infoWidth - metaColWidth - index * (metaColWidth + metaGap) : infoX + index * (metaColWidth + metaGap);
+    drawPdfInfoItem(doc, { ...item, x: colX, y: metaY, width: metaColWidth, rtl });
   });
 
-  const totalY = experienceY + experienceHeight + 12;
-  drawPriceBlock(doc, t.total, money, t.paymentNote, margin, totalY, contentWidth, 76, rtl);
+  // Stub: reference, QR (opens a pre-filled WhatsApp chat), payment status, total.
+  const stubPad = 18;
+  const stubInnerX = ticket.stubX + stubPad;
+  const stubInnerWidth = ticket.stubWidth - stubPad * 2;
+  let stubY = ticket.top + 24;
+  pdfLabelValue(doc, t.reference, invoice.reference, stubInnerX, stubY, stubInnerWidth, { rtl, labelColor: "#9FC3D6", valueColor: pdfColors.white });
+  stubY += 34;
+  const qrSize = Math.min(76, stubInnerWidth);
+  drawQrCodeBlock(doc, qrPng, stubInnerX + (stubInnerWidth - qrSize) / 2, stubY, qrSize);
+  stubY += qrSize + 16;
+  drawStatusBadge(doc, t.cash, stubInnerX, stubY, stubInnerWidth, 22, "positive", rtl);
+  stubY += 34;
+  pdfWrite(doc, t.total, stubInnerX, stubY, stubInnerWidth, { size: 8, color: "#9FC3D6", rtl, letterSpacing: 0.3 });
+  pdfWrite(doc, money, stubInnerX, stubY + 12, stubInnerWidth, { size: 19, color: pdfColors.white, rtl, bold: true });
+  pdfWrite(doc, t.paymentNote, stubInnerX, stubY + 36, stubInnerWidth, { size: 7, color: "#cfe3ee", rtl, wrap: true, lineGap: 2 });
 
-  const nextY = totalY + 76 + 12;
-  drawCalloutCard(doc, t.next, t.steps, margin, nextY, contentWidth, 73, rtl);
-  pdfWrite(doc, t.thanks, margin, nextY + 73 + 10, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
+  // Two supporting blocks only — everything else lives inside the ticket.
+  const guestY = ticketY + ticketHeight + 20;
+  const guestHeight = 62;
+  drawPdfGuestDetails(doc, {
+    title: t.guest, name: invoice.customerName || t.pending, whatsapp: invoice.customerPhone || t.pending, email: invoice.customerEmail || t.pending,
+    x: margin, y: guestY, width: contentWidth, height: guestHeight, rtl,
+  });
 
+  const whatsappY = guestY + guestHeight + 16;
+  const whatsappHeight = 92;
+  drawPdfWhatsAppPanel(doc, { title: t.next, body: t.steps, x: margin, y: whatsappY, width: contentWidth, height: whatsappHeight, rtl });
+  pdfWrite(doc, t.thanks, margin, whatsappY + whatsappHeight + 14, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
+
+  // --- Page 2: compact header + five policy rows (not paragraphs) + branded footer ---
   const policy = new PdfFlow(doc, { header: { variant: "compact", title: t.policy, rtl } });
   policy.newPage();
   const policyParagraphs = locale === "en" ? getCancellationPolicyParagraphs() : t.policyParagraphs;
-  for (const paragraph of policyParagraphs) {
-    const height = pdfTextHeight(doc, paragraph, contentWidth, 9.5, rtl, 4);
-    policy.ensure(height + 18);
-    pdfWrite(doc, paragraph, margin, policy.y, contentWidth, { size: 9.5, color: pdfColors.muted, rtl, lineGap: 4 });
-    policy.advance(height + 18);
-  }
+  policyParagraphs.forEach((paragraph, index) => {
+    const heading = t.policyHeadings[index] || t.policy;
+    const consumed = drawPdfPolicyRow(doc, { icon: index, heading, body: paragraph, x: margin, y: policy.y, width: contentWidth, rtl });
+    policy.advance(consumed);
+  });
   stampPdfFooters(doc, { reference: invoice.reference, rtl });
 
   doc.end();
   return renderPdfToBuffer(doc);
+}
+
+function destinationCue(itemName: string) {
+  const name = (itemName || "").toLowerCase();
+  if (name.includes("jeddah")) return "JEDDAH  →  RED SEA";
+  if (name.includes("luxor") || name.includes("cairo") || name.includes("karnak")) return "HURGHADA  →  NILE VALLEY";
+  if (name.includes("marsa")) return "MARSA ALAM  →  RED SEA";
+  return "HURGHADA  →  RED SEA";
 }
 
 type StatusPdfCopy = {
@@ -360,9 +386,9 @@ export async function createBookingStatusPdf(booking: BookingStatusPdfData): Pro
   const doc = createPdfDocument({ title: `${t.statusUpdate} - ${booking.reference}`, locale, createdAt: booking.generatedAt });
   const flow = new PdfFlow(doc, { header: { variant: "compact", title: t.statusUpdate, subtitle: `${booking.reference} | ${generatedDate}`, rtl }, bottomMargin: 56 });
 
-  const write = (value: string, width: number, x: number, size = 10, color: string = pdfColors.ink) => pdfWrite(doc, value, x, flow.y, width, { size, color, rtl, wrap: true });
+  const write = (value: string, width: number, x: number, size = 10, color: string = pdfColors.text) => pdfWrite(doc, value, x, flow.y, width, { size, color, rtl, wrap: true });
   const paragraphHeight = (value: string, width: number, size: number) => pdfTextHeight(doc, value, width, size, rtl, 3);
-  const paragraph = (value: string, size = 10, color: string = pdfColors.ink) => {
+  const paragraph = (value: string, size = 10, color: string = pdfColors.text) => {
     const h = paragraphHeight(value, contentWidth, size);
     flow.ensure(h + 12);
     write(value, contentWidth, margin, size, color);
@@ -374,7 +400,7 @@ export async function createBookingStatusPdf(booking: BookingStatusPdfData): Pro
     const h = Math.max(paragraphHeight(label, 190, 10), paragraphHeight(value, 260, 10));
     flow.ensure(h + 12);
     pdfWrite(doc, label, margin + 293, flow.y, 190, { size: 10, color: pdfColors.muted, rtl });
-    pdfWrite(doc, value, margin, flow.y, 260, { size: 10, color: pdfColors.ink, rtl });
+    pdfWrite(doc, value, margin, flow.y, 260, { size: 10, color: pdfColors.text, rtl });
     flow.advance(h + 10);
   };
   const participants = (counts: unknown, guests?: number | null) => {

@@ -206,6 +206,7 @@ export async function POST(request: NextRequest) {
       paymentMethod: "Cash on arrival", date: body.date, time: body.time || extractBookingValue(String(body.message || ""), "Time"), hotel: pickupOrMeetingPoint,
       tripLines: localizedTripLines,
       locale: body.locale,
+      tourSlug: body.tourSlug || undefined,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
 
