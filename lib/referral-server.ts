@@ -19,21 +19,23 @@ function tokenSecret() {
 /** A short-lived, server-signed proof that a customer verified ownership of an email/phone via OTP. */
 export function signRedemptionToken(customerKey: string) {
   const expires = Date.now() + REDEMPTION_TOKEN_TTL_MS;
-  const payload = `${customerKey}.${expires}`;
+  const payload = Buffer.from(JSON.stringify({ version: 1, customerKey, expires })).toString("base64url");
   const signature = createHmac("sha256", tokenSecret()).update(payload).digest("hex");
-  return Buffer.from(`${payload}.${signature}`).toString("base64url");
+  return `${payload}.${signature}`;
 }
 
 export function verifyRedemptionToken(token: string | undefined, customerKey: string) {
   if (!token) return false;
   try {
-    const decoded = Buffer.from(token, "base64url").toString("utf8");
-    const [key, expiresRaw, signature] = decoded.split(".");
-    if (!key || !expiresRaw || !signature) return false;
-    const expires = Number(expiresRaw);
-    if (!Number.isFinite(expires) || Date.now() > expires) return false;
-    if (key !== customerKey) return false;
-    const expected = createHmac("sha256", tokenSecret()).update(`${key}.${expiresRaw}`).digest("hex");
+    if (token.length > 2048) return false;
+    const parts = token.split(".");
+    if (parts.length !== 2) return false;
+    const [payload, signature] = parts;
+    if (!/^[a-f0-9]{64}$/.test(signature)) return false;
+    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    if (claims.version !== 1 || claims.customerKey !== customerKey) return false;
+    if (!Number.isSafeInteger(claims.expires) || Date.now() >= claims.expires || claims.expires > Date.now() + REDEMPTION_TOKEN_TTL_MS) return false;
+    const expected = createHmac("sha256", tokenSecret()).update(payload).digest("hex");
     const a = Buffer.from(signature);
     const b = Buffer.from(expected);
     return a.length === b.length && timingSafeEqual(a, b);

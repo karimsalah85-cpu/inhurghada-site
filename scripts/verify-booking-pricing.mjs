@@ -25,6 +25,7 @@ await db.exec(read('20260913123742_trip_identifiers.sql'));
 await db.exec(read('20260913123918_booking_promo_codes.sql'));
 await db.exec(read('20260914114918_booking_pricing_snapshot.sql'));
 await db.exec(read('20260920100000_referral_program.sql'));
+await db.exec(read('20260921070742_referral_acquisition_hardening.sql'));
 await db.exec(`grant all on all tables in schema public to service_role;grant usage on schema public to service_role;`);
 await db.exec(`insert into content_items(content_type,slug,locale,status,title,trip_id) values('tour','reef','en','published','Reef','DRS-001');insert into tour_availability(tour_slug,service_date,capacity) values('reef','2027-01-01',50);`);
 const create=async(code,changes='')=> db.exec(`insert into promo_codes(code,discount_type,discount_value,max_redemptions${changes?', '+changes.split('=')[0]:''}) values('${code}','percent',10,1${changes?', '+changes.split('=').slice(1).join('='):''})`);
@@ -63,50 +64,5 @@ await assert.rejects(reserve({code:null}),/permission denied/);
 await db.exec(`reset role;set role service_role`);
 assert.equal((await reserve({code:null})).booking.amount,100);
 
-// Referral program: first booking earns the referrer their own code; a genuinely new,
-// non-self referred customer gets 5% off; the referrer only earns after the referred
-// booking reaches 'completed'; redemption is capped at 15% and cannot be double-spent.
-await reserve({code:null,email:'referrer@example.com',phone:'+201111111111'});
-const referrerRow=(await db.query(`select referral_code from referral_identities where customer_key='referrer@example.com'`)).rows[0];
-assert.ok(referrerRow?.referral_code, 'referrer should get their own referral code on first booking');
-const referrerCode=referrerRow.referral_code;
-
-const referred=await reserve({code:null,email:'referred@example.com',phone:'+202222222222',referralCode:referrerCode});
-assert.equal(Number(referred.booking.referral_discount_percent),5);
-assert.equal(Number(referred.booking.referral_discount_amount),5);
-assert.equal(Number(referred.booking.amount),95);
-assert.equal(referred.booking.referrer_customer_key,'referrer@example.com');
-
-// Self-referral: no discount, no attribution.
-const selfReferral=await reserve({code:null,email:'referrer@example.com',phone:'+201111111111',referralCode:referrerCode});
-assert.equal(Number(selfReferral.booking.referral_discount_percent),0);
-
-// A second, different new customer using the same code again should NOT get the first-booking
-// discount a second time once the referrer's OWN identity already has a booking — but a fresh
-// referred identity still qualifies once, and only once, ever.
-const referredAgainSameCustomer=await reserve({code:null,email:'referred@example.com',phone:'+202222222222',referralCode:referrerCode});
-assert.equal(Number(referredAgainSameCustomer.booking.referral_discount_percent),0,'a customer cannot claim the first-booking referral discount twice');
-
-assert.equal(await db.query(`select public.referral_reward_balance('referrer@example.com') as b`).then(r=>r.rows[0].b),0,'no reward yet — referred booking has not completed');
-await db.query(`select public.sync_referral_reward_for_booking($1,'completed')`,[referred.booking.id]);
-await db.query(`select public.sync_referral_reward_for_booking($1,'completed')`,[referred.booking.id]);
-assert.equal(await db.query(`select public.referral_reward_balance('referrer@example.com') as b`).then(r=>r.rows[0].b),1,'repeated status updates must not duplicate the reward');
-assert.equal((await db.query(`select count(*)::int n from referral_reward_transactions where type='EARN'`)).rows[0].n,1);
-
-await db.query(`select public.sync_referral_reward_for_booking($1,'cancelled')`,[referred.booking.id]);
-assert.equal(await db.query(`select public.referral_reward_balance('referrer@example.com') as b`).then(r=>r.rows[0].b),0,'cancelling an already-earned reward reverses it');
-assert.equal((await db.query(`select status from referrals where referred_booking_id=$1`,[referred.booking.id])).rows[0].status,'reversed');
-
-// Rebuild balance to 4 units (20%) to check the 15% cap and remaining balance after redemption.
-for (let i=0;i<4;i++) {
-  const r=await reserve({code:null,email:`referred-${i}@example.com`,phone:`+20300000000${i}`,referralCode:referrerCode});
-  await db.query(`select public.sync_referral_reward_for_booking($1,'completed')`,[r.booking.id]);
-}
-assert.equal(await db.query(`select public.referral_reward_balance('referrer@example.com') as b`).then(r=>r.rows[0].b),4);
-const redeemed=await reserve({code:null,email:'referrer@example.com',phone:'+201111111111',redeemUnits:5});
-assert.equal(Number(redeemed.booking.referral_discount_percent),15,'redemption never exceeds 15% per booking even with 20% available');
-assert.equal(Number(redeemed.booking.referral_reward_units_redeemed),3);
-assert.equal(await db.query(`select public.referral_reward_balance('referrer@example.com') as b`).then(r=>r.rows[0].b),1,'5% remains available after redeeming 15% of 20%');
-
 await db.close();
-console.log('PASS: pricing snapshot persistence, promo totals, replay immutability, transaction rollback, capacity, role restrictions, and referral attribution/earning/redemption accounting.');
+console.log('PASS: pricing snapshots, promo totals, replay immutability, transaction rollback, capacity and role restrictions. Run npx vitest run tests/referral-database.test.ts for current referral lifecycle/abuse checks.');

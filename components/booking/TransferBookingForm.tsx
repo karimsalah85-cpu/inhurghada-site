@@ -1,5 +1,8 @@
 "use client";
 
+import ReferralRewardsField, { useReferralRewards } from "@/components/booking/ReferralRewardsField";
+import ReferralCodeField, { useReferralCode } from "@/components/booking/ReferralCodeField";
+
 import { type FormEvent, type ReactNode, useMemo, useRef, useState } from "react";
 import { CalendarDays, Car, Clock3, Hotel, MapPin, MessageCircle, Phone, Plane, User, Users } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
@@ -71,6 +74,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const rewards = useReferralRewards(email, language);
+  const referral = useReferralCode();
   const [pickup, setPickup] = useState(initialService === "airport" ? "Hurghada Airport" : "Hurghada Hotels");
   const [pickupDetails, setPickupDetails] = useState("");
   const [dropoff, setDropoff] = useState(initialService === "airport" ? "Hurghada Hotels" : "Senzo Mall");
@@ -155,6 +160,9 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
           customerName: name.trim(),
           phone: phoneCheck.e164,
           customerEmail: email.trim(),
+          referralCode: referral.code || undefined,
+          redeemReferralUnits: rewards.redemption?.units,
+          referralVerificationToken: rewards.redemption?.token,
           tourName: serviceName,
           location: `${pickup} to ${dropoff}`,
           duration: "One way",
@@ -179,6 +187,11 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         return;
       }
 
+      if (data.referralDiscountPercent > 0) trackEvent("referral_discount_applied", { value: Number(data.referralDiscountAmount || 0), currency: "USD", percent: data.referralDiscountPercent });
+      if (data.referralRewardUnitsRedeemed > 0) trackEvent("referral_reward_redeemed", { transaction_id: data.reference, percent: data.referralRewardUnitsRedeemed * 5 });
+      if (data.referralCode) trackEvent("referred_booking_created", { transaction_id: data.reference });
+      rewards.reset();
+      try { window.sessionStorage.removeItem("drs_referral_redemption"); } catch { /* optional handoff cleanup */ }
       trackEvent("booking_complete", { transaction_id: data.reference, booking_type: "transfer", item_name: serviceName, value: total, currency: "USD" });
 
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
@@ -233,6 +246,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
       <label className="mt-4 block text-sm font-medium text-ink" htmlFor="transfer-notes">{tr("Notes (optional)", "Hinweise (optional)", "Примечания (необязательно)")}</label>
       <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-line bg-white p-3 text-ink outline-none placeholder:text-muted focus:border-ocean" placeholder={tr("Add luggage, child seat, or any special request.", "Kindersitz oder besondere Wünsche hinzufügen.", "Укажите детское кресло или другие пожелания.")} />
       <p className="mt-4 rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">{tr("Before booking, please review our", "Bitte lies vor der Buchung unsere", "Перед бронированием ознакомьтесь с")} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{tr("cancellation policy", "Stornierungsbedingungen", "правилами отмены")}</Link>. {tr("By submitting, you agree to our terms and conditions.", "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu.", "Отправляя заявку, вы соглашаетесь с нашими условиями.")}</p>
+      <div className="mt-4 space-y-4"><ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/><ReferralCodeField referral={referral} locale={language} disabled={submitting}/></div>
       <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"><MessageCircle size={20} />{submitting ? tr("Sending transfer request…", "Transferanfrage wird gesendet…", "Отправка заявки…") : `${tr("Book one way", "Einfache Fahrt buchen", "Забронировать поездку")} · $${total.toFixed(2)}`}</button>
     </form>
   );

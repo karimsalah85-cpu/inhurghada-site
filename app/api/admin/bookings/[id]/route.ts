@@ -3,6 +3,7 @@ import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
+import { deliverReferralNotifications } from "@/lib/referral-notifications";
 import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 
 const bookingStatuses = new Set(["new", "confirmed", "completed", "cancelled"]);
@@ -57,12 +58,11 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: "booking", resource_identifier: id, summary_text: `Updated booking ${data.reference || id}`, before_value: existing, after_value: { ...data, actor: user?.email } });
   const changed = (update.status && update.status !== existing.status)
     || (update.payment_status && update.payment_status !== existing.payment_status);
-  if (update.status && update.status !== existing.status) {
-    const { error: referralError } = await supabase.rpc("sync_referral_reward_for_booking", { p_booking_id: id, p_new_status: update.status });
-    if (referralError) console.error("Referral reward sync failed", { bookingId: id, message: referralError.message });
-  }
+  // Reward and completion events are posted atomically by the booking database trigger.
+  // Delivery is retryable through the existing cron if the email provider is unavailable.
+  if (changed) await deliverReferralNotifications().catch(error => console.error("Referral notification delivery deferred", error.message));
   const customerAssignment = changed ? await getCustomerVisibleAssignment(supabase, id) : {};
-  const notification = changed ? await sendBookingAndPaymentStatusNotification({ ...data, ...customerAssignment }) : null;
+  const notification = changed && data.status !== "completed" ? await sendBookingAndPaymentStatusNotification({ ...data, ...customerAssignment }) : null;
   return json({
     booking: data,
     notification: notification

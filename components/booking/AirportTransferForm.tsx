@@ -1,5 +1,8 @@
 "use client";
 
+import ReferralRewardsField, { useReferralRewards } from "@/components/booking/ReferralRewardsField";
+import ReferralCodeField, { useReferralCode } from "@/components/booking/ReferralCodeField";
+
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -679,6 +682,8 @@ export default function AirportTransferForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const rewards = useReferralRewards(email, language);
+  const referral = useReferralCode();
   const [notes, setNotes] = useState("");
   const [website, setWebsite] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -798,6 +803,9 @@ export default function AirportTransferForm() {
         customerName: name.trim(),
         phone: phoneCheck.e164,
         customerEmail: email.trim(),
+          referralCode: quote.requiresManualConfirmation ? undefined : referral.code || undefined,
+          redeemReferralUnits: quote.requiresManualConfirmation ? undefined : rewards.redemption?.units,
+          referralVerificationToken: quote.requiresManualConfirmation ? undefined : rewards.redemption?.token,
         tripType,
         direction,
         zone: zone ?? undefined,
@@ -833,6 +841,11 @@ export default function AirportTransferForm() {
         return;
       }
 
+      if (data.referralDiscountPercent > 0) trackEvent("referral_discount_applied", { value: Number(data.referralDiscountAmount || 0), currency: "USD", percent: data.referralDiscountPercent });
+      if (data.referralRewardUnitsRedeemed > 0) trackEvent("referral_reward_redeemed", { transaction_id: data.reference, percent: data.referralRewardUnitsRedeemed * 5 });
+      if (data.referralCode) trackEvent("referred_booking_created", { transaction_id: data.reference });
+      rewards.reset();
+      try { window.sessionStorage.removeItem("drs_referral_redemption"); } catch { /* optional handoff cleanup */ }
       trackEvent("booking_complete", {
         transaction_id: data.reference,
         booking_type: "transfer",
@@ -1086,6 +1099,7 @@ export default function AirportTransferForm() {
         {copy.cancellationBefore}{" "}
         <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{copy.cancellation}</Link>. {copy.agree}
       </p>
+      {!quote.requiresManualConfirmation ? <div className="mt-4 space-y-4"><ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/><ReferralCodeField referral={referral} locale={language} disabled={submitting}/></div> : null}
       <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60">
         <MessageCircle size={20} />
         {submitting ? copy.submitting : quote.requiresManualConfirmation ? copy.submit : `${copy.submit} · $${quote.total.toFixed(2)}`}

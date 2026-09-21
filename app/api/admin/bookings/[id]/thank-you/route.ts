@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasLivePermission } from "@/lib/admin-permission";
-import { buildThankYouEmail } from "@/lib/booking-communications-i18n";
-import { sendBookingEmail } from "@/lib/booking-service";
+import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -19,8 +18,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (error || !booking) return json({ error: "Booking not found." }, 404);
   if (booking.status !== "completed") return json({ error: "Mark the trip as completed before sending a thank-you email." }, 409);
   if (!booking.customer_email) return json({ error: "This customer does not have an email address." }, 400);
-  const email = buildThankYouEmail({ locale: booking.locale, customerName: booking.customer_name, reference: booking.reference, tourName: booking.tour_name });
-  const result = await sendBookingEmail(booking.customer_email, email.subject, email.html);
+  const result = await sendBookingAndPaymentStatusNotification({ ...booking, date: null });
   if (!result.success) return json({ error: "The thank-you email could not be delivered.", reason: result.reason }, 503);
   await supabase.rpc("record_admin_audit", { action_name: "send", resource_name: "booking_thank_you_email", resource_identifier: id, summary_text: `Sent thank-you email for ${booking.reference}`, before_value: null, after_value: { recipient: booking.customer_email, locale: booking.locale, actor: user?.email } });
   return json({ sent: true, recipient: booking.customer_email });

@@ -1,5 +1,7 @@
 "use client";
 
+import ReferralProgramInfo from "@/components/referral/ReferralProgramInfo";
+
 import Link from "next/link";
 import { useState } from "react";
 import { CalendarRange, CheckCircle2, Clock3, MessageCircle, ShieldCheck, Smartphone, Ticket } from "lucide-react";
@@ -602,6 +604,7 @@ export default function BookingPortal() {
           <Link href="/booking" className="font-semibold text-ocean-dark">{copy.footerBookingPortal}</Link>
         </div>
       </footer>
+      <section className="mx-auto max-w-5xl px-6 pb-10"><ReferralProgramInfo locale={language} /></section>
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import { buildReferralMessage } from "@/lib/referral-messages";
 import { companyStatement, sendBookingEmail } from "@/lib/booking-service";
 import { createBookingStatusPdf } from "@/lib/invoice-service";
 import { bookingLocale } from "@/lib/booking-communications-i18n";
@@ -109,6 +110,13 @@ const localizedStatusLabels = {
 
 export async function sendBookingAndPaymentStatusNotification(booking: StatusBooking) {
   if (!booking.customer_email) return { success: false, reason: "missing-recipient" };
+  if (booking.status === "completed") {
+    const { createRequiredAdminClient } = await import("@/utils/supabase/admin");
+    const { data: account, error } = await createRequiredAdminClient().rpc("referral_account", { p_customer_key: booking.customer_email.trim().toLowerCase() });
+    if (error) return { success: false, reason: "referral-account-unavailable" };
+    const email = buildReferralMessage({ event: "trip_completed", customerName: booking.customer_name, locale: booking.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code });
+    return sendBookingEmail(booking.customer_email, email.subject, email.html);
+  }
   const email = buildBookingAndPaymentStatusEmail(booking);
   if (!email) return { success: false, reason: "invalid-status" };
   const attachment = await buildBookingStatusPdfAttachment(booking);

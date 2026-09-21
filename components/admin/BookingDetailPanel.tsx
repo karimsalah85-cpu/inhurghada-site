@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { ReferralReviewPanel } from "./ReferralReviewPanel";
 import { readPricingSnapshot, validParticipantCounts, type BookingPricingSnapshot } from "@/lib/booking-pricing-snapshot";
 type Booking={id:string;reference:string;customer_name:string;tour_name:string|null;amount:number|string;currency:string;date:string|null;status?:string;phone?:string;customer_email?:string|null;hotel?:string|null;guests?:number|null;notes?:string|null;payment_status?:string;booking_source?:string;supplier_name?:string|null};
 type Expense={id:string;description:string;amount:number|string;currency:string;expense_date:string;category:string|null};
@@ -41,6 +42,7 @@ export default function BookingDetailPanel({booking,onClose}:{booking:Booking;on
   <div><p className="text-xs font-semibold text-slate-600">Supplier</p><p>{detail ? detail.suppliers.find(supplier => supplier.id === assigned("supplier")?.supplier_id)?.name || "Not assigned" : booking.supplier_name || "Loading assignment…"}</p></div>
   {booking.notes ? <div className="sm:col-span-2"><p className="text-xs font-semibold text-slate-600">Booking notes</p><p className="whitespace-pre-wrap wrap-break-word">{booking.notes}</p></div> : null}
  </section>
+ <ReferralReviewPanel bookingId={booking.id}/>
  {error?<p className="mt-4 rounded-xl bg-rose-50 p-3 text-rose-700" role="alert">{error}</p>:null}{!detail?<p role="status" className="mt-4">{error ? "Additional details could not be loaded." : "Loading booking details…"}</p>:<div className="mt-6 space-y-6">
  {detail.booking?.transfer_details?<TransferBlock t={detail.booking.transfer_details} money={money}/>:null}
  <PricingBlock booking={detail.booking} amount={Number(booking.amount)} currency={booking.currency} money={money}/>
@@ -69,7 +71,7 @@ function PricingBlock({booking,amount,currency,money}:{booking?:Detail["booking"
    <div className="rounded-xl bg-white p-3"><p className="text-xs text-slate-500">{booking.promo_code?`Promo: ${booking.promo_code}`:"Promo"}</p><b>{discount==null?"—":money(discount)}</b></div>
    <div className="rounded-xl bg-white p-3"><p className="text-xs text-slate-500">Total</p><b>{money(amount)}</b></div>
   </div>
-  {booking.referral_code?<div className="mt-3 rounded-xl bg-white p-3 text-sm"><b className="text-xs uppercase tracking-wider text-emerald-900">Referral</b><p className="mt-1">Code: <b>{booking.referral_code}</b>{booking.referrer_customer_key?<> · Referrer: <span className="font-mono text-xs">{booking.referrer_customer_key}</span></>:null}</p><p>Discount applied: {referralPercent>0?`${referralPercent}% · ${money(Number(booking.referral_discount_amount||0))}`:"Not applied (promo code used instead, or reward not yet earned)"}</p></div>:null}
+  {booking.referral_code?<div className="mt-3 rounded-xl bg-white p-3 text-sm"><b className="text-xs uppercase tracking-wider text-emerald-900">Referral</b><p className="mt-1">Code: <b>{booking.referral_code}</b></p><p>Discount applied: {referralPercent>0?`${referralPercent}% · ${money(Number(booking.referral_discount_amount||0))}`:"Not applied (promo code used instead, or reward not yet earned)"}</p></div>:null}
  </section>;
 }
 

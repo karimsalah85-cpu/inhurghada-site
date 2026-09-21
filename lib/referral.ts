@@ -17,7 +17,7 @@ export function referralLink(origin: string, code: string) {
 
 export const REFERRAL_COOKIE_NAME = "drs_ref";
 export const REFERRAL_COOKIE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
-export const referralCodePattern = /^DRS-[A-Z0-9]{6}$/;
+export const referralCodePattern = /^DRS-(?:[A-Z0-9]{6}|[A-F0-9]{32})$/;
 
 export function isValidReferralCode(value: unknown): value is string {
   return typeof value === "string" && referralCodePattern.test(value);

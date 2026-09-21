@@ -91,10 +91,14 @@ export async function runAdminAutomation() {
   ]);
   if (templateError || pickupError || reviewError) throw templateError || pickupError || reviewError;
 
+  const { data: completionEvents, error: completionError } = await supabase.from("referral_notification_events").select("booking_id").eq("event_type", "trip_completed");
+  if (completionError) throw completionError;
+  const completionBookingIds = new Set((completionEvents || []).map(event => event.booking_id));
   const typedTemplates = (templates || []) as Template[];
   const queueRows: Array<Record<string, unknown>> = [];
   for (const [eventKey, bookings] of [["pickup_reminder", pickupBookings || []], ["review_request", reviewBookings || []]] as const) {
     for (const booking of bookings as Booking[]) {
+      if (eventKey === "review_request" && completionBookingIds.has(booking.id)) continue;
       for (const channel of ["email", "whatsapp"] as const) {
         const template = pickTemplate(typedTemplates, eventKey, channel, booking.locale || "en");
         if (!template) continue;
@@ -123,6 +127,7 @@ export async function runAdminAutomation() {
     const template = typedTemplates.find((entry) => entry.id === item.template_id);
     const booking = [...((pickupBookings || []) as Booking[]), ...((reviewBookings || []) as Booking[])].find((entry) => entry.id === item.booking_id);
     if (!template || !booking) continue;
+    if (template.event_key === "review_request" && completionBookingIds.has(booking.id)) continue;
     await supabase.from("communication_queue").update({ status: "processing", attempts: item.attempts + 1 }).eq("id", item.id).eq("status", "pending");
     const body = render(template.body, booking);
     const result = template.channel === "email"

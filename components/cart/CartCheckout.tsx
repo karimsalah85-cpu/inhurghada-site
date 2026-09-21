@@ -1,5 +1,7 @@
 "use client";
 
+import ReferralRewardsField, { useReferralRewards } from "@/components/booking/ReferralRewardsField";
+import ReferralCodeField, { useReferralCode } from "@/components/booking/ReferralCodeField";
 import PromoCodeField, { usePromoCode } from "@/components/booking/PromoCodeField";
 
 import { type FormEvent, useRef, useState } from "react";
@@ -53,6 +55,8 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
     : `${count} trip booking`;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const rewards = useReferralRewards(email, language);
+  const referral = useReferralCode();
   const [phone, setPhone] = useState("");
   const [hotel, setHotel] = useState("");
   const [message, setMessage] = useState("");
@@ -120,10 +124,15 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...bookingInput, idempotencyKey: idempotencyKey.current, phone: phoneCheck.e164, promoCode: promo.quote?.code }),
+        body: JSON.stringify({ ...bookingInput, idempotencyKey: idempotencyKey.current, phone: phoneCheck.e164, promoCode: promo.quote?.code, referralCode: referral.code || undefined, redeemReferralUnits: rewards.redemption?.units, referralVerificationToken: rewards.redemption?.token }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || "Cart booking failed.");
+      if (data.referralDiscountPercent > 0) trackEvent("referral_discount_applied", { value: Number(data.referralDiscountAmount || 0), currency: cartCurrency, percent: data.referralDiscountPercent });
+      if (data.referralRewardUnitsRedeemed > 0) trackEvent("referral_reward_redeemed", { transaction_id: data.reference, percent: data.referralRewardUnitsRedeemed * 5 });
+      if (data.referralCode) trackEvent("referred_booking_created", { transaction_id: data.reference });
+      rewards.reset();
+      try { window.sessionStorage.removeItem("drs_referral_redemption"); } catch { /* optional handoff cleanup */ }
       trackEvent("booking_complete", { transaction_id: data.reference, value: Number(data.booking.amount), currency: cartCurrencies[0] || "USD", item_name: "Multi-trip cart", booking_type: "tour" });
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
@@ -188,6 +197,8 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
           <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-ocean-tint"/></label>
           <p className="text-xs leading-5 text-muted">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-ocean-dark underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
           {error ? <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p> : null}
+          <ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/>
+          <ReferralCodeField referral={referral} locale={language} disabled={submitting}/>
           <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
           {priceError ? <p role="alert" className="text-sm text-rose-600">{priceError}</p> : null}
           <button disabled={submitting || Boolean(priceError)} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink py-4 font-bold text-white disabled:opacity-60">{submitting ? tr("Sending…", "Wird gesendet…", "Отправка…", "جارٍ الإرسال…") : `${tr("Book all trips", "Alle Ausflüge buchen", "Забронировать все поездки", "احجز جميع الرحلات")} · ${formatPrice(String(promo.total), cartCurrency)}`} <MessageCircle size={18}/></button>

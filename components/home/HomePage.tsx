@@ -1,5 +1,7 @@
 "use client";
 
+import ReferralProgramInfo from "@/components/referral/ReferralProgramInfo";
+
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -630,6 +632,8 @@ text-ocean
           <a href={whatsappUrl(tr("Hello Daily Red Sea, I would like help planning my trip.","Hallo Daily Red Sea, ich möchte Hilfe bei der Reiseplanung.","Здравствуйте! Помогите мне спланировать поездку.","مرحبًا Daily Red Sea، أرغب في المساعدة في تخطيط رحلتي.","Dzień dobry Daily Red Sea, poproszę o pomoc w zaplanowaniu mojej podróży.","您好 Daily Red Sea，我想请你们协助规划我的行程。"))} onClick={() => trackEvent("whatsapp_click", { placement: "home_cta" })} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex rounded-xl bg-white px-7 py-4 font-semibold text-ocean-dark transition hover:bg-ocean-tint">{tr("Plan on WhatsApp","Über WhatsApp planen","Спланировать в WhatsApp","خطط عبر واتساب","Planuj przez WhatsApp","通过 WhatsApp 规划")}</a>
         </div>
       </section>
+
+      <section className="mx-auto max-w-5xl px-6 py-10"><ReferralProgramInfo locale={language} /></section>
 
       <footer className="bg-ink px-6 py-12 text-line sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1.5fr_1fr_1fr]">

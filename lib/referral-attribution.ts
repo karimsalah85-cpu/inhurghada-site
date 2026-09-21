@@ -27,7 +27,7 @@ export function getStoredReferralCode(): string | null {
     const stored = JSON.parse(raw) as StoredReferral;
     if (!isValidReferralCode(stored.code)) return null;
     const ageSeconds = (Date.now() - stored.capturedAt) / 1000;
-    if (ageSeconds > REFERRAL_COOKIE_MAX_AGE_SECONDS) {
+    if (!Number.isFinite(ageSeconds) || ageSeconds < 0 || ageSeconds > REFERRAL_COOKIE_MAX_AGE_SECONDS) {
       window.localStorage.removeItem(REFERRAL_COOKIE_NAME);
       return null;
     }

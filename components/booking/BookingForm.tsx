@@ -1,6 +1,7 @@
 "use client";
 
 import PromoCodeField, { usePromoCode } from "@/components/booking/PromoCodeField";
+import ReferralRewardsField, { useReferralRewards } from "@/components/booking/ReferralRewardsField";
 import ReferralCodeField, { useReferralCode } from "@/components/booking/ReferralCodeField";
 
 import { type FormEvent, useEffect, useRef, useState } from "react";
@@ -276,16 +277,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         };
   const promo = usePromoCode(bookingInput, total, language, () => (idempotencyKey.current ||= crypto.randomUUID()));
   const referral = useReferralCode();
-  const [referralRedemption, setReferralRedemption] = useState<{ units: number; token: string } | null>(null);
-  useEffect(() => {
-    let parsed: { units: number; token: string } | null = null;
-    try {
-      const raw = window.sessionStorage.getItem("drs_referral_redemption");
-      if (raw) parsed = JSON.parse(raw);
-    } catch { /* redemption handoff is optional */ }
-    const update = window.setTimeout(() => { if (parsed) setReferralRedemption(parsed); }, 0);
-    return () => window.clearTimeout(update);
-  }, []);
+  const rewards = useReferralRewards(email, language);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -315,14 +307,17 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         body: JSON.stringify({
           ...bookingInput, idempotencyKey: idempotencyKey.current, phone: phoneCheck.e164, promoCode: promo.quote?.code,
           referralCode: referral.code || undefined,
-          redeemReferralUnits: referralRedemption?.units || undefined,
-          referralVerificationToken: referralRedemption?.token || undefined,
+          redeemReferralUnits: rewards.redemption?.units || undefined,
+          referralVerificationToken: rewards.redemption?.token || undefined,
         }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.error || bookingSubmissionFailedText);
       trackEvent("booking_complete", { transaction_id: data.reference, value: Number(data.booking.amount), currency, item_name: tourName, booking_type: "tour" });
       if (data.referralDiscountPercent > 0) trackEvent("referral_discount_applied", { value: Number(data.referralDiscountAmount || 0), currency, percent: data.referralDiscountPercent });
+      if (data.referralRewardUnitsRedeemed > 0) trackEvent("referral_reward_redeemed", { transaction_id: data.reference, percent: data.referralRewardUnitsRedeemed * 5 });
+      if (data.referralCode) trackEvent("referred_booking_created", { transaction_id: data.reference });
+      rewards.reset();
       try { window.sessionStorage.removeItem("drs_referral_redemption"); } catch { /* best-effort cleanup */ }
       if (!data.whatsappSent && data.whatsappUrl) window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
       window.sessionStorage.setItem(confirmationStorageKey(data.reference), JSON.stringify({
@@ -412,7 +407,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания")} <span className="font-normal text-muted">({tr("optional", "optional", "необязательно")})</span><textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-20 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none placeholder:text-muted focus:border-ocean focus:ring-4 focus:ring-ocean-tint" placeholder={tr("Anything we should know?", "Gibt es etwas, das wir wissen sollten?", "Что нам нужно знать?")} /></label>
         <p className="rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">{tr("Before booking, please review our", "Bitte lies vor der Buchung unsere", "Перед бронированием ознакомьтесь с")} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{tr("cancellation policy", "Stornierungsbedingungen", "правилами отмены")}</Link>. {tr("By submitting, you agree to our terms and conditions.", "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu.", "Отправляя заявку, вы соглашаетесь с нашими условиями.")}</p>
         {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
-        {referralRedemption ? <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm font-bold text-emerald-800">{tr(`A ${referralRedemption.units * 5}% referral reward will be applied to this booking.`, `Eine Empfehlungsprämie von ${referralRedemption.units * 5}% wird auf diese Buchung angewendet.`, `К этому бронированию будет применена реферальная скидка ${referralRedemption.units * 5}%.`)}</p> : null}
+        <ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/>
         <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
         <ReferralCodeField referral={referral} locale={language} disabled={submitting}/>
         <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:opacity-60">{submitting ? tr("Sending booking…", "Buchung wird gesendet…", "Отправка бронирования…") : `${tr("Confirm booking", "Buchung bestätigen", "Подтвердить бронирование")} · ${formatPrice(String(promo.total), currency)}`} <MessageCircle size={18}/></button>

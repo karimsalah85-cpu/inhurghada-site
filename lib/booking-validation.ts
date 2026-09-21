@@ -109,8 +109,8 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   }
   let referralCode: string | undefined;
   if (body.referralCode != null && body.referralCode !== "") {
-    const candidate = text(body.referralCode, 16).toUpperCase();
-    if (!/^DRS-[A-Z0-9]{6}$/.test(candidate)) return { error: "Enter a valid referral code." as const };
+    const candidate = text(body.referralCode, 40).toUpperCase();
+    if (!/^DRS-(?:[A-Z0-9]{6}|[A-F0-9]{32})$/.test(candidate)) return { error: "Enter a valid referral code." as const };
     referralCode = candidate;
   }
   const redeemReferralUnits = Math.max(0, Math.min(3, Math.trunc(number(body.redeemReferralUnits))));

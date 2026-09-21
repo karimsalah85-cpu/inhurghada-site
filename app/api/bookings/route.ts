@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
     const redeemReferralUnits = body.redeemReferralUnits > 0 && referralCustomer && verifyRedemptionToken(referralVerificationToken, referralCustomer)
       ? body.redeemReferralUnits
       : 0;
+    if (body.redeemReferralUnits > 0 && !redeemReferralUnits) return bookingJson({ success: false, error: "Verify your booking email again before using referral rewards." }, { status: 401 });
     const bookingType = body.type;
     const { customerName, phone, customerEmail, hotel } = body;
     const tours = await getLiveTours();
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       const capacityMessage = /promo code|sold out|places remain|capacity|unavailable/i.test(bookingError.message || "") ? bookingError.message : null;
       return bookingJson({ success: false, error: conflictMessage || capacityMessage || "We could not save your booking. Please try again or contact us on WhatsApp." }, { status: conflictMessage ? 409 : capacityMessage ? 409 : 503 });
     }
-    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string; promo_code?: string; discount_amount?: number | string; trip_id?: string; referral_code?: string; referral_discount_percent?: number | string; referral_discount_amount?: number | string }; replayed?: boolean } | null;
+    const persisted = reservation as { booking?: { id?: string; reference?: string; amount?: number | string; promo_code?: string; discount_amount?: number | string; trip_id?: string; referral_code?: string; referral_discount_percent?: number | string; referral_discount_amount?: number | string; referral_reward_units_redeemed?: number; referral_status?: string }; replayed?: boolean } | null;
     const bookingId = persisted?.booking?.id;
     const reference = persisted?.booking?.reference;
     if (!bookingId || !reference) return bookingJson({ success: false, error: "We could not confirm the saved booking." }, { status: 503 });
@@ -256,6 +257,7 @@ export async function POST(request: NextRequest) {
       paymentStatus: "cash-on-arrival",
       referralDiscountPercent,
       referralDiscountAmount,
+      referralRewardUnitsRedeemed: Number(persisted?.booking?.referral_reward_units_redeemed || 0),
       referralCode: persisted?.booking?.referral_code || null,
     });
   } catch (error) {

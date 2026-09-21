@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { hasLivePermission } from "@/lib/admin-permission";
+import { deliverReferralNotifications } from "@/lib/referral-notifications";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
@@ -13,7 +14,7 @@ export async function PATCH(request: NextRequest) {
   if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!isAuthorizedAdmin(user)) return json({ error: "Unauthorized." }, 401);
+  if (!(await hasLivePermission(supabase, user, "bookings"))) return json({ error: "Unauthorized." }, 401);
 
   const body = await request.json().catch(() => null) as { ids?: unknown; status?: unknown; payment_status?: unknown } | null;
   const ids = Array.isArray(body?.ids) ? [...new Set(body.ids.filter((id): id is string => typeof id === "string" && uuidPattern.test(id)))] : [];
@@ -40,13 +41,8 @@ export async function PATCH(request: NextRequest) {
       || (update.payment_status && update.payment_status !== before.payment_status)
     );
   });
-  if (update.status) {
-    await Promise.all(changed.map(async (booking) => {
-      const { error: referralError } = await supabase.rpc("sync_referral_reward_for_booking", { p_booking_id: booking.id, p_new_status: update.status });
-      if (referralError) console.error("Referral reward sync failed", { bookingId: booking.id, message: referralError.message });
-    }));
-  }
-  const notifications = await Promise.all(changed.map((booking) => sendBookingAndPaymentStatusNotification(booking)));
+  if (changed.length) await deliverReferralNotifications().catch(error => console.error("Referral notification delivery deferred", error.message));
+  const notifications = await Promise.all(changed.filter(booking => booking.status !== "completed").map((booking) => sendBookingAndPaymentStatusNotification(booking)));
   return json({
     bookings: data || [],
     updated: data?.length || 0,
