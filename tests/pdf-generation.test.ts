@@ -65,8 +65,8 @@ describe("PDF generators", () => {
     }
   });
 
-  it("creates a valid situation report PDF", () => {
-    const output = createReportPdf({
+  it("creates a valid situation report PDF", async () => {
+    const output = await createReportPdf({
       from: "2026-07-01", to: "2026-07-31", trip: "all", status: "all", generatedAt: "2026-07-22T12:00:00Z",
       bookings: 2, people: 7, cancelled: 0, revenue: 92,
       rows: [

@@ -1,14 +1,32 @@
 import { getCancellationPolicyParagraphs } from "@/lib/pdf-policy";
 import { bookingLocale } from "@/lib/booking-communications-i18n";
-import { drawPdfBrandMark } from "@/lib/pdf-logo";
 import type { Locale } from "@/lib/i18n";
-import PDFDocument from "pdfkit";
 import { historicalTripParticipants, readPricingSnapshot, validParticipantCounts } from "@/lib/booking-pricing-snapshot";
 import { statusPricingCopy } from "@/lib/status-pdf-pricing-copy";
-import path from "node:path";
-
-const notoFontPath = (locale: Locale) =>
-  path.join(process.cwd(), "assets/fonts", locale === "ar" ? "NotoSansArabic.ttf" : locale === "zh" ? "NotoSansSC.ttf" : "NotoSans.ttf");
+import { whatsappNumber } from "@/lib/contact";
+import { buildWhatsAppLink } from "@/lib/booking-service";
+import { pdfColors, pdfPage } from "@/lib/pdf/theme";
+import { createPdfDocument, renderPdfToBuffer } from "@/lib/pdf/render";
+import { renderQrCodePng } from "@/lib/pdf/qrcode";
+import { PdfFlow, stampPdfFooters } from "@/lib/pdf/layout";
+import {
+  pdfPageBackground,
+  drawPdfHeader,
+  drawStatusBadge,
+  drawPriceBlock,
+  drawTicketCard,
+  drawQrCodeBlock,
+  drawCalloutCard,
+  drawSectionTitle,
+  drawInfoRow,
+  pdfCard,
+  pdfWrite,
+  pdfTextHeight,
+  pdfLabelValue,
+  drawTableRow,
+  statusToneFor,
+  type TableColumn,
+} from "@/lib/pdf/components";
 
 export type InvoiceData = {
   reference: string;
@@ -140,9 +158,11 @@ const confirmationCopy = {
 
 /**
  * A self-contained, branded PDF voucher with embedded Unicode fonts so the
- * customer's booking language and entered details survive intact.
+ * customer's booking language and entered details survive intact. The
+ * booking-reference card uses the ticket/boarding-pass motif (a QR code that
+ * opens a pre-filled WhatsApp support chat) — see lib/pdf/components.ts.
  */
-export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
+export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const locale = bookingLocale(invoice.locale);
   const t = confirmationCopy[locale];
   const money = locale === "ar"
@@ -151,123 +171,87 @@ export function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const quantity = Math.max(Number(invoice.quantity) || 1, 1);
   const issuedDate = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale, { day: "2-digit", month: "short", year: "numeric" }).format(invoice.issuedAt);
   const rtl = locale === "ar";
-  const font = notoFontPath(locale);
+  const qrPng = await renderQrCodePng(buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${invoice.reference}`));
 
-  return new Promise((resolve, reject) => {
-    // font: "" stops PDFKit's constructor from eagerly loading its built-in
-    // Helvetica AFM through the "#standard-fonts/*" subpath import, which is not
-    // resolvable once the route is bundled for serverless. Every text run below
-    // sets the embedded "Noto" face explicitly, so no default font is needed.
-    const doc = new PDFDocument({ size: "A4", margin: 0, autoFirstPage: false, font: "", info: { Title: `${t.confirmation} - ${invoice.reference}`, Author: "Daily Red Sea" } });
-    const chunks: Buffer[] = [];
-    doc.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-    doc.registerFont("Noto", font);
+  const doc = createPdfDocument({ title: `${t.confirmation} - ${invoice.reference}`, locale, createdAt: invoice.issuedAt });
+  const margin = pdfPage.margin;
+  const contentWidth = pdfPage.width - margin * 2;
 
-    const rtlDigits = (value: string) => /\p{Script=Arabic}/u.test(value) ? value.replace(/[0-9][0-9:./-]*/g, (part) => [...part].reverse().join("")) : value;
-    // Non-breaking spaces keep short RTL labels/values from wrapping mid-phrase, but
-    // they also disable word-wrap entirely, so long free text (like a pickup address)
-    // must skip this and use rtlWrappableText below instead.
-    const rtlText = (value: string) => rtl ? rtlDigits(value).replaceAll(" ", "\u00a0") : value;
-    const rtlWrappableText = (value: string) => rtl ? rtlDigits(value) : value;
-    const write = (value: string, x: number, y: number, width: number, size = 10, color = "#0d3b78", align: "left" | "right" | "center" = rtl ? "right" : "left") => {
-      doc.font("Noto").fontSize(size).fillColor(color).text(rtlText(value), x, y, { width, align, lineGap: 2 });
-    };
-    const labelValue = (label: string, value: string, x: number, y: number, width: number) => {
-      write(label, x, y, width, 8, "#64748b");
-      write(value, x, y + 15, width, 10, "#0f172a");
-    };
-    const card = (x: number, y: number, width: number, height: number) => doc.roundedRect(x, y, width, height, 10).fill("#ffffff");
-    const addBackground = () => doc.rect(0, 0, 595.28, 841.89).fill("#f1f5f9");
+  doc.addPage();
+  pdfPageBackground(doc);
+  const headerBottom = drawPdfHeader(doc, { variant: "hero", title: t.confirmation, subtitle: `${t.issued}: ${issuedDate}`, rtl });
+  drawStatusBadge(doc, t.cash, 405, 95, 142, 38, "positive", rtl);
 
-    doc.addPage();
-    addBackground();
-    doc.rect(0, 0, 595.28, 158).fill("#0d3b78");
-    doc.rect(0, 158, 595.28, 5).fill("#ff3300");
-    drawPdfBrandMark(doc, { pageWidth: 595.28, margin: 48, y: 32, width: 170, rtl });
-    write(t.confirmation, 48, 76, 320, 18, "#ffffff", rtl ? "right" : "left");
-    write(`${t.issued}: ${issuedDate}`, 48, 104, 320, 9, "#dbeafe", rtl ? "right" : "left");
-    doc.roundedRect(405, 95, 142, 38, 8).fill("#166534");
-    write(t.cash, 417, 106, 118, 9, "#dcfce7", "center");
+  // Ticket card: reference + QR stub. QR opens a pre-filled WhatsApp chat, so a
+  // guest who only has the printed/downloaded PDF can still reach support instantly.
+  const ticketY = headerBottom + 20;
+  const stubWidth = 150;
+  const ticketHeight = 92;
+  const ticket = drawTicketCard(doc, { x: margin, y: ticketY, width: contentWidth, height: ticketHeight, stubWidth, rtl });
+  pdfLabelValue(doc, t.reference, invoice.reference, ticket.infoX + 16, ticketY + 18, ticket.infoWidth - 32, { rtl });
+  pdfWrite(doc, t.keepReference, ticket.infoX + 16, ticketY + 56, ticket.infoWidth - 32, { size: 9, color: pdfColors.muted, rtl, wrap: true });
+  drawQrCodeBlock(doc, qrPng, ticket.stubX + stubWidth / 2 - 32, ticketY + 14, 64);
 
-    card(48, 183, 499, 62);
-    labelValue(t.reference, invoice.reference, 64, 198, 220);
-    write(t.keepReference, 300, 207, 230, 9, "#475569");
+  // Guest details.
+  const guestY = ticketY + ticketHeight + 20;
+  const guestHeight = 126;
+  pdfCard(doc, margin, guestY, contentWidth, guestHeight);
+  drawSectionTitle(doc, t.guest, margin + 16, guestY + 17, contentWidth - 32, rtl);
+  pdfLabelValue(doc, t.guestName, invoice.customerName || t.pending, margin + 16, guestY + 47, 210, { rtl });
+  pdfLabelValue(doc, "WhatsApp", invoice.customerPhone || t.pending, margin + 252, guestY + 47, 230, { rtl });
+  pdfLabelValue(doc, "Email", invoice.customerEmail || t.pending, margin + 16, guestY + 85, contentWidth - 32, { rtl });
 
-    card(48, 265, 499, 126);
-    write(t.guest, 64, 282, 467, 10, "#0d3b78");
-    labelValue(t.guestName, invoice.customerName || t.pending, 64, 312, 210);
-    labelValue("WhatsApp", invoice.customerPhone || t.pending, 300, 312, 230);
-    labelValue("Email", invoice.customerEmail || t.pending, 64, 350, 467);
+  // Experience details. The pickup/meeting-point field is free text and can run
+  // long, so its height is measured and the card grows to fit (capped, with an
+  // ellipsis), so long text can never bleed into the total block below.
+  const experienceY = guestY + guestHeight + 20;
+  const pickupLabel = t.pickup;
+  const pickupValue = invoice.hotel || t.pending;
+  const pickupX = margin + 252;
+  const pickupWidth = 231;
+  const pickupValueY = experienceY + 143 + 15;
+  const pickupBaselineBudget = 601 - (pickupValueY - experienceY - 190); // vertical room the original fixed-height design allotted
+  const pickupMaxExtra = 40;
+  const pickupFullHeight = pdfTextHeight(doc, pickupValue, pickupWidth, 10, rtl);
+  const pickupExtra = Math.min(Math.max(0, pickupFullHeight - pickupBaselineBudget), pickupMaxExtra);
+  const experienceHeight = 190 + pickupExtra;
 
-    // The pickup / meeting-point field is free text and can run long, so its
-    // height is measured and the experience card (and everything stacked below
-    // it) grows to fit, up to a safety cap enforced with an ellipsis, so long
-    // text can never bleed into the orange total block below.
-    const experienceCardTop = 411;
-    const pickupLabel = t.pickup;
-    const pickupValue = invoice.hotel || t.pending;
-    const pickupX = 300;
-    const pickupWidth = 247;
-    const pickupValueY = experienceCardTop + 143 + 15;
-    const pickupBaselineBudget = 601 - pickupValueY; // vertical room the original fixed-height design allotted
-    const pickupMaxExtra = 40;
-    const pickupFullHeight = doc.font("Noto").fontSize(10).heightOfString(rtlWrappableText(pickupValue), { width: pickupWidth, lineGap: 2 });
-    const pickupExtra = Math.min(Math.max(0, pickupFullHeight - pickupBaselineBudget), pickupMaxExtra);
-    const experienceCardHeight = 190 + pickupExtra;
-
-    card(48, experienceCardTop, 499, experienceCardHeight);
-    write(t.experience, 64, experienceCardTop + 17, 467, 10, "#0d3b78");
-    write(invoice.itemName || "Daily Red Sea", 64, experienceCardTop + 46, 467, 14, "#0f172a");
-    if (invoice.tripLines?.length) {
-      write(invoice.tripLines.slice(0, 4).join("\n"), 64, experienceCardTop + 75, 467, 8.5, "#475569");
-    } else {
-      labelValue(t.date, invoice.date || t.pending, 64, experienceCardTop + 94, 210);
-      labelValue(t.time, invoice.time || t.pending, 300, experienceCardTop + 94, 230);
-    }
-    labelValue(t.travelers, invoice.travelerSummary || `${quantity}`, 64, experienceCardTop + 143, 210);
-    write(pickupLabel, pickupX, experienceCardTop + 143, pickupWidth, 8, "#64748b");
-    doc.font("Noto").fontSize(10).fillColor("#0f172a").text(rtlWrappableText(pickupValue), pickupX, pickupValueY, {
-      width: pickupWidth, align: rtl ? "right" : "left", lineGap: 2,
-      height: pickupBaselineBudget + pickupExtra, ellipsis: true,
-    });
-
-    const totalBoxY = experienceCardTop + experienceCardHeight + 12;
-    doc.roundedRect(48, totalBoxY, 499, 76, 10).fill("#e2380f");
-    write(t.total, 64, totalBoxY + 17, 210, 9, "#ffebe6");
-    write(money, 64, totalBoxY + 36, 210, 22, "#ffffff");
-    write(t.paymentNote, 295, totalBoxY + 25, 235, 9, "#ffffff");
-
-    const nextCardY = totalBoxY + 76 + 12;
-    card(48, nextCardY, 499, 73);
-    write(t.next, 64, nextCardY + 15, 467, 9, "#0d3b78");
-    write(t.steps, 64, nextCardY + 34, 467, 8.5, "#475569");
-    const footerY = nextCardY + 73 + 10;
-    write(`Daily Red Sea | ${invoice.reference} | dailyredsea.com`, 48, footerY, 310, 8, "#64748b", "left");
-    write(t.thanks, 340, footerY, 207, 8, "#64748b");
-
-    doc.addPage();
-    addBackground();
-    card(48, 60, 499, 720);
-    write(t.policy, 68, 86, 459, 14, "#0d3b78");
-    let policyY = 125;
-    const policyParagraphs = locale === "en" ? getCancellationPolicyParagraphs() : t.policyParagraphs;
-    for (const paragraph of policyParagraphs) {
-      const height = doc.font("Noto").fontSize(9.5).heightOfString(paragraph, { width: 459, lineGap: 4 });
-      if (policyY + height > 740) {
-        doc.addPage();
-        addBackground();
-        card(48, 60, 499, 720);
-        write(t.policy, 68, 86, 459, 14, "#0d3b78");
-        policyY = 125;
-      }
-      write(paragraph, 68, policyY, 459, 9.5, "#475569");
-      policyY += height + 18;
-    }
-    write(`Daily Red Sea | ${invoice.reference} | dailyredsea.com`, 48, 810, 499, 8, "#64748b", "left");
-    doc.end();
+  pdfCard(doc, margin, experienceY, contentWidth, experienceHeight);
+  drawSectionTitle(doc, t.experience, margin + 16, experienceY + 17, contentWidth - 32, rtl);
+  pdfWrite(doc, invoice.itemName || "Daily Red Sea", margin + 16, experienceY + 46, contentWidth - 32, { size: 14, color: pdfColors.ink, rtl });
+  if (invoice.tripLines?.length) {
+    pdfWrite(doc, invoice.tripLines.slice(0, 4).join("\n"), margin + 16, experienceY + 75, contentWidth - 32, { size: 8.5, color: pdfColors.muted, rtl });
+  } else {
+    drawInfoRow(doc, t.date, invoice.date || t.pending, margin + 16, experienceY + 94, 210, rtl);
+    drawInfoRow(doc, t.time, invoice.time || t.pending, margin + 252, experienceY + 94, 230, rtl);
+  }
+  drawInfoRow(doc, t.travelers, invoice.travelerSummary || `${quantity}`, margin + 16, experienceY + 143, 210, rtl);
+  pdfWrite(doc, pickupLabel, pickupX, experienceY + 143, pickupWidth, { size: 8, color: pdfColors.muted, rtl });
+  doc.font("Noto").fontSize(10).fillColor(pdfColors.ink).text(pickupValue, pickupX, pickupValueY, {
+    width: pickupWidth, align: rtl ? "right" : "left", lineGap: 2,
+    height: pickupBaselineBudget + pickupExtra, ellipsis: true,
   });
+
+  const totalY = experienceY + experienceHeight + 12;
+  drawPriceBlock(doc, t.total, money, t.paymentNote, margin, totalY, contentWidth, 76, rtl);
+
+  const nextY = totalY + 76 + 12;
+  drawCalloutCard(doc, t.next, t.steps, margin, nextY, contentWidth, 73, rtl);
+  pdfWrite(doc, t.thanks, margin, nextY + 73 + 10, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
+
+  const policy = new PdfFlow(doc, { header: { variant: "compact", title: t.policy, rtl } });
+  policy.newPage();
+  const policyParagraphs = locale === "en" ? getCancellationPolicyParagraphs() : t.policyParagraphs;
+  for (const paragraph of policyParagraphs) {
+    const height = pdfTextHeight(doc, paragraph, contentWidth, 9.5, rtl, 4);
+    policy.ensure(height + 18);
+    pdfWrite(doc, paragraph, margin, policy.y, contentWidth, { size: 9.5, color: pdfColors.muted, rtl, lineGap: 4 });
+    policy.advance(height + 18);
+  }
+  stampPdfFooters(doc, { reference: invoice.reference, rtl });
+
+  doc.end();
+  return renderPdfToBuffer(doc);
 }
 
 type StatusPdfCopy = {
@@ -354,167 +338,127 @@ const statusPdfCopy: Record<Locale, StatusPdfCopy> = {
   },
 };
 
-function statusTone(value: string): { bg: string; fg: string } {
-  if (["confirmed", "completed", "paid"].includes(value)) return { bg: "#dcfce7", fg: "#166534" };
-  if (value === "cancelled") return { bg: "#fee2e2", fg: "#991b1b" };
-  if (value === "unpaid") return { bg: "#fef3c7", fg: "#92400e" };
-  return { bg: "#dbeafe", fg: "#1e40af" };
-}
-
 /**
  * A branded status voucher rendered with the embedded Noto family so the
  * customer's booking language survives in its native script (Cyrillic, Arabic
  * and CJK included), matching createInvoicePdf.
  */
-export function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<Buffer> {
+export async function createBookingStatusPdf(booking: BookingStatusPdfData): Promise<Buffer> {
   const locale = bookingLocale(booking.locale);
   const t = statusPdfCopy[locale];
   const p = statusPricingCopy[locale];
   const rtl = locale === "ar";
+  const margin = pdfPage.margin;
+  const contentWidth = pdfPage.width - margin * 2;
   const subtotal = booking.subtotal != null && Number.isFinite(booking.subtotal) ? booking.subtotal : null;
   const discount = booking.discountAmount != null && Number.isFinite(booking.discountAmount) ? booking.discountAmount : null;
   const snapshot = readPricingSnapshot(booking.pricingSnapshot, booking.currency, subtotal);
   const historicalTrips = !snapshot && booking.itemName.startsWith("Multi-trip booking:") ? historicalTripParticipants(booking.historicalNotes) : [];
   const money = (amount: number) => rtl ? `${amount.toFixed(2)} ${booking.currency.toUpperCase()}` : formatMoney(amount, booking.currency, locale);
   const generatedDate = rtl ? booking.generatedAt.toISOString().slice(0, 10) : new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale, { day: "2-digit", month: "short", year: "numeric" }).format(booking.generatedAt);
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 0, autoFirstPage: false, font: "", info: { Title: `${t.statusUpdate} - ${booking.reference}`, Author: "Daily Red Sea", CreationDate: booking.generatedAt } });
-    const chunks: Buffer[] = [];
-    doc.on("data", chunk => chunks.push(Buffer.from(chunk)));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-    doc.registerFont("Noto", notoFontPath(locale));
-    // PDFKit shapes Arabic; reverse numeric runs inside Arabic text to preserve their visual order.
-    const text = (value: string, width: number, size: number) => {
-      if (!rtl || !/\p{Script=Arabic}/u.test(value)) return value;
-      // Keep each Arabic line in one shaping run. Ordinary spaces split PDFKit's
-      // RTL runs; wrap explicitly before substituting non-breaking spaces.
-      const words = value.replace(/[0-9][0-9:./-]*/g, part => [...part].reverse().join("")).split(/\s+/);
-      const lines: string[] = [];
-      let line = "";
-      for (const word of words) {
-        const candidate = line ? `${line}\u00a0${word}` : word;
-        if (line && doc.font("Noto").fontSize(size).widthOfString(candidate) > width) { lines.push(line); line = word; }
-        else line = candidate;
-      }
-      if (line) lines.push(line);
-      return lines.join("\n");
-    };
-    const write = (value: string, x: number, y: number, width: number, size = 10, color = "#0f172a", align: "left" | "right" | "center" = rtl ? "right" : "left") => {
-      doc.font("Noto").fontSize(size).fillColor(color).text(text(value, width, size), x, y, { width, align, lineGap: 3 });
-    };
-    const height = (value: string, width: number, size: number) => doc.font("Noto").fontSize(size).heightOfString(text(value, width, size), { width, lineGap: 3 });
-    let y = 0;
-    let page = 0;
-    const addPage = () => {
-      doc.addPage(); page++;
-      doc.rect(0, 0, 595.28, 841.89).fill("#f1f5f9");
-      doc.rect(0, 0, 595.28, 130).fill("#0d3b78");
-      doc.rect(0, 130, 595.28, 4).fill("#ff3300");
-      drawPdfBrandMark(doc, { pageWidth: 595.28, margin: 48, y: 24, width: 155, rtl });
-      write(t.statusUpdate, 48, 67, 499, 17, "#ffffff");
-      write(`${booking.reference} | ${generatedDate}`, 48, 101, 499, 9, "#dbeafe", "left");
-      write(`${booking.reference} | ${page} | dailyredsea.com/terms-conditions`, 48, 808, 499, 8, "#64748b", "left");
-      y = 152;
-    };
-    const ensure = (space: number) => { if (y + space > 785) addPage(); };
-    const paragraph = (value: string, size = 10, color = "#0f172a") => {
-      const h = height(value, 467, size);
-      ensure(h + 12);
-      write(value, 64, y, 467, size, color); y += h + 10;
-    };
-    const heading = (value: string) => { ensure(70); paragraph(value, 12, "#0d3b78"); };
-    const detail = (label: string, value: string) => {
-      if (!rtl) { paragraph(`${label}: ${value}`); return; }
-      const h = Math.max(height(label, 190, 10), height(value, 260, 10));
-      ensure(h + 12);
-      write(label, 341, y, 190, 10, "#64748b");
-      write(value, 64, y, 260, 10); y += h + 10;
-    };
-    const participants = (counts: unknown, guests?: number | null) => {
-      if (validParticipantCounts(counts, guests)) {
-        paragraph(`${p.adults}: ${counts.adults} | ${p.youth}: ${counts.youth} | ${p.infants}: ${counts.infants}`);
-      } else {
-        paragraph(`${guests == null ? "" : `${p.guests}: ${guests}. `}${p.unknownParticipants}`, 9, "#64748b");
-      }
-    };
-    addPage();
-    heading(t.current);
-    for (const [label, value, status] of [
-      [t.booking, t.statusLabel[booking.bookingStatus] || t.pending, booking.bookingStatus],
-      [t.payment, t.paymentLabel[booking.paymentStatus] || t.pending, booking.paymentStatus],
-    ]) {
-      const tone = statusTone(status);
-      const h = height(`${label}: ${value}`, 467, 11) + 18;
-      ensure(h + 8);
-      doc.roundedRect(48, y - 4, 499, h, 7).fill(tone.bg);
-      write(`${label}: ${value}`, 64, y + 3, 467, 11, tone.fg); y += h + 8;
+
+  const doc = createPdfDocument({ title: `${t.statusUpdate} - ${booking.reference}`, locale, createdAt: booking.generatedAt });
+  const flow = new PdfFlow(doc, { header: { variant: "compact", title: t.statusUpdate, subtitle: `${booking.reference} | ${generatedDate}`, rtl }, bottomMargin: 56 });
+
+  const write = (value: string, width: number, x: number, size = 10, color: string = pdfColors.ink) => pdfWrite(doc, value, x, flow.y, width, { size, color, rtl, wrap: true });
+  const paragraphHeight = (value: string, width: number, size: number) => pdfTextHeight(doc, value, width, size, rtl, 3);
+  const paragraph = (value: string, size = 10, color: string = pdfColors.ink) => {
+    const h = paragraphHeight(value, contentWidth, size);
+    flow.ensure(h + 12);
+    write(value, contentWidth, margin, size, color);
+    flow.advance(h + 10);
+  };
+  const heading = (value: string) => { flow.ensure(70); paragraph(value, 12, pdfColors.navy); };
+  const detail = (label: string, value: string) => {
+    if (!rtl) { paragraph(`${label}: ${value}`); return; }
+    const h = Math.max(paragraphHeight(label, 190, 10), paragraphHeight(value, 260, 10));
+    flow.ensure(h + 12);
+    pdfWrite(doc, label, margin + 293, flow.y, 190, { size: 10, color: pdfColors.muted, rtl });
+    pdfWrite(doc, value, margin, flow.y, 260, { size: 10, color: pdfColors.ink, rtl });
+    flow.advance(h + 10);
+  };
+  const participants = (counts: unknown, guests?: number | null) => {
+    if (validParticipantCounts(counts, guests)) {
+      paragraph(`${p.adults}: ${counts.adults} | ${p.youth}: ${counts.youth} | ${p.infants}: ${counts.infants}`);
+    } else {
+      paragraph(`${guests == null ? "" : `${p.guests}: ${guests}. `}${p.unknownParticipants}`, 9, pdfColors.muted);
     }
-    heading(t.guest);
-    detail(t.guestName, booking.customerName || t.pending);
-    if (booking.customerPhone) detail("WhatsApp", booking.customerPhone);
-    if (booking.customerEmail) detail("Email", booking.customerEmail);
-    heading(t.bookingDetails);
-    // Snapshot trips below contain the full names, dates and participant categories.
-    if (!snapshot) paragraph(booking.itemName || "Daily Red Sea", 11);
-    detail(t.date, booking.date || t.pending);
-    if (!snapshot && !historicalTrips.length) participants(booking.participants, booking.guests);
-    for (const trip of historicalTrips) {
-      paragraph(`${trip.name} | ${trip.date} | ${trip.time}`, 10, "#0d3b78");
-      participants(trip.participants);
-    }
-    detail(t.pickup, booking.pickup || t.pending);
-    if (booking.assignedPersonName) detail(booking.assignedPersonRole === "driver" ? t.assignedDriver : t.assignedGuide, booking.assignedPersonName);
-    heading(rtl ? p.pricing : `${p.pricing} (${booking.currency.toUpperCase()})`);
-    const widths = [222, 55, 95, 95];
-    const positions = rtl ? [309, 254, 159, 64] : [64, 286, 341, 436];
-    const tableRow = (values: string[], header = false) => {
-      const h = Math.max(...values.map((v, i) => height(v, widths[i] - 10, 9))) + 16;
-      ensure(h);
-      doc.rect(48, y - 4, 499, h).fill(header ? "#dbeafe" : "#ffffff");
-      values.forEach((v, i) => write(v, positions[i], y + 3, widths[i] - 10, 9, header ? "#0d3b78" : "#0f172a", rtl ? "right" : i === 0 ? "left" : "right"));
-      y += h;
-    };
-    const tableHeader = () => tableRow([p.item, p.quantity, p.unit, p.lineTotal], true);
-    if (snapshot) {
-      for (const trip of snapshot.trips) {
-        ensure(150);
-        paragraph(trip.name, 11, "#0d3b78");
-        if (trip.date) paragraph(`${trip.date}${trip.time ? ` | ${trip.time}` : ""}`, 9);
-        participants(trip.participants, trip.guests);
-        if (snapshot.pending) { paragraph(p.pending); continue; }
-        tableHeader();
-        for (const line of trip.lines) {
-          const label = `${p[line.kind]}${line.label ? ` - ${line.label}` : ""}`;
-          const values = [label, String(line.quantity), money(line.unitPrice), money(line.total)];
-          const needed = Math.max(...values.map((v, i) => height(v, widths[i] - 10, 9))) + 16;
-          if (y + needed > 785) { addPage(); paragraph(trip.name, 11, "#0d3b78"); tableHeader(); }
-          tableRow(values);
-        }
-        y += 14;
+  };
+
+  flow.newPage();
+  heading(t.current);
+  for (const [label, value, status] of [
+    [t.booking, t.statusLabel[booking.bookingStatus] || t.pending, booking.bookingStatus],
+    [t.payment, t.paymentLabel[booking.paymentStatus] || t.pending, booking.paymentStatus],
+  ]) {
+    const h = paragraphHeight(`${label}: ${value}`, contentWidth, 11) + 18;
+    flow.ensure(h + 8);
+    drawStatusBadge(doc, `${label}: ${value}`, margin, flow.y - 4, contentWidth, h, statusToneFor(status), rtl);
+    flow.advance(h + 8);
+  }
+  heading(t.guest);
+  detail(t.guestName, booking.customerName || t.pending);
+  if (booking.customerPhone) detail("WhatsApp", booking.customerPhone);
+  if (booking.customerEmail) detail("Email", booking.customerEmail);
+  heading(t.bookingDetails);
+  // Snapshot trips below contain the full names, dates and participant categories.
+  if (!snapshot) paragraph(booking.itemName || "Daily Red Sea", 11);
+  detail(t.date, booking.date || t.pending);
+  if (!snapshot && !historicalTrips.length) participants(booking.participants, booking.guests);
+  for (const trip of historicalTrips) {
+    paragraph(`${trip.name} | ${trip.date} | ${trip.time}`, 10, pdfColors.navy);
+    participants(trip.participants);
+  }
+  detail(t.pickup, booking.pickup || t.pending);
+  if (booking.assignedPersonName) detail(booking.assignedPersonRole === "driver" ? t.assignedDriver : t.assignedGuide, booking.assignedPersonName);
+  heading(rtl ? p.pricing : `${p.pricing} (${booking.currency.toUpperCase()})`);
+  const columns: TableColumn[] = rtl
+    ? [{ label: p.item, width: 222, align: "right" }, { label: p.quantity, width: 55, align: "right" }, { label: p.unit, width: 95, align: "right" }, { label: p.lineTotal, width: 95, align: "right" }]
+    : [{ label: p.item, width: 222, align: "left" }, { label: p.quantity, width: 55, align: "right" }, { label: p.unit, width: 95, align: "right" }, { label: p.lineTotal, width: 95, align: "right" }];
+  const tableHeader = () => { const h = drawTableRow(doc, [p.item, p.quantity, p.unit, p.lineTotal], columns, margin, flow.y, { header: true, rtl }); flow.advance(h); };
+  if (snapshot) {
+    for (const trip of snapshot.trips) {
+      flow.ensure(150);
+      paragraph(trip.name, 11, pdfColors.navy);
+      if (trip.date) paragraph(`${trip.date}${trip.time ? ` | ${trip.time}` : ""}`, 9);
+      participants(trip.participants, trip.guests);
+      if (snapshot.pending) { paragraph(p.pending); continue; }
+      tableHeader();
+      let zebra = false;
+      for (const line of trip.lines) {
+        const label = `${p[line.kind]}${line.label ? ` - ${line.label}` : ""}`;
+        const values = [label, String(line.quantity), money(line.unitPrice), money(line.total)];
+        const needed = Math.max(...values.map((v, i) => paragraphHeight(v, columns[i].width - 10, 9))) + 16;
+        if (flow.y + needed > pdfPage.height - 56) { flow.newPage(); paragraph(trip.name, 11, pdfColors.navy); tableHeader(); }
+        const h = drawTableRow(doc, values, columns, margin, flow.y, { zebra, rtl });
+        flow.advance(h);
+        zebra = !zebra;
       }
-    } else paragraph(p.unknownPrices, 10, "#64748b");
-    ensure(180);
-    if (!snapshot?.pending) {
-      detail(p.subtotal, subtotal === null ? t.pending : money(subtotal));
-      if (booking.promoCode) detail(p.promo, booking.promoCode);
-      else paragraph(subtotal !== null && discount === 0 ? p.noPromo : p.unknownPromo);
-      detail(p.discount, discount === null ? t.pending : money(discount));
-      if (subtotal !== null && discount !== null && Math.abs(subtotal - discount - booking.amount) > 0.011) paragraph(p.inconsistent, 9, "#92400e");
+      flow.advance(14);
     }
-    const total = snapshot?.pending ? p.pending : money(booking.amount);
-    const totalHeight = Math.max(height(t.total, 220, 12), height(total, 230, 17)) + 28;
-    ensure(totalHeight + 12);
-    doc.roundedRect(48, y, 499, totalHeight, 9).fill("#0d3b78");
-    write(t.total, rtl ? 311 : 64, y + 12, 220, 12, "#ffffff");
-    write(total, rtl ? 64 : 301, y + 12, 230, 17, "#ffffff"); y += totalHeight + 16;
-    if (!snapshot?.pending) paragraph(t.paymentNote[booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "refunded" ? "refunded" : "default"], 9, "#475569");
-    ensure(100);
-    heading(t.help);
-    paragraph(t.helpBody, 9, "#475569");
-    paragraph(t.policyLine, 8, "#64748b");
-    doc.end();
-  });
+  } else paragraph(p.unknownPrices, 10, pdfColors.muted);
+  flow.ensure(180);
+  if (!snapshot?.pending) {
+    detail(p.subtotal, subtotal === null ? t.pending : money(subtotal));
+    if (booking.promoCode) detail(p.promo, booking.promoCode);
+    else paragraph(subtotal !== null && discount === 0 ? p.noPromo : p.unknownPromo);
+    detail(p.discount, discount === null ? t.pending : money(discount));
+    if (subtotal !== null && discount !== null && Math.abs(subtotal - discount - booking.amount) > 0.011) paragraph(p.inconsistent, 9, "#92400e");
+  }
+  const total = snapshot?.pending ? p.pending : money(booking.amount);
+  const totalHeight = Math.max(paragraphHeight(t.total, 220, 12), paragraphHeight(total, 230, 17)) + 28;
+  flow.ensure(totalHeight + 12);
+  drawPriceBlock(doc, t.total, total, undefined, margin, flow.y, contentWidth, totalHeight, rtl);
+  flow.advance(totalHeight + 16);
+  if (!snapshot?.pending) paragraph(t.paymentNote[booking.paymentStatus === "paid" ? "paid" : booking.paymentStatus === "refunded" ? "refunded" : "default"], 9, pdfColors.muted);
+  flow.ensure(100);
+  heading(t.help);
+  paragraph(t.helpBody, 9, pdfColors.muted);
+  paragraph(t.policyLine, 8, pdfColors.muted);
+  stampPdfFooters(doc, { reference: booking.reference, rtl });
+
+  doc.end();
+  return renderPdfToBuffer(doc);
 }
 
 function formatMoney(amount: number, currency: string, locale = "en") { try { return new Intl.NumberFormat(locale, { style: "currency", currency: currency.toUpperCase() }).format(amount); } catch { return `${amount.toFixed(2)} ${currency.toUpperCase()}`; } }

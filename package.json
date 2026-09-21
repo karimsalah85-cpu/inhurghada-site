@@ -26,6 +26,7 @@
     "nodemailer": "^9.0.3",
     "pdfjs-dist": "^4.10.38",
     "pdfkit": "^0.20.1",
+    "qrcode": "^1.5.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tesseract.js": "^5.1.1"
@@ -34,6 +35,7 @@
     "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

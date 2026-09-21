@@ -3,8 +3,10 @@ import path from "node:path";
 
 /**
  * The reversed (white) wordmark, sized for the navy header used by every
- * generated booking PDF. It ships as a rasterized PNG (rather than the source
- * SVG) because PDFKit cannot embed SVG images directly.
+ * generated PDF. It ships as a rasterized PNG (rather than the source SVG)
+ * because PDFKit cannot embed SVG images directly. This is the ONLY logo
+ * asset every PDF header should use — never recreate the wordmark as text
+ * except as the last-resort fallback below, when the asset can't be read.
  */
 const LOGO_PATH = path.join(process.cwd(), "public/brand/dailyredsea-wordmark-white.png");
 
@@ -27,7 +29,7 @@ function loadLogoBuffer(): Buffer | null {
 /**
  * PDFKit only dedupes repeated `doc.image()` calls when passed a string path;
  * a raw Buffer re-embeds a brand-new (and asynchronously decoded) XObject on
- * every call. A multi-page status PDF draws the brand mark once per page, so
+ * every call. A multi-page document draws the brand mark once per page, so
  * without this cache each page would race its own PNG decode, making the
  * embedded object order (and so the rendered bytes) nondeterministic.
  */
@@ -40,11 +42,12 @@ function openLogoImage(doc: PDFKit.PDFDocument, buffer: Buffer): unknown {
 }
 
 /**
- * Draws the Daily Red Sea wordmark into a PDFKit document header, right-aligned
- * for RTL locales and left-aligned otherwise. If the logo asset cannot be read
- * or fails to render, this falls back to the plain text brand name on the same
- * font already registered as "Noto" for the document, so PDF generation never
- * fails because of the brand mark.
+ * Draws the official Daily Red Sea wordmark, preserving its aspect ratio and
+ * clear space, right-aligned for RTL locales and left-aligned otherwise. If
+ * the logo asset cannot be read or fails to render, this falls back to the
+ * plain text brand name on the same font already registered as "Noto" for
+ * the document, so PDF generation never fails because of the brand mark —
+ * but the raster logo is always tried first and is the only supported mark.
  */
 export function drawPdfBrandMark(
   doc: PDFKit.PDFDocument,

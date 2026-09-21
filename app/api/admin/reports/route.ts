@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (format === "pdf") {
-    const output = createReportPdf({
+    const output = await createReportPdf({
       from,
       to,
       trip,
