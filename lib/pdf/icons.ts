@@ -47,8 +47,9 @@ export function iconWhatsapp(doc: Doc, x: number, y: number, size: number, color
   const cx = x + size / 2, cy = y + size / 2, r = size / 2 - 1;
   doc.circle(cx, cy, r).stroke();
   doc.path(`M ${cx - r * 0.35} ${cy + r * 0.3} l -${r * 0.22} ${r * 0.22} l ${r * 0.22} -${r * 0.06}`).fill(color);
-  doc.save();
-  doc.path(`M ${cx - r * 0.35} ${cy - r * 0.15} C ${cx - r * 0.35} ${cy - r * 0.45}, ${cx + r * 0.35} ${cy - r * 0.45}, ${cx + r * 0.35} ${cy - r * 0.05} C ${cx + r * 0.35} ${cy + r * 0.35}, ${cx - r * 0.05} ${cy + r * 0.35}, ${cx - r * 0.35} ${cy + r * 0.15}`).lineWidth(1.1).stroke();
+  // Recognizable telephone handset inside the chat bubble.
+  doc.save().translate(x + size * 0.2, y + size * 0.2).scale(size * 0.025);
+  doc.path("M 22 16.92 V 20 a 2 2 0 0 1 -2.18 2 A 19.79 19.79 0 0 1 11.19 18.93 A 19.5 19.5 0 0 1 5.19 12.93 A 19.79 19.79 0 0 1 2.09 4.18 A 2 2 0 0 1 4.08 2 h 3 a 2 2 0 0 1 2 1.72 c .12 .96 .35 1.9 .69 2.79 a 2 2 0 0 1 -.45 2.11 L 8.05 9.89 a 16 16 0 0 0 6 6 l 1.27 -1.27 a 2 2 0 0 1 2.11 -.45 c .89 .34 1.83 .57 2.79 .69 A 2 2 0 0 1 22 16.92 Z").lineWidth(1.7).stroke();
   doc.restore();
 }
 

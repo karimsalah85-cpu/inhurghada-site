@@ -210,7 +210,10 @@ export function statusToneFor(value: string): StatusTone {
 export function drawStatusBadge(doc: Doc, label: string, x: number, y: number, width: number, height: number, tone: StatusTone, rtl = false) {
   const { bg, fg } = pdfColors.status[tone];
   doc.roundedRect(x, y, width, height, pdfRadius.chip).fill(bg);
-  pdfWrite(doc, label, x, y + height / 2 - 6, width, { size: 9, color: fg, align: "center", rtl });
+  let size = 9;
+  while (size > 6 && pdfTextHeight(doc, label, width - 12, size, rtl, 1) > height - 6) size -= 0.25;
+  const textHeight = pdfTextHeight(doc, label, width - 12, size, rtl, 1);
+  pdfWrite(doc, label, x + 6, y + (height - textHeight) / 2, width - 12, { size, color: fg, align: "center", rtl, wrap: true, lineGap: 1 });
 }
 
 /** The coral "total due" block — used by the status voucher; the booking
@@ -272,7 +275,19 @@ export function drawPdfHero(doc: Doc, options: { image: Buffer | null; height: n
   doc.rect(0, 0, pdfPage.width, height).fill(overlay);
   doc.restore();
 
-  drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: 26, width: 150, variant: "light", align: rtl ? "right" : "left" });
+  // The reversed/white wordmark used here previously could lose contrast against a bright
+  // sky/sand hero photo (the overlay gradient is lightest at the very top, right where the
+  // logo sits). A white backing plate lets the official full-color mark render instead, with
+  // guaranteed contrast regardless of the underlying photo.
+  const heroLogoWidth = 185;
+  const heroLogoAspectRatio = 1566 / 254; // Matches the wordmark asset's own ratio (see lib/pdf/logo.ts).
+  const heroLogoHeight = heroLogoWidth / heroLogoAspectRatio;
+  const heroLogoPadX = 14;
+  const heroLogoPadY = 10;
+  const heroLogoY = 26;
+  const heroLogoX = rtl ? pdfPage.width - pdfPage.margin - heroLogoWidth : pdfPage.margin;
+  doc.roundedRect(heroLogoX - heroLogoPadX, heroLogoY - heroLogoPadY, heroLogoWidth + heroLogoPadX * 2, heroLogoHeight + heroLogoPadY * 2, 10).fill(pdfColors.white);
+  drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: heroLogoY, width: heroLogoWidth, variant: "dark", align: rtl ? "right" : "left" });
   pdfWrite(doc, title, pdfPage.margin, height - 92, pdfPage.width - pdfPage.margin * 2, { size: title.length > 40 ? 21 : 27, color: pdfColors.white, rtl, bold: true });
   pdfWrite(doc, subtitle, pdfPage.margin, height - 38, pdfPage.width - pdfPage.margin * 2, { size: 11, color: "#dceaf1", rtl });
   return height;
@@ -296,12 +311,28 @@ export function drawExperienceTicket(doc: Doc, options: { x: number; y: number; 
 
   doc.roundedRect(x, y, width, height, pdfRadius.ticket).fill(pdfColors.white);
   doc.roundedRect(stubX, y, stubWidth, height, pdfRadius.ticket).fill(pdfColors.navy);
+  // The card previously had no outline, so its silhouette only read where it happened to sit
+  // over a darker part of the sand page background. Stroke it after both fills so the outline
+  // is visible on top of the navy stub too.
+  doc.roundedRect(x, y, width, height, pdfRadius.ticket).lineWidth(1).strokeColor(pdfColors.border).stroke();
 
   const seamX = rtl ? x + stubWidth : stubX;
   doc.save();
-  doc.circle(seamX, y, 10).fill(pdfColors.sand);
-  doc.circle(seamX, y + height, 10).fill(pdfColors.sand);
-  doc.dash(3, { space: 4 }).moveTo(seamX, y + 16).lineTo(seamX, y + height - 16).strokeColor(pdfColors.border).lineWidth(1).stroke();
+  // Punch-hole notches: filled with the page's own sand color to read as a cutout, plus a
+  // thin stroke so the edge stays visible even where the fill alone would blend into the
+  // navy stub (an unstroked fill made these nearly invisible on that side before).
+  for (const notchY of [y, y + height]) {
+    doc.circle(seamX, notchY, 10).fill(pdfColors.sand);
+
+  }
+  for (const edgeX of [x, x + width]) {
+    for (let notchY = y + 48; notchY < y + height - 24; notchY += 34) {
+      doc.circle(edgeX, notchY, 6).fill(pdfColors.sand);
+    }
+  }
+  // A heavier, tighter dash than the previous 1px hairline so the perforation reads clearly
+  // in print against both the white and navy sides of the seam.
+  doc.dash(4, { space: 3 }).moveTo(seamX, y + 16).lineTo(seamX, y + height - 16).strokeColor(pdfColors.border).lineWidth(1.5).stroke();
   doc.undash();
   doc.restore();
 
@@ -340,17 +371,58 @@ export function drawPdfGuestDetails(doc: Doc, options: { title: string; name: st
   drawInfoRow(doc, "Email", email, x + 22 + (colWidth + 10) * 2, y + 40, colWidth, rtl);
 }
 
-/** Aqua-tinted "what happens next" panel with a WhatsApp glyph — the one strong support call-to-action under the ticket. */
-export function drawPdfWhatsAppPanel(doc: Doc, options: { title: string; body: string; x: number; y: number; width: number; height: number; rtl?: boolean }) {
-  const { title, body, x, y, width, height, rtl = false } = options;
+/**
+ * Aqua-tinted "what happens next" panel with a WhatsApp glyph — the one strong support
+ * call-to-action under the ticket. The caller draws its own full-card `doc.link` over this,
+ * so the CTA pill drawn here is a visual affordance, not the click target itself.
+ *
+ * `cta` is optional and, when supplied, must already be localized by the caller (matching
+ * every other string this component receives) — this function never invents new copy.
+ * Without it, the pill still renders with just the WhatsApp glyph and no text, which needs
+ * no translation and keeps the affordance visible for existing callers unchanged.
+ */
+export function drawPdfWhatsAppPanel(doc: Doc, options: { title: string; body: string; x: number; y: number; width: number; height: number; rtl?: boolean; cta?: string }) {
+  const { title, body, x, y, width, height, rtl = false, cta } = options;
   doc.roundedRect(x, y, width, height, pdfRadius.card).fill("#EAF6F8");
-  const iconSize = 26;
-  const iconX = rtl ? x + width - 22 - iconSize : x + 22;
-  iconWhatsapp(doc, iconX, y + height / 2 - iconSize / 2, iconSize, pdfColors.aqua);
-  const textX = rtl ? x + 22 : x + 22 + iconSize + 16;
-  const textWidth = width - 44 - iconSize - 16;
-  pdfWrite(doc, title, textX, y + 16, textWidth, { size: 10, color: pdfColors.navy, rtl, bold: true });
-  pdfWrite(doc, body, textX, y + 34, textWidth, { size: 8.5, color: pdfColors.text, rtl, wrap: true, lineGap: 2 });
+  const pad = 22;
+  const iconSize = 22;
+  // Top-align the icon with the title instead of centering it on the full card height: at the
+  // ~288pt-wide narrow column this panel is actually laid out in (the booking confirmation's
+  // two-column support row), the card is much taller than its text, and a vertically-centered
+  // icon used to float away from the title/body block it belongs to.
+  const iconX = rtl ? x + width - pad - iconSize : x + pad;
+  iconWhatsapp(doc, iconX, y + 16, iconSize, pdfColors.aqua);
+  const textX = rtl ? x + pad : x + pad + iconSize + 14;
+  const textWidth = Math.max(0, width - pad * 2 - iconSize - 14);
+  pdfWrite(doc, title, textX, y + 16, textWidth, { size: 10, color: pdfColors.navy, rtl, bold: true, wrap: true, lineGap: 1 });
+  // The title previously assumed a single line. At narrow widths a longer localized title can
+  // wrap, and the body used to be drawn at a fixed offset regardless — colliding with a
+  // wrapped title. Measure the title's actual height instead.
+  const titleHeight = pdfTextHeight(doc, title, textWidth, 10, rtl, 1);
+  const bodyY = y + 16 + Math.max(titleHeight, iconSize) + 10;
+  const bodyX = x + pad;
+  const bodyWidth = width - pad * 2;
+  pdfWrite(doc, body, bodyX, bodyY, bodyWidth, { size: 8.5, color: pdfColors.text, rtl, wrap: true, lineGap: 2 });
+
+  // A visible WhatsApp CTA pill anchored to the card's bottom edge, instead of leaving the
+  // rest of a tall narrow card blank below the paragraph — previously nothing in this panel
+  // signaled that the whole card is a tap target.
+  const ctaHeight = 26;
+  const ctaY = y + height - pad - ctaHeight;
+  const bodyHeight = pdfTextHeight(doc, body, bodyWidth, 8.5, rtl, 2);
+  if (ctaY > bodyY + bodyHeight + 10) {
+    const ctaX = x + pad;
+    const ctaWidth = width - pad * 2;
+    doc.roundedRect(ctaX, ctaY, ctaWidth, ctaHeight, pdfRadius.chip).fill(pdfColors.aqua);
+    const ctaIconSize = 15;
+    const ctaIconX = rtl ? ctaX + ctaWidth - 14 - ctaIconSize : ctaX + 14;
+    iconWhatsapp(doc, ctaIconX, ctaY + ctaHeight / 2 - ctaIconSize / 2, ctaIconSize, pdfColors.white);
+    if (cta) {
+      const ctaTextX = rtl ? ctaX + 14 : ctaIconX + ctaIconSize + 8;
+      const ctaTextWidth = Math.max(0, ctaWidth - 28 - ctaIconSize - 8);
+      pdfWrite(doc, cta, ctaTextX, ctaY + ctaHeight / 2 - 5, ctaTextWidth, { size: 8.5, color: pdfColors.white, rtl, bold: true, align: rtl ? "right" : "left" });
+    }
+  }
 }
 
 const policyIconIndex = ["calendar", "alert", "wave", "shield", "dive"] as const;

@@ -256,7 +256,7 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
     title: t.guest, name: invoice.customerName || t.pending, whatsapp: invoice.customerPhone || t.pending, email: invoice.customerEmail || t.pending,
     x: guestX, y: guestY, width: guestWidth, height: cardHeight, rtl,
   });
-  drawPdfWhatsAppPanel(doc, { title: t.next, body: t.steps, x: supportX, y: guestY, width: supportWidth, height: cardHeight, rtl });
+  drawPdfWhatsAppPanel(doc, { title: t.next, body: t.steps, cta: ({ en: "Chat with us on WhatsApp", de: "Schreib uns auf WhatsApp", ru: "Напишите нам в WhatsApp", ar: "تواصل معنا عبر واتساب", pl: "Napisz do nas na WhatsApp", zh: "通过 WhatsApp 联系我们" })[locale], x: supportX, y: guestY, width: supportWidth, height: cardHeight, rtl });
   doc.link(supportX, guestY, supportWidth, cardHeight, buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${invoice.reference}`));
   pdfWrite(doc, t.thanks, margin, guestY + cardHeight + 16, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
 

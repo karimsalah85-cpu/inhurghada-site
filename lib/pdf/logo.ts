@@ -13,10 +13,10 @@ import path from "node:path";
  */
 const LOGO_PATHS = {
   light: path.join(process.cwd(), "public/brand/dailyredsea-wordmark-white.png"),
-  dark: path.join(process.cwd(), "public/brand/dailyredsea-wordmark.png"),
+  dark: path.join(process.cwd(), "public/brand/dailyredsea-wordmark-coral.png"),
 } as const;
 
-const LOGO_ASPECT_RATIO = 633 / 98;
+const LOGO_ASPECT_RATIOS = { light: 633 / 98, dark: 1566 / 254 };
 
 const cachedLogos = new Map<keyof typeof LOGO_PATHS, Buffer | null>();
 
@@ -60,7 +60,7 @@ export function drawPdfLogo(
   options: { x: number; y: number; width: number; variant: "light" | "dark"; align?: "left" | "right" },
 ) {
   const { x, y, width, variant, align = "left" } = options;
-  const height = width / LOGO_ASPECT_RATIO;
+  const height = width / LOGO_ASPECT_RATIOS[variant];
   const drawX = align === "right" ? x - width : x;
   const logo = loadLogoBuffer(variant);
   if (logo) {
