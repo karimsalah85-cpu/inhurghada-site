@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { pdfHeroAssetPaths } from "./lib/pdf/hero-image";
+
+const pdfAssets = ["./assets/fonts/**/*", "./public/brand/dailyredsea-wordmark*.png", ...pdfHeroAssetPaths];
 import { assertDeploymentEnvironment } from "./lib/environment";
 
 assertDeploymentEnvironment(process.env);
@@ -15,9 +18,10 @@ const nextConfig: NextConfig = {
   // both into the serverless bundle for every route that renders a PDF.
   // (PDFKit's own "#standard-fonts/*" AFM imports are sidestepped in code via `font: ""`.)
   outputFileTracingIncludes: {
-    "/api/bookings": ["./assets/fonts/**/*", "./public/brand/dailyredsea-wordmark-white.png"],
-    "/api/invoices/*": ["./assets/fonts/**/*", "./public/brand/dailyredsea-wordmark-white.png"],
-    "/api/admin/bookings/**": ["./assets/fonts/**/*", "./public/brand/dailyredsea-wordmark-white.png"],
+    "/api/cron/admin-automation": pdfAssets,
+    "/api/bookings": pdfAssets,
+    "/api/invoices/*": pdfAssets,
+    "/api/admin/bookings/**": pdfAssets,
   },
   async redirects() {
     return [

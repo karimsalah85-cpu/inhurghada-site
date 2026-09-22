@@ -98,7 +98,7 @@ export function pdfPageBackground(doc: Doc) {
   doc.rect(0, 0, pdfPage.width, pdfPage.height).fill(pdfColors.sand);
 }
 
-export type PdfHeaderVariant = "hero" | "compact";
+export type PdfHeaderVariant = "hero" | "compact" | "policy";
 
 /** Compact branded header band — the dark logo header used on text-heavy pages
  * (policy page, status voucher, admin report). See PdfHero for the large
@@ -108,6 +108,13 @@ export function drawPdfHeader(
   options: { variant: PdfHeaderVariant; title: string; subtitle?: string; rtl?: boolean; logoWidth?: number },
 ) {
   const { title, subtitle, rtl = false, logoWidth = 130 } = options;
+  if (options.variant === "policy") {
+    doc.rect(0, 0, pdfPage.width, 115).fill(pdfColors.white);
+    drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: 24, width: 165, variant: "dark", align: rtl ? "right" : "left" });
+    doc.moveTo(pdfPage.margin, 62).lineTo(pdfPage.width - pdfPage.margin, 62).strokeColor(pdfColors.aqua).lineWidth(0.8).stroke();
+    pdfWrite(doc, title, pdfPage.margin, 76, pdfPage.width - pdfPage.margin * 2, { size: 18, color: pdfColors.navy, rtl, bold: true });
+    return 115;
+  }
   const height = 78;
   doc.rect(0, 0, pdfPage.width, height).fill(pdfColors.navy);
   doc.rect(0, height, pdfPage.width, 3).fill(pdfColors.coral);
@@ -157,7 +164,7 @@ export function drawPdfImageFooter(doc: Doc, options: { image?: Buffer | null; r
   overlay.stop(0, pdfColors.navyDark, 0.55).stop(1, pdfColors.navyDark, 0.82);
   doc.rect(0, y, pdfPage.width, height).fill(overlay);
   doc.restore();
-  drawPdfFooter(doc, { page: options.page, totalPages: options.totalPages, reference: options.reference, y: y + height / 2 - 5, rtl: options.rtl });
+  pdfWrite(doc, ["dailyredsea.com", options.reference, `Page ${options.page} of ${options.totalPages}`].filter(Boolean).join("   ·   "), pdfPage.margin, y + height / 2 - 5, pdfPage.width - pdfPage.margin * 2, { size: 8, color: pdfColors.white, rtl: options.rtl });
 }
 
 // ---------------------------------------------------------------------------
@@ -266,7 +273,7 @@ export function drawPdfHero(doc: Doc, options: { image: Buffer | null; height: n
   doc.restore();
 
   drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: 26, width: 150, variant: "light", align: rtl ? "right" : "left" });
-  pdfWrite(doc, title, pdfPage.margin, height - 74, pdfPage.width - pdfPage.margin * 2, { size: 27, color: pdfColors.white, rtl, bold: true });
+  pdfWrite(doc, title, pdfPage.margin, height - 92, pdfPage.width - pdfPage.margin * 2, { size: title.length > 40 ? 21 : 27, color: pdfColors.white, rtl, bold: true });
   pdfWrite(doc, subtitle, pdfPage.margin, height - 38, pdfPage.width - pdfPage.margin * 2, { size: 11, color: "#dceaf1", rtl });
   return height;
 }
@@ -321,7 +328,13 @@ export function drawPdfGuestDetails(doc: Doc, options: { title: string; name: st
   doc.roundedRect(x, y, width, height, pdfRadius.card).fill(pdfColors.white);
   doc.roundedRect(x, y, 4, height, 2).fill(pdfColors.aqua);
   pdfWrite(doc, title, x + 22, y + 16, width - 40, { size: 9.5, color: pdfColors.navy, rtl, bold: true, letterSpacing: 0.3 });
-  const colWidth = (width - 44) / 3;
+  if (width < 300) {
+    for (const [index, value] of [name, whatsapp, email].entries()) {
+      pdfWrite(doc, value, x + 18, y + 51 + index * 37, width - 36, {size: 9, rtl: index === 0 ? rtl : false, wrap: true});
+    }
+    return;
+  }
+  const colWidth = (width - 64) / 3;
   drawInfoRow(doc, "Guest name", name, x + 22, y + 40, colWidth, rtl);
   drawInfoRow(doc, "WhatsApp", whatsapp, x + 22 + colWidth + 10, y + 40, colWidth, rtl);
   drawInfoRow(doc, "Email", email, x + 22 + (colWidth + 10) * 2, y + 40, colWidth, rtl);

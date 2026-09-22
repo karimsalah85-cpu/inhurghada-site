@@ -29,6 +29,7 @@ await db.exec(read('20260913123918_booking_promo_codes.sql'));
 await db.exec(read('20260914114918_booking_pricing_snapshot.sql'));
 await db.exec(read('20260920100000_referral_program.sql'));
 await db.exec(read('20260921070742_referral_acquisition_hardening.sql'));
+await db.exec(read('20260921205256_referral_operational_analytics.sql'));
 await db.exec(`grant all on all tables in schema public to service_role;grant usage on schema public to service_role;`);
 
 await db.exec(`insert into content_items(content_type,slug,locale,status,title,trip_id) values('tour','reef','en','published','Reef','DRS-001');insert into tour_availability(tour_slug,service_date,capacity) values('reef','2099-01-01',10000);`);
@@ -149,4 +150,12 @@ describe("referral acquisition database invariants",()=>{
   const a=await qualify(),b=await reserve({referralCode:a.code});await complete(b.booking.id);await complete(b.booking.id);
   const events=await db.query<{event_type:string;payload:object}>("select event_type,payload from referral_notification_events where booking_id=$1",[b.booking.id]);expect(events.rows.map(r=>r.event_type).sort()).toEqual(["activated","reward_earned","trip_completed"]);expect(JSON.stringify(events.rows)).not.toContain('amount');
  });
+ it("keeps creation analytics after qualification and denies public analytics access",async()=>{
+  const a=await qualify(),b=await reserve({referralCode:a.code});await complete(b.booking.id);
+  const events=await db.query<{event_name:string}>("select event_name from referral_analytics_events where booking_id=$1",[b.booking.id]);
+  expect(events.rows.filter(e=>e.event_name==='referred_booking_created')).toHaveLength(1);
+  expect(events.rows.filter(e=>e.event_name==='referral_reward_earned')).toHaveLength(1);
+  await db.exec("set role authenticated");try{await expect(db.query("select * from referral_analytics_events")).rejects.toThrow(/permission denied/);}finally{await db.exec("reset role");}
+ });
+
 });

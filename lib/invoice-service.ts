@@ -18,6 +18,7 @@ import {
   drawPdfGuestDetails,
   drawPdfWhatsAppPanel,
   drawPdfPolicyRow,
+  drawPdfImageFooter,
   drawStatusBadge,
   drawPriceBlock,
   drawQrCodeBlock,
@@ -199,7 +200,7 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const heroHeight = 235;
   drawPdfHero(doc, { image: heroImage, height: heroHeight, title: t.confirmation, subtitle: `${t.issued}: ${issuedDate}  ·  ${invoice.reference}`, rtl });
 
-  const ticketY = heroHeight + 24;
+  const ticketY = heroHeight + 12;
   const ticketHeight = 300;
   const ticket = drawExperienceTicket(doc, { x: margin, y: ticketY, width: contentWidth, height: ticketHeight, rtl });
   const padLeft = 26;
@@ -214,7 +215,7 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
 
   const metaY = titleY + titleHeight + 24;
   const metaGap = 14;
-  const metaColWidth = (infoWidth - metaGap * 3) / 4;
+  const metaColWidth = invoice.tripLines?.length ? infoWidth : (infoWidth - metaGap * 3) / 4;
   const metaItems: { icon: "calendar" | "clock" | "people" | "pin"; label: string; value: string }[] = invoice.tripLines?.length
     ? [{ icon: "calendar", label: t.metaLabels[0], value: invoice.tripLines[0] || t.pending }]
     : [
@@ -246,27 +247,47 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
 
   // Two supporting blocks only — everything else lives inside the ticket.
   const guestY = ticketY + ticketHeight + 20;
-  const guestHeight = 62;
+  const guestWidth = contentWidth * 0.42;
+  const supportWidth = contentWidth - guestWidth - 12;
+  const cardHeight = 188;
+  const guestX = rtl ? margin + contentWidth - guestWidth : margin;
+  const supportX = rtl ? margin : margin + guestWidth + 12;
   drawPdfGuestDetails(doc, {
     title: t.guest, name: invoice.customerName || t.pending, whatsapp: invoice.customerPhone || t.pending, email: invoice.customerEmail || t.pending,
-    x: margin, y: guestY, width: contentWidth, height: guestHeight, rtl,
+    x: guestX, y: guestY, width: guestWidth, height: cardHeight, rtl,
   });
+  drawPdfWhatsAppPanel(doc, { title: t.next, body: t.steps, x: supportX, y: guestY, width: supportWidth, height: cardHeight, rtl });
+  doc.link(supportX, guestY, supportWidth, cardHeight, buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${invoice.reference}`));
+  pdfWrite(doc, t.thanks, margin, guestY + cardHeight + 16, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
 
-  const whatsappY = guestY + guestHeight + 16;
-  const whatsappHeight = 92;
-  drawPdfWhatsAppPanel(doc, { title: t.next, body: t.steps, x: margin, y: whatsappY, width: contentWidth, height: whatsappHeight, rtl });
-  pdfWrite(doc, t.thanks, margin, whatsappY + whatsappHeight + 14, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
+  // Preserve every itinerary entry from multi-trip bookings on flow-managed pages.
+  if (invoice.tripLines && invoice.tripLines.length > 1) {
+    const itinerary = new PdfFlow(doc, { header: { variant: "policy", title: t.metaLabels[0], rtl }, bottomMargin: 88 });
+    itinerary.newPage();
+    for (const line of invoice.tripLines) {
+      const height = pdfTextHeight(doc, line, contentWidth, 11, rtl, 3) + 20;
+      itinerary.ensure(height);
+      pdfWrite(doc, line, margin, itinerary.y, contentWidth, { size: 11, rtl, wrap: true, lineGap: 3 });
+      itinerary.advance(height);
+    }
+  }
 
   // --- Page 2: compact header + five policy rows (not paragraphs) + branded footer ---
-  const policy = new PdfFlow(doc, { header: { variant: "compact", title: t.policy, rtl } });
+  const policy = new PdfFlow(doc, { header: { variant: "policy", title: t.policy, rtl }, bottomMargin: 88 });
   policy.newPage();
   const policyParagraphs = locale === "en" ? getCancellationPolicyParagraphs() : t.policyParagraphs;
   policyParagraphs.forEach((paragraph, index) => {
     const heading = t.policyHeadings[index] || t.policy;
+    policy.ensure(pdfTextHeight(doc, paragraph, contentWidth - 206, 9.5, rtl, 3.5) + 30);
     const consumed = drawPdfPolicyRow(doc, { icon: index, heading, body: paragraph, x: margin, y: policy.y, width: contentWidth, rtl });
     policy.advance(consumed);
   });
   stampPdfFooters(doc, { reference: invoice.reference, rtl });
+  const pageCount = doc.bufferedPageRange().count;
+  for (let index = 1; index < pageCount; index++) {
+    doc.switchToPage(index);
+    drawPdfImageFooter(doc, { image: resolveHeroImage("full-day-diving"), reference: invoice.reference, page: index + 1, totalPages: pageCount, rtl });
+  }
 
   doc.end();
   return renderPdfToBuffer(doc);
@@ -274,10 +295,10 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
 
 function destinationCue(itemName: string) {
   const name = (itemName || "").toLowerCase();
-  if (name.includes("jeddah")) return "JEDDAH  →  RED SEA";
-  if (name.includes("luxor") || name.includes("cairo") || name.includes("karnak")) return "HURGHADA  →  NILE VALLEY";
-  if (name.includes("marsa")) return "MARSA ALAM  →  RED SEA";
-  return "HURGHADA  →  RED SEA";
+  if (name.includes("jeddah")) return "JEDDAH  /  RED SEA";
+  if (name.includes("luxor") || name.includes("cairo") || name.includes("karnak")) return "HURGHADA  /  NILE VALLEY";
+  if (name.includes("marsa")) return "MARSA ALAM  /  RED SEA";
+  return "HURGHADA  /  RED SEA";
 }
 
 type StatusPdfCopy = {
