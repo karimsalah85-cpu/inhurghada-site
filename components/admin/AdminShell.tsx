@@ -33,6 +33,7 @@ const groups: NavGroup[] = [
     { href: "/admin/analytics", label: "Analytics", permissions: ["finance"] },
     { href: "/admin/reports", label: "Reports", permissions: ["reports"] },
     { href: "/admin/finance", label: "Finance", permissions: ["finance"] },
+    { href: "/admin/finance/suppliers", label: "Supplier balances", permissions: ["finance"] },
   ] },
   { label: "Settings & access", items: [
     { href: "/admin/currency", label: "Currency settings", permissions: ["finance", "settings"] },
@@ -77,7 +78,10 @@ export default function AdminShell({ children, permissions, role, environment }:
     ...group,
     items: group.items.filter((item) => item.ownerOnly ? role === "owner" : !item.permissions || item.permissions.some((permission) => allowed.has(permission))),
   })).filter((group) => group.items.length);
-  const isActive = (href: string) => pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
+  const matches = (href: string) => pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
+  // Nested items (e.g. /admin/finance/suppliers under /admin/finance): only the most specific match is active.
+  const activeHref = permittedGroups.flatMap((group) => group.items).map((item) => item.href).filter(matches).sort((a, b) => b.length - a.length)[0];
+  const isActive = (href: string) => href === activeHref;
   const currentPage = permittedGroups.flatMap((group) => group.items).find((item) => isActive(item.href))?.label ?? (pathname === "/admin/account" ? "Account & security" : "Admin workspace");
   const visibleGroups = permittedGroups.map((group) => ({
     ...group,
