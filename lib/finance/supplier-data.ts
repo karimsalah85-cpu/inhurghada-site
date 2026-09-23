@@ -73,6 +73,9 @@ export type SupplierBookingRow = {
   guests: number;
   currency: FinanceCurrency;
   net_selling_price: string;
+  supplier_cost: string;
+  supplier_cost_currency: FinanceCurrency;
+  supplier_cost_source: string;
   collected_by: "daily_red_sea" | "supplier";
   collection_status: "not_collected" | "partial" | "collected";
   collected_amount: string;
@@ -113,7 +116,7 @@ export async function supplierDetail(supabase: SupabaseClient, supplierId: strin
   for (let index = 0; index < lineIds.length; index += 200) {
     const chunk = lineIds.slice(index, index + 200);
     const [lineRows, statusRows] = await Promise.all([
-      supabase.from("booking_financial_lines").select("id,booking_id,line_no,trip_date,tour_name,guests,currency,net_selling_price,collected_by,collection_status,collected_amount,outcome,included,supplier_id,margin_amount,margin_pct,margin_amount_usd,margin_pct_usd,booking_financials(reference)").in("id", chunk),
+      supabase.from("booking_financial_lines").select("id,booking_id,line_no,trip_date,tour_name,guests,currency,net_selling_price,supplier_cost,supplier_cost_currency,supplier_cost_source,collected_by,collection_status,collected_amount,outcome,included,supplier_id,margin_amount,margin_pct,margin_amount_usd,margin_pct_usd,booking_financials(reference)").in("id", chunk),
       supabase.from("booking_financial_line_status").select("line_id,ledger_state,supplier_cost_paid_status,commission_received_status").in("line_id", chunk),
     ]);
     const statuses = new Map((check(statusRows) as { line_id: string; ledger_state: string; supplier_cost_paid_status: string; commission_received_status: string }[]).map((row) => [row.line_id, row]));
@@ -127,6 +130,7 @@ export async function supplierDetail(supabase: SupabaseClient, supplierId: strin
         line_id: row.id, booking_id: row.booking_id, reference, line_no: row.line_no as number,
         trip_date: row.trip_date as string | null, tour_name: row.tour_name as string | null, guests: row.guests as number,
         currency: row.currency as FinanceCurrency, net_selling_price: String(row.net_selling_price),
+        supplier_cost: String(row.supplier_cost), supplier_cost_currency: row.supplier_cost_currency as FinanceCurrency, supplier_cost_source: String(row.supplier_cost_source),
         collected_by: row.collected_by as SupplierBookingRow["collected_by"], collection_status: row.collection_status as SupplierBookingRow["collection_status"],
         collected_amount: String(row.collected_amount), outcome: row.outcome as string, included: row.included as boolean,
         margin_amount: row.margin_amount === null ? null : String(row.margin_amount), margin_pct: row.margin_pct === null ? null : String(row.margin_pct),

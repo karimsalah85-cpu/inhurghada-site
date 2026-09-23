@@ -609,6 +609,9 @@ begin
     end case;
   end if;
   if l.collection_status = 'not_collected' then l.collected_amount := 0; end if;
+  if l.collected_amount > l.net_selling_price then
+    raise exception 'Collected amount (%) cannot exceed the net selling price (%).', l.collected_amount, l.net_selling_price using errcode = '23514';
+  end if;
 
   update public.booking_financial_lines set
     collected_by = l.collected_by, collection_status = l.collection_status, collected_amount = l.collected_amount,

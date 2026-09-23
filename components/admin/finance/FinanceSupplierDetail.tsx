@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { supplierCostFromSplit } from "@/lib/finance/booking-split";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { FINANCE_CURRENCIES, formatMoney, fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
 import { entryTypeLabels, filterLedger, LEDGER_ENTRY_TYPES, type BalanceLabel, type LedgerFilters, type LedgerRow } from "@/lib/finance/supplier-ledger";
@@ -125,10 +126,11 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
     const values = Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
     const ok = await run(async () => {
       await send(`/api/admin/finance/lines/${line.line_id}`, "PATCH", {
+        ...(values.split_amount ? { supplier_cost: supplierCostFromSplit(line.net_selling_price, values.split_amount, values.split_mode as "drs_cut" | "supplier_amount", line.currency) } : {}),
         collected_by: values.collected_by, collection_status: values.collection_status,
         collected_amount: values.collection_status === "not_collected" ? "0" : values.collected_amount || "0",
       });
-      return `Collection updated for ${line.reference}.`;
+      return `Booking split and collection updated for ${line.reference}.`;
     });
     if (ok) setEditingLine(null);
   }
@@ -199,7 +201,7 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
         <table className="w-full min-w-[1100px] text-left text-sm">
           <thead className="text-xs uppercase tracking-wide text-slate-500"><tr>
             <th className="py-2 pr-2" /><th className="py-2 pr-3">Trip date</th><th className="py-2 pr-3">Booking / tour</th><th className="py-2 pr-3 text-right">Guests</th>
-            <th className="py-2 pr-3">Collected by</th><th className="py-2 pr-3">Collection</th><th className="py-2 pr-3">Supplier cost</th><th className="py-2 pr-3">Commission</th>
+            <th className="py-2 pr-3">Collected by</th><th className="py-2 pr-3">Collection</th><th className="py-2 pr-3">Supplier cost</th><th className="py-2 pr-3">Daily Red Sea cut</th>
             <th className="py-2 pr-3 text-right">Margin (USD)</th><th className="py-2 pr-3 text-right">Balance with supplier</th><th className="py-2" />
           </tr></thead>
           <tbody>
@@ -211,14 +213,18 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
                 <td className="py-3 pr-3 text-right">{line.guests}</td>
                 <td className="py-3 pr-3">{statusText[line.collected_by]}</td>
                 <td className={`py-3 pr-3 ${statusTone(line.collection_status)}`}>{statusText[line.collection_status]}{line.collection_status === "partial" ? ` · ${formatMoney(line.collected_amount, line.currency)}` : ""}</td>
-                <td className={`py-3 pr-3 ${statusTone(line.supplier_cost_paid_status)}`}>{line.current_supplier ? statusText[line.supplier_cost_paid_status || ""] || "—" : "—"}</td>
-                <td className={`py-3 pr-3 ${statusTone(line.commission_received_status)}`}>{line.current_supplier ? statusText[line.commission_received_status || ""] || "—" : "—"}{line.ledger_state === "awaiting_fx" || line.ledger_state === "usd_pending" ? <p className="text-xs text-amber-700">{statusText[line.ledger_state]}</p> : null}</td>
+                <td className={`py-3 pr-3 ${statusTone(line.supplier_cost_paid_status)}`}>{line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}<p className="text-xs">{statusText[line.supplier_cost_paid_status || ""] || "—"}</p></> : "—"}</td>
+                <td className={`py-3 pr-3 ${statusTone(line.commission_received_status)}`}>{line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : line.supplier_cost_currency === line.currency ? formatMoney(fromMinor(toMinor(line.net_selling_price) - toMinor(line.supplier_cost)), line.currency) : "See currency balance"}<p className="text-xs">{statusText[line.commission_received_status || ""] || "—"}</p></> : "—"}{line.ledger_state === "awaiting_fx" || line.ledger_state === "usd_pending" ? <p className="text-xs text-amber-700">{statusText[line.ledger_state]}</p> : null}</td>
                 <td className={`py-3 pr-3 text-right tabular-nums ${line.margin_amount_usd !== null && Number(line.margin_amount_usd) < 0 ? "font-bold text-rose-700" : ""}`}>{line.margin_amount_usd === null ? <span className="text-xs text-amber-700">USD pending</span> : <>{formatMoney(line.margin_amount_usd)}<p className="text-xs text-slate-500">{line.margin_pct_usd === null ? "—" : `${line.margin_pct_usd}%`}</p></>}</td>
                 <td className="py-3 pr-3 text-right tabular-nums">{line.balances.length ? line.balances.map((balance) => <div key={balance.currency} className={Number(balance.balance) < 0 ? "text-amber-800" : "text-emerald-800"}>{formatMoney(balance.balance, balance.currency)}</div>) : <span className="text-slate-400">Settled</span>}</td>
-                <td className="py-3 text-right">{data.canManage && line.current_supplier ? <button type="button" onClick={() => setEditingLine(editingLine === line.line_id ? null : line.line_id)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold">Collection…</button> : null}</td>
+                <td className="py-3 text-right">{data.canManage && line.current_supplier ? <button type="button" onClick={() => setEditingLine(editingLine === line.line_id ? null : line.line_id)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold">Edit split & collection</button> : null}</td>
               </tr>
               {editingLine === line.line_id ? <tr className="bg-slate-50"><td colSpan={11} className="p-3">
                 <form onSubmit={(event) => saveCollection(event, line)} className="flex flex-wrap items-end gap-3 text-sm">
+                  <p className="basis-full font-semibold">Net booking price: {formatMoney(line.net_selling_price, line.currency)} · Supplier amount: {line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}{line.supplier_cost_source !== "none" && line.supplier_cost_currency === line.currency ? ` · Daily Red Sea cut: ${formatMoney(fromMinor(toMinor(line.net_selling_price) - toMinor(line.supplier_cost)), line.currency)}` : ""}</p>
+                  <label className="font-semibold">Enter<select name="split_mode" className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="drs_cut">Daily Red Sea cut</option><option value="supplier_amount">Supplier amount</option></select></label>
+                  <label className="font-semibold">Agreed amount ({line.currency})<input name="split_amount" type="number" min="0" max={line.net_selling_price} step="0.01" placeholder="Leave blank to keep current split" className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5" /></label>
+                  <p className="basis-full text-xs text-slate-600">Enter the full booking share, before agent commission and payment fees. If the supplier collects, they owe Daily Red Sea its cut. If Daily Red Sea collects, we owe the supplier their amount. Refunds and recorded payments affect the remaining balance.</p>
                   <label className="font-semibold">Guest paid<select name="collected_by" defaultValue={line.collected_by} className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="daily_red_sea">Daily Red Sea</option><option value="supplier">The supplier</option></select></label>
                   <label className="font-semibold">Status<select name="collection_status" defaultValue={line.collection_status} className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="not_collected">Not collected</option><option value="partial">Partly collected</option><option value="collected">Collected</option></select></label>
                   <label className="font-semibold">Amount collected ({line.currency})<input name="collected_amount" inputMode="decimal" pattern="\d+(\.\d{1,2})?" defaultValue={line.collection_status === "not_collected" ? line.net_selling_price : line.collected_amount} className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5" /></label>
