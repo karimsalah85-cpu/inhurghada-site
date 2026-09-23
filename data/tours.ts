@@ -20,6 +20,8 @@ export type Tour = {
   bookingCutoff?: { daysBefore: number; localTime?: string; timeZone: "Africa/Cairo" | "Asia/Riyadh"; assumption?: boolean };
   fulfillmentType?: import("@/lib/tour-booking").FulfillmentType;
   departureMarina?: string;
+  /** Named local operator shown in the tour's operator disclosure; generic "licensed local partner" wording is used when unset. */
+  operator?: string;
   bookingBlocker?: string;
   title: string;
   image: string;
@@ -599,6 +601,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   },
   {
     slug: "basic-diver-jeddah",
+    operator: "Al-Haddad Scuba Shop",
     listingStatus: "active",
     destinationSlug: "jeddah",
     currency: "USD",
@@ -658,6 +661,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   },
   {
     slug: "certified-diver-boat-trip-jeddah",
+    operator: "Al-Haddad Scuba Shop",
     listingStatus: "active",
     destinationSlug: "jeddah",
     currency: "USD",
@@ -716,6 +720,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   },
   {
     slug: "jeddah-yacht-sunset-cruise",
+    operator: "Shorouk Sat yacht",
     listingStatus: "active",
     destinationSlug: "jeddah",
     pricingLockedToCode: true,
@@ -783,6 +788,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   },
   {
     slug: "bayada-snorkeling-trip-jeddah",
+    operator: "Al-Haddad Scuba Shop",
     listingStatus: "active",
     destinationSlug: "jeddah",
     currency: "USD",

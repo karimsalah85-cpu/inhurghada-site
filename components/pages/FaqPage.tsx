@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 
 const faqs = [
   { question: "How do I book a tour?", answer: "Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp." },
+  { question: "Who operates the tours?", answer: "Each tour is operated by a licensed local partner, such as a boat crew, dive center, safari company or driver, who is responsible for safety, equipment and delivering the activity. Daily Red Sea books and coordinates your trip and supports you before, during and after it." },
   { question: "Is hotel pickup available?", answer: "Many tours include or offer hotel pickup. Check the tour details and add your hotel during booking." },
   { question: "When do I pay?", answer: "Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation." },
   { question: "Can I change my booking?", answer: "Contact us on WhatsApp as early as possible. We will check availability and help where possible." },
@@ -26,6 +27,7 @@ const faqs = [
 
 const germanFaqs = [
   { question: "Wie buche ich?", answer: "Wähle ein Erlebnis, Datum, Uhrzeit und die Anzahl der Reisenden und sende anschließend deine Angaben. Wir bestätigen Verfügbarkeit und Abholung per E-Mail oder WhatsApp." },
+  { question: "Wer führt die Ausflüge durch?", answer: "Jeder Ausflug wird von einem lizenzierten lokalen Partner durchgeführt, etwa einer Bootscrew, einer Tauchbasis, einem Safariunternehmen oder einem Fahrer, der für Sicherheit, Ausrüstung und die Durchführung verantwortlich ist. Daily Red Sea bucht und koordiniert deine Reise und unterstützt dich davor, währenddessen und danach." },
   { question: "Wann und wie bezahle ich?", answer: "Die meisten Buchungen werden online reserviert und bei Ankunft bar bezahlt. Zahlungsart und Gesamtpreis werden vor dem Absenden angezeigt." },
   { question: "Ist die Hotelabholung inklusive?", answer: "Die Abholinformationen stehen auf jeder Ausflugsseite. Für einige Resortgebiete kann ein Zuschlag gelten, der vor der Leistung angezeigt oder bestätigt wird." },
   { question: "Brauche ich einen Reisepass?", answer: "Für Ausflüge kann ein gültiger Reisepass, Ausweis oder eine Kopie für Reisegenehmigungen erforderlich sein. Für gewöhnliche Privattransfers gilt dies normalerweise nicht." },
@@ -36,6 +38,7 @@ const germanFaqs = [
 ];
 const russianFaqs = [
   { question: "Как забронировать?", answer: "Выберите экскурсию, дату, время и количество гостей, затем отправьте данные. Мы подтвердим наличие мест и детали трансфера по электронной почте или в WhatsApp." },
+  { question: "Кто проводит экскурсии?", answer: "Каждую экскурсию проводит лицензированный местный партнёр — экипаж лодки, дайв-центр, сафари-компания или водитель, который отвечает за безопасность, снаряжение и проведение мероприятия. Daily Red Sea бронирует и координирует вашу поездку и поддерживает вас до, во время и после неё." },
   { question: "Когда и как оплачивать?", answer: "Большинство бронирований оформляются онлайн и оплачиваются наличными по прибытии. Способ оплаты и итоговая сумма показаны до отправки заявки." },
   { question: "Включён ли трансфер из отеля?", answer: "Информация о трансфере указана на странице каждой экскурсии. Для некоторых курортных районов возможна доплата, которую мы показываем или подтверждаем заранее." },
   { question: "Нужен ли паспорт?", answer: "Для экскурсий может потребоваться действующий паспорт, удостоверение личности или копия для оформления разрешений. Для обычного частного трансфера это, как правило, не требуется." },
@@ -46,6 +49,7 @@ const russianFaqs = [
 ];
 const arabicFaqs = [
   { question: "كيف أحجز؟", answer: "اختر الرحلة والتاريخ والوقت وعدد المسافرين ثم أرسل بياناتك. نؤكد التوفر وتفاصيل الاستلام عبر البريد الإلكتروني أو واتساب." },
+  { question: "من يُنفّذ الرحلات؟", answer: "يُنفّذ كل رحلة شريك محلي مرخّص، مثل طاقم قارب أو مركز غوص أو شركة سفاري أو سائق، ويكون مسؤولاً عن السلامة والمعدات وتقديم النشاط. وتتولى Daily Red Sea حجز رحلتك وتنسيقها ودعمك قبلها وأثناءها وبعدها." },
   { question: "متى وكيف أدفع؟", answer: "يتم حجز معظم الرحلات عبر الموقع والدفع نقداً عند الوصول. تظهر طريقة الدفع والإجمالي قبل إرسال الحجز." },
   { question: "هل الاستلام من الفندق مشمول؟", answer: "تظهر معلومات الاستلام في صفحة كل رحلة. قد توجد إضافة لبعض مناطق المنتجعات ويتم توضيحها قبل الخدمة." },
   { question: "هل أحتاج إلى جواز سفر؟", answer: "قد تتطلب الرحلات جواز سفر أو بطاقة هوية سارية أو صورة منها لاستخراج التصاريح. لا ينطبق ذلك عادةً على التوصيل الخاص العادي." },
@@ -56,6 +60,7 @@ const arabicFaqs = [
 ];
 const polishFaqs = [
   { question: "Jak dokonać rezerwacji?", answer: "Wybierz doświadczenie, datę, godzinę i liczbę uczestników, a następnie wyślij swoje dane. Potwierdzimy dostępność i szczegóły odbioru e-mailem lub przez WhatsApp." },
+  { question: "Kto realizuje wycieczki?", answer: "Każdą wycieczkę realizuje licencjonowany lokalny partner, na przykład załoga łodzi, centrum nurkowe, firma organizująca safari lub kierowca, który odpowiada za bezpieczeństwo, sprzęt i przeprowadzenie aktywności. Daily Red Sea rezerwuje i koordynuje Twoją wycieczkę oraz wspiera Cię przed nią, w jej trakcie i po niej." },
   { question: "Kiedy i jak płacę?", answer: "Większość rezerwacji dokonuje się online, a płatność odbywa się gotówką po przyjeździe. Sposób płatności i łączna kwota są widoczne przed wysłaniem rezerwacji." },
   { question: "Czy odbiór z hotelu jest wliczony w cenę?", answer: "Informacje o odbiorze znajdziesz na stronie każdej wycieczki. Dla niektórych rejonów kurortowych może obowiązywać dopłata, która jest pokazana lub potwierdzona przed realizacją usługi." },
   { question: "Czy potrzebuję paszportu?", answer: "Niektóre wycieczki mogą wymagać ważnego paszportu, dowodu tożsamości lub jego kopii do uzyskania zezwoleń. Zwykle nie dotyczy to standardowych prywatnych transferów." },
@@ -66,6 +71,7 @@ const polishFaqs = [
 ];
 const chineseFaqs = [
   { question: "如何预订？", answer: "选择体验、日期、时间和出行人数，然后提交您的信息。我们会通过电子邮件或 WhatsApp 确认名额和接送信息。" },
+  { question: "谁来运营这些旅游项目？", answer: "每个项目均由持牌本地合作伙伴运营，例如游船船员、潜水中心、沙漠探险公司或司机，由其负责安全、装备和活动的执行。Daily Red Sea 负责预订和协调您的行程，并在行程前、行程中和行程后为您提供支持。" },
   { question: "何时以及如何付款？", answer: "大多数预订可在线提交，并在抵达时以现金付款。提交预订前会显示付款方式和总价。" },
   { question: "包含酒店接送吗？", answer: "每个旅游页面都会列出接送信息。部分度假区可能需要支付额外接送费，相关金额会在服务前显示或确认。" },
   { question: "需要护照吗？", answer: "办理旅行许可时，旅游和活动可能需要有效护照、身份证或复印件。普通私人接送通常不需要，除非有关部门要求。" },

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Handshake, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { whatsappUrl } from "@/lib/contact";
 import { localePath } from "@/lib/i18n";
 import { pageMetadata } from "@/lib/seo";
@@ -33,6 +33,8 @@ export function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar
     "Hello Daily Red Sea, I would like help planning my Red Sea trip.": "مرحباً Daily Red Sea، أرغب في المساعدة لتخطيط رحلتي إلى البحر الأحمر.",
     "Ask our local team": "تواصل مع فريقنا المحلي",
     "Explore tours": "استكشف الرحلات",
+    "Our local partners": "شركاؤنا المحليون",
+    "Every tour is operated by carefully selected, licensed local partners: boat crews, dive centers, safari guides and drivers who know these waters and roads well. Daily Red Sea handles your booking, communication and support, so you have one team to talk to from your first message until you are back at your hotel.": "يُنفَّذ كل نشاط بواسطة شركاء محليين مرخّصين نختارهم بعناية، من أطقم القوارب ومراكز الغوص ومرشدي السفاري والسائقين الذين يعرفون هذه المياه والطرق جيداً. وتتولى Daily Red Sea الحجز والتواصل والدعم، لتتعامل مع فريق واحد من أول رسالة حتى عودتك إلى فندقك.",
   };
   const chinese: Record<string, string> = {
     "Local help on the Red Sea": "红海本地协助", "Memorable Red Sea days, made easier.": "轻松畅享难忘的红海时光。",
@@ -43,6 +45,7 @@ export function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar
     "Transparent booking": "透明预订", "Your date, travelers, total, payment method, and important requirements are shown before confirmation.": "确认前会清楚显示日期、人数、总价、付款方式和重要要求。",
     "Planning something specific?": "有特别的行程需求？", "Tell us your dates, hotel, group size, and interests. We will help you choose an appropriate available experience without adding hidden costs.": "告诉我们日期、酒店、人数和兴趣，我们会帮助您选择合适且有名额的体验，不收取隐藏费用。",
     "Hello Daily Red Sea, I would like help planning my Red Sea trip.": "您好 Daily Red Sea，我想请您帮助规划红海行程。", "Ask our local team": "咨询本地团队", "Explore tours": "探索旅游项目",
+    "Our local partners": "我们的本地合作伙伴", "Every tour is operated by carefully selected, licensed local partners: boat crews, dive centers, safari guides and drivers who know these waters and roads well. Daily Red Sea handles your booking, communication and support, so you have one team to talk to from your first message until you are back at your hotel.": "每个项目均由我们精心挑选的持牌本地合作伙伴运营，包括熟悉当地海域和道路的船员、潜水中心、沙漠向导和司机。Daily Red Sea 负责您的预订、沟通和支持，从您发出第一条消息到返回酒店，您只需对接一个团队。",
   };
   const polish: Record<string, string> = {
     "Local help on the Red Sea": "Lokalne wsparcie nad Morzem Czerwonym",
@@ -61,6 +64,8 @@ export function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar
     "Hello Daily Red Sea, I would like help planning my Red Sea trip.": "Dzień dobry Daily Red Sea, proszę o pomoc w zaplanowaniu pobytu nad Morzem Czerwonym.",
     "Ask our local team": "Zapytaj lokalny zespół",
     "Explore tours": "Odkryj wycieczki",
+    "Our local partners": "Nasi lokalni partnerzy",
+    "Every tour is operated by carefully selected, licensed local partners: boat crews, dive centers, safari guides and drivers who know these waters and roads well. Daily Red Sea handles your booking, communication and support, so you have one team to talk to from your first message until you are back at your hotel.": "Każdą wycieczkę realizują starannie wybrani, licencjonowani lokalni partnerzy: załogi łodzi, centra nurkowe, przewodnicy safari i kierowcy, którzy dobrze znają te wody i drogi. Daily Red Sea zajmuje się rezerwacją, komunikacją i wsparciem, więc od pierwszej wiadomości aż do powrotu do hotelu masz kontakt z jednym zespołem.",
   };
   const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : ar ? arabic[en] || en : locale === "pl" ? polish[en] || en : zh ? chinese[en] || en : en;
   return (
@@ -78,6 +83,8 @@ export function AboutPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar
             { icon: ShieldCheck, title: tr("Transparent booking", "Transparente Buchung", "Прозрачное бронирование"), text: tr("Your date, travelers, total, payment method, and important requirements are shown before confirmation.", "Datum, Reisende, Gesamtpreis, Zahlungsart und wichtige Anforderungen werden vor der Bestätigung angezeigt.", "До подтверждения вы увидите дату, количество гостей, итоговую сумму, способ оплаты и важные требования.") },
           ].map(({ icon: Icon, title, text }) => <div key={title} className="rounded-3xl border border-line bg-white p-7 shadow-sm"><Icon className="text-ocean-dark" /><h2 className="mt-5 text-xl font-black text-ink">{title}</h2><p className="mt-3 leading-7 text-muted">{text}</p></div>)}
         </section>
+
+        <section className="mt-12 rounded-3xl border border-line bg-white p-7 shadow-sm sm:p-10"><Handshake className="text-ocean-dark" /><h2 className="mt-5 text-2xl font-black text-ink">{tr("Our local partners", "Unsere lokalen Partner", "Наши местные партнёры")}</h2><p className="mt-3 max-w-3xl leading-7 text-muted">{tr("Every tour is operated by carefully selected, licensed local partners: boat crews, dive centers, safari guides and drivers who know these waters and roads well. Daily Red Sea handles your booking, communication and support, so you have one team to talk to from your first message until you are back at your hotel.", "Jeder Ausflug wird von sorgfältig ausgewählten, lizenzierten lokalen Partnern durchgeführt: Bootscrews, Tauchbasen, Safari-Guides und Fahrern, die diese Gewässer und Straßen gut kennen. Daily Red Sea übernimmt Buchung, Kommunikation und Betreuung – so hast du von der ersten Nachricht bis zur Rückkehr ins Hotel ein Team als Ansprechpartner.", "Каждую экскурсию проводят тщательно отобранные лицензированные местные партнёры: экипажи лодок, дайв-центры, гиды сафари и водители, которые хорошо знают эти воды и дороги. Daily Red Sea берёт на себя бронирование, общение и поддержку — от первого сообщения до возвращения в отель вы общаетесь с одной командой.")}</p></section>
 
         <section className="mt-12 rounded-[2rem] bg-ink p-8 text-white sm:p-10"><h2 className="text-3xl font-black">{tr("Planning something specific?", "Planst du etwas Besonderes?", "Планируете что-то особенное?")}</h2><p className="mt-4 max-w-2xl leading-7 text-line">{tr("Tell us your dates, hotel, group size, and interests. We will help you choose an appropriate available experience without adding hidden costs.", "Nenne uns Reisedaten, Hotel, Gruppengröße und Interessen. Wir helfen dir, ein passendes verfügbares Erlebnis ohne versteckte Kosten zu finden.", "Сообщите даты, отель, размер группы и ваши интересы. Мы поможем выбрать подходящий доступный вариант без скрытых доплат.")}</p><div className="mt-7 flex flex-wrap gap-3"><a href={whatsappUrl(tr("Hello Daily Red Sea, I would like help planning my Red Sea trip.", "Hallo Daily Red Sea, ich möchte Hilfe bei der Planung meiner Reise ans Rote Meer.", "Здравствуйте! Помогите мне спланировать отдых на Красном море."))} target="_blank" rel="noopener noreferrer" className="rounded-full bg-green-600 px-6 py-3 font-bold text-white">{tr("Ask our local team", "Lokales Team fragen", "Написать нашей команде")}</a><Link href={`${localePath(locale)}#tours`} className="rounded-full border border-white/20 px-6 py-3 font-bold">{tr("Explore tours", "Ausflüge entdecken", "Выбрать экскурсию")}</Link></div></section>
       </article>

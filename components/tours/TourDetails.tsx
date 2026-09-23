@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { useTripReviews } from "@/components/tours/TripReviewsContext";
-import { BadgeCheck, CalendarDays, Clock3, Compass, MapPin, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock3, Compass, MapPin, ShieldCheck, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
 import TourItinerary from "@/components/tours/TourItinerary";
 import { speedboatTerms } from "@/data/speedboat-booking";
 
@@ -23,6 +23,9 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
+  const operatorLine = tour.operator
+    ? pl ? `Realizowane przez ${tour.operator}. Rezerwacja i koordynacja: Daily Red Sea.` : tr(`Operated by ${tour.operator}. Booked and coordinated by Daily Red Sea.`, `Durchgeführt von ${tour.operator}. Gebucht und koordiniert von Daily Red Sea.`, `Организатор: ${tour.operator}. Бронирование и координация — Daily Red Sea.`, `يُنفَّذ بواسطة ${tour.operator}. الحجز والتنسيق عبر Daily Red Sea.`, `由 ${tour.operator} 运营。由 Daily Red Sea 负责预订与协调。`)
+    : pl ? "Realizowane przez licencjonowanego lokalnego partnera. Rezerwacja i koordynacja: Daily Red Sea." : tr("Operated by a licensed local partner. Booked and coordinated by Daily Red Sea.", "Durchgeführt von einem lizenzierten lokalen Partner. Gebucht und koordiniert von Daily Red Sea.", "Проводится лицензированным местным партнёром. Бронирование и координация — Daily Red Sea.", "يُنفَّذ بواسطة شريك محلي مرخّص. الحجز والتنسيق عبر Daily Red Sea.", "由持牌本地合作伙伴运营。由 Daily Red Sea 负责预订与协调。");
   const startTime = tour.availableTimes?.find((slot) => /^\d{1,2}:\d{2}/.test(slot));
   const pickupFact = tour.fulfillmentType === "meeting_point"
     ? tour.departureMarina || tr("Meeting point", "Treffpunkt", "Место встречи", "نقطة اللقاء", "集合点")
@@ -81,6 +84,10 @@ export default function TourDetails({ tour }: { tour: Tour }) {
               </li>
             ))}
           </ul>
+          <p className="mt-5 flex items-start gap-2 text-sm leading-6 text-muted">
+            <ShieldCheck className="mt-0.5 shrink-0 text-ocean-dark" size={16} />
+            <span>{operatorLine}</span>
+          </p>
         </div>
 
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
