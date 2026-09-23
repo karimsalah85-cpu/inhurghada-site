@@ -95,9 +95,10 @@ describe("supplier ledger entries", () => {
   });
 
   it("validates net settlements and reversals", () => {
-    expect(netSettlementSchema.safeParse({ supplier_id: id, line_ids: [id, otherId], entry_date: "2026-10-01" }).success).toBe(true);
-    expect(netSettlementSchema.safeParse({ supplier_id: id, line_ids: [id, id], entry_date: "2026-10-01" }).success).toBe(false);
-    expect(netSettlementSchema.safeParse({ supplier_id: id, line_ids: [], entry_date: "2026-10-01" }).success).toBe(false);
+    expect(netSettlementSchema.safeParse({ idempotency_key: otherId, supplier_id: id, line_ids: [id, otherId], entry_date: "2026-10-01" }).success).toBe(true);
+    expect(netSettlementSchema.safeParse({ idempotency_key: otherId, supplier_id: id, line_ids: [id, id], entry_date: "2026-10-01" }).success).toBe(false);
+    expect(netSettlementSchema.safeParse({ idempotency_key: otherId, supplier_id: id, line_ids: [], entry_date: "2026-10-01" }).success).toBe(false);
+    expect(netSettlementSchema.safeParse({ supplier_id: id, line_ids: [id], entry_date: "2026-10-01" }).success).toBe(false);
     expect(reverseEntrySchema.safeParse({ entry_id: id, note: "" }).success).toBe(false);
   });
 });

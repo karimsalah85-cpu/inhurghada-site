@@ -101,7 +101,7 @@ export async function setRate(db: FinanceDb, date: string, currency: string, uni
 
 export async function lines(db: FinanceDb, bookingId: string) {
   const { rows } = await db.query<Record<string, unknown>>(
-    "select l.*, s.balance, s.obligation, s.supplier_cost_paid_status, s.commission_received_status from public.booking_financial_lines l join public.booking_financial_line_status s on s.line_id = l.id where l.booking_id = $1 order by line_no",
+    "select l.*, s.balance, s.obligation, s.ledger_state, s.ledger_currency, s.supplier_cost_paid_status, s.commission_received_status from public.booking_financial_lines l join public.booking_financial_line_status s on s.line_id = l.id where l.booking_id = $1 order by line_no",
     [bookingId],
   );
   return rows;

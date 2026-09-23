@@ -340,12 +340,12 @@ describe("supplier ledger: append-only, payments, settlements and balances", () 
     const [owesUsLine] = await lines(db, owesUs);
     await actAs(db, owner);
     const { rows } = await db.query<{ result: { entries: number; net_by_currency: Record<string, number> } }>(
-      "select public.finance_post_net_settlement($1, $2::uuid[], '2026-10-20', 'Weekly settlement') result", [supplier, [owesUsLine.id, weOweLine.id]]);
+      "select public.finance_post_net_settlement(gen_random_uuid(), $1, $2::uuid[], '2026-10-20', 'Weekly settlement') result", [supplier, [owesUsLine.id, weOweLine.id]]);
     expect(rows[0].result.entries).toBe(2);
     expect(Number(rows[0].result.net_by_currency.USD)).toBe(50); // DRS pays the supplier 80 - 30
     const balances = await db.query<{ balance: string }>("select balance from public.supplier_balances where supplier_id = $1", [supplier]);
     expect(n(balances.rows[0].balance)).toBe("0.00");
-    await expect(db.query("select public.finance_post_net_settlement($1, $2::uuid[], '2026-10-21')", [supplier, [owesUsLine.id]])).rejects.toThrow(/already settled/);
+    await expect(db.query("select public.finance_post_net_settlement(gen_random_uuid(), $1, $2::uuid[], '2026-10-21')", [supplier, [owesUsLine.id]])).rejects.toThrow(/already settled/);
   });
 
   it("corrects manual entries only by reversal, once, and never reverses a reversal", async () => {
@@ -449,5 +449,167 @@ describe("permissions, RLS and audit", () => {
       "select actor_email, action from public.admin_audit_log where resource_type = 'booking_financial_lines' and resource_id = $1 order by id", [line.id]);
     expect(rows[0]).toEqual({ actor_email: "system", action: "insert" });
     expect(rows.some((row) => row.actor_email === "info@dailyredsea.com" && row.action === "update")).toBe(true);
+  });
+});
+
+describe("review regressions: FX on automatic ledger entries", () => {
+  const usdTotal = async (bookingId: string) => {
+    const { rows } = await db.query<{ total: string | null; pending: number }>(
+      "select sum(amount_usd) total, count(*) filter (where amount_usd is null)::int pending from public.supplier_ledger where booking_id = $1", [bookingId]);
+    return rows[0];
+  };
+
+  it("posts USD-pending while the trip-date rate is provisional, then reverses and reposts at the locked rate", async () => {
+    const supplier = await createSupplier(db);
+    const booking = await createBooking(db, { amount: 100, currency: "EUR", date: "2026-10-03" });
+    await assignSupplier(db, booking, supplier, 60, "EUR");
+    let [line] = await lines(db, booking);
+    expect(line.ledger_state).toBe("usd_pending");
+    let entries = await ledger(db, { bookingId: booking });
+    expect(entries.map((entry) => [entry.entry_type, n(entry.amount), entry.amount_usd])).toEqual([["commission_receivable", "40.00", null]]);
+
+    await setRate(db, "2026-10-03", "EUR", 1);
+    await db.query("select public.finance_refresh_unlocked_fx()");
+    [line] = await lines(db, booking);
+    entries = await ledger(db, { bookingId: booking });
+    expect(entries.map((entry) => [entry.entry_type, n(entry.amount), n(entry.amount_usd)])).toEqual([
+      ["commission_receivable", "40.00", null], ["reversal", "-40.00", null], ["commission_receivable", "40.00", "40.00"],
+    ]);
+    expect(entries[1].note).toContain("FX rate updated");
+    expect([line.ledger_state, n(line.balance)]).toEqual(["posted", "40.00"]);
+    expect(n((await usdTotal(booking)).total)).toBe(n(Number(line.drs_commission_usd) + Number(line.agent_commission_usd)));
+
+    // A later admin override for that date never moves a locked line or its ledger entry.
+    await setRate(db, "2026-10-03", "EUR", 2);
+    await db.query("select public.finance_refresh_unlocked_fx()");
+    expect(await ledger(db, { bookingId: booking })).toHaveLength(3);
+  });
+
+  it("keeps a DRS-collected payable's USD equal to the line's supplier cost in USD", async () => {
+    const supplier = await createSupplier(db);
+    const booking = await createBooking(db, { amount: 100, date: "2026-10-04" });
+    await assignSupplier(db, booking, supplier, 3000, "EGP");
+    const [line] = await lines(db, booking);
+    await updateLine(line.id, { collected_by: "daily_red_sea" });
+    expect(n((await usdTotal(booking)).total)).toBe(null);
+    await setRate(db, "2026-10-04", "EGP", 48);
+    await db.query("select public.finance_refresh_unlocked_fx()");
+    const [after] = await lines(db, booking);
+    expect(n(after.supplier_cost_usd)).toBe("62.50");
+    expect(n((await usdTotal(booking)).total)).toBe("-62.50");
+    expect([n(after.balance), after.ledger_state]).toEqual(["-3000.00", "posted"]);
+  });
+
+  it("waits for locked rates before posting a cross-currency receivable, and reverses an existing entry meanwhile", async () => {
+    const supplier = await createSupplier(db);
+    const booking = await createBooking(db, { amount: 100, currency: "EUR", date: "2026-11-15" });
+    await assignSupplier(db, booking, supplier, 2000, "EGP");
+    let [line] = await lines(db, booking);
+    expect(line.ledger_state).toBe("awaiting_fx");
+    expect(await ledger(db, { bookingId: booking })).toEqual([]);
+
+    await updateLine(line.id, { collected_by: "daily_red_sea" });
+    expect((await ledger(db, { bookingId: booking })).map((entry) => [entry.entry_type, n(entry.amount), entry.currency])).toEqual([["supplier_cost_payable", "-2000.00", "EGP"]]);
+    await updateLine(line.id, { collected_by: "supplier" });
+    expect((await ledger(db, { bookingId: booking })).map((entry) => entry.entry_type)).toEqual(["supplier_cost_payable", "reversal"]);
+    [line] = await lines(db, booking);
+    expect([line.ledger_state, n(line.balance)]).toEqual(["awaiting_fx", "0.00"]);
+
+    await setRate(db, "2026-11-15", "EUR", 0.8);
+    await setRate(db, "2026-11-15", "EGP", 50);
+    await db.query("select public.finance_refresh_unlocked_fx()");
+    [line] = await lines(db, booking);
+    const last = (await ledger(db, { bookingId: booking })).at(-1)!;
+    // 100 EUR sales (125 USD) - 2000 EGP cost (40 USD = 32 EUR)
+    expect([last.entry_type, n(last.amount), last.currency, n(last.amount_usd)]).toEqual(["commission_receivable", "68.00", "EUR", "85.00"]);
+    expect(line.ledger_state).toBe("posted");
+  });
+});
+
+describe("review regressions: balances scoped by supplier and currency", () => {
+  it("keeps a replaced supplier's payment history with that supplier and can settle it", async () => {
+    const first = await createSupplier(db, "First");
+    const second = await createSupplier(db, "Second");
+    const booking = await createBooking(db, { amount: 100 });
+    await assignSupplier(db, booking, first, 60);
+    const [line] = await lines(db, booking);
+    await updateLine(line.id, { collected_by: "daily_red_sea" });
+    await actAs(db, owner);
+    await db.query("select public.finance_post_supplier_entry($1, 'payment_to_supplier', 60, 'USD', '2026-10-10', $2)", [first, line.id]);
+    await updateLine(line.id, { supplier_id: second, supplier_cost: { mode: "amount", amount: 60, currency: "USD" } });
+
+    const [updated] = await lines(db, booking);
+    expect([n(updated.balance), updated.supplier_cost_paid_status]).toEqual(["-60.00", "unpaid"]);
+    const balances = await db.query<{ supplier_id: string; balance: string }>(
+      "select supplier_id, balance from public.supplier_line_balances where line_id = $1 order by balance", [line.id]);
+    expect(balances.rows.map((row) => [row.supplier_id, n(row.balance)])).toEqual([[second, "-60.00"], [first, "60.00"]]);
+
+    // The first supplier now owes the prepayment back; settle it against the same line.
+    await actAs(db, owner);
+    const settled = await db.query<{ result: { net_by_currency: Record<string, number> } }>(
+      "select public.finance_post_net_settlement(gen_random_uuid(), $1, $2::uuid[], '2026-10-12', 'Refund of prepayment') result", [first, [line.id]]);
+    expect(Number(settled.rows[0].result.net_by_currency.USD)).toBe(-60);
+    const after = await db.query<{ balance: string }>("select balance from public.supplier_balances where supplier_id = $1", [first]);
+    expect(n(after.rows[0].balance)).toBe("0.00");
+    expect(n((await lines(db, booking))[0].balance)).toBe("-60.00");
+  });
+
+  it("only lets a former supplier post against a line in a currency it has history in", async () => {
+    const first = await createSupplier(db);
+    const second = await createSupplier(db);
+    const booking = await createBooking(db, { amount: 100 });
+    await assignSupplier(db, booking, first, 60);
+    const [line] = await lines(db, booking);
+    await updateLine(line.id, { supplier_id: second });
+    await actAs(db, owner);
+    await db.query("select public.finance_post_supplier_entry($1, 'commission_received_from_supplier', 5, 'USD', '2026-10-10', $2)", [first, line.id]);
+    await expect(db.query("select public.finance_post_supplier_entry($1, 'commission_received_from_supplier', 5, 'EUR', '2026-10-10', $2)", [first, line.id]))
+      .rejects.toThrow(/no EUR history/);
+  });
+
+  it("scopes line status to the current ledger currency after collected_by changes currency", async () => {
+    const supplier = await createSupplier(db);
+    const booking = await createBooking(db, { amount: 100, currency: "EUR", date: "2026-10-10" });
+    await assignSupplier(db, booking, supplier, 2000, "EGP");
+    const [line] = await lines(db, booking);
+    await actAs(db, owner);
+    await db.query("select public.finance_post_supplier_entry($1, 'commission_received_from_supplier', 60, 'EUR', '2026-10-11', $2)", [supplier, line.id]);
+    await updateLine(line.id, { collected_by: "daily_red_sea" });
+    const [after] = await lines(db, booking);
+    expect([after.ledger_currency, n(after.balance), after.supplier_cost_paid_status]).toEqual(["EGP", "-2000.00", "unpaid"]);
+    const { rows } = await db.query<{ currency: string; balance: string }>(
+      "select currency, balance from public.supplier_line_balances where line_id = $1 order by currency", [line.id]);
+    expect(rows.map((row) => [row.currency, n(row.balance)])).toEqual([["EUR", "-60.00"], ["EGP", "-2000.00"]]);
+  });
+});
+
+describe("review regressions: idempotent net settlements", () => {
+  it("replays the same key without posting twice and rejects reusing a key for other input", async () => {
+    const supplier = await createSupplier(db);
+    const one = await createBooking(db, { amount: 100 });
+    await assignSupplier(db, one, supplier, 70);
+    const two = await createBooking(db, { amount: 100 });
+    await assignSupplier(db, two, supplier, 50);
+    const [lineOne] = await lines(db, one);
+    const [lineTwo] = await lines(db, two);
+    await actAs(db, owner);
+    const key = "0b6e7c1a-2f3d-4a5b-8c9d-0e1f2a3b4c5d";
+    const post = (ids: unknown[]) => db.query<{ result: Record<string, unknown> }>(
+      "select public.finance_post_net_settlement($1, $2, $3::uuid[], '2026-10-20') result", [key, supplier, ids]);
+    const first = (await post([lineOne.id, lineTwo.id])).rows[0].result;
+    const replay = (await post([lineTwo.id, lineOne.id])).rows[0].result;
+    expect(replay).toEqual({ ...first, replayed: true });
+    const settlements = await db.query<{ count: number }>("select count(*)::int count from public.supplier_ledger where settlement_id = $1", [key]);
+    expect(settlements.rows[0].count).toBe(2);
+    await expect(post([lineOne.id])).rejects.toThrow(/already used for a different settlement/);
+    await expect(db.query("delete from public.finance_settlements where id = $1", [key])).rejects.toThrow(/append-only/);
+  });
+
+  it("locks the selected lines before reading balances", async () => {
+    const { rows } = await db.query<{ source: string }>("select prosrc source from pg_proc where proname = 'finance_post_net_settlement'");
+    const source = rows[0].source;
+    expect(source.indexOf("for update")).toBeGreaterThan(-1);
+    expect(source.indexOf("for update")).toBeLessThan(source.indexOf("supplier_line_balances b"));
+    expect(source).toContain("pg_advisory_xact_lock");
   });
 });

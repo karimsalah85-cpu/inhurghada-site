@@ -13,8 +13,29 @@
 --   * No entry while the line is pending/removed/excluded, has no supplier, or
 --     the amount is zero. Whenever the wanted entry changes, the previous
 --     automatic entry is reversed and a new one is posted; nothing is edited.
+--
+-- FX ON AUTOMATIC ENTRIES (append-only correction):
+--   * An automatic entry's amount_usd is exactly the line's own USD figure
+--     (-supplier_cost_usd, or net_sales_usd - supplier_cost_usd), and is only
+--     set once the rate(s) it depends on are locked (exact trip-date rate).
+--     While a rate is provisional or missing, the entry is posted in its own
+--     currency with amount_usd / fx_rate_to_usd NULL ("USD pending").
+--   * The rate and USD value are part of the entry's identity: when the line's
+--     rate locks (or an admin override changes a provisional rate), the entry
+--     is reversed and reposted, so ledger USD always equals the line's USD.
+--   * If the obligation itself cannot be computed in its own currency (a
+--     supplier-collected line whose supplier cost is in another currency, and
+--     either rate is not locked yet), no automatic entry exists and the line's
+--     ledger_state is 'awaiting_fx'; any earlier automatic entry is reversed.
+--
+-- BALANCES are always scoped by (supplier, line, currency): see
+-- supplier_line_balances. A line reassigned to another supplier keeps the old
+-- supplier's history (and any open balance) with that supplier.
+--
 -- Manual entries (payments, commission received, net settlements, adjustments)
 -- are posted through the finance_* RPCs below and corrected only by reversal.
+-- Every RPC that reads a line's balance first locks the line row, and net
+-- settlements are idempotent by a client-supplied key.
 
 create type public.finance_ledger_entry_type as enum (
   'supplier_cost_payable', 'commission_receivable', 'payment_to_supplier',
@@ -90,6 +111,13 @@ begin
     new.settlement_id := original.settlement_id;
     return new;
   end if;
+  if new.is_automatic then
+    -- Automatic entries carry the line's own locked USD value (or none yet).
+    if new.amount_usd is not null and new.fx_rate_to_usd is null then
+      raise exception 'Automatic entries with a USD value must record the rate used.' using errcode = '23514';
+    end if;
+    return new;
+  end if;
   if new.fx_rate_to_usd is null then
     select * into fx from public.finance_fx_lookup(new.currency, new.entry_date);
     new.fx_rate_to_usd := fx.usd_per_unit;
@@ -121,6 +149,7 @@ declare
   want_currency public.finance_currency;
   want_rate numeric;
   want_rate_date date;
+  want_usd numeric;
   current_entry record;
   matched boolean := false;
 begin
@@ -132,21 +161,23 @@ begin
       want_type := 'supplier_cost_payable';
       want_amount := -l.recognised_supplier_cost;
       want_currency := l.supplier_cost_currency;
-      want_rate := l.supplier_fx_rate_to_usd;
-      want_rate_date := l.supplier_fx_rate_date;
-    else
-      if l.recognised_supplier_cost_booking_ccy is null then
-        -- Cross-currency cost without a rate: leave the ledger untouched and surface it.
-        insert into public.finance_sync_errors (booking_id, context, message)
-        values (l.booking_id, 'ledger', format('Line %s: no FX rate to convert the supplier cost; commission receivable not posted.', l.line_no));
-        return;
+      if l.supplier_fx_locked and l.supplier_cost_usd is not null then
+        want_rate := l.supplier_fx_rate_to_usd;
+        want_rate_date := l.supplier_fx_rate_date;
+        want_usd := -l.supplier_cost_usd;
       end if;
+    elsif l.recognised_supplier_cost_booking_ccy is not null
+          and (l.supplier_cost_currency = l.currency or (l.fx_locked and l.supplier_fx_locked)) then
       want_type := 'commission_receivable';
       want_amount := l.recognised_revenue - l.recognised_supplier_cost_booking_ccy;
       want_currency := l.currency;
-      want_rate := l.fx_rate_to_usd;
-      want_rate_date := l.fx_rate_date;
+      if l.fx_locked and l.supplier_fx_locked and l.net_sales_usd is not null and l.supplier_cost_usd is not null then
+        want_rate := l.fx_rate_to_usd;
+        want_rate_date := l.fx_rate_date;
+        want_usd := l.net_sales_usd - l.supplier_cost_usd;
+      end if;
     end if;
+    -- otherwise: cross-currency receivable awaiting locked rates -> no entry
   end if;
 
   for current_entry in
@@ -156,20 +187,28 @@ begin
     order by e.entry_no
   loop
     if not matched and want_amount <> 0 and current_entry.entry_type = want_type and current_entry.amount = want_amount
-       and current_entry.currency = want_currency and current_entry.supplier_id = l.supplier_id then
+       and current_entry.currency = want_currency and current_entry.supplier_id = l.supplier_id
+       and current_entry.amount_usd is not distinct from want_usd
+       and current_entry.fx_rate_to_usd is not distinct from want_rate
+       and current_entry.fx_rate_date is not distinct from want_rate_date then
       matched := true;
     else
       insert into public.supplier_ledger (supplier_id, entry_type, amount, currency, entry_date, reverses_entry_id, is_automatic, note)
       values (current_entry.supplier_id, 'reversal', -current_entry.amount, current_entry.currency, current_date, current_entry.id, true,
-        'Automatic reversal: booking financials changed');
+        case when current_entry.amount = want_amount and current_entry.entry_type = want_type and current_entry.currency = want_currency
+              and current_entry.supplier_id = l.supplier_id
+          then 'Automatic reversal: trip-date FX rate updated'
+          else 'Automatic reversal: booking financials changed' end);
     end if;
   end loop;
 
   if not matched and want_amount <> 0 then
-    insert into public.supplier_ledger (supplier_id, booking_id, line_id, entry_type, amount, currency, fx_rate_to_usd, fx_rate_date, entry_date, is_automatic, note)
-    values (l.supplier_id, l.booking_id, l.id, want_type, want_amount, want_currency, want_rate, want_rate_date,
+    insert into public.supplier_ledger (supplier_id, booking_id, line_id, entry_type, amount, currency, fx_rate_to_usd, fx_rate_date,
+      amount_usd, entry_date, is_automatic, note)
+    values (l.supplier_id, l.booking_id, l.id, want_type, want_amount, want_currency, want_rate, want_rate_date, want_usd,
       coalesce(l.trip_date, current_date), true,
-      format('Automatic: %s, trip %s', case when want_type = 'supplier_cost_payable' then 'Daily Red Sea collected' else 'supplier collected' end, l.line_no));
+      format('Automatic: %s, trip %s%s', case when want_type = 'supplier_cost_payable' then 'Daily Red Sea collected' else 'supplier collected' end,
+        l.line_no, case when want_usd is null then ' (USD pending final trip-date rate)' else '' end));
   end if;
 end $$;
 
@@ -457,38 +496,50 @@ create trigger finance_tour_dimensions_changed after insert or update on public.
 -- ---------------------------------------------------------------------------
 -- Views: per-line settlement status and per-supplier balances.
 -- ---------------------------------------------------------------------------
+-- Open balance per supplier, line and currency (reversals count toward the
+-- type of the entry they reverse).
+create view public.supplier_line_balances with (security_invoker = true) as
+select e.supplier_id, e.line_id, e.currency,
+  coalesce(sum(e.amount) filter (where coalesce(o.entry_type, e.entry_type) in ('supplier_cost_payable', 'commission_receivable')), 0) as obligation,
+  sum(e.amount) as balance,
+  sum(e.amount_usd) as balance_usd,
+  count(*) filter (where e.amount_usd is null) as usd_pending_entries
+from public.supplier_ledger e
+left join public.supplier_ledger o on o.id = e.reverses_entry_id
+where e.line_id is not null
+group by e.supplier_id, e.line_id, e.currency;
+
+-- Status of each line with its CURRENT supplier in its current ledger currency.
+-- Entries with an earlier supplier (or in another currency) stay in
+-- supplier_line_balances / supplier_balances for that supplier.
 create view public.booking_financial_line_status with (security_invoker = true) as
-with entries as (
-  select e.line_id, e.amount,
-    coalesce(o.entry_type, e.entry_type) as base_type
-  from public.supplier_ledger e
-  left join public.supplier_ledger o on o.id = e.reverses_entry_id
-  where e.line_id is not null
-), totals as (
-  select line_id,
-    coalesce(sum(amount) filter (where base_type in ('supplier_cost_payable', 'commission_receivable')), 0) as obligation,
-    coalesce(sum(amount), 0) as balance
-  from entries group by line_id
-)
 select l.id as line_id, l.booking_id, l.supplier_id, l.collected_by, l.collection_status,
   public.finance_line_ledger_currency(l) as ledger_currency,
-  coalesce(t.obligation, 0) as obligation,
-  coalesce(t.balance, 0) as balance,
+  coalesce(b.obligation, 0) as obligation,
+  coalesce(b.balance, 0) as balance,
   case
-    when l.collected_by = 'supplier' or coalesce(t.obligation, 0) >= 0 or t.balance >= 0 then 'paid'
-    when t.balance <= t.obligation then 'unpaid'
+    when not l.included or l.supplier_id is null or (l.collected_by = 'daily_red_sea' and l.recognised_supplier_cost = 0) then 'none'
+    when l.collected_by = 'supplier' and (l.recognised_supplier_cost_booking_ccy is null
+      or (l.supplier_cost_currency <> l.currency and not (l.fx_locked and l.supplier_fx_locked))) then 'awaiting_fx'
+    when (l.collected_by = 'daily_red_sea' and not l.supplier_fx_locked)
+      or (l.collected_by = 'supplier' and not (l.fx_locked and l.supplier_fx_locked)) then 'usd_pending'
+    else 'posted' end as ledger_state,
+  case
+    when l.collected_by = 'supplier' or coalesce(b.obligation, 0) >= 0 or b.balance >= 0 then 'paid'
+    when b.balance <= b.obligation then 'unpaid'
     else 'partial' end as supplier_cost_paid_status,
   case
-    when l.collected_by = 'daily_red_sea' or coalesce(t.obligation, 0) <= 0 then 'not_applicable'
-    when t.balance <= 0 then 'paid'
-    when t.balance >= t.obligation then 'unpaid'
+    when l.collected_by = 'daily_red_sea' or coalesce(b.obligation, 0) <= 0 then 'not_applicable'
+    when b.balance <= 0 then 'paid'
+    when b.balance >= b.obligation then 'unpaid'
     else 'partial' end as commission_received_status
 from public.booking_financial_lines l
-left join totals t on t.line_id = l.id;
+left join public.supplier_line_balances b
+  on b.line_id = l.id and b.supplier_id = l.supplier_id and b.currency = public.finance_line_ledger_currency(l);
 
 create view public.supplier_balances with (security_invoker = true) as
-select supplier_id, currency, sum(amount) as balance, sum(amount_usd) as balance_usd_at_posting, count(*) as entries,
-  max(entry_date) as last_entry_date
+select supplier_id, currency, sum(amount) as balance, sum(amount_usd) as balance_usd_at_posting,
+  count(*) filter (where amount_usd is null) as usd_pending_entries, count(*) as entries, max(entry_date) as last_entry_date
 from public.supplier_ledger
 group by supplier_id, currency;
 
@@ -600,12 +651,18 @@ begin
     raise exception 'Supplier not found.' using errcode = 'P0002';
   end if;
   if p_line_id is not null then
-    select * into l from public.booking_financial_lines where id = p_line_id;
-    if not found or l.supplier_id is distinct from p_supplier_id then
+    -- Lock the line so balance reads and writes on it are serialized.
+    select * into l from public.booking_financial_lines where id = p_line_id for update;
+    if not found then raise exception 'That booking line does not belong to this supplier.' using errcode = '22023'; end if;
+    if l.supplier_id is not distinct from p_supplier_id then
+      if public.finance_line_ledger_currency(l) <> v_currency
+         and not exists (select 1 from public.supplier_ledger e where e.line_id = l.id and e.supplier_id = p_supplier_id and e.currency = v_currency) then
+        raise exception 'Entries against this booking must be in %.', public.finance_line_ledger_currency(l) using errcode = '22023';
+      end if;
+    elsif not exists (select 1 from public.supplier_ledger e where e.line_id = l.id and e.supplier_id = p_supplier_id) then
       raise exception 'That booking line does not belong to this supplier.' using errcode = '22023';
-    end if;
-    if public.finance_line_ledger_currency(l) <> v_currency then
-      raise exception 'Entries against this booking must be in %.', public.finance_line_ledger_currency(l) using errcode = '22023';
+    elsif not exists (select 1 from public.supplier_ledger e where e.line_id = l.id and e.supplier_id = p_supplier_id and e.currency = v_currency) then
+      raise exception 'This supplier has no % history on that booking.', v_currency using errcode = '22023';
     end if;
   end if;
   insert into public.supplier_ledger (supplier_id, booking_id, line_id, entry_type, amount, currency, entry_date, note)
@@ -616,39 +673,82 @@ begin
   return saved;
 end $$;
 
--- Settles the open balance of each selected line with one net_settlement entry
--- per line, grouped under a shared settlement_id. Returns the net per currency.
-create function public.finance_post_net_settlement(p_supplier_id uuid, p_line_ids uuid[], p_entry_date date, p_note text default null)
+-- Settlement headers. The id is the client-supplied idempotency key and is
+-- also the settlement_id on every ledger entry of the settlement.
+create table public.finance_settlements (
+  id uuid primary key,
+  supplier_id uuid not null references public.suppliers(id) on delete restrict,
+  line_ids uuid[] not null,
+  entry_date date not null,
+  note text,
+  result jsonb not null,
+  created_by uuid,
+  created_by_email text not null default 'system',
+  created_at timestamptz not null default now()
+);
+create trigger finance_settlements_no_update before update or delete on public.finance_settlements
+  for each row execute function public.supplier_ledger_append_only();
+
+-- Settles, for one supplier, every open (line, currency) balance on the
+-- selected lines with one net_settlement entry each. Idempotent: repeating a
+-- key returns the stored result; reusing a key for different input fails.
+-- Selected lines are row-locked (in id order) before balances are read, so
+-- concurrent settlements or payments on the same lines cannot double count.
+create function public.finance_post_net_settlement(p_idempotency_key uuid, p_supplier_id uuid, p_line_ids uuid[], p_entry_date date, p_note text default null)
 returns jsonb
 language plpgsql security definer set search_path = '' as $$
 declare
-  v_settlement uuid := gen_random_uuid();
+  existing public.finance_settlements;
+  v_line_ids uuid[];
   target record;
   totals jsonb := '{}'::jsonb;
   posted integer := 0;
+  v_result jsonb;
 begin
   perform public.finance_require('manage_finance');
+  if p_idempotency_key is null then raise exception 'An idempotency key is required.' using errcode = '22023'; end if;
   if p_line_ids is null or cardinality(p_line_ids) = 0 then raise exception 'Select at least one booking.' using errcode = '22023'; end if;
   if p_entry_date is null then raise exception 'An entry date is required.' using errcode = '22023'; end if;
-  if exists (select 1 from unnest(p_line_ids) as selected(line_id) left join public.booking_financial_lines l on l.id = selected.line_id
-             where l.id is null or l.supplier_id is distinct from p_supplier_id) then
+  select array_agg(distinct x order by x) into v_line_ids from unnest(p_line_ids) x;
+
+  perform pg_advisory_xact_lock(hashtextextended('finance_settlement:' || p_idempotency_key::text, 0));
+  select * into existing from public.finance_settlements where id = p_idempotency_key;
+  if found then
+    if existing.supplier_id <> p_supplier_id or existing.line_ids <> v_line_ids or existing.entry_date <> p_entry_date then
+      raise exception 'This idempotency key was already used for a different settlement.' using errcode = '22023';
+    end if;
+    return existing.result || jsonb_build_object('replayed', true);
+  end if;
+
+  if exists (select 1 from unnest(v_line_ids) as selected(line_id)
+             left join public.booking_financial_lines l on l.id = selected.line_id
+             where l.id is null or (l.supplier_id is distinct from p_supplier_id
+               and not exists (select 1 from public.supplier_ledger e where e.line_id = l.id and e.supplier_id = p_supplier_id))) then
     raise exception 'Every selected booking must belong to this supplier.' using errcode = '22023';
   end if;
+
+  perform 1 from public.booking_financial_lines where id = any (v_line_ids) order by id for update;
+
   for target in
-    select l.id, l.booking_id, s.balance, s.ledger_currency
-    from public.booking_financial_lines l join public.booking_financial_line_status s on s.line_id = l.id
-    where l.id = any (p_line_ids) and s.balance <> 0
-    order by l.trip_date, l.id
+    select b.line_id, l.booking_id, b.currency, b.balance
+    from public.supplier_line_balances b join public.booking_financial_lines l on l.id = b.line_id
+    where b.supplier_id = p_supplier_id and b.line_id = any (v_line_ids) and b.balance <> 0
+    order by l.trip_date, b.line_id, b.currency
   loop
     insert into public.supplier_ledger (supplier_id, booking_id, line_id, entry_type, amount, currency, entry_date, settlement_id, note)
-    values (p_supplier_id, target.booking_id, target.id, 'net_settlement', -target.balance, target.ledger_currency, p_entry_date,
-      v_settlement, nullif(trim(coalesce(p_note, '')), ''));
-    totals := jsonb_set(totals, array[target.ledger_currency::text],
-      to_jsonb(coalesce((totals ->> target.ledger_currency::text)::numeric, 0) - target.balance));
+    values (p_supplier_id, target.booking_id, target.line_id, 'net_settlement', -target.balance, target.currency, p_entry_date,
+      p_idempotency_key, nullif(trim(coalesce(p_note, '')), ''));
+    totals := jsonb_set(totals, array[target.currency::text],
+      to_jsonb(coalesce((totals ->> target.currency::text)::numeric, 0) - target.balance));
     posted := posted + 1;
   end loop;
   if posted = 0 then raise exception 'The selected bookings are already settled.' using errcode = '22023'; end if;
-  return jsonb_build_object('settlement_id', v_settlement, 'entries', posted, 'net_by_currency', totals);
+
+  v_result := jsonb_build_object('settlement_id', p_idempotency_key, 'entries', posted, 'net_by_currency', totals);
+  insert into public.finance_settlements (id, supplier_id, line_ids, entry_date, note, result, created_by, created_by_email)
+  values (p_idempotency_key, p_supplier_id, v_line_ids, p_entry_date, nullif(trim(coalesce(p_note, '')), ''), v_result, auth.uid(),
+    coalesce(nullif(lower(coalesce(auth.jwt() ->> 'email', '')), ''), 'system'));
+  return v_result;
 end $$;
 
 -- Corrects a manual entry by reversing it. Automatic entries follow the booking
@@ -731,12 +831,19 @@ end $$;
 
 alter table public.supplier_ledger enable row level security;
 create policy "Finance staff read supplier ledger" on public.supplier_ledger for select to authenticated using (public.admin_has_permission('view_finance'));
+alter table public.finance_settlements enable row level security;
+create policy "Finance staff read settlements" on public.finance_settlements for select to authenticated using (public.admin_has_permission('view_finance'));
+create trigger finance_settlements_audit after insert on public.finance_settlements
+  for each row execute function public.finance_audit_trigger('id');
+revoke all on public.finance_settlements from anon, authenticated;
+grant select on public.finance_settlements to authenticated;
+grant select, insert on public.finance_settlements to service_role;
 
 revoke all on public.supplier_ledger from anon, authenticated;
 grant select on public.supplier_ledger to authenticated;
 grant select, insert on public.supplier_ledger to service_role;
-revoke all on public.booking_financial_line_status, public.supplier_balances from anon, authenticated;
-grant select on public.booking_financial_line_status, public.supplier_balances to authenticated, service_role;
+revoke all on public.booking_financial_line_status, public.supplier_balances, public.supplier_line_balances from anon, authenticated;
+grant select on public.booking_financial_line_status, public.supplier_balances, public.supplier_line_balances to authenticated, service_role;
 
 do $$
 declare fn text;
@@ -753,7 +860,7 @@ begin
   foreach fn in array array[
     'public.finance_update_line(uuid, jsonb)',
     'public.finance_post_supplier_entry(uuid, text, numeric, text, date, uuid, text)',
-    'public.finance_post_net_settlement(uuid, uuid[], date, text)',
+    'public.finance_post_net_settlement(uuid, uuid, uuid[], date, text)',
     'public.finance_reverse_supplier_entry(uuid, text)',
     'public.finance_void_expense(uuid, text)',
     'public.finance_set_fx_rate(date, text, numeric, text)'

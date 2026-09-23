@@ -141,6 +141,8 @@ export const ledgerEntrySchema = z.discriminatedUnion("entry_type", [
 export type LedgerEntryInput = z.output<typeof ledgerEntrySchema>;
 
 export const netSettlementSchema = z.object({
+  /** Client-generated once per settlement form submission; retries reuse it. */
+  idempotency_key: idSchema,
   supplier_id: idSchema,
   line_ids: z.array(idSchema).min(1, "Select at least one booking.").max(500)
     .refine((ids) => new Set(ids).size === ids.length, "Each booking can only be selected once."),
