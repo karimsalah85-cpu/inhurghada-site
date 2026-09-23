@@ -8,6 +8,7 @@ describe("post-trip PDF", () => {
     for (const locale of ["en","de","ru","ar","pl","zh"]) {
       const pdf=await createPostTripPdf({reference:"DRS-SAMPLE",customerName:locale==="ar"?"ضيف ديلي رد سي":"Sample Guest",itemName:"Jeddah Yacht Sunset Cruise",tourSlug:"jeddah-yacht-sunset-cruise",locale,qualified:true,referralCode:"DRS-SAMPLE",generatedAt:new Date("2026-09-21T12:00:00Z")});
       expect(pdf.subarray(0,5).toString()).toBe("%PDF-");
+      expect(pdf.toString("binary")).toContain("https://dailyredsea.com/reviews?lang="+locale+"&ref=DRS-SAMPLE");
       expect(pdf.toString("binary").match(/\/Type \/Page\b/g)?.length).toBe(1);
       if(process.env.GENERATE_PDF_SAMPLES){await mkdir("output/pdf",{recursive:true});await writeFile(`output/pdf/daily-red-sea-thank-you-${locale}.pdf`,pdf);}
     }

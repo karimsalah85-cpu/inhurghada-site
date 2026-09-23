@@ -15,7 +15,7 @@ export type PostTripPdfData = { reference: string; customerName: string; itemNam
 export async function createPostTripPdf(input: PostTripPdfData): Promise<Buffer> {
   const locale = bookingLocale(input.locale), rtl = locale === "ar";
   const copy = referralCopy[locale], program = referralProgramCopy[locale], note = referralNotificationCopy[locale];
-  const reviewUrl = `https://dailyredsea.com${localePath(locale, "/reviews")}`;
+  const reviewUrl = `https://dailyredsea.com/reviews?${new URLSearchParams({ lang: locale, ref: input.reference })}`;
   const accountUrl = `https://dailyredsea.com${localePath(locale, "/referrals")}`;
   const link = new URL(input.qualified && input.referralCode ? referralLink("https://dailyredsea.com", input.referralCode) : accountUrl);
   if (input.qualified && input.referralCode) link.pathname = localePath(locale, "/");

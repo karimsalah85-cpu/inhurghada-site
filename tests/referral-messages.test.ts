@@ -27,3 +27,12 @@ describe("post-trip communication", () => {
     expect(result.html).toContain(locale==="ar" ? 'dir="rtl"' : 'dir="ltr"');
   });
 });
+
+it.each(locales)("post-trip %s links to the real review form with reference and invites referrals", locale => {
+ const result=buildReferralMessage({event:"trip_completed",customerName:"Sam",qualified:true,referralCode:"DRS-ABC123",locale,bookingReference:"DRS-TEST"});
+ expect(result.html).toContain('/reviews?lang='+locale+'&amp;ref=DRS-TEST');
+ expect(result.html).not.toContain('/'+locale+'/reviews');
+ expect(result.html).toContain('wa.me/');
+ expect(result.html).toContain('referrals');
+ if(locale==='en') expect(result.text).toContain('Invite your friends and family');
+});

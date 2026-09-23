@@ -1,5 +1,6 @@
-import { referralProgramCopy } from "@/lib/referral-i18n";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { referralNotificationCopy } from "@/lib/referral-notification-copy";
+import { referralCopy, referralProgramCopy } from "@/lib/referral-i18n";
+import { isLocale, localePath, type Locale } from "@/lib/i18n";
 
 export function bookingLocale(value?: string | null): Locale {
   return value && isLocale(value) ? value : "en";
@@ -64,6 +65,6 @@ export function buildThankYouEmail(input: { locale?: string | null; customerName
   const t = copy[locale];
   return {
     subject: `${t.thankYouSubject} · ${input.reference}`,
-    html: `<div dir="${t.direction}" lang="${locale}"><p>${t.greeting} ${escapeHtml(input.customerName)},</p><p>${t.thankYouMessage}</p>${input.tourName ? `<p>${escapeHtml(input.tourName)}</p>` : ""}<p>${t.review}</p><p>${t.closing}</p></div>`,
+    html: `<div dir="${t.direction}" lang="${locale}"><p>${t.greeting} ${escapeHtml(input.customerName)},</p><p>${t.thankYouMessage}</p>${input.tourName ? `<p>${escapeHtml(input.tourName)}</p>` : ""}<p><a href="https://dailyredsea.com/reviews?lang=${locale}&amp;ref=${encodeURIComponent(input.reference)}">${escapeHtml(referralNotificationCopy[locale].review)}</a></p><h3>${escapeHtml(referralCopy[locale].heading)}</h3><p>${escapeHtml(referralCopy[locale].tagline)}</p><p><a href="https://dailyredsea.com${localePath(locale, "/referrals")}">${escapeHtml(referralProgramCopy[locale].viewRewards)}</a></p><p>${t.closing}</p></div>`,
   };
 }

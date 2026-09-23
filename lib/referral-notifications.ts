@@ -49,7 +49,7 @@ export async function deliverReferralNotifications() {
         ? await db.from("bookings").select("reference,tour_name,tour_slug,locale").eq("id", event.booking_id).single()
         : { data: null };
       if (event.event_type === "trip_completed" && !completedBooking) throw new Error("completed-booking-unavailable");
-      const message = buildReferralMessage({ event: event.event_type, customerName: identity.customer_name || "", locale: completedBooking?.locale || booking?.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code, balanceUnits: Number(account?.balance_units || 0) });
+      const message = buildReferralMessage({ event: event.event_type, bookingReference: completedBooking?.reference, customerName: identity.customer_name || "", locale: completedBooking?.locale || booking?.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code, balanceUnits: Number(account?.balance_units || 0) });
       const attachment = completedBooking ? {
         filename: `daily-red-sea-thank-you-${completedBooking.reference.replace(/[^a-z0-9-]/gi, "-")}.pdf`,
         content: await createPostTripPdf({ reference: completedBooking.reference, customerName: identity.customer_name || "", itemName: completedBooking.tour_name, tourSlug: completedBooking.tour_slug, locale: completedBooking.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code }),
