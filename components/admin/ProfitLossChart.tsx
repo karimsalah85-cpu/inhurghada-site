@@ -29,9 +29,11 @@ function labelMonth(month: string) {
 export default function ProfitLossChart({
   rows,
   formatValue,
+  labels = { revenue: "Revenue", costs: "Expenses", profit: "Profit" },
 }: {
   rows: MonthRow[];
   formatValue: (value: number) => string;
+  labels?: { revenue: string; costs: string; profit: string };
 }) {
   const [hoverMonth, setHoverMonth] = useState<string | null>(null);
   const sorted = [...rows].sort((a, b) => a.month.localeCompare(b.month));
@@ -51,10 +53,10 @@ export default function ProfitLossChart({
   return (
     <div>
       <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
-        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: revenueColor }} />Revenue</span>
-        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: costsColor }} />Expenses</span>
+        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: revenueColor }} />{labels.revenue}</span>
+        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: costsColor }} />{labels.costs}</span>
       </div>
-      <svg viewBox={`0 0 ${width} ${height}`} className="mt-2 w-full" role="img" aria-label="Monthly revenue and expenses">
+      <svg viewBox={`0 0 ${width} ${height}`} className="mt-2 w-full" role="img" aria-label={`Monthly ${labels.revenue.toLowerCase()} and ${labels.costs.toLowerCase()}`}>
         {yTicks.map((tick) => (
           <g key={tick}>
             <line x1={padding.left} x2={width - padding.right} y1={yFor(tick)} y2={yFor(tick)} stroke="#e2e8f0" strokeWidth={1} />
@@ -77,6 +79,26 @@ export default function ProfitLossChart({
             </g>
           );
         })}
+        {(() => {
+          const index = sorted.findIndex((row) => row.month === hoverMonth);
+          if (index < 0) return null;
+          const row = sorted[index];
+          const boxWidth = 168;
+          const center = padding.left + index * groupWidth + groupWidth / 2;
+          const x = Math.min(Math.max(center - boxWidth / 2, padding.left), width - padding.right - boxWidth);
+          const lines = [[labels.revenue, row.revenue], [labels.costs, row.costs], [labels.profit, row.profit]] as const;
+          return (
+            <g pointerEvents="none" role="presentation">
+              <rect x={x} y={padding.top + 6} width={boxWidth} height={20 + lines.length * 15} rx={6} fill="#0f172a" opacity={0.92} />
+              <text x={x + 10} y={padding.top + 20} fill="#ffffff" fontSize={10} fontWeight={700}>{labelMonth(row.month)}</text>
+              {lines.map(([label, value], line) => (
+                <text key={label} x={x + 10} y={padding.top + 36 + line * 15} fill="#e2e8f0" fontSize={10}>
+                  {label}: {value < 0 ? "-" : ""}{formatValue(Math.abs(value))}
+                </text>
+              ))}
+            </g>
+          );
+        })()}
       </svg>
     </div>
   );

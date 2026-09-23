@@ -1,3 +1,4 @@
+import { toCsv } from "@/lib/finance/csv";
 import { convertMinor, formatMoney, fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
 
 /**
@@ -129,13 +130,6 @@ export function filterLedger(rows: LedgerRow[], filters: LedgerFilters, openLine
   });
 }
 
-const csvCell = (value: string | number | null | undefined) => {
-  const text = value === null || value === undefined ? "" : String(value);
-  // Neutralise spreadsheet formula injection from free-text notes.
-  const safe = /^[=+\-@\t\r]/.test(text) && !/^-?\d/.test(text) ? `'${text}` : text;
-  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
-};
-
 export type StatementInput = {
   supplierName: string;
   from: string;
@@ -189,7 +183,7 @@ export function statementCsv(statement: Statement) {
       row.amount, row.running_balance, row.amount_usd ?? "pending", row.reversed ? "yes" : "",
     ]),
   ];
-  return lines.map((cells) => cells.map(csvCell).join(",")).join("\r\n") + "\r\n";
+  return toCsv(lines);
 }
 
 export { formatBalances };
