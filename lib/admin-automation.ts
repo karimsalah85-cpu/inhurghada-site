@@ -4,6 +4,7 @@ import { sendBookingEmail, sendWhatsAppMessage } from "@/lib/booking-service";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getGoogleAdsReport, googleAdsConfiguration, isDeveloperTokenNotApproved } from "@/lib/google-ads";
 import { pickTemplate } from "@/lib/communication-template";
+import { runFinanceAutomation } from "@/lib/finance/automation";
 
 type Template = { id: string; event_key: string; channel: "email" | "whatsapp"; subject: string | null; body: string; locale: string };
 type Booking = { id: string; reference: string; customer_name: string; customer_email: string | null; phone: string; tour_name: string | null; date: string | null; hotel: string | null; locale: string };
@@ -173,5 +174,6 @@ export async function runAdminAutomation() {
   // the automation run.
   const { error: pruneError } = await supabase.rpc("prune_rate_limit_hits");
   if (pruneError) console.info("Rate-limit prune skipped", pruneError.message);
-  return { published: published?.length || 0, considered: queueRows.length, sent, failed, googleAdsSpendImported, googleAdsStatus };
+  const finance = await runFinanceAutomation(supabase);
+  return { published: published?.length || 0, considered: queueRows.length, sent, failed, googleAdsSpendImported, googleAdsStatus, finance };
 }

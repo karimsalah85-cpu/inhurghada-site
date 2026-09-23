@@ -11,7 +11,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    return NextResponse.json({ ok: true, ...(await runAdminAutomation()), referrals: await deliverReferralNotifications() });
+    const automation = await runAdminAutomation();
+    const referrals = await deliverReferralNotifications();
+    // Finance failures are recorded in finance_sync_errors; fail the run so they are never silent.
+    const ok = automation.finance.status !== "error";
+    return NextResponse.json({ ok, ...automation, referrals }, { status: ok ? 200 : 500 });
   } catch (error) {
     console.error("Admin automation failed", error);
     return NextResponse.json({ ok: false, error: "Automation failed." }, { status: 500 });

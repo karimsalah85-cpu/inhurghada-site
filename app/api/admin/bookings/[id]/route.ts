@@ -80,6 +80,8 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   const { supabase, user } = authorized;
   const { data: existing } = await supabase.from("bookings").select("*").eq("id", id).single();
   const { error } = await supabase.from("bookings").delete().eq("id", id);
+  // The append-only supplier ledger keeps its bookings; archive those instead.
+  if (error?.code === "23503") return json({ error: "This booking has supplier ledger history and cannot be deleted. Archive it instead." }, 409);
   if (error) return json({ error: "Could not delete the booking." }, 500);
   await supabase.rpc("record_admin_audit", { action_name: "delete", resource_name: "booking", resource_identifier: id, summary_text: `Deleted booking ${existing?.reference || id}`, before_value: existing ? { ...existing, actor: user?.email } : { actor: user?.email }, after_value: null });
   return json({ ok: true });
