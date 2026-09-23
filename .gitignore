@@ -58,3 +58,6 @@ next-env.d.ts
 /public/vendor/tesseract/core/
 /public/vendor/tesseract/worker.min.js
 /public/vendor/pdf/
+
+# real guest booking PDFs (personal data) — never commit
+/output/pdf/daily-red-sea-booking-DRS-*.pdf
