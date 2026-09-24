@@ -5,7 +5,6 @@ import { ArrowRight, Calendar, ChevronDown, MapPin, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getImageProps } from "next/image";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
-import ImageWatermark from "@/components/media/ImageWatermark";
 import { localePath } from "@/lib/i18n";
 
 const heroImageCommon = {
@@ -121,7 +120,7 @@ export default function Hero() {
   );
 
   return (
-    <section className="relative min-h-[600px] overflow-hidden sm:min-h-[700px]">
+    <section className="relative overflow-hidden sm:min-h-[540px]">
       {/* React 19 hoists these to <head> so the LCP hero is discovered before the CSS/JS parse finishes. */}
       <link rel="preload" as="image" imageSrcSet={mobileHeroSrcSet} imageSizes="100vw" media="(max-width: 639px)" fetchPriority="high" />
       <link rel="preload" as="image" imageSrcSet={desktopHeroSrcSet} imageSizes="100vw" media="(min-width: 640px)" fetchPriority="high" />
@@ -130,11 +129,10 @@ export default function Hero() {
         <source media="(max-width: 639px)" srcSet={mobileHeroSrcSet} />
         <img {...mobileHeroProps} alt={heroImageCommon.alt} fetchPriority="high" loading="eager" className="h-full w-full object-cover" />
       </picture>
-      <ImageWatermark prominent />
       <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/65 to-ink/10 sm:via-ink/55" />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/65 via-transparent to-ink/20" />
 
-      <div className="relative z-10 mx-auto flex min-h-[600px] max-w-7xl items-start px-5 pb-12 pt-24 sm:min-h-[700px] sm:items-center sm:px-8 sm:pb-28 sm:pt-36">
+      <div className="relative z-10 mx-auto flex max-w-7xl items-start px-5 pb-8 pt-24 sm:min-h-[540px] sm:items-center sm:px-8 sm:pb-12 sm:pt-28">
         <div className="w-full max-w-5xl text-white">
           <p className={`mb-2 text-sm font-bold transition-opacity sm:mb-4 sm:text-base ${greetingKey ? "opacity-100" : "opacity-0"}`} aria-live="polite">
             {greetingKey ? `${t(greetingKey)} 👋` : "\u00a0"}
