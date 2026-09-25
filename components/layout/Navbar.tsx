@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { currencies, languages, useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
 import { whatsappUrl } from "@/lib/contact";
-import { localePath, localeSwitchPath } from "@/lib/i18n";
+import { localePath, localeSwitchPath, type Locale } from "@/lib/i18n";
 import { useCart } from "@/components/cart/CartProvider";
 import { useFavourites } from "@/components/favourites/FavouritesProvider";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
@@ -20,14 +20,20 @@ const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظ
 
 export default function Navbar() {
 
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  // The mobile menu remembers the page it was opened on, so any route change closes it.
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const open = menuPath === pathname;
+  const setOpen = (next: boolean | ((current: boolean) => boolean)) => setMenuPath((currentPath) => {
+    const value = typeof next === "function" ? next(currentPath === pathname) : next;
+    return value ? pathname : null;
+  });
   const scrolled = useScrolledPast(24);
   // Solid once scrolled, or whenever the mobile menu is open so its panel reads.
   const solid = scrolled || open;
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstMobileLinkRef = useRef<HTMLAnchorElement>(null);
   const { currency, language, setCurrency, t } = useSiteSettings();
-  const pathname = usePathname();
   const { items } = useCart();
   const { count: savedCount, openPanel: openSavedTrips } = useFavourites();
   const savedTripsLabel = savedTripsLabels[language];
@@ -44,7 +50,7 @@ export default function Navbar() {
     firstMobileLinkRef.current?.focus();
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOpen(false);
+        setMenuPath(null);
         menuButtonRef.current?.focus();
       }
     };
@@ -161,12 +167,7 @@ export default function Navbar() {
             {t("tours")}
           </NavLink>
 
-          <details className="group relative">
-            <summary className="flex cursor-pointer list-none items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-ink hover:bg-brand-navy-tint hover:text-brand-navy">{destinationsLabel} <ChevronDown size={16} className="transition group-open:rotate-180"/></summary>
-            <div className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-line bg-white p-2 shadow-xl">
-              {destinations.filter((destination) => destination.status === "live").map((destination) => <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="block rounded-xl px-4 py-3 font-semibold text-ink hover:bg-brand-navy-tint hover:text-brand-navy">{destination.name}</Link>)}
-            </div>
-          </details>
+          <DestinationsMenu language={language} label={destinationsLabel} pathname={pathname} />
 
 
           <NavLink href={localePath(language, "/transfers")} active={pathname === localePath(language, "/transfers")}>
@@ -495,6 +496,90 @@ function LanguageDropdown({
 
 
 
+
+function DestinationsMenu({ language, label, pathname }: { language: Locale; label: string; pathname: string }) {
+  // Remember which page the menu was opened on, so any route change closes it without an effect.
+  const [openPath, setOpenPath] = useState<string | null>(null);
+  const open = openPath === pathname;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const liveDestinations = destinations.filter((destination) => destination.status === "live");
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpenPath(null);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpenPath(null);
+      buttonRef.current?.focus();
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  function focusLink(index: number) {
+    const count = liveDestinations.length;
+    linkRefs.current[(index + count) % count]?.focus();
+  }
+
+  function openAndFocus(index: number) {
+    setOpenPath(pathname);
+    window.requestAnimationFrame(() => focusLink(index));
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onBlur={(event) => {
+        if (open && !containerRef.current?.contains(event.relatedTarget as Node | null)) setOpenPath(null);
+      }}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-expanded={open}
+        aria-controls="desktop-destinations-menu"
+        onClick={() => setOpenPath(open ? null : pathname)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") { event.preventDefault(); openAndFocus(0); }
+          if (event.key === "ArrowUp") { event.preventDefault(); openAndFocus(liveDestinations.length - 1); }
+        }}
+        className="flex items-center gap-1 rounded-xl px-4 py-2.5 font-semibold text-ink outline-none hover:bg-brand-navy-tint hover:text-brand-navy focus-visible:ring-2 focus-visible:ring-ocean"
+      >
+        {label} <ChevronDown aria-hidden="true" size={16} className={`transition ${open ? "rotate-180" : ""}`} />
+      </button>
+      <nav id="desktop-destinations-menu" aria-label={label} hidden={!open} className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-line bg-white p-2 shadow-xl">
+        {liveDestinations.map((destination, index) => {
+          const href = localePath(language, `/destinations/${destination.slug}`);
+          return (
+            <Link
+              key={destination.slug}
+              ref={(element) => { linkRefs.current[index] = element; }}
+              href={href}
+              aria-current={pathname === href ? "page" : undefined}
+              onClick={() => setOpenPath(null)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowDown") { event.preventDefault(); focusLink(index + 1); }
+                if (event.key === "ArrowUp") { event.preventDefault(); focusLink(index - 1); }
+              }}
+              className="block rounded-xl px-4 py-3 font-semibold text-ink outline-none hover:bg-brand-navy-tint hover:text-brand-navy focus-visible:ring-2 focus-visible:ring-ocean"
+            >
+              {destination.name}
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
 
 function NavLink({
   href,
