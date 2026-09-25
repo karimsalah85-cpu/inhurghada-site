@@ -26,6 +26,7 @@ export default function OrganizationSchema() {
         areaServed: [
           { "@type": "City", name: "Hurghada", containedInPlace: { "@type": "Country", name: "Egypt" } },
           { "@type": "City", name: "Marsa Alam", containedInPlace: { "@type": "Country", name: "Egypt" } },
+          { "@type": "City", name: "El Gouna", containedInPlace: { "@type": "Country", name: "Egypt" } },
           { "@type": "City", name: "Jeddah", containedInPlace: { "@type": "Country", name: "Saudi Arabia" } },
         ],
         contactPoint: {
@@ -40,7 +41,7 @@ export default function OrganizationSchema() {
         "@id": `${absoluteUrl()}#website`,
         url: absoluteUrl(),
         name: siteName,
-        description: "Red Sea tours and local experiences in Hurghada, Marsa Alam and Jeddah, including diving, boat trips, desert adventures and private transfers.",
+        description: "Red Sea tours and local experiences in Hurghada, Marsa Alam, El Gouna and Jeddah, including diving, boat trips, horse riding, desert adventures and private transfers.",
         inLanguage: ["en", "ar", "de", "ru", "pl", "zh"],
         publisher: { "@id": organizationId },
       },

@@ -1,5 +1,6 @@
 import type { Tour } from "@/data/tours";
 import { localizeMarsaAlamTour } from "@/data/marsa-alam-tours-i18n";
+import { localizeElGounaTour } from "@/data/el-gouna-tours-i18n";
 import type { Locale } from "@/lib/i18n";
 import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
@@ -1580,6 +1581,7 @@ export function localizeTour(tour: Tour, locale: Locale): Tour {
   const { image, imageAlt, imageFocalPoint, galleryImages, galleryImageAlts, galleryImageFocalPoints } = applyTourMediaSafety(tour, locale);
   const mediaFields = { image, imageAlt, imageFocalPoint, galleryImages, galleryImageAlts, galleryImageFocalPoints };
   if (tour.destinationSlug === "marsa-alam") return { ...localizeMarsaAlamTour(tour, locale), ...mediaFields };
+  if (tour.destinationSlug === "el-gouna") return { ...localizeElGounaTour(tour, locale), ...mediaFields };
   const base = locale === "de" ? localizeTourGerman(tour)
     : locale === "ru" ? localizeTourRussian(tour)
     : locale === "ar" ? localizeTourArabic(tour)

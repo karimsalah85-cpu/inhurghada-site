@@ -1,4 +1,4 @@
-export type DestinationSlug = "hurghada" | "marsa-alam" | "jeddah";
+export type DestinationSlug = "hurghada" | "marsa-alam" | "el-gouna" | "jeddah";
 export type DestinationStatus = "live" | "coming-soon";
 
 export type PickupZone = {
@@ -66,6 +66,28 @@ export const destinations: Destination[] = [
       { name: "Marsa Alam hotels", supplement: 0, currency: "EUR" },
       { name: "Port Ghalib", supplement: 0, currency: "EUR" },
       { name: "Coraya Bay", supplement: 0, currency: "EUR" },
+    ],
+  },
+  {
+    slug: "el-gouna",
+    name: "El Gouna",
+    country: "Egypt",
+    region: "Red Sea Governorate",
+    status: "live",
+    tagline: "Lagoons, beaches and relaxed Red Sea activities",
+    shortDescription: "A car-free-feeling lagoon town about 25 km north of Hurghada, known for its canals, beaches and relaxed pace. Popular with families and couples.",
+    longDescription: "Explore El Gouna, a car-free-feeling lagoon town about 25 km north of Hurghada, known for its canals, beaches and relaxed pace. Popular with families and couples, with clear EUR prices and free pickup from El Gouna and El Ahyaa hotels.",
+    coordinates: { latitude: 27.3942, longitude: 33.6782 },
+    defaultCurrency: "EUR",
+    image: "/images/owned/el-gouna-horse-riding-sea-riders.jpg",
+    seo: {
+      title: "Things to do in El Gouna",
+      description: "Book El Gouna activities like beach and desert horse riding with clear EUR prices, free hotel pickup in El Gouna and El Ahyaa and local WhatsApp support.",
+      ogImage: "/images/owned/el-gouna-horse-riding-sea-riders.jpg",
+    },
+    pickupZones: [
+      { name: "El Gouna hotels", supplement: 0, currency: "EUR" },
+      { name: "El Ahyaa hotels", supplement: 0, currency: "EUR" },
     ],
   },
   {

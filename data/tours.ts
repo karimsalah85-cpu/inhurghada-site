@@ -77,6 +77,8 @@ export type Tour = {
   galleryImageAlts?: string[];
   imageFocalPoint?: { x: number; y: number };
   galleryImageFocalPoints?: { x: number; y: number }[];
+  /** Requests handled on WhatsApp instead of the booking form (e.g. private rides), each shown with a prefilled WhatsApp button. */
+  whatsappContactNotes?: { text: string; cta: string; message: string }[];
 };
 
 
@@ -886,6 +888,48 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   {
     slug: "abu-dabbab-snorkeling", listingStatus: "active", destinationSlug: "marsa-alam", currency: "EUR", title: "Abu Dabbab Beach Snorkeling Trip by Bus from Marsa Alam", image: "/images/placeholders/island-trip.svg", price: "50", rating: "New", reviews: "New", location: "Abu Dabbab Beach, Marsa Alam", duration: "Approximately 6 hours", category: "Snorkeling", badge: "New", bookingMode: "direct", priceUnit: "per person", participantPricing: { adults: 50, youth: 30, infants: 0 }, ageBands: { adults: "Adults (ages 12+)", children: "Children (ages 2–11)", infants: "Infants (under 2) — free" }, availableTimes: ["07:00 pickup"], operatingWeekdays: [1, 3, 5], bookingCutoff: { daysBefore: 1, localTime: "18:00", timeZone: "Africa/Cairo" },
     description: "Travel by bus or shared transfer to Abu Dabbab Beach for an easy-access snorkeling visit. Departure from the beach is at approximately 13:00. Sea turtles are often seen in the area, but sightings are not guaranteed.", highlights: ["Monday, Wednesday and Friday departures", "Easy beach access", "Suitable for families with normal swimming ability and supervision", "Beach entrance included", "Included pickup from Marsa Alam, Port Ghalib and Coraya Bay"], included: ["Hotel pickup from Marsa Alam, Port Ghalib or Coraya Bay", "Abu Dabbab Beach entrance fee"], notIncluded: ["Lunch", "Personal expenses", "Optional equipment unless explicitly confirmed"], notes: ["Pickup is included from hotels in Marsa Alam, Port Ghalib and Coraya Bay with no extra supplement.", "Departure from Abu Dabbab Beach is at approximately 13:00.", "Never touch, feed, chase or disturb turtles or other wildlife.", "Swimming suitability depends on ability, adult supervision, weather and sea conditions.", "Bookings close at 18:00 Africa/Cairo time on the previous day.", "Adults are ages 12+, children are ages 2–11, and infants under 2 travel free."], itinerary: ["Hotel pickup at approximately 07:00", "Arrival at Abu Dabbab Beach at approximately 07:45", "Beach time and independent snorkeling according to conditions", "Depart Abu Dabbab Beach at approximately 13:00"], whatToBring: ["Passport or photo ID", "Swimwear", "Towel", "Sun protection", "Water", "Personal snorkeling equipment if desired"], notSuitableFor: ["Children without responsible adult supervision", "Guests unable to enter or leave the water safely under the day's conditions"], faqs: [{ question: "Will we see sea turtles?", answer: "Sightings are common but never guaranteed because turtles are wild animals." }, { question: "Is lunch included?", answer: "No. Lunch is not included in the supplied package." }], seoTitle: "Abu Dabbab Beach Snorkeling from Marsa Alam", metaDescription: "Book the Monday, Wednesday and Friday Abu Dabbab Beach snorkeling trip from Marsa Alam with included hotel transfer and beach entrance. Turtle sightings are not guaranteed."
+  },
+
+  {
+    slug: "horse-riding-el-gouna", listingStatus: "active", destinationSlug: "el-gouna", currency: "EUR", operator: "Yalla Horse, El Gouna",
+    title: "Horseback Riding in El Gouna – Beach & Desert Ride (2 Hours)", image: "/images/owned/el-gouna-horse-riding-sea-riders.jpg",
+    price: "45", rating: "New", reviews: "New", location: "El Gouna, Egypt", duration: "2 Hours", category: "Outdoor Activity", badge: "New", bookingMode: "direct", priceUnit: "per person",
+    participantPricing: { adults: 45, youth: 22.5 },
+    ageBands: { adults: "Adults (ages 11+)", children: "Children (ages 5–10) — 50% of the adult price", infants: "" },
+    availableTimes: ["07:00", "08:00", "09:00"],
+    description: "Swap El Gouna's lagoons for open sand on a two-hour morning ride that takes you from the desert edge down to the Red Sea shore. Early starts at 7, 8 or 9 am mean cooler air, softer light for photos and quiet beaches.\n\nYou'll be picked up from your hotel in El Gouna or El Ahyaa and driven to Yalla Horse stable, where your guide matches you with a calm, well-trained horse and gives a short introduction. No experience needed. Beginners are led at an easy pace, while confident riders can enjoy a bit more freedom.\n\nThe route mixes desert trails with a stretch along the beach. When the season and sea conditions allow, you may get the chance to ride into the shallow water and swim with your horse. Your guide will confirm on the day. The guide stays with you the whole ride and is happy to take photos on your phone.\n\nThe stable is also home to friendly cats, dogs, goats and sheep, which children especially love. The horses are well cared for in a calm, animal-friendly environment.\n\nPrefer a ride just for your family or group? Private rides are available. Contact us on WhatsApp to arrange one.",
+    highlights: ["Ride along the Red Sea beach and into the open desert", "Suitable for beginners and experienced riders", "Small groups with friendly, professional guides", "Chance to swim with the horses in the sea, depending on season and conditions", "Great photo opportunities (guides can take photos with your phone)"],
+    included: ["Hotel pickup and drop-off (El Gouna & El Ahyaa)", "2-hour guided horse ride through desert and along the beach", "Professional guide", "Helmet (and safety vest for children)", "Photos during the ride (using your phone)"],
+    notIncluded: ["Food and drinks", "Transfers from outside El Gouna / El Ahyaa (available for an extra cost, arranged via WhatsApp)"],
+    notSuitableFor: ["Children under 5 years", "People with mobility impairments", "Riders over 100 kg (220 lbs)"],
+    itinerary: ["Hotel pickup in El Gouna / El Ahyaa (time depends on your hotel)", "Arrival at Yalla Horse stable, safety briefing and meet your horse", "2-hour ride through the desert and along the beach", "Return transfer to your hotel"],
+    notes: [
+      "Free cancellation up to 24 hours before the ride for a full refund.",
+      "Reserve now & pay later: book your place today and pay on the day of the ride.",
+      "Minimum age is 5 years. Adults are ages 11+, and children aged 5–10 pay 50% of the adult price.",
+      "Maximum rider weight is 100 kg (220 lbs) for the horses' safety.",
+      "Swimming with the horses depends on season and sea conditions and is confirmed by the guide on the day.",
+      "Pregnant guests should consult their doctor before booking.",
+      "Wear comfortable, breathable clothes. Long trousers are ideal to prevent chafing.",
+      "Your exact pickup time is sent by WhatsApp and email. Please reconfirm one day before.",
+      "Pickups can run up to 15 minutes late due to traffic or hotel security checks.",
+      "Wait at your hotel entrance or security gate. Some hotels don't allow drivers inside.",
+      "Staying outside El Gouna / El Ahyaa? Message us on WhatsApp to arrange a transfer (extra cost).",
+      "If you're afraid of animals, please consider this before booking, as the stable has several animals roaming freely.",
+    ],
+    whatsappContactNotes: [
+      { text: "Prefer a ride just for your family or group? Private rides are available on request.", cta: "Ask about a private ride", message: "Hello Daily Red Sea, I would like to arrange a private horse ride in El Gouna." },
+      { text: "Staying outside El Gouna or El Ahyaa, for example in central Hurghada? Pickup is available for an extra cost. Book the ride, then message us to arrange it.", cta: "Arrange a transfer", message: "Hello Daily Red Sea, I would like to arrange a transfer from outside El Gouna / El Ahyaa for the El Gouna horse ride." },
+    ],
+    faqs: [
+      { question: "Do I need riding experience?", answer: "No. Beginners are led at an easy pace, while confident riders can enjoy a bit more freedom." },
+      { question: "Can children join the ride?", answer: "Yes, from 5 years old. Children aged 5–10 pay 50% of the adult price and get a helmet and safety vest. Children under 5 cannot join." },
+      { question: "Is hotel pickup included?", answer: "Pickup and drop-off are free from hotels in El Gouna and El Ahyaa. Pickup from other areas, such as central Hurghada, is available for an extra cost. Message us on WhatsApp after booking to arrange it." },
+      { question: "Can I book a private ride?", answer: "Yes. Private rides for your family or group are available on request. Contact us on WhatsApp to arrange one." },
+    ],
+    packageName: "El Gouna Beach & Desert Horse Ride", packageDescription: "2-hour guided morning ride through the desert and along the beach, with free hotel pickup in El Gouna and El Ahyaa.", packagePrice: "45", packageLabel: "Per person",
+    seoTitle: "Horse Riding in El Gouna – Beach & Desert | Daily Red Sea",
+    metaDescription: "2-hour morning horse ride in El Gouna along the beach and desert. Beginners welcome, free hotel pickup, kids 50% off. Book now, pay later.",
   },
 
 
