@@ -68,6 +68,7 @@ export default function Hero() {
       <option value="">{t("searchPlaceholder")}</option>
       <option value="hurghada">Hurghada</option>
       <option value="marsa-alam">Marsa Alam</option>
+      <option value="el-gouna">El Gouna</option>
       <option value="jeddah">Jeddah</option>
     </>
   );

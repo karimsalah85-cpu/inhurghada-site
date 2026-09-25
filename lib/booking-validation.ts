@@ -1,4 +1,5 @@
 import { normalizePromoCode } from "@/lib/promo-codes";
+import { minimumAgeError, tourMinimumAge } from "@/lib/tour-booking";
 import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
 import { tours } from "@/data/tours";
 import { validatePhoneNumber } from "@/lib/phone";
@@ -178,7 +179,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     for (const item of selectedCartItems) {
       if (!item.tourSlug || !/^\d{4}-\d{2}-\d{2}$/.test(item.date) || item.date < todayInCairo) return { error: "Choose a valid future date for every trip." as const };
       if (item.tourSlug === "full-day-diving" && !item.divingLicenseConfirmed) return { error: "Every diver must hold a valid diving license and bring proof on the trip." as const };
-      if (["quad-safari-morning", "quad-safari-sunset"].includes(item.tourSlug) && !item.quadMinimumAgeConfirmed) return { error: "Every quad-tour participant must be at least 9 years old." as const };
+      if (tourMinimumAge(item.tourSlug) !== undefined && !item.quadMinimumAgeConfirmed) return { error: minimumAgeError(item.tourSlug) };
     }
   }
   const divingLicenseConfirmed = body.divingLicenseConfirmed === true;
@@ -186,8 +187,8 @@ export function validateBookingInput(input: unknown, now = new Date()) {
     return { error: "Every diver must hold a valid diving license and bring proof on the trip." as const };
   }
   const quadMinimumAgeConfirmed = body.quadMinimumAgeConfirmed === true;
-  if (type === "tour" && ["quad-safari-morning", "quad-safari-sunset"].includes(tourSlug) && !quadMinimumAgeConfirmed) {
-    return { error: "Every quad-tour participant must be at least 9 years old." as const };
+  if (type === "tour" && tourMinimumAge(tourSlug) !== undefined && !quadMinimumAgeConfirmed) {
+    return { error: minimumAgeError(tourSlug) };
   }
 
   return {

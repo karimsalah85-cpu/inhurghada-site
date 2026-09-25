@@ -4,9 +4,11 @@ import Link from "next/link";
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { useTripReviews } from "@/components/tours/TripReviewsContext";
-import { BadgeCheck, CalendarDays, Clock3, Compass, MapPin, ShieldCheck, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock3, Compass, MapPin, MessageCircle, ShieldCheck, Sparkles, Star, Ticket, TriangleAlert } from "lucide-react";
 import TourItinerary from "@/components/tours/TourItinerary";
 import { speedboatTerms } from "@/data/speedboat-booking";
+import { whatsappUrl } from "@/lib/contact";
+import { trackEvent } from "@/lib/analytics";
 
 export default function TourDetails({ tour }: { tour: Tour }) {
   const { formatPrice, language } = useSiteSettings();
@@ -20,7 +22,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const staticReviewCount = Number(tour.reviews);
   const hasReviews = hasLiveReviews || (Number.isFinite(staticReviewCount) && staticReviewCount > 0);
   const displayRating = hasLiveReviews ? liveReviews.average : tour.rating;
-  const polish: Record<string, string> = { "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
+  const polish: Record<string, string> = { "Arrange on WhatsApp": "Ustal przez WhatsApp", "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
   const operatorLine = tour.operator
@@ -36,7 +38,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
       <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Description","Beschreibung","Описание","الوصف","项目介绍")}</p>
         <h2 className="mt-4 text-3xl font-bold text-ink">{tr("About this tour","Über diesen Ausflug","Об этой экскурсии","عن هذه الرحلة","关于此行程")}</h2>
-        <p className="mt-6 text-lg leading-8 text-muted">{tour.description}</p>
+        <p className="mt-6 whitespace-pre-line text-lg leading-8 text-muted">{tour.description}</p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl bg-surface-muted p-4">
             <div className="flex items-center gap-2 text-ocean-dark"><Clock3 size={16} /> {tr("Duration","Dauer","Продолжительность","المدة","时长")}</div>
@@ -139,6 +141,8 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
         </div>
       </div>
+
+      {tour.whatsappContactNotes?.length ? <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-emerald-800"><MessageCircle size={16} /> {tr("Arrange on WhatsApp", "Per WhatsApp vereinbaren", "Договоритесь в WhatsApp", "رتّب عبر واتساب", "通过 WhatsApp 安排")}</p><div className="mt-5 grid gap-4 lg:grid-cols-2">{tour.whatsappContactNotes.map((note) => <div key={note.cta} className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5"><p className="text-sm leading-6 text-ink">{note.text}</p><a href={whatsappUrl(note.message)} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { placement: "tour_details_request", item_name: tour.title })} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700"><MessageCircle size={17} /> {note.cta}</a></div>)}</div></section> : null}
 
       {tour.itinerary ? <TourItinerary items={tour.itinerary} /> : null}
 

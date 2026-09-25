@@ -18,6 +18,7 @@ import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { trackEvent } from "@/lib/analytics";
 import ShareTripButton from "@/components/share/ShareTripButton";
 import { validatePhoneNumber } from "@/lib/phone";
+import { isQuadTour, tourMinimumAge } from "@/lib/tour-booking";
 
 export default function CartCheckout({ tours }: { tours: Tour[] }) {
   const idempotencyKey = useRef<string | null>(null);
@@ -62,10 +63,13 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
   const [message, setMessage] = useState("");
   const [divingConfirmed, setDivingConfirmed] = useState(false);
   const [quadConfirmed, setQuadConfirmed] = useState(false);
+  const [riderAgeConfirmed, setRiderAgeConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const requiresDivingLicense = items.some((item) => item.requiresDivingLicense);
-  const requiresQuadMinimumAge = items.some((item) => item.requiresQuadMinimumAge);
+  const requiresQuadMinimumAge = items.some((item) => item.requiresQuadMinimumAge && isQuadTour(item.tourSlug));
+  const riderMinimumAge = items.map((item) => (!isQuadTour(item.tourSlug) ? tourMinimumAge(item.tourSlug) : undefined)).find((age) => age !== undefined);
+  const riderAgeText = riderMinimumAge === undefined ? "" : de ? `Alle Reiter sind mindestens ${riderMinimumAge} Jahre alt.` : ru ? `Всем всадникам не менее ${riderMinimumAge} лет.` : ar ? `عمر كل راكب ${riderMinimumAge} سنوات على الأقل.` : pl ? `Każdy jeździec ma co najmniej ${riderMinimumAge} lat.` : zh ? `每位骑手均已年满${riderMinimumAge}岁。` : `Every rider is at least ${riderMinimumAge} years old.`;
   const cartCurrencies = [...new Set(items.map((item) => item.currency))];
   const cartCurrency = cartCurrencies[0] || "USD";
   const cartDestinations = [...new Set(items.map((item) => item.destinationSlug))];
@@ -83,7 +87,7 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
           time: items[0]?.time,
           tourName: `Multi-trip booking (${items.length})`,
           tourSlug: "multi-trip",
-          location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : slug === "jeddah" ? "Jeddah" : "Hurghada").join(" and "),
+          location: cartDestinations.map((slug) => slug === "marsa-alam" ? "Marsa Alam" : slug === "el-gouna" ? "El Gouna" : slug === "jeddah" ? "Jeddah" : "Hurghada").join(" and "),
           duration: `${items.length} trips`,
           message,
           adults: 0,
@@ -102,7 +106,7 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
             transferRequired: item.transferRequired,
             transferArea: item.transferArea,
             divingLicenseConfirmed: item.requiresDivingLicense ? divingConfirmed : true,
-            quadMinimumAgeConfirmed: item.requiresQuadMinimumAge ? quadConfirmed : true,
+            quadMinimumAgeConfirmed: tourMinimumAge(item.tourSlug) === undefined ? true : isQuadTour(item.tourSlug) ? quadConfirmed : riderAgeConfirmed,
           })),
         };
   const promo = usePromoCode(bookingInput, total, language, () => (idempotencyKey.current ||= crypto.randomUUID()));
@@ -115,6 +119,7 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
     if (cartCurrencies.length > 1) return setError("Please book trips in different settlement currencies separately.");
     if (requiresDivingLicense && !divingConfirmed) return setError(tr("Confirm that every diver has a valid diving license.", "Bestätige, dass jeder Taucher einen gültigen Tauchschein besitzt.", "Подтвердите наличие действующего сертификата у каждого дайвера.", "أكد أن كل غواص يحمل رخصة غوص سارية."));
     if (requiresQuadMinimumAge && !quadConfirmed) return setError(tr("Confirm that every quad participant is at least 9 years old.", "Bestätige, dass alle Quad-Teilnehmer mindestens 9 Jahre alt sind.", "Подтвердите, что всем участникам тура на квадроциклах не менее 9 лет.", "أكد أن عمر كل مشارك في رحلة الكواد لا يقل عن 9 سنوات."));
+    if (riderMinimumAge !== undefined && !riderAgeConfirmed) return setError(de ? `Bestätige, dass alle Reiter mindestens ${riderMinimumAge} Jahre alt sind.` : ru ? `Подтвердите, что всем всадникам не менее ${riderMinimumAge} лет.` : ar ? `أكد أن عمر كل راكب لا يقل عن ${riderMinimumAge} سنوات.` : pl ? `Potwierdź, że każdy jeździec ma co najmniej ${riderMinimumAge} lat.` : zh ? `请确认每位骑手均已年满${riderMinimumAge}岁。` : `Confirm that every rider is at least ${riderMinimumAge} years old.`);
     const phoneCheck = validatePhoneNumber(phone, phoneCountryHint);
     if (!phoneCheck.valid) return setError(tr("Please enter a valid WhatsApp phone number including the country code.", "Bitte gib eine gültige WhatsApp-Telefonnummer inklusive Landesvorwahl ein.", "Пожалуйста, введите действительный номер WhatsApp с кодом страны.", "يرجى إدخال رقم واتساب صحيح مع رمز الدولة."));
     setSubmitting(true);
@@ -194,6 +199,7 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
           ) : <RequiredInput label={tr("Hotel / pickup location", "Hotel / Abholort", "Отель / место встречи", "الفندق / مكان الاستلام")} value={hotel} onChange={setHotel}/>}
           {requiresDivingLicense ? <Confirmation checked={divingConfirmed} onChange={setDivingConfirmed} text={tr("Every diver has a valid diving license and will bring proof.", "Jeder Taucher besitzt einen gültigen Tauchschein und bringt den Nachweis mit.", "У каждого дайвера есть действующий сертификат, который он возьмёт с собой.", "يحمل كل غواص رخصة غوص سارية وسيحضر إثباتها.")}/> : null}
           {requiresQuadMinimumAge ? <Confirmation checked={quadConfirmed} onChange={setQuadConfirmed} text={tr("Every quad participant is at least 9 years old.", "Alle Quad-Teilnehmer sind mindestens 9 Jahre alt.", "Всем участникам тура на квадроциклах не менее 9 лет.", "عمر كل مشارك في رحلة الكواد 9 سنوات على الأقل.")}/> : null}
+          {riderMinimumAge !== undefined ? <Confirmation checked={riderAgeConfirmed} onChange={setRiderAgeConfirmed} text={riderAgeText}/> : null}
           <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания", "طلبات خاصة")}<textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-24 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none focus:border-ocean focus:ring-4 focus:ring-ocean-tint"/></label>
           <p className="text-xs leading-5 text-muted">{tr("By submitting, you agree to our", "Mit dem Absenden stimmst du unseren", "Отправляя заявку, вы соглашаетесь с", "بإرسال الطلب، فإنك توافق على")} <Link href={localePath(language, "/terms-conditions")} className="font-bold text-ocean-dark underline">{tr("terms and cancellation policy", "AGB und Stornierungsbedingungen", "условиями и правилами отмены", "الشروط وسياسة الإلغاء")}</Link>.</p>
           {error ? <p role="alert" className="text-sm font-semibold text-rose-600">{error}</p> : null}

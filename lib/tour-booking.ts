@@ -38,3 +38,26 @@ export function nextDepartures(minimumDate: string, operatingWeekdays?: number[]
   }
   return dates;
 }
+
+/**
+ * Tours whose operator enforces a minimum participant age. Guests must confirm the age before booking;
+ * the confirmation travels in the booking payload's historical `quadMinimumAgeConfirmed` field.
+ */
+const tourMinimumAges: Record<string, number> = {
+  "quad-safari-morning": 9,
+  "quad-safari-sunset": 9,
+  "horse-riding-el-gouna": 5,
+};
+
+export function tourMinimumAge(tourSlug: string): number | undefined {
+  return tourMinimumAges[tourSlug];
+}
+
+export function isQuadTour(tourSlug: string) {
+  return tourSlug === "quad-safari-morning" || tourSlug === "quad-safari-sunset";
+}
+
+export function minimumAgeError(tourSlug: string) {
+  const age = tourMinimumAge(tourSlug);
+  return isQuadTour(tourSlug) ? "Every quad-tour participant must be at least 9 years old." : `Every rider must be at least ${age} years old.`;
+}
