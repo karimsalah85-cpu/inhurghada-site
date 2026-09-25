@@ -109,15 +109,33 @@ export default function BottomNav() {
 /** Compact, conversion-focused bottom bar for tour/experience detail pages: real price, a direct Book Now CTA, and WhatsApp, in place of the generic nav so the two never overlap. */
 function TourBookingBar({ tour, pathname }: { tour: Tour; pathname: string }) {
   const { t, formatPrice } = useSiteSettings();
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  // Step aside while the booking form itself is on screen: it already shows the
+  // live total and Book now button, so the bar would only duplicate and cover it.
+  useEffect(() => {
+    const form = document.getElementById("book");
+    if (!form || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setIsFormVisible(entry.isIntersecting));
+    observer.observe(form);
+    return () => {
+      observer.disconnect();
+      setIsFormVisible(false);
+    };
+  }, [pathname]);
 
   return (
     <nav
       aria-label={t("booking")}
-      className="
+      aria-hidden={isFormVisible || undefined}
+      inert={isFormVisible}
+      className={`
       fixed inset-x-0 bottom-0 z-50 xl:hidden
       mobile-glass-nav
       pb-[env(safe-area-inset-bottom)]
-      "
+      transition-transform duration-300
+      ${isFormVisible ? "translate-y-full" : "translate-y-0"}
+      `}
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
         <div className="flex shrink-0 flex-col leading-tight">
