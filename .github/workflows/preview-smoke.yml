@@ -31,4 +31,6 @@ jobs:
         run: npm ci
 
       - name: Verify preview deployment
+        env:
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: npm run test:smoke -- "${{ github.event.deployment_status.target_url }}"
