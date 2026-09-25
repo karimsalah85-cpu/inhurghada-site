@@ -113,13 +113,26 @@ function TourBookingBar({ tour, pathname }: { tour: Tour; pathname: string }) {
 
   // Step aside while the booking form itself is on screen: it already shows the
   // live total and Book now button, so the bar would only duplicate and cover it.
+  // The page streams in behind app/loading.tsx, so #book can appear (or be
+  // replaced) after this runs: keep watching the DOM and re-attach to it.
   useEffect(() => {
-    const form = document.getElementById("book");
-    if (!form || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(([entry]) => setIsFormVisible(entry.isIntersecting));
-    observer.observe(form);
+    if (typeof IntersectionObserver === "undefined") return;
+    const visibility = new IntersectionObserver(([entry]) => setIsFormVisible(entry.isIntersecting));
+    let observed: HTMLElement | null = null;
+    const attach = () => {
+      const form = document.getElementById("book");
+      if (form === observed) return;
+      if (observed) visibility.unobserve(observed);
+      observed = form;
+      if (form) visibility.observe(form);
+      else setIsFormVisible(false);
+    };
+    attach();
+    const domChanges = new MutationObserver(attach);
+    domChanges.observe(document.body, { childList: true, subtree: true });
     return () => {
-      observer.disconnect();
+      domChanges.disconnect();
+      visibility.disconnect();
       setIsFormVisible(false);
     };
   }, [pathname]);

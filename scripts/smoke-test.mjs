@@ -2,14 +2,28 @@ import assert from "node:assert/strict";
 
 const base = (process.argv[2] || "https://dailyredsea.com").replace(/\/$/, "");
 const requiredHeaders = ["content-security-policy", "referrer-policy", "x-content-type-options", "x-frame-options", "permissions-policy"];
+// Preview deployments sit behind Vercel Authentication. Without this secret
+// ("Protection Bypass for Automation") every request lands on Vercel's login page.
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+
+/** fetch() that carries the protection-bypass secret, but only to the deployment under test. */
+function siteFetch(url, options = {}) {
+  if (!bypassSecret || new URL(url).origin !== new URL(base).origin) return fetch(url, options);
+  return fetch(url, { ...options, headers: { ...options.headers, "x-vercel-protection-bypass": bypassSecret } });
+}
 
 async function get(path, options) {
-  const response = await fetch(`${base}${path}`, options);
+  const response = await siteFetch(`${base}${path}`, options);
   const body = await response.text();
   return { response, body };
 }
 
 const home = await get("/");
+const landedOn = new URL(home.response.url);
+assert.ok(
+  home.response.status !== 401 && landedOn.origin === new URL(base).origin,
+  `${base} is behind Vercel Authentication (landed on ${landedOn.origin}${landedOn.pathname}, HTTP ${home.response.status}). Set the VERCEL_AUTOMATION_BYPASS_SECRET secret.`,
+);
 assert.equal(home.response.status, 200, "Home page must return 200");
 for (const header of requiredHeaders) assert.ok(home.response.headers.get(header), `Missing security header: ${header}`);
 assert.match(home.body, /<title>[^<]+<\/title>/, "Home page must have a title");
@@ -48,7 +62,7 @@ for (let offset = 0; offset < urls.length; offset += 10) {
   const batch = urls.slice(offset, offset + 10);
   await Promise.all(batch.map(async (url) => {
     try {
-      const response = await fetch(url);
+      const response = await siteFetch(url);
       const body = await response.text();
       const pathname = new URL(response.url).pathname;
       const first = pathname.split("/").filter(Boolean)[0];
@@ -76,7 +90,7 @@ for (const [path, status] of apiChecks) {
   if (result.response.status !== status) failures.push(`${path}: expected ${status}, received ${result.response.status}`);
 }
 
-const rates = await fetch(`${base}/api/exchange-rates`).then((response) => response.json());
+const rates = await siteFetch(`${base}/api/exchange-rates`).then((response) => response.json());
 for (const currency of ["USD", "EUR", "GBP", "EGP"]) {
   if (!(Number(rates.rates?.[currency]) > 0)) failures.push(`/api/exchange-rates: invalid ${currency} rate`);
 }
