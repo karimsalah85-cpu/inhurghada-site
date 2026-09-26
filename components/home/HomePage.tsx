@@ -194,7 +194,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
     <>
 
 
-      <Hero />
+      <Hero tours={displayTours} />
 
       <section aria-label="Booking benefits" className="border-b border-line bg-white px-5 py-3 sm:px-8 sm:py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 sm:justify-start sm:gap-x-8">
