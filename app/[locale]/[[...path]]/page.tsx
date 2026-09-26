@@ -26,7 +26,7 @@ import { FaqPage } from "@/components/pages/FaqPage";
 import { PrivacyPolicyPage } from "@/components/pages/PrivacyPolicyPage";
 import TermsConditionsPage from "@/app/terms-conditions/page";
 import TourPageShell from "@/components/tours/TourPageShell";
-import TourCategoryPage from "@/app/hurghada/[category]/page";
+import TourCategoryView from "@/components/categories/TourCategoryView";
 import DestinationCategoryPage from "@/components/categories/DestinationCategoryPage";
 import { localizeTour } from "@/lib/tour-localization";
 import CartPage from "@/app/cart/page";
@@ -156,7 +156,7 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
     return <TourPageShell locale={locale} tour={localizeTour(tour, locale)} />;
   }
 
-  if (kind === "category") return <TourCategoryPage locale={locale} params={Promise.resolve({ category: path[1] })} />;
+  if (kind === "category") return <TourCategoryView locale={locale} categorySlug={path[1]} />;
   if (kind === "transfers") return <TransfersPage locale={locale} />;
   if (kind === "booking") return <BookingPage />;
   if (kind === "booking/confirmation") return <BookingConfirmationPage />;
