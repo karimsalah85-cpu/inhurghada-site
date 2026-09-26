@@ -54,6 +54,8 @@ export type Tour = {
     youth?: number;
     infants?: number;
   };
+  /** Per-person rates by group size; overrides `participantPricing.adults` once a tier's traveler count is reached. */
+  groupPricing?: import("@/lib/group-pricing").GroupPriceTier[];
   availableTimes?: string[];
   category?: string;
   /** Structured catalog placement from broad category to specific trip type. */
@@ -291,7 +293,10 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     slug: "luxor-private-day-trip",
     title: "Private Day Trip to Luxor from Hurghada",
     image: "/images/placeholders/sea-activity.svg",
-    price: "120",
+    // Supplier rates €150 / €130 / €100 per person (2 / 4 / 6–8 pax), converted at 1 EUR = 1.1399 USD.
+    price: "170.99",
+    groupPricing: [{ minTravelers: 1, pricePerPerson: 170.99 }, { minTravelers: 4, pricePerPerson: 148.19 }, { minTravelers: 6, pricePerPerson: 113.99 }],
+    pricingLockedToCode: true,
     rating: "5.0",
     reviews: "New",
     location: "Luxor, Egypt",
@@ -305,7 +310,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
       "See Queen Hatshepsut's dramatic terraced temple",
       "Stand before the Colossi of Memnon",
       "Explore the vast Karnak Temple complex",
-      "Family and group pricing available on request",
+      "Lower per-person group prices for 4 or more travelers",
       "Free cancellation up to 48 hours before the activity starts",
       "Runs every day with approximately 05:00 hotel pickup",
     ],
@@ -330,7 +335,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     ],
     notes: [
       "A valid ID or passport is required for the travel permit.",
-      "The advertised $120 is the starting adult price. Contact us for a family or private-group quotation.",
+      "Group prices per person: groups of 4–5 and groups of 6 or more pay a lower rate than 1–3 travelers. The booking form applies the right rate automatically.",
       "Pickup is planned for approximately 05:00 and confirmed by WhatsApp.",
       "Tutankhamun's tomb is not part of the standard three-tomb ticket and is paid separately if requested.",
       "All itinerary times are guidelines and may change with traffic, opening conditions and your private schedule.",
@@ -338,9 +343,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     ],
     packageName: "Private Luxor Day Trip from Hurghada",
     packageDescription: "A full private Luxor experience with transport, Egyptologist guide, main entrance fees, three Valley of the Kings tombs and lunch.",
-    packagePrice: "120",
-    packageLabel: "Starting price per adult",
-    participantPricing: { adults: 120 },
+    packageLabel: "Per adult · lower group rates from 4 travelers",
+    participantPricing: { adults: 170.99 },
     availableTimes: ["05:00"],
     seoTitle: "Private Luxor Day Trip from Hurghada | Valley of the Kings",
     metaDescription: "Book a private Luxor day trip from Hurghada with Valley of the Kings, Hatshepsut Temple, Colossi of Memnon, Karnak, guide, entrance fees and lunch.",
@@ -581,7 +585,9 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     packageName: "Sahl Hasheesh Desert and Sea Horse Ride", packageDescription: "Approximately two hours of guided desert and shoreline horse riding with an optional shallow-water section when safe.", packagePrice: "20.99", packageLabel: "Rider", availableTimes: ["Morning departure confirmed by WhatsApp", "Sunset departure confirmed by WhatsApp"], notSuitableFor: ["Pregnant guests", "People with serious back, neck or mobility conditions", "Guests outside the stable's confirmed age or weight limits"], whatToBring: ["Long trousers", "Closed shoes", "Sunscreen", "Sunglasses", "Swimwear and towel if selecting the sea option"], seoTitle: "Sahl Hasheesh Desert and Sea Horse Ride", metaDescription: "Book a guided Sahl Hasheesh desert and Red Sea horse ride with optional shallow-water riding, priced 20% below the verified comparison fare."
   },
   {
-    slug: "cairo-giza-day-trip-bus", title: "Cairo and Giza Day Trip by Bus", image: "/images/placeholders/sea-activity.svg", price: "60.80", rating: "New", reviews: "New", location: "Cairo and Giza, Egypt", duration: "Full Day", category: "Cultural Day Trip", badge: "New", bookingMode: "direct", participantPricing: { adults: 60.80 },
+    slug: "cairo-giza-day-trip-bus", title: "Cairo and Giza Day Trip by Bus", image: "/images/placeholders/sea-activity.svg", price: "182.38", rating: "New", reviews: "New", location: "Cairo and Giza, Egypt", duration: "Full Day", category: "Cultural Day Trip", badge: "New", bookingMode: "direct", participantPricing: { adults: 182.38 },
+    // Supplier rates €160 / €140 / €130 per person (2 / 4 / 6–8 pax), converted at 1 EUR = 1.1399 USD.
+    groupPricing: [{ minTravelers: 1, pricePerPerson: 182.38 }, { minTravelers: 4, pricePerPerson: 159.59 }, { minTravelers: 6, pricePerPerson: 148.19 }], pricingLockedToCode: true,
     description: "Travel overland from Hurghada for a guided day covering the Giza pyramid complex and major Cairo highlights selected in the confirmed itinerary.", highlights: ["Giza Pyramids and Sphinx", "Egyptologist guide", "Cairo museum visit according to package", "Lunch and air-conditioned transport"], included: ["Round-trip transport from the confirmed pickup zone", "Professional guide", "Main entrance tickets stated in the quotation", "Lunch", "Required travel permits"], notIncluded: ["Entry inside pyramids unless quoted", "Drinks", "Optional Nile cruise", "Personal expenses"], notes: ["A passport or valid ID is required in advance for permits.", "This is a very long day with an early pickup and extensive driving.", "Museum choice and entrance tickets must match the final confirmation.", "Free cancellation is available up to 48 hours before the trip."], availableTimes: ["Very early pickup confirmed by WhatsApp"], notSuitableFor: ["Guests unable to manage a very long travel day"], whatToBring: ["Passport or photo ID", "Comfortable shoes", "Sun protection", "Breakfast or snacks"], seoTitle: "Cairo and Giza Day Trip by Bus from Hurghada", metaDescription: "Request a guided Cairo and Giza day trip by bus from Hurghada with pyramids, Sphinx, museum, lunch and transport."
   },
   {

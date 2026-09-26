@@ -148,6 +148,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
                   duration={tour.duration}
                   location={tour.location}
                   participantPricing={tour.participantPricing}
+                  groupPricing={tour.groupPricing}
                   availableTimes={tour.availableTimes}
                   ageBands={tour.ageBands}
                   boatOptions={tour.boatOptions}

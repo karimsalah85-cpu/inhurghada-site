@@ -2,6 +2,7 @@ import { tours, type Tour } from "@/data/tours";
 import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
 import { pricingLine, type BookingPricingSnapshot, type PricingLine } from "@/lib/booking-pricing-snapshot";
+import { groupRate } from "@/lib/group-pricing";
 import { EXTRAS_CONFIG, SENZO_MALL_FARE, type ChildSeatType } from "@/lib/transfer-config";
 
 type PricingInput = {
@@ -77,12 +78,13 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   if (Object.keys(quantities).some((id) => !allowedQuantityExtras.has(id))) return { error: "Choose valid quantity add-ons." as const };
   const quantityExtrasTotal = Object.entries(quantities).reduce((sum, [id, quantity]) => sum + (allowedQuantityExtras.get(id)?.price || 0) * quantity, 0);
   if (tour.requiresMarinaTransferChoice && input.transferRequired && !["Hurghada Hotels", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay", "Safaga"].includes(input.transferArea || "")) return { error: "Choose a valid marina transfer area." as const };
+  const adultRate = groupRate(tour.groupPricing, input.adults + input.youth) ?? pricing.adults;
   const entranceTotal = tour.entrancePricing ? input.adults * tour.entrancePricing.adults + input.youth * tour.entrancePricing.youth : 0;
   const participantTotal = boat
     ? boat.price + entranceTotal
     : tour.pricingMode === "per-booking"
     ? pricing.adults
-    : input.adults * pricing.adults + input.youth * (pricing.youth ?? pricing.adults) + input.infants * (pricing.infants ?? 0);
+    : input.adults * adultRate + input.youth * (pricing.youth ?? adultRate) + input.infants * (pricing.infants ?? 0);
   const amount = Math.round((participantTotal + extrasTotal + quantityExtrasTotal) * 100) / 100;
   const guestSummary = tour.pricingMode === "per-booking"
     ? `${guests} passenger${guests === 1 ? "" : "s"}${boat ? ` · ${boat.label}` : ""}`
@@ -95,8 +97,8 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
       if (input.youth) lines.push(pricingLine("entrance", input.youth, tour.entrancePricing.youth, "Children / youth"));
     }
   } else {
-    if (input.adults) lines.push(pricingLine("adults", input.adults, pricing.adults));
-    if (input.youth) lines.push(pricingLine("youth", input.youth, pricing.youth ?? pricing.adults));
+    if (input.adults) lines.push(pricingLine("adults", input.adults, adultRate));
+    if (input.youth) lines.push(pricingLine("youth", input.youth, pricing.youth ?? adultRate));
     if (input.infants) lines.push(pricingLine("infants", input.infants, pricing.infants ?? 0));
   }
   for (const id of selectedExtras) {
