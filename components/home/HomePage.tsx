@@ -12,7 +12,7 @@ import TourCard from "@/components/cards/TourCard";
 import MobileTourCarousel from "@/components/home/MobileTourCarousel";
 import ContinuePlanningRail from "@/components/favourites/ContinuePlanningRail";
 
-import { BadgeCheck, MessageCircle, ShieldCheck, Headphones, ArrowRight, Car, Search } from "lucide-react";
+import { BadgeCheck, MessageCircle, ShieldCheck, Headphones, Car, Search } from "lucide-react";
 
 import { type Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
@@ -43,6 +43,13 @@ export default function Home({ initialTours }: { initialTours: Tour[] }) {
     </Suspense>
   );
 }
+
+// Homepage destination cards lead with a water/tour photo. Destination pages keep
+// their own hero image from lib/destinations.ts.
+const homeDestinationCardImages: Partial<Record<string, string>> = {
+  hurghada: "/images/owned/speedboat-action.jpg",
+  jeddah: "/images/owned/certified-diver-boat-trip-jeddah.jpg",
+};
 
 function HomeContent({ initialTours }: { initialTours: Tour[] }) {
   const { t, language } = useSiteSettings();
@@ -189,35 +196,33 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
 
       <Hero />
 
-      <section aria-label="Booking benefits" className="border-b border-line bg-white px-5 py-5 sm:px-8">
-        <div className="mx-auto grid max-w-7xl gap-3 sm:grid-cols-3">
-          {[tr("Clear prices before you book", "Klare Preise vor der Buchung", "Понятные цены до бронирования", "أسعار واضحة قبل الحجز", "Jasne ceny przed rezerwacją", "预订前价格透明"), tr("Hotel pickup where available", "Hotelabholung, wo verfügbar", "Трансфер из отеля, где доступно", "الاستلام من الفندق عند توفره", "Odbiór z hotelu, gdy dostępny", "可提供酒店接送"), tr("Local help on WhatsApp", "Lokale Hilfe per WhatsApp", "Местная помощь в WhatsApp", "مساعدة محلية عبر واتساب", "Lokalna pomoc na WhatsApp", "WhatsApp 本地协助")].map((item) => <div key={item} className="flex items-center gap-3 text-sm font-bold text-ink"><BadgeCheck className="shrink-0 text-emerald-600" size={20}/>{item}</div>)}
+      <section aria-label="Booking benefits" className="border-b border-line bg-white px-5 py-3 sm:px-8 sm:py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 sm:justify-start sm:gap-x-8">
+          {[
+            [tr("Clear prices", "Klare Preise", "Понятные цены", "أسعار واضحة", "Jasne ceny", "价格透明"), tr("Clear prices before you book", "Klare Preise vor der Buchung", "Понятные цены до бронирования", "أسعار واضحة قبل الحجز", "Jasne ceny przed rezerwacją", "预订前价格透明")],
+            [tr("Hotel pickup", "Hotelabholung", "Трансфер из отеля", "استلام من الفندق", "Odbiór z hotelu", "酒店接送"), tr("Hotel pickup where available", "Hotelabholung, wo verfügbar", "Трансфер из отеля, где доступно", "الاستلام من الفندق عند توفره", "Odbiór z hotelu, gdy dostępny", "可提供酒店接送")],
+            [tr("WhatsApp help", "WhatsApp-Hilfe", "Помощь в WhatsApp", "مساعدة واتساب", "Pomoc WhatsApp", "WhatsApp 协助"), tr("Local help on WhatsApp", "Lokale Hilfe per WhatsApp", "Местная помощь в WhatsApp", "مساعدة محلية عبر واتساب", "Lokalna pomoc na WhatsApp", "WhatsApp 本地协助")],
+          ].map(([short, full]) => <div key={full} className="flex items-center gap-1.5 text-xs font-bold text-ink sm:text-sm"><BadgeCheck className="shrink-0 text-emerald-600" size={16}/><span className="sm:hidden">{short}</span><span className="hidden sm:inline">{full}</span></div>)}
         </div>
       </section>
 
-      <section className="bg-white px-6 pb-6 pt-10 sm:px-8 sm:pb-14 sm:pt-14">
+      <section aria-labelledby="home-destinations-title" className="bg-white pb-8 pt-5 sm:pb-14 sm:pt-8">
         <div className="mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{de ? "Reiseziele am Roten Meer" : ru ? "Направления Красного моря" : ar ? "وجهات البحر الأحمر" : pl ? "Destynacje nad Morzem Czerwonym" : zh ? "红海目的地" : "Red Sea destinations"}</p>
-            <h2 className="mt-3 text-4xl font-black text-ink">{de ? "Wähle dein Reiseziel" : ru ? "Выберите направление" : ar ? "اختر وجهتك للاستكشاف" : pl ? "Wybierz kierunek podróży" : zh ? "选择您想探索的目的地" : "Choose where you want to explore"}</h2>
-            <p className="mt-4 text-lg leading-8 text-muted">{de ? "Entdecke getrennte Ausflugskataloge für Hurghada, Marsa Alam, El Gouna und Jeddah mit eigenen Preisen, Abholgebieten und Buchungsbedingungen." : ru ? "Выбирайте отдельные каталоги Хургады, Марса-Алама, Эль-Гуны и Джидды с собственными ценами, зонами трансфера и условиями бронирования." : ar ? "استكشف كتالوجات منفصلة للغردقة ومرسى علم والجونة وجدة مع أسعار ومناطق استلام وشروط حجز خاصة بكل وجهة." : pl ? "Odkryj osobne katalogi Hurghady, Marsa Alam, El Gouny i Dżuddy z własnymi cenami, strefami odbioru i zasadami rezerwacji." : zh ? "探索赫尔格达、马萨阿拉姆、埃尔古纳和吉达的独立行程目录，各自提供专属价格、接送区域和预订条件。" : "Explore separate Hurghada, Marsa Alam, El Gouna and Jeddah catalogues with destination-specific prices, pickup areas and booking conditions."}</p>
+          <div className="flex items-baseline justify-between gap-4 px-5 sm:px-8">
+            <h2 id="home-destinations-title" className="text-xl font-black tracking-tight text-ink sm:text-3xl">{tr("Where are you staying?", "Wo übernachtest du?", "Где вы остановились?", "أين تقيم؟", "Gdzie się zatrzymujesz?", "您住在哪里？")}</h2>
+            <Link href={localePath(language, "/tours")} className="shrink-0 text-sm font-bold text-ocean-dark hover:text-primary sm:text-base">{t("viewAllTours")} →</Link>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-5 px-5 pb-2 [scrollbar-width:none] sm:mt-6 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-8 xl:grid-cols-4 [&::-webkit-scrollbar]:hidden">
             {destinations.map((destination) => (
-              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group relative min-h-[410px] overflow-hidden rounded-[2rem] border border-line shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:ring-4 focus-visible:ring-ocean">
-                <Image src={destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-7 text-white">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-3xl font-black">{destination.name}</h3>
-                    {destination.status === "coming-soon" ? <span className="rounded-full bg-brand-orange-soft px-3 py-1 text-xs font-black uppercase tracking-wide text-brand-orange-cta">{de ? "Demnächst" : ru ? "Скоро" : ar ? "قريباً" : pl ? "Wkrótce" : zh ? "即将推出" : "Coming soon"}</span> : <span className="rounded-full bg-brand-navy-soft px-3 py-1 text-xs font-black uppercase tracking-wide text-brand-navy">{de ? "Jetzt verfügbar" : ru ? "Доступно сейчас" : ar ? "متاح الآن" : pl ? "Dostępne teraz" : zh ? "现已开放" : "Available now"}</span>}
-                  </div>
-                  <p className="mt-2 max-w-xl text-sm leading-6 text-line">{destination.slug === "hurghada" ? (de ? "Ausflüge am Roten Meer, Transfers und lokale Erlebnisse" : ru ? "Экскурсии, трансферы и местные впечатления на Красном море" : ar ? "رحلات البحر الأحمر والتنقلات والتجارب المحلية" : pl ? "Wycieczki nad Morzem Czerwonym, transfery i lokalne atrakcje" : zh ? "红海旅游、接送和本地体验" : "Red Sea tours, transfers, and local experiences") : destination.slug === "el-gouna" ? (de ? "Lagunen, Strände und entspannte Aktivitäten am Roten Meer" : ru ? "Лагуны, пляжи и спокойный отдых на Красном море" : ar ? "بحيرات وشواطئ وأنشطة هادئة على البحر الأحمر" : pl ? "Laguny, plaże i spokojne atrakcje nad Morzem Czerwonym" : zh ? "潟湖、海滩与悠闲的红海体验" : "Lagoons, beaches and relaxed Red Sea activities") : destination.slug === "jeddah" ? (de ? "Tauchen und Küstenerlebnisse in Jeddah" : ru ? "Дайвинг и прибрежные впечатления в Джидде" : ar ? "غوص وتجارب ساحلية في جدة" : pl ? "Nurkowanie i nadmorskie atrakcje w Dżuddzie" : zh ? "吉达的红海潜水与海岸体验" : "Red Sea diving and coastal experiences in Jeddah") : (de ? "Unberührte Riffe, Wüstenlandschaften und Abenteuer im südlichen Roten Meer" : ru ? "Нетронутые рифы, пустынные пейзажи и приключения на юге Красного моря" : ar ? "شعاب نقية ومناظر صحراوية ومغامرات جنوب البحر الأحمر" : pl ? "Dziewicze rafy, pustynne krajobrazy i przygody na południu Morza Czerwonego" : zh ? "原始珊瑚礁、沙漠景观和红海南部探险" : "Untouched reefs, desert landscapes, and southern Red Sea adventures")}</p>
-                  <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/20 pt-4">
-                    <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-ocean-soft">{destinationDetails[destination.slug].signature}</p><p className="mt-1 text-sm text-line">{displayTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).length} {t("tours").toLowerCase()} · {tr("from", "ab", "от", "من", "od", "起价")} {destinationDetails[destination.slug].startingPrice}</p></div>
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-ocean-dark transition group-hover:translate-x-1"><ArrowRight size={19}/></span>
-                  </div>
-                </div>
+              <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group w-[38%] min-w-[140px] shrink-0 snap-start rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean sm:w-auto sm:min-w-0">
+                <span className="relative block h-44 overflow-hidden rounded-2xl bg-surface-muted sm:h-52">
+                  <Image src={homeDestinationCardImages[destination.slug] ?? destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 40vw" className="object-cover transition duration-500 group-hover:scale-105" />
+                  {destination.status === "coming-soon" ? <span className="absolute left-2 top-2 rounded-full bg-brand-orange-soft px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-orange-cta">{de ? "Demnächst" : ru ? "Скоро" : ar ? "قريباً" : pl ? "Wkrótce" : zh ? "即将推出" : "Coming soon"}</span> : null}
+                </span>
+                <span className="mt-2 flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <span className="text-[15px] font-black text-ink sm:text-lg">{destination.name}</span>
+                  <span className="text-xs font-semibold text-muted sm:text-sm">{displayTours.filter((tour) => (tour.destinationSlug || "hurghada") === destination.slug).length} {t("tours").toLowerCase()} · {tr("from", "ab", "от", "من", "od", "起价")} {destinationDetails[destination.slug].startingPrice}</span>
+                </span>
               </Link>
             ))}
           </div>
