@@ -6,6 +6,7 @@ import Link from "next/link";
 import { tours } from "@/data/tours";
 import { absoluteUrl, siteName } from "@/lib/seo";
 import TourViewTracker from "@/components/analytics/TourViewTracker";
+import TourBookingBar from "@/components/tours/TourBookingBar";
 import TransferBookingForm from "@/components/booking/TransferBookingForm";
 import AirportTransferForm from "@/components/booking/AirportTransferForm";
 import { localePath, type Locale } from "@/lib/i18n";
@@ -116,6 +117,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     <TripReviewsProvider tourSlug={tour.slug}>
     <main className="min-h-screen bg-surface-muted">
       <TourViewTracker title={tour.title} price={tour.price} />
+      <TourBookingBar slug={tour.slug} title={tour.title} price={tour.price} currency={tour.currency} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
         <nav aria-label="Breadcrumb" className="mb-5 text-sm text-muted"><Link href={homeHref} className="hover:text-ocean-dark">{breadcrumbLabels.home}</Link><span className="px-2" aria-hidden="true">/</span><Link href={destinationHref} className="hover:text-ocean-dark">{destination?.name || "Hurghada"}</Link>{isOrangeBay ? <><span className="px-2" aria-hidden="true">/</span><Link href={islandTripsHref} className="hover:text-ocean-dark">{islandTripsLabel}</Link></> : null}<span className="px-2" aria-hidden="true">/</span><span className="text-ink" aria-current="page">{tour.title}</span></nav>
