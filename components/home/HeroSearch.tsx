@@ -81,7 +81,7 @@ export default function HeroSearch({ tours, className = "" }: { tours: Tour[]; c
       }
       [...groups.entries()]
         .filter(([key, group]) => group.count > 1 && (group.nameMatches || (matchedPerGroup.get(key) ?? 0) >= 2))
-        .sort((a, b) => b[1].count - a[1].count)
+        .sort((a, b) => Number(b[1].nameMatches) - Number(a[1].nameMatches) || b[1].count - a[1].count)
         .slice(0, 2)
         .forEach(([key, group]) => {
           const destinationName = destinations.find((destination) => destination.slug === group.destination)?.name ?? group.destination;
