@@ -48,7 +48,7 @@ export default function Home({ initialTours }: { initialTours: Tour[] }) {
 // their own hero image from lib/destinations.ts.
 const homeDestinationCardImages: Partial<Record<string, string>> = {
   hurghada: "/images/owned/speedboat-action.jpg",
-  jeddah: "/images/owned/certified-diver-boat-trip-jeddah.jpg",
+  jeddah: "/images/owned/jeddah-bayada-family-snorkeling.jpg",
 };
 
 function HomeContent({ initialTours }: { initialTours: Tour[] }) {
