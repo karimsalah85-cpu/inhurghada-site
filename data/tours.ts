@@ -188,7 +188,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
 
     image: "/images/placeholders/sea-activity.svg",
 
-    price: "30",
+    price: "22.80",
 
     rating: "4.7",
 
@@ -205,7 +205,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
       "Bedouin tea",
       "Sunset experience",
     ],
-    participantPricing: { adults: 30, youth: 20 },
+    participantPricing: { adults: 22.80, youth: 20 },
     availableTimes: ["Afternoon - exact pickup confirmed by WhatsApp"],
     category: "Desert Safari",
     badge: "Most Popular",
@@ -214,7 +214,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     notes: ["The exact afternoon pickup time is confirmed by WhatsApp.", "Follow the guide's safety briefing throughout the quad-bike ride.", "Bring closed shoes, sunglasses and sun protection."],
     packageName: "Hurghada Desert Safari Adventure",
     packageDescription: "A five-hour desert experience combining a quad-bike ride, camel ride and Bedouin village visit.",
-    packagePrice: "30",
+    packagePrice: "22.80",
     packageLabel: "Per adult",
     whatToBring: ["Closed shoes", "Sunglasses", "Sun protection", "Cash for personal expenses"],
     seoTitle: "Hurghada Desert Safari with Quad Bike and Camel Ride",
@@ -628,13 +628,13 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     seoTitle: "Orange Bay and Magawish Private Speedboat Hurghada", metaDescription: "Book a private Orange Bay and Magawish speedboat trip from Hurghada with selectable boats, reef snorkeling, island time and optional catering."
   },
   {
-    slug: "royal-seascope-submarine", listingStatus: "active", title: "Hurghada Glass-Bottom Boat and Snorkeling Trip", image: "/images/owned/hurghada-glass-bottom-boat.jpg", price: "25", rating: "New", reviews: "New", location: "Hurghada Marina", duration: "2.5 Hours", category: "Family Sea Activity", badge: "New", bookingMode: "direct", priceUnit: "per person", departureMarina: "Hurghada Marina", participantPricing: { adults: 25, youth: 12.5, infants: 0 }, ageBands: { adults: "Adults — $25", children: "Children — 50% of the adult price ($12.50)", infants: "Infants — free" },
+    slug: "royal-seascope-submarine", listingStatus: "active", title: "Hurghada Glass-Bottom Boat and Snorkeling Trip", image: "/images/owned/hurghada-glass-bottom-boat.jpg", price: "17.10", rating: "New", reviews: "New", location: "Hurghada Marina", duration: "2.5 Hours", category: "Family Sea Activity", badge: "New", bookingMode: "direct", priceUnit: "per person", departureMarina: "Hurghada Marina", participantPricing: { adults: 17.10, youth: 12.5, infants: 0 }, ageBands: { adults: "Adults — $25", children: "Children — 50% of the adult price ($12.50)", infants: "Infants — free" },
     description: "Depart from Hurghada Marina for a 2.5-hour glass-bottom boat trip combining panoramic views of the Red Sea reef with a 30-minute snorkeling stop.",
     highlights: ["Four daily departures", "45 minutes exploring through panoramic glass windows", "30-minute snorkeling stop", "Family-friendly 2.5-hour trip", "Departs directly from Hurghada Marina"],
     included: ["2.5-hour glass-bottom boat trip", "45-minute glass-bottom reef viewing experience", "30-minute snorkeling stop"],
     notIncluded: ["Hotel pickup and drop-off — available for an extra charge", "Food and drinks", "Personal expenses"],
     notes: ["Meet at Hurghada Marina; the boat trip starts from the marina.", "Hotel transfer is not included and can be arranged for an extra charge.", "Child tickets cost 50% of the adult price. Infants travel free.", "Exact child and infant age eligibility is confirmed before booking.", "The route, snorkeling access and underwater visibility depend on weather, sea conditions and crew safety instructions."],
-    packageName: "Hurghada Glass-Bottom Boat Trip", packageDescription: "A 2.5-hour marina departure with panoramic glass-bottom reef viewing and a snorkeling stop.", packagePrice: "25", packageLabel: "Adult",
+    packageName: "Hurghada Glass-Bottom Boat Trip", packageDescription: "A 2.5-hour marina departure with panoramic glass-bottom reef viewing and a snorkeling stop.", packagePrice: "17.10", packageLabel: "Adult",
     availableTimes: ["09:00", "10:30", "12:30", "15:00"],
     itinerary: ["Meet at Hurghada Marina", "Boat journey to the viewing site (30 minutes)", "Explore the reef through the glass-bottom viewing area (45 minutes)", "Snorkeling stop (30 minutes)", "Return to Hurghada Marina"],
     notSuitableFor: ["Guests unable to use the stairs to the glass-bottom viewing area without assistance", "Guests who cannot enter or leave the water safely for the snorkeling stop"],
@@ -671,7 +671,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     packageName: "3-Day SSI Open Water Diver Course", packageDescription: "Three days of digital theory and practical training with two dives per day, equipment, professional instruction, lunches, drinks and hotel transfers. The separate €100 SSI training-materials and certification charge is excluded.", packagePrice: "342.20", packageLabel: "Student", availableTimes: ["08:00"], notSuitableFor: ["Children under 10 years", "Pregnant guests", "People with serious back problems", "People with heart problems", "Guests who cannot meet the medical and swimming requirements"], whatToBring: ["Passport or ID card", "Towel", "Camera", "Sunglasses", "Swimwear"], seoTitle: "3-Day SSI Open Water Diver Course in Hurghada", metaDescription: "Book a three-day SSI Open Water Diver course in Hurghada for €300, excluding the separate €100 training-materials and certification charge."
   },
   {
-    slug: "super-safari", title: "Hurghada Super Safari with Quad, Camel and Dinner", image: "/images/placeholders/sea-activity.svg", price: "18.40", rating: "New", reviews: "New", location: "Hurghada Desert", duration: "About 7 Hours", category: "Desert Safari", badge: "New", bookingMode: "direct", participantPricing: { adults: 18.40 },
+    slug: "super-safari", title: "Hurghada Super Safari with Quad, Camel and Dinner", image: "/images/placeholders/sea-activity.svg", price: "28.50", rating: "New", reviews: "New", location: "Hurghada Desert", duration: "About 7 Hours", category: "Desert Safari", badge: "New", bookingMode: "direct", participantPricing: { adults: 28.50 },
     description: "A longer desert program combining quad biking, a Bedouin village visit, camel riding, sunset views and an evening meal or show.", highlights: ["Quad bike ride", "Camel experience", "Bedouin village", "Sunset, dinner and entertainment"], included: ["Hotel transfer in the confirmed zone", "Safety briefing and quad ride", "Camel ride", "Bedouin tea", "Dinner when included in the selected package"], notIncluded: ["Scarf and goggles", "Transfers outside Hurghada until quoted", "Personal expenses"], notes: ["Drivers must meet the operator's minimum age and safety rules.", "Pregnant guests and people with serious back problems should not ride.", "Exact route, dinner and show inclusions are confirmed with the package.", "Pickup time changes seasonally."], availableTimes: ["Afternoon pickup confirmed by WhatsApp"], notSuitableFor: ["Pregnant guests", "People with serious back, neck or mobility conditions"], whatToBring: ["Closed shoes", "Sunglasses", "Scarf", "Warm layer in winter"], seoTitle: "Hurghada Super Safari with Quad Bike, Camel and Dinner", metaDescription: "Request a Hurghada super safari with quad biking, camel ride, Bedouin village, sunset and dinner."
   },
   {

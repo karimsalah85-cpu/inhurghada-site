@@ -9,8 +9,8 @@ const ages = { adults: "Adults (ages 11+)", children: "Youth (ages 4–10)", inf
 
 export const snorkelingBoatEnglish: Record<SnorkelingBoatSlug, Partial<Tour>> = {
   "dolphin-house-snorkeling": {
-    title: "Dolphin House Snorkeling Boat Trip from Hurghada", price: "25", packagePrice: "25", duration: "7 Hours", category: "Snorkeling", categoryPath: hierarchy,
-    participantPricing: { adults: 25, youth: 15, infants: 0 }, ageBands: ages,
+    title: "Dolphin House Snorkeling Boat Trip from Hurghada", price: "25.08", packagePrice: "25.08", duration: "7 Hours", category: "Snorkeling", categoryPath: hierarchy,
+    participantPricing: { adults: 25.08, youth: 15, infants: 0 }, ageBands: ages,
     description: "Cruise from Hurghada to the Dolphin House area, where wild dolphins are often seen in their Red Sea habitat. The seven-hour boat day includes two reef snorkeling sessions for beginners and experienced swimmers, with time to relax onboard between the coral gardens.",
     highlights: ["Wild-dolphin watching with an estimated 80% sighting chance", "Two coral-reef snorkeling stops", "Suitable for new and experienced snorkelers", "Lunch and drinks served onboard", "Hurghada hotel transfers"],
     included: ["Hotel pickup and drop-off in Hurghada", "Boat cruise to Dolphin House", "Two snorkeling stops", "Snorkeling equipment", "Lunch onboard", "Water and soft drinks", "Professional crew", "Life jackets and safety equipment"],
@@ -22,8 +22,8 @@ export const snorkelingBoatEnglish: Record<SnorkelingBoatSlug, Partial<Tour>> = 
     imageAlt: "Snorkelers exploring a Red Sea reef during the Dolphin House boat trip", galleryImageAlts: ["Dolphin House boat cruising from Hurghada", "Snorkeler above a colorful Red Sea coral reef", "Guests relaxing between Dolphin House snorkeling stops", "Clear Red Sea water near the Dolphin House area"],
   },
   "hula-hula-island-snorkeling": {
-    title: "Hula Hula Island Boat Trip and Snorkeling from Hurghada", price: "25", packagePrice: "25", duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,
-    participantPricing: { adults: 25, youth: 15, infants: 0 }, ageBands: ages,
+    title: "Hula Hula Island Boat Trip and Snorkeling from Hurghada", price: "25.08", packagePrice: "25.08", duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,
+    participantPricing: { adults: 25.08, youth: 15, infants: 0 }, ageBands: ages,
     description: "Sail across the Red Sea from Hurghada for an eight-hour escape combining reef snorkeling with an hour on Hula Hula Island. Swim in bright turquoise water, unwind on the sandy shore and enjoy a relaxed boat day with lunch and refreshments.",
     highlights: ["One hour on Hula Hula Island", "Two Red Sea snorkeling stops", "Beach time and swimming", "Lunch and drinks onboard", "Hotel pickup and return"],
     included: ["Hotel pickup and drop-off in Hurghada", "Boat cruise", "Hula Hula Island access", "Two snorkeling stops", "Snorkeling equipment", "Snorkeling guide", "Lunch onboard", "Water and soft drinks", "Professional crew", "Life jackets and safety equipment"],
@@ -48,8 +48,8 @@ export const snorkelingBoatEnglish: Record<SnorkelingBoatSlug, Partial<Tour>> = 
     imageAlt: "Boat approaching Mahmya Island's white-sand shore near Hurghada", galleryImageAlts: ["Mahmya Island boats on the Red Sea", "White-sand beach and turquoise water at Mahmya Island", "Coral reef visited on the Mahmya snorkeling trip", "Guests enjoying a quiet Mahmya Island beach"],
   },
   "orange-bay": {
-    title: "Orange Bay Island Snorkeling Boat Trip from Hurghada", price: "30", packagePrice: "30", originalPrice: undefined, duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,
-    participantPricing: { adults: 30, youth: 20, infants: 0 }, ageBands: ages, availableTimes: ["08:00"],
+    title: "Orange Bay Island Snorkeling Boat Trip from Hurghada", price: "25.08", packagePrice: "25.08", originalPrice: undefined, duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,
+    participantPricing: { adults: 25.08, youth: 20, infants: 0 }, ageBands: ages, availableTimes: ["08:00"],
     description: "Balance reef adventure with island relaxation on an eight-hour Orange Bay boat trip from Hurghada. Spend an hour on the sandy island, snorkel at two Red Sea coral sites and enjoy lunch and drinks while the crew takes care of the day at sea.",
     highlights: ["One hour on Orange Bay Island", "Two coral-reef snorkeling stops", "Turquoise-water swimming and beach time", "Lunch and beverages onboard", "Hurghada hotel pickup and return"],
     included: ["Hotel pickup and drop-off", "Boat cruise", "Orange Bay Island visit", "Two snorkeling stops", "Snorkeling equipment", "Lunch onboard", "Water, soft drinks, coffee, tea and cola", "Professional crew assistance", "Life jackets and safety equipment"],
@@ -61,8 +61,8 @@ export const snorkelingBoatEnglish: Record<SnorkelingBoatSlug, Partial<Tour>> = 
     imageAlt: "Orange Bay Island beach and turquoise Red Sea water near Hurghada", galleryImageAlts: ["Boat trip approaching Orange Bay Island", "Sandy Orange Bay beach beside clear water", "Snorkeling above a Red Sea reef near Orange Bay", "Guests relaxing during the Orange Bay island stop"],
   },
   "paradise-island": {
-    title: "Paradise Island Snorkeling Boat Trip from Hurghada", price: "30", packagePrice: "30", originalPrice: undefined, duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,
-    participantPricing: { adults: 30, youth: 15, infants: 0 }, ageBands: ages, availableTimes: ["08:00"],
+    title: "Paradise Island Snorkeling Boat Trip from Hurghada", price: "39.90", packagePrice: "39.90", originalPrice: undefined, duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,
+    participantPricing: { adults: 39.90, youth: 15, infants: 0 }, ageBands: ages, availableTimes: ["08:00"],
     description: "Leave Hurghada for an eight-hour Red Sea cruise shaped around calm island time and underwater discovery. Relax for an hour on Paradise Island, then explore two coral-reef locations before unwinding onboard with lunch and refreshments.",
     highlights: ["One hour on Paradise Island", "Two guided snorkeling stops", "White-sand beach and turquoise swimming water", "Lunch and refreshments onboard", "Hotel pickup and drop-off"],
     included: ["Hotel pickup and drop-off", "Boat cruise", "Paradise Island access", "Two snorkeling stops", "Snorkeling equipment", "Lunch onboard", "Water and soft drinks", "Coffee and tea", "Professional crew", "Safety equipment"],

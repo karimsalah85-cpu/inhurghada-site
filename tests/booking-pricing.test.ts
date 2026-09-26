@@ -7,7 +7,7 @@ const transfer = { type: "transfer" as const, tourName: "", adults: 0, youth: 0,
 
 describe("authoritative booking pricing", () => {
   it("calculates adult, youth and infant tour pricing", () => {
-    expect(calculateBookingPrice({ ...tour, adults: 2, youth: 1, infants: 1 }).data).toMatchObject({ amount: 80, guests: 4 });
+    expect(calculateBookingPrice({ ...tour, adults: 2, youth: 1, infants: 1 }).data).toMatchObject({ amount: 70.16, guests: 4 });
   });
 
   it("rejects the removed Orange Bay remote pickup supplement", () => {
@@ -71,7 +71,7 @@ describe("authoritative booking pricing", () => {
 
   it("uses the supplied Dolphin House adult, child and infant prices", () => {
     const result = calculateBookingPrice({ ...tour, tourName: "", tourSlug: "dolphin-house-snorkeling", adults: 2, youth: 1, infants: 1 });
-    expect(result.data).toMatchObject({ amount: 65, guests: 4 });
+    expect(result.data).toMatchObject({ amount: 65.16, guests: 4 });
   });
 
   it("prices multiple cart trips from the server-side catalog", () => {
@@ -85,7 +85,7 @@ describe("authoritative booking pricing", () => {
         { tourSlug: "full-day-diving", date: "2099-01-02", time: "08:00", adults: 1, youth: 0, infants: 0, extras: [] },
       ],
     });
-    expect(result.data).toMatchObject({ amount: 135, guests: 4, guestSummary: "2 trips · 4 participant places" });
+    expect(result.data).toMatchObject({ amount: 125.16, guests: 4, guestSummary: "2 trips · 4 participant places" });
     expect(result.data && "items" in result.data ? result.data.items : []).toHaveLength(2);
   });
 

@@ -21,7 +21,7 @@ describe("saved pricing snapshots", () => {
   it("records each category's actual unit price including free infants", () => {
     const data = calculateBookingPrice(input).data!;
     expect(data.pricingSnapshot.trips[0].lines).toEqual([
-      { kind: "adults", quantity: 2, unitPrice: 30, total: 60 },
+      { kind: "adults", quantity: 2, unitPrice: 25.08, total: 50.16 },
       { kind: "youth", quantity: 1, unitPrice: 20, total: 20 },
       { kind: "infants", quantity: 1, unitPrice: 0, total: 0 },
     ]);
