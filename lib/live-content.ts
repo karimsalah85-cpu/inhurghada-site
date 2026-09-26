@@ -34,6 +34,7 @@ export function codeControlledTourFields(fallback: Tour | undefined) {
     originalPrice: fallback.originalPrice,
     currency: fallback.currency,
     participantPricing: fallback.participantPricing,
+    groupPricing: fallback.groupPricing,
     entrancePricing: fallback.entrancePricing,
     additionalPackages: fallback.additionalPackages,
     pricingMode: fallback.pricingMode,

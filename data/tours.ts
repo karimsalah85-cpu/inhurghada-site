@@ -54,6 +54,8 @@ export type Tour = {
     youth?: number;
     infants?: number;
   };
+  /** Per-person rates by group size; overrides `participantPricing.adults` once a tier's traveler count is reached. */
+  groupPricing?: import("@/lib/group-pricing").GroupPriceTier[];
   availableTimes?: string[];
   category?: string;
   /** Structured catalog placement from broad category to specific trip type. */
@@ -186,7 +188,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
 
     image: "/images/placeholders/sea-activity.svg",
 
-    price: "30",
+    price: "22.80",
 
     rating: "4.7",
 
@@ -203,7 +205,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
       "Bedouin tea",
       "Sunset experience",
     ],
-    participantPricing: { adults: 30, youth: 20 },
+    participantPricing: { adults: 22.80, youth: 20 },
     availableTimes: ["Afternoon - exact pickup confirmed by WhatsApp"],
     category: "Desert Safari",
     badge: "Most Popular",
@@ -212,7 +214,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     notes: ["The exact afternoon pickup time is confirmed by WhatsApp.", "Follow the guide's safety briefing throughout the quad-bike ride.", "Bring closed shoes, sunglasses and sun protection."],
     packageName: "Hurghada Desert Safari Adventure",
     packageDescription: "A five-hour desert experience combining a quad-bike ride, camel ride and Bedouin village visit.",
-    packagePrice: "30",
+    packagePrice: "22.80",
     packageLabel: "Per adult",
     whatToBring: ["Closed shoes", "Sunglasses", "Sun protection", "Cash for personal expenses"],
     seoTitle: "Hurghada Desert Safari with Quad Bike and Camel Ride",
@@ -291,7 +293,10 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     slug: "luxor-private-day-trip",
     title: "Private Day Trip to Luxor from Hurghada",
     image: "/images/placeholders/sea-activity.svg",
-    price: "120",
+    // Supplier rates €150 / €130 / €100 per person (2 / 4 / 6–8 pax), converted at 1 EUR = 1.1399 USD.
+    price: "170.99",
+    groupPricing: [{ minTravelers: 1, pricePerPerson: 170.99 }, { minTravelers: 4, pricePerPerson: 148.19 }, { minTravelers: 6, pricePerPerson: 113.99 }],
+    pricingLockedToCode: true,
     rating: "5.0",
     reviews: "New",
     location: "Luxor, Egypt",
@@ -305,7 +310,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
       "See Queen Hatshepsut's dramatic terraced temple",
       "Stand before the Colossi of Memnon",
       "Explore the vast Karnak Temple complex",
-      "Family and group pricing available on request",
+      "Lower per-person group prices for 4 or more travelers",
       "Free cancellation up to 48 hours before the activity starts",
       "Runs every day with approximately 05:00 hotel pickup",
     ],
@@ -330,7 +335,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     ],
     notes: [
       "A valid ID or passport is required for the travel permit.",
-      "The advertised $120 is the starting adult price. Contact us for a family or private-group quotation.",
+      "Group prices per person: groups of 4–5 and groups of 6 or more pay a lower rate than 1–3 travelers. The booking form applies the right rate automatically.",
       "Pickup is planned for approximately 05:00 and confirmed by WhatsApp.",
       "Tutankhamun's tomb is not part of the standard three-tomb ticket and is paid separately if requested.",
       "All itinerary times are guidelines and may change with traffic, opening conditions and your private schedule.",
@@ -338,9 +343,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     ],
     packageName: "Private Luxor Day Trip from Hurghada",
     packageDescription: "A full private Luxor experience with transport, Egyptologist guide, main entrance fees, three Valley of the Kings tombs and lunch.",
-    packagePrice: "120",
-    packageLabel: "Starting price per adult",
-    participantPricing: { adults: 120 },
+    packageLabel: "Per adult · lower group rates from 4 travelers",
+    participantPricing: { adults: 170.99 },
     availableTimes: ["05:00"],
     seoTitle: "Private Luxor Day Trip from Hurghada | Valley of the Kings",
     metaDescription: "Book a private Luxor day trip from Hurghada with Valley of the Kings, Hatshepsut Temple, Colossi of Memnon, Karnak, guide, entrance fees and lunch.",
@@ -358,6 +362,124 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
       "13:30 – Included lunch at a local Egyptian restaurant; vegetarian meal available",
       "14:45 – Guided visit to Karnak Temple and its extraordinary ancient halls and monuments",
       "17:00 – Private air-conditioned return transfer to your hotel in Hurghada",
+    ],
+  },
+
+  {
+    slug: "luxor-two-day-trip",
+    title: "Two-Day Private Trip to Luxor from Hurghada",
+    image: "/images/placeholders/sea-activity.svg",
+    // Supplier rates €250 / €230 / €220 per person (2 / 4 / 6–8 pax), converted at 1 EUR = 1.1399 USD.
+    price: "284.98",
+    groupPricing: [{ minTravelers: 1, pricePerPerson: 284.98 }, { minTravelers: 4, pricePerPerson: 262.18 }, { minTravelers: 6, pricePerPerson: 250.78 }],
+    pricingLockedToCode: true,
+    rating: "New",
+    reviews: "New",
+    location: "Luxor, Egypt",
+    duration: "2 Days, 1 Night",
+    category: "Cultural Day Trip",
+    badge: "New",
+    bookingMode: "direct",
+    description: "See Luxor at an unhurried pace on a private two-day trip from Hurghada. Explore Karnak and Luxor Temple on the east bank, stay overnight in Luxor, then cross to the west bank for the Valley of the Kings, Hatshepsut Temple and the Colossi of Memnon with your own vehicle and Egyptologist guide.",
+    highlights: [
+      "Private vehicle and Egyptologist guide on both days",
+      "Overnight stay in Luxor instead of one rushed day",
+      "Karnak Temple and Luxor Temple on the east bank",
+      "Valley of the Kings, Hatshepsut Temple and the Colossi of Memnon on the west bank",
+      "Lower per-person group prices for 4 or more travelers",
+      "Free cancellation up to 48 hours before the trip starts",
+    ],
+    included: [
+      "Private hotel pickup and return in Hurghada",
+      "Private air-conditioned vehicle on both days",
+      "One night's hotel accommodation in Luxor",
+      "Private English-speaking Egyptologist guide",
+      "Entrance fees for the sites in the itinerary",
+      "Mineral water",
+      "Required travel permits",
+    ],
+    notIncluded: [
+      "Tutankhamun's tomb ticket",
+      "Meals and drinks unless stated in your booking confirmation",
+      "Optional felucca ride or hot-air balloon flight",
+      "Tipping and personal expenses",
+    ],
+    notes: [
+      "A valid ID or passport is required for the travel permit and hotel check-in.",
+      "Group prices per person: groups of 4–5 and groups of 6 or more pay a lower rate than 1–3 travelers. The booking form applies the right rate automatically.",
+      "Pickup is planned for approximately 05:00 on day one. We confirm it by WhatsApp together with your Luxor hotel details.",
+      "All itinerary times are guidelines and may change with traffic, opening conditions and your private schedule.",
+      "Free cancellation is available up to 48 hours before the trip starts.",
+    ],
+    packageName: "Two-Day Private Luxor Trip",
+    packageDescription: "Two private guided days in Luxor with transport from Hurghada, one hotel night, an Egyptologist guide and entrance fees for the itinerary.",
+    packageLabel: "Per adult · lower group rates from 4 travelers",
+    participantPricing: { adults: 284.98 },
+    availableTimes: ["05:00"],
+    seoTitle: "2-Day Private Luxor Trip from Hurghada | Overnight Stay",
+    metaDescription: "Private two-day Luxor trip from Hurghada with a hotel night, Egyptologist guide, Karnak, Luxor Temple, Valley of the Kings and Hatshepsut Temple.",
+    faqs: [
+      { question: "Where do we stay overnight?", answer: "You stay one night in a Luxor hotel. We confirm the hotel by WhatsApp before the trip." },
+      { question: "Are meals included?", answer: "Meals are included only when your booking confirmation states them. Ask us on WhatsApp if you would like lunch or dinner arranged." },
+      { question: "Can I add the hot-air balloon flight?", answer: "Yes. The Luxor hot-air balloon ride is booked separately. Ask us on WhatsApp whether it fits your trip dates." },
+    ],
+    itinerary: [
+      "Day 1, 05:00 – Private pickup from your Hurghada hotel and drive to Luxor, with a comfort stop en route",
+      "Day 1, late morning – Guided visit to Karnak Temple",
+      "Day 1, afternoon – Guided visit to Luxor Temple, then check in to your Luxor hotel",
+      "Day 2, morning – Cross to the west bank and visit three decorated royal tombs in the Valley of the Kings",
+      "Day 2, midday – Hatshepsut Temple and the Colossi of Memnon",
+      "Day 2, afternoon – Private air-conditioned return transfer to your hotel in Hurghada",
+    ],
+  },
+
+  {
+    slug: "luxor-hot-air-balloon",
+    title: "Luxor Hot-Air Balloon Ride with Transfer",
+    image: "/images/placeholders/sea-activity.svg",
+    // Supplier rate €75 per person including transfer, converted at 1 EUR = 1.1399 USD.
+    price: "85.49",
+    pricingLockedToCode: true,
+    rating: "New",
+    reviews: "New",
+    location: "Luxor, Egypt",
+    duration: "Early Morning",
+    category: "Cultural Day Trip",
+    badge: "New",
+    bookingMode: "direct",
+    priceUnit: "per person",
+    description: "Float above Luxor's west bank at sunrise on a hot-air balloon flight, with views over the Nile, green fields and ancient temples. Transfer is included, and we confirm the exact pickup time by WhatsApp.",
+    highlights: [
+      "Sunrise hot-air balloon flight over Luxor's west bank",
+      "Views of the Nile, farmland and ancient temples",
+      "Transfer included",
+      "Combine it with a Luxor day trip or two-day trip",
+    ],
+    included: [
+      "Hot-air balloon flight",
+      "Transfer as confirmed in your booking",
+      "Safety briefing by the balloon crew",
+    ],
+    notIncluded: [
+      "Entrance tickets to Luxor sites",
+      "Meals and drinks",
+      "Tipping and personal expenses",
+    ],
+    notSuitableFor: ["Pregnant travelers", "Travelers with limited mobility"],
+    notes: [
+      "Balloons launch around sunrise, so pickup is very early. We confirm the exact time by WhatsApp.",
+      "Flights depend on wind and weather, and the operator can cancel them for safety. If that happens, we contact you by WhatsApp to arrange another date.",
+      "Free cancellation is available up to 48 hours before the flight.",
+    ],
+    packageName: "Luxor Sunrise Balloon Flight",
+    packageDescription: "A sunrise hot-air balloon flight over Luxor's west bank with transfer included.",
+    packageLabel: "Per person",
+    participantPricing: { adults: 85.49 },
+    seoTitle: "Luxor Hot-Air Balloon Ride with Transfer | Sunrise Flight",
+    metaDescription: "Book a sunrise hot-air balloon ride over Luxor's west bank with transfer included. See the Nile, temples and fields; pickup confirmed by WhatsApp.",
+    faqs: [
+      { question: "How early does the balloon flight start?", answer: "Balloons launch around sunrise, so pickup is very early. We confirm the exact pickup time by WhatsApp." },
+      { question: "What happens if the weather is bad?", answer: "The operator can cancel flights for wind or weather safety. If that happens, we contact you by WhatsApp to arrange another date." },
     ],
   },
 
@@ -506,13 +628,13 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     seoTitle: "Orange Bay and Magawish Private Speedboat Hurghada", metaDescription: "Book a private Orange Bay and Magawish speedboat trip from Hurghada with selectable boats, reef snorkeling, island time and optional catering."
   },
   {
-    slug: "royal-seascope-submarine", listingStatus: "active", title: "Hurghada Glass-Bottom Boat and Snorkeling Trip", image: "/images/owned/hurghada-glass-bottom-boat.jpg", price: "25", rating: "New", reviews: "New", location: "Hurghada Marina", duration: "2.5 Hours", category: "Family Sea Activity", badge: "New", bookingMode: "direct", priceUnit: "per person", departureMarina: "Hurghada Marina", participantPricing: { adults: 25, youth: 12.5, infants: 0 }, ageBands: { adults: "Adults — $25", children: "Children — 50% of the adult price ($12.50)", infants: "Infants — free" },
+    slug: "royal-seascope-submarine", listingStatus: "active", title: "Hurghada Glass-Bottom Boat and Snorkeling Trip", image: "/images/owned/hurghada-glass-bottom-boat.jpg", price: "17.10", rating: "New", reviews: "New", location: "Hurghada Marina", duration: "2.5 Hours", category: "Family Sea Activity", badge: "New", bookingMode: "direct", priceUnit: "per person", departureMarina: "Hurghada Marina", participantPricing: { adults: 17.10, youth: 12.5, infants: 0 }, ageBands: { adults: "Adults — $25", children: "Children — 50% of the adult price ($12.50)", infants: "Infants — free" },
     description: "Depart from Hurghada Marina for a 2.5-hour glass-bottom boat trip combining panoramic views of the Red Sea reef with a 30-minute snorkeling stop.",
     highlights: ["Four daily departures", "45 minutes exploring through panoramic glass windows", "30-minute snorkeling stop", "Family-friendly 2.5-hour trip", "Departs directly from Hurghada Marina"],
     included: ["2.5-hour glass-bottom boat trip", "45-minute glass-bottom reef viewing experience", "30-minute snorkeling stop"],
     notIncluded: ["Hotel pickup and drop-off — available for an extra charge", "Food and drinks", "Personal expenses"],
     notes: ["Meet at Hurghada Marina; the boat trip starts from the marina.", "Hotel transfer is not included and can be arranged for an extra charge.", "Child tickets cost 50% of the adult price. Infants travel free.", "Exact child and infant age eligibility is confirmed before booking.", "The route, snorkeling access and underwater visibility depend on weather, sea conditions and crew safety instructions."],
-    packageName: "Hurghada Glass-Bottom Boat Trip", packageDescription: "A 2.5-hour marina departure with panoramic glass-bottom reef viewing and a snorkeling stop.", packagePrice: "25", packageLabel: "Adult",
+    packageName: "Hurghada Glass-Bottom Boat Trip", packageDescription: "A 2.5-hour marina departure with panoramic glass-bottom reef viewing and a snorkeling stop.", packagePrice: "17.10", packageLabel: "Adult",
     availableTimes: ["09:00", "10:30", "12:30", "15:00"],
     itinerary: ["Meet at Hurghada Marina", "Boat journey to the viewing site (30 minutes)", "Explore the reef through the glass-bottom viewing area (45 minutes)", "Snorkeling stop (30 minutes)", "Return to Hurghada Marina"],
     notSuitableFor: ["Guests unable to use the stairs to the glass-bottom viewing area without assistance", "Guests who cannot enter or leave the water safely for the snorkeling stop"],
@@ -549,7 +671,7 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     packageName: "3-Day SSI Open Water Diver Course", packageDescription: "Three days of digital theory and practical training with two dives per day, equipment, professional instruction, lunches, drinks and hotel transfers. The separate €100 SSI training-materials and certification charge is excluded.", packagePrice: "342.20", packageLabel: "Student", availableTimes: ["08:00"], notSuitableFor: ["Children under 10 years", "Pregnant guests", "People with serious back problems", "People with heart problems", "Guests who cannot meet the medical and swimming requirements"], whatToBring: ["Passport or ID card", "Towel", "Camera", "Sunglasses", "Swimwear"], seoTitle: "3-Day SSI Open Water Diver Course in Hurghada", metaDescription: "Book a three-day SSI Open Water Diver course in Hurghada for €300, excluding the separate €100 training-materials and certification charge."
   },
   {
-    slug: "super-safari", title: "Hurghada Super Safari with Quad, Camel and Dinner", image: "/images/placeholders/sea-activity.svg", price: "18.40", rating: "New", reviews: "New", location: "Hurghada Desert", duration: "About 7 Hours", category: "Desert Safari", badge: "New", bookingMode: "direct", participantPricing: { adults: 18.40 },
+    slug: "super-safari", title: "Hurghada Super Safari with Quad, Camel and Dinner", image: "/images/placeholders/sea-activity.svg", price: "28.50", rating: "New", reviews: "New", location: "Hurghada Desert", duration: "About 7 Hours", category: "Desert Safari", badge: "New", bookingMode: "direct", participantPricing: { adults: 28.50 },
     description: "A longer desert program combining quad biking, a Bedouin village visit, camel riding, sunset views and an evening meal or show.", highlights: ["Quad bike ride", "Camel experience", "Bedouin village", "Sunset, dinner and entertainment"], included: ["Hotel transfer in the confirmed zone", "Safety briefing and quad ride", "Camel ride", "Bedouin tea", "Dinner when included in the selected package"], notIncluded: ["Scarf and goggles", "Transfers outside Hurghada until quoted", "Personal expenses"], notes: ["Drivers must meet the operator's minimum age and safety rules.", "Pregnant guests and people with serious back problems should not ride.", "Exact route, dinner and show inclusions are confirmed with the package.", "Pickup time changes seasonally."], availableTimes: ["Afternoon pickup confirmed by WhatsApp"], notSuitableFor: ["Pregnant guests", "People with serious back, neck or mobility conditions"], whatToBring: ["Closed shoes", "Sunglasses", "Scarf", "Warm layer in winter"], seoTitle: "Hurghada Super Safari with Quad Bike, Camel and Dinner", metaDescription: "Request a Hurghada super safari with quad biking, camel ride, Bedouin village, sunset and dinner."
   },
   {
@@ -581,7 +703,9 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     packageName: "Sahl Hasheesh Desert and Sea Horse Ride", packageDescription: "Approximately two hours of guided desert and shoreline horse riding with an optional shallow-water section when safe.", packagePrice: "20.99", packageLabel: "Rider", availableTimes: ["Morning departure confirmed by WhatsApp", "Sunset departure confirmed by WhatsApp"], notSuitableFor: ["Pregnant guests", "People with serious back, neck or mobility conditions", "Guests outside the stable's confirmed age or weight limits"], whatToBring: ["Long trousers", "Closed shoes", "Sunscreen", "Sunglasses", "Swimwear and towel if selecting the sea option"], seoTitle: "Sahl Hasheesh Desert and Sea Horse Ride", metaDescription: "Book a guided Sahl Hasheesh desert and Red Sea horse ride with optional shallow-water riding, priced 20% below the verified comparison fare."
   },
   {
-    slug: "cairo-giza-day-trip-bus", title: "Cairo and Giza Day Trip by Bus", image: "/images/placeholders/sea-activity.svg", price: "60.80", rating: "New", reviews: "New", location: "Cairo and Giza, Egypt", duration: "Full Day", category: "Cultural Day Trip", badge: "New", bookingMode: "direct", participantPricing: { adults: 60.80 },
+    slug: "cairo-giza-day-trip-bus", title: "Cairo and Giza Day Trip by Bus", image: "/images/placeholders/sea-activity.svg", price: "182.38", rating: "New", reviews: "New", location: "Cairo and Giza, Egypt", duration: "Full Day", category: "Cultural Day Trip", badge: "New", bookingMode: "direct", participantPricing: { adults: 182.38 },
+    // Supplier rates €160 / €140 / €130 per person (2 / 4 / 6–8 pax), converted at 1 EUR = 1.1399 USD.
+    groupPricing: [{ minTravelers: 1, pricePerPerson: 182.38 }, { minTravelers: 4, pricePerPerson: 159.59 }, { minTravelers: 6, pricePerPerson: 148.19 }], pricingLockedToCode: true,
     description: "Travel overland from Hurghada for a guided day covering the Giza pyramid complex and major Cairo highlights selected in the confirmed itinerary.", highlights: ["Giza Pyramids and Sphinx", "Egyptologist guide", "Cairo museum visit according to package", "Lunch and air-conditioned transport"], included: ["Round-trip transport from the confirmed pickup zone", "Professional guide", "Main entrance tickets stated in the quotation", "Lunch", "Required travel permits"], notIncluded: ["Entry inside pyramids unless quoted", "Drinks", "Optional Nile cruise", "Personal expenses"], notes: ["A passport or valid ID is required in advance for permits.", "This is a very long day with an early pickup and extensive driving.", "Museum choice and entrance tickets must match the final confirmation.", "Free cancellation is available up to 48 hours before the trip."], availableTimes: ["Very early pickup confirmed by WhatsApp"], notSuitableFor: ["Guests unable to manage a very long travel day"], whatToBring: ["Passport or photo ID", "Comfortable shoes", "Sun protection", "Breakfast or snacks"], seoTitle: "Cairo and Giza Day Trip by Bus from Hurghada", metaDescription: "Request a guided Cairo and Giza day trip by bus from Hurghada with pyramids, Sphinx, museum, lunch and transport."
   },
   {

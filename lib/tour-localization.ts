@@ -1,6 +1,7 @@
 import type { Tour } from "@/data/tours";
 import { localizeMarsaAlamTour } from "@/data/marsa-alam-tours-i18n";
 import { localizeElGounaTour } from "@/data/el-gouna-tours-i18n";
+import { luxorTourTranslations } from "@/data/luxor-tours-i18n";
 import type { Locale } from "@/lib/i18n";
 import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
@@ -310,6 +311,8 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
   },
 };
 
+Object.assign(arabicTourOverrides, luxorTourTranslations.ar);
+
 export function localizeTourArabic(tour: Tour): Tour {
   return { ...tour, ...arabicTourOverrides[tour.slug] };
 }
@@ -344,11 +347,11 @@ const germanTourOverrides: Record<string, Partial<Tour>> = {
   "luxor-private-day-trip": {
     title: "Privater Tagesausflug nach Luxor ab Hurghada", location: "Luxor, Ägypten", duration: "Etwa 1 Tag", category: "Kultureller Tagesausflug",
     description: "Entdecke Luxor privat ab Hurghada mit klimatisiertem Fahrzeug und eigenem Ägyptologen. Besuche das Tal der Könige, den Hatschepsut-Tempel, die Memnonkolosse und Karnak; Hotelabholung, Eintritt und Mittagessen sind inklusive.",
-    highlights: ["Privates Fahrzeug und eigener Reiseführer", "Drei Königsgräber im Tal der Könige", "Hatschepsut-Tempel und Memnonkolosse", "Karnak-Tempel", "Sonderpreis für Familien und Gruppen", "Kostenlose Stornierung bis 48 Stunden vorher"],
+    highlights: ["Privates Fahrzeug und eigener Reiseführer", "Drei Königsgräber im Tal der Könige", "Hatschepsut-Tempel und Memnonkolosse", "Karnak-Tempel", "Günstigere Gruppenpreise ab 4 Reisenden", "Kostenlose Stornierung bis 48 Stunden vorher"],
     included: ["Private Abholung und Rückfahrt", "Klimatisiertes Fahrzeug", "Drei Standardgräber im Tal der Könige", "Hatschepsut-Tempel, Memnonkolosse und Karnak", "Eintrittsgelder", "Englischsprachiger Ägyptologe", "Mittagessen mit vegetarischer Option", "Mineralwasser und Genehmigungen"],
     notIncluded: ["Grab Tutanchamuns – etwa 30 $ Aufpreis", "Deutsch- und weitere fremdsprachige Reiseführer – Aufpreis", "Getränke", "Optionale Felukenfahrt", "Trinkgeld"],
-    notes: ["Ein gültiger Ausweis oder Reisepass ist erforderlich.", "120 $ ist der Startpreis pro Erwachsenen; Familien- und Gruppenpreis auf Anfrage.", "Abholung etwa um 05:00 Uhr, Bestätigung per WhatsApp.", "Alle Zeiten sind Richtwerte."],
-    packageName: "Privater Luxor-Tagesausflug", packageDescription: "Privater Luxor-Tag mit Transport, Ägyptologen, wichtigen Eintrittsgeldern, drei Königsgräbern und Mittagessen.", packageLabel: "Startpreis pro Erwachsenen",
+    notes: ["Ein gültiger Ausweis oder Reisepass ist erforderlich.", "Gruppenpreise pro Person: Ab 4 und ab 6 Reisenden sinkt der Preis; das Buchungsformular berechnet ihn automatisch.", "Abholung etwa um 05:00 Uhr, Bestätigung per WhatsApp.", "Alle Zeiten sind Richtwerte."],
+    packageName: "Privater Luxor-Tagesausflug", packageDescription: "Privater Luxor-Tag mit Transport, Ägyptologen, wichtigen Eintrittsgeldern, drei Königsgräbern und Mittagessen.", packageLabel: "Pro Erwachsenen · günstiger ab 4 Reisenden",
     itinerary: ["05:00 – Private Hotelabholung", "09:30 – Tal der Könige", "11:30 – Memnonkolosse", "12:30 – Hatschepsut-Tempel", "13:30 – Mittagessen", "14:45 – Karnak-Tempel", "17:00 – Rückfahrt"],
   },
   "mahmya-island": {
@@ -643,6 +646,8 @@ export function germanTourTitle(slug: string, fallback: string) {
   return germanTourOverrides[slug]?.title || fallback;
 }
 
+Object.assign(germanTourOverrides, luxorTourTranslations.de);
+
 export function localizeTourGerman(tour: Tour): Tour {
   return { ...tour, ...germanTourOverrides[tour.slug] };
 }
@@ -677,11 +682,11 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
   "luxor-private-day-trip": {
     title: "Индивидуальная поездка в Луксор из Хургады", location: "Луксор, Египет", duration: "Около 1 дня", category: "Историческая экскурсия",
     description: "Посетите Луксор на личном автомобиле с египтологом: Долина царей, храм Хатшепсут, Колоссы Мемнона и Карнакский храм, включая трансфер и обед.",
-    highlights: ["Личный автомобиль и гид", "Три гробницы в Долине царей", "Храм Хатшепсут и Колоссы Мемнона", "Карнакский храм", "Цена для семей и групп", "Бесплатная отмена за 48 часов"],
+    highlights: ["Личный автомобиль и гид", "Три гробницы в Долине царей", "Храм Хатшепсут и Колоссы Мемнона", "Карнакский храм", "Сниженная цена для групп от 4 человек", "Бесплатная отмена за 48 часов"],
     included: ["Индивидуальный трансфер", "Автомобиль с кондиционером", "Три стандартные гробницы", "Основные достопримечательности", "Входные билеты", "Англоязычный египтолог", "Обед и вода", "Разрешения"],
     notIncluded: ["Гробница Тутанхамона — около 30 $", "Гид на русском и других языках — доплата", "Напитки", "Прогулка на фелюге", "Чаевые"],
-    notes: ["Необходим действующий паспорт или удостоверение личности.", "120 $ — начальная цена за взрослого; цена для семьи или группы по запросу.", "Трансфер около 05:00, подтверждение через WhatsApp.", "Время в программе ориентировочное."],
-    packageName: "Индивидуальная экскурсия в Луксор", packageDescription: "Личный транспорт, египтолог, основные билеты, три гробницы и обед.", packageLabel: "Начальная цена за взрослого",
+    notes: ["Необходим действующий паспорт или удостоверение личности.", "Групповые цены за человека: для групп от 4 и от 6 человек цена ниже; форма бронирования рассчитывает её автоматически.", "Трансфер около 05:00, подтверждение через WhatsApp.", "Время в программе ориентировочное."],
+    packageName: "Индивидуальная экскурсия в Луксор", packageDescription: "Личный транспорт, египтолог, основные билеты, три гробницы и обед.", packageLabel: "За взрослого · дешевле для групп от 4 человек",
   },
   "mahmya-island": {
     title: "Морская прогулка на остров Махмея", location: "Хургада, Египет", duration: "Целый день", category: "Островная экскурсия",
@@ -972,6 +977,8 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
   },
 };
 
+Object.assign(russianTourOverrides, luxorTourTranslations.ru);
+
 export function localizeTourRussian(tour: Tour): Tour {
   return { ...tour, ...russianTourOverrides[tour.slug] };
 }
@@ -1008,8 +1015,8 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
     highlights: ["私人车辆和专属导游", "帝王谷三座王陵", "哈特谢普苏特神庙", "门农巨像", "卡纳克神庙", "含午餐和主要门票"],
     included: ["赫尔格达酒店私人接送", "私人空调车辆", "帝王谷及三座普通王陵门票", "主要景点门票", "英语埃及学导游", "当地餐厅午餐", "矿泉水和旅行许可"],
     notIncluded: ["图坦卡蒙墓门票（约 30 美元）", "其他语种导游附加费", "午餐饮料", "自选帆船体验", "小费和个人消费"],
-    notes: ["办理旅行许可需有效身份证件或护照。", "120 美元为成人起价，家庭或私人团体请咨询报价。", "约 05:00 接送，准确时间通过 WhatsApp 确认。", "活动开始前 48 小时可免费取消。"],
-    packageName: "卢克索私人一日游", packageDescription: "包含私人交通、埃及学导游、主要门票、三座王陵和午餐。", packageLabel: "成人起价", availableTimes: ["05:00"],
+    notes: ["办理旅行许可需有效身份证件或护照。", "团体每人价格：4 人及以上、6 人及以上享受更低价格，预订表单会自动计算。", "约 05:00 接送，准确时间通过 WhatsApp 确认。", "活动开始前 48 小时可免费取消。"],
+    packageName: "卢克索私人一日游", packageDescription: "包含私人交通、埃及学导游、主要门票、三座王陵和午餐。", packageLabel: "每位成人 · 4 人及以上更优惠", availableTimes: ["05:00"],
     itinerary: ["05:00 从赫尔格达酒店私人接送", "参观帝王谷三座王陵", "参观门农巨像和哈特谢普苏特神庙", "享用当地午餐", "导览卡纳克神庙", "乘私人空调车辆返回酒店"],
   },
   "mahmya-island": {
@@ -1290,6 +1297,8 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
   },
 };
 
+Object.assign(chineseTourOverrides, luxorTourTranslations.zh);
+
 export function localizeTourChinese(tour: Tour): Tour {
   return { ...tour, ...chineseTourOverrides[tour.slug] };
 }
@@ -1327,8 +1336,8 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     highlights: ["Prywatny samochód i przewodnik", "Trzy grobowce w Dolinie Królów", "Świątynia Hatszepsut", "Kolosy Memnona", "Kompleks świątyń Karnak", "Lunch i główne bilety w cenie"],
     included: ["Prywatny odbiór i powrót z Hurghady", "Klimatyzowany samochód", "Wstęp do Doliny Królów z trzema standardowymi grobowcami", "Świątynia Hatszepsut, Kolosy Memnona i Karnak", "Bilety wstępu", "Anglojęzyczny egiptolog", "Lunch z opcją wegetariańską", "Woda mineralna i pozwolenia"],
     notIncluded: ["Grobowiec Tutanchamona — około 30 USD", "Przewodnik w innym języku — dopłata", "Napoje do lunchu", "Opcjonalny rejs feluką", "Napiwki i wydatki osobiste"],
-    notes: ["Do pozwolenia na podróż potrzebny jest ważny dokument lub paszport.", "Cena 120 USD to cena wyjściowa dla osoby dorosłej; zapytaj o ofertę rodzinną lub grupową.", "Odbiór planowany jest około 05:00 i potwierdzany przez WhatsApp.", "Grobowiec Tutanchamona wymaga osobnego biletu."],
-    packageName: "Prywatna wycieczka do Luksoru", packageDescription: "Prywatny transport, egiptolog, główne bilety, trzy grobowce w Dolinie Królów i lunch.", packageLabel: "Cena wyjściowa dla osoby dorosłej", availableTimes: ["05:00"],
+    notes: ["Do pozwolenia na podróż potrzebny jest ważny dokument lub paszport.", "Ceny grupowe za osobę: od 4 i od 6 uczestników cena jest niższa; formularz rezerwacji nalicza ją automatycznie.", "Odbiór planowany jest około 05:00 i potwierdzany przez WhatsApp.", "Grobowiec Tutanchamona wymaga osobnego biletu."],
+    packageName: "Prywatna wycieczka do Luksoru", packageDescription: "Prywatny transport, egiptolog, główne bilety, trzy grobowce w Dolinie Królów i lunch.", packageLabel: "Za osobę dorosłą · taniej od 4 uczestników", availableTimes: ["05:00"],
   },
   "mahmya-island": {
     title: "Rejs na wyspę Mahmya", location: "Hurghada, Egipt", duration: "Cały dzień",
@@ -1559,6 +1568,8 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     metaDescription: "Zarezerwuj codzienną wycieczkę snorkelingową Bayada od Al-Haddad Scuba z Dżuddy: rotacyjnie wybierane rafy Morza Czerwonego z profesjonalnym instruktorem oraz sprzęt, przekąski i napoje, teraz 104,50 USD od osoby (wcześniej 110 USD).",
   },
 };
+
+Object.assign(polishTourOverrides, luxorTourTranslations.pl);
 
 export function localizeTourPolish(tour: Tour): Tour {
   return { ...tour, ...polishTourOverrides[tour.slug] };
