@@ -10,6 +10,8 @@ const tourAliases: Record<string, string[]> = {
   "quad-safari-morning": ["desert safari quad morning wüste morgens", "пустыня сафари квадроцикл утро", "pustynia safari quad rano", "صحراء سفاري كواد صباح", "沙漠 四轮摩托 上午"],
   "quad-safari-sunset": ["desert safari quad sunset wüste sonnenuntergang", "пустыня сафари квадроцикл закат", "pustynia safari quad zachód słońca", "صحراء سفاري كواد غروب", "沙漠 四轮摩托 日落"],
   "luxor-private-day-trip": ["luxor history temple cultural historical geschichte tempel", "луксор история храм", "luksor historia świątynia", "الأقصر تاريخ معبد", "卢克索 历史 神庙"],
+  "luxor-two-day-trip": ["luxor two day overnight 2 days history temple cultural zwei tage übernachtung", "луксор два дня ночёвка история храм", "luksor dwa dni nocleg historia świątynia", "الأقصر يومين مبيت تاريخ معبد", "卢克索 两日 住宿 历史 神庙"],
+  "luxor-hot-air-balloon": ["luxor hot air balloon sunrise flight ballon ballonfahrt heißluftballon", "луксор воздушный шар полёт рассвет", "luksor balon lot wschód słońca", "الأقصر منطاد شروق", "卢克索 热气球 日出"],
   "hurghada-airport-transfer": ["airport hotel transfer taxi flughafen", "аэропорт отель трансфер такси", "lotnisko hotel transfer", "مطار فندق انتقال", "机场 酒店 接送"],
   "senzo-transfer": ["senzo mall transfer taxi shopping einkaufszentrum", "сензо молл трансфер такси", "senzo centrum handlowe transfer", "سنزو مول انتقال", "森佐 商场 接送"],
 };

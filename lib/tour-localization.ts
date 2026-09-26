@@ -1,6 +1,7 @@
 import type { Tour } from "@/data/tours";
 import { localizeMarsaAlamTour } from "@/data/marsa-alam-tours-i18n";
 import { localizeElGounaTour } from "@/data/el-gouna-tours-i18n";
+import { luxorTourTranslations } from "@/data/luxor-tours-i18n";
 import type { Locale } from "@/lib/i18n";
 import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
@@ -309,6 +310,8 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
     metaDescription: "احجز رحلة سنوركلينج بياضة اليومية من الحداد سكوبا في جدة: مجموعة متغيرة من مواقع الشعاب في البحر الأحمر مع مدرب محترف ومعدات ووجبات خفيفة ومشروبات، الآن 104.50 دولارًا أمريكيًا للشخص (بدلاً من 110).",
   },
 };
+
+Object.assign(arabicTourOverrides, luxorTourTranslations.ar);
 
 export function localizeTourArabic(tour: Tour): Tour {
   return { ...tour, ...arabicTourOverrides[tour.slug] };
@@ -643,6 +646,8 @@ export function germanTourTitle(slug: string, fallback: string) {
   return germanTourOverrides[slug]?.title || fallback;
 }
 
+Object.assign(germanTourOverrides, luxorTourTranslations.de);
+
 export function localizeTourGerman(tour: Tour): Tour {
   return { ...tour, ...germanTourOverrides[tour.slug] };
 }
@@ -972,6 +977,8 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
   },
 };
 
+Object.assign(russianTourOverrides, luxorTourTranslations.ru);
+
 export function localizeTourRussian(tour: Tour): Tour {
   return { ...tour, ...russianTourOverrides[tour.slug] };
 }
@@ -1290,6 +1297,8 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
   },
 };
 
+Object.assign(chineseTourOverrides, luxorTourTranslations.zh);
+
 export function localizeTourChinese(tour: Tour): Tour {
   return { ...tour, ...chineseTourOverrides[tour.slug] };
 }
@@ -1559,6 +1568,8 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
     metaDescription: "Zarezerwuj codzienną wycieczkę snorkelingową Bayada od Al-Haddad Scuba z Dżuddy: rotacyjnie wybierane rafy Morza Czerwonego z profesjonalnym instruktorem oraz sprzęt, przekąski i napoje, teraz 104,50 USD od osoby (wcześniej 110 USD).",
   },
 };
+
+Object.assign(polishTourOverrides, luxorTourTranslations.pl);
 
 export function localizeTourPolish(tour: Tour): Tour {
   return { ...tour, ...polishTourOverrides[tour.slug] };

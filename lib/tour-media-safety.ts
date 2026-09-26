@@ -97,7 +97,7 @@ const ownedMedia: Record<string, SafeMedia> = {
   },
   mahmya: { image: "/images/owned/mahmya-island-boats-owner.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
   luxor: {
-    image: "/images/owned/luxor-branded.jpg", alt: localizedAlt("Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall"), focal: { x: 0.5, y: 0.42 },
+    image: "/images/owned/luxor-branded.jpg", alt: { en: "Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall", ar: "تصميم Daily Red Sea للأقصر يظهر جدار معبد مصري قديم", de: "Daily-Red-Sea-Luxor-Grafik mit einer altägyptischen Tempelwand", ru: "Иллюстрация Daily Red Sea о Луксоре со стеной древнеегипетского храма", pl: "Grafika Daily Red Sea o Luksorze ze ścianą starożytnej egipskiej świątyni", zh: "Daily Red Sea 卢克索主题图，展示古埃及神庙墙壁" }, focal: { x: 0.5, y: 0.42 },
     gallery: ["/images/owned/luxor-temple-facade.jpg", "/images/owned/luxor-temple-reliefs.jpg", "/images/owned/luxor-temple-columns.jpg", "/images/owned/luxor-hieroglyphs.jpg"],
     galleryAlts: { en: ["Ancient Egyptian temple facade with carved figures", "Temple wall reliefs beside the Nile", "Hieroglyph-covered columns at an ancient Egyptian temple", "Close view of carved figures and hieroglyphs on a temple wall"], ar: [], de: [], ru: [], pl: [], zh: [] },
   },
@@ -199,6 +199,8 @@ const mediaBySlug: Record<string, SafeMedia> = {
   "padi-open-water-course": ownedMedia.diveTraining,
   "ssi-open-water-course": ownedMedia.diveTraining,
   "luxor-private-day-trip": ownedMedia.luxor,
+  "luxor-two-day-trip": ownedMedia.luxor,
+  "luxor-hot-air-balloon": ownedMedia.luxor,
   "full-day-snorkeling": ownedMedia.snorkeling,
 };
 
