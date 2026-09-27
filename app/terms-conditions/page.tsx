@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { localePath, type Locale } from "@/lib/i18n";
 import { pageMetadata } from "@/lib/seo";
+import { displayPhoneNumber } from "@/lib/contact";
 
 export const metadata: Metadata = pageMetadata({
   title: "Terms & Conditions",
@@ -27,7 +28,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "Free cancellation window: Cancellations made at least 48 hours before the scheduled trip or pickup time are eligible for a full refund (or no charge for cash-on-arrival bookings).",
         "Late cancellations and no-shows: Cancellations made within 48 hours are non-refundable. Arrival more than 15 minutes after the confirmed meeting time is treated as a no-show, with no refund, credit, or reschedule; group departures cannot be delayed.",
         "Cancellations by us: If we or our local supplier need to cancel or reschedule an activity (weather, safety, insufficient group size, or operational reasons), you'll be offered a full refund or the option to rebook another date or activity.",
-        "How to cancel: Message us on WhatsApp at +20 103 080 9150 with your booking reference as soon as possible. We'll confirm your refund eligibility and, where applicable, process it to your original payment method within a stated number of business days (for example, 5–7 days)—for cash-on-arrival bookings, no charge is made.",
+        `How to cancel: Message us on WhatsApp at ${displayPhoneNumber} with your booking reference as soon as possible. We'll confirm your refund eligibility and, where applicable, process it to your original payment method within a stated number of business days (for example, 5–7 days)—for cash-on-arrival bookings, no charge is made.`,
       ] },
       { title: "Safety, diving & equipment", paragraphs: [
         "Guests must follow all safety instructions from instructors and crew, confirm they are medically fit, disclose relevant medical conditions or allergies before departure, and ensure no travel ban or legal restriction prevents participation. Routes, itineraries, and dive sites may change due to weather, sea conditions, or safety considerations; the trip leader makes the final safety decision.",
@@ -58,7 +59,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "Kostenlose Stornierungsfrist: Stornierungen mindestens 48 Stunden vor der geplanten Tour oder Abholzeit berechtigen zu einer vollständigen Rückerstattung. Bei Barzahlung vor Ort entstehen keine Kosten.",
         "Verspätete Stornierungen: Bei Stornierungen innerhalb von 48 Stunden vor der Abholung oder bei Nichterscheinen besteht kein Anspruch auf Rückerstattung, da lokale Anbieter deinen Platz reservieren und Kosten entstehen.",
         "Stornierungen durch uns: Müssen wir oder ein lokaler Anbieter eine Aktivität wegen Wetter, Sicherheit, zu geringer Gruppengröße oder betrieblicher Gründe absagen oder verschieben, erhältst du eine vollständige Rückerstattung oder kannst einen anderen Termin beziehungsweise eine andere Aktivität wählen.",
-        "So stornierst du: Sende uns so früh wie möglich deine Buchungsnummer per WhatsApp an +20 103 080 9150. Wir bestätigen die Erstattungsberechtigung und veranlassen eine mögliche Rückzahlung innerhalb der genannten Bearbeitungszeit, zum Beispiel 5–7 Werktage, über die ursprüngliche Zahlungsmethode. Bei Barzahlung vor Ort wird nichts berechnet.",
+        `So stornierst du: Sende uns so früh wie möglich deine Buchungsnummer per WhatsApp an ${displayPhoneNumber}. Wir bestätigen die Erstattungsberechtigung und veranlassen eine mögliche Rückzahlung innerhalb der genannten Bearbeitungszeit, zum Beispiel 5–7 Werktage, über die ursprüngliche Zahlungsmethode. Bei Barzahlung vor Ort wird nichts berechnet.`,
       ] },
       { title: "Sicherheit, Tauchen & Ausrüstung", paragraphs: ["Gäste müssen alle Sicherheitsanweisungen befolgen, ihre medizinische Eignung bestätigen, Erkrankungen oder Allergien vorab mitteilen und sicherstellen, dass keine rechtlichen Reisebeschränkungen bestehen. Mehr als 15 Minuten Verspätung gelten als Nichterscheinen ohne Erstattung oder Umbuchung. Route, Tauchplätze und Ablauf können aus Sicherheitsgründen geändert werden; die Reiseleitung trifft die endgültige Entscheidung.", "Bei Tauchaktivitäten ist eine Haftungsverzichtserklärung zu unterschreiben; zertifizierte Taucher müssen einen gültigen Nachweis vorlegen. Flaschen und Gewichte sind für zertifizierte Taucher inklusive. Persönliche Ausrüstung (BCD, Atemregler, Neoprenanzug, Maske und Flossen) ist nicht inklusive, kann angefragt werden und muss bei Verlust oder Beschädigung ersetzt werden."] },
       { title: "Haftung", paragraphs: [
@@ -86,7 +87,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "Бесплатная отмена: При отмене не позднее чем за 48 часов до поездки или запланированного трансфера предоставляется полный возврат. При оплате наличными по прибытии плата не взимается.",
         "Поздняя отмена: При отмене менее чем за 48 часов до трансфера или при неявке возврат не предоставляется, поскольку местные поставщики резервируют место и несут расходы.",
         "Отмена с нашей стороны: Если мы или местный поставщик вынуждены отменить или перенести мероприятие из-за погоды, безопасности, недостаточного количества участников или операционных причин, вам предложат полный возврат либо перенос на другую дату или мероприятие.",
-        "Как отменить: Как можно раньше отправьте нам номер бронирования через WhatsApp на номер +20 103 080 9150. Мы подтвердим право на возврат и, если он положен, вернём средства исходным способом оплаты в течение указанного количества рабочих дней, например 5–7 дней. При оплате наличными по прибытии плата не взимается.",
+        `Как отменить: Как можно раньше отправьте нам номер бронирования через WhatsApp на номер ${displayPhoneNumber}. Мы подтвердим право на возврат и, если он положен, вернём средства исходным способом оплаты в течение указанного количества рабочих дней, например 5–7 дней. При оплате наличными по прибытии плата не взимается.`,
       ] },
       { title: "Безопасность, дайвинг и снаряжение", paragraphs: ["Гости обязаны соблюдать указания инструкторов и экипажа, подтвердить медицинскую пригодность, заранее сообщить о заболеваниях и аллергиях и убедиться в отсутствии правовых ограничений на поездку. Опоздание более чем на 15 минут считается неявкой без возврата или переноса. Маршрут и места погружений могут меняться; окончательное решение по безопасности принимает руководитель поездки.", "Для дайвинга необходимо подписать отказ от ответственности, а сертифицированным дайверам — предъявить действующий сертификат. Баллоны и грузы включены. Личное снаряжение (BCD, регулятор, гидрокостюм, маска и ласты) не включено и доступно в аренду; гость отвечает за его утрату или повреждение."] },
       { title: "Ответственность", paragraphs: [
@@ -114,7 +115,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "الإلغاء المجاني: يحق لك استرداد كامل عند الإلغاء قبل موعد الرحلة أو الاستلام بـ48 ساعة على الأقل. لا تُحصّل أي رسوم للحجوزات المدفوعة نقداً عند الوصول.",
         "الإلغاء المتأخر: لا يحق استرداد المبلغ عند الإلغاء خلال 48 ساعة من موعد الاستلام أو عدم الحضور، لأن المورد المحلي يحجز مكانك ويتحمل تكاليف.",
         "الإلغاء من طرفنا: إذا اضطررنا نحن أو المورد المحلي للإلغاء أو إعادة الجدولة بسبب الطقس أو السلامة أو أسباب تشغيلية، سنعرض استرداداً كاملاً أو موعداً أو نشاطاً بديلاً.",
-        "طريقة الإلغاء: أرسل رقم الحجز عبر واتساب على الرقم ‎+20 103 080 9150 في أسرع وقت. سنؤكد استحقاق الاسترداد ونعيده إلى طريقة الدفع الأصلية خلال المدة الموضحة، عادةً من 5 إلى 7 أيام عمل.",
+        `طريقة الإلغاء: أرسل رقم الحجز عبر واتساب على الرقم ‎${displayPhoneNumber} في أسرع وقت. سنؤكد استحقاق الاسترداد ونعيده إلى طريقة الدفع الأصلية خلال المدة الموضحة، عادةً من 5 إلى 7 أيام عمل.`,
       ] },
       { title: "السلامة والغوص والمعدات", paragraphs: ["يجب على الضيوف اتباع تعليمات المدربين والطاقم، والتأكد من اللياقة الطبية، والإفصاح عن الحالات الطبية أو الحساسية، والتأكد من عدم وجود قيود قانونية تمنع المشاركة. يُعد التأخر لأكثر من 15 دقيقة عدم حضور دون استرداد أو إعادة جدولة. قد تتغير المسارات ومواقع الغوص، ويكون قرار قائد الرحلة بشأن السلامة نهائياً.", "تتطلب أنشطة الغوص توقيع إقرار المسؤولية، وعلى الغواصين المعتمدين إبراز شهادة سارية. تشمل أنشطة الغواصين المعتمدين أسطوانات الهواء والأوزان. لا تشمل المعدات الشخصية مثل BCD والمنظم وبدلة الغوص والقناع والزعانف، ويمكن استئجارها عند الطلب، ويتحمل الضيف مسؤولية فقدها أو تلفها."] },
       { title: "المسؤولية", paragraphs: [
@@ -142,7 +143,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "免费取消期限：在计划行程或接送时间至少 48 小时前取消，可获得全额退款；抵达后现金付款的预订不会收费。",
         "逾期取消：在接送前 48 小时内取消或未到场，因本地供应商已保留名额并产生成本，不予退款。",
         "由我们取消：如我们或本地供应商因天气、安全、人数不足或运营原因取消或改期，您可选择全额退款，或改订其他日期或活动。",
-        "取消方式：请尽快通过 WhatsApp（+20 103 080 9150）发送预订编号。我们会确认退款资格，并在所述工作日内（例如 5–7 个工作日）按原付款方式处理；抵达后现金付款的预订不会收费。",
+        `取消方式：请尽快通过 WhatsApp（${displayPhoneNumber}）发送预订编号。我们会确认退款资格，并在所述工作日内（例如 5–7 个工作日）按原付款方式处理；抵达后现金付款的预订不会收费。`,
       ] },
       { title: "安全、潜水与装备", paragraphs: ["客人必须遵守教练和船员的安全指示，确认身体适合参加活动，提前披露疾病或过敏情况，并确保不存在妨碍参加活动的法律或旅行限制。超过集合时间 15 分钟视为未到场，不退款也不改期。路线、行程和潜点可因天气、海况或安全原因调整，行程负责人拥有最终安全决定权。", "潜水参加者须签署责任豁免书，持证潜水员须出示有效证书。持证潜水活动包含气瓶和配重；BCD、调节器、湿衣、面镜和脚蹼等个人装备不包含，可按要求租用，客人须承担租赁装备丢失或损坏的责任。"] },
       { title: "责任", paragraphs: [
@@ -170,7 +171,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "Bezpłatne anulowanie: Anulacje dokonane co najmniej 48 godzin przed planowaną wycieczką lub odbiorem uprawniają do pełnego zwrotu (lub nie wiążą się z opłatą przy płatności gotówką na miejscu).",
         "Późne anulacje: Anulacje dokonane w ciągu 48 godzin przed odbiorem oraz niestawienie się nie uprawniają do zwrotu, ponieważ lokalni dostawcy rezerwują dla Ciebie miejsce i ponoszą związane z tym koszty.",
         "Anulacje z naszej strony: Jeśli my lub nasz lokalny dostawca musimy odwołać lub przełożyć aktywność (z powodu pogody, bezpieczeństwa, niewystarczającej liczby uczestników lub przyczyn operacyjnych), zaproponujemy pełny zwrot środków lub możliwość zmiany terminu bądź aktywności.",
-        "Jak anulować: Napisz do nas na WhatsApp pod numer +20 103 080 9150, podając numer rezerwacji, najszybciej jak to możliwe. Potwierdzimy Twoje uprawnienie do zwrotu i, jeśli ma to zastosowanie, zrealizujemy go na pierwotną metodę płatności w podanej liczbie dni roboczych (na przykład 5–7 dni) — w przypadku rezerwacji z płatnością gotówką po przyjeździe nie pobiera się żadnej opłaty.",
+        `Jak anulować: Napisz do nas na WhatsApp pod numer ${displayPhoneNumber}, podając numer rezerwacji, najszybciej jak to możliwe. Potwierdzimy Twoje uprawnienie do zwrotu i, jeśli ma to zastosowanie, zrealizujemy go na pierwotną metodę płatności w podanej liczbie dni roboczych (na przykład 5–7 dni) — w przypadku rezerwacji z płatnością gotówką po przyjeździe nie pobiera się żadnej opłaty.`,
       ] },
       { title: "Bezpieczeństwo, nurkowanie i sprzęt", paragraphs: ["Goście muszą przestrzegać poleceń instruktorów i załogi, potwierdzić zdolność medyczną, zgłosić schorzenia lub alergie oraz upewnić się, że nie istnieją ograniczenia prawne uniemożliwiające udział. Spóźnienie ponad 15 minut oznacza niepojawienie się bez zwrotu lub zmiany terminu. Trasa, plan i miejsca nurkowe mogą się zmienić; kierownik wycieczki podejmuje ostateczną decyzję dotyczącą bezpieczeństwa.", "Uczestnicy nurkowania muszą podpisać zrzeczenie odpowiedzialności, a certyfikowani nurkowie okazać ważny certyfikat. Butle i balast są wliczone. Osobisty sprzęt (BCD, automat, pianka, maska i płetwy) nie jest wliczony i można go wynająć; gość odpowiada za jego utratę lub uszkodzenie."] },
       { title: "Odpowiedzialność", paragraphs: [

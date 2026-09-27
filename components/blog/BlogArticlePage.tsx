@@ -7,6 +7,7 @@ import { getLiveBlogPosts, getLiveTours } from "@/lib/live-content";
 import { localizeBlogPost } from "@/lib/blog-localization";
 import { absoluteUrl, pageMetadata, siteName } from "@/lib/seo";
 import { localePath } from "@/lib/i18n";
+import { whatsappUrl } from "@/lib/contact";
 
 type BlogLocale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
 
@@ -148,7 +149,7 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
         </section>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <a href="https://wa.me/201030809150" className="rounded-full bg-green-600 px-7 py-4 font-bold text-white">{copy.whatsapp}</a>
+          <a href={whatsappUrl()} className="rounded-full bg-green-600 px-7 py-4 font-bold text-white">{copy.whatsapp}</a>
           <Link href={localePath(locale, "/blog")} className="rounded-full border px-7 py-4 font-bold">{copy.moreGuides}</Link>
         </div>
       </article>

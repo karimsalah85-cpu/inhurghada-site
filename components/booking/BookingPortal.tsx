@@ -7,7 +7,7 @@ import { useState } from "react";
 import { CalendarRange, CheckCircle2, Clock3, MessageCircle, ShieldCheck, Smartphone, Ticket } from "lucide-react";
 import type { BookingRecord } from "@/lib/booking-service";
 import { trackEvent } from "@/lib/analytics";
-import { contactEmail, displayPhoneNumber, whatsappNumber, whatsappUrl } from "@/lib/contact";
+import { contactEmail, displayPhoneNumber, telephoneNumber, whatsappUrl } from "@/lib/contact";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import type { Language } from "@/components/settings/SiteSettingsContext";
 
@@ -541,7 +541,7 @@ export default function BookingPortal() {
                   <span className="flex items-center gap-3 font-semibold text-ink"><CalendarRange className="text-ocean-dark" /> {copy.emailUs}</span>
                   <span className="text-sm text-muted">{contactEmail}</span>
                 </a>
-                <a href={`tel:+${whatsappNumber}`} onClick={() => trackEvent("phone_click", { placement: "booking_portal" })} className="flex items-center justify-between rounded-2xl border border-line bg-surface-muted px-4 py-4 transition hover:border-ocean"><span className="flex items-center gap-3 font-semibold text-ink"><Smartphone className="text-ocean-dark" /> {copy.callUs}</span><span className="text-sm text-muted">{displayPhoneNumber}</span></a>
+                <a href={`tel:${telephoneNumber}`} onClick={() => trackEvent("phone_click", { placement: "booking_portal" })} className="flex items-center justify-between rounded-2xl border border-line bg-surface-muted px-4 py-4 transition hover:border-ocean"><span className="flex items-center gap-3 font-semibold text-ink"><Smartphone className="text-ocean-dark" /> {copy.callUs}</span><span className="text-sm text-muted">{displayPhoneNumber}</span></a>
               </div>
             </div>
           </div>

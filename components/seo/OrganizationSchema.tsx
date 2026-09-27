@@ -1,3 +1,4 @@
+import { telephoneNumber } from "@/lib/contact";
 import { absoluteUrl, siteName } from "@/lib/seo";
 
 export default function OrganizationSchema() {
@@ -13,7 +14,7 @@ export default function OrganizationSchema() {
         logo: absoluteUrl("/images/logo.png"),
         image: absoluteUrl("/og-image.svg"),
         email: "info@dailyredsea.com",
-        telephone: "+201030809150",
+        telephone: telephoneNumber,
         sameAs: [
           "https://www.facebook.com/profile.php?id=61592247695069",
           "https://www.instagram.com/dailyredsea.com7/",
@@ -31,7 +32,7 @@ export default function OrganizationSchema() {
         ],
         contactPoint: {
           "@type": "ContactPoint",
-          telephone: "+201030809150",
+          telephone: telephoneNumber,
           contactType: "customer service",
           availableLanguage: ["English", "Arabic", "German", "Russian", "Polish", "Chinese"],
         },
