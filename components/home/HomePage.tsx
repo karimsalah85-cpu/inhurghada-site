@@ -1,6 +1,7 @@
 "use client";
 
 import ReferralProgramInfo from "@/components/referral/ReferralProgramInfo";
+import { startTimeChoices } from "@/lib/tour-times";
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -557,6 +558,7 @@ text-ocean
                   location={tour.location}
 
                   duration={tour.duration}
+                  startTimes={startTimeChoices(tour.availableTimes)}
 
                   description={tour.description}
 

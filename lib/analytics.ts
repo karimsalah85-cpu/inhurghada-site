@@ -18,6 +18,7 @@ export type AnalyticsEventName =
   | "share_email"
   | "shared_link_opened"
   | "date_selected"
+  | "time_selected"
   | "travelers_changed"
   | "add_to_cart"
   | "checkout_started"

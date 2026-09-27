@@ -24,6 +24,7 @@ type TourCardProps = {
   reviews?: string;
   category?: string;
   availableTime?: string;
+  startTimes?: string[];
   priceUnit?: string;
   bookingMode?: "direct" | "inquiry";
   entrancePrice?: number;
@@ -56,6 +57,7 @@ export default function TourCard({
   reviews,
   category,
   availableTime,
+  startTimes,
   priceUnit,
   bookingMode,
   entrancePrice,
@@ -92,7 +94,7 @@ export default function TourCard({
               : <span className="text-brand-orange-cta">{copy.newTour}</span>}
           </p>
           {description?.trim() ? <p className="mt-2 line-clamp-2 text-sm leading-5 text-muted">{description}</p> : null}
-          {duration ? <div className="mt-2 flex items-start gap-2 text-sm text-muted"><Clock size={16} className="shrink-0" /><span>{duration}</span></div> : null}
+          {duration ? <div className="mt-2 flex items-start gap-2 text-sm text-muted"><Clock size={16} className="shrink-0" /><span>{duration}{startTimes?.length ? <> · <span className="font-semibold text-ink">{startTimes.join(" · ")}</span></> : null}</span></div> : null}
           {pickup ? <p className="mt-1.5 line-clamp-2 text-sm text-muted">{pickup}</p> : null}
           {inclusion ? <p className="mt-1.5 flex items-start gap-2 text-sm text-muted"><Check size={16} className="shrink-0" /><span className="line-clamp-2">{inclusion}</span></p> : null}
           <div className="mt-auto pt-3">

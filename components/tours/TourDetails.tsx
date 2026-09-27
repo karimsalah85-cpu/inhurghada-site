@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { startTimeChoices } from "@/lib/tour-times";
 import type { Tour } from "@/data/tours";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { useTripReviews } from "@/components/tours/TripReviewsContext";
@@ -22,13 +23,14 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const staticReviewCount = Number(tour.reviews);
   const hasReviews = hasLiveReviews || (Number.isFinite(staticReviewCount) && staticReviewCount > 0);
   const displayRating = hasLiveReviews ? liveReviews.average : tour.rating;
-  const polish: Record<string, string> = { "Arrange on WhatsApp": "Ustal przez WhatsApp", "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
+  const polish: Record<string, string> = { "Arrange on WhatsApp": "Ustal przez WhatsApp", "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Start times": "Godziny startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
   const operatorLine = tour.operator
     ? pl ? `Realizowane przez ${tour.operator}. Rezerwacja i koordynacja: Daily Red Sea.` : tr(`Operated by ${tour.operator}. Booked and coordinated by Daily Red Sea.`, `Durchgeführt von ${tour.operator}. Gebucht und koordiniert von Daily Red Sea.`, `Организатор: ${tour.operator}. Бронирование и координация — Daily Red Sea.`, `يُنفَّذ بواسطة ${tour.operator}. الحجز والتنسيق عبر Daily Red Sea.`, `由 ${tour.operator} 运营。由 Daily Red Sea 负责预订与协调。`)
     : pl ? "Realizowane przez licencjonowanego lokalnego partnera. Rezerwacja i koordynacja: Daily Red Sea." : tr("Operated by a licensed local partner. Booked and coordinated by Daily Red Sea.", "Durchgeführt von einem lizenzierten lokalen Partner. Gebucht und koordiniert von Daily Red Sea.", "Проводится лицензированным местным партнёром. Бронирование и координация — Daily Red Sea.", "يُنفَّذ بواسطة شريك محلي مرخّص. الحجز والتنسيق عبر Daily Red Sea.", "由持牌本地合作伙伴运营。由 Daily Red Sea 负责预订与协调。");
   const startTime = tour.availableTimes?.find((slot) => /^\d{1,2}:\d{2}/.test(slot));
+  const startTimes = startTimeChoices(tour.availableTimes);
   const pickupFact = tour.fulfillmentType === "meeting_point"
     ? tour.departureMarina || tr("Meeting point", "Treffpunkt", "Место встречи", "نقطة اللقاء", "集合点")
     : tr("Hotel pickup", "Hotelabholung", "Трансфер из отеля", "الاستلام من الفندق", "酒店接送");
@@ -53,8 +55,8 @@ export default function TourDetails({ tour }: { tour: Tour }) {
             <p className="mt-3 text-xl font-semibold text-ink">{tour.bookingMode === "inquiry" ? tr("Price on request", "Preis auf Anfrage", "Цена по запросу", "السعر عند الطلب", "价格需咨询") : <>{tour.originalPrice && Number(tour.originalPrice) > Number(tour.price) ? <span className="mr-2 text-base text-muted line-through">{displayPrice(tour.originalPrice)}</span> : null}{displayPrice(tour.price)} {tour.priceUnit ?? tr("per person","pro Person","за человека","للشخص","每人")}</>}</p>
           </div>
           {startTime ? <div className="rounded-2xl bg-surface-muted p-4">
-            <div className="flex items-center gap-2 text-ocean-dark"><Clock3 size={16} /> {tr("Start time","Startzeit","Время начала","وقت البدء","出发时间")}</div>
-            <p className="mt-3 text-xl font-semibold text-ink">{startTime}</p>
+            <div className="flex items-center gap-2 text-ocean-dark"><Clock3 size={16} /> {startTimes.length ? tr("Start times","Startzeiten","Время начала","أوقات البدء","出发时间") : tr("Start time","Startzeit","Время начала","وقت البدء","出发时间")}</div>
+            <p className="mt-3 text-xl font-semibold text-ink">{startTimes.length ? startTimes.join(" · ") : startTime}</p>
           </div> : null}
           <div className="rounded-2xl bg-surface-muted p-4">
             <div className="flex items-center gap-2 text-ocean-dark"><MapPin size={16} /> {tr("Pickup","Abholung","Трансфер","الاستلام","接送")}</div>

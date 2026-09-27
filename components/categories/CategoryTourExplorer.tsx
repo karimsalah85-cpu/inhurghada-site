@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { startTimeChoices } from "@/lib/tour-times";
 import Link from "next/link";
 import { Clock, MapPin, Search, ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -175,7 +176,7 @@ export default function CategoryTourExplorer({ tours, locale = "en", initialQuer
                   <h2 className="mt-2 line-clamp-2 text-xl font-black text-ink">{tour.title}</h2>
                   <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted sm:line-clamp-3">{tour.description}</p>
                   <div className="mt-5 grid gap-2 text-sm text-muted">
-                    <span className="flex items-center gap-2"><Clock size={17} className="text-ocean-dark" />{tour.duration}</span>
+                    <span className="flex items-center gap-2"><Clock size={17} className="text-ocean-dark" />{tour.duration}{startTimeChoices(tour.availableTimes).length ? <> · <span className="font-semibold text-ink">{startTimeChoices(tour.availableTimes).join(" · ")}</span></> : null}</span>
                     <span className="flex items-center gap-2"><MapPin size={17} className="text-ocean-dark" />{tour.location}</span>
                     <span className="flex items-center gap-2"><ShieldCheck size={17} className="text-emerald-600" />{tour.bookingMode === "inquiry" ? copy.inquiryAssurance : copy.assurance}</span>
                   </div>
