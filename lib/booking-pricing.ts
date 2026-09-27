@@ -1,3 +1,4 @@
+import { optionalExtraPrice } from "@/lib/tour-extras";
 import { tours, type Tour } from "@/data/tours";
 import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
 import type { ParsedTransferRequest } from "@/lib/transfer-request";
@@ -11,6 +12,7 @@ type PricingInput = {
   tourSlug?: string;
   extras?: string[];
   selectedBoatOption?: string;
+  selectedPackageOption?: string;
   extraQuantities?: Record<string, number>;
   transferRequired?: boolean;
   transferArea?: string;
@@ -33,6 +35,7 @@ type PricingInput = {
     youth: number;
     infants: number;
     selectedBoatOption?: string;
+    selectedPackageOption?: string;
     extraQuantities?: Record<string, number>;
     transferRequired?: boolean;
     transferArea?: string;
@@ -46,7 +49,7 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
   return Number.isInteger(value) && value >= minimum && value <= maximum;
 }
 
-function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "extraQuantities" | "transferRequired" | "transferArea">, catalog: Tour[]) {
+function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "selectedPackageOption" | "extraQuantities" | "transferRequired" | "transferArea">, catalog: Tour[]) {
   const tour = catalog.find((item) => item.slug === input.tourSlug) || catalog.find((item) => item.title === input.tourName);
   if (!tour) return { error: "Choose a valid tour." as const };
   if (tour.listingStatus === "paused" || tour.listingStatus === "unlisted") return { error: "This tour is not accepting bookings yet." as const };
@@ -54,12 +57,15 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     return { error: "Choose a valid number of travelers." as const };
   }
 
+  if (tour.groupSize && (input.adults + input.youth < tour.groupSize.min || input.adults + input.youth > tour.groupSize.max)) {
+    return { error: `Choose ${tour.groupSize.min}–${tour.groupSize.max} travelers for this group rate. Contact us for other group sizes.` };
+  }
   const pricing = tour.participantPricing || { adults: Number(tour.price) };
   if (input.youth && pricing.youth === undefined && !tour.entrancePricing) return { error: "Youth pricing is not available for this tour." as const };
   if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
   const allowedExtras: Record<string, Record<string, { price: number; charge: "booking" | "adult" }>> = {
     "full-day-diving": { "diving-equipment": { price: 30, charge: "booking" } },
-    "luxor-private-day-trip": { "tutankhamun-ticket": { price: 30, charge: "booking" } },
+    "luxor-private-day-trip": { "tutankhamun-ticket": { price: optionalExtraPrice(30, tour.currency), charge: "booking" } },
   };
   const selectedExtras = [...new Set(input.extras || [])];
   const extraPrices = allowedExtras[tour.slug] || {};
@@ -78,7 +84,15 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   if (Object.keys(quantities).some((id) => !allowedQuantityExtras.has(id))) return { error: "Choose valid quantity add-ons." as const };
   const quantityExtrasTotal = Object.entries(quantities).reduce((sum, [id, quantity]) => sum + (allowedQuantityExtras.get(id)?.price || 0) * quantity, 0);
   if (tour.requiresMarinaTransferChoice && input.transferRequired && !["Hurghada Hotels", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay", "Safaga"].includes(input.transferArea || "")) return { error: "Choose a valid marina transfer area." as const };
-  const adultRate = groupRate(tour.groupPricing, input.adults + input.youth) ?? pricing.adults;
+  const packages = tour.additionalPackages?.length ? [
+    { id: "primary", price: Number(tour.packagePrice ?? tour.price), label: tour.packageName ?? tour.title },
+    ...tour.additionalPackages.map((pkg, index) => ({ id: `package-${index}`, price: Number(pkg.price), label: pkg.name })),
+  ].sort((a, b) => a.price - b.price) : [];
+  const selectedPackage = input.selectedPackageOption
+    ? packages.find(pkg => pkg.id === input.selectedPackageOption)
+    : packages[0];
+  if (input.selectedPackageOption && !selectedPackage) return { error: "Choose a valid package." };
+  const adultRate = selectedPackage?.price ?? groupRate(tour.groupPricing, input.adults + input.youth) ?? pricing.adults;
   const entranceTotal = tour.entrancePricing ? input.adults * tour.entrancePricing.adults + input.youth * tour.entrancePricing.youth : 0;
   const participantTotal = boat
     ? boat.price + entranceTotal
@@ -97,7 +111,7 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
       if (input.youth) lines.push(pricingLine("entrance", input.youth, tour.entrancePricing.youth, "Children / youth"));
     }
   } else {
-    if (input.adults) lines.push(pricingLine("adults", input.adults, adultRate));
+    if (input.adults) lines.push(pricingLine("adults", input.adults, adultRate, selectedPackage?.label));
     if (input.youth) lines.push(pricingLine("youth", input.youth, pricing.youth ?? adultRate));
     if (input.infants) lines.push(pricingLine("infants", input.infants, pricing.infants ?? 0));
   }

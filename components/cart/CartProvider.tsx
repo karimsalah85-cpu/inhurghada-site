@@ -16,6 +16,7 @@ export type CartItem = {
   infants: number;
   extras: string[];
   selectedBoatOption?: string;
+  selectedPackageOption?: string;
   extraQuantities?: Record<string, number>;
   transferRequired?: boolean;
   transferArea?: string;

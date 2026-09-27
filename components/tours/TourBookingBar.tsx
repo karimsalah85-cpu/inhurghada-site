@@ -1,5 +1,6 @@
 "use client";
 
+import { useTourPricing } from "@/components/tours/TourPricingContext";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,6 +16,7 @@ import type { Tour } from "@/data/tours";
  * "From" price always matches the booking form; never read prices from the static data/tours.ts catalog here.
  */
 export default function TourBookingBar({ slug, title, price, currency }: { slug: string; title: string; price: string; currency?: Tour["currency"] }) {
+  const selection = useTourPricing();
   const pathname = usePathname();
   const { t, formatPrice } = useSiteSettings();
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -61,7 +63,7 @@ export default function TourBookingBar({ slug, title, price, currency }: { slug:
       <div className="flex items-center gap-3 px-4 py-2.5">
         <div className="flex shrink-0 flex-col leading-tight">
           <span className="text-[10px] font-bold uppercase tracking-wide text-muted">{t("from")}</span>
-          <span className="text-lg font-black text-ink">{formatPrice(price, currency)}</span>
+          <span className="text-lg font-black text-ink">{formatPrice(selection?.price ?? price, currency)}</span>
         </div>
         <Link
           href={`${pathname}#book`}

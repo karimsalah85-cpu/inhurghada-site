@@ -18,10 +18,10 @@ describe("group pricing", () => {
   });
 
   it("charges Luxor and Cairo per person at the group-size rate", () => {
-    expect(booking("luxor-private-day-trip", 2).amount).toBe(341.98);
-    expect(booking("luxor-private-day-trip", 4).amount).toBe(592.76);
-    expect(booking("luxor-private-day-trip", 6).pricingSnapshot.trips[0].lines[0]).toMatchObject({ kind: "adults", quantity: 6, unitPrice: 113.99 });
-    expect(booking("cairo-giza-day-trip-bus", 5).amount).toBe(797.95);
+    expect(booking("luxor-private-day-trip", 2).amount).toBe(360);
+    expect(booking("luxor-private-day-trip", 4).amount).toBe(624);
+    expect(booking("luxor-private-day-trip", 6).pricingSnapshot.trips[0].lines[0]).toMatchObject({ kind: "adults", quantity: 6, unitPrice: 120 });
+    expect(booking("cairo-giza-day-trip-bus", 5).amount).toBe(840);
   });
 
   it("keeps group rates code-controlled so the CMS cannot pin an old price", () => {
