@@ -1,6 +1,6 @@
-export const whatsappNumber = "201030809150";
+export const whatsappNumber = "201154516040";
 export const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
-export const displayPhoneNumber = "+20 103 080 9150";
+export const displayPhoneNumber = "+20 115 451 6040";
 export const facebookUrl = "https://www.facebook.com/profile.php?id=61592247695069";
 export const instagramUrl = "https://www.instagram.com/dailyredsea.com7/";
 export const googleReviewUrl = "https://g.page/r/CZO2rT5pTQOXEAI/review";
