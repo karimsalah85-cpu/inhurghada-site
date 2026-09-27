@@ -23,8 +23,8 @@ describe("Luxor two-day trip and balloon ride", () => {
   });
 
   it("prices the two-day trip by group size and the balloon per person", () => {
-    expect([1, 3, 4, 5, 6, 8].map((adults) => price("luxor-two-day-trip", adults))).toEqual([284.98, 854.94, 1048.72, 1310.9, 1504.68, 2006.24]);
-    expect(price("luxor-hot-air-balloon", 2)).toBe(170.98);
+    expect([2, 3, 4, 5, 6, 8].map((adults) => price("luxor-two-day-trip", adults))).toEqual([600, 900, 1116, 1395, 1584, 2112]);
+    expect(price("luxor-hot-air-balloon", 2)).toBe(180);
   });
 
   it("fully localizes every customer-facing field in each non-English language", () => {

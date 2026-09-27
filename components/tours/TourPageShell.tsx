@@ -1,3 +1,4 @@
+import { TourPricingProvider } from "@/components/tours/TourPricingContext";
 import { Suspense } from "react";
 import BookingForm from "@/components/booking/BookingForm";
 import TourDetails from "@/components/tours/TourDetails";
@@ -114,9 +115,10 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
     { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
   ] };
   return (
+    <TourPricingProvider key={tour.slug}>
     <TripReviewsProvider tourSlug={tour.slug}>
     <main className="min-h-screen bg-surface-muted">
-      <TourViewTracker title={tour.title} price={tour.price} />
+      <TourViewTracker title={tour.title} price={tour.price} currency={tour.currency} />
       <TourBookingBar slug={tour.slug} title={tour.title} price={tour.price} currency={tour.currency} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <section className="mx-auto max-w-7xl px-6 pb-8 pt-28 lg:px-8">
@@ -149,6 +151,7 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
                   location={tour.location}
                   participantPricing={tour.participantPricing}
                   groupPricing={tour.groupPricing}
+                  groupSize={tour.groupSize}
                   availableTimes={tour.availableTimes}
                   ageBands={tour.ageBands}
                   boatOptions={tour.boatOptions}
@@ -187,5 +190,6 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
       ) : null}
     </main>
     </TripReviewsProvider>
+    </TourPricingProvider>
   );
 }

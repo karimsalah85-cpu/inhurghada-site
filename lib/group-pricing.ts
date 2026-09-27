@@ -17,12 +17,12 @@ export function groupRate(tiers: GroupPriceTier[] | undefined, travelers: number
 }
 
 /** Tiers with display ranges ("1–3", "4–5", "6+"); the first tier also covers smaller groups. */
-export function groupTierRanges(tiers: GroupPriceTier[]) {
+export function groupTierRanges(tiers: GroupPriceTier[], limits?: { min: number; max: number }) {
   const sorted = sortedTiers(tiers);
   return sorted.map((tier, index) => {
-    const from = index === 0 ? 1 : tier.minTravelers;
+    const from = index === 0 ? limits?.min ?? 1 : tier.minTravelers;
     const next = sorted[index + 1];
-    const to = next ? next.minTravelers - 1 : undefined;
+    const to = next ? next.minTravelers - 1 : limits?.max;
     return { ...tier, from, to, label: to === undefined ? `${from}+` : from === to ? `${from}` : `${from}–${to}` };
   });
 }

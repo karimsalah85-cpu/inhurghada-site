@@ -102,6 +102,7 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
             infants: item.infants,
             extras: item.extras,
             selectedBoatOption: item.selectedBoatOption,
+            selectedPackageOption: item.selectedPackageOption,
             extraQuantities: item.extraQuantities,
             transferRequired: item.transferRequired,
             transferArea: item.transferArea,

@@ -1,3 +1,4 @@
+import { preserveTourPrices } from "@/lib/tour-pricing";
 import type { Tour } from "@/data/tours";
 import { localizeMarsaAlamTour } from "@/data/marsa-alam-tours-i18n";
 import { localizeElGounaTour } from "@/data/el-gouna-tours-i18n";
@@ -314,7 +315,7 @@ const arabicTourOverrides: Record<string, Partial<Tour>> = {
 Object.assign(arabicTourOverrides, luxorTourTranslations.ar);
 
 export function localizeTourArabic(tour: Tour): Tour {
-  return { ...tour, ...arabicTourOverrides[tour.slug] };
+  return preserveTourPrices(tour, { ...tour, ...arabicTourOverrides[tour.slug] });
 }
 
 const germanTourOverrides: Record<string, Partial<Tour>> = {
@@ -649,7 +650,7 @@ export function germanTourTitle(slug: string, fallback: string) {
 Object.assign(germanTourOverrides, luxorTourTranslations.de);
 
 export function localizeTourGerman(tour: Tour): Tour {
-  return { ...tour, ...germanTourOverrides[tour.slug] };
+  return preserveTourPrices(tour, { ...tour, ...germanTourOverrides[tour.slug] });
 }
 
 const russianTourOverrides: Record<string, Partial<Tour>> = {
@@ -980,7 +981,7 @@ const russianTourOverrides: Record<string, Partial<Tour>> = {
 Object.assign(russianTourOverrides, luxorTourTranslations.ru);
 
 export function localizeTourRussian(tour: Tour): Tour {
-  return { ...tour, ...russianTourOverrides[tour.slug] };
+  return preserveTourPrices(tour, { ...tour, ...russianTourOverrides[tour.slug] });
 }
 
 const chineseTourOverrides: Record<string, Partial<Tour>> = {
@@ -1300,7 +1301,7 @@ const chineseTourOverrides: Record<string, Partial<Tour>> = {
 Object.assign(chineseTourOverrides, luxorTourTranslations.zh);
 
 export function localizeTourChinese(tour: Tour): Tour {
-  return { ...tour, ...chineseTourOverrides[tour.slug] };
+  return preserveTourPrices(tour, { ...tour, ...chineseTourOverrides[tour.slug] });
 }
 
 const polishTourOverrides: Record<string, Partial<Tour>> = {
@@ -1572,7 +1573,7 @@ const polishTourOverrides: Record<string, Partial<Tour>> = {
 Object.assign(polishTourOverrides, luxorTourTranslations.pl);
 
 export function localizeTourPolish(tour: Tour): Tour {
-  return { ...tour, ...polishTourOverrides[tour.slug] };
+  return preserveTourPrices(tour, { ...tour, ...polishTourOverrides[tour.slug] });
 }
 
 const magawishSpeedboatTranslations: Partial<Record<Locale, Partial<Tour>>> = {

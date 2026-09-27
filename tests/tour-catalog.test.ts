@@ -43,8 +43,8 @@ describe("tour catalog publication safety", () => {
     const magawish = tours.find((tour) => tour.slug === "magawish-speedboat");
 
     for (const tour of [dolphin, hulaHula]) {
-      expect(tour?.price).toBe("25.08");
-      expect(tour?.participantPricing).toEqual({ adults: 25.08, youth: 15, infants: 0 });
+      expect(tour?.price).toBe("26.5");
+      expect(tour?.participantPricing).toEqual(tour?.slug === "dolphin-house-snorkeling" ? { adults: 26.5 } : { adults: 26.5, youth: 15.85, infants: 0 });
       expect(tour?.ageBands?.children).toBe("Youth (ages 4–10)");
     }
     expect(magawish?.price).toBe(String(halfDayBoatOptions[0].price));
@@ -55,8 +55,8 @@ describe("tour catalog publication safety", () => {
   it("publishes the Hurghada glass-bottom boat with the supplied schedule and pricing", () => {
     const trip = tours.find((tour) => tour.slug === "royal-seascope-submarine");
     expect(trip?.listingStatus).toBe("active");
-    expect(trip?.price).toBe("17.10");
-    expect(trip?.participantPricing).toEqual({ adults: 17.1, youth: 12.5, infants: 0 });
+    expect(trip?.price).toBe("25");
+    expect(trip?.participantPricing).toEqual({ adults: 25, youth: 12.5, infants: 0 });
     expect(trip?.availableTimes).toEqual(["09:00", "10:30", "12:30", "15:00"]);
     expect(trip?.duration).toBe("2.5 Hours");
     expect(trip?.departureMarina).toBe("Hurghada Marina");
@@ -160,7 +160,7 @@ describe("displayed 'from' price stays consistent with the booking engine", () =
           type: "tour",
           tourName: tour.title,
           tourSlug: tour.slug,
-          adults: 1,
+          adults: tour.groupSize?.min ?? 1,
           youth: 0,
           infants: 0,
           service: "",
@@ -170,7 +170,7 @@ describe("displayed 'from' price stays consistent with the booking engine", () =
           travelBags: 0,
         });
         expect(result.error).toBeUndefined();
-        expect(result.data?.amount).toBe(displayed);
+        expect(result.data?.amount).toBe(displayed * (tour.groupSize?.min ?? 1));
       }
     });
   }
