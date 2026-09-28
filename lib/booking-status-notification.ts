@@ -1,3 +1,4 @@
+import { getPostTripContext } from "@/lib/post-trip-context";
 import { createPostTripPdf } from "@/lib/post-trip-pdf";
 import { buildReferralMessage } from "@/lib/referral-messages";
 import { companyStatement, sendBookingEmail } from "@/lib/booking-service";
@@ -10,6 +11,7 @@ export type StatusBooking = {
   customer_email: string | null;
   phone?: string | null;
   tour_name: string | null;
+  tour_slug?: string | null;
   date: string | null;
   guests?: number | null;
   adults?: number | null;
@@ -115,8 +117,8 @@ export async function sendBookingAndPaymentStatusNotification(booking: StatusBoo
     const { createRequiredAdminClient } = await import("@/utils/supabase/admin");
     const { data: account, error } = await createRequiredAdminClient().rpc("referral_account", { p_customer_key: booking.customer_email.trim().toLowerCase() });
     if (error) return { success: false, reason: "referral-account-unavailable" };
-    const email = buildReferralMessage({ event: "trip_completed", bookingReference: booking.reference, customerName: booking.customer_name, locale: booking.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code });
-    const attachment = { filename: `daily-red-sea-thank-you-${booking.reference.replace(/[^a-z0-9-]/gi, "-")}.pdf`, content: await createPostTripPdf({ reference: booking.reference, customerName: booking.customer_name, itemName: booking.tour_name, locale: booking.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code }) };
+    const email = buildReferralMessage({ trip: await getPostTripContext(booking), event: "trip_completed", bookingReference: booking.reference, customerName: booking.customer_name, locale: booking.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code });
+    const attachment = { filename: `daily-red-sea-thank-you-${booking.reference.replace(/[^a-z0-9-]/gi, "-")}.pdf`, content: await createPostTripPdf({ reference: booking.reference, customerName: booking.customer_name, itemName: booking.tour_name, tourSlug: booking.tour_slug, locale: booking.locale, qualified: Boolean(account?.qualified), referralCode: account?.referral_code }) };
     return sendBookingEmail(booking.customer_email, email.subject, email.html, attachment);
   }
   const email = buildBookingAndPaymentStatusEmail(booking);

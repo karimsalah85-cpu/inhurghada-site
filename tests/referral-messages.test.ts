@@ -36,3 +36,14 @@ it.each(locales)("post-trip %s links to the real review form with reference and 
  expect(result.html).toContain('referrals');
  if(locale==='en') expect(result.text).toContain('Invite your friends and family');
 });
+
+it("shows trip context, both review destinations and escaped recommendations", () => {
+ const result = buildReferralMessage({ event: "trip_completed", customerName: "<script>", qualified: true, trip: { title: "Desert & sea", destination: "Hurghada", image: "https://dailyredsea.com/trip.jpg", url: "https://dailyredsea.com/tours/example", related: [{ title: "<b>Next trip</b>", url: "https://dailyredsea.com/tours/next" }, { title: "Bad", url: "javascript:alert(1)" }] } });
+ expect(result.html).toContain('data-drs-complete-email');
+ expect(result.html).toContain('https://g.page/r/CZO2rT5pTQOXEAI/review');
+ expect(result.html).toContain('Desert &amp; sea');
+ expect(result.html).toContain('&lt;b&gt;Next trip&lt;/b&gt;');
+ expect(result.html).not.toContain('javascript:');
+ expect(result.html).not.toContain('<script>');
+ expect(result.text).toContain('never depend on leaving a review');
+});

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!(await hasLivePermission(supabase, user, "bookings"))) return json({ error: "Unauthorized." }, 401);
-  const { data: booking, error } = await supabase.from("bookings").select("reference,customer_name,customer_email,tour_name,status,locale").eq("id", id).single();
+  const { data: booking, error } = await supabase.from("bookings").select("reference,customer_name,customer_email,tour_name,tour_slug,status,locale").eq("id", id).single();
   if (error || !booking) return json({ error: "Booking not found." }, 404);
   if (booking.status !== "completed") return json({ error: "Mark the trip as completed before sending a thank-you email." }, 409);
   if (!booking.customer_email) return json({ error: "This customer does not have an email address." }, 400);
