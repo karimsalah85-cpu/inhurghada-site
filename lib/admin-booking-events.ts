@@ -11,8 +11,26 @@ export function notifyAdminBookingsChanged() {
   }
 }
 
-export function subscribeToAdminBookingChanges(listener: () => void) {
+let refreshedForChangeAt = 0;
+
+function lastBookingChangeAt() {
+  try {
+    return Number(window.localStorage.getItem(bookingChangeStorageKey)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+// `dataLoadedAt` is when the page's booking data was read. Back/forward
+// navigation reuses that cached page, so refresh it if bookings changed since.
+export function subscribeToAdminBookingChanges(listener: () => void, dataLoadedAt?: number) {
   if (typeof window === "undefined") return () => undefined;
+  const changedAt = lastBookingChangeAt();
+  // Refresh once per change, so server/browser clock skew cannot loop refreshes.
+  if (dataLoadedAt && changedAt > dataLoadedAt && changedAt !== refreshedForChangeAt) {
+    refreshedForChangeAt = changedAt;
+    listener();
+  }
   const onStorage = (event: StorageEvent) => {
     if (event.key === bookingChangeStorageKey) listener();
   };

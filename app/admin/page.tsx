@@ -37,6 +37,11 @@ const paymentStatuses = ["all", "unpaid", "paid", "refunded"] as const;
 const bookingTypes = ["all", "tour", "transfer"] as const;
 const archiveFilters = ["active", "archived", "all"] as const;
 
+// Marks when booking data was read, so cached client copies can detect later changes.
+function currentTimestamp() {
+  return Date.now();
+}
+
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -234,6 +239,7 @@ export default async function AdminPage({
   if (archive === "active") bookingListQuery = bookingListQuery.is("archived_at", null);
   else if (archive === "archived") bookingListQuery = bookingListQuery.not("archived_at", "is", null);
 
+  const bookingsLoadedAt = currentTimestamp();
   const [
     { data: bookings, error: bookingsError },
     { data: bookingList, error: bookingListError },
@@ -461,6 +467,7 @@ export default async function AdminPage({
             isOwner={isAdminOwner(user)}
             analyticsRange={analyticsRange}
             initialControlPanel={controlPanel}
+            renderedAt={bookingsLoadedAt}
           />
         )}
       </div>

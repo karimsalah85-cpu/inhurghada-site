@@ -159,6 +159,7 @@ export default function AdminDashboard({
   isOwner,
   analyticsRange,
   initialControlPanel,
+  renderedAt,
 }: {
   mode?:
     | "overview"
@@ -204,6 +205,7 @@ export default function AdminDashboard({
     | "queue"
     | "settings"
     | "redirects";
+  renderedAt?: number;
 }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
@@ -351,8 +353,8 @@ export default function AdminDashboard({
   }
 
   useEffect(
-    () => subscribeToAdminBookingChanges(() => router.refresh()),
-    [router],
+    () => subscribeToAdminBookingChanges(() => router.refresh(), renderedAt),
+    [router, renderedAt],
   );
 
   const expenseOptions = expenseTypes.map((type) => [type.key, type.label] as const);
