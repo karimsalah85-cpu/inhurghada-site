@@ -24,7 +24,7 @@ import { AboutPage } from "@/components/pages/AboutPage";
 import { ContactPage } from "@/components/pages/ContactPage";
 import { FaqPage } from "@/components/pages/FaqPage";
 import { PrivacyPolicyPage } from "@/components/pages/PrivacyPolicyPage";
-import TermsConditionsPage from "@/app/terms-conditions/page";
+import TermsConditionsPage from "@/components/pages/TermsConditionsPage";
 import TourPageShell from "@/components/tours/TourPageShell";
 import TourCategoryView from "@/components/categories/TourCategoryView";
 import DestinationCategoryPage from "@/components/categories/DestinationCategoryPage";
