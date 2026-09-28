@@ -3,9 +3,9 @@ import { buildReferralMessage } from "@/lib/referral-messages";
 import { selectPostTripContext } from "@/lib/post-trip-context";
 import { bookingLocale } from "@/lib/booking-communications-i18n";
 
-/** Local, synthetic preview only. Never sends email or reads customer records. */
+/** Synthetic preview for local dev and Vercel preview deployments. Never sends email or reads customer records. */
 export async function GET(request: Request) {
-  if (process.env.NODE_ENV !== "development") return new Response(null, { status: 404 });
+  if (process.env.NODE_ENV !== "development" && process.env.VERCEL_ENV !== "preview") return new Response(null, { status: 404 });
   const url = new URL(request.url);
   const locale = bookingLocale(url.searchParams.get("lang"));
   const slug = url.searchParams.get("trip") || "orange-bay";
