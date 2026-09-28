@@ -175,7 +175,10 @@ export async function sendWhatsAppMessage(phone: string, body: string) {
   };
 }
 
-export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: { filename: string; content: Buffer }) {
+/** Customer communications are BCC'd to the shared inbox so staff keep a copy. */
+export const customerEmailBcc = customerEmailSender.email;
+
+export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: { filename: string; content: Buffer }, options: { bcc?: boolean } = {}) {
   const environment = process.env as Record<string, string | undefined>;
   const smtpAppPassword = normalizeGoogleAppPassword(environment.GMAIL_SMTP_APP_PASSWORD);
   const apiKey = process.env.RESEND_API_KEY;
@@ -184,6 +187,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
     return { success: false, reason: "missing-recipient" };
   }
   const deliveredHtml = withCustomerEmailSignature(toEmail, html);
+  const bcc = options.bcc !== false && toEmail.trim().toLowerCase() !== customerEmailBcc ? customerEmailBcc : undefined;
 
   if (smtpAppPassword) {
     try {
@@ -200,6 +204,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
         from: customerEmailSender.formatted,
         replyTo: customerEmailSender.email,
         to: toEmail,
+        bcc,
         subject,
         html: deliveredHtml,
         attachments: attachment ? [attachment] : undefined,
@@ -237,6 +242,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
       from: customerEmailSender.formatted,
       reply_to: customerEmailSender.email,
       to: [toEmail],
+      ...(bcc ? { bcc: [bcc] } : {}),
       subject,
       html: deliveredHtml,
       ...(attachment ? { attachments: [{ filename: attachment.filename, content: attachment.content.toString("base64") }] } : {}),

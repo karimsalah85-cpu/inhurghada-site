@@ -43,6 +43,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     profile.email,
     "Your Daily Red Sea admin invitation",
     `<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.6"><h1 style="font-size:24px">Join the Daily Red Sea admin team</h1><p>Hello ${displayName},</p><p>Your invitation has been renewed. Use the button below to choose your password and access the admin area.</p><p style="margin:24px 0"><a href="${safeUrl}" style="display:inline-block;border-radius:10px;background:#0e7490;color:#fff;padding:12px 18px;text-decoration:none;font-weight:700">Accept invitation</a></p><p style="font-size:13px;color:#64748b">If you were not expecting this invitation, you can ignore this email.</p></div>`,
+    undefined,
+    // Staff invitation links are personal credentials, not customer communication.
+    { bcc: false },
   );
   if (!delivery.success) return NextResponse.json({ error: "The invitation email could not be sent. Check the email integration." }, { status: 502 });
 

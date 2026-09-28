@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - link "DAILY RED SEA" [ref=e2] [cursor=pointer]:
+    - /url: https://dailyredsea.com/
+  - paragraph [ref=e3]: A little more Red Sea
+  - img "Orange Bay Island Snorkeling Boat Trip from Hurghada" [ref=e4]
+  - paragraph [ref=e5]: Hurghada
+  - paragraph [ref=e6]:
+    - link "Orange Bay Island Snorkeling Boat Trip from Hurghada" [ref=e7] [cursor=pointer]:
+      - /url: https://dailyredsea.com/tours/orange-bay
+  - heading "Thank you for sharing the adventure." [level=1] [ref=e8]
+  - paragraph [ref=e9]: Sarah,
+  - paragraph [ref=e10]: We hope your trip left you with wonderful memories. It was a pleasure to have you with us.
+  - heading "How was your experience?" [level=2] [ref=e11]
+  - paragraph [ref=e12]: Your honest review helps other travellers choose their next adventure and helps us improve. Share your trip experience on our site, and review Daily Red Sea on Google too.
+  - paragraph [ref=e13]:
+    - link "Review your trip" [ref=e14] [cursor=pointer]:
+      - /url: https://dailyredsea.com/reviews?lang=en&ref=DRS-PREVIEW
+  - paragraph [ref=e15]:
+    - link "Review us on Google" [ref=e16] [cursor=pointer]:
+      - /url: https://g.page/r/CZO2rT5pTQOXEAI/review
+  - paragraph [ref=e17]: Reviews are optional. Referral rewards are separate and never depend on leaving a review or its rating.
+  - heading "GIVE 5% — EARN 5%" [level=2] [ref=e18]
+  - paragraph [ref=e19]: Give friends 5% off their first eligible booking. After they complete their experience, you earn 5% off a future booking.
+  - paragraph [ref=e20]:
+    - link "Share on WhatsApp" [ref=e21] [cursor=pointer]:
+      - /url: https://wa.me/?text=Explore%20the%20Red%20Sea%20with%20Daily%20Red%20Sea!%20Use%20my%20link%20and%20get%205%25%20off%20your%20first%20eligible%20booking.%20https%3A%2F%2Fdailyredsea.com%2F%3Fref%3DDRS-DEMO5
+  - paragraph [ref=e22]: Copy referral link
+  - paragraph [ref=e23]:
+    - link "https://dailyredsea.com/?ref=DRS-DEMO5" [ref=e24] [cursor=pointer]:
+      - /url: https://dailyredsea.com/?ref=DRS-DEMO5
+  - paragraph [ref=e25]:
+    - link "View my referral rewards →" [ref=e26] [cursor=pointer]:
+      - /url: https://dailyredsea.com/referrals
+  - paragraph [ref=e27]: Referral rewards are discounts on eligible future bookings, not cash. They cannot be withdrawn or transferred. Use up to 15% per booking; unused rewards stay available.
+  - heading "More to discover in Hurghada" [level=2] [ref=e28]
+  - link [ref=e29] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/mahmya-island
+    - img "Mahmya Island Snorkeling Boat Trip from Hurghada" [ref=e30]
+  - heading "Mahmya Island Snorkeling Boat Trip from Hurghada" [level=3] [ref=e31]
+  - link "Explore this trip →" [ref=e32] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/mahmya-island
+  - link [ref=e33] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/hula-hula-island-snorkeling
+    - img "Hula Hula Island Boat Trip and Snorkeling from Hurghada" [ref=e34]
+  - heading "Hula Hula Island Boat Trip and Snorkeling from Hurghada" [level=3] [ref=e35]
+  - link "Explore this trip →" [ref=e36] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/hula-hula-island-snorkeling
+  - link [ref=e37] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/paradise-island
+    - img "Paradise Island Snorkeling Boat Trip from Hurghada" [ref=e38]
+  - heading "Paradise Island Snorkeling Boat Trip from Hurghada" [level=3] [ref=e39]
+  - link "Explore this trip →" [ref=e40] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/paradise-island
+  - paragraph [ref=e41]: Until your next adventure,The Daily Red Sea team
+  - link "dailyredsea.com" [ref=e42] [cursor=pointer]:
+    - /url: https://dailyredsea.com/

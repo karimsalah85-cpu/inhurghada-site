@@ -41,6 +41,9 @@ export async function POST(request: NextRequest) {
       identity.customer_email,
       copy.otpSubject,
       `<p>${copy.otpSubject}</p><p style="font-size:28px;font-weight:800;letter-spacing:4px">${code}</p><p>${copy.otpBody}</p>`,
+      undefined,
+      // One-time codes must not land in a shared inbox.
+      { bcc: false },
     );
   }
   return json({ sent: true });

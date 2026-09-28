@@ -1,0 +1,56 @@
+- generic [active] [ref=f1e1]:
+  - link "DAILY RED SEA" [ref=f1e2] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar
+  - paragraph [ref=f1e3]: المزيد من سحر البحر الأحمر
+  - img "رحلة أورانج باي البحرية والسنوركلينج" [ref=f1e4]
+  - paragraph [ref=f1e5]: Hurghada
+  - paragraph [ref=f1e6]:
+    - link "رحلة أورانج باي البحرية والسنوركلينج" [ref=f1e7] [cursor=pointer]:
+      - /url: https://dailyredsea.com/ar/tours/orange-bay
+  - heading "شكراً لمشاركتنا المغامرة." [level=1] [ref=f1e8]
+  - paragraph [ref=f1e9]: سارة,
+  - paragraph [ref=f1e10]: نتمنى أن تكون رحلتك قد تركت ذكريات جميلة. سعدنا بوجودك معنا.
+  - heading "كيف كانت تجربتك؟" [level=2] [ref=f1e11]
+  - paragraph [ref=f1e12]: تقييمك الصادق يساعد المسافرين على اختيار مغامرتهم القادمة ويساعدنا على التحسين. شارك تجربة رحلتك على موقعنا، وقيّم ديلي رد سي على Google أيضاً.
+  - paragraph [ref=f1e13]:
+    - link "قيّم رحلتك" [ref=f1e14] [cursor=pointer]:
+      - /url: https://dailyredsea.com/reviews?lang=ar&ref=DRS-PREVIEW
+  - paragraph [ref=f1e15]:
+    - link "قيّمنا على Google" [ref=f1e16] [cursor=pointer]:
+      - /url: https://g.page/r/CZO2rT5pTQOXEAI/review
+  - paragraph [ref=f1e17]: التقييم اختياري. مكافآت الإحالة مستقلة ولا تعتمد أبداً على كتابة تقييم أو عدد نجومه.
+  - heading "امنح 5% — اكسب 5%" [level=2] [ref=f1e18]
+  - paragraph [ref=f1e19]: امنح أصدقاءك خصم 5% على أول حجز مؤهل لهم. وبعد إتمام رحلتهم، تحصل أنت على خصم 5% لحجز قادم.
+  - paragraph [ref=f1e20]:
+    - link "مشاركة عبر واتساب" [ref=f1e21] [cursor=pointer]:
+      - /url: https://wa.me/?text=%D8%A7%D9%83%D8%AA%D8%B4%D9%81%20%D8%A7%D9%84%D8%A8%D8%AD%D8%B1%20%D8%A7%D9%84%D8%A3%D8%AD%D9%85%D8%B1%20%D9%85%D8%B9%20%D8%AF%D9%8A%D9%84%D9%8A%20%D8%B1%D9%90%D8%AF%20%D8%B3%D9%8A!%20%D8%A7%D8%B3%D8%AA%D8%AE%D8%AF%D9%85%20%D8%B1%D8%A7%D8%A8%D8%B7%D9%8A%20%D9%88%D8%A7%D8%AD%D8%B5%D9%84%20%D8%B9%D9%84%D9%89%20%D8%AE%D8%B5%D9%85%205%25%20%D8%B9%D9%84%D9%89%20%D8%A3%D9%88%D9%84%20%D8%AD%D8%AC%D8%B2%20%D9%85%D8%A4%D9%87%D9%84%20%D9%84%D9%83.%20https%3A%2F%2Fdailyredsea.com%2Far%3Fref%3DDRS-DEMO5
+  - paragraph [ref=f1e22]: نسخ رابط الإحالة
+  - paragraph [ref=f1e23]:
+    - link "https://dailyredsea.com/ar?ref=DRS-DEMO5" [ref=f1e24] [cursor=pointer]:
+      - /url: https://dailyredsea.com/ar?ref=DRS-DEMO5
+  - paragraph [ref=f1e25]:
+    - link "عرض مكافآت الإحالة →" [ref=f1e26] [cursor=pointer]:
+      - /url: https://dailyredsea.com/ar/referrals
+  - paragraph [ref=f1e27]: مكافآت الإحالة خصومات على حجوزات مستقبلية مؤهلة وليست نقداً. لا يمكن سحبها أو تحويلها. استخدم حتى 15% لكل حجز، ويبقى الرصيد غير المستخدم متاحاً.
+  - heading "اكتشف المزيد في Hurghada" [level=2] [ref=f1e28]
+  - link [ref=f1e29] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar/tours/mahmya-island
+    - img "رحلة محمية والسنوركلينج من الغردقة" [ref=f1e30]
+  - heading "رحلة محمية والسنوركلينج من الغردقة" [level=3] [ref=f1e31]
+  - link "اكتشف هذه الرحلة →" [ref=f1e32] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar/tours/mahmya-island
+  - link [ref=f1e33] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar/tours/hula-hula-island-snorkeling
+    - img "رحلة جزيرة هولا هولا والسنوركلينج" [ref=f1e34]
+  - heading "رحلة جزيرة هولا هولا والسنوركلينج" [level=3] [ref=f1e35]
+  - link "اكتشف هذه الرحلة →" [ref=f1e36] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar/tours/hula-hula-island-snorkeling
+  - link [ref=f1e37] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar/tours/paradise-island
+    - img "رحلة بارادايس آيلاند والسنوركلينج" [ref=f1e38]
+  - heading "رحلة بارادايس آيلاند والسنوركلينج" [level=3] [ref=f1e39]
+  - link "اكتشف هذه الرحلة →" [ref=f1e40] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar/tours/paradise-island
+  - paragraph [ref=f1e41]: إلى مغامرتك القادمة،فريق ديلي رد سي
+  - link "dailyredsea.com" [ref=f1e42] [cursor=pointer]:
+    - /url: https://dailyredsea.com/ar

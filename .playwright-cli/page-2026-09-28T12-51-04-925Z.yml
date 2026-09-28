@@ -1,0 +1,50 @@
+- generic [active] [ref=f4e1]:
+  - link "DAILY RED SEA" [ref=f4e2] [cursor=pointer]:
+    - /url: https://dailyredsea.com/
+  - paragraph [ref=f4e3]: A little more Red Sea
+  - img "Sunset Quad Bike Safari" [ref=f4e4]
+  - paragraph [ref=f4e5]: Hurghada
+  - paragraph [ref=f4e6]:
+    - link "Sunset Quad Bike Safari" [ref=f4e7] [cursor=pointer]:
+      - /url: https://dailyredsea.com/tours/quad-safari-sunset
+  - heading "Thank you for sharing the adventure." [level=1] [ref=f4e8]
+  - paragraph [ref=f4e9]: Sarah,
+  - paragraph [ref=f4e10]: We hope your trip left you with wonderful memories. It was a pleasure to have you with us.
+  - heading "How was your experience?" [level=2] [ref=f4e11]
+  - paragraph [ref=f4e12]: Your honest review helps other travellers choose their next adventure and helps us improve. Share your trip experience on our site, and review Daily Red Sea on Google too.
+  - paragraph [ref=f4e13]:
+    - link "Review your trip" [ref=f4e14] [cursor=pointer]:
+      - /url: https://dailyredsea.com/reviews?lang=en&ref=DRS-PREVIEW
+  - paragraph [ref=f4e15]:
+    - link "Review us on Google" [ref=f4e16] [cursor=pointer]:
+      - /url: https://g.page/r/CZO2rT5pTQOXEAI/review
+  - paragraph [ref=f4e17]: Reviews are optional. Referral rewards are separate and never depend on leaving a review or its rating.
+  - heading "GIVE 5% — EARN 5%" [level=2] [ref=f4e18]
+  - paragraph [ref=f4e19]: Give friends 5% off their first eligible booking. After they complete their experience, you earn 5% off a future booking.
+  - paragraph [ref=f4e20]:
+    - link "Share on WhatsApp" [ref=f4e21] [cursor=pointer]:
+      - /url: https://wa.me/?text=Explore%20the%20Red%20Sea%20with%20Daily%20Red%20Sea!%20Use%20my%20link%20and%20get%205%25%20off%20your%20first%20eligible%20booking.%20https%3A%2F%2Fdailyredsea.com%2F%3Fref%3DDRS-DEMO5
+  - paragraph [ref=f4e22]: Copy referral link
+  - paragraph [ref=f4e23]:
+    - link "https://dailyredsea.com/?ref=DRS-DEMO5" [ref=f4e24] [cursor=pointer]:
+      - /url: https://dailyredsea.com/?ref=DRS-DEMO5
+  - paragraph [ref=f4e25]:
+    - link "View my referral rewards →" [ref=f4e26] [cursor=pointer]:
+      - /url: https://dailyredsea.com/referrals
+  - paragraph [ref=f4e27]: Referral rewards are discounts on eligible future bookings, not cash. They cannot be withdrawn or transferred. Use up to 15% per booking; unused rewards stay available.
+  - heading "More to discover in Hurghada" [level=2] [ref=f4e28]
+  - link [ref=f4e29] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/safari
+    - img "Desert Safari Adventure" [ref=f4e30]
+  - heading "Desert Safari Adventure" [level=3] [ref=f4e31]
+  - link "Explore this trip →" [ref=f4e32] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/safari
+  - link [ref=f4e33] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/orange-bay
+    - img "Orange Bay Island Snorkeling Boat Trip from Hurghada" [ref=f4e34]
+  - heading "Orange Bay Island Snorkeling Boat Trip from Hurghada" [level=3] [ref=f4e35]
+  - link "Explore this trip →" [ref=f4e36] [cursor=pointer]:
+    - /url: https://dailyredsea.com/tours/orange-bay
+  - paragraph [ref=f4e37]: Until your next adventure,The Daily Red Sea team
+  - link "dailyredsea.com" [ref=f4e38] [cursor=pointer]:
+    - /url: https://dailyredsea.com/
