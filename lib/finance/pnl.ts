@@ -243,8 +243,30 @@ export function drilldown(key: string, lines: PnlLine[], expenses: PnlExpense[])
 export type MarginGroup = "booking" | "tour" | "supplier" | "destination";
 export type MarginRow = {
   key: string; label: string; bookings: number; net_sales: string; margin: string; margin_pct: string | null;
+  /** Expenses linked to these bookings / this tour (USD, excluding deductible VAT), and the margin after them. */
+  direct_expenses: string; profit: string; profit_pct: string | null;
   flag: "negative" | "below_threshold" | null;
 };
+
+/**
+ * An expense linked to one booking or one tour, in USD excluding deductible
+ * VAT (null while its exchange rate is missing). Tour-linked expenses carry
+ * their tour's name and destination.
+ */
+export type DirectExpense = {
+  id: string; booking_id: string | null; tour_slug: string | null; tour_name?: string | null; destination?: string | null;
+  amount_ex_vat_usd: string | null;
+};
+
+/** Splits cents across weights (the rounding remainder goes to the last share), so the parts always add up. */
+function splitCents(amount: bigint, weights: bigint[]): bigint[] {
+  if (!weights.length) return [];
+  const usable = weights.some((weight) => weight > 0n) ? weights.map((weight) => (weight > 0n ? weight : 0n)) : weights.map(() => 1n);
+  const total = usable.reduce((sum, weight) => sum + weight, 0n);
+  const parts = usable.map((weight) => (amount * weight) / total);
+  parts[parts.length - 1] += amount - parts.reduce((sum, part) => sum + part, 0n);
+  return parts;
+}
 
 const groupKey: Record<MarginGroup, (line: PnlLine) => [string, string]> = {
   booking: (line) => [line.booking_id, line.reference],
@@ -255,24 +277,53 @@ const groupKey: Record<MarginGroup, (line: PnlLine) => [string, string]> = {
 
 /**
  * Margin (after supplier cost, agent commission and payment fees) per group,
- * in USD, on revenue excluding VAT (in the net_sales field). Flags negative margins and margins below the threshold percentage.
+ * in USD, on revenue excluding VAT (in the net_sales field), then profit after
+ * the expenses linked to the group's bookings or tour. A booking's expense is
+ * shared across its trips by revenue; a tour's expense counts for that tour
+ * and its destination only. Flags (negative / below the threshold) are on
+ * profit after linked expenses.
  */
-export function marginsBy(group: MarginGroup, lines: PnlLine[], thresholdPct: string): MarginRow[] {
+export function marginsBy(group: MarginGroup, lines: PnlLine[], thresholdPct: string, direct: DirectExpense[] = []): MarginRow[] {
   const threshold = toMinor(thresholdPct);
-  const groups = new Map<string, { label: string; bookings: Set<string>; net: bigint; margin: bigint }>();
+  const groups = new Map<string, { label: string; bookings: Set<string>; net: bigint; margin: bigint; direct: bigint }>();
+  const entryFor = (key: string, label: string) => {
+    const entry = groups.get(key) ?? { label, bookings: new Set<string>(), net: 0n, margin: 0n, direct: 0n };
+    groups.set(key, entry);
+    return entry;
+  };
+  const byBooking = new Map<string, PnlLine[]>();
   for (const line of lines.filter(lineIsConverted)) {
     const [key, label] = groupKey[group](line);
-    const entry = groups.get(key) ?? { label, bookings: new Set<string>(), net: 0n, margin: 0n };
+    const entry = entryFor(key, label);
     entry.bookings.add(line.booking_id);
     entry.net += toMinor(line.net_sales_usd!) - vatOf(line);
     entry.margin += toMinor(line.margin_amount_usd!);
-    groups.set(key, entry);
+    byBooking.set(line.booking_id, [...(byBooking.get(line.booking_id) ?? []), line]);
+  }
+  for (const expense of direct) {
+    if (expense.amount_ex_vat_usd === null) continue;
+    const amount = toMinor(expense.amount_ex_vat_usd);
+    if (expense.booking_id) {
+      const trips = byBooking.get(expense.booking_id);
+      if (!trips) continue;
+      const shares = splitCents(amount, trips.map((line) => toMinor(line.net_sales_usd!) - vatOf(line)));
+      trips.forEach((line, index) => { const [key, label] = groupKey[group](line); entryFor(key, label).direct += shares[index]; });
+    } else if (expense.tour_slug && (group === "tour" || group === "destination")) {
+      const [key, label] = group === "tour"
+        ? [expense.tour_slug, expense.tour_name || expense.tour_slug]
+        : groupKey.destination({ destination: expense.destination ?? null } as PnlLine);
+      entryFor(key, label).direct += amount;
+    }
   }
   return [...groups].map(([key, entry]) => {
-    const pct = percentOf(entry.margin, entry.net);
-    const flag = entry.margin < 0n ? "negative" as const : pct !== null && toMinor(pct) < threshold ? "below_threshold" as const : null;
-    return { key, label: entry.label, bookings: entry.bookings.size, net_sales: fromMinor(entry.net), margin: fromMinor(entry.margin), margin_pct: pct, flag };
-  }).sort((a, b) => Number(toMinor(a.margin) - toMinor(b.margin)));
+    const profit = entry.margin - entry.direct;
+    const profitPct = percentOf(profit, entry.net);
+    const flag = profit < 0n ? "negative" as const : profitPct !== null && toMinor(profitPct) < threshold ? "below_threshold" as const : null;
+    return {
+      key, label: entry.label, bookings: entry.bookings.size, net_sales: fromMinor(entry.net), margin: fromMinor(entry.margin),
+      margin_pct: percentOf(entry.margin, entry.net), direct_expenses: fromMinor(entry.direct), profit: fromMinor(profit), profit_pct: profitPct, flag,
+    };
+  }).sort((a, b) => Number(toMinor(a.profit) - toMinor(b.profit)));
 }
 
 const signed = (row: StatementRow, value: string | null) =>

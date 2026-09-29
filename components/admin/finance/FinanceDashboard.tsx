@@ -48,7 +48,7 @@ function Bars({ rows, money, empty }: { rows: MarginRow[]; money: (usd: Amount) 
       {shown.map((row) => {
         const width = max > 0n ? Number((toMinor(row.net_sales) * 1000n) / max) / 10 : 0;
         return (
-          <li key={row.key} title={`${row.label}: revenue excl. VAT ${money(row.net_sales)}, margin ${money(row.margin)}${row.margin_pct === null ? "" : ` (${row.margin_pct}%)`}, ${row.bookings} booking(s)`}>
+          <li key={row.key} title={`${row.label}: revenue excl. VAT ${money(row.net_sales)}, margin ${money(row.margin)}${row.margin_pct === null ? "" : ` (${row.margin_pct}%)`}, profit after linked expenses ${money(row.profit)}, ${row.bookings} booking(s)`}>
             <div className="flex items-baseline justify-between gap-3 text-sm">
               <span className="min-w-0 truncate font-semibold text-slate-900">{row.label}</span>
               <span className="shrink-0 tabular-nums text-slate-900">{money(row.net_sales)}</span>
@@ -57,7 +57,7 @@ function Bars({ rows, money, empty }: { rows: MarginRow[]; money: (usd: Amount) 
               <div className="h-2.5 rounded-full bg-cyan-700" style={{ width: `${Math.max(width, 1)}%` }} />
             </div>
             <p className="mt-0.5 text-xs text-slate-500">
-              Margin {money(row.margin)}{row.margin_pct === null ? "" : ` · ${row.margin_pct}%`} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}
+              Margin {money(row.margin)}{row.margin_pct === null ? "" : ` · ${row.margin_pct}%`}{row.direct_expenses && row.direct_expenses !== "0.00" ? ` · after linked expenses ${money(row.profit)}` : ""} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}
               {row.flag === "negative" ? <span className="ml-1 font-semibold text-rose-700">· losing money</span> : row.flag === "below_threshold" ? <span className="ml-1 font-semibold text-amber-800">· low margin</span> : null}
             </p>
           </li>

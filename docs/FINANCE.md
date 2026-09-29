@@ -42,9 +42,17 @@ P&L on its **trip date**:
 | Cancelled, nothing paid | none | only agreed cancellation fees |
 | Cancelled, guest paid | what the guest paid and did not get back | only agreed cancellation fees |
 
-**Margin** = revenue − all partner costs (main + extra partners) − agent
-commission − payment fees. Business expenses are subtracted in the P&L, not
-per trip.
+**Margin** = revenue (excl. VAT) − all partner costs (main + extra partners) −
+agent commission − payment fees.
+
+**Profit after linked expenses** = margin − the expenses linked to the trip:
+- An expense can be linked to **one booking**. It is shared across that booking's
+  trips by revenue.
+- Or it can be linked to **one tour**, such as snorkel gear for Giftun trips. It
+  counts against that tour and its destination.
+- It is never linked to both, so it is never counted twice.
+- The Margins page and the dashboard show both figures, and flag on profit.
+- The P&L still subtracts every expense once, by expense date.
 
 ## Guest payments, refunds and credit notes
 
@@ -110,9 +118,11 @@ rules. Change any of it on *Finance → VAT*.
 - **When VAT is due (tax point):** money a guest pays before the trip carries its
   share of the VAT in the month it was received. The rest falls in the trip
   month. Partner VAT counts by trip date, expense VAT by expense date.
-- **The VAT page** shows VAT per country and month, with each return's due date.
-  Amounts are in USD; the return itself is filed in EGP, and the CSV export has
-  each VAT amount in its original currency.
+- **The VAT page** shows VAT per country and month in the currency the return
+  is filed in (EGP; SAR for Saudi Arabia), with USD underneath and each return's
+  due date.
+  - Amounts already in that currency are used as they are.
+  - Others are converted at the rate on their tax date.
 
 **For the accountant to confirm:**
 - Daily Red Sea is VAT-registered in Egypt (it must be above EGP 250,000 a year

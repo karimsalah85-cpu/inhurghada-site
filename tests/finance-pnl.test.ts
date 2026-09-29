@@ -113,6 +113,23 @@ describe("margins", () => {
     expect(marginsBy("supplier", lines, "25").map((row) => [row.label, row.flag])).toEqual([["Sand Tours", "negative"], ["No supplier assigned", null], ["Blue Boat", "below_threshold"]]);
     expect(marginsBy("destination", lines, "15").map((row) => [row.label, row.bookings])).toEqual([["Marsa Alam", 1], ["Hurghada", 2]]);
   });
+
+  it("takes linked expenses off profit: a booking's shared across its trips by revenue, a tour's on that tour and destination", () => {
+    const direct = [
+      { id: "x1", booking_id: "a", tour_slug: null, amount_ex_vat_usd: "15.01" },         // 100 : 50 -> 10.00 + 5.01
+      { id: "x2", booking_id: null, tour_slug: "safari", tour_name: "Safari", destination: "marsa-alam", amount_ex_vat_usd: "20.00" },
+      { id: "x3", booking_id: "zzz", tour_slug: null, amount_ex_vat_usd: "99.00" },        // booking not in the report: ignored
+      { id: "x4", booking_id: "a", tour_slug: null, amount_ex_vat_usd: null },             // waiting for a rate: left out
+    ];
+    const booking = marginsBy("booking", lines, "15", direct).find((row) => row.label === lines[0].reference)!;
+    expect([booking.margin, booking.direct_expenses, booking.profit, booking.profit_pct, booking.flag]).toEqual(["32.00", "15.01", "16.99", "11.33", "below_threshold"]);
+    const tours = marginsBy("tour", lines, "15", direct);
+    expect(tours.map((row) => [row.label, row.margin, row.direct_expenses, row.profit])).toEqual([["Safari", "-3.00", "25.01", "-28.01"], ["Reef", "30.00", "10.00", "20.00"]]);
+    const destinations = marginsBy("destination", lines, "15", direct);
+    expect(destinations.map((row) => [row.label, row.direct_expenses])).toEqual([["Marsa Alam", "20.00"], ["Hurghada", "15.01"]]);
+    // Supplier view: only booking-linked expenses can be attributed.
+    expect(marginsBy("supplier", lines, "15", direct).find((row) => row.label === "Blue Boat")?.direct_expenses).toBe("15.01");
+  });
 });
 
 describe("P&L from real booking financials (in-memory Postgres)", () => {

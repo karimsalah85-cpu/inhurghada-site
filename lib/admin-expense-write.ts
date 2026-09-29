@@ -52,6 +52,8 @@ export type NormalizedExpense = {
   supplierId: string | null;
   salesPersonId: string | null;
   bookingId: string | null;
+  /** A tour the expense is for, when it is not for one booking. */
+  tourSlug?: string | null;
   vendor: string | null;
   invoiceNumber: string | null;
   /** undefined = default purchases VAT rate; null = no VAT. */
@@ -81,6 +83,7 @@ export function normalizeExpensePayload(
       supplierId: input.supplier_id,
       salesPersonId: input.sales_person_id,
       bookingId: input.booking_id,
+      tourSlug: input.tour_slug,
       vendor: input.vendor,
       invoiceNumber: input.invoice_number,
       taxRateId: input.tax_rate_id,
@@ -98,7 +101,7 @@ export async function insertExpense(
   supabase: SupabaseClient,
   value: NormalizedExpense,
 ): Promise<{ expense: ExpenseRow; warning?: string } | { error: string; status: number }> {
-  const { description, amount, currency, date, category, expenseType, supplierId, salesPersonId, bookingId, vendor, invoiceNumber, taxRateId } = value;
+  const { description, amount, currency, date, category, expenseType, supplierId, salesPersonId, bookingId, tourSlug, vendor, invoiceNumber, taxRateId } = value;
 
   const { data, error } = await supabase
     .from("expenses")
@@ -116,6 +119,7 @@ export async function insertExpense(
       ...(vendor ? { vendor } : {}),
       ...(invoiceNumber ? { invoice_number: invoiceNumber } : {}),
       ...(taxRateId ? { tax_rate_id: taxRateId } : {}),
+      ...(tourSlug ? { tour_slug: tourSlug } : {}),
     })
     .select()
     .single();

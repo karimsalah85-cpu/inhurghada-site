@@ -100,6 +100,7 @@ type Expense = {
   supplier_id?: string | null;
   sales_person_id?: string | null;
   booking_id?: string | null;
+  tour_slug?: string | null;
   voided_at?: string | null;
   void_reason?: string | null;
   tax_rate_id?: string | null;
@@ -174,6 +175,7 @@ export default function AdminDashboard({
   analyticsRange,
   initialControlPanel,
   renderedAt,
+  tourOptions = [],
 }: {
   mode?:
     | "overview"
@@ -199,6 +201,8 @@ export default function AdminDashboard({
   initialVisibleBookings: Booking[];
   bookingView: BookingView;
   initialExpenses: Expense[];
+  /** Catalog tours an expense can be linked to. */
+  tourOptions?: { slug: string; title: string }[];
   initialExpenseTypes?: ExpenseType[];
   initialSuppliers: Supplier[];
   initialSalesPeople: SalesPerson[];
@@ -255,7 +259,7 @@ export default function AdminDashboard({
   const [showManualBooking, setShowManualBooking] = useState(false);
   const [expense, setExpense] = useState<{
     description: string; amount: string; currency: string; category: string; date: string; expense_type: string;
-    supplier_id: string; sales_person_id: string; booking_id: string;
+    supplier_id: string; sales_person_id: string; booking_id: string; tour_slug: string;
     /** undefined = the default purchases VAT rate; null = no VAT. */
     tax_rate_id?: string | null;
   }>({
@@ -268,6 +272,7 @@ export default function AdminDashboard({
     supplier_id: "",
     sales_person_id: "",
     booking_id: "",
+    tour_slug: "",
   });
   const taxRates = useTaxRates();
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
@@ -742,6 +747,7 @@ export default function AdminDashboard({
       supplier_id: "",
       sales_person_id: "",
       booking_id: "",
+      tour_slug: "",
       tax_rate_id: undefined,
     });
     setEditingExpenseId(null);
@@ -759,6 +765,7 @@ export default function AdminDashboard({
       supplier_id: item.supplier_id || "",
       sales_person_id: item.sales_person_id || "",
       booking_id: item.booking_id || "",
+      tour_slug: item.tour_slug || "",
       tax_rate_id: item.tax_rate_id ?? null,
     });
     document.getElementById("expenses")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1953,27 +1960,39 @@ export default function AdminDashboard({
                   </select>
                 </label>
               ) : null}
-              {!editingExpenseId && ["supplier_per_trip", "sales_commission"].includes(
-                expense.expense_type,
-              ) ? (
+              <label className="block text-sm font-semibold">
+                For a booking{" "}
+                <span className="font-normal text-slate-400">optional, counts against its profit</span>
+                <select
+                  value={expense.booking_id}
+                  onChange={(event) =>
+                    setExpense({ ...expense, booking_id: event.target.value, tour_slug: event.target.value ? "" : expense.tour_slug })
+                  }
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
+                >
+                  <option value="">No booking</option>
+                  {bookings
+                    .filter((item) => item.status !== "cancelled" || item.id === expense.booking_id)
+                    .map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.reference} · {item.tour_name || "Transfer"}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              {!expense.booking_id && tourOptions.length ? (
                 <label className="block text-sm font-semibold">
-                  Booking{" "}
-                  <span className="font-normal text-slate-400">optional</span>
+                  Or for a tour{" "}
+                  <span className="font-normal text-slate-400">optional, e.g. gear for one trip</span>
                   <select
-                    value={expense.booking_id}
-                    onChange={(event) =>
-                      setExpense({ ...expense, booking_id: event.target.value })
-                    }
+                    value={expense.tour_slug}
+                    onChange={(event) => setExpense({ ...expense, tour_slug: event.target.value })}
                     className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
                   >
-                    <option value="">No booking selected</option>
-                    {bookings
-                      .filter((item) => item.status !== "cancelled")
-                      .map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.reference} · {item.tour_name || "Transfer"}
-                        </option>
-                      ))}
+                    <option value="">No tour</option>
+                    {tourOptions.map((tour) => (
+                      <option key={tour.slug} value={tour.slug}>{tour.title}</option>
+                    ))}
                   </select>
                 </label>
               ) : null}

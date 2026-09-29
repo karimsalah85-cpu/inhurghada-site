@@ -80,6 +80,9 @@ export const expenseInputSchema = z.object({
   supplier_id: optionalId,
   sales_person_id: optionalId,
   booking_id: optionalId,
+  /** A tour this expense is for (e.g. gear for one trip), when it is not for one booking. */
+  tour_slug: z.union([z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9-]{0,99}$/, "Choose a tour from the list."), z.literal(""), z.null()])
+    .optional().transform((value) => value || null),
   vendor: optionalText(200),
   invoice_number: optionalText(120),
   /** Omitted = the default purchases VAT rate (if any); "" or null = no VAT. */
@@ -87,6 +90,9 @@ export const expenseInputSchema = z.object({
 }).superRefine((value, context) => {
   if (value.expense_type === "supplier_per_trip" && !value.supplier_id) {
     context.addIssue({ code: "custom", path: ["supplier_id"], message: "Choose a supplier for this trip expense." });
+  }
+  if (value.booking_id && value.tour_slug) {
+    context.addIssue({ code: "custom", path: ["tour_slug"], message: "Link the expense to a booking or to a tour, not both." });
   }
   if (value.expense_type === "sales_commission" && !value.sales_person_id) {
     context.addIssue({ code: "custom", path: ["sales_person_id"], message: "Choose a sales person for this commission." });

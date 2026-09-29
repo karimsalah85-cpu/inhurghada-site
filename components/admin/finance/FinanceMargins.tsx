@@ -5,7 +5,7 @@ import { initialQuery, queryString, ReportFilters, type ReportOptions, type Repo
 import { formatMoney } from "@/lib/finance/money";
 import type { MarginGroup, MarginRow } from "@/lib/finance/pnl";
 
-type Payload = { configured: boolean; error?: string; threshold: string; rows: MarginRow[]; pending: number; options: ReportOptions };
+type Payload = { configured: boolean; error?: string; threshold: string; rows: MarginRow[]; pending: number; directPending?: number; options: ReportOptions };
 const groups: { key: MarginGroup; label: string }[] = [
   { key: "booking", label: "Per booking" }, { key: "tour", label: "Per tour" }, { key: "supplier", label: "Per supplier" }, { key: "destination", label: "Per destination" },
 ];
@@ -64,33 +64,36 @@ export default function FinanceMargins() {
       </div>
       {error ? <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p> : null}
       {notice ? <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p> : null}
-      <p className="mt-4 text-xs text-slate-500">Margin = net sales − supplier cost − agent commission − payment fees, in USD at each trip-date rate. Worst first. {flagged} flagged{data?.pending ? ` · ${data.pending} booking lines not included until their USD rate is final` : ""}.</p>
+      <p className="mt-4 text-xs text-slate-500">Margin = revenue excl. VAT − partner costs − agent commission − payment fees, in USD at each trip-date rate. Profit = margin − expenses linked to the booking or tour (a booking&apos;s expense is shared across its trips; a tour&apos;s expense counts for that tour and its destination). Worst profit first; flags are on profit. {flagged} flagged{data?.pending ? ` · ${data.pending} booking lines not included until their USD rate is final` : ""}{data?.directPending ? ` · ${data.directPending} linked expenses waiting for a rate` : ""}.</p>
       {!data ? <p className="mt-4 text-sm text-slate-500">Loading margins…</p> : <>
       <ul className="mt-3 space-y-2 md:hidden">
         {rows.map((row) => <li key={row.key} className="rounded-xl border border-slate-200 p-3 text-sm">
           <div className="flex items-start justify-between gap-3">
             <p className="min-w-0 font-semibold text-slate-900">{group === "supplier" && row.key !== "none" ? <a href={`/admin/finance/suppliers/${row.key}`} className="underline">{row.label}</a> : row.label}</p>
-            <p className={`shrink-0 text-right font-bold tabular-nums ${row.flag === "negative" ? "text-rose-700" : ""}`}>{formatMoney(row.margin)}<span className="block text-xs font-normal text-slate-500">{row.margin_pct === null ? "—" : `${row.margin_pct}%`}</span></p>
+            <p className={`shrink-0 text-right font-bold tabular-nums ${row.flag === "negative" ? "text-rose-700" : ""}`}>{formatMoney(row.profit)}<span className="block text-xs font-normal text-slate-500">profit {row.profit_pct === null ? "—" : `${row.profit_pct}%`}</span></p>
           </div>
-          <p className="mt-1 text-xs text-slate-500">Revenue excl. VAT {formatMoney(row.net_sales)} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}</p>
+          <p className="mt-1 text-xs text-slate-500">Revenue excl. VAT {formatMoney(row.net_sales)} · margin {formatMoney(row.margin)}{row.direct_expenses !== "0.00" ? ` · linked expenses ${formatMoney(row.direct_expenses)}` : ""} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}</p>
           {row.flag === "negative" ? <p className="mt-1 text-xs font-bold text-rose-800">▼ Negative margin</p> : row.flag === "below_threshold" ? <p className="mt-1 text-xs font-bold text-amber-900">! Below {data.threshold}%</p> : null}
         </li>)}
         {!rows.length ? <li className="py-6 text-center text-slate-500">{onlyFlagged ? "Nothing flagged in this period." : "No bookings in this period."}</li> : null}
       </ul>
       <div className="mt-3 hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-2 pr-3">{groups.find((item) => item.key === group)?.label.replace("Per ", "")}</th><th className="py-2 pr-3 text-right">Bookings</th><th className="py-2 pr-3 text-right">Revenue excl. VAT</th><th className="py-2 pr-3 text-right">Margin</th><th className="py-2 pr-3 text-right">Margin %</th><th className="py-2">Flag</th></tr></thead>
+        <table className="w-full min-w-[820px] text-left text-sm">
+          <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-2 pr-3">{groups.find((item) => item.key === group)?.label.replace("Per ", "")}</th><th className="py-2 pr-3 text-right">Bookings</th><th className="py-2 pr-3 text-right">Revenue excl. VAT</th><th className="py-2 pr-3 text-right">Margin</th><th className="py-2 pr-3 text-right">Margin %</th><th className="py-2 pr-3 text-right">Linked expenses</th><th className="py-2 pr-3 text-right">Profit</th><th className="py-2 pr-3 text-right">Profit %</th><th className="py-2">Flag</th></tr></thead>
           <tbody>
             {rows.map((row) => <tr key={row.key} className="border-t border-slate-100">
               <td className="py-2 pr-3 font-semibold text-slate-900">{group === "supplier" && row.key !== "none" ? <a href={`/admin/finance/suppliers/${row.key}`} className="hover:text-cyan-700 hover:underline">{row.label}</a> : row.label}</td>
               <td className="py-2 pr-3 text-right tabular-nums">{row.bookings}</td>
               <td className="py-2 pr-3 text-right tabular-nums">{formatMoney(row.net_sales)}</td>
-              <td className={`py-2 pr-3 text-right tabular-nums ${row.flag === "negative" ? "font-bold text-rose-700" : ""}`}>{formatMoney(row.margin)}</td>
+              <td className="py-2 pr-3 text-right tabular-nums">{formatMoney(row.margin)}</td>
               <td className="py-2 pr-3 text-right tabular-nums">{row.margin_pct === null ? "—" : `${row.margin_pct}%`}</td>
+              <td className="py-2 pr-3 text-right tabular-nums">{row.direct_expenses === "0.00" ? "—" : formatMoney(row.direct_expenses)}</td>
+              <td className={`py-2 pr-3 text-right tabular-nums ${row.flag === "negative" ? "font-bold text-rose-700" : "font-semibold"}`}>{formatMoney(row.profit)}</td>
+              <td className="py-2 pr-3 text-right tabular-nums">{row.profit_pct === null ? "—" : `${row.profit_pct}%`}</td>
               <td className="py-2">{row.flag === "negative" ? <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-800 ring-1 ring-rose-200">▼ Negative margin</span>
                 : row.flag === "below_threshold" ? <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-900 ring-1 ring-amber-200">! Below {data.threshold}%</span> : null}</td>
             </tr>)}
-            {!rows.length ? <tr><td colSpan={6} className="py-6 text-center text-slate-500">{onlyFlagged ? "Nothing flagged in this period." : "No bookings in this period."}</td></tr> : null}
+            {!rows.length ? <tr><td colSpan={9} className="py-6 text-center text-slate-500">{onlyFlagged ? "Nothing flagged in this period." : "No bookings in this period."}</td></tr> : null}
           </tbody>
         </table>
       </div></>}

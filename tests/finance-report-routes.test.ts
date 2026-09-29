@@ -17,7 +17,7 @@ import { PUT as putSettings } from "@/app/api/admin/finance/settings/route";
 /** A chainable PostgREST query double that resolves to `result`. */
 function query(result: { data: unknown; error: unknown }) {
   const chain: Record<string, unknown> = {};
-  for (const method of ["select", "eq", "is", "gte", "lte", "order", "range", "in", "upsert", "maybeSingle"]) chain[method] = vi.fn(() => chain);
+  for (const method of ["select", "eq", "is", "not", "gte", "lte", "order", "range", "in", "upsert", "maybeSingle"]) chain[method] = vi.fn(() => chain);
   chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve);
   return chain;
 }

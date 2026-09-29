@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
+import { tourDimensions } from "@/lib/finance/dimensions";
 import AdminLegacyHashRedirect from "@/components/admin/AdminLegacyHashRedirect";
 import { createClient } from "@/utils/supabase/server";
 import {
@@ -468,6 +469,7 @@ export default async function AdminPage({
             analyticsRange={analyticsRange}
             initialControlPanel={controlPanel}
             renderedAt={bookingsLoadedAt}
+            tourOptions={tourDimensions().map((tour) => ({ slug: tour.tour_slug, title: tour.tour_name }))}
           />
         )}
       </div>

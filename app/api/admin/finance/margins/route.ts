@@ -3,11 +3,11 @@ import { financeAuthorization, financeDbError, financeJson } from "@/lib/finance
 import { toCsv } from "@/lib/finance/csv";
 import { marginsBy, type MarginGroup } from "@/lib/finance/pnl";
 import { firstIssue } from "@/lib/finance/schemas";
-import { describeFilters, marginThreshold, parseReportQuery, reportFilterOptions, reportLines } from "@/lib/finance/reporting-data";
+import { describeFilters, marginThreshold, parseReportQuery, reportDirectExpenses, reportFilterOptions, reportLines } from "@/lib/finance/reporting-data";
 
 const groups: MarginGroup[] = ["booking", "tour", "supplier", "destination"];
 
-/** Margin per booking / tour / supplier / destination (USD), with negative and below-threshold flags. ?format=csv exports. */
+/** Margin and profit after linked expenses per booking / tour / supplier / destination (USD), with negative and below-threshold flags. ?format=csv exports. */
 export async function GET(request: NextRequest) {
   const { supabase, user, allowed } = await financeAuthorization("view_finance");
   if (!user) return financeJson({ error: "Sign in required." }, 401);
@@ -22,7 +22,9 @@ export async function GET(request: NextRequest) {
   const query = parsed.data;
   try {
     const [lines, threshold, options] = await Promise.all([reportLines(supabase, query, query), marginThreshold(supabase), reportFilterOptions(supabase)]);
-    const rows = marginsBy(group, lines, threshold);
+    const direct = await reportDirectExpenses(supabase, lines, query, query);
+    const rows = marginsBy(group, lines, threshold, direct);
+    const directPending = direct.filter((expense) => expense.amount_ex_vat_usd === null).length;
     const pending = lines.length - lines.filter((line) => line.margin_amount_usd !== null && line.net_sales_usd !== null).length;
     if (format === "csv") {
       const filters = describeFilters(query, { supplier: options.suppliers.find((supplier) => supplier.id === query.supplier)?.name });
@@ -30,12 +32,13 @@ export async function GET(request: NextRequest) {
         ["Daily Red Sea margins (USD, accrual by trip date) - management reporting"],
         ["Period", `${query.from} to ${query.to}`], ["Grouped by", group], ["Filters", filters || "none"], ["Flag threshold", `${threshold}%`],
         [],
-        ["Name", "Bookings", "Revenue excl. VAT (USD)", "Margin (USD)", "Margin %", "Flag"],
-        ...rows.map((row) => [row.label, row.bookings, row.net_sales, row.margin, row.margin_pct === null ? "" : `${row.margin_pct}%`, row.flag ?? ""]),
+        ["Name", "Bookings", "Revenue excl. VAT (USD)", "Margin (USD)", "Margin %", "Linked expenses (USD)", "Profit after linked expenses (USD)", "Profit %", "Flag"],
+        ...rows.map((row) => [row.label, row.bookings, row.net_sales, row.margin, row.margin_pct === null ? "" : `${row.margin_pct}%`,
+          row.direct_expenses, row.profit, row.profit_pct === null ? "" : `${row.profit_pct}%`, row.flag ?? ""]),
       ]);
       return new Response(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="margins-by-${group}-${query.from}-to-${query.to}.csv"`, "Cache-Control": "private, no-store" } });
     }
-    return financeJson({ configured: true, query, group, threshold, rows, pending, options });
+    return financeJson({ configured: true, query, group, threshold, rows, pending, directPending, options });
   } catch (error) {
     return financeDbError(error);
   }

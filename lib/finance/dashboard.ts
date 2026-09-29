@@ -2,7 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
 import { computePnl, marginsBy } from "@/lib/finance/pnl";
-import { expenseTypeLabels, marginThreshold, reportExpenses, reportLines } from "@/lib/finance/reporting-data";
+import { expenseTypeLabels, marginThreshold, reportDirectExpenses, reportExpenses, reportLines } from "@/lib/finance/reporting-data";
 import { supplierSummaries } from "@/lib/finance/supplier-data";
 
 type Amount = string | number | null;
@@ -30,6 +30,7 @@ export async function financeDashboard(supabase: SupabaseClient, range: { from: 
     rows(supabase.from("fx_rates").select("currency,units_per_usd,rate_date").order("rate_date", { ascending: false }).limit(60)),
   ]);
 
+  const direct = await reportDirectExpenses(supabase, lines, range, {});
   const pnl = computePnl(lines, expenses, labels);
   const totals = Object.fromEntries(Object.entries(pnl.totals).map(([key, value]) => [key, fromMinor(value)]));
 
@@ -59,8 +60,8 @@ export async function financeDashboard(supabase: SupabaseClient, range: { from: 
       usd_pending: cashFlow.reduce((total, row) => total + Number((row as Record<string, Amount>).usd_pending ?? 0), 0),
     },
     partners: { we_owe_usd: fromMinor(weOwe), owed_to_us_usd: fromMinor(owedToUs), top: topOwed, missing_rates: [...new Set(partners.suppliers.flatMap((supplier) => supplier.missing_rates))] },
-    byTour: marginsBy("tour", lines, threshold).sort((a, b) => Number(toMinor(b.net_sales) - toMinor(a.net_sales))),
-    byDestination: marginsBy("destination", lines, threshold).sort((a, b) => Number(toMinor(b.net_sales) - toMinor(a.net_sales))),
+    byTour: marginsBy("tour", lines, threshold, direct).sort((a, b) => Number(toMinor(b.net_sales) - toMinor(a.net_sales))),
+    byDestination: marginsBy("destination", lines, threshold, direct).sort((a, b) => Number(toMinor(b.net_sales) - toMinor(a.net_sales))),
     cancellations: {
       bookings: cancellations.reduce((total, row) => total + Number((row as Record<string, Amount>).bookings ?? 0), 0),
       lost_sales_usd: sumField(cancellations, (row: Record<string, Amount>) => row.lost_sales_usd),

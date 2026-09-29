@@ -1,16 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { formatMoney, fromMinor, toMinor } from "@/lib/finance/money";
+import { formatMoney, fromMinor, isFinanceCurrency, toMinor } from "@/lib/finance/money";
 import { loadTaxRates, type TaxRate } from "@/components/admin/finance/TaxRateSelect";
 
 type Amount = string | number | null;
 type Country = { country: string; name: string; is_home: boolean; destinations: string[]; filing_frequency: "monthly" | "quarterly"; filing_due_months: number };
-type Month = { country: string; country_name: string; filing_due_on: string; filing_frequency: string; month: string; output_vat_usd: Amount; input_vat_usd: Amount; net_vat_usd: Amount; output_items: number; input_items: number; usd_pending: number };
+type Month = { country: string; country_name: string; filing_due_on: string; filing_frequency: string; month: string;
+  local_currency?: string; output_vat_local?: Amount; input_vat_local?: Amount; net_vat_local?: Amount; local_pending?: number; output_vat_usd: Amount; input_vat_usd: Amount; net_vat_usd: Amount; output_items: number; input_items: number; usd_pending: number };
 const field = "mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 text-base font-normal sm:text-sm";
 const usd = (value: Amount) => formatMoney(fromMinor(value === null || value === undefined ? 0n : toMinor(value)), "USD");
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 const kindLabel = { sales: "Sales", purchases: "Purchases", both: "Sales & purchases" } as const;
+const local = (value: Amount | undefined, currency: string | undefined) => (currency && isFinanceCurrency(currency) ? formatMoney(fromMinor(value === null || value === undefined ? 0n : toMinor(value)), currency) : null);
 const dayLabel = (day: string) => new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const monthLabel = (month: string) => new Date(`${month}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
 
@@ -144,7 +146,7 @@ export default function FinanceVat() {
       </section>
 
       <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
-        <h2 className="text-xl font-black">VAT returns (USD)</h2>
+        <h2 className="text-xl font-black">VAT returns</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-md">
           <label className="text-sm font-semibold">From<input type="date" value={from} onChange={(event) => setFrom(event.target.value)} className={field} /></label>
           <label className="text-sm font-semibold">To<input type="date" value={to} onChange={(event) => setTo(event.target.value)} className={field} /></label>
@@ -152,23 +154,24 @@ export default function FinanceVat() {
         {!months ? <p role="status" className="mt-4 text-sm">Loading…</p> : months.length ? (
           <>
             <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs text-slate-500">VAT on sales</dt><dd className="font-black">{usd(fromMinor(total("output_vat_usd")))}</dd></div>
-              <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs text-slate-500">VAT on purchases</dt><dd className="font-black">{usd(fromMinor(total("input_vat_usd")))}</dd></div>
-              <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs text-slate-500">Net VAT</dt><dd className="font-black">{usd(fromMinor(total("net_vat_usd")))}</dd></div>
+              <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs text-slate-500">VAT on sales (USD)</dt><dd className="font-black">{usd(fromMinor(total("output_vat_usd")))}</dd></div>
+              <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs text-slate-500">VAT on purchases (USD)</dt><dd className="font-black">{usd(fromMinor(total("input_vat_usd")))}</dd></div>
+              <div className="rounded-xl bg-slate-50 p-3"><dt className="text-xs text-slate-500">Net VAT (USD)</dt><dd className="font-black">{usd(fromMinor(total("net_vat_usd")))}</dd></div>
             </dl>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead><tr className="border-b text-left text-xs text-slate-500"><th className="py-2">Month</th><th className="pr-3 text-right">On sales</th><th className="pr-3 text-right">On purchases</th><th className="pr-2 text-right">Net</th><th className="hidden sm:table-cell">Items</th></tr></thead>
                 <tbody>{months.map((month) => (
                   <tr key={`${month.country}-${month.month}`} className="border-b last:border-0">
-                    <td className="py-2 pr-2"><span className="font-semibold">{monthLabel(month.month)}</span>{countries.length > 1 ? <span className="block text-xs text-slate-500">{month.country_name}</span> : null}<span className="block text-xs text-slate-500">Return due {dayLabel(month.filing_due_on)}</span></td><td className="whitespace-nowrap pr-3 text-right tabular-nums">{usd(month.output_vat_usd)}</td><td className="whitespace-nowrap pr-3 text-right tabular-nums">{usd(month.input_vat_usd)}</td>
-                    <td className="whitespace-nowrap pr-2 text-right font-bold tabular-nums">{usd(month.net_vat_usd)}</td>
-                    <td className="hidden text-xs text-slate-500 sm:table-cell">{month.output_items + month.input_items}{month.usd_pending ? ` · ${month.usd_pending} awaiting rate` : ""}</td>
+                    <td className="py-2 pr-2"><span className="font-semibold">{monthLabel(month.month)}</span>{countries.length > 1 ? <span className="block text-xs text-slate-500">{month.country_name}</span> : null}<span className="block text-xs text-slate-500">Return due {dayLabel(month.filing_due_on)}</span></td><td className="whitespace-nowrap pr-3 text-right tabular-nums">{local(month.output_vat_local, month.local_currency) ?? usd(month.output_vat_usd)}{local(month.output_vat_local, month.local_currency) ? <span className="block text-xs text-slate-500">{usd(month.output_vat_usd)}</span> : null}</td>
+                    <td className="whitespace-nowrap pr-3 text-right tabular-nums">{local(month.input_vat_local, month.local_currency) ?? usd(month.input_vat_usd)}{local(month.input_vat_local, month.local_currency) ? <span className="block text-xs text-slate-500">{usd(month.input_vat_usd)}</span> : null}</td>
+                    <td className="whitespace-nowrap pr-2 text-right font-bold tabular-nums">{local(month.net_vat_local, month.local_currency) ?? usd(month.net_vat_usd)}{local(month.net_vat_local, month.local_currency) ? <span className="block text-xs font-normal text-slate-500">{usd(month.net_vat_usd)}</span> : null}</td>
+                    <td className="hidden text-xs text-slate-500 sm:table-cell">{month.output_items + month.input_items}{month.usd_pending || month.local_pending ? ` · ${Math.max(month.usd_pending, month.local_pending ?? 0)} awaiting rate` : ""}</td>
                   </tr>
                 ))}</tbody>
               </table>
             </div>
-            <p className="mt-2 text-xs text-slate-500">Sales VAT is counted at the tax point: money a guest pays before the trip carries its share of VAT in the month it was received, the rest falls in the trip month. Partner VAT by trip date, expenses by expense date. VAT is in USD here; the return itself is filed in the local currency.</p>
+            <p className="mt-2 text-xs text-slate-500">Sales VAT is counted at the tax point: money a guest pays before the trip carries its share of VAT in the month it was received, the rest falls in the trip month. Partner VAT by trip date, expenses by expense date. Each month is in the currency its return is filed in (EGP for Egypt, SAR for Saudi Arabia): amounts already in it are used as they are, others are converted at the rate on their tax date. USD underneath; the totals above are USD.</p>
           </>
         ) : <p className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No VAT recorded in this period.</p>}
       </section>

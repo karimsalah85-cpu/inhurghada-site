@@ -4,7 +4,8 @@ import { z } from "zod";
 import { DEFAULT_EXPENSE_TYPES } from "@/lib/admin-expense-write";
 import { FinanceNotConfiguredError } from "@/lib/finance/supplier-data";
 import { idSchema, isoDateSchema } from "@/lib/finance/schemas";
-import type { PnlExpense, PnlLine } from "@/lib/finance/pnl";
+import type { DirectExpense, PnlExpense, PnlLine } from "@/lib/finance/pnl";
+import { fromMinor, toMinor } from "@/lib/finance/money";
 
 const MISSING = new Set(["42P01", "42703", "42883", "PGRST200", "PGRST202", "PGRST205"]);
 const PAGE = 1000; // PostgREST max_rows
@@ -75,6 +76,43 @@ export async function reportLines(supabase: SupabaseClient, range: { from: strin
     }
     if (!data || data.length < PAGE) return rows;
   }
+}
+
+/**
+ * Expenses linked to the bookings in the report (whatever their date) and to
+ * a tour (expense date in range, matching the tour / destination filters), in
+ * USD excluding deductible VAT. Supplier-filtered reports only use booking links.
+ */
+export async function reportDirectExpenses(supabase: SupabaseClient, lines: PnlLine[], range: { from: string; to: string }, query: Partial<ReportQuery>): Promise<DirectExpense[]> {
+  const columns = "id,booking_id,tour_slug,amount,amount_usd,tax_amount,tax_usd";
+  const found: Record<string, unknown>[] = [];
+  const bookingIds = [...new Set(lines.map((line) => line.booking_id))];
+  for (let index = 0; index < bookingIds.length; index += 200) {
+    const { data, error } = await supabase.from("expenses").select(columns).is("voided_at", null).in("booking_id", bookingIds.slice(index, index + 200));
+    if (error) fail(error);
+    found.push(...(data || []));
+  }
+  let dims = new Map<string, { tour_name: string; destination: string | null }>();
+  if (!query.supplier) {
+    for (let offset = 0; ; offset += PAGE) {
+      const { data, error } = await supabase.from("expenses").select(columns).is("voided_at", null).not("tour_slug", "is", null)
+        .gte("expense_date", range.from).lte("expense_date", range.to).order("id").range(offset, offset + PAGE - 1);
+      if (error) fail(error);
+      found.push(...(data || []));
+      if (!data || data.length < PAGE) break;
+    }
+    const { data } = await supabase.from("finance_tour_dimensions").select("tour_slug,tour_name,destination");
+    dims = new Map((data || []).map((row) => [String(row.tour_slug), { tour_name: String(row.tour_name), destination: row.destination === null ? null : String(row.destination) }]));
+  }
+  const text = (value: unknown) => (value === null || value === undefined ? null : String(value));
+  return found.flatMap((row) => {
+    const tour = text(row.tour_slug);
+    const dim = tour ? dims.get(tour) : undefined;
+    if (tour && ((query.tour && query.tour !== tour) || (query.destination && query.destination !== dim?.destination) || query.product_line)) return [];
+    const vatMissing = row.tax_usd === null && Number(row.tax_amount ?? 0) !== 0;
+    const amount = row.amount_usd === null || vatMissing ? null : fromMinor(toMinor(String(row.amount_usd)) - toMinor(String(row.tax_usd ?? 0)));
+    return [{ id: String(row.id), booking_id: text(row.booking_id), tour_slug: tour, tour_name: dim?.tour_name ?? null, destination: dim?.destination ?? null, amount_ex_vat_usd: amount }];
+  });
 }
 
 /** Non-voided expenses with an invoice date in range. Operating expenses are company-wide and never trip-filtered. */
