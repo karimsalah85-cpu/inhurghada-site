@@ -9,18 +9,9 @@ function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 }
 
-export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
-  const { id } = await context.params;
-  if (!uuidPattern.test(id)) return json({ error: "Invalid expense identifier." }, 400);
-  const { supabase, user, allowed } = await getAdminAuthorization("edit_expenses");
-  if (!allowed) return json({ error: "Expense-editing permission required." }, 403);
-  const { data: before } = await supabase.from("expenses").select("*").eq("id", id).maybeSingle();
-  if (!before) return json({ error: "Expense not found." }, 404);
-  const { error } = await supabase.from("expenses").delete().eq("id", id);
-  if (error) return json({ error: "Could not delete the expense." }, 500);
-  await supabase.rpc("record_admin_audit", { action_name: "delete", resource_name: "expense", resource_identifier: id, summary_text: `Deleted expense ${before.description}`, before_value: { ...before, actor: user?.email } });
-  return json({ ok: true });
+// Expenses are voided (POST ./void with a reason), never deleted.
+export async function DELETE() {
+  return json({ error: "Expenses are never deleted. Void the expense with a reason instead." }, 405);
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {

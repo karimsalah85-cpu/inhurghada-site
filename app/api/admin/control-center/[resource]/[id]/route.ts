@@ -90,6 +90,14 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const usages = [...(explicitUsages || []), ...legacyUsages];
     if (usages.length) return NextResponse.json({ error: "This image is still in use and cannot be deleted.", usages }, { status: 409 });
   }
+  // Assignments carry partner costs, so "removing" one cancels it; the finance
+  // sync then drops its cost and reverses what the partner was owed.
+  if (resource === "assignments") {
+    const { error: cancelError } = await supabase.from(table).update({ status: "cancelled", updated_at: new Date().toISOString() }).eq(key, id);
+    if (cancelError) return NextResponse.json({ error: cancelError.message }, { status: 400 });
+    await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: resource, resource_identifier: id, summary_text: "Cancelled assignment", before_value: before });
+    return NextResponse.json({ deleted: false, cancelled: true }, { headers: { "Cache-Control": "private, no-store" } });
+  }
   const { error } = await supabase.from(table).delete().eq(key, id);
   if (error) return NextResponse.json({ error: error.code === "23505" ? "This Trip ID or URL slug is already in use." : error.message }, { status: 400 });
   await supabase.rpc("record_admin_audit", { action_name: "delete", resource_name: resource, resource_identifier: id, summary_text: `Deleted ${resource} record`, before_value: before });

@@ -18,5 +18,12 @@ psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
 ```
 
 The test runs in one transaction and rolls back every synthetic fixture. The
-seed contains only a non-public synthetic marker. Do not put customer data,
+seed contains only a non-public synthetic marker, plus `seeds/finance_demo.sql`:
+synthetic partners, bookings, expenses and manual exchange rates (references
+`DEMO-…`) for trying the finance screens locally. `tests/finance-seed.test.ts`
+replays it on every test run.
+
+Financial records (bookings, expenses, partners, assignments, receipts, ledger
+and finance lines) are never deleted; they are archived, voided, deactivated or
+cancelled. The audit log is append-only. Do not put customer data,
 hosted credentials, database dumps, or VM/container files in this directory.

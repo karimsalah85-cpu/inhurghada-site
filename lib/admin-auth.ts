@@ -18,12 +18,16 @@ export function isAdminOwner(user: AuthUser | null | undefined) { return Boolean
 export type AdminPermission = "bookings" | "content" | "operations" | "finance" | "suppliers" | "reports" | "settings" | "staff";
 export const rolePermissions: Record<AdminRole, AdminPermission[]> = {
   owner: ["bookings","content","operations","finance","suppliers","reports","settings","staff"],
-  manager: ["bookings","content","operations","finance","suppliers","reports","settings"],
+  manager: ["bookings","content","operations","suppliers","reports","settings"],
   sales: ["bookings","reports"],
   operations: ["bookings","operations","suppliers"],
   operator: ["bookings","operations"],
   content_editor: ["content"],
   finance: ["finance","suppliers","reports"],
+};
+/** Display names: the "finance" role is the accountant. */
+export const adminRoleLabels: Record<AdminRole, string> = {
+  owner: "Owner", manager: "Manager", sales: "Sales", finance: "Accountant", operations: "Operations", content_editor: "Content editor", operator: "Operator",
 };
 export function permissionsForAdminRole(role: AdminRole) { return [...rolePermissions[role]]; }
 export function hasAdminPermission(user: AuthUser | null | undefined, permission: AdminPermission) { if (isAdminOwner(user)) return true; const role=user?.app_metadata?.admin_role as AdminRole|undefined; return Boolean(role&&rolePermissions[role]?.includes(permission)); }

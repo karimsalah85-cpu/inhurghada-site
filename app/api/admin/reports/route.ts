@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
   const rowsMayBeTruncated = (data?.length || 0) >= reportRowLimit;
 
   const bookingIds = (data || []).map(item => item.id).filter(Boolean);
-  const { data: expenseRows } = bookingIds.length ? await supabase.from("expenses").select("booking_id,amount,currency,supplier_id,suppliers(name)").in("booking_id", bookingIds) : { data: [] };
+  const { data: expenseRows } = bookingIds.length ? await supabase.from("expenses").select("booking_id,amount,currency,supplier_id,suppliers(name)").in("booking_id", bookingIds).is("voided_at", null) : { data: [] };
   const linkedExpenses = new Map<string, { byCurrency: Record<string, number>; suppliers: Set<string> }>();
   for (const expense of expenseRows || []) { if (!expense.booking_id) continue; const summary = linkedExpenses.get(expense.booking_id) || { byCurrency: {}, suppliers: new Set<string>() }; const currency = expense.currency || "USD"; summary.byCurrency[currency] = (summary.byCurrency[currency] || 0) + Number(expense.amount || 0); const relation = expense.suppliers as unknown as { name?: string } | Array<{ name?: string }> | null; const supplier = Array.isArray(relation) ? relation[0]?.name : relation?.name; if (supplier) summary.suppliers.add(supplier); linkedExpenses.set(expense.booking_id, summary); }
   const rows: ReportRow[] = (data || []).map((item) => {

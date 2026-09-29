@@ -106,31 +106,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   return json({ error: "Unknown action." }, 400);
 }
 
-export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  if (!hasValidRequestOrigin(request)) return json({ error: "Invalid origin." }, 403);
-  const { id } = await context.params;
-  if (!uuidPattern.test(id)) return json({ error: "Invalid invoice identifier." }, 400);
-  const { supabase, user, allowed } = await getAdminAuthorization("edit_expenses");
-  if (!allowed) return json({ error: "Expense-editing permission required." }, 403);
-
-  const { data: before } = await supabase.from("expense_invoices").select("*").eq("id", id).maybeSingle();
-  if (!before) return json({ error: "Invoice not found." }, 404);
-
-  const admin = createAdminClient();
-  if (admin) {
-    const { error: storageError } = await admin.storage.from(BUCKET).remove([before.file_path]);
-    if (storageError) console.error("Expense invoice file delete failed", { message: storageError.message });
-  }
-
-  const { error } = await supabase.from("expense_invoices").delete().eq("id", id);
-  if (error) return json({ error: "Could not delete the invoice." }, 500);
-
-  await supabase.rpc("record_admin_audit", {
-    action_name: "delete",
-    resource_name: "expense_invoice",
-    resource_identifier: id,
-    summary_text: `Deleted invoice ${before.file_name}`,
-    before_value: { ...before, actor: user?.email },
-  });
-  return json({ ok: true });
+// Receipts are evidence for the books: reject them (PATCH { action: "reject" }),
+// the file and record are kept.
+export async function DELETE() {
+  return json({ error: "Receipts are never deleted. Reject the invoice instead." }, 405);
 }

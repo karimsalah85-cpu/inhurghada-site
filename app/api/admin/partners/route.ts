@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
+import { normalizePartnerRecord } from "@/lib/partner-record";
 import { createClient } from "@/utils/supabase/server";
 
 const tables = { supplier: "suppliers", sales_person: "sales_people" } as const;
@@ -21,23 +22,9 @@ export async function POST(request: NextRequest) {
   const canManage = (await hasLivePermission(supabase, user, "suppliers"))
     || (type === "supplier" && (await hasLivePermission(supabase, user, "bookings")));
   if (!canManage) return json({ error: "Unauthorized." }, 401);
-  const name = String(body?.name || "").trim().slice(0, 120);
-  const phone = String(body?.phone || "").trim().slice(0, 40) || null;
-  const email = String(body?.email || "").trim().toLowerCase().slice(0, 160) || null;
-  const notes = String(body?.notes || "").trim().slice(0, 500) || null;
-  if (name.length < 2 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) return json({ error: "Enter a valid name and email address." }, 400);
-
-  const record: Record<string, unknown> = { name, phone, email, notes };
-  if (type === "supplier") {
-    record.contact_name = String(body?.contact_name || "").trim().slice(0, 120) || null;
-    const supplierType = String(body?.supplier_type || "").trim().toLowerCase();
-    if (["boat", "driver", "guide", "other"].includes(supplierType)) record.type = supplierType;
-  }
-  if (type === "sales_person") {
-    const commission = body?.commission_percent === "" || body?.commission_percent == null ? null : Number(body.commission_percent);
-    if (commission !== null && (!Number.isFinite(commission) || commission < 0 || commission > 100)) return json({ error: "Commission must be between 0 and 100%." }, 400);
-    record.commission_percent = commission;
-  }
+  const normalized = normalizePartnerRecord(type, body);
+  if ("error" in normalized) return json({ error: normalized.error }, 400);
+  const record = normalized.record;
 
   const { data, error } = await supabase.from(tables[type]).insert(record).select().single();
   if (error && error.code === "PGRST205") return json({ error: "The admin database migration must be applied before suppliers and sales people can be created." }, 503);

@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
   const { allowed: canViewCosts } = await getAdminAuthorization("view_expenses");
   const [bookingResult, expensesResult, assignmentsResult, staffResult, suppliersResult] = await Promise.all([
     supabase.from("bookings").select("*").eq("id", id).single(),
-    canViewCosts ? supabase.from("expenses").select("*").eq("booking_id", id).order("expense_date", { ascending: false }) : Promise.resolve({ data: [] }),
+    canViewCosts ? supabase.from("expenses").select("*").eq("booking_id", id).is("voided_at", null).order("expense_date", { ascending: false }) : Promise.resolve({ data: [] }),
     canViewCosts ? supabase.from("booking_assignments").select("*").eq("booking_id", id).neq("status", "cancelled") : Promise.resolve({ data: [] }),
     supabase.from("staff_members").select("id,name,staff_type,active").eq("active", true).in("staff_type", ["guide", "driver"]),
     supabase.from("suppliers").select("id,name,type").order("name"),

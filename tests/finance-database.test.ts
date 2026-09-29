@@ -285,7 +285,7 @@ describe("cancellations, refunds, no-shows and archiving", () => {
 
   it("blocks deleting a booking that has ledger history", async () => {
     const { booking } = await confirmedDrsBooking();
-    await expect(db.query("delete from public.bookings where id = $1", [booking])).rejects.toThrow(/foreign key/);
+    await expect(db.query("delete from public.bookings where id = $1", [booking])).rejects.toThrow(/never deleted/);
   });
 });
 
@@ -404,14 +404,14 @@ describe("expenses", () => {
 });
 
 describe("permissions, RLS and audit", () => {
-  it("lets owner, manager and finance manage finance, and nobody else", async () => {
+  it("lets only the owner and the accountant (finance role) manage finance", async () => {
     const booking = await createBooking(db, { amount: 50 });
     const [line] = await lines(db, booking);
-    for (const role of ["manager", "finance"]) {
-      await actAs(db, await createStaff(db, role));
-      await db.query("select public.finance_update_line($1, '{\"payment_fees\": 1}')", [line.id]);
-    }
-    for (const role of ["sales", "operations", "content_editor"]) {
+    await actAs(db, await createStaff(db, "finance"));
+    await db.query("select public.finance_update_line($1, '{\"payment_fees\": 1}')", [line.id]);
+    await actAs(db, owner);
+    await db.query("select public.finance_update_line($1, '{\"payment_fees\": 1.5}')", [line.id]);
+    for (const role of ["manager", "sales", "operations", "content_editor"]) {
       await actAs(db, await createStaff(db, role));
       await expect(db.query("select public.finance_update_line($1, '{\"payment_fees\": 2}')", [line.id])).rejects.toThrow(/manage_finance/);
     }

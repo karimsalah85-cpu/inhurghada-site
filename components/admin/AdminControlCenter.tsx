@@ -200,7 +200,7 @@ function deleteWarning(resource: Resource, item: RecordValue) {
   }
   if (resource === "media") return `Delete "${name}"? Any tour or page still assigned to this image will lose it.`;
   if (resource === "availability") return `Delete this availability record for ${item.tour_slug} on ${item.service_date}? Capacity limits and blocks for that date will be removed.`;
-  if (resource === "assignments") return `Delete this assignment for booking ${item.booking_id}? The supplier/staff link to that booking will be removed.`;
+  if (resource === "assignments") return `Cancel this assignment for booking ${item.booking_id}? It stays on record as cancelled and its partner cost is removed from what the partner is owed.`;
   if (resource === "notes") return `Delete the note for ${item.customer_key}? This cannot be undone.`;
   if (resource === "templates") return `Delete the "${name}" message template? Automations using it will stop sending until replaced.`;
   if (resource === "queue") return `Delete this queued message to ${item.recipient}? It will not be sent.`;

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Archive,
   ArchiveRestore,
+  Ban,
   CalendarDays,
   CheckCircle2,
   ChevronLeft,
@@ -20,6 +21,7 @@ import {
   Mail,
   Pencil,
   Plus,
+  RotateCcw,
   Search,
   Send,
   Trash2,
@@ -45,6 +47,7 @@ import {
 import BookingDetailPanel from "@/components/admin/BookingDetailPanel";
 import ExpenseInvoiceInbox from "@/components/admin/ExpenseInvoiceInbox";
 import { money, sumByCurrency, moneyBreakdown } from "@/lib/admin-money";
+import { PARTNER_PAYMENT_METHODS, PARTNER_TYPES, partnerTypeLabels, paymentMethodLabels, type PartnerKind, type PartnerPaymentMethod } from "@/lib/partner-record";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
 type PaymentStatus = "unpaid" | "paid" | "refunded";
@@ -96,15 +99,22 @@ type Expense = {
   supplier_id?: string | null;
   sales_person_id?: string | null;
   booking_id?: string | null;
+  voided_at?: string | null;
+  void_reason?: string | null;
   bookings?: { status?: string | null; reference?: string | null } | null;
 };
 type Supplier = {
   id: string;
   name: string;
+  type?: string | null;
   contact_name: string | null;
   phone: string | null;
   email: string | null;
   notes: string | null;
+  whatsapp?: string | null;
+  payment_method?: string | null;
+  payment_details?: string | null;
+  active?: boolean | null;
 };
 type SalesPerson = {
   id: string;
@@ -113,6 +123,7 @@ type SalesPerson = {
   email: string | null;
   commission_percent: number | string | null;
   notes: string | null;
+  active?: boolean | null;
 };
 type PartnerType = "supplier" | "sales_person";
 
@@ -260,6 +271,10 @@ export default function AdminDashboard({
     email: "",
     commission_percent: "",
     notes: "",
+    supplier_type: "other",
+    whatsapp: "",
+    payment_method: "",
+    payment_details: "",
   });
   const [previewRole, setPreviewRole] = useState<AdminRole | "">("");
   const effectivePermissions = previewRole
@@ -304,7 +319,7 @@ export default function AdminDashboard({
       (booking) => booking.date && booking.date >= monthStart && booking.date < nextMonthStart,
     );
     const monthExpenses = expenses.filter(
-      (expense) => expense.expense_date && expense.expense_date >= monthStart && expense.expense_date < nextMonthStart,
+      (expense) => !expense.voided_at && expense.expense_date && expense.expense_date >= monthStart && expense.expense_date < nextMonthStart,
     );
     const active = monthBookings.filter(
       (booking) => booking.status !== "cancelled" && booking.payment_status !== "refunded",
@@ -566,38 +581,6 @@ export default function AdminDashboard({
     }
   }
 
-  async function deleteBooking(id: string, reference: string) {
-    if (
-      !window.confirm(
-        `Permanently delete booking ${reference}? Use Cancelled instead when you need to keep its history.`,
-      )
-    )
-      return;
-    setBusyId(id);
-    setError("");
-    try {
-      await api(`/api/admin/bookings/${id}`, { method: "DELETE" });
-      setBookings((items) => items.filter((item) => item.id !== id));
-      setVisibleBookings((items) => items.filter((item) => item.id !== id));
-      setSelected((items) => {
-        const next = new Set(items);
-        next.delete(id);
-        return next;
-      });
-      notifyAdminBookingsChanged();
-      feedback(`Booking ${reference} deleted.`);
-      router.refresh();
-    } catch (reason) {
-      setError(
-        reason instanceof Error
-          ? reason.message
-          : "Could not delete the booking.",
-      );
-    } finally {
-      setBusyId(null);
-    }
-  }
-
   async function setBookingArchived(booking: Booking, archived: boolean) {
     setBusyId(booking.id);
     setError("");
@@ -800,22 +783,33 @@ export default function AdminDashboard({
     }
   }
 
-  async function deleteExpense(item: Expense) {
-    if (!window.confirm(`Delete expense “${item.description}”?`)) return;
+  async function voidExpense(item: Expense) {
+    const reason = window.prompt(
+      `Void expense “${item.description}”? It stays on record but no longer counts in any total. Reason:`,
+    );
+    if (reason === null) return;
+    if (reason.trim().length < 3) {
+      setError("Enter a reason (at least 3 characters) to void an expense.");
+      return;
+    }
     setBusyId(`expense-${item.id}`);
     setError("");
     try {
-      await api(`/api/admin/expenses/${item.id}`, { method: "DELETE" });
+      const result = await api<{ expense: Expense }>(`/api/admin/expenses/${item.id}/void`, {
+        method: "POST",
+        body: JSON.stringify({ reason: reason.trim() }),
+      });
       setExpenses((items) =>
-        items.filter((expenseItem) => expenseItem.id !== item.id),
+        items.map((expenseItem) => (expenseItem.id === item.id ? { ...expenseItem, ...result.expense } : expenseItem)),
       );
-      feedback("Expense deleted.");
+      if (editingExpenseId === item.id) resetExpenseForm();
+      feedback("Expense voided.");
       router.refresh();
     } catch (reason) {
       setError(
         reason instanceof Error
           ? reason.message
-          : "Could not delete the expense.",
+          : "Could not void the expense.",
       );
     } finally {
       setBusyId(null);
@@ -830,6 +824,10 @@ export default function AdminDashboard({
       email: "",
       commission_percent: "",
       notes: "",
+      supplier_type: "other",
+      whatsapp: "",
+      payment_method: "",
+      payment_details: "",
     });
     setEditingPartnerId(null);
   }
@@ -847,6 +845,10 @@ export default function AdminDashboard({
           ? String((item as SalesPerson).commission_percent)
           : "",
       notes: item.notes || "",
+      supplier_type: (item as Supplier).type || "other",
+      whatsapp: (item as Supplier).whatsapp || "",
+      payment_method: (item as Supplier).payment_method || "",
+      payment_details: (item as Supplier).payment_details || "",
     });
   }
 
@@ -884,7 +886,7 @@ export default function AdminDashboard({
       const wasEditing = Boolean(editingPartnerId);
       resetPartnerForm();
       feedback(
-        `${partnerType === "supplier" ? "Supplier" : "Sales person"} ${wasEditing ? "updated" : "created"}.`,
+        `${partnerType === "supplier" ? "Partner" : "Sales person"} ${wasEditing ? "updated" : "created"}.`,
       );
       router.refresh();
     } catch (reason) {
@@ -898,25 +900,30 @@ export default function AdminDashboard({
     }
   }
 
-  async function deletePartner(type: PartnerType, id: string, name: string) {
+  async function setPartnerActive(type: PartnerType, id: string, name: string, active: boolean) {
     if (
-      !window.confirm(`Delete ${name}? Existing expense records will be kept.`)
+      !active &&
+      !window.confirm(`Deactivate ${name}? Their history and balances are kept; you can reactivate them later.`)
     )
       return;
     setBusyId(`partner-${id}`);
     setError("");
     try {
-      await api(`/api/admin/partners/${type}/${id}`, { method: "DELETE" });
+      const result = await api<{ partner: Supplier | SalesPerson }>(`/api/admin/partners/${type}/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ active }),
+      });
       if (type === "supplier")
-        setSuppliers((items) => items.filter((item) => item.id !== id));
-      else setSalesPeople((items) => items.filter((item) => item.id !== id));
-      feedback("Record deleted.");
+        setSuppliers((items) => items.map((item) => (item.id === id ? (result.partner as Supplier) : item)));
+      else
+        setSalesPeople((items) => items.map((item) => (item.id === id ? (result.partner as SalesPerson) : item)));
+      feedback(`${name} ${active ? "reactivated" : "deactivated"}.`);
       router.refresh();
     } catch (reason) {
       setError(
         reason instanceof Error
           ? reason.message
-          : "Could not delete this record.",
+          : "Could not update this record.",
       );
     } finally {
       setBusyId(null);
@@ -1609,17 +1616,6 @@ export default function AdminDashboard({
                               <Archive size={17} />
                             )}
                           </button>
-                          <button
-                            aria-label={`Delete ${booking.reference}`}
-                            title="Delete permanently"
-                            disabled={busyId === booking.id}
-                            onClick={() =>
-                              deleteBooking(booking.id, booking.reference)
-                            }
-                            className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40"
-                          >
-                            <Trash2 size={17} />
-                          </button>
                         </div></details>
                       </td>
                     </tr>
@@ -1785,16 +1781,6 @@ export default function AdminDashboard({
                         <Archive size={14} />
                       )}
                       {booking.archived_at ? "Restore booking" : "Archive booking"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        deleteBooking(booking.id, booking.reference)
-                      }
-                      disabled={busyId === booking.id}
-                      className="inline-flex items-center gap-2 text-xs font-bold text-rose-700 disabled:opacity-40"
-                    >
-                      <Trash2 size={14} /> Delete permanently
                     </button>
                   </div>
                 </article>
@@ -2020,8 +2006,9 @@ export default function AdminDashboard({
                     <button
                       type="button"
                       key={item.id}
+                      disabled={Boolean(item.voided_at)}
                       onClick={() => startEditExpense(item)}
-                      className={`flex w-full items-start justify-between gap-3 rounded-xl p-3 text-left text-sm transition hover:bg-cyan-50 ${editingExpenseId === item.id ? "bg-cyan-50 ring-1 ring-cyan-300" : "bg-slate-50"}`}
+                      className={`flex w-full items-start justify-between gap-3 rounded-xl p-3 text-left text-sm transition enabled:hover:bg-cyan-50 disabled:opacity-60 ${editingExpenseId === item.id ? "bg-cyan-50 ring-1 ring-cyan-300" : "bg-slate-50"}`}
                     >
                       <div>
                         <p className="font-medium">{item.description}</p>
@@ -2029,35 +2016,42 @@ export default function AdminDashboard({
                           {typeLabel(item.expense_type) || item.category || "Other"} ·{" "}
                           {item.expense_date}
                         </p>
-                        {item.bookings?.status === "cancelled" ? (
+                        {item.voided_at ? (
+                          <p className="mt-1 inline-block rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                            Voided{item.void_reason ? ` — ${item.void_reason}` : ""}
+                          </p>
+                        ) : item.bookings?.status === "cancelled" ? (
                           <p className="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800">
                             Review — booking {item.bookings.reference || ""} cancelled
                           </p>
                         ) : null}
                       </div>
                       <div className="flex items-center gap-2">
-                        <p className="font-semibold">
+                        <p className={`font-semibold ${item.voided_at ? "line-through" : ""}`}>
                           {money(Number(item.amount), item.currency)}
                         </p>
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          aria-label={`Delete expense ${item.description}`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            deleteExpense(item);
-                          }}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
+                        {item.voided_at ? null : (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Void expense ${item.description}`}
+                            title="Void expense"
+                            onClick={(event) => {
                               event.stopPropagation();
-                              deleteExpense(item);
-                            }
-                          }}
-                          className={`rounded p-1 text-slate-400 hover:bg-rose-100 hover:text-rose-700 ${busyId === `expense-${item.id}` ? "pointer-events-none opacity-40" : ""}`}
-                        >
-                          <Trash2 size={15} />
-                        </span>
+                              voidExpense(item);
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                voidExpense(item);
+                              }
+                            }}
+                            className={`rounded p-2 text-slate-400 hover:bg-rose-100 hover:text-rose-700 ${busyId === `expense-${item.id}` ? "pointer-events-none opacity-40" : ""}`}
+                          >
+                            <Ban size={16} />
+                          </span>
+                        )}
                       </div>
                     </button>
                   ))}
@@ -2315,9 +2309,9 @@ export default function AdminDashboard({
           <div className="flex items-start gap-3">
             <UsersRound className="mt-1 text-cyan-700" size={24} />
             <div>
-              <h2 className="text-2xl font-bold">Suppliers & sales people</h2>
+              <h2 className="text-2xl font-bold">Partners & sales people</h2>
               <p className="mt-1 text-sm text-slate-500">
-                Create reusable contacts and attach them to expenses.
+                Boats, guides, drivers, hotels and companies that deliver trips, and how you pay them.
               </p>
             </div>
           </div>
@@ -2336,7 +2330,7 @@ export default function AdminDashboard({
                   }
                   className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal disabled:bg-slate-100 disabled:text-slate-400"
                 >
-                  <option value="supplier">Supplier</option>
+                  <option value="supplier">Partner</option>
                   <option value="sales_person">Sales person</option>
                 </select>
               </label>
@@ -2352,6 +2346,24 @@ export default function AdminDashboard({
                   className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal"
                 />
               </label>
+              {partnerType === "supplier" ? (
+                <label className="block text-sm font-semibold">
+                  Partner type
+                  <select
+                    value={partner.supplier_type}
+                    onChange={(event) =>
+                      setPartner({ ...partner, supplier_type: event.target.value })
+                    }
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
+                  >
+                    {PARTNER_TYPES.map((kind) => (
+                      <option key={kind} value={kind}>
+                        {partnerTypeLabels[kind]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
               {partnerType === "supplier" ? (
                 <label className="block text-sm font-semibold">
                   Contact person
@@ -2412,6 +2424,56 @@ export default function AdminDashboard({
                   />
                 </label>
               </div>
+              {partnerType === "supplier" ? (
+                <>
+                  <label className="block text-sm font-semibold">
+                    WhatsApp
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      maxLength={40}
+                      placeholder="+20…"
+                      value={partner.whatsapp}
+                      onChange={(event) =>
+                        setPartner({ ...partner, whatsapp: event.target.value })
+                      }
+                      className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal"
+                    />
+                  </label>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="block text-sm font-semibold">
+                      Payment method
+                      <select
+                        value={partner.payment_method}
+                        onChange={(event) =>
+                          setPartner({ ...partner, payment_method: event.target.value })
+                        }
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 font-normal"
+                      >
+                        <option value="">Not set</option>
+                        {PARTNER_PAYMENT_METHODS.map((method) => (
+                          <option key={method} value={method}>
+                            {paymentMethodLabels[method]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block text-sm font-semibold">
+                      Payment details{" "}
+                      <span className="font-normal text-slate-400">optional</span>
+                      <input
+                        maxLength={500}
+                        placeholder="Account, wallet or IBAN"
+                        value={partner.payment_details}
+                        onChange={(event) =>
+                          setPartner({ ...partner, payment_details: event.target.value })
+                        }
+                        className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal"
+                      />
+                    </label>
+                  </div>
+                </>
+              ) : null}
               <label className="block text-sm font-semibold">
                 Notes{" "}
                 <span className="font-normal text-slate-400">optional</span>
@@ -2432,8 +2494,8 @@ export default function AdminDashboard({
                   {busyId === "partner"
                     ? "Saving…"
                     : editingPartnerId
-                      ? `Update ${partnerType === "supplier" ? "supplier" : "sales person"}`
-                      : `Create ${partnerType === "supplier" ? "supplier" : "sales person"}`}
+                      ? `Update ${partnerType === "supplier" ? "partner" : "sales person"}`
+                      : `Create ${partnerType === "supplier" ? "partner" : "sales person"}`}
                 </button>
                 {editingPartnerId ? (
                   <button
@@ -2448,23 +2510,24 @@ export default function AdminDashboard({
             </form>
             <div className="grid gap-6 md:grid-cols-2">
               <PartnerList
-                title="Suppliers"
-                empty="No suppliers yet."
+                title="Partners"
+                empty="No partners yet."
                 items={suppliers.map((item) => ({
                   id: item.id,
                   name: item.name,
-                  detail:
-                    item.contact_name ||
-                    item.phone ||
-                    item.email ||
-                    "No contact details",
+                  active: item.active !== false,
+                  detail: [
+                    partnerTypeLabels[item.type as PartnerKind] || "Other",
+                    item.whatsapp ? `WhatsApp ${item.whatsapp}` : item.contact_name || item.phone || item.email,
+                    item.payment_method ? `paid by ${paymentMethodLabels[item.payment_method as PartnerPaymentMethod] || item.payment_method}` : null,
+                  ].filter(Boolean).join(" · "),
                 }))}
                 busyId={busyId}
                 onEdit={(id) => {
                   const item = suppliers.find((entry) => entry.id === id);
                   if (item) startEditPartner("supplier", item);
                 }}
-                onDelete={(id, name) => deletePartner("supplier", id, name)}
+                onToggleActive={(id, name, active) => setPartnerActive("supplier", id, name, active)}
               />
               <PartnerList
                 title="Sales people"
@@ -2472,6 +2535,7 @@ export default function AdminDashboard({
                 items={salesPeople.map((item) => ({
                   id: item.id,
                   name: item.name,
+                  active: item.active !== false,
                   detail:
                     item.commission_percent != null
                       ? `${item.commission_percent}% commission`
@@ -2482,7 +2546,7 @@ export default function AdminDashboard({
                   const item = salesPeople.find((entry) => entry.id === id);
                   if (item) startEditPartner("sales_person", item);
                 }}
-                onDelete={(id, name) => deletePartner("sales_person", id, name)}
+                onToggleActive={(id, name, active) => setPartnerActive("sales_person", id, name, active)}
               />
             </div>
           </div>
@@ -2549,6 +2613,7 @@ function SalesPerformancePanel({
     const paidByCurrency = sumByCurrency(
       expenses.filter(
         (item) =>
+          !item.voided_at &&
           item.expense_type === "sales_commission" &&
           item.sales_person_id === person.id,
       ),
@@ -2679,14 +2744,14 @@ function PartnerList({
   items,
   busyId,
   onEdit,
-  onDelete,
+  onToggleActive,
 }: {
   title: string;
   empty: string;
-  items: { id: string; name: string; detail: string }[];
+  items: { id: string; name: string; detail: string; active: boolean }[];
   busyId: string | null;
   onEdit: (id: string) => void;
-  onDelete: (id: string, name: string) => void;
+  onToggleActive: (id: string, name: string, active: boolean) => void;
 }) {
   return (
     <div>
@@ -2701,10 +2766,17 @@ function PartnerList({
           {items.map((item) => (
             <article
               key={item.id}
-              className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 p-3"
+              className={`flex items-start justify-between gap-3 rounded-xl border border-slate-200 p-3 ${item.active ? "" : "bg-slate-50 opacity-70"}`}
             >
-              <div>
-                <p className="font-bold text-slate-900">{item.name}</p>
+              <div className="min-w-0">
+                <p className="font-bold text-slate-900">
+                  {item.name}
+                  {item.active ? null : (
+                    <span className="ml-2 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                      Inactive
+                    </span>
+                  )}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">{item.detail}</p>
               </div>
               <div className="flex shrink-0">
@@ -2718,12 +2790,13 @@ function PartnerList({
                 </button>
                 <button
                   type="button"
-                  aria-label={`Delete ${item.name}`}
-                  onClick={() => onDelete(item.id, item.name)}
+                  aria-label={`${item.active ? "Deactivate" : "Reactivate"} ${item.name}`}
+                  title={item.active ? "Deactivate" : "Reactivate"}
+                  onClick={() => onToggleActive(item.id, item.name, !item.active)}
                   disabled={busyId === `partner-${item.id}`}
-                  className="rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40"
+                  className="rounded-lg p-2 text-slate-400 hover:bg-amber-50 hover:text-amber-700 disabled:opacity-40"
                 >
-                  <Trash2 size={16} />
+                  {item.active ? <Ban size={16} /> : <RotateCcw size={16} />}
                 </button>
               </div>
             </article>
