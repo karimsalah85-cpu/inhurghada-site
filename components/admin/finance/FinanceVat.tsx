@@ -158,11 +158,11 @@ export default function FinanceVat() {
             </dl>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm">
-                <thead><tr className="border-b text-left text-xs text-slate-500"><th className="py-2">Month</th><th>On sales</th><th>On purchases</th><th>Net</th><th className="hidden sm:table-cell">Items</th></tr></thead>
+                <thead><tr className="border-b text-left text-xs text-slate-500"><th className="py-2">Month</th><th className="pr-3 text-right">On sales</th><th className="pr-3 text-right">On purchases</th><th className="pr-2 text-right">Net</th><th className="hidden sm:table-cell">Items</th></tr></thead>
                 <tbody>{months.map((month) => (
                   <tr key={`${month.country}-${month.month}`} className="border-b last:border-0">
-                    <td className="py-2 pr-2"><span className="font-semibold">{monthLabel(month.month)}</span>{countries.length > 1 ? <span className="block text-xs text-slate-500">{month.country_name}</span> : null}<span className="block text-xs text-slate-500">Return due {dayLabel(month.filing_due_on)}</span></td><td>{usd(month.output_vat_usd)}</td><td>{usd(month.input_vat_usd)}</td>
-                    <td className="font-bold">{usd(month.net_vat_usd)}</td>
+                    <td className="py-2 pr-2"><span className="font-semibold">{monthLabel(month.month)}</span>{countries.length > 1 ? <span className="block text-xs text-slate-500">{month.country_name}</span> : null}<span className="block text-xs text-slate-500">Return due {dayLabel(month.filing_due_on)}</span></td><td className="whitespace-nowrap pr-3 text-right tabular-nums">{usd(month.output_vat_usd)}</td><td className="whitespace-nowrap pr-3 text-right tabular-nums">{usd(month.input_vat_usd)}</td>
+                    <td className="whitespace-nowrap pr-2 text-right font-bold tabular-nums">{usd(month.net_vat_usd)}</td>
                     <td className="hidden text-xs text-slate-500 sm:table-cell">{month.output_items + month.input_items}{month.usd_pending ? ` · ${month.usd_pending} awaiting rate` : ""}</td>
                   </tr>
                 ))}</tbody>
