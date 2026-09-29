@@ -5,6 +5,7 @@ import nextConfig from "@/next.config";
 import { generateMetadata as generateCategoryMetadata } from "@/app/hurghada/[category]/page";
 import { generateMetadata as generateJeddahCategoryMetadata } from "@/app/jeddah/[category]/page";
 import { generateMetadata as generateTourMetadata } from "@/app/tours/[slug]/page";
+import { normalizeMetaTitle } from "@/lib/seo";
 import { tours } from "@/data/tours";
 
 vi.mock("@/lib/live-content", () => ({
@@ -32,6 +33,15 @@ describe("SEO build contract", () => {
     expect(diving.alternates?.canonical).toBe("/jeddah/diving-snorkeling");
     expect(diving.alternates?.languages).toMatchObject({ en: "/jeddah/diving-snorkeling", ar: "/ar/jeddah/diving-snorkeling" });
     expect(cruises.alternates?.canonical).toBe("/jeddah/boat-cruises");
+  });
+
+  it("does not assign Hurghada to short titles for other destinations", () => {
+    expect(normalizeMetaTitle("Things to do in Jeddah")).toBe("Things to do in Jeddah | Daily Red Sea");
+  });
+
+  it("omits a blog modification date when there are no published posts", async () => {
+    const entries = await sitemap();
+    expect(entries.find((entry) => entry.url === "https://dailyredsea.com/blog")?.lastModified).toBeUndefined();
   });
 
   it("advertises only the canonical sitemap in robots.txt", () => {

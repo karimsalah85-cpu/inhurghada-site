@@ -176,6 +176,18 @@ export default function TourPageShell({ tour, locale = "en", relatedTourCandidat
       <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm"><p className="text-sm font-semibold uppercase tracking-[0.28em] text-ocean-dark">{ui.before}</p><h2 className="mt-3 text-3xl font-bold text-ink">{ui.faq}</h2><div className="mt-6 divide-y divide-line">{faqs.map((faq) => <details key={faq.question} className="py-4"><summary className="cursor-pointer font-semibold text-ink">{faq.question}</summary><p className="mt-3 leading-7 text-muted">{faq.answer}</p></details>)}</div></div>
       </section>
+      {tour.slug === "full-day-snorkeling" && (locale === "en" || locale === "ar") ? (
+        <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
+          <div className="rounded-3xl border border-line bg-ocean-tint p-6 sm:p-8">
+            <h2 className="text-2xl font-black text-ink">{ar ? "كيف تختار رحلة السنوركلينج في الغردقة؟" : "Reef snorkeling or an island boat trip?"}</h2>
+            <p className="mt-4 leading-8 text-muted">{ar ? "قارن برنامج الرحلة ووقت السباحة وتفاصيل الاستلام قبل الحجز. إذا كنت ترغب في قضاء وقت على الشاطئ أيضاً، راجع رحلات الجزر وتحقق من مدة التوقف على الجزيرة والخدمات المشمولة. تتحدد مواقع السنوركلينج حسب الطقس وحالة البحر." : "Compare the itinerary, time in the water and pickup details before booking. If you also want beach time, compare the island trips and check the stated island stop and inclusions. Snorkeling locations depend on weather and sea conditions."}</p>
+            <div className="mt-6 flex flex-wrap gap-5 font-bold text-ocean-dark">
+              <Link className="underline underline-offset-4" href={localePath(locale, "/hurghada/island-trips")}>{ar ? "قارن رحلات جزر الغردقة" : "Compare Hurghada island trips"}</Link>
+              <Link className="underline underline-offset-4" href={localePath(locale, "/hurghada/diving-snorkeling")}>{ar ? "استكشف الغوص والسنوركلينج" : "Explore diving and snorkeling in Hurghada"}</Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
       {relatedTours.length ? (
         <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
           <RelatedExperiences

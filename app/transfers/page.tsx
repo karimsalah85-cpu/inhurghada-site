@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { Car, Clock, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import AirportTransferForm from "@/components/booking/AirportTransferForm";
 import AirportTransferPolicy from "@/components/pages/AirportTransferPolicy";
 import { pageMetadata } from "@/lib/seo";
-import { languageAlternates } from "@/lib/i18n";
+import { languageAlternates, localePath } from "@/lib/i18n";
 import { lowestVehicleFare } from "@/lib/transfer-config";
 
 const fromFare = `$${lowestVehicleFare()}`;
@@ -11,7 +12,7 @@ const fromFare = `$${lowestVehicleFare()}`;
 export const metadata: Metadata = {
   ...pageMetadata({
   title: "Private Hurghada Airport Transfer — Price Per Vehicle",
-  description: `Private, fixed-price Hurghada Airport transfers to hotels across Hurghada, El Gouna, Sahl Hasheesh, Makadi Bay, Soma Bay, Safaga and the southern Red Sea coast. Per vehicle, from ${fromFare}. Price shown before you book.`,
+  description: `Hurghada Airport private transfers from ${fromFare} per vehicle, one way. Choose your hotel, passengers and luggage to see your price before booking.`,
   path: "/transfers",
   image: "/images/owned/hurghada-transfer-road-sunset.jpg",
   }),
@@ -284,6 +285,10 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
 
       </section>
 
+      <nav aria-label={ar ? "خطط لإقامتك" : "Explore your destination"} className="mx-auto flex max-w-6xl flex-wrap gap-6 px-6 py-10 font-bold text-ocean-dark">
+        <Link className="underline underline-offset-4" href={localePath(locale, "/destinations/hurghada")}>{ar ? "رحلات وأنشطة الغردقة" : de ? "Ausflüge in Hurghada" : ru ? "Экскурсии в Хургаде" : pl ? "Wycieczki w Hurghadzie" : zh ? "赫尔格达旅游" : "Things to do in Hurghada"}</Link>
+        <Link className="underline underline-offset-4" href={localePath(locale, "/destinations/el-gouna")}>{ar ? "أنشطة الجونة" : de ? "Aktivitäten in El Gouna" : ru ? "Отдых в Эль-Гуне" : pl ? "Atrakcje w El Gouna" : zh ? "艾尔古纳活动" : "Things to do in El Gouna"}</Link>
+      </nav>
       <AirportTransferPolicy locale={locale} />
 
       {locale === "en" ? <section className="border-t border-line bg-white px-6 py-20"><div className="mx-auto max-w-4xl"><p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">Plan your pickup</p><h2 className="mt-3 text-4xl font-bold text-ink">Hurghada Airport transfer prices and questions</h2><p className="mt-5 text-lg leading-8 text-muted">Airport transfers are priced per vehicle and per journey, not per person. A private transfer within Hurghada starts from {fromFare} per vehicle; longer routes are priced by distance. Your vehicle, pickup point and time are confirmed before travel.</p><div className="mt-8 divide-y divide-line rounded-3xl border border-line px-6">{transferFaqs.map((item) => <details key={item.question} className="py-5"><summary className="cursor-pointer font-bold text-ink">{item.question}</summary><p className="mt-3 leading-7 text-muted">{item.answer}</p></details>)}</div></div></section> : null}

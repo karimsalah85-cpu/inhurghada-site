@@ -20,14 +20,14 @@ export const tourCategories = [
     slug: "island-trips",
     title: "Island trips",
     eyebrow: "Turquoise escapes",
-    description: "Sail to Orange Bay or Mahmya for snorkeling, clear water, lunch onboard, and an easy Red Sea beach day.",
+    description: "Compare Hurghada island trips to Orange Bay, Mahmya, Paradise and Hula Hula. Check beach time, snorkeling stops, pickup and inclusions.",
     matches: (tour: Tour) => tour.category === "Island Trip",
   },
   {
     slug: "diving-snorkeling",
     title: "Diving & snorkeling",
     eyebrow: "Below the surface",
-    description: "Discover Hurghada’s coral reefs with full-day snorkeling, guided diving, and professional underwater photography.",
+    description: "Compare Hurghada snorkeling trips, beginner scuba experiences and certified diving. Explore Red Sea reefs with clear trip details and prices.",
     matches: (tour: Tour) => tour.categoryPath?.[0] === "Diving & Snorkeling" || ["Snorkeling", "Diving"].includes(tour.category || "") || tour.slug === "professional-underwater-photographer",
   },
   {
