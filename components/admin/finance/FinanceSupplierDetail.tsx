@@ -6,12 +6,16 @@ import { FINANCE_CURRENCIES, formatMoney, fromMinor, toMinor, type FinanceCurren
 import { entryTypeLabels, filterLedger, LEDGER_ENTRY_TYPES, type BalanceLabel, type LedgerFilters, type LedgerRow } from "@/lib/finance/supplier-ledger";
 import type { SupplierBookingRow } from "@/lib/finance/supplier-data";
 import { FinanceNotConfigured, toneClasses } from "@/components/admin/finance/FinanceSuppliers";
+import { paymentMethodLabels, type PartnerPaymentMethod } from "@/lib/partner-record";
 
 type Detail = {
   configured: boolean;
   error?: string;
   canManage: boolean;
-  supplier: { id: string; name: string; type: string; contact_name: string | null; phone: string | null; default_currency: string };
+  supplier: {
+    id: string; name: string; type: string; contact_name: string | null; phone: string | null; default_currency: string;
+    whatsapp?: string | null; payment_method?: string | null; payment_details?: string | null;
+  };
   ledger: LedgerRow[];
   lines: SupplierBookingRow[];
   openLineIds: string[];
@@ -142,7 +146,7 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
     if (ok) setReversing(null);
   }
 
-  const bookingOptions = data.lines.filter((line) => line.current_supplier || line.balances.length);
+  const bookingOptions = data.lines.filter((line) => line.current_supplier || line.partner_role || line.balances.length);
   const input = "mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-normal";
 
   return <div className="space-y-6">
@@ -152,6 +156,11 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
           <Link href="/admin/finance/suppliers" className="text-sm font-semibold text-cyan-700 hover:underline">← All suppliers</Link>
           <h2 className="mt-2 text-2xl font-black text-slate-950">{data.supplier.name}</h2>
           <p className="text-sm capitalize text-slate-500">{data.supplier.type}{data.supplier.contact_name ? ` · ${data.supplier.contact_name}` : ""}{data.supplier.phone ? ` · ${data.supplier.phone}` : ""}</p>
+          {data.supplier.whatsapp || data.supplier.payment_method ? <p className="mt-1 text-sm text-slate-600">
+            {data.supplier.whatsapp ? <a href={`https://wa.me/${data.supplier.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="font-semibold text-emerald-800 underline">WhatsApp {data.supplier.whatsapp}</a> : null}
+            {data.supplier.whatsapp && data.supplier.payment_method ? " · " : ""}
+            {data.supplier.payment_method ? <>Paid by <b>{paymentMethodLabels[data.supplier.payment_method as PartnerPaymentMethod] || data.supplier.payment_method}</b>{data.supplier.payment_details ? ` (${data.supplier.payment_details})` : ""}</> : null}
+          </p> : null}
         </div>
         <div className="text-right">
           <span className={`inline-block rounded-full px-4 py-1.5 text-sm font-black ring-1 ${toneClasses[data.label.tone]}`}>{data.label.text}</span>
@@ -209,11 +218,11 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
               <tr className={`border-t border-slate-100 align-top ${line.included ? "" : "text-slate-400"}`}>
                 <td className="py-3 pr-2"><input type="checkbox" aria-label={`Select ${line.reference}`} disabled={!line.balances.length || !data.canManage} checked={selected.has(line.line_id)} onChange={() => toggleLine(line.line_id)} /></td>
                 <td className="py-3 pr-3 tabular-nums">{line.trip_date || "—"}</td>
-                <td className="py-3 pr-3"><span className="font-bold text-slate-900">{line.reference}{line.line_no > 1 ? `/${line.line_no}` : ""}</span><p className="text-xs text-slate-500">{line.tour_name || "Trip"} · {line.outcome}{line.current_supplier ? "" : " · former supplier"}</p></td>
+                <td className="py-3 pr-3"><span className="font-bold text-slate-900">{line.reference}{line.line_no > 1 ? `/${line.line_no}` : ""}</span><p className="text-xs text-slate-500">{line.tour_name || "Trip"} · {line.outcome}{line.current_supplier ? "" : line.partner_role ? ` · ${line.partner_role} (extra partner)` : " · former supplier"}</p></td>
                 <td className="py-3 pr-3 text-right">{line.guests}</td>
-                <td className="py-3 pr-3">{statusText[line.collected_by]}</td>
+                <td className="py-3 pr-3">{line.partner_role ? "Daily Red Sea pays" : statusText[line.collected_by]}</td>
                 <td className={`py-3 pr-3 ${statusTone(line.collection_status)}`}>{statusText[line.collection_status]}{line.collection_status === "partial" ? ` · ${formatMoney(line.collected_amount, line.currency)}` : ""}</td>
-                <td className={`py-3 pr-3 ${statusTone(line.supplier_cost_paid_status)}`}>{line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}<p className="text-xs">{statusText[line.supplier_cost_paid_status || ""] || "—"}</p></> : "—"}</td>
+                <td className={`py-3 pr-3 ${statusTone(line.supplier_cost_paid_status)}`}>{line.partner_role ? formatMoney(line.supplier_cost, line.supplier_cost_currency) : line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}<p className="text-xs">{statusText[line.supplier_cost_paid_status || ""] || "—"}</p></> : "—"}</td>
                 <td className={`py-3 pr-3 ${statusTone(line.commission_received_status)}`}>{line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : line.supplier_cost_currency === line.currency ? formatMoney(fromMinor(toMinor(line.net_selling_price) - toMinor(line.supplier_cost)), line.currency) : "See currency balance"}<p className="text-xs">{statusText[line.commission_received_status || ""] || "—"}</p></> : "—"}{line.ledger_state === "awaiting_fx" || line.ledger_state === "usd_pending" ? <p className="text-xs text-amber-700">{statusText[line.ledger_state]}</p> : null}</td>
                 <td className={`py-3 pr-3 text-right tabular-nums ${line.margin_amount_usd !== null && Number(line.margin_amount_usd) < 0 ? "font-bold text-rose-700" : ""}`}>{line.margin_amount_usd === null ? <span className="text-xs text-amber-700">USD pending</span> : <>{formatMoney(line.margin_amount_usd)}<p className="text-xs text-slate-500">{line.margin_pct_usd === null ? "—" : `${line.margin_pct_usd}%`}</p></>}</td>
                 <td className="py-3 pr-3 text-right tabular-nums">{line.balances.length ? line.balances.map((balance) => <div key={balance.currency} className={Number(balance.balance) < 0 ? "text-amber-800" : "text-emerald-800"}>{formatMoney(balance.balance, balance.currency)}</div>) : <span className="text-slate-400">Settled</span>}</td>

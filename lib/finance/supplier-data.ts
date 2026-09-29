@@ -86,6 +86,8 @@ export type SupplierBookingRow = {
   margin_amount_usd: string | null;
   margin_pct_usd: string | null;
   current_supplier: boolean;
+  /** Set when this partner is an extra partner (guide, driver ...) on the trip rather than its main partner. */
+  partner_role: string | null;
   ledger_state: string | null;
   supplier_cost_paid_status: string | null;
   commission_received_status: string | null;
@@ -94,20 +96,27 @@ export type SupplierBookingRow = {
 };
 
 export async function supplierDetail(supabase: SupabaseClient, supplierId: string) {
-  type Supplier = { id: string; name: string; type: string; contact_name: string | null; phone: string | null; email: string | null; default_currency: string; active: boolean };
-  const supplier = check(await supabase.from("suppliers").select("id,name,type,contact_name,phone,email,default_currency,active").eq("id", supplierId).maybeSingle()) as Supplier | null;
+  type Supplier = {
+    id: string; name: string; type: string; contact_name: string | null; phone: string | null; email: string | null; default_currency: string; active: boolean;
+    whatsapp: string | null; payment_method: string | null; payment_details: string | null;
+  };
+  const supplier = check(await supabase.from("suppliers").select("id,name,type,contact_name,phone,email,default_currency,active,whatsapp,payment_method,payment_details").eq("id", supplierId).maybeSingle()) as Supplier | null;
   if (!supplier) return null;
 
-  const [entriesResult, lineBalancesResult, currentLinesResult, rates] = await Promise.all([
+  const [entriesResult, lineBalancesResult, currentLinesResult, partnerCostsResult, rates] = await Promise.all([
     supabase.from("supplier_ledger").select("*").eq("supplier_id", supplierId).order("entry_date").order("entry_no").limit(10000),
     supabase.from("supplier_line_balances").select("line_id,currency,balance").eq("supplier_id", supplierId),
     supabase.from("booking_financial_lines").select("id").eq("supplier_id", supplierId).limit(5000),
+    supabase.from("booking_line_partner_costs").select("line_id,role,cost,currency,cost_source").eq("supplier_id", supplierId).eq("status", "active").limit(5000),
     latestRates(supabase),
   ]);
+  const partnerCosts = new Map((check(partnerCostsResult) as { line_id: string; role: string; cost: string; currency: FinanceCurrency; cost_source: string }[])
+    .map((row) => [row.line_id, row]));
   const entries = check(entriesResult) as LedgerEntry[];
   const lineBalances = check(lineBalancesResult) as { line_id: string; currency: FinanceCurrency; balance: string }[];
   const lineIds = [...new Set([
     ...(check(currentLinesResult) as { id: string }[]).map((row) => row.id),
+    ...partnerCosts.keys(),
     ...lineBalances.map((row) => row.line_id),
   ])];
 
@@ -126,16 +135,20 @@ export async function supplierDetail(supabase: SupabaseClient, supplierId: strin
       references.set(row.booking_id, reference);
       const current = row.supplier_id === supplierId;
       const status = current ? statuses.get(row.id) : undefined;
+      const extra = current ? undefined : partnerCosts.get(row.id);
       lines.push({
         line_id: row.id, booking_id: row.booking_id, reference, line_no: row.line_no as number,
         trip_date: row.trip_date as string | null, tour_name: row.tour_name as string | null, guests: row.guests as number,
         currency: row.currency as FinanceCurrency, net_selling_price: String(row.net_selling_price),
-        supplier_cost: String(row.supplier_cost), supplier_cost_currency: row.supplier_cost_currency as FinanceCurrency, supplier_cost_source: String(row.supplier_cost_source),
+        supplier_cost: String(extra ? extra.cost : row.supplier_cost),
+        supplier_cost_currency: (extra ? extra.currency : row.supplier_cost_currency) as FinanceCurrency,
+        supplier_cost_source: String(extra ? extra.cost_source : row.supplier_cost_source),
         collected_by: row.collected_by as SupplierBookingRow["collected_by"], collection_status: row.collection_status as SupplierBookingRow["collection_status"],
         collected_amount: String(row.collected_amount), outcome: row.outcome as string, included: row.included as boolean,
         margin_amount: row.margin_amount === null ? null : String(row.margin_amount), margin_pct: row.margin_pct === null ? null : String(row.margin_pct),
         margin_amount_usd: row.margin_amount_usd === null ? null : String(row.margin_amount_usd), margin_pct_usd: row.margin_pct_usd === null ? null : String(row.margin_pct_usd),
         current_supplier: current,
+        partner_role: extra ? extra.role : null,
         ledger_state: status?.ledger_state ?? null,
         supplier_cost_paid_status: status?.supplier_cost_paid_status ?? null,
         commission_received_status: status?.commission_received_status ?? null,

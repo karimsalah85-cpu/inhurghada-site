@@ -24,21 +24,25 @@ describe("synthetic finance demo seed", () => {
     const { rows } = await db.query<{ name: string; balance: string }>(
       `select s.name, b.balance::text from public.supplier_balances b join public.suppliers s on s.id = b.supplier_id
        where s.name like 'Demo %' and b.currency = 'EGP' order by s.name`);
-    // Negative = Daily Red Sea owes the partner; positive = the partner owes Daily Red Sea
-    // (the driver collected EGP 1,200 cash for a EGP 600 job). The cancelled safari leaves nothing owed.
+    // Negative = Daily Red Sea owes the partner; positive = the partner owes Daily Red Sea.
+    // Driver: collected EGP 1,200 cash for a EGP 600 transfer (+600), owed EGP 300 for DEMO-1002 (-300).
+    // Guide: EGP 400 on DEMO-1001 plus the EGP 100 cancellation fee on the cancelled safari.
     expect(rows.map((row) => [row.name, n(row.balance)])).toEqual([
       ["Demo Captain Boat", "-2400.00"],
-      ["Demo Driver", "600.00"],
+      ["Demo Driver", "300.00"],
+      ["Demo Guide", "-500.00"],
       ["Demo Marsa Alam Dive Co", "-3000.00"],
     ]);
   });
 
   it("converts every demo line to USD at the stored rate", async () => {
     const { rows: [line] } = await db.query<Record<string, string>>(
-      `select l.net_sales_usd::text, l.supplier_cost_usd::text, l.margin_amount_usd::text from public.booking_financial_lines l
+      `select l.net_sales_usd::text, l.supplier_cost_usd::text, l.total_partner_cost_usd::text, l.margin_amount_usd::text from public.booking_financial_lines l
        join public.bookings b on b.id = l.booking_id where b.reference = 'DEMO-1001'`);
-    // EUR 90 at 0.86 EUR/USD = USD 104.65; EGP 2,400 at 48.50 = USD 49.48; 10% agent commission = EUR 9 = USD 10.47.
-    expect([n(line.net_sales_usd), n(line.supplier_cost_usd), n(line.margin_amount_usd)]).toEqual(["104.65", "49.48", "44.70"]);
+    // EUR 90 at 0.86 EUR/USD = USD 104.65; boat EGP 2,400 at 48.50 = USD 49.48; guide EGP 400 = USD 8.25;
+    // 10% agent commission = EUR 9 = USD 10.47.
+    expect([n(line.net_sales_usd), n(line.supplier_cost_usd), n(line.total_partner_cost_usd), n(line.margin_amount_usd)])
+      .toEqual(["104.65", "49.48", "57.73", "36.45"]);
   });
 
   it("records the demo guest payments, refund, credit note and cancellation", async () => {

@@ -213,6 +213,32 @@ export const cancellationSchema = z.object({
   cancellation_note: optionalText(500),
 });
 
+// ---------------------------------------------------------------------------
+// Extra partners on a trip (guide, driver, hotel ... next to the main partner).
+// ---------------------------------------------------------------------------
+export const PARTNER_ROLES = ["boat", "guide", "driver", "hotel", "company", "other"] as const;
+
+export const partnerCostAddSchema = z.object({
+  supplier_id: idSchema,
+  role: z.enum(PARTNER_ROLES, { error: "Choose the partner's role on this trip." }),
+  /** Blank = use the partner's price for this tour. */
+  cost: z.union([nonNegativeAmountSchema, z.literal(""), z.null()]).optional().transform((value) => (value === "" || value === undefined ? null : value)),
+  currency: z.union([currencySchema, z.literal(""), z.null()]).optional().transform((value) => value || null),
+  cancellation_fee: nonNegativeAmountSchema.optional().default("0.00"),
+  note: optionalText(500),
+}).refine((value) => value.cost === null || value.currency !== null, { path: ["currency"], message: "Choose the currency of the cost." });
+
+export const partnerCostUpdateSchema = z.object({
+  cost: nonNegativeAmountSchema.optional(),
+  currency: currencySchema.optional(),
+  cancellation_fee: nonNegativeAmountSchema.optional(),
+  role: z.enum(PARTNER_ROLES).optional(),
+  /** Omitted = keep the note; "" = clear it. */
+  note: z.string().trim().max(500).optional().transform((value) => (value === undefined ? undefined : value || null)),
+}).strict().refine((value) => Object.values(value).some((entry) => entry !== undefined), "Nothing to update.");
+
+export const partnerCostRemoveSchema = z.object({ reason: requiredNoteSchema });
+
 /** First human-readable validation message, for API error responses. */
 export function firstIssue(error: z.ZodError) {
   const issue = error.issues[0];

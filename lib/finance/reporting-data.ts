@@ -54,7 +54,7 @@ export async function reportLines(supabase: SupabaseClient, range: { from: strin
   const rows: PnlLine[] = [];
   for (let offset = 0; ; offset += PAGE) {
     let request = supabase.from("booking_financial_lines")
-      .select("line_id:id,booking_id,trip_date,tour_slug,tour_name,destination,product_line,supplier_id,outcome,gross_usd,discount_usd,refund_usd,net_sales_usd,supplier_cost_usd,agent_commission_usd,payment_fees_usd,margin_amount_usd,booking_financials(reference),suppliers(name)")
+      .select("line_id:id,booking_id,trip_date,tour_slug,tour_name,destination,product_line,supplier_id,outcome,gross_usd,discount_usd,refund_usd,net_sales_usd,supplier_cost_usd:total_partner_cost_usd,agent_commission_usd,payment_fees_usd,margin_amount_usd,booking_financials(reference),suppliers(name)")
       .eq("included", true).gte("trip_date", range.from).lte("trip_date", range.to)
       .order("trip_date").order("id").range(offset, offset + PAGE - 1);
     if (query.destination) request = request.eq("destination", query.destination);

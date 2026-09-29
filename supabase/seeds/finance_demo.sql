@@ -92,3 +92,17 @@ insert into public.guest_payments (id, idempotency_key, booking_id, kind, method
   ('00000000-0000-4000-8000-000000005006', '00000000-0000-4000-8000-000000005006', '00000000-0000-4000-8000-000000001003', 'credit_note_issued', 'credit_note', -20, 'USD', 'USD', -20, 1, '2026-09-18', '00000000-0000-4000-8000-000000004001', 'CN-2026-D001', 'Demo: weather cancellation, deposit kept as credit'),
   ('00000000-0000-4000-8000-000000005007', '00000000-0000-4000-8000-000000005007', '00000000-0000-4000-8000-000000001004', 'balance', 'bank_transfer', 450, 'SAR', 'SAR', 450, 1, '2026-09-19', null, 'DEMO-WIRE', null)
 on conflict (id) do nothing;
+
+-- Extra partners (phase 2):
+--   DEMO-1001 Demo Guide  EGP 400 on the Orange Bay trip
+--   DEMO-1002 Demo Driver EGP 300 for the Marsa Alam transfer to Dolphin House
+--   DEMO-1003 Demo Guide  EGP 350, trip cancelled -> owed only the EGP 100 cancellation fee
+insert into public.booking_line_partner_costs (id, line_id, booking_id, supplier_id, role, cost, currency, cancellation_fee, note)
+select v.id::uuid, l.id, l.booking_id, v.supplier_id::uuid, v.role, v.cost, 'EGP', v.fee, 'Synthetic demo'
+from (values
+  ('00000000-0000-4000-8000-000000006001', '00000000-0000-4000-8000-000000001001', '00000000-0000-4000-8000-000000000102', 'guide', 400, 0),
+  ('00000000-0000-4000-8000-000000006002', '00000000-0000-4000-8000-000000001002', '00000000-0000-4000-8000-000000000103', 'driver', 300, 0),
+  ('00000000-0000-4000-8000-000000006003', '00000000-0000-4000-8000-000000001003', '00000000-0000-4000-8000-000000000102', 'guide', 350, 100)
+) as v(id, booking_id, supplier_id, role, cost, fee)
+join public.booking_financial_lines l on l.booking_id = v.booking_id::uuid and l.line_no = 1
+on conflict (id) do nothing;
