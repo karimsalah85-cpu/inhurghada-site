@@ -149,8 +149,31 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
   const bookingOptions = data.lines.filter((line) => line.current_supplier || line.partner_role || line.balances.length);
   const input = "mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-normal";
 
+  const collectionForm = (line: SupplierBookingRow) => (
+                <form onSubmit={(event) => saveCollection(event, line)} className="flex flex-wrap items-end gap-3 text-sm">
+                    <p className="basis-full font-semibold">Net booking price: {formatMoney(line.net_selling_price, line.currency)} · Supplier amount: {line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}{line.supplier_cost_source !== "none" && line.supplier_cost_currency === line.currency ? ` · Daily Red Sea cut: ${formatMoney(fromMinor(toMinor(line.net_selling_price) - toMinor(line.supplier_cost)), line.currency)}` : ""}</p>
+                    <label className="font-semibold">Enter<select name="split_mode" className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="drs_cut">Daily Red Sea cut</option><option value="supplier_amount">Supplier amount</option></select></label>
+                    <label className="basis-full font-semibold sm:basis-auto">Agreed amount ({line.currency})<input name="split_amount" type="number" min="0" max={line.net_selling_price} step="0.01" placeholder="Leave blank to keep current split" className="mt-1 block w-full rounded-lg border border-slate-200 px-2 py-1.5 sm:w-64" /></label>
+                    <p className="basis-full text-xs text-slate-600">Enter the full booking share, before agent commission and payment fees. If the supplier collects, they owe Daily Red Sea its cut. If Daily Red Sea collects, we owe the supplier their amount. Refunds and recorded payments affect the remaining balance.</p>
+                    <label className="font-semibold">Guest paid<select name="collected_by" defaultValue={line.collected_by} className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="daily_red_sea">Daily Red Sea</option><option value="supplier">The supplier</option></select></label>
+                    <label className="font-semibold">Status<select name="collection_status" defaultValue={line.collection_status} className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="not_collected">Not collected</option><option value="partial">Partly collected</option><option value="collected">Collected</option></select></label>
+                    <label className="font-semibold">Amount collected ({line.currency})<input name="collected_amount" inputMode="decimal" pattern="\d+(\.\d{1,2})?" defaultValue={line.collection_status === "not_collected" ? line.net_selling_price : line.collected_amount} className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5" /></label>
+                    <button disabled={busy} className="rounded-lg bg-cyan-700 px-3 py-1.5 font-bold text-white disabled:opacity-50">Save</button>
+                    <p className="basis-full text-xs text-slate-500">Changing who collected reverses the automatic ledger entry and posts the new one; past entries are never edited.</p>
+                  </form>
+  );
+  const reverseForm = (row: LedgerRow) => (
+                <form onSubmit={(event) => reverse(event, row)} className="flex flex-wrap items-end gap-3 text-sm">
+                    <label className="grow font-semibold">Why is entry #{row.entry_no} being reversed? (required)<input name="note" required minLength={3} maxLength={1000} className="mt-1 block w-full rounded-lg border border-slate-200 px-2 py-1.5" /></label>
+                    <button disabled={busy} className="rounded-lg bg-rose-700 px-3 py-1.5 font-bold text-white disabled:opacity-50">Post reversal of {formatMoney(fromMinor(-toMinor(row.amount)), row.currency)}</button>
+                  </form>
+  );
+  const lineBalances = (line: SupplierBookingRow) => line.balances.length
+    ? line.balances.map((balance) => <div key={balance.currency} className={Number(balance.balance) < 0 ? "text-amber-800" : "text-emerald-800"}>{formatMoney(balance.balance, balance.currency)}</div>)
+    : <span className="text-slate-400">Settled</span>;
+
   return <div className="space-y-6">
-    <section className="rounded-3xl bg-white p-6 shadow-sm">
+    <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <Link href="/admin/finance/suppliers" className="text-sm font-semibold text-cyan-700 hover:underline">← All suppliers</Link>
@@ -193,7 +216,7 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
       </form> : null}
     </section>
 
-    <section className="rounded-3xl bg-white p-6 shadow-sm">
+    <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div><h2 className="text-xl font-black">Bookings</h2><p className="text-sm text-slate-500">One row per trip. Tick bookings with an open balance to settle them together.</p></div>
         {selected.size && data.canManage ? <div className="rounded-2xl bg-cyan-50 p-3 text-sm text-cyan-950">
@@ -206,7 +229,25 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
           </form> : <button type="button" onClick={() => setConfirmSettlement(true)} className="mt-2 rounded-lg bg-cyan-700 px-3 py-1.5 font-bold text-white">Settle selected…</button>}
         </div> : null}
       </div>
-      <div className="mt-4 overflow-x-auto">
+      <ul className="mt-4 space-y-3 md:hidden">
+        {data.lines.map((line) => (
+          <li key={line.line_id} className={`rounded-2xl border border-slate-200 p-3 text-sm ${line.included ? "" : "text-slate-400"}`}>
+            <div className="flex items-start gap-3">
+              <input type="checkbox" className="mt-1 h-5 w-5" aria-label={`Select ${line.reference}`} disabled={!line.balances.length || !data.canManage} checked={selected.has(line.line_id)} onChange={() => toggleLine(line.line_id)} />
+              <div className="min-w-0 grow">
+                <p className="font-bold text-slate-900">{line.reference}{line.line_no > 1 ? `/${line.line_no}` : ""} <span className="font-normal text-slate-500">· {line.trip_date || "no date"}</span></p>
+                <p className="text-xs text-slate-500">{line.tour_name || "Trip"} · {line.outcome}{line.current_supplier ? "" : line.partner_role ? ` · ${line.partner_role} (extra partner)` : " · former supplier"}</p>
+                <p className="mt-1 text-xs">{line.partner_role ? "Daily Red Sea pays" : `Guest paid ${statusText[line.collected_by]}`} · cost {line.supplier_cost_source === "none" && !line.partner_role ? "not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}</p>
+              </div>
+              <div className="shrink-0 text-right font-semibold tabular-nums">{lineBalances(line)}</div>
+            </div>
+            {data.canManage && line.current_supplier ? <button type="button" onClick={() => setEditingLine(editingLine === line.line_id ? null : line.line_id)} className="mt-2 w-full rounded-lg border border-slate-300 py-2 text-xs font-bold">Edit split & collection</button> : null}
+            {editingLine === line.line_id ? <div className="mt-2 rounded-xl bg-slate-50 p-3">{collectionForm(line)}</div> : null}
+          </li>
+        ))}
+        {!data.lines.length ? <li className="py-6 text-center text-slate-500">No bookings with this supplier yet.</li> : null}
+      </ul>
+      <div className="mt-4 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[1100px] text-left text-sm">
           <thead className="text-xs uppercase tracking-wide text-slate-500"><tr>
             <th className="py-2 pr-2" /><th className="py-2 pr-3">Trip date</th><th className="py-2 pr-3">Booking / tour</th><th className="py-2 pr-3 text-right">Guests</th>
@@ -225,21 +266,11 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
                 <td className={`py-3 pr-3 ${statusTone(line.supplier_cost_paid_status)}`}>{line.partner_role ? formatMoney(line.supplier_cost, line.supplier_cost_currency) : line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}<p className="text-xs">{statusText[line.supplier_cost_paid_status || ""] || "—"}</p></> : "—"}</td>
                 <td className={`py-3 pr-3 ${statusTone(line.commission_received_status)}`}>{line.current_supplier ? <>{line.supplier_cost_source === "none" ? "Not set" : line.supplier_cost_currency === line.currency ? formatMoney(fromMinor(toMinor(line.net_selling_price) - toMinor(line.supplier_cost)), line.currency) : "See currency balance"}<p className="text-xs">{statusText[line.commission_received_status || ""] || "—"}</p></> : "—"}{line.ledger_state === "awaiting_fx" || line.ledger_state === "usd_pending" ? <p className="text-xs text-amber-700">{statusText[line.ledger_state]}</p> : null}</td>
                 <td className={`py-3 pr-3 text-right tabular-nums ${line.margin_amount_usd !== null && Number(line.margin_amount_usd) < 0 ? "font-bold text-rose-700" : ""}`}>{line.margin_amount_usd === null ? <span className="text-xs text-amber-700">USD pending</span> : <>{formatMoney(line.margin_amount_usd)}<p className="text-xs text-slate-500">{line.margin_pct_usd === null ? "—" : `${line.margin_pct_usd}%`}</p></>}</td>
-                <td className="py-3 pr-3 text-right tabular-nums">{line.balances.length ? line.balances.map((balance) => <div key={balance.currency} className={Number(balance.balance) < 0 ? "text-amber-800" : "text-emerald-800"}>{formatMoney(balance.balance, balance.currency)}</div>) : <span className="text-slate-400">Settled</span>}</td>
+                <td className="py-3 pr-3 text-right tabular-nums">{lineBalances(line)}</td>
                 <td className="py-3 text-right">{data.canManage && line.current_supplier ? <button type="button" onClick={() => setEditingLine(editingLine === line.line_id ? null : line.line_id)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold">Edit split & collection</button> : null}</td>
               </tr>
               {editingLine === line.line_id ? <tr className="bg-slate-50"><td colSpan={11} className="p-3">
-                <form onSubmit={(event) => saveCollection(event, line)} className="flex flex-wrap items-end gap-3 text-sm">
-                  <p className="basis-full font-semibold">Net booking price: {formatMoney(line.net_selling_price, line.currency)} · Supplier amount: {line.supplier_cost_source === "none" ? "Not set" : formatMoney(line.supplier_cost, line.supplier_cost_currency)}{line.supplier_cost_source !== "none" && line.supplier_cost_currency === line.currency ? ` · Daily Red Sea cut: ${formatMoney(fromMinor(toMinor(line.net_selling_price) - toMinor(line.supplier_cost)), line.currency)}` : ""}</p>
-                  <label className="font-semibold">Enter<select name="split_mode" className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="drs_cut">Daily Red Sea cut</option><option value="supplier_amount">Supplier amount</option></select></label>
-                  <label className="font-semibold">Agreed amount ({line.currency})<input name="split_amount" type="number" min="0" max={line.net_selling_price} step="0.01" placeholder="Leave blank to keep current split" className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5" /></label>
-                  <p className="basis-full text-xs text-slate-600">Enter the full booking share, before agent commission and payment fees. If the supplier collects, they owe Daily Red Sea its cut. If Daily Red Sea collects, we owe the supplier their amount. Refunds and recorded payments affect the remaining balance.</p>
-                  <label className="font-semibold">Guest paid<select name="collected_by" defaultValue={line.collected_by} className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="daily_red_sea">Daily Red Sea</option><option value="supplier">The supplier</option></select></label>
-                  <label className="font-semibold">Status<select name="collection_status" defaultValue={line.collection_status} className="mt-1 block rounded-lg border border-slate-200 bg-white px-2 py-1.5"><option value="not_collected">Not collected</option><option value="partial">Partly collected</option><option value="collected">Collected</option></select></label>
-                  <label className="font-semibold">Amount collected ({line.currency})<input name="collected_amount" inputMode="decimal" pattern="\d+(\.\d{1,2})?" defaultValue={line.collection_status === "not_collected" ? line.net_selling_price : line.collected_amount} className="mt-1 block rounded-lg border border-slate-200 px-2 py-1.5" /></label>
-                  <button disabled={busy} className="rounded-lg bg-cyan-700 px-3 py-1.5 font-bold text-white disabled:opacity-50">Save</button>
-                  <p className="basis-full text-xs text-slate-500">Changing who collected reverses the automatic ledger entry and posts the new one; past entries are never edited.</p>
-                </form>
+                {collectionForm(line)}
               </td></tr> : null}
             </Fragment>)}
             {!data.lines.length ? <tr><td colSpan={11} className="py-6 text-center text-slate-500">No bookings with this supplier yet.</td></tr> : null}
@@ -248,7 +279,7 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
       </div>
     </section>
 
-    <section className="rounded-3xl bg-white p-6 shadow-sm">
+    <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
       <h2 className="text-xl font-black">Ledger</h2>
       <p className="text-sm text-slate-500">Append-only. Balance is the running balance in the entry&apos;s currency over the full history. Corrections appear as reversals.</p>
       <div className="mt-4 grid gap-3 text-sm sm:grid-cols-5">
@@ -258,7 +289,27 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
         <label className="font-semibold">Booking<input value={filters.booking || ""} placeholder="Reference" onChange={(event) => setFilters({ ...filters, booking: event.target.value })} className={input} /></label>
         <label className="font-semibold">Status<select value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value as LedgerFilters["status"] })} className={input}><option value="all">All</option><option value="open">Open bookings</option><option value="settled">Settled bookings</option><option value="reversed">Reversed / reversals</option></select></label>
       </div>
-      <div className="mt-4 overflow-x-auto">
+      <ul className="mt-4 space-y-2 md:hidden">
+        {ledgerRows.map((row) => (
+          <li key={row.id} className={`rounded-xl border border-slate-200 p-3 text-sm ${row.reversed || row.entry_type === "reversal" ? "text-slate-400" : ""}`}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-semibold">{entryTypeLabels[row.entry_type]}{row.is_automatic ? <span className="ml-1 rounded bg-slate-100 px-1.5 text-[10px] font-bold uppercase text-slate-500">auto</span> : null}{row.reversed ? <span className="ml-1 rounded bg-slate-100 px-1.5 text-[10px] font-bold uppercase text-slate-500">reversed</span> : null}</p>
+                <p className="text-xs text-slate-500">#{row.entry_no} · {row.entry_date}{row.booking_reference ? ` · ${row.booking_reference}` : ""}</p>
+                {row.note ? <p className="mt-1 text-xs text-slate-600 wrap-break-word">{row.note}</p> : null}
+              </div>
+              <div className="shrink-0 text-right tabular-nums">
+                <p className={Number(row.amount) < 0 ? "text-amber-800" : "text-emerald-800"}>{formatMoney(row.amount, row.currency)}</p>
+                <p className="text-xs font-semibold text-slate-600">bal. {formatMoney(row.running_balance, row.currency)}</p>
+              </div>
+            </div>
+            {data.canManage && !row.is_automatic && !row.reversed && row.entry_type !== "reversal" ? <button type="button" onClick={() => setReversing(reversing === row.id ? null : row.id)} className="mt-2 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold">Reverse…</button> : null}
+            {reversing === row.id ? <div className="mt-2 rounded-xl bg-slate-50 p-3">{reverseForm(row)}</div> : null}
+          </li>
+        ))}
+        {!ledgerRows.length ? <li className="py-6 text-center text-slate-500">No ledger entries match these filters.</li> : null}
+      </ul>
+      <div className="mt-4 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[980px] text-left text-sm">
           <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-2 pr-3">Date</th><th className="py-2 pr-3">#</th><th className="py-2 pr-3">Type</th><th className="py-2 pr-3">Booking</th><th className="py-2 pr-3">Note</th><th className="py-2 pr-3 text-right">Amount</th><th className="py-2 pr-3 text-right">Balance</th><th className="py-2 pr-3 text-right">USD</th><th className="py-2" /></tr></thead>
           <tbody>
@@ -275,10 +326,7 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
                 <td className="py-2 text-right">{data.canManage && !row.is_automatic && !row.reversed && row.entry_type !== "reversal" ? <button type="button" onClick={() => setReversing(reversing === row.id ? null : row.id)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-bold">Reverse…</button> : null}</td>
               </tr>
               {reversing === row.id ? <tr className="bg-slate-50"><td colSpan={9} className="p-3">
-                <form onSubmit={(event) => reverse(event, row)} className="flex flex-wrap items-end gap-3 text-sm">
-                  <label className="grow font-semibold">Why is entry #{row.entry_no} being reversed? (required)<input name="note" required minLength={3} maxLength={1000} className="mt-1 block w-full rounded-lg border border-slate-200 px-2 py-1.5" /></label>
-                  <button disabled={busy} className="rounded-lg bg-rose-700 px-3 py-1.5 font-bold text-white disabled:opacity-50">Post reversal of {formatMoney(fromMinor(-toMinor(row.amount)), row.currency)}</button>
-                </form>
+                {reverseForm(row)}
               </td></tr> : null}
             </Fragment>)}
             {!ledgerRows.length ? <tr><td colSpan={9} className="py-6 text-center text-slate-500">No ledger entries match these filters.</td></tr> : null}

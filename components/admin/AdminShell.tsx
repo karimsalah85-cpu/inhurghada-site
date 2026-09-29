@@ -32,6 +32,7 @@ const groups: NavGroup[] = [
   { label: "Performance & finance", items: [
     { href: "/admin/analytics", label: "Analytics", permissions: ["finance"] },
     { href: "/admin/reports", label: "Reports", permissions: ["reports"] },
+    { href: "/admin/finance/reports", label: "Finance reports", permissions: ["finance"] },
     { href: "/admin/finance", label: "Finance", permissions: ["finance"] },
     { href: "/admin/finance/pnl", label: "Profit & loss", permissions: ["finance"] },
     { href: "/admin/finance/margins", label: "Margins", permissions: ["finance"] },
