@@ -51,7 +51,7 @@ export default function FinanceMargins() {
       <div className="flex items-end"><a href={`/api/admin/finance/margins?${queryString(query, { group, compare: "0", format: "csv" })}`} className="w-full rounded-xl border border-slate-300 px-3 py-2 text-center font-bold text-slate-800">Export CSV</a></div>
     </ReportFilters>
 
-    <section className="rounded-3xl bg-white p-6 shadow-sm">
+    <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div role="tablist" aria-label="Group margins" className="flex flex-wrap gap-2">
           {groups.map((item) => <button key={item.key} type="button" role="tab" aria-selected={group === item.key} onClick={() => setGroup(item.key)}
@@ -65,7 +65,19 @@ export default function FinanceMargins() {
       {error ? <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p> : null}
       {notice ? <p role="status" className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">{notice}</p> : null}
       <p className="mt-4 text-xs text-slate-500">Margin = net sales − supplier cost − agent commission − payment fees, in USD at each trip-date rate. Worst first. {flagged} flagged{data?.pending ? ` · ${data.pending} booking lines not included until their USD rate is final` : ""}.</p>
-      {!data ? <p className="mt-4 text-sm text-slate-500">Loading margins…</p> : <div className="mt-3 overflow-x-auto">
+      {!data ? <p className="mt-4 text-sm text-slate-500">Loading margins…</p> : <>
+      <ul className="mt-3 space-y-2 md:hidden">
+        {rows.map((row) => <li key={row.key} className="rounded-xl border border-slate-200 p-3 text-sm">
+          <div className="flex items-start justify-between gap-3">
+            <p className="min-w-0 font-semibold text-slate-900">{group === "supplier" && row.key !== "none" ? <a href={`/admin/finance/suppliers/${row.key}`} className="underline">{row.label}</a> : row.label}</p>
+            <p className={`shrink-0 text-right font-bold tabular-nums ${row.flag === "negative" ? "text-rose-700" : ""}`}>{formatMoney(row.margin)}<span className="block text-xs font-normal text-slate-500">{row.margin_pct === null ? "—" : `${row.margin_pct}%`}</span></p>
+          </div>
+          <p className="mt-1 text-xs text-slate-500">Net sales {formatMoney(row.net_sales)} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}</p>
+          {row.flag === "negative" ? <p className="mt-1 text-xs font-bold text-rose-800">▼ Negative margin</p> : row.flag === "below_threshold" ? <p className="mt-1 text-xs font-bold text-amber-900">! Below {data.threshold}%</p> : null}
+        </li>)}
+        {!rows.length ? <li className="py-6 text-center text-slate-500">{onlyFlagged ? "Nothing flagged in this period." : "No bookings in this period."}</li> : null}
+      </ul>
+      <div className="mt-3 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-2 pr-3">{groups.find((item) => item.key === group)?.label.replace("Per ", "")}</th><th className="py-2 pr-3 text-right">Bookings</th><th className="py-2 pr-3 text-right">Net sales</th><th className="py-2 pr-3 text-right">Margin</th><th className="py-2 pr-3 text-right">Margin %</th><th className="py-2">Flag</th></tr></thead>
           <tbody>
@@ -81,7 +93,7 @@ export default function FinanceMargins() {
             {!rows.length ? <tr><td colSpan={6} className="py-6 text-center text-slate-500">{onlyFlagged ? "Nothing flagged in this period." : "No bookings in this period."}</td></tr> : null}
           </tbody>
         </table>
-      </div>}
+      </div></>}
     </section>
   </div>;
 }

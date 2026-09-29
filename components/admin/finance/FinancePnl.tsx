@@ -57,7 +57,7 @@ export function ReportFilters({ query, onChange, options, children }: { query: R
 }
 
 function StatementTable({ title, subtitle, rows, compare, onDrill, active }: { title: string; subtitle: string; rows: StatementRow[]; compare: boolean; onDrill: (row: StatementRow) => void; active: string | null }) {
-  return <section className="rounded-3xl bg-white p-6 shadow-sm">
+  return <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
     <h2 className="text-lg font-black text-slate-950">{title}</h2>
     <p className="text-xs text-slate-500">{subtitle}</p>
     <table className="mt-4 w-full text-sm">
@@ -132,12 +132,12 @@ export default function FinancePnl() {
         <StatementTable title="Net revenue view" subtitle="Only what Daily Red Sea earns over the supplier cost." rows={report.net} compare={compare} onDrill={openDrill} active={drill?.key ?? null} />
       </div>
 
-      {drill ? <section className="rounded-3xl bg-white p-6 shadow-sm">
+      {drill ? <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
         <div className="flex items-center justify-between"><h2 className="text-lg font-black">{drill.label}</h2><button type="button" onClick={() => setDrill(null)} className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-bold">Close</button></div>
         {drill.error ? <p role="alert" className="mt-3 text-sm text-rose-700">{drill.error}</p> : !drill.rows ? <p className="mt-3 text-sm text-slate-500">Loading…</p> : <DrillTable rows={drill.rows} total={drill.total ?? 0} truncated={Boolean(drill.truncated)} />}
       </section> : null}
 
-      <section className="rounded-3xl bg-white p-6 shadow-sm">
+      <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-lg font-black">Monthly trend</h2>
         <p className="text-xs text-slate-500">Net sales against all costs (trip, selling and operating); the label above each month is net profit.</p>
         <div className="mt-3"><ProfitLossChart rows={chartRows} labels={{ revenue: "Net sales", costs: "All costs", profit: "Net profit" }} formatValue={(value) => formatMoney(value.toFixed(2)).replace(/\.00$/, "")} /></div>
@@ -148,8 +148,22 @@ export default function FinancePnl() {
 
 function DrillTable({ rows, total, truncated }: { rows: DrillRow[]; total: number; truncated: boolean }) {
   if (!rows.length) return <p className="mt-3 text-sm text-slate-500">Nothing behind this line in the selected period.</p>;
-  return <div className="mt-3 overflow-x-auto">
+  return <div className="mt-3">
     {truncated ? <p className="mb-2 text-xs text-amber-700">Showing the largest {rows.length} of {total}. Narrow the date range or filters to see the rest.</p> : null}
+    <ul className="space-y-2 md:hidden">
+      {rows.map((row) => row.kind === "line"
+        ? <li key={row.line.line_id} className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 p-3 text-sm">
+            <div className="min-w-0"><p className="font-semibold">{row.line.reference} <span className="font-normal text-slate-500">· {row.line.trip_date}</span></p>
+              <p className="text-xs text-slate-500">{row.line.tour_name || "—"} · {row.line.supplier_name || "no partner"} · {row.line.outcome.replace("_", " ")}</p></div>
+            <p className="shrink-0 font-semibold tabular-nums">{formatMoney(row.amount)}</p>
+          </li>
+        : <li key={row.expense.id} className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 p-3 text-sm">
+            <div className="min-w-0"><p className="font-semibold">{row.expense.description}</p>
+              <p className="text-xs text-slate-500">{row.expense.expense_date} · {row.expense.vendor || "—"} · {row.expense.amount} {row.expense.currency}</p></div>
+            <p className="shrink-0 font-semibold tabular-nums">{formatMoney(row.amount)}</p>
+          </li>)}
+    </ul>
+    <div className="hidden overflow-x-auto md:block">
     <table className="w-full min-w-[720px] text-left text-sm">
       {rows[0].kind === "line" ? <>
         <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-1 pr-3">Trip date</th><th className="py-1 pr-3">Booking</th><th className="py-1 pr-3">Tour</th><th className="py-1 pr-3">Supplier</th><th className="py-1 pr-3">Outcome</th><th className="py-1 text-right">USD</th></tr></thead>
@@ -159,5 +173,6 @@ function DrillTable({ rows, total, truncated }: { rows: DrillRow[]; total: numbe
         <tbody>{rows.map((row) => row.kind === "expense" ? <tr key={row.expense.id} className="border-t border-slate-100"><td className="py-1.5 pr-3 tabular-nums">{row.expense.expense_date}</td><td className="py-1.5 pr-3">{row.expense.description}</td><td className="py-1.5 pr-3">{row.expense.vendor || "—"}</td><td className="py-1.5 pr-3 capitalize">{row.expense.source.replace("_", " ")}</td><td className="py-1.5 pr-3 text-right tabular-nums">{row.expense.amount} {row.expense.currency}</td><td className="py-1.5 text-right tabular-nums">{formatMoney(row.amount)}</td></tr> : null)}</tbody>
       </>}
     </table>
+    </div>
   </div>;
 }
