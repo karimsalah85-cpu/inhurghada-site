@@ -128,9 +128,12 @@ alter table public.expenses
 -- trigger (same-timing triggers fire in name order), i.e. on the final
 -- recognised amounts and rates. The percent is only (re)read when the rate
 -- itself changes; otherwise the stored copy is kept.
+-- They are SECURITY DEFINER because expenses are saved by signed-in staff
+-- directly, and the rate helpers are not executable by them; each trigger
+-- only computes VAT on the row being written.
 -- ---------------------------------------------------------------------------
 create function public.finance_line_tax() returns trigger
-language plpgsql set search_path = '' as $$
+language plpgsql security definer set search_path = '' as $$
 begin
   if tg_op = 'INSERT' then
     new.sales_tax_rate_id := coalesce(new.sales_tax_rate_id, public.finance_default_tax_rate('sales', new.trip_date));
@@ -154,7 +157,7 @@ begin
 end $$;
 
 create function public.finance_partner_cost_tax() returns trigger
-language plpgsql set search_path = '' as $$
+language plpgsql security definer set search_path = '' as $$
 begin
   if tg_op = 'INSERT' then
     new.tax_rate_id := coalesce(new.tax_rate_id, public.finance_default_tax_rate('purchases', new.trip_date));
@@ -170,7 +173,7 @@ begin
 end $$;
 
 create function public.finance_expense_tax() returns trigger
-language plpgsql set search_path = '' as $$
+language plpgsql security definer set search_path = '' as $$
 begin
   if tg_op = 'INSERT' then
     new.tax_rate_id := coalesce(new.tax_rate_id, public.finance_default_tax_rate('purchases', new.expense_date));

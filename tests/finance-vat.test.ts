@@ -160,3 +160,24 @@ describe("VAT on transactions", () => {
     await clearDefaults();
   });
 });
+
+describe("as a real signed-in admin (not the database superuser)", () => {
+  it("can save and edit an expense while a default VAT rate exists", async () => {
+    const rate = await createRate(10, "purchases", { purchases: true });
+    const accountant = await createStaff(db, "finance");
+    // Supabase grants signed-in users table access (row-level security decides the rows); mirror that here.
+    await db.exec("grant select, insert, update on public.expenses to authenticated");
+    await actAs(db, accountant);
+    await db.exec("set role authenticated");
+    try {
+      const { rows: [saved] } = await db.query<Row>(
+        "insert into public.expenses(description, amount, currency, expense_date) values ('Boat fuel', 550, 'EGP', '2026-06-10') returning id, tax_rate_id, tax_amount");
+      expect([saved.tax_rate_id, n(saved.tax_amount)]).toEqual([rate.id, "50.00"]);
+      const { rows: [edited] } = await db.query<Row>("update public.expenses set tax_rate_id = null where id = $1 returning tax_amount", [saved.id]);
+      expect(n(edited.tax_amount)).toBe("0.00");
+    } finally {
+      await db.exec("reset role");
+      await clearDefaults();
+    }
+  });
+});
