@@ -495,12 +495,15 @@ export default function AdminDashboard({
           : items.filter((item) => item.id !== id),
       );
       notifyAdminBookingsChanged();
+      // Open the booking so the cancellation reason (and any refund) is recorded right away.
+      const cancelled = patch.status === "cancelled";
+      if (cancelled) setExpandedId(id);
       feedback(
-        result.notification.attempted
+        (result.notification.attempted
           ? result.notification.sent
             ? "Booking updated and customer automatically emailed with the PDF."
             : "Booking updated, but the customer email could not be sent."
-          : "Booking updated.",
+          : "Booking updated.") + (cancelled ? " Record why it was cancelled below." : ""),
       );
       router.refresh();
     } catch (reason) {

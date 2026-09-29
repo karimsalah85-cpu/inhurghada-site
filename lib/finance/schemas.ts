@@ -169,6 +169,50 @@ export const fxOverrideSchema = z.object({
   note: optionalNoteSchema,
 });
 
+// ---------------------------------------------------------------------------
+// Guest payments, refunds, credit notes and cancellations.
+// ---------------------------------------------------------------------------
+export const GUEST_PAYMENT_METHODS = ["cash", "card", "stripe", "bank_transfer", "paypal", "instapay", "vodafone_cash", "other"] as const;
+export const CANCELLATION_REASONS = ["weather", "guest", "partner", "other"] as const;
+
+export const guestPaymentSchema = z.object({
+  /** Client-generated once per form submission; a retry or double tap reuses it. */
+  idempotency_key: idSchema,
+  kind: z.enum(["deposit", "balance", "refund"], { error: "Choose deposit, balance or refund." }),
+  amount: positiveAmountSchema,
+  currency: currencySchema,
+  method: z.enum(GUEST_PAYMENT_METHODS, { error: "Choose how the money was paid." }),
+  paid_on: isoDateSchema,
+  /** Only when paid in another currency: the booking-currency amount this covers (the rate used at the desk). */
+  applied_amount: z.union([positiveAmountSchema, z.literal(""), z.null()]).optional().transform((value) => value || null),
+  reference: optionalText(120),
+  note: optionalNoteSchema,
+});
+
+export const creditNoteIssueSchema = z.object({
+  idempotency_key: idSchema,
+  amount: positiveAmountSchema,
+  issued_on: isoDateSchema,
+  expires_on: z.union([isoDateSchema, z.literal(""), z.null()]).optional().transform((value) => value || null),
+  reason: requiredNoteSchema,
+}).refine((value) => !value.expires_on || value.expires_on >= value.issued_on, { path: ["expires_on"], message: "The expiry date must be after the issue date." });
+
+export const creditNoteRedeemSchema = z.object({
+  idempotency_key: idSchema,
+  /** The credit note number the guest quotes (CN-2026-0001), or its id. */
+  credit_note: z.string().trim().min(3, "Enter the credit note number.").max(60),
+  amount: positiveAmountSchema,
+  paid_on: isoDateSchema,
+  applied_amount: z.union([positiveAmountSchema, z.literal(""), z.null()]).optional().transform((value) => value || null),
+});
+
+export const guestReversalSchema = z.object({ note: requiredNoteSchema });
+
+export const cancellationSchema = z.object({
+  cancellation_reason: z.enum(CANCELLATION_REASONS, { error: "Choose weather, guest, partner or other." }),
+  cancellation_note: optionalText(500),
+});
+
 /** First human-readable validation message, for API error responses. */
 export function firstIssue(error: z.ZodError) {
   const issue = error.issues[0];

@@ -40,4 +40,21 @@ describe("synthetic finance demo seed", () => {
     // EUR 90 at 0.86 EUR/USD = USD 104.65; EGP 2,400 at 48.50 = USD 49.48; 10% agent commission = EUR 9 = USD 10.47.
     expect([n(line.net_sales_usd), n(line.supplier_cost_usd), n(line.margin_amount_usd)]).toEqual(["104.65", "49.48", "44.70"]);
   });
+
+  it("records the demo guest payments, refund, credit note and cancellation", async () => {
+    const { rows } = await db.query<{ reference: string; payment_state: string; outstanding: string }>(
+      "select reference, payment_state, outstanding::text from public.booking_payment_summary where reference like 'DEMO-%' order by reference");
+    expect(rows.map((row) => [row.reference, row.payment_state, n(row.outstanding)])).toEqual([
+      ["DEMO-1001", "paid", "0.00"],
+      ["DEMO-1002", "partly_refunded", "0.00"],
+      ["DEMO-1003", "refunded", "0.00"],
+      ["DEMO-1004", "paid", "0.00"],
+      ["DEMO-1005", "unpaid", "1200.00"],
+    ]);
+    const { rows: [note] } = await db.query<{ status: string; remaining: string }>("select status, remaining::text from public.credit_note_balances where number = 'CN-2026-D001'");
+    expect([note.status, n(note.remaining)]).toEqual(["open", "20.00"]);
+    const { rows: [impact] } = await db.query<{ bookings: number; lost_sales_usd: string }>(
+      "select bookings, lost_sales_usd::text from public.finance_cancellation_impact where month = '2026-09-01' and reason = 'weather'");
+    expect([impact.bookings, n(impact.lost_sales_usd)]).toEqual([1, "70.00"]);
+  });
 });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
+import { cancellationSchema, firstIssue } from "@/lib/finance/schemas";
 import { createClient } from "@/utils/supabase/server";
 import { sendBookingAndPaymentStatusNotification } from "@/lib/booking-status-notification";
 import { deliverReferralNotifications } from "@/lib/referral-notifications";
@@ -28,8 +29,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   if (!authorized) return json({ error: "Unauthorized." }, 401);
   const { supabase, user } = authorized;
 
-  const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown; sales_person_id?: unknown; archived?: unknown } | null;
-  const update: { status?: string; payment_status?: string; sales_person_id?: string | null; sales_commission_percent?: number | null; archived_at?: string | null } = {};
+  const body = await request.json().catch(() => null) as { status?: unknown; payment_status?: unknown; sales_person_id?: unknown; archived?: unknown; cancellation_reason?: unknown; cancellation_note?: unknown } | null;
+  const update: { status?: string; payment_status?: string; sales_person_id?: string | null; sales_commission_percent?: number | null; archived_at?: string | null; cancellation_reason?: string; cancellation_note?: string | null } = {};
   if (typeof body?.status === "string" && bookingStatuses.has(body.status)) update.status = body.status;
   if (typeof body?.payment_status === "string" && paymentStatuses.has(body.payment_status)) update.payment_status = body.payment_status;
   if (typeof body?.archived === "boolean") update.archived_at = body.archived ? new Date().toISOString() : null;
@@ -44,6 +45,12 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       update.sales_commission_percent = salesPerson.commission_percent == null ? 0 : Number(salesPerson.commission_percent);
     } else return json({ error: "Choose a valid sales person." }, 400);
   }
+  if (body && (Object.hasOwn(body, "cancellation_reason") || Object.hasOwn(body, "cancellation_note"))) {
+    const cancellation = cancellationSchema.safeParse(body);
+    if (!cancellation.success) return json({ error: firstIssue(cancellation.error) }, 400);
+    update.cancellation_reason = cancellation.data.cancellation_reason;
+    update.cancellation_note = cancellation.data.cancellation_note;
+  }
   if (!Object.keys(update).length) return json({ error: "Choose a valid booking update." }, 400);
 
   const { data: existing, error: readError } = await supabase
@@ -52,6 +59,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     .eq("id", id)
     .single();
   if (readError || !existing) return json({ error: "Booking not found." }, 404);
+  if (update.cancellation_reason && (update.status ?? existing.status) !== "cancelled") {
+    return json({ error: "A cancellation reason can only be set on a cancelled booking." }, 400);
+  }
 
   const { data, error } = await supabase.from("bookings").update(update).eq("id", id).select().single();
   if (error) return json({ error: "Could not update the booking." }, 500);

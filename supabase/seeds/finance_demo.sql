@@ -67,3 +67,28 @@ set collected_by = 'daily_red_sea', collection_status = 'collected', collected_a
 from public.bookings b
 where b.id = l.booking_id and b.reference in ('DEMO-1001', 'DEMO-1002', 'DEMO-1004')
   and l.collected_by is distinct from 'daily_red_sea';
+
+-- Guest money (phase 1):
+--   DEMO-1001 EUR 20 cash deposit, then EUR 70 by card        -> paid
+--   DEMO-1002 GBP 120 via Stripe, GBP 20 refunded as goodwill  -> partly refunded
+--   DEMO-1003 USD 20 deposit, cancelled for weather, deposit
+--             given back as credit note CN-2026-D001           -> refunded (by credit)
+--   DEMO-1004 SAR 450 by bank transfer                         -> paid
+--   DEMO-1005 nothing recorded yet (driver collects cash)      -> unpaid
+update public.bookings set cancellation_reason = 'weather', cancellation_note = 'Demo: harbour closed by coastguard'
+where reference = 'DEMO-1003' and cancellation_reason is null;
+
+insert into public.credit_notes (id, number, booking_id, customer_name, customer_email, customer_phone, currency, amount, issued_on, expires_on, reason) values
+  ('00000000-0000-4000-8000-000000004001', 'CN-2026-D001', '00000000-0000-4000-8000-000000001003', 'Demo Guest Three', 'demo3@example.com', '+490000001003',
+   'USD', 20, '2026-09-18', '2027-09-18', 'Demo: weather cancellation, deposit kept as credit')
+on conflict (id) do nothing;
+
+insert into public.guest_payments (id, idempotency_key, booking_id, kind, method, amount, currency, booking_currency, applied_amount, applied_rate, paid_on, credit_note_id, reference, note) values
+  ('00000000-0000-4000-8000-000000005001', '00000000-0000-4000-8000-000000005001', '00000000-0000-4000-8000-000000001001', 'deposit', 'cash', 20, 'EUR', 'EUR', 20, 1, '2026-09-05', null, 'DEMO-R-1', null),
+  ('00000000-0000-4000-8000-000000005002', '00000000-0000-4000-8000-000000005002', '00000000-0000-4000-8000-000000001001', 'balance', 'card', 70, 'EUR', 'EUR', 70, 1, '2026-09-12', null, 'DEMO-R-2', null),
+  ('00000000-0000-4000-8000-000000005003', '00000000-0000-4000-8000-000000005003', '00000000-0000-4000-8000-000000001002', 'balance', 'stripe', 120, 'GBP', 'GBP', 120, 1, '2026-09-10', null, 'DEMO-STRIPE', null),
+  ('00000000-0000-4000-8000-000000005004', '00000000-0000-4000-8000-000000005004', '00000000-0000-4000-8000-000000001002', 'refund', 'card', -20, 'GBP', 'GBP', -20, 1, '2026-09-16', null, null, 'Demo: snorkel stop skipped'),
+  ('00000000-0000-4000-8000-000000005005', '00000000-0000-4000-8000-000000005005', '00000000-0000-4000-8000-000000001003', 'deposit', 'cash', 20, 'USD', 'USD', 20, 1, '2026-09-15', null, null, null),
+  ('00000000-0000-4000-8000-000000005006', '00000000-0000-4000-8000-000000005006', '00000000-0000-4000-8000-000000001003', 'credit_note_issued', 'credit_note', -20, 'USD', 'USD', -20, 1, '2026-09-18', '00000000-0000-4000-8000-000000004001', 'CN-2026-D001', 'Demo: weather cancellation, deposit kept as credit'),
+  ('00000000-0000-4000-8000-000000005007', '00000000-0000-4000-8000-000000005007', '00000000-0000-4000-8000-000000001004', 'balance', 'bank_transfer', 450, 'SAR', 'SAR', 450, 1, '2026-09-19', null, 'DEMO-WIRE', null)
+on conflict (id) do nothing;
