@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { AsYouType, getCountries, getCountryCallingCode, parsePhoneNumberFromString } from "libphonenumber-js";
 import { Check, ChevronDown } from "lucide-react";
 import { validatePhoneNumber, type CountryCode } from "@/lib/phone";
@@ -23,6 +23,12 @@ type PhoneNumberInputProps = {
 
 // Common traveller origins for the Red Sea market, shown above the full list.
 const PINNED: CountryCode[] = ["EG", "SA", "DE", "GB", "RU", "PL", "CZ", "FR", "IT", "NL", "AT", "CH", "BE", "UA", "CN", "US"];
+
+// Use identical country codes during SSR/hydration. ICU region names and
+// collation can differ between Node and browsers; localize after hydration.
+const subscribeHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
 
 function flagEmoji(country: string) {
   return String.fromCodePoint(...[...country.toUpperCase()].map((char) => 0x1f1e6 + char.charCodeAt(0) - 65));
@@ -55,10 +61,11 @@ export default function PhoneNumberInput({
     if (!national && !touched && isSupportedCountry(defaultCountry)) setCountry(defaultCountry);
   }
 
+  const hydrated = useSyncExternalStore(subscribeHydration, clientSnapshot, serverSnapshot);
   const countryOptions = useMemo(() => {
     let names: Intl.DisplayNames | undefined;
     try {
-      names = new Intl.DisplayNames([language], { type: "region" });
+      names = hydrated ? new Intl.DisplayNames([language], { type: "region" }) : undefined;
     } catch {
       names = undefined;
     }
@@ -66,10 +73,10 @@ export default function PhoneNumberInput({
       const name = names?.of(code) ?? code;
       return { code, name, calling: getCountryCallingCode(code) };
     };
-    const all = (getCountries() as CountryCode[]).map(label).sort((a, b) => a.name.localeCompare(b.name, language));
+    const all = (getCountries() as CountryCode[]).map(label).sort((a, b) => hydrated ? a.name.localeCompare(b.name, language) : a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
     const pinned = PINNED.filter(isSupportedCountry).map(label);
     return { pinned, all };
-  }, [language]);
+  }, [language, hydrated]);
 
   const callingCode = getCountryCallingCode(country);
 

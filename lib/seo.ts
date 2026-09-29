@@ -60,14 +60,7 @@ export function absoluteUrl(path = "/") {
   return new URL(path, siteUrl).toString();
 }
 
-const metadataTitleSuffix: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
-  en: " · Hurghada tours | Daily Red Sea",
-  ar: " · رحلات الغردقة | Daily Red Sea",
-  de: " · Hurghada Ausflüge | Daily Red Sea",
-  ru: " · туры Хургады | Daily Red Sea",
-  pl: " · wycieczki Hurghada | Daily Red Sea",
-  zh: " · Hurghada tours | Daily Red Sea",
-};
+const metadataTitleSuffix = " | Daily Red Sea";
 
 const metadataSupportCopy: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
   en: "Clear prices, pickup confirmation and local WhatsApp support from Daily Red Sea.",
@@ -89,8 +82,9 @@ function shortenMetadata(value: string, maxLength: number) {
 
 /** Keeps route titles between the audit minimum and maximum without relying on a root title template. */
 export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en") {
+  void locale; // Retained for callers; the brand suffix is destination-neutral.
   let title = value.replace(/\s+/g, " ").trim();
-  if (title.length < 30) title = `${title}${metadataTitleSuffix[locale]}`;
+  if (title.length < 30) title = `${title}${metadataTitleSuffix}`;
   return shortenMetadata(title.replace(/[|,:;–—-]+$/u, "").trim(), 58);
 }
 

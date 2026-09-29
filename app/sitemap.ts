@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getLiveBlogPosts, getLiveTours } from "@/lib/live-content";
-import { siteUrl } from "@/lib/seo";
+import { absoluteUrl, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
@@ -11,7 +11,11 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [tours, posts] = await Promise.all([getLiveTours(), getLiveBlogPosts()]);
-  const publishedAt = (value: string) => new Date(Math.min(new Date(value).getTime(), Date.now()));
+  const publishedAt = (value: string) => {
+    const timestamp = new Date(value).getTime();
+    return Number.isFinite(timestamp) ? new Date(Math.min(timestamp, Date.now())) : undefined;
+  };
+  const postDates = posts.map((post) => publishedAt(post.publishedAt)).filter((date): date is Date => date !== undefined);
   const paths = [
     "",
     "/tours",
@@ -41,14 +45,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           changeFrequency: path ? "weekly" as const : "daily" as const,
           priority: !path ? 1 : tour ? 0.85 : path.startsWith("/hurghada/") || path.startsWith("/marsa-alam/") || path.startsWith("/jeddah/") ? 0.8 : 0.6,
           alternates: { languages },
-          ...(tour ? { images: [`${siteUrl}${tour.image}`] } : {}),
+          ...(tour ? { images: [absoluteUrl(tour.image)] } : {}),
         };
       })
   );
   const blogEntries: MetadataRoute.Sitemap = [
     {
       url: `${siteUrl}/blog`,
-      lastModified: new Date(Math.min(Math.max(...posts.map((post) => new Date(post.publishedAt).getTime())), Date.now())),
+      ...(postDates.length ? { lastModified: new Date(Math.max(...postDates.map((date) => date.getTime()))) } : {}),
       changeFrequency: "weekly",
       priority: 0.75,
     },
