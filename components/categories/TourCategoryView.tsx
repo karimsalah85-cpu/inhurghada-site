@@ -112,6 +112,23 @@ export default async function TourCategoryView({ categorySlug, locale = "en" }: 
       <section className="mx-auto max-w-7xl px-6 py-16 sm:px-8">
         <CategoryTourExplorer tours={categoryTours} locale={locale} />
       </section>
+      {category.slug === "diving-snorkeling" && locale === "en" ? (
+        <section className="border-t border-line bg-white px-6 py-12 sm:px-8" aria-labelledby="diving-next-steps">
+          <div className="mx-auto max-w-6xl">
+            <h2 id="diving-next-steps" className="text-2xl font-black text-ink">Choose your Red Sea day</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <Link href="/tours/full-day-diving" className="rounded-2xl border border-line p-6 text-ink hover:border-ocean">
+                <h3 className="text-lg font-black">Certified divers: full-day Hurghada scuba trip →</h3>
+                <p className="mt-2 leading-7 text-muted">Two guided dives, lunch and hotel transfers. Bring your valid diving certification; rental equipment is available at extra cost.</p>
+              </Link>
+              <Link href="/blog/best-snorkeling-tours-in-hurghada-for-beginners" className="rounded-2xl border border-line p-6 text-ink hover:border-ocean">
+                <h3 className="text-lg font-black">New to the water? Compare beginner snorkeling tours →</h3>
+                <p className="mt-2 leading-7 text-muted">Our guide explains reef trips, island stops, swimming confidence and what to check before booking.</p>
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
       {buyerGuide ? <section className="border-t border-line bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-6xl"><h2 className="text-3xl font-black text-ink">{buyerGuide.title}</h2><p className="mt-4 max-w-3xl text-lg leading-8 text-muted">{buyerGuide.intro}</p><div className="mt-8 grid gap-5 md:grid-cols-3">{buyerGuide.options.map((option) => <article key={option.title} className="rounded-3xl border border-line bg-surface-muted p-6"><h3 className="text-xl font-black text-ink">{option.title}</h3><p className="mt-3 leading-7 text-muted">{option.text}</p></article>)}</div><div className="mt-10 rounded-3xl border border-ocean-soft bg-ocean-tint p-7"><h2 className="text-2xl font-black text-ink">Planning questions</h2><div className="mt-4 divide-y divide-ocean-soft">{buyerGuide.questions.map((item) => <details key={item.q} className="py-4"><summary className="cursor-pointer font-bold text-ink">{item.q}</summary><p className="mt-3 leading-7 text-ink">{item.a}</p></details>)}</div></div></div></section> : null}
       {category.slug !== "diving-snorkeling" ? <section className="border-t border-line bg-ocean-tint px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl rounded-3xl border border-ocean-soft bg-white p-8"><h2 className="text-3xl font-black text-ink">{relatedDivingCopy.title}</h2><p className="mt-4 max-w-2xl leading-8 text-muted">{relatedDivingCopy.text}</p><Link href={localePath(locale, "/hurghada/diving-snorkeling")} className="mt-6 inline-block rounded-full bg-ocean-dark px-6 py-3 font-bold text-white">{relatedDivingCopy.cta} →</Link></div></section> : null}
       <section className="border-t border-line bg-white px-6 py-16 sm:px-8"><div className="mx-auto max-w-4xl"><h2 className="text-3xl font-black text-ink">{de ? "Mit klaren Informationen buchen" : ru ? "Бронируйте с полной информацией" : ar ? "احجز مع معلومات واضحة" : pl ? "Rezerwuj z jasnymi informacjami" : zh ? "信息清晰，放心预订" : "Book with clear information"}</h2><p className="mt-4 leading-8 text-muted">{de ? "Jeder Ausflug zeigt Startpreis, Dauer, Abholung, enthaltene Leistungen und wichtige Hinweise vor der Buchung. Unser Team bestätigt die endgültigen Details direkt per WhatsApp." : ru ? "Перед бронированием вы увидите начальную цену, продолжительность, информацию о трансфере, включённые услуги и важные примечания. Наша местная команда подтвердит окончательные детали в WhatsApp." : ar ? "قبل الحجز ستظهر لك السعر المبدئي والمدة والاستلام والخدمات المشمولة والملاحظات المهمة. سيؤكد فريقنا التفاصيل النهائية عبر واتساب." : pl ? "Przed rezerwacją zobaczysz cenę wyjściową, czas trwania, informacje o odbiorze, zakres świadczeń i ważne uwagi. Nasz zespół potwierdzi szczegóły przez WhatsApp." : zh ? "每个项目都会在预订前展示起价、时长、接送信息、包含项目和重要提示。我们的本地团队会通过 WhatsApp 确认最终详情。" : "Every Daily Red Sea experience shows its starting price, duration, pickup information, inclusions, and practical notes before you submit a booking. Our local team confirms final pickup details directly on WhatsApp."}</p></div></section>
