@@ -10,10 +10,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
   if (!allowed) return financeJson({ error: "Finance access required." }, 403);
   const [lines, partnerCosts, suppliers] = await Promise.all([
     supabase.from("booking_financial_lines")
-      .select("id,line_no,tour_name,trip_date,currency,net_selling_price,outcome,included,supplier_id,supplier_cost,supplier_cost_currency,supplier_cost_source,supplier_cancellation_fee,collected_by,recognised_revenue,recognised_supplier_cost,extra_partner_cost_booking_ccy,margin_amount,margin_pct,margin_amount_usd,total_partner_cost_usd")
+      .select("id,line_no,tour_name,trip_date,currency,net_selling_price,outcome,included,supplier_id,supplier_cost,supplier_cost_currency,supplier_cost_source,supplier_cancellation_fee,collected_by,recognised_revenue,recognised_supplier_cost,extra_partner_cost_booking_ccy,margin_amount,margin_pct,margin_amount_usd,total_partner_cost_usd,sales_tax_rate_id,sales_tax_amount,purchase_tax_rate_id,purchase_tax_amount")
       .eq("booking_id", id).neq("outcome", "removed").order("line_no"),
     supabase.from("booking_line_partner_costs")
-      .select("id,line_id,supplier_id,role,cost,currency,cancellation_fee,cost_source,status,removed_reason,note,recognised_cost,fx_locked,suppliers(name)")
+      .select("id,line_id,supplier_id,role,cost,currency,cancellation_fee,cost_source,status,removed_reason,note,recognised_cost,fx_locked,tax_rate_id,tax_amount,suppliers(name)")
       .eq("booking_id", id).order("created_at"),
     supabase.from("suppliers").select("id,name,type,active,default_currency").order("name"),
   ]);

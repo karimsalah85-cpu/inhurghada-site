@@ -47,6 +47,7 @@ import {
 import BookingDetailPanel from "@/components/admin/BookingDetailPanel";
 import ExpenseInvoiceInbox from "@/components/admin/ExpenseInvoiceInbox";
 import { money, sumByCurrency, moneyBreakdown } from "@/lib/admin-money";
+import TaxRateSelect, { ratesFor, useTaxRates } from "@/components/admin/finance/TaxRateSelect";
 import { PARTNER_PAYMENT_METHODS, PARTNER_TYPES, partnerTypeLabels, paymentMethodLabels, type PartnerKind, type PartnerPaymentMethod } from "@/lib/partner-record";
 
 type Status = "new" | "confirmed" | "completed" | "cancelled";
@@ -101,6 +102,8 @@ type Expense = {
   booking_id?: string | null;
   voided_at?: string | null;
   void_reason?: string | null;
+  tax_rate_id?: string | null;
+  tax_amount?: number | string | null;
   bookings?: { status?: string | null; reference?: string | null } | null;
 };
 type Supplier = {
@@ -250,7 +253,12 @@ export default function AdminDashboard({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [moreFilters, setMoreFilters] = useState(bookingView.service !== "all" || bookingView.archive !== "active" || bookingView.expense_sort !== "none");
   const [showManualBooking, setShowManualBooking] = useState(false);
-  const [expense, setExpense] = useState({
+  const [expense, setExpense] = useState<{
+    description: string; amount: string; currency: string; category: string; date: string; expense_type: string;
+    supplier_id: string; sales_person_id: string; booking_id: string;
+    /** undefined = the default purchases VAT rate; null = no VAT. */
+    tax_rate_id?: string | null;
+  }>({
     description: "",
     amount: "",
     currency: "USD",
@@ -261,6 +269,7 @@ export default function AdminDashboard({
     sales_person_id: "",
     booking_id: "",
   });
+  const taxRates = useTaxRates();
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [partnerType, setPartnerType] = useState<PartnerType>("supplier");
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
@@ -731,6 +740,7 @@ export default function AdminDashboard({
       supplier_id: "",
       sales_person_id: "",
       booking_id: "",
+      tax_rate_id: undefined,
     });
     setEditingExpenseId(null);
   }
@@ -747,6 +757,7 @@ export default function AdminDashboard({
       supplier_id: item.supplier_id || "",
       sales_person_id: item.sales_person_id || "",
       booking_id: item.booking_id || "",
+      tax_rate_id: item.tax_rate_id ?? null,
     });
     document.getElementById("expenses")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -1989,6 +2000,19 @@ export default function AdminDashboard({
                   className="mt-1 w-full rounded-xl border border-slate-200 p-3 font-normal"
                 />
               </label>
+              {taxRates?.length ? (
+                <TaxRateSelect
+                  rates={taxRates}
+                  kind="purchases"
+                  date={expense.date}
+                  value={expense.tax_rate_id === undefined
+                    ? ratesFor(taxRates, "purchases", expense.date).find((rate) => rate.default_for_purchases)?.id ?? null
+                    : expense.tax_rate_id}
+                  onChange={(id) => setExpense({ ...expense, tax_rate_id: id })}
+                  label="VAT included in this amount"
+                  className="block text-sm font-semibold"
+                />
+              ) : null}
               <button
                 disabled={busyId === "expense"}
                 className="w-full rounded-xl bg-slate-900 py-3 font-bold text-white hover:bg-slate-700 disabled:opacity-60"

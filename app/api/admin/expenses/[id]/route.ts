@@ -38,9 +38,11 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     ...(sent("booking_id") ? { booking_id: value.bookingId } : {}),
     ...(sent("vendor") ? { vendor: value.vendor } : {}),
     ...(sent("invoice_number") ? { invoice_number: value.invoiceNumber } : {}),
+    ...(sent("tax_rate_id") ? { tax_rate_id: value.taxRateId ?? null } : {}),
   };
   const { data, error } = await supabase.from("expenses").update(update).eq("id", id).select().single();
   if (error?.code === "23505") return json({ error: "An expense with this vendor and invoice number is already recorded." }, 409);
+  if (error && ["22023", "P0002"].includes(error.code || "")) return json({ error: error.message }, 400);
   if (error) return json({ error: "Could not update the expense." }, 500);
   await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: "expense", resource_identifier: id, summary_text: `Updated expense ${value.description}`, before_value: before, after_value: { ...data, actor: user?.email } });
   return json({ expense: data });

@@ -5,6 +5,7 @@ import { Pencil, UserMinus } from "lucide-react";
 import { notifyAdminBookingsChanged } from "@/lib/admin-booking-events";
 import { FINANCE_CURRENCIES, formatMoney, fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
 import { partnerTypeLabels, type PartnerKind } from "@/lib/partner-record";
+import TaxRateSelect, { useTaxRates } from "@/components/admin/finance/TaxRateSelect";
 
 type Amount = string | number;
 type Line = {
@@ -13,10 +14,12 @@ type Line = {
   supplier_cost_source: string; supplier_cancellation_fee: Amount; collected_by: "daily_red_sea" | "supplier";
   recognised_revenue: Amount; recognised_supplier_cost: Amount; extra_partner_cost_booking_ccy: Amount | null;
   margin_amount: Amount | null; margin_pct: Amount | null;
+  sales_tax_rate_id: string | null; sales_tax_amount: Amount; purchase_tax_rate_id: string | null; purchase_tax_amount: Amount;
 };
 type PartnerCost = {
   id: string; line_id: string; supplier_id: string; role: PartnerKind; cost: Amount; currency: FinanceCurrency; cancellation_fee: Amount;
   cost_source: string; status: "active" | "removed"; removed_reason: string | null; note: string | null; recognised_cost: Amount;
+  tax_rate_id: string | null; tax_amount: Amount;
   suppliers: { name: string } | { name: string }[] | null;
 };
 type Supplier = { id: string; name: string; type: string; active: boolean; default_currency: string };
@@ -48,6 +51,7 @@ export default function BookingPartners({ bookingId }: { bookingId: string }) {
   const [adding, setAdding] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [mainEditing, setMainEditing] = useState<string | null>(null);
+  const taxRates = useTaxRates();
 
   const load = useCallback(async () => {
     const response = await fetch(`/api/admin/finance/bookings/${bookingId}/partners`, { cache: "no-store" });
@@ -106,6 +110,10 @@ export default function BookingPartners({ bookingId }: { bookingId: string }) {
     }), "Main partner updated.");
   }
 
+  function setTax(target: "sales" | "main_partner" | "partner_cost", id: string, taxRateId: string | null) {
+    void run(() => send("/api/admin/finance/tax", "POST", { target, id, tax_rate_id: taxRateId }), taxRateId ? "VAT rate set." : "VAT removed.");
+  }
+
   if (hidden) return null;
   const suppliers = data?.suppliers ?? [];
   const supplierName = (id: string | null) => suppliers.find((supplier) => supplier.id === id)?.name ?? "Not assigned";
@@ -162,7 +170,12 @@ export default function BookingPartners({ bookingId }: { bookingId: string }) {
                       <p className="text-xs text-slate-500">
                         Cost {show(row.cost, row.currency)}{toMinor(row.cancellation_fee) > 0n ? ` · cancellation fee ${show(row.cancellation_fee, row.currency)}` : ""}
                         {row.status === "removed" && row.removed_reason ? ` · ${row.removed_reason}` : ""}
+                        {toMinor(row.tax_amount) > 0n ? ` · VAT ${show(row.tax_amount, row.currency)}` : ""}
                       </p>
+                      {taxRates?.length && data.canManage && row.status === "active" ? (
+                        <TaxRateSelect rates={taxRates} kind="purchases" date={line.trip_date} value={row.tax_rate_id} disabled={busy}
+                          onChange={(id) => setTax("partner_cost", row.id, id)} label="VAT on this cost" className="mt-1 block max-w-xs text-xs font-semibold text-slate-600" />
+                      ) : null}
                     </div>
                     {data.canManage && row.status === "active" ? (
                       <div className="flex shrink-0">
@@ -185,6 +198,23 @@ export default function BookingPartners({ bookingId }: { bookingId: string }) {
                 </li>
               ))}
             </ul>
+
+            {taxRates?.length ? (
+              <div className="mt-3 grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2">
+                <div>
+                  <TaxRateSelect rates={taxRates} kind="sales" date={line.trip_date} value={line.sales_tax_rate_id} disabled={busy || !data.canManage}
+                    onChange={(id) => setTax("sales", line.id, id)} label="VAT on the sale" />
+                  <p className="mt-1 text-xs text-slate-500">VAT {show(line.sales_tax_amount, line.currency)}</p>
+                </div>
+                {line.supplier_id ? (
+                  <div>
+                    <TaxRateSelect rates={taxRates} kind="purchases" date={line.trip_date} value={line.purchase_tax_rate_id} disabled={busy || !data.canManage}
+                      onChange={(id) => setTax("main_partner", line.id, id)} label="VAT on the main partner's cost" />
+                    <p className="mt-1 text-xs text-slate-500">VAT {show(line.purchase_tax_amount, line.supplier_cost_currency)}</p>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
               <div className="rounded-lg bg-slate-50 p-2"><dt className="text-slate-500">Revenue</dt><dd className="font-bold">{show(line.recognised_revenue, line.currency)}</dd></div>

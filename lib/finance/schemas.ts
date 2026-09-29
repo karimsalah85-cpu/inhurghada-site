@@ -82,6 +82,8 @@ export const expenseInputSchema = z.object({
   booking_id: optionalId,
   vendor: optionalText(200),
   invoice_number: optionalText(120),
+  /** Omitted = the default purchases VAT rate (if any); "" or null = no VAT. */
+  tax_rate_id: z.union([idSchema, z.literal(""), z.null()]).optional().transform((value) => (value === undefined ? undefined : value || null)),
 }).superRefine((value, context) => {
   if (value.expense_type === "supplier_per_trip" && !value.supplier_id) {
     context.addIssue({ code: "custom", path: ["supplier_id"], message: "Choose a supplier for this trip expense." });
@@ -238,6 +240,50 @@ export const partnerCostUpdateSchema = z.object({
 }).strict().refine((value) => Object.values(value).some((entry) => entry !== undefined), "Nothing to update.");
 
 export const partnerCostRemoveSchema = z.object({ reason: requiredNoteSchema });
+
+// ---------------------------------------------------------------------------
+// VAT (rates are configured by the owner / accountant; nothing is hard-coded).
+// ---------------------------------------------------------------------------
+export const TAX_TARGETS = ["sales", "main_partner", "partner_cost", "expense"] as const;
+
+const taxPercentSchema = z.union([z.string(), z.number()]).transform((value, context) => {
+  const text = String(value).trim();
+  if (!/^\d{1,3}(\.\d{1,4})?$/.test(text) || Number(text) > 100) {
+    context.addIssue({ code: "custom", message: "Enter a VAT percent between 0 and 100 (up to 4 decimals)." });
+    return z.NEVER;
+  }
+  return text;
+});
+const optionalDate = z.union([isoDateSchema, z.literal(""), z.null()]).optional().transform((value) => value || null);
+
+export const taxRateCreateSchema = z.object({
+  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{2,20}$/, "Use 2–20 letters, digits, - or _ for the code (e.g. VAT14)."),
+  name: z.string().trim().min(2, "Enter a name.").max(80),
+  rate_percent: taxPercentSchema,
+  applies_to: z.enum(["sales", "purchases", "both"], { error: "Choose sales, purchases or both." }),
+  effective_from: isoDateSchema,
+  effective_to: optionalDate,
+  default_for_sales: z.boolean().optional().default(false),
+  default_for_purchases: z.boolean().optional().default(false),
+  note: optionalText(500),
+}).refine((value) => !value.effective_to || value.effective_to >= value.effective_from, { path: ["effective_to"], message: "The end date must be after the start date." })
+  .refine((value) => !value.default_for_sales || value.applies_to !== "purchases", { path: ["default_for_sales"], message: "A purchases-only rate cannot be the sales default." })
+  .refine((value) => !value.default_for_purchases || value.applies_to !== "sales", { path: ["default_for_purchases"], message: "A sales-only rate cannot be the purchases default." });
+
+export const taxRateUpdateSchema = z.object({
+  name: z.string().trim().min(2).max(80).optional(),
+  effective_to: z.union([isoDateSchema, z.literal(""), z.null()]).optional().transform((value) => (value === undefined ? undefined : value || null)),
+  default_for_sales: z.boolean().optional(),
+  default_for_purchases: z.boolean().optional(),
+  note: z.string().trim().max(500).optional().transform((value) => (value === undefined ? undefined : value || null)),
+}).strict().refine((value) => Object.values(value).some((entry) => entry !== undefined), "Nothing to update.");
+
+export const transactionTaxSchema = z.object({
+  target: z.enum(TAX_TARGETS, { error: "Unknown VAT target." }),
+  id: idSchema,
+  /** null = no VAT on this transaction. */
+  tax_rate_id: z.union([idSchema, z.literal(""), z.null()]).transform((value) => value || null),
+});
 
 /** First human-readable validation message, for API error responses. */
 export function firstIssue(error: z.ZodError) {

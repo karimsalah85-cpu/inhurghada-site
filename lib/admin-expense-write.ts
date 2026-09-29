@@ -54,6 +54,8 @@ export type NormalizedExpense = {
   bookingId: string | null;
   vendor: string | null;
   invoiceNumber: string | null;
+  /** undefined = default purchases VAT rate; null = no VAT. */
+  taxRateId?: string | null;
 };
 
 /**
@@ -81,6 +83,7 @@ export function normalizeExpensePayload(
       bookingId: input.booking_id,
       vendor: input.vendor,
       invoiceNumber: input.invoice_number,
+      taxRateId: input.tax_rate_id,
     },
   };
 }
@@ -95,7 +98,7 @@ export async function insertExpense(
   supabase: SupabaseClient,
   value: NormalizedExpense,
 ): Promise<{ expense: ExpenseRow; warning?: string } | { error: string; status: number }> {
-  const { description, amount, currency, date, category, expenseType, supplierId, salesPersonId, bookingId, vendor, invoiceNumber } = value;
+  const { description, amount, currency, date, category, expenseType, supplierId, salesPersonId, bookingId, vendor, invoiceNumber, taxRateId } = value;
 
   const { data, error } = await supabase
     .from("expenses")
@@ -112,13 +115,22 @@ export async function insertExpense(
       // Finance columns are only sent when used, so saves keep working before the finance migration.
       ...(vendor ? { vendor } : {}),
       ...(invoiceNumber ? { invoice_number: invoiceNumber } : {}),
+      ...(taxRateId ? { tax_rate_id: taxRateId } : {}),
     })
     .select()
     .single();
 
+  // "No VAT" chosen explicitly: undo the default rate the database applies to new expenses.
+  if (!error && data && taxRateId === null && (data as ExpenseRow).tax_rate_id) {
+    const cleared = await supabase.rpc("finance_set_transaction_tax", { p_target: "expense", p_id: (data as ExpenseRow).id, p_tax_rate_id: null });
+    if (!cleared.error) Object.assign(data, cleared.data ?? {}, { tax_rate_id: null });
+  }
+
   if (error?.code === "23505") {
     return { error: "An expense with this vendor and invoice number is already recorded.", status: 409 };
   }
+  // VAT rate of the wrong kind or outside its dates (message written for staff by the database).
+  if (error && ["22023", "P0002"].includes(error.code)) return { error: error.message, status: 400 };
   if (
     error &&
     ["42703", "PGRST204"].includes(error.code) &&
