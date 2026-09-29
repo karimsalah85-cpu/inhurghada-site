@@ -157,3 +157,24 @@ describe("guest payments still to record", () => {
     expect(rows).toEqual([{ reason: "trip_done_unpaid" }]);
   });
 });
+
+describe("as a real signed-in admin (not the database superuser)", () => {
+  it("can read the VAT returns and the payments to record, and set a partner's VAT status", async () => {
+    const accountant = await createStaff(db, "finance");
+    const boat = await partner("Signed-in Boat", "not_registered");
+    // Supabase grants signed-in users table access (row-level security decides the rows); mirror that here.
+    await db.exec(`grant select on public.bookings, public.booking_financial_lines, public.booking_line_partner_costs, public.guest_payments,
+      public.expenses, public.tax_jurisdictions, public.tax_rates, public.suppliers to authenticated`);
+    await actAs(db, accountant);
+    await db.exec("set role authenticated");
+    try {
+      const { rows: vat } = await db.query<Row>("select country, month::text, filing_due_on::text from public.finance_vat_summary where country = 'EG' and month = '2026-09-01'");
+      expect(vat).toEqual([{ country: "EG", month: "2026-09-01", filing_due_on: "2026-10-31" }]);
+      await db.query("select count(*) from public.finance_payments_to_record");
+      const { rows: [result] } = await db.query<{ r: Row }>("select public.finance_set_partner_vat_status($1, 'on_top') as r", [boat]);
+      expect(result.r).toMatchObject({ vat_status: "on_top" });
+    } finally {
+      await db.exec("reset role");
+    }
+  });
+});
