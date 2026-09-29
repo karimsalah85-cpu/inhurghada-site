@@ -61,6 +61,18 @@ describe("audit trail", () => {
     await expect(db.query("delete from public.admin_audit_log where resource_type = 'test'")).rejects.toThrow(/append-only/);
   });
 
+  it("still lets a staff login be deleted, keeping who did what by email", async () => {
+    const staff = await createStaff(db, "finance");
+    await actAs(db, staff);
+    const supplier = await createSupplier(db, "Audit Actor Boat");
+    await actAs(db, system);
+    await db.query("delete from public.admin_profiles where id = $1", [staff.uid]);
+    await db.query("delete from auth.users where id = $1", [staff.uid]);
+    const [row] = await auditRows("suppliers", supplier);
+    expect(row.actor_email).toBe(staff.email);
+    await expect(db.query("update public.admin_audit_log set actor_id = null, summary = 'x' where resource_id = $1", [supplier])).rejects.toThrow(/append-only/);
+  });
+
   it("records who changed a booking's money fields, and only those fields", async () => {
     await actAs(db, owner);
     const booking = await createBooking(db, { amount: 120, status: "new", payment_status: "unpaid" });

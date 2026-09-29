@@ -33,11 +33,16 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
--- The audit log is append-only.
+-- The audit log is append-only. The one change allowed is the foreign key
+-- clearing actor_id when a staff login is deleted (actor_email is kept).
 -- ---------------------------------------------------------------------------
 create function public.admin_audit_log_append_only() returns trigger
 language plpgsql set search_path = '' as $$
 begin
+  if tg_op = 'UPDATE' and new.actor_id is null and old.actor_id is not null
+     and (to_jsonb(new) - 'actor_id') = (to_jsonb(old) - 'actor_id') then
+    return new;
+  end if;
   raise exception 'admin_audit_log is append-only.' using errcode = '55000';
 end $$;
 revoke all on function public.admin_audit_log_append_only() from public, anon, authenticated;
