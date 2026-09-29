@@ -34,6 +34,7 @@ describe("VAT rate routes", () => {
     expect(mocks.rpc).toHaveBeenCalledWith("finance_create_tax_rate", {
       p_code: "VAT-STD", p_name: "Standard VAT", p_rate_percent: "14", p_applies_to: "both", p_effective_from: "2026-01-01",
       p_effective_to: null, p_default_for_sales: false, p_default_for_purchases: true, p_note: null,
+      p_country: null,
     });
   });
 

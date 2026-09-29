@@ -14,7 +14,7 @@ type Detail = {
   canManage: boolean;
   supplier: {
     id: string; name: string; type: string; contact_name: string | null; phone: string | null; default_currency: string;
-    whatsapp?: string | null; payment_method?: string | null; payment_details?: string | null;
+    whatsapp?: string | null; payment_method?: string | null; payment_details?: string | null; vat_status?: string;
   };
   ledger: LedgerRow[];
   lines: SupplierBookingRow[];
@@ -23,6 +23,12 @@ type Detail = {
   usd_balance: string;
   missing_rates: FinanceCurrency[];
   label: BalanceLabel;
+};
+
+const vatStatusText: Record<string, string> = {
+  not_registered: "Not VAT-registered (no VAT)",
+  included: "VAT-registered, VAT included in their price",
+  on_top: "VAT-registered, VAT added on top of their price",
 };
 
 type EntryForm = "payment_to_supplier" | "commission_received_from_supplier" | "adjustment";
@@ -73,6 +79,16 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
     try { setNotice(await action()); await load(); return true; }
     catch (reason) { setError(reason instanceof Error ? reason.message : "The update failed."); return false; }
     finally { setBusy(false); }
+  }
+
+  function saveVatStatus(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    void run(async () => {
+      const result = await send(`/api/admin/finance/suppliers/${supplierId}/vat`, "POST", { vat_status: form.get("vat_status"), apply_from: form.get("apply_from") });
+      const trips = Number(result.result?.trips_updated ?? 0) + Number(result.result?.extra_partner_rows_updated ?? 0);
+      return form.get("apply_from") ? `VAT status saved and applied to ${trips} trip(s).` : "VAT status saved for new trips.";
+    });
   }
 
   const openLines = useMemo(() => new Set(data?.openLineIds || []), [data]);
@@ -184,6 +200,16 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
             {data.supplier.whatsapp && data.supplier.payment_method ? " · " : ""}
             {data.supplier.payment_method ? <>Paid by <b>{paymentMethodLabels[data.supplier.payment_method as PartnerPaymentMethod] || data.supplier.payment_method}</b>{data.supplier.payment_details ? ` (${data.supplier.payment_details})` : ""}</> : null}
           </p> : null}
+          <p className="mt-1 text-sm text-slate-600">VAT: <b>{vatStatusText[data.supplier.vat_status || "not_registered"]}</b></p>
+          {data.canManage ? <details className="mt-1 text-sm">
+            <summary className="cursor-pointer font-semibold text-cyan-800">Change VAT status</summary>
+            <form onSubmit={saveVatStatus} className="mt-2 grid gap-2 rounded-xl bg-slate-50 p-3 sm:max-w-md">
+              <label className="font-semibold">VAT status<select name="vat_status" defaultValue={data.supplier.vat_status || "not_registered"} className={input}>{Object.entries(vatStatusText).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+              <label className="font-semibold">Also update their trips from <span className="font-normal text-slate-500">optional</span><input name="apply_from" type="date" className={input} /></label>
+              <p className="text-xs text-slate-500">Only VAT on a registered partner&apos;s tax invoice can be deducted. With VAT on top, what Daily Red Sea owes them includes the VAT. Without a date, only trips added from now on change.</p>
+              <button disabled={busy} className="rounded-lg bg-cyan-700 px-3 py-2 font-bold text-white disabled:opacity-50">Save VAT status</button>
+            </form>
+          </details> : null}
         </div>
         <div className="text-right">
           <span className={`inline-block rounded-full px-4 py-1.5 text-sm font-black ring-1 ${toneClasses[data.label.tone]}`}>{data.label.text}</span>

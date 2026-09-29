@@ -30,6 +30,8 @@ export type PnlLine = {
   agent_commission_usd: string | null;
   payment_fees_usd: string | null;
   margin_amount_usd: string | null;
+  /** Output VAT inside net sales (absent = none). Costs and margin are already excluding deductible VAT. */
+  vat_usd?: string | null;
 };
 
 export type PnlExpense = {
@@ -48,12 +50,13 @@ export type PnlExpense = {
 };
 
 const LINE_USD_FIELDS = ["gross_usd", "discount_usd", "refund_usd", "net_sales_usd", "supplier_cost_usd", "agent_commission_usd", "payment_fees_usd", "margin_amount_usd"] as const;
-export const lineIsConverted = (line: PnlLine) => LINE_USD_FIELDS.every((field) => line[field] !== null && line[field] !== undefined);
+export const lineIsConverted = (line: PnlLine) => LINE_USD_FIELDS.every((field) => line[field] !== null && line[field] !== undefined) && line.vat_usd !== null;
+const vatOf = (line: PnlLine) => toMinor(line.vat_usd ?? "0");
 
 const sum = <T,>(rows: T[], pick: (row: T) => string | null) => rows.reduce((total, row) => total + toMinor(pick(row) ?? "0"), 0n);
 
 export type PnlTotals = {
-  gross: bigint; discounts: bigint; refunds: bigint; net_sales: bigint; supplier_costs: bigint; gross_profit: bigint;
+  gross: bigint; discounts: bigint; refunds: bigint; net_sales: bigint; output_vat: bigint; revenue: bigint; supplier_costs: bigint; gross_profit: bigint;
   agent_commissions: bigint; payment_fees: bigint; contribution: bigint; drs_net_revenue: bigint; opex: bigint; net_profit: bigint;
 };
 
@@ -73,10 +76,12 @@ export function computePnl(lines: PnlLine[], expenses: PnlExpense[], expenseType
   const discounts = sum(converted, (line) => line.discount_usd);
   const refunds = sum(converted, (line) => line.refund_usd);
   const net_sales = sum(converted, (line) => line.net_sales_usd);
+  const output_vat = sum(converted, (line) => line.vat_usd ?? "0");
+  const revenue = net_sales - output_vat;
   const supplier_costs = sum(converted, (line) => line.supplier_cost_usd);
   const agent_commissions = sum(converted, (line) => line.agent_commission_usd);
   const payment_fees = sum(converted, (line) => line.payment_fees_usd);
-  const gross_profit = net_sales - supplier_costs;
+  const gross_profit = revenue - supplier_costs;
   const contribution = gross_profit - agent_commissions - payment_fees;
 
   const byCategory = new Map<string, OpexCategory>();
@@ -92,7 +97,7 @@ export function computePnl(lines: PnlLine[], expenses: PnlExpense[], expenseType
 
   return {
     totals: {
-      gross, discounts, refunds, net_sales, supplier_costs, gross_profit, agent_commissions, payment_fees, contribution,
+      gross, discounts, refunds, net_sales, output_vat, revenue, supplier_costs, gross_profit, agent_commissions, payment_fees, contribution,
       drs_net_revenue: gross_profit, opex: opexTotal, net_profit: contribution - opexTotal,
     },
     opex,
@@ -147,17 +152,19 @@ export function grossView(current: PnlResult, previous: PnlResult | null) {
     { key: "gross", label: "Gross booking value", kind: "revenue", value: money((t) => t.gross), drill: "gross" },
     { key: "discounts", label: "Discounts", kind: "cost", value: money((t) => t.discounts), drill: "discounts", indent: true },
     { key: "refunds", label: "Refunds", kind: "cost", value: money((t) => t.refunds), drill: "refunds", indent: true },
-    { key: "net_sales", label: "Net sales", kind: "subtotal", value: money((t) => t.net_sales), drill: "net_sales" },
-    { key: "supplier_costs", label: "Cost of trips (supplier costs)", kind: "cost", value: money((t) => t.supplier_costs), drill: "supplier_costs", indent: true },
+    { key: "net_sales", label: "Net sales (incl. VAT)", kind: "subtotal", value: money((t) => t.net_sales), drill: "net_sales" },
+    { key: "output_vat", label: "Output VAT", kind: "cost", value: money((t) => t.output_vat), drill: "output_vat", indent: true },
+    { key: "revenue", label: "Revenue excl. VAT", kind: "subtotal", value: money((t) => t.revenue), drill: "revenue" },
+    { key: "supplier_costs", label: "Cost of trips (supplier costs, excl. deductible VAT)", kind: "cost", value: money((t) => t.supplier_costs), drill: "supplier_costs", indent: true },
     { key: "gross_profit", label: "Gross profit", kind: "subtotal", value: money((t) => t.gross_profit), drill: "gross_profit" },
-    { key: "gross_margin_pct", label: "Gross margin %", kind: "percent", value: ratio((t) => t.gross_profit, (t) => t.net_sales) },
+    { key: "gross_margin_pct", label: "Gross margin %", kind: "percent", value: ratio((t) => t.gross_profit, (t) => t.revenue) },
     { key: "agent_commissions", label: "Agent / partner commissions", kind: "cost", value: money((t) => t.agent_commissions), drill: "agent_commissions", indent: true },
     { key: "payment_fees", label: "Payment / processor fees", kind: "cost", value: money((t) => t.payment_fees), drill: "payment_fees", indent: true },
     { key: "contribution", label: "Contribution after selling costs", kind: "subtotal", value: money((t) => t.contribution), drill: "contribution" },
     ...opexSpecs(current, previous),
     { key: "opex", label: "Total operating expenses", kind: "cost", value: money((t) => t.opex), drill: "opex" },
     { key: "net_profit", label: "Net profit", kind: "subtotal", value: money((t) => t.net_profit) },
-    { key: "net_margin_pct", label: "Net margin % (of net sales)", kind: "percent", value: ratio((t) => t.net_profit, (t) => t.net_sales) },
+    { key: "net_margin_pct", label: "Net margin % (of revenue excl. VAT)", kind: "percent", value: ratio((t) => t.net_profit, (t) => t.revenue) },
   ], current, previous);
 }
 
@@ -178,7 +185,7 @@ export function netRevenueView(current: PnlResult, previous: PnlResult | null) {
 
 export type TrendPoint = { month: string; net_sales: string; costs: string; net_profit: string };
 
-/** Monthly net sales, all costs (trip, selling and operating) and net profit, one row per month in range. */
+/** Monthly revenue (excl. VAT, in the net_sales field), all costs (trip, selling and operating) and net profit, one row per month in range. */
 export function monthlyTrend(lines: PnlLine[], expenses: PnlExpense[], from: string, to: string): TrendPoint[] {
   const months: string[] = [];
   for (let cursor = new Date(`${from.slice(0, 7)}-01T00:00:00Z`); cursor.toISOString().slice(0, 7) <= to.slice(0, 7); cursor.setUTCMonth(cursor.getUTCMonth() + 1)) {
@@ -187,7 +194,7 @@ export function monthlyTrend(lines: PnlLine[], expenses: PnlExpense[], from: str
   return months.map((month) => {
     const result = computePnl(lines.filter((line) => line.trip_date?.startsWith(month)), expenses.filter((expense) => expense.expense_date.startsWith(month)), {});
     const t = result.totals;
-    return { month, net_sales: fromMinor(t.net_sales), costs: fromMinor(t.supplier_costs + t.agent_commissions + t.payment_fees + t.opex), net_profit: fromMinor(t.net_profit) };
+    return { month, net_sales: fromMinor(t.revenue), costs: fromMinor(t.supplier_costs + t.agent_commissions + t.payment_fees + t.opex), net_profit: fromMinor(t.net_profit) };
   });
 }
 
@@ -207,8 +214,10 @@ const lineDrill: Record<string, (line: PnlLine) => bigint> = {
   discounts: (line) => toMinor(line.discount_usd!),
   refunds: (line) => toMinor(line.refund_usd!),
   net_sales: (line) => toMinor(line.net_sales_usd!),
+  output_vat: (line) => vatOf(line),
+  revenue: (line) => toMinor(line.net_sales_usd!) - vatOf(line),
   supplier_costs: (line) => toMinor(line.supplier_cost_usd!),
-  gross_profit: (line) => toMinor(line.net_sales_usd!) - toMinor(line.supplier_cost_usd!),
+  gross_profit: (line) => toMinor(line.net_sales_usd!) - vatOf(line) - toMinor(line.supplier_cost_usd!),
   agent_commissions: (line) => toMinor(line.agent_commission_usd!),
   payment_fees: (line) => toMinor(line.payment_fees_usd!),
   contribution: (line) => toMinor(line.margin_amount_usd!),
@@ -246,7 +255,7 @@ const groupKey: Record<MarginGroup, (line: PnlLine) => [string, string]> = {
 
 /**
  * Margin (after supplier cost, agent commission and payment fees) per group,
- * in USD. Flags negative margins and margins below the threshold percentage.
+ * in USD, on revenue excluding VAT (in the net_sales field). Flags negative margins and margins below the threshold percentage.
  */
 export function marginsBy(group: MarginGroup, lines: PnlLine[], thresholdPct: string): MarginRow[] {
   const threshold = toMinor(thresholdPct);
@@ -255,7 +264,7 @@ export function marginsBy(group: MarginGroup, lines: PnlLine[], thresholdPct: st
     const [key, label] = groupKey[group](line);
     const entry = groups.get(key) ?? { label, bookings: new Set<string>(), net: 0n, margin: 0n };
     entry.bookings.add(line.booking_id);
-    entry.net += toMinor(line.net_sales_usd!);
+    entry.net += toMinor(line.net_sales_usd!) - vatOf(line);
     entry.margin += toMinor(line.margin_amount_usd!);
     groups.set(key, entry);
   }

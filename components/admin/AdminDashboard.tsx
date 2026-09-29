@@ -506,13 +506,15 @@ export default function AdminDashboard({
       notifyAdminBookingsChanged();
       // Open the booking so the cancellation reason (and any refund) is recorded right away.
       const cancelled = patch.status === "cancelled";
-      if (cancelled) setExpandedId(id);
+      // Marked paid/refunded by hand: open it so the actual payment can be recorded (amount, method, date).
+      const moneyMarked = can("finance") && (patch.payment_status === "paid" || patch.payment_status === "refunded");
+      if (cancelled || moneyMarked) setExpandedId(id);
       feedback(
         (result.notification.attempted
           ? result.notification.sent
             ? "Booking updated and customer automatically emailed with the PDF."
             : "Booking updated, but the customer email could not be sent."
-          : "Booking updated.") + (cancelled ? " Record why it was cancelled below." : ""),
+          : "Booking updated.") + (cancelled ? " Record why it was cancelled below." : moneyMarked ? " Record the payment in the booking details so cash in stays complete." : ""),
       );
       router.refresh();
     } catch (reason) {

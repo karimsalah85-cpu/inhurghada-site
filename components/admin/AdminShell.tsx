@@ -37,6 +37,7 @@ const groups: NavGroup[] = [
     { href: "/admin/finance/pnl", label: "Profit & loss", permissions: ["finance"] },
     { href: "/admin/finance/margins", label: "Margins", permissions: ["finance"] },
     { href: "/admin/finance/suppliers", label: "Supplier balances", permissions: ["finance"] },
+    { href: "/admin/finance/payments-to-record", label: "Payments to record", permissions: ["finance"] },
     { href: "/admin/finance/credit-notes", label: "Credit notes", permissions: ["finance"] },
     { href: "/admin/finance/cancellations", label: "Cancellations", permissions: ["finance"] },
     { href: "/admin/finance/vat", label: "VAT", permissions: ["finance"] },

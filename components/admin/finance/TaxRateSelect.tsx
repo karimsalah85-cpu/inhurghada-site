@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export type TaxRate = {
   id: string; code: string; name: string; rate_percent: string | number; applies_to: "sales" | "purchases" | "both";
   effective_from: string; effective_to: string | null; default_for_sales: boolean; default_for_purchases: boolean;
+  country?: string | null;
 };
 
 let cached: Promise<TaxRate[]> | null = null;

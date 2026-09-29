@@ -266,9 +266,18 @@ export const taxRateCreateSchema = z.object({
   default_for_sales: z.boolean().optional().default(false),
   default_for_purchases: z.boolean().optional().default(false),
   note: optionalText(500),
+  /** Country the rate is for (its defaults apply there); empty = any. */
+  country: z.union([z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/, "Choose a country."), z.literal(""), z.null()]).optional().transform((value) => value || null),
 }).refine((value) => !value.effective_to || value.effective_to >= value.effective_from, { path: ["effective_to"], message: "The end date must be after the start date." })
   .refine((value) => !value.default_for_sales || value.applies_to !== "purchases", { path: ["default_for_sales"], message: "A purchases-only rate cannot be the sales default." })
   .refine((value) => !value.default_for_purchases || value.applies_to !== "sales", { path: ["default_for_purchases"], message: "A sales-only rate cannot be the purchases default." });
+
+export const PARTNER_VAT_STATUSES = ["not_registered", "included", "on_top"] as const;
+export const partnerVatStatusSchema = z.object({
+  vat_status: z.enum(PARTNER_VAT_STATUSES, { error: "Choose the partner's VAT status." }),
+  /** Also re-apply it to this partner's trips from this date (empty = new trips only). */
+  apply_from: z.union([isoDateSchema, z.literal(""), z.null()]).optional().transform((value) => value || null),
+});
 
 export const taxRateUpdateSchema = z.object({
   name: z.string().trim().min(2).max(80).optional(),

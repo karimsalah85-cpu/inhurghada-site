@@ -5,11 +5,13 @@ import { formatMoney, fromMinor, toMinor } from "@/lib/finance/money";
 import { loadTaxRates, type TaxRate } from "@/components/admin/finance/TaxRateSelect";
 
 type Amount = string | number | null;
-type Month = { month: string; output_vat_usd: Amount; input_vat_usd: Amount; net_vat_usd: Amount; output_items: number; input_items: number; usd_pending: number };
+type Country = { country: string; name: string; is_home: boolean; destinations: string[]; filing_frequency: "monthly" | "quarterly"; filing_due_months: number };
+type Month = { country: string; country_name: string; filing_due_on: string; filing_frequency: string; month: string; output_vat_usd: Amount; input_vat_usd: Amount; net_vat_usd: Amount; output_items: number; input_items: number; usd_pending: number };
 const field = "mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 text-base font-normal sm:text-sm";
 const usd = (value: Amount) => formatMoney(fromMinor(value === null || value === undefined ? 0n : toMinor(value)), "USD");
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 const kindLabel = { sales: "Sales", purchases: "Purchases", both: "Sales & purchases" } as const;
+const dayLabel = (day: string) => new Date(`${day}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const monthLabel = (month: string) => new Date(`${month}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
 
 async function send(url: string, method: string, body: unknown) {
@@ -23,6 +25,7 @@ export default function FinanceVat() {
   const year = new Date().getFullYear();
   const [rates, setRates] = useState<TaxRate[] | null>(null);
   const [canManage, setCanManage] = useState(false);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [months, setMonths] = useState<Month[] | null>(null);
   const [from, setFrom] = useState(`${year}-01-01`);
   const [to, setTo] = useState(`${year}-12-31`);
@@ -35,7 +38,7 @@ export default function FinanceVat() {
     const response = await fetch("/api/admin/finance/tax-rates", { cache: "no-store" });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body.error || "Could not load VAT rates.");
-    setRates(body.taxRates); setCanManage(Boolean(body.canManage));
+    setRates(body.taxRates); setCountries(body.countries ?? []); setCanManage(Boolean(body.canManage));
     void loadTaxRates(true);
   }, []);
 
@@ -58,7 +61,7 @@ export default function FinanceVat() {
     const form = new FormData(event.currentTarget);
     void run(() => send("/api/admin/finance/tax-rates", "POST", {
       code: form.get("code"), name: form.get("name"), rate_percent: form.get("rate_percent"), applies_to: form.get("applies_to"),
-      effective_from: form.get("effective_from"), effective_to: form.get("effective_to"), note: form.get("note"),
+      effective_from: form.get("effective_from"), effective_to: form.get("effective_to"), note: form.get("note"), country: form.get("country"),
       default_for_sales: form.get("default_for_sales") === "on", default_for_purchases: form.get("default_for_purchases") === "on",
     }), "VAT rate added.");
   }
@@ -83,7 +86,16 @@ export default function FinanceVat() {
           <h2 className="text-xl font-black">VAT rates</h2>
           {canManage && !adding ? <button type="button" onClick={() => setAdding(true)} className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white">Add rate</button> : null}
         </div>
-        <p className="mt-1 text-sm text-slate-600">Amounts are treated as VAT-inclusive: VAT is the part of each amount at its rate. A rate&apos;s percent never changes; end it and add a new one. The default rates are applied to new trips, partner costs and expenses only.</p>
+        <p className="mt-1 text-sm text-slate-600">Guest prices and expenses include VAT: VAT is the part of each amount at its rate. A partner&apos;s VAT follows their VAT status on their partner page (not registered: none; registered: included in or added on top of their price). Each country&apos;s default rates apply to new trips there; expenses use {countries.find((country) => country.is_home)?.name || "the home country"}&apos;s. A rate&apos;s percent never changes; end it and add a new one.</p>
+        {countries.length ? (
+          <ul className="mt-3 flex flex-wrap gap-2 text-xs">
+            {countries.map((country) => (
+              <li key={country.country} className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
+                <span className="font-bold">{country.name}</span> · {country.destinations.map((slug) => slug.replace(/-/g, " ")).join(", ") || "no destinations"} · {country.filing_frequency} return, due {country.filing_due_months} month{country.filing_due_months === 1 ? "" : "s"} after the period
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         {adding ? (
           <form onSubmit={create} className="mt-4 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
@@ -91,6 +103,7 @@ export default function FinanceVat() {
             <label className="text-sm font-semibold">Code<input name="code" required pattern="[A-Za-z0-9_\-]{2,20}" placeholder="e.g. VAT-STD" className={field} /></label>
             <label className="text-sm font-semibold">Percent<input name="rate_percent" required inputMode="decimal" pattern="\d{1,3}(\.\d{1,4})?" placeholder="as confirmed by your accountant" className={field} /></label>
             <label className="text-sm font-semibold">Applies to<select name="applies_to" defaultValue="both" className={field}><option value="sales">Sales</option><option value="purchases">Purchases</option><option value="both">Sales & purchases</option></select></label>
+            <label className="text-sm font-semibold">Country<select name="country" defaultValue={countries.find((country) => country.is_home)?.country ?? ""} className={field}><option value="">Any country</option>{countries.map((country) => <option key={country.country} value={country.country}>{country.name}</option>)}</select></label>
             <label className="text-sm font-semibold">Valid from<input name="effective_from" type="date" required defaultValue={today()} className={field} /></label>
             <label className="text-sm font-semibold">Valid until <span className="font-normal text-slate-500">optional</span><input name="effective_to" type="date" className={field} /></label>
             <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="default_for_sales" /> Default for new sales</label>
@@ -112,7 +125,7 @@ export default function FinanceVat() {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <p className="font-bold">{rate.name} <span className="font-mono text-xs text-slate-500">{rate.code}</span></p>
-                      <p className="text-slate-600">{Number(rate.rate_percent)}% · {kindLabel[rate.applies_to]} · from {rate.effective_from}{rate.effective_to ? ` until ${rate.effective_to}` : ""}</p>
+                      <p className="text-slate-600">{Number(rate.rate_percent)}% · {countries.find((country) => country.country === rate.country)?.name || "Any country"} · {kindLabel[rate.applies_to]} · from {rate.effective_from}{rate.effective_to ? ` until ${rate.effective_to}` : ""}</p>
                       {rate.default_for_sales || rate.default_for_purchases ? <p className="mt-1 text-xs font-semibold text-cyan-800">Default for {[rate.default_for_sales && "new sales", rate.default_for_purchases && "new purchases"].filter(Boolean).join(" and ")}</p> : null}
                     </div>
                     {canManage && !ended ? (
@@ -127,11 +140,11 @@ export default function FinanceVat() {
               );
             })}
           </ul>
-        ) : <p className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">No VAT rates set up yet, so no VAT is recorded anywhere. Add the rates once your accountant confirms them.</p>}
+        ) : <p className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">No VAT rates set up yet, so no VAT is recorded anywhere.</p>}
       </section>
 
       <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
-        <h2 className="text-xl font-black">VAT per month (USD)</h2>
+        <h2 className="text-xl font-black">VAT returns (USD)</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-md">
           <label className="text-sm font-semibold">From<input type="date" value={from} onChange={(event) => setFrom(event.target.value)} className={field} /></label>
           <label className="text-sm font-semibold">To<input type="date" value={to} onChange={(event) => setTo(event.target.value)} className={field} /></label>
@@ -147,15 +160,15 @@ export default function FinanceVat() {
               <table className="w-full text-sm">
                 <thead><tr className="border-b text-left text-xs text-slate-500"><th className="py-2">Month</th><th>On sales</th><th>On purchases</th><th>Net</th><th className="hidden sm:table-cell">Items</th></tr></thead>
                 <tbody>{months.map((month) => (
-                  <tr key={month.month} className="border-b last:border-0">
-                    <td className="py-2 pr-2 font-semibold">{monthLabel(month.month)}</td><td>{usd(month.output_vat_usd)}</td><td>{usd(month.input_vat_usd)}</td>
+                  <tr key={`${month.country}-${month.month}`} className="border-b last:border-0">
+                    <td className="py-2 pr-2"><span className="font-semibold">{monthLabel(month.month)}</span>{countries.length > 1 ? <span className="block text-xs text-slate-500">{month.country_name}</span> : null}<span className="block text-xs text-slate-500">Return due {dayLabel(month.filing_due_on)}</span></td><td>{usd(month.output_vat_usd)}</td><td>{usd(month.input_vat_usd)}</td>
                     <td className="font-bold">{usd(month.net_vat_usd)}</td>
                     <td className="hidden text-xs text-slate-500 sm:table-cell">{month.output_items + month.input_items}{month.usd_pending ? ` · ${month.usd_pending} awaiting rate` : ""}</td>
                   </tr>
                 ))}</tbody>
               </table>
             </div>
-            <p className="mt-2 text-xs text-slate-500">Sales and partner costs are counted by trip date (like the P&amp;L), expenses by expense date. Confirm the filing basis with your accountant.</p>
+            <p className="mt-2 text-xs text-slate-500">Sales VAT is counted at the tax point: money a guest pays before the trip carries its share of VAT in the month it was received, the rest falls in the trip month. Partner VAT by trip date, expenses by expense date. VAT is in USD here; the return itself is filed in the local currency.</p>
           </>
         ) : <p className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No VAT recorded in this period.</p>}
       </section>

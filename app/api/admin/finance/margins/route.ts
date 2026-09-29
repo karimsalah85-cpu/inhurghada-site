@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         ["Daily Red Sea margins (USD, accrual by trip date) - management reporting"],
         ["Period", `${query.from} to ${query.to}`], ["Grouped by", group], ["Filters", filters || "none"], ["Flag threshold", `${threshold}%`],
         [],
-        ["Name", "Bookings", "Net sales (USD)", "Margin (USD)", "Margin %", "Flag"],
+        ["Name", "Bookings", "Revenue excl. VAT (USD)", "Margin (USD)", "Margin %", "Flag"],
         ...rows.map((row) => [row.label, row.bookings, row.net_sales, row.margin, row.margin_pct === null ? "" : `${row.margin_pct}%`, row.flag ?? ""]),
       ]);
       return new Response(csv, { headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="margins-by-${group}-${query.from}-to-${query.to}.csv"`, "Cache-Control": "private, no-store" } });

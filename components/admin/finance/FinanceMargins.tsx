@@ -72,14 +72,14 @@ export default function FinanceMargins() {
             <p className="min-w-0 font-semibold text-slate-900">{group === "supplier" && row.key !== "none" ? <a href={`/admin/finance/suppliers/${row.key}`} className="underline">{row.label}</a> : row.label}</p>
             <p className={`shrink-0 text-right font-bold tabular-nums ${row.flag === "negative" ? "text-rose-700" : ""}`}>{formatMoney(row.margin)}<span className="block text-xs font-normal text-slate-500">{row.margin_pct === null ? "—" : `${row.margin_pct}%`}</span></p>
           </div>
-          <p className="mt-1 text-xs text-slate-500">Net sales {formatMoney(row.net_sales)} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}</p>
+          <p className="mt-1 text-xs text-slate-500">Revenue excl. VAT {formatMoney(row.net_sales)} · {row.bookings} booking{row.bookings === 1 ? "" : "s"}</p>
           {row.flag === "negative" ? <p className="mt-1 text-xs font-bold text-rose-800">▼ Negative margin</p> : row.flag === "below_threshold" ? <p className="mt-1 text-xs font-bold text-amber-900">! Below {data.threshold}%</p> : null}
         </li>)}
         {!rows.length ? <li className="py-6 text-center text-slate-500">{onlyFlagged ? "Nothing flagged in this period." : "No bookings in this period."}</li> : null}
       </ul>
       <div className="mt-3 hidden overflow-x-auto md:block">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-2 pr-3">{groups.find((item) => item.key === group)?.label.replace("Per ", "")}</th><th className="py-2 pr-3 text-right">Bookings</th><th className="py-2 pr-3 text-right">Net sales</th><th className="py-2 pr-3 text-right">Margin</th><th className="py-2 pr-3 text-right">Margin %</th><th className="py-2">Flag</th></tr></thead>
+          <thead className="text-xs uppercase tracking-wide text-slate-500"><tr><th className="py-2 pr-3">{groups.find((item) => item.key === group)?.label.replace("Per ", "")}</th><th className="py-2 pr-3 text-right">Bookings</th><th className="py-2 pr-3 text-right">Revenue excl. VAT</th><th className="py-2 pr-3 text-right">Margin</th><th className="py-2 pr-3 text-right">Margin %</th><th className="py-2">Flag</th></tr></thead>
           <tbody>
             {rows.map((row) => <tr key={row.key} className="border-t border-slate-100">
               <td className="py-2 pr-3 font-semibold text-slate-900">{group === "supplier" && row.key !== "none" ? <a href={`/admin/finance/suppliers/${row.key}`} className="hover:text-cyan-700 hover:underline">{row.label}</a> : row.label}</td>

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const params = new URLSearchParams(request.nextUrl.searchParams);
   const key = params.get("key") || "";
   params.delete("key");
-  if (!/^(gross|discounts|refunds|net_sales|supplier_costs|gross_profit|agent_commissions|payment_fees|contribution|opex|opex:[a-z0-9_]{1,40})$/.test(key)) {
+  if (!/^(gross|discounts|refunds|net_sales|output_vat|revenue|supplier_costs|gross_profit|agent_commissions|payment_fees|contribution|opex|opex:[a-z0-9_]{1,40})$/.test(key)) {
     return financeJson({ error: "Unknown P&L line." }, 400);
   }
   const parsed = parseReportQuery(params);

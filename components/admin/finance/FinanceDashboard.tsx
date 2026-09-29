@@ -48,7 +48,7 @@ function Bars({ rows, money, empty }: { rows: MarginRow[]; money: (usd: Amount) 
       {shown.map((row) => {
         const width = max > 0n ? Number((toMinor(row.net_sales) * 1000n) / max) / 10 : 0;
         return (
-          <li key={row.key} title={`${row.label}: net sales ${money(row.net_sales)}, margin ${money(row.margin)}${row.margin_pct === null ? "" : ` (${row.margin_pct}%)`}, ${row.bookings} booking(s)`}>
+          <li key={row.key} title={`${row.label}: revenue excl. VAT ${money(row.net_sales)}, margin ${money(row.margin)}${row.margin_pct === null ? "" : ` (${row.margin_pct}%)`}, ${row.bookings} booking(s)`}>
             <div className="flex items-baseline justify-between gap-3 text-sm">
               <span className="min-w-0 truncate font-semibold text-slate-900">{row.label}</span>
               <span className="shrink-0 tabular-nums text-slate-900">{money(row.net_sales)}</span>
@@ -145,7 +145,7 @@ export default function FinanceDashboard() {
           <section>
             <div className="flex items-baseline justify-between gap-2"><h2 className="text-lg font-black">Profit & loss</h2><Link href="/admin/finance/pnl" className="text-sm font-semibold text-cyan-800 underline">Full P&amp;L</Link></div>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
-              <Tile label="Net sales" value={money(totals.net_sales)} note={`${data.pnl.bookings} booking(s), by trip date`} />
+              <Tile label="Revenue excl. VAT" value={money(totals.revenue ?? totals.net_sales)} note={`${data.pnl.bookings} booking(s), by trip date`} />
               <Tile label="Partner costs" value={money(totals.supplier_costs)} />
               <Tile label="Gross profit" value={money(totals.gross_profit)} tone={toMinor(totals.gross_profit) < 0n ? "bad" : undefined} />
               <Tile label="Business expenses" value={money(totals.opex)} />

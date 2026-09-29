@@ -77,21 +77,58 @@ Sea owes the partner.**
   cancellation fees. Payments, commission received, settlements and adjustments
   are recorded on the partner's page and corrected only by reversal.
 
-## VAT (configurable, nothing hard-coded)
+## VAT (set up for Egypt; everything stays configurable)
 
-- Rates are set up on *Finance → VAT* (percent, sales/purchases/both, valid
-  dates, optional default for new sales / new purchases). A rate's percent
-  never changes; end it and add a new one. Each transaction keeps the percent
-  it was given.
-- Amounts are treated as **VAT-inclusive**: VAT = amount × r / (100 + r).
-- VAT is recorded on trip sales, main-partner costs, extra-partner costs and
-  expenses, and reported per month (sales, purchases, net).
-- VAT does **not** yet reduce revenue, margins or what partners are owed.
+Set up on 30 Sep 2026 following Egyptian VAT Law 67/2016 and Saudi (ZATCA)
+rules. Change any of it on *Finance → VAT*.
 
-**To confirm with the accountant:** the rates; whether some partners charge
-VAT on top of their price; whether revenue should be shown excluding VAT; and
-whether VAT is filed by trip date (as reported now), invoice date or payment
-date.
+- **Rates:** Egypt 14% (`EG-VAT-14`), the default for Egyptian trips (Hurghada,
+  Marsa Alam, El Gouna), partners and expenses **from 1 October 2026**.
+  September and earlier stay as reported (no VAT). Saudi 15% (`SA-VAT-15`) is
+  set up for Jeddah but not applied until Daily Red Sea registers with ZATCA:
+  then make it the sales default.
+- **Countries:** which destinations belong to which country, and how often each
+  files, are settings (Egypt: monthly, due by the end of the next month; Saudi:
+  quarterly, due by the end of the month after the quarter).
+- **Tours in Egypt are local services,** not zero-rated exports: the guest is
+  physically here, so foreign guests pay VAT too.
+- **Guest prices include VAT.** VAT = amount × r / (100 + r).
+- **Revenue excludes VAT.** The P&L shows *Net sales (incl. VAT) → Output VAT →
+  Revenue excl. VAT*; margins, tours, destinations and the dashboard use revenue
+  excluding VAT.
+- **Partners** each have a VAT status on their partner page:
+  - *Not registered* (the default): no VAT, nothing to deduct. This fits most
+    small boats, guides and drivers.
+  - *Registered, VAT included:* the VAT inside their price is deductible, so their
+    cost excludes it.
+  - *Registered, VAT on top:* the usual quote from registered Egyptian companies
+    ("+14%"). What Daily Red Sea owes them includes the VAT; the cost in the
+    margin does not.
+  - Only VAT on a registered partner's tax (e-)invoice can be deducted.
+- **Expenses** get 14% by default from October. Choose "No VAT" when the receipt
+  is not a tax invoice or e-receipt.
+- **When VAT is due (tax point):** money a guest pays before the trip carries its
+  share of the VAT in the month it was received. The rest falls in the trip
+  month. Partner VAT counts by trip date, expense VAT by expense date.
+- **The VAT page** shows VAT per country and month, with each return's due date.
+  Amounts are in USD; the return itself is filed in EGP, and the CSV export has
+  each VAT amount in its original currency.
+
+**For the accountant to confirm:**
+- Daily Red Sea is VAT-registered in Egypt (it must be above EGP 250,000 a year
+  in sales).
+- Which partners are registered.
+- Whether an earlier start date is needed.
+
+## Recording guest payments (from now on)
+
+Record every deposit, balance and refund on the day it happens (amount, method,
+date) from the booking's details. *Finance → Payments to record* lists the
+bookings Daily Red Sea collects that are marked paid or refunded, or whose trip
+has happened, but have no payment recorded. Marking a booking paid by hand opens
+it so the payment can be recorded. Trips a partner collects are not listed: the
+guest pays the partner, and Daily Red Sea's share is settled on the partner's
+page.
 
 ## Cash in vs cash out
 

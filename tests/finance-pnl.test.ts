@@ -156,3 +156,21 @@ describe("P&L from real booking financials (in-memory Postgres)", () => {
     expect(fromMinor(lineMargins)).toBe(value(gross, "contribution"));
   });
 });
+
+describe("P&L with VAT", () => {
+  // 114 incl. 14 VAT; partner 50 excluding deductible VAT; margin excl. VAT 50.
+  const result = computePnl([line({ gross_usd: "114.00", net_sales_usd: "114.00", vat_usd: "14.00", supplier_cost_usd: "50.00", margin_amount_usd: "50.00" })], [], labels);
+  const gross = grossView(result, null);
+
+  it("reports revenue and margins excluding output VAT", () => {
+    expect(["net_sales", "output_vat", "revenue", "supplier_costs", "gross_profit", "gross_margin_pct", "contribution"].map((key) => value(gross, key)))
+      .toEqual(["114.00", "14.00", "100.00", "50.00", "50.00", "50.00", "50.00"]);
+    expect(drilldown("output_vat", [line({ vat_usd: "7.00" })], [])?.map((row) => row.amount)).toEqual(["7.00"]);
+    const [tour] = marginsBy("tour", [line({ net_sales_usd: "114.00", vat_usd: "14.00", margin_amount_usd: "50.00" })], "15");
+    expect([tour.net_sales, tour.margin, tour.margin_pct]).toEqual(["100.00", "50.00", "50.00"]);
+  });
+
+  it("leaves a line out while its VAT is waiting for an exchange rate", () => {
+    expect(computePnl([line({ vat_usd: null })], [], labels).pending.lines).toBe(1);
+  });
+});

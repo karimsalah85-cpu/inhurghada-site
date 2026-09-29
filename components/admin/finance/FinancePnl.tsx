@@ -139,8 +139,8 @@ export default function FinancePnl() {
 
       <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
         <h2 className="text-lg font-black">Monthly trend</h2>
-        <p className="text-xs text-slate-500">Net sales against all costs (trip, selling and operating); the label above each month is net profit.</p>
-        <div className="mt-3"><ProfitLossChart rows={chartRows} labels={{ revenue: "Net sales", costs: "All costs", profit: "Net profit" }} formatValue={(value) => formatMoney(value.toFixed(2)).replace(/\.00$/, "")} /></div>
+        <p className="text-xs text-slate-500">Revenue excluding VAT against all costs (trip, selling and operating); the label above each month is net profit.</p>
+        <div className="mt-3"><ProfitLossChart rows={chartRows} labels={{ revenue: "Revenue excl. VAT", costs: "All costs", profit: "Net profit" }} formatValue={(value) => formatMoney(value.toFixed(2)).replace(/\.00$/, "")} /></div>
       </section>
     </>}
   </div>;

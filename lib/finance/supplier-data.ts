@@ -98,9 +98,9 @@ export type SupplierBookingRow = {
 export async function supplierDetail(supabase: SupabaseClient, supplierId: string) {
   type Supplier = {
     id: string; name: string; type: string; contact_name: string | null; phone: string | null; email: string | null; default_currency: string; active: boolean;
-    whatsapp: string | null; payment_method: string | null; payment_details: string | null;
+    whatsapp: string | null; payment_method: string | null; payment_details: string | null; vat_status: string;
   };
-  const supplier = check(await supabase.from("suppliers").select("id,name,type,contact_name,phone,email,default_currency,active,whatsapp,payment_method,payment_details").eq("id", supplierId).maybeSingle()) as Supplier | null;
+  const supplier = check(await supabase.from("suppliers").select("id,name,type,contact_name,phone,email,default_currency,active,whatsapp,payment_method,payment_details,vat_status").eq("id", supplierId).maybeSingle()) as Supplier | null;
   if (!supplier) return null;
 
   const [entriesResult, lineBalancesResult, currentLinesResult, partnerCostsResult, rates] = await Promise.all([
