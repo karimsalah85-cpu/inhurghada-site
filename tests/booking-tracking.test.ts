@@ -83,6 +83,16 @@ describe("booking tracking semantics", () => {
     });
   });
 
+  it("sends the WhatsApp click conversion the way Google Ads defined it (1 EGP)", () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID", "AW-18350927636");
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_CONVERSION_LABEL", "k25CCLifvYYdEJTes65E");
+    vi.stubGlobal("window", { gtag, fbq, localStorage: { getItem: () => JSON.stringify({ analytics: true, marketing: true }) } });
+    trackEvent("whatsapp_click", { placement: "blog_article" });
+    expect(gtag).toHaveBeenCalledWith("event", "conversion", expect.objectContaining({
+      send_to: "AW-18350927636/k25CCLifvYYdEJTes65E", value: 1, currency: "EGP",
+    }));
+  });
+
   it.each([null, "invalid", JSON.stringify({ analytics: false, marketing: false })])("does not send marketing conversions without consent (%s)", (storedConsent) => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID", "AW-test");
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL", "lead-label");

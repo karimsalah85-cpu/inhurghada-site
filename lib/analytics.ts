@@ -171,7 +171,8 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
     gtag("event", "conversion", {
       send_to: `${googleAdsId}/${label}`,
       value: typeof cleanData.value === "number" ? cleanData.value : 1,
-      currency: typeof cleanData.currency === "string" ? cleanData.currency : "USD",
+      // Contact clicks carry no price; match the Google Ads account (EGP, value 1) so each counts as 1.
+      currency: typeof cleanData.currency === "string" ? cleanData.currency : "EGP",
       transaction_id: cleanData.transaction_id || id,
     });
   }
