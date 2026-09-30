@@ -16,3 +16,4 @@
   .shell[data-pinned="true"] .brand, .sidebar:hover .brand, .sidebar:focus-within .brand { font-size: 18px; white-space: nowrap; }
   .shell[data-pinned="true"] .brand::after, .sidebar:hover .brand::after, .sidebar:focus-within .brand::after { content: none; }
 }
+@media print { .shell, .shell[data-pinned="true"] { display: block; } }

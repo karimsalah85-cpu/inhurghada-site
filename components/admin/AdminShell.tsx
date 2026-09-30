@@ -51,7 +51,7 @@ export default function AdminShell({ children, permissions, role, environment }:
 
   return <div className={`${styles.shell} min-h-screen bg-slate-50`} data-pinned={pinned}>
     <a href="#admin-workspace" className="sr-only z-50 rounded-lg bg-white p-3 text-slate-950 focus:not-sr-only focus:fixed focus:left-3 focus:top-3">Skip to workspace</a>
-    <div className={styles.rail}><aside className={`${styles.sidebar} border-b border-slate-200 bg-slate-950 px-4 py-4 text-white lg:sticky lg:top-0 lg:h-dvh lg:overflow-y-auto lg:border-b-0 lg:border-r lg:border-slate-800 lg:px-3 lg:py-3`}>
+    <div className={`${styles.rail} print:hidden`}><aside className={`${styles.sidebar} border-b border-slate-200 bg-slate-950 px-4 py-4 text-white lg:sticky lg:top-0 lg:h-dvh lg:overflow-y-auto lg:border-b-0 lg:border-r lg:border-slate-800 lg:px-3 lg:py-3`}>
       <div className="flex items-center justify-between gap-3">
         <Link href="/admin" aria-label={`Daily Red Sea admin — ${environment} environment`} title={`Daily Red Sea · ${environment}`} onClick={closeMenu} className={`${styles.brand} rounded text-lg font-black focus-visible:outline-2 focus-visible:outline-cyan-300`}>Daily Red Sea</Link>
         <span className={`${styles.label} rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide ${environment === "live" ? "bg-emerald-400/20 text-emerald-300" : "bg-amber-400/20 text-amber-300"}`}>{environment}</span>
@@ -87,7 +87,7 @@ export default function AdminShell({ children, permissions, role, environment }:
       </div>
     </aside></div>
     <div id="admin-workspace" tabIndex={-1} className="min-w-0 outline-none">
-      {sectionTabs ? <nav aria-label={`${active!.section.label} pages`} className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+      {sectionTabs ? <nav aria-label={`${active!.section.label} pages`} className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6 print:hidden">
         <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto py-2">{sectionTabs.map((page) => {
           const current = active?.page.href === page.href;
           return <Link key={page.href} href={page.href} aria-current={current ? "page" : undefined} className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold focus-visible:outline-2 focus-visible:outline-cyan-600 ${current ? "bg-slate-950 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`}>{page.label}</Link>;

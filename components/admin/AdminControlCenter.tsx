@@ -47,7 +47,7 @@ export default function AdminControlCenter({ initialTab, variant = "content", se
     catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load control center."); }
     finally { setBusy(false); }
   }
-  useEffect(() => { const timeout = window.setTimeout(() => { void load(); }, 0); return () => window.clearTimeout(timeout); }, []);
+  useEffect(() => { const timeout = window.setTimeout(() => { void load(); }, 0); const reload = () => { void load(); }; window.addEventListener("drs-availability-changed", reload); return () => { window.clearTimeout(timeout); window.removeEventListener("drs-availability-changed", reload); }; }, []);
   function choose(next: Resource) { setTab(next); setForm(settingsCategory && next === "settings" ? { ...empty.settings, category: settingsCategory } : { ...empty[next] }); setEditId(""); setError(""); }
   function set(name: string, value: unknown) { setForm((current) => ({ ...current, [name]: value })); }
 

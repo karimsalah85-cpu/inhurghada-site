@@ -14,6 +14,7 @@ export const adminNav: AdminNavGroup[] = [
     { label: "Bookings", icon: BookOpen, pages: [{ href: "/admin/bookings", label: "Bookings", permissions: ["bookings", "reports"] }], keywords: "reservations guests" },
     { label: "Dispatch & calendar", icon: CalendarDays, pages: [
       { href: "/admin/operations", label: "Calendar & assignments", permissions: ["operations"] },
+      { href: "/admin/operations/manifest", label: "Pickup manifest", permissions: ["operations"] },
     ], keywords: "operations pickups drivers boats assignments manifest run sheet" },
     { label: "Customers", icon: Users, pages: [{ href: "/admin/customers", label: "Customers", permissions: ["operations"] }], keywords: "crm guests notes repeat" },
     { label: "Messages", icon: MessageSquareText, pages: [{ href: "/admin/messages", label: "Messages", permissions: ["operations"] }], keywords: "whatsapp email conversations templates queue communications" },
