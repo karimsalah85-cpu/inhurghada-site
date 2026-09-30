@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { CalendarDays, CheckCircle2, Clock, MapPin, ShieldAlert, Ticket, Users, Wallet } from "lucide-react";
+import { cookies } from "next/headers";
 import { hasLivePermission } from "@/lib/admin-permission";
+import { findGuideByCookie, guideCookieName } from "@/lib/guide-checkin";
 import { loadTicket, type TicketView } from "@/lib/ticket-service";
 import { verifyTicketToken } from "@/lib/ticket-token";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -34,6 +36,15 @@ function verdictFor(ticket: TicketView): Verdict {
   return { tone: "valid", title: ticket.bookingStatus === "confirmed" || ticket.bookingStatus === "completed" ? "Valid ticket" : "Valid ticket · awaiting final confirmation", detail: "Show this screen to your guide or driver." };
 }
 
+const checkinMessages: Record<string, string> = {
+  done: "Checked in.",
+  error: "Check-in could not be saved. Try again.",
+  badpin: "That PIN is not recognised. Check it with the Daily Red Sea office.",
+  pin: "Enter your 6-digit PIN.",
+  locked: "Too many attempts. Wait 15 minutes and try again.",
+  cancelled: "This booking is cancelled. Do not board.",
+};
+
 const toneStyles: Record<Verdict["tone"], string> = {
   valid: "bg-ocean text-white",
   used: "bg-amber-500 text-white",
@@ -64,6 +75,8 @@ export default async function TicketPage({ params, searchParams }: { params: Pro
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const isStaff = await hasLivePermission(supabase, user, "bookings");
+  const guide = isStaff ? null : await findGuideByCookie(database, (await cookies()).get(guideCookieName)?.value);
+  const canCheckIn = isStaff || Boolean(guide);
   const verdict = verdictFor(ticket);
   const paid = ticket.paymentStatus === "paid";
   const rows = [
@@ -100,21 +113,29 @@ export default async function TicketPage({ params, searchParams }: { params: Pro
           ))}
         </dl>
 
-        {isStaff && (
+        {ticket.checkInAvailable && (
           <div className="border-t border-line bg-primary-tint px-5 py-5">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted">Staff</p>
-            {(ticket.customerPhone || ticket.customerEmail) && (
-              <p className="mt-2 text-sm text-ink">{[ticket.customerPhone, ticket.customerEmail].filter(Boolean).join(" · ")}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted">{isStaff ? "Staff" : guide ? `Guide · ${guide.name}` : "Guide check-in"}</p>
+            {canCheckIn && ticket.customerPhone && (
+              <p className="mt-2 text-sm text-ink">Guest phone: <a className="font-semibold text-primary underline" href={`tel:${ticket.customerPhone.replace(/[^+\d]/g, "")}`}>{ticket.customerPhone}</a>{isStaff && ticket.customerEmail ? ` · ${ticket.customerEmail}` : ""}</p>
             )}
-            {checkin === "done" && <p className="mt-3 rounded-lg bg-ocean-soft px-3 py-2 text-sm font-semibold text-ocean-dark">Checked in.</p>}
-            {checkin === "error" && <p className="mt-3 rounded-lg bg-cta-soft px-3 py-2 text-sm font-semibold text-cta-dark">Check-in could not be saved. Try again.</p>}
-            {!ticket.checkInAvailable ? (
-              <p className="mt-3 text-sm text-muted">Check-in is not enabled yet (database migration pending).</p>
-            ) : ticket.checkedInAt || ticket.bookingStatus === "cancelled" ? null : (
+            {checkin && checkinMessages[checkin] && (
+              <p className={`mt-3 rounded-lg px-3 py-2 text-sm font-semibold ${checkin === "done" ? "bg-ocean-soft text-ocean-dark" : "bg-cta-soft text-cta-dark"}`}>{checkinMessages[checkin]}</p>
+            )}
+            {ticket.checkedInAt || ticket.bookingStatus === "cancelled" ? null : canCheckIn ? (
               <form method="post" action={`/api/tickets/${encodeURIComponent(token)}/check-in`} className="mt-3">
                 <button type="submit" className="w-full rounded-xl bg-primary px-4 py-3 text-base font-bold text-white hover:bg-primary-dark">
                   Check in {ticket.guests} guest{ticket.guests === 1 ? "" : "s"}
                 </button>
+              </form>
+            ) : (
+              <form method="post" action={`/api/tickets/${encodeURIComponent(token)}/check-in`} className="mt-3">
+                <label className="block text-sm font-semibold text-ink" htmlFor="pin">Guides and drivers: enter your check-in PIN</label>
+                <div className="mt-2 flex gap-2">
+                  <input id="pin" name="pin" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} required placeholder="6 digits" className="min-w-0 flex-1 rounded-xl border border-line bg-white px-3 py-3 text-center font-mono text-lg tracking-[0.3em]" />
+                  <button type="submit" className="rounded-xl bg-primary px-4 py-3 font-bold text-white hover:bg-primary-dark">Check in</button>
+                </div>
+                <p className="mt-2 text-xs text-muted">Your phone will be remembered, so next time it&apos;s one tap.</p>
               </form>
             )}
           </div>

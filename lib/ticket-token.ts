@@ -13,7 +13,8 @@ const referencePattern = /^[A-Z0-9][A-Z0-9-]{3,39}$/;
 const tokenPattern = /^([A-Z0-9][A-Z0-9-]{3,39})~(\d{1,2})~([A-Za-z0-9_-]{22})$/;
 export const maxTicketTrips = 20;
 
-function signingSecret() {
+/** Server-only secret shared by ticket signatures and guide check-in credentials. */
+export function signingSecret() {
   const explicit = process.env.TICKET_SIGNING_SECRET?.trim();
   if (explicit) return explicit;
   // Fall back to a key derived from the server-only service-role key so tickets
