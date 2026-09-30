@@ -27,12 +27,12 @@ type Props = {
 
 const tools: { title: string; description: string; href: string; permissions: AdminPermission[] }[] = [
   { title: "Bookings", description: "Confirm requests, update payments and manage guests.", href: "/admin/bookings", permissions: ["bookings", "reports"] },
-  { title: "Operations calendar", description: "Plan departures and coordinate daily delivery.", href: "/admin/operations", permissions: ["operations"] },
+  { title: "Dispatch & calendar", description: "Plan departures, assign guides and drivers, set pickup times.", href: "/admin/operations", permissions: ["operations"] },
   { title: "Trips & listings", description: "Manage availability, visibility and trip content.", href: "/admin/trips", permissions: ["content"] },
   { title: "Finance", description: "Record expenses and review monthly cash flow.", href: "/admin/finance", permissions: ["finance"] },
-  { title: "Suppliers & team", description: "Manage supplier contacts, sales people and staff.", href: "/admin/suppliers", permissions: ["suppliers", "finance"] },
-  { title: "Reports", description: "Review booking performance and export summaries.", href: "/admin/reports", permissions: ["reports"] },
-  { title: "Users & access", description: "Manage staff access and assigned roles.", href: "/admin/users", permissions: ["settings", "staff"] },
+  { title: "Partners & sales people", description: "Supplier contacts, cost prices, contracts and sales commission.", href: "/admin/suppliers", permissions: ["suppliers", "finance"] },
+  { title: "Insights", description: "Booking reports, marketing performance and booking profit.", href: "/admin/reports", permissions: ["reports"] },
+  { title: "Users & system", description: "Staff logins and roles, integrations, backups and audit log.", href: "/admin/users", permissions: ["settings", "staff"] },
 ];
 
 export default function AdminOverview({ bookings, permissions, day, metrics, rowsMayBeTruncated, onOpenBooking, tripChanges }: Props) {

@@ -25,12 +25,14 @@ const moneyBreakdown = (byCurrency: Record<string, number>) => {
 };
 const iso = (date: Date) => date.toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 
+export type OperationsTab = Tab;
 const validTabs: Tab[] = ["calendar", "customers", "finance", "suppliers", "communications", "security"];
 
-export default function AdminOperationsCenter() {
+export default function AdminOperationsCenter({ lockedTab, heading }: { lockedTab?: Tab; heading?: string } = {}) {
   const searchParams = useSearchParams();
   const requestedTab = searchParams.get("tab");
-  const tab: Tab = (validTabs as string[]).includes(requestedTab || "") ? (requestedTab as Tab) : "calendar";
+  // Pages that own one part of operations pass lockedTab; the in-page tab bar is then hidden.
+  const tab: Tab = lockedTab ?? ((validTabs as string[]).includes(requestedTab || "") ? (requestedTab as Tab) : "calendar");
   const [data, setData] = useState<Data | null>(null); const [busy, setBusy] = useState(true); const [error, setError] = useState(""); const [notice, setNotice] = useState("");
   function selectTab(nextTab: Tab) {
     if (nextTab === tab) return;
@@ -64,7 +66,7 @@ export default function AdminOperationsCenter() {
   };
   return <section className="mt-8 rounded-3xl bg-white p-5 shadow-sm sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div><p className="text-sm font-bold uppercase tracking-[.2em] text-cyan-700">Operations workspace</p><h2 className="mt-2 text-2xl font-black">Plan, serve and follow up</h2></div>
+      <div><p className="text-sm font-bold uppercase tracking-[.2em] text-cyan-700">{lockedTab ? "Live data" : "Operations workspace"}</p><h2 className="mt-2 text-2xl font-black">{heading || "Plan, serve and follow up"}</h2></div>
       <button type="button" onClick={() => { void load(); }} disabled={busy} className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold disabled:opacity-50"><RefreshCw size={16} aria-hidden="true" className={busy ? "animate-spin" : ""}/>Refresh</button>
     </div>
     {error ? <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-4 text-sm font-bold text-rose-800">{error}</p> : null}
@@ -72,12 +74,12 @@ export default function AdminOperationsCenter() {
     {busy && !data ? <p role="status" className="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-600"><RefreshCw size={16} aria-hidden="true" className="animate-spin"/>Loading operations…</p> : null}
     {!busy && data?.configured === false ? <div className="mt-5 rounded-2xl bg-amber-50 p-5 text-sm text-amber-950"><p className="font-black">One database upgrade is required</p><p className="mt-2">Run <code>{data.migration}</code> in Supabase SQL Editor, then refresh.</p></div> : null}
     {data?.configured ? <>
-      <nav aria-label="Operations sections" className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 xl:grid-cols-[1.5fr_1fr_.8fr]">
+      {!lockedTab ? <>      <nav aria-label="Operations sections" className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 xl:grid-cols-[1.5fr_1fr_.8fr]">
         {tabGroups.map((group) => <div key={group.label}>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">{group.label}</p>
           <div className="flex flex-wrap gap-2">{group.items.map(([key, label]) => <button type="button" key={key} onClick={() => selectTab(key)} aria-pressed={tab === key} className={`rounded-lg px-3 py-2.5 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700 ${tab === key ? "bg-slate-950 text-white" : "bg-white text-slate-700 hover:bg-slate-200"}`}>{label}</button>)}</div>
         </div>)}
-      </nav>
+      </nav></> : null}
       <p className="mt-4 text-sm text-slate-600">{descriptions[tab]}</p>
       {tab === "calendar" ? <CalendarPanel data={data}/> : tab === "customers" ? <CustomersPanel data={data} save={save}/> : tab === "finance" ? <ProfitPanel data={data}/> : tab === "suppliers" ? <SuppliersPanel data={data} save={save}/> : tab === "communications" ? <CommunicationsPanel data={data} save={save}/> : <SecurityPanel data={data} save={save}/>}
     </> : null}

@@ -2606,14 +2606,8 @@ export default function AdminDashboard({
         </section>
       ) : null}
       {mode === "suppliers" && can("operations") ? (
-        <div id="staff" className="scroll-mt-6">
-          <AdminControlCenter
-            initialTab="staff"
-            variant="content"
-            compact
-            title="Staff"
-            description="Guides, drivers, crew, and operations staff you assign to bookings. Not the same as sales people above, or admin login accounts (see Users & roles)."
-          />
+        <div id="supplier-prices" className="scroll-mt-6">
+          <AdminOperationsCenter lockedTab="suppliers" heading="Supplier cost prices & contracts" />
         </div>
       ) : null}
       {mode === "reports" && can("reports") ? (

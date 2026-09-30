@@ -3,52 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
-import { ArrowUpRight, ChevronDown, Search, X, PanelLeft, LayoutDashboard, CalendarDays, BookOpen, Users, Truck, Tag, Map, FileText, Star, ChartNoAxesCombined, ClipboardList, Wallet, Coins, Shield, Plug, Layers, History, UserRound, TrendingUp, Percent, Building2, HandCoins, ReceiptText, Ban, Landmark, Banknote, Scale, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, X, PanelLeft, UserRound } from "lucide-react";
 import type { AdminPermission, AdminRole } from "@/lib/admin-auth";
+import { activeNavPage, visibleNav } from "@/components/admin/admin-nav";
 
 import styles from "./AdminShell.module.css";
-
-type NavItem = { href: string; label: string; icon: LucideIcon; permissions?: AdminPermission[]; ownerOnly?: boolean };
-type NavGroup = { label: string; items: NavItem[] };
-
-const groups: NavGroup[] = [
-  { label: "Workspace", items: [
-    { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  ] },
-  { label: "Daily operations", items: [
-    { href: "/admin/bookings", label: "Bookings", icon: BookOpen, permissions: ["bookings", "reports"] },
-    { href: "/admin/operations", label: "Calendar & operations", icon: CalendarDays, permissions: ["operations"] },
-    { href: "/admin/customers", label: "Customer notes", icon: Users, permissions: ["bookings", "operations"] },
-    { href: "/admin/suppliers", label: "Suppliers", icon: Truck, permissions: ["suppliers", "finance"] },
-  ] },
-  { label: "Trips & content", items: [
-    { href: "/admin/promo-codes", label: "Promo codes", icon: Tag, permissions: ["content"] },
-    { href: "/admin/trips", label: "Trips & listings", icon: Map, permissions: ["content"] },
-    { href: "/admin/content", label: "Trip content", icon: FileText, permissions: ["content"] },
-    { href: "/admin/reviews", label: "Reviews", icon: Star, permissions: ["content"] },
-  ] },
-  { label: "Performance & finance", items: [
-    { href: "/admin/analytics", label: "Analytics", icon: ChartNoAxesCombined, permissions: ["finance"] },
-    { href: "/admin/reports", label: "Reports", icon: ClipboardList, permissions: ["reports"] },
-    { href: "/admin/finance/reports", label: "Finance reports", icon: Wallet, permissions: ["finance"] },
-    { href: "/admin/finance", label: "Finance", icon: Coins, permissions: ["finance"] },
-    { href: "/admin/finance/pnl", label: "Profit & loss", icon: TrendingUp, permissions: ["finance"] },
-    { href: "/admin/finance/margins", label: "Margins", icon: Percent, permissions: ["finance"] },
-    { href: "/admin/finance/suppliers", label: "Supplier balances", icon: Building2, permissions: ["finance"] },
-    { href: "/admin/finance/payments-to-record", label: "Payments to record", icon: HandCoins, permissions: ["finance"] },
-    { href: "/admin/finance/credit-notes", label: "Credit notes", icon: ReceiptText, permissions: ["finance"] },
-    { href: "/admin/finance/cancellations", label: "Cancellations", icon: Ban, permissions: ["finance"] },
-    { href: "/admin/finance/vat", label: "VAT", icon: Landmark, permissions: ["finance"] },
-  ] },
-  { label: "Settings & access", items: [
-    { href: "/admin/currency", label: "Currency settings", icon: Banknote, permissions: ["finance", "settings"] },
-    { href: "/admin/policies", label: "Terms & policies", icon: Scale, permissions: ["settings"] },
-    { href: "/admin/users", label: "Users & roles", icon: Shield, permissions: ["settings", "staff"] },
-    { href: "/admin/integrations", label: "Integrations", icon: Plug, permissions: ["settings"] },
-    { href: "/admin/environments", label: "Environments", icon: Layers, permissions: ["settings"] },
-    { href: "/admin/audit-log", label: "Audit log", icon: History, permissions: ["settings"] },
-  ] },
-];
 
 let sessionPinned = false;
 function navigationPinned() {
@@ -78,20 +37,16 @@ export default function AdminShell({ children, permissions, role, environment }:
   }
   if (authPaths.some((path) => pathname.startsWith(path))) return children;
 
-  const allowed = new Set(permissions);
-  const permittedGroups = groups.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => item.ownerOnly ? role === "owner" : !item.permissions || item.permissions.some((permission) => allowed.has(permission))),
-  })).filter((group) => group.items.length);
-  const matches = (href: string) => pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
-  // Nested items (e.g. /admin/finance/suppliers under /admin/finance): only the most specific match is active.
-  const activeHref = permittedGroups.flatMap((group) => group.items).map((item) => item.href).filter(matches).sort((a, b) => b.length - a.length)[0];
-  const isActive = (href: string) => href === activeHref;
-  const currentPage = permittedGroups.flatMap((group) => group.items).find((item) => isActive(item.href))?.label ?? (pathname === "/admin/account" ? "Account & security" : "Admin workspace");
+  const permittedGroups = visibleNav(permissions, role);
+  const active = activeNavPage(pathname, permittedGroups);
+  const isActive = (label: string) => active?.section.label === label;
+  const currentPage = active ? (active.section.pages.length > 1 ? `${active.section.label} · ${active.page.label}` : active.section.label) : (pathname === "/admin/account" ? "Account & security" : "Admin workspace");
+  const needle = query.trim().toLowerCase();
   const visibleGroups = permittedGroups.map((group) => ({
     ...group,
-    items: group.items.filter((item) => `${group.label} ${item.label} ${item.href === "/admin/operations" ? "customers CRM calendar communications" : ""}`.toLowerCase().includes(query.trim().toLowerCase())),
-  })).filter((group) => group.items.length);
+    sections: group.sections.filter((section) => `${group.label} ${section.label} ${section.pages.map((page) => page.label).join(" ")} ${section.keywords || ""}`.toLowerCase().includes(needle)),
+  })).filter((group) => group.sections.length);
+  const sectionTabs = active && active.section.pages.length > 1 ? active.section.pages : null;
   const closeMenu = () => { setMenuOpen(false); setQuery(""); };
 
   return <div className={`${styles.shell} min-h-screen bg-slate-50`} data-pinned={pinned}>
@@ -116,10 +71,10 @@ export default function AdminShell({ children, permissions, role, environment }:
         <nav aria-label="Admin navigation" className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
           {visibleGroups.map((group) => <section key={group.label}>
             <h2 className={`${styles.label} px-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400`}>{group.label}</h2>
-            <div className="mt-2 space-y-1">{group.items.map((item) => {
-              const active = isActive(item.href);
-              const Icon = item.icon;
-              return <Link key={item.href} href={item.href} onClick={closeMenu} aria-label={item.label} title={item.label} aria-current={active ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-cyan-300 ${active ? "bg-cyan-400 text-slate-950" : "text-slate-200 hover:bg-slate-800 hover:text-white"}`}><Icon size={20} className="shrink-0" aria-hidden="true"/><span className={styles.label}>{item.label}</span></Link>;
+            <div className="mt-2 space-y-1">{group.sections.map((section) => {
+              const current = isActive(section.label);
+              const Icon = section.icon;
+              return <Link key={section.label} href={section.pages[0].href} onClick={closeMenu} aria-label={section.label} title={section.label} aria-current={current ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-cyan-300 ${current ? "bg-cyan-400 text-slate-950" : "text-slate-200 hover:bg-slate-800 hover:text-white"}`}><Icon size={20} className="shrink-0" aria-hidden="true"/><span className={styles.label}>{section.label}</span></Link>;
             })}</div>
           </section>)}
         </nav>
@@ -131,6 +86,14 @@ export default function AdminShell({ children, permissions, role, environment }:
         </div>
       </div>
     </aside></div>
-    <div id="admin-workspace" tabIndex={-1} className="min-w-0 outline-none">{children}</div>
+    <div id="admin-workspace" tabIndex={-1} className="min-w-0 outline-none">
+      {sectionTabs ? <nav aria-label={`${active!.section.label} pages`} className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+        <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto py-2">{sectionTabs.map((page) => {
+          const current = active?.page.href === page.href;
+          return <Link key={page.href} href={page.href} aria-current={current ? "page" : undefined} className={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold focus-visible:outline-2 focus-visible:outline-cyan-600 ${current ? "bg-slate-950 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`}>{page.label}</Link>;
+        })}</div>
+      </nav> : null}
+      {children}
+    </div>
   </div>;
 }

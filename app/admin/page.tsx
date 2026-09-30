@@ -397,10 +397,10 @@ export default async function AdminPage({
       "Search, filter, update, and inspect bookings.",
     ],
     analytics: [
-      "Analytics & advertising",
+      "Marketing",
       "Website audiences, booking demand, and advertising performance.",
     ],
-    finance: ["Finance", "Booking margins, expenses, and business costs."],
+    finance: ["Finance", "Expenses, booking costs and margins. Use the tabs above for P&L, balances, VAT and reports."],
     trips: [
       "Trips & listings",
       "Toggle a trip active, paused, or unlisted — or open one to edit its full content.",
@@ -411,24 +411,24 @@ export default async function AdminPage({
     ],
     policies: [
       "Terms & policies",
-      "Legal-category site settings only — cancellation rules and similar published text.",
+      "Cancellation rules and other published legal text.",
     ],
     currency: [
       "Currency settings",
-      "Currency-category site settings only — manual exchange-rate overrides.",
+      "Manual exchange-rate overrides used for price display.",
     ],
     customers: ["Customers", "Manage customer notes and operational context."],
     suppliers: [
-      "Suppliers",
-      "Manage suppliers, sales contacts, staff, and performance.",
+      "Partners & sales people",
+      "Boats, guides, drivers, hotels and companies that deliver trips, sales people and their commission, and supplier cost prices. Guides & staff and supplier balances have their own pages.",
     ],
     operations: [
       "Operations",
       "Manage calendars, communications, reports, and operational records.",
     ],
     reports: [
-      "Reports & statistics",
-      "Booking status, workload percentages, service performance, and exports.",
+      "Bookings report",
+      "Bookings by period, status and service, with exports.",
     ],
   };
   return (
