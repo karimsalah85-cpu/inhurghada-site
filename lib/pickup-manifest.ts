@@ -1,3 +1,5 @@
+import { createZoneLookup, type PickupZoneData } from "@/lib/pickup-zones";
+
 export type ManifestBooking = {
   id: string;
   reference: string;
@@ -26,7 +28,11 @@ export type ManifestStop = {
   bookingId: string;
   reference: string;
   time: string | null;
+  /** Where the time came from: set on the assignment, the zone's standard time, or the tour departure. */
+  timeSource: "assignment" | "zone" | "booking" | null;
   hotel: string;
+  /** Pickup zone of the matched hotel, when the hotel is on the hotel list and has a zone. */
+  zone: string | null;
   guest: string;
   phone: string;
   tour: string;
@@ -56,8 +62,12 @@ function guestCounts(booking: ManifestBooking) {
  * Builds the day's run sheet: one group per boat / vehicle / guide (whoever is assigned first to the
  * booking — suppliers before staff), stops ordered by pickup time then hotel. Unassigned bookings go
  * in their own group at the end so nothing is missed.
+ *
+ * Pickup time: the assignment's pickup time, else the standard time for the hotel's pickup zone and
+ * the tour (when `zoneData` is given), else the booking's departure time.
  */
-export function buildManifest(bookings: ManifestBooking[], assignments: ManifestAssignment[], people: ManifestPerson[]): ManifestGroup[] {
+export function buildManifest(bookings: ManifestBooking[], assignments: ManifestAssignment[], people: ManifestPerson[], zoneData?: PickupZoneData | null): ManifestGroup[] {
+  const zoneFor = createZoneLookup(zoneData);
   const peopleById = new Map(people.map((person) => [`${person.kind}:${person.id}`, person]));
   const assignmentsByBooking = new Map<string, ManifestAssignment[]>();
   for (const assignment of assignments) {
@@ -72,14 +82,18 @@ export function buildManifest(bookings: ManifestBooking[], assignments: Manifest
     const person = lead ? (lead.supplier_id ? peopleById.get(`supplier:${lead.supplier_id}`) : lead.staff_member_id ? peopleById.get(`staff:${lead.staff_member_id}`) : undefined) : undefined;
     const key = person ? `${person.kind}:${person.id}` : "unassigned";
     const pickup = own.map((assignment) => assignment.pickup_time).filter((value): value is string => Boolean(value) && !Number.isNaN(new Date(value!).getTime())).sort()[0];
-    const time = pickup ? cairoTime(pickup) : booking.start_time ? booking.start_time.slice(0, 5) : null;
+    const zoned = zoneFor(booking.hotel, booking.tour_slug);
+    const time = pickup ? cairoTime(pickup) : zoned.time ?? (booking.start_time ? booking.start_time.slice(0, 5) : null);
+    const timeSource: ManifestStop["timeSource"] = pickup ? "assignment" : zoned.time ? "zone" : time ? "booking" : null;
     const counts = guestCounts(booking);
     const extraNotes = own.map((assignment) => assignment.notes).filter(Boolean).join(" · ");
     const stop: ManifestStop = {
       bookingId: booking.id,
       reference: booking.reference,
       time,
+      timeSource,
       hotel: booking.hotel?.trim() || "Hotel not recorded",
+      zone: zoned.zone?.name ?? null,
       guest: booking.customer_name?.trim() || "Guest",
       phone: booking.phone?.trim() || "",
       tour: booking.tour_name?.trim() || booking.tour_slug || "Service",
@@ -110,7 +124,7 @@ export function manifestText(date: string, group: ManifestGroup, { includeCash =
   const lines = [`Daily Red Sea — pickups ${date}`, `${group.title}: ${group.stops.length} booking${group.stops.length === 1 ? "" : "s"}, ${group.guests} guest${group.guests === 1 ? "" : "s"}`, ""];
   for (const stop of group.stops) {
     const pax = [stop.adults && `${stop.adults}A`, stop.children && `${stop.children}C`, stop.infants && `${stop.infants}I`].filter(Boolean).join(" ") || `${stop.total}`;
-    lines.push(`${stop.time || "Time TBC"} · ${stop.hotel}`);
+    lines.push(`${stop.time || "Time TBC"} · ${stop.hotel}${stop.zone ? ` (${stop.zone})` : ""}`);
     lines.push(`${stop.guest} (${pax}) · ${stop.phone || "no phone"} · ${stop.reference}`);
     lines.push(stop.tour);
     if (includeCash && stop.cashToCollect) lines.push(`Collect: ${stop.cashToCollect}`);

@@ -28,7 +28,7 @@ export default function PickupManifest({ date, groups }: { date: string; groups:
       <button type="button" onClick={() => window.print()} className="ml-auto inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"><Printer size={16}/>Print</button>
     </div>
     <header className="mt-6"><h2 className="text-2xl font-black">{longDate(date)}</h2><p className="mt-1 text-sm text-slate-600">{totalStops} booking{totalStops === 1 ? "" : "s"} · {totalGuests} guest{totalGuests === 1 ? "" : "s"} · {groups.length} list{groups.length === 1 ? "" : "s"}</p>
-      {missingTimes ? <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-900 print:hidden">{missingTimes} pickup{missingTimes === 1 ? " has" : "s have"} no time yet. Set it on the booking&apos;s assignment under Dispatch &amp; calendar — it is also sent to the guest in the reminder.</p> : null}
+      {missingTimes ? <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-900 print:hidden">{missingTimes} pickup{missingTimes === 1 ? " has" : "s have"} no time yet. Set it on the booking&apos;s assignment under Dispatch &amp; calendar, or give the hotel&apos;s zone a standard time under <Link href="/admin/operations/pickup-zones" className="underline">Hotels &amp; pickup times</Link> — it is also sent to the guest in the reminder.</p> : null}
     </header>
     {!groups.length ? <p className="mt-6 rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">No active bookings on this date.</p> : null}
     <div className="mt-6 space-y-6">{groups.map((group) => <section key={group.key} className="break-inside-avoid rounded-2xl border border-slate-200 bg-white shadow-sm print:shadow-none">
@@ -42,8 +42,8 @@ export default function PickupManifest({ date, groups }: { date: string; groups:
       <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm">
         <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="p-3">Time</th><th className="p-3">Hotel</th><th className="p-3">Guest</th><th className="p-3">Pax</th><th className="p-3">Tour</th><th className="p-3">Notes</th><th className="p-3">Collect</th></tr></thead>
         <tbody>{group.stops.map((stop) => <tr key={stop.bookingId} className="border-t border-slate-100 align-top">
-          <td className={`p-3 font-black ${stop.time ? "" : "text-amber-700"}`}>{stop.time || "TBC"}</td>
-          <td className="p-3 font-semibold">{stop.hotel}</td>
+          <td className={`p-3 font-black ${stop.time ? "" : "text-amber-700"}`}>{stop.time || "TBC"}{stop.timeSource === "zone" ? <span className="block text-[10px] font-bold uppercase text-slate-400" title="Standard pickup time for this hotel's zone">Zone time</span> : null}</td>
+          <td className="p-3"><span className="font-semibold">{stop.hotel}</span>{stop.zone ? <span className="block text-xs font-semibold text-cyan-800">{stop.zone}</span> : null}</td>
           <td className="p-3"><span className="font-semibold">{stop.guest}</span><span className="block text-xs text-slate-500">{stop.phone || "No phone"}</span><Link href={`/admin/bookings?month=${date.slice(0, 7)}&search=${encodeURIComponent(stop.reference)}`} className="text-xs font-bold text-cyan-700 print:text-slate-500">{stop.reference}</Link></td>
           <td className="p-3 whitespace-nowrap"><span className="font-black">{stop.total}</span><span className="block text-xs text-slate-500">{[stop.adults && `${stop.adults} adult${stop.adults === 1 ? "" : "s"}`, stop.children && `${stop.children} child${stop.children === 1 ? "" : "ren"}`, stop.infants && `${stop.infants} infant${stop.infants === 1 ? "" : "s"}`].filter(Boolean).join(", ")}</span></td>
           <td className="p-3">{stop.tour}{stop.status === "new" ? <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase text-amber-800">Not confirmed</span> : null}</td>
