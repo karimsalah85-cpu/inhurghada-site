@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
 import { hasLivePermission as permitted } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
+import { tours } from "@/data/tours";
 
 const resources = {
   content: "content_items",
@@ -54,16 +55,24 @@ export async function GET() {
     canContent ? supabase.from("redirect_rules").select("*").order("source_path").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     supabase.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(50),
     supabase.from("system_health_checks").select("*").order("checked_at", { ascending: false }).limit(20),
+    // Pickers for the assignment and availability forms, so staff choose records instead of typing IDs.
+    canOperations ? supabase.from("bookings").select("id,reference,customer_name,tour_name,date").is("archived_at", null).neq("status", "cancelled").gte("date", new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10)).order("date").limit(300) : Promise.resolve({data:[],error:null}),
+    canOperations ? supabase.from("suppliers").select("id,name,active").order("name").limit(300) : Promise.resolve({data:[],error:null}),
   ]);
   const migrationError = queries.find((result) => result.error && ["42P01", "PGRST205"].includes(result.error.code || ""))?.error;
   if (migrationError) return json({ configured: false, migration: "202608010001_admin_control_center.sql" });
   const otherError = queries.find((result) => result.error)?.error;
   if (otherError) return json({ error: otherError.message }, 500);
-  const [content, media, mediaLocalizations, mediaUsages, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health] = queries.map((result) => result.data || []);
+  const [content, media, mediaLocalizations, mediaUsages, availability, staff, assignments, notes, templates, queue, settings, redirects, audit, health, bookingOptions, supplierOptions] = queries.map((result) => result.data || []);
   const capped = { content, media, availability, staff, assignments, notes, templates, queue, settings, redirects };
   const truncated = Object.fromEntries(Object.entries(capped).map(([key, rows]) => [key, rows.length > CAP]));
   for (const key of Object.keys(capped)) capped[key as keyof typeof capped] = capped[key as keyof typeof capped].slice(0, CAP);
-  return json({ configured: true, ...capped, mediaLocalizations, mediaUsages, audit, health, truncated });
+  const lookups = {
+    bookings: bookingOptions,
+    suppliers: supplierOptions.filter((row) => (row as { active?: boolean | null }).active !== false),
+    tours: tours.map((tour) => ({ slug: tour.slug, title: tour.title })),
+  };
+  return json({ configured: true, ...capped, mediaLocalizations, mediaUsages, audit, health, truncated, lookups });
 }
 
 export async function POST(request: NextRequest) {

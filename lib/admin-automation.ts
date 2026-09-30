@@ -7,7 +7,7 @@ import { pickTemplate } from "@/lib/communication-template";
 import { runFinanceAutomation } from "@/lib/finance/automation";
 
 type Template = { id: string; event_key: string; channel: "email" | "whatsapp"; subject: string | null; body: string; locale: string };
-type Booking = { id: string; reference: string; customer_name: string; customer_email: string | null; phone: string; tour_name: string | null; date: string | null; hotel: string | null; locale: string };
+type Booking = { id: string; reference: string; customer_name: string; customer_email: string | null; phone: string; tour_name: string | null; date: string | null; hotel: string | null; locale: string; start_time?: string | null; pickup_time?: string | null };
 type QueueItem = { id: string; recipient: string; channel: "email" | "whatsapp"; attempts: number; template_id: string | null; booking_id: string | null };
 
 // Localized post-trip review requests. Every other event stays English-only and
@@ -23,7 +23,22 @@ const reviewRequestTemplates = [
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const dateOnly = (date: Date) => date.toISOString().slice(0, 10);
 
-function render(value: string, booking: Booking) {
+const cairoTime = (value: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Cairo" }).format(new Date(value));
+
+// Pickup time shown to guests: the assigned pickup time wins, then the booking's departure time.
+export function resolvePickupTime(assignmentPickup: string | null | undefined, startTime: string | null | undefined) {
+  if (assignmentPickup && !Number.isNaN(new Date(assignmentPickup).getTime())) return cairoTime(assignmentPickup);
+  if (startTime && /^\d{2}:\d{2}/.test(startTime)) return startTime.slice(0, 5);
+  return null;
+}
+
+export function pickupLine(booking: Pick<Booking, "hotel" | "pickup_time">) {
+  const place = booking.hotel ? ` from ${booking.hotel}` : "";
+  if (booking.pickup_time) return `Your pickup is at ${booking.pickup_time}${place}. Please be ready in the lobby 10 minutes early.`;
+  return `We will confirm the pickup time${booking.hotel ? ` for ${booking.hotel}` : ""} by WhatsApp.`;
+}
+
+export function render(value: string, booking: Booking) {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://dailyredsea.com";
   const reviewQuery = new URLSearchParams({ lang: booking.locale || "en" });
   if (booking.reference) reviewQuery.set("ref", booking.reference);
@@ -36,6 +51,8 @@ function render(value: string, booking: Booking) {
     date: booking.date || "",
     hotel: booking.hotel || "",
     review_url: reviewUrl,
+    pickup_time: booking.pickup_time || "",
+    pickup_line: pickupLine(booking),
   };
   return value.replace(/{{\s*([a-z_]+)\s*}}/g, (_, key: string) => replacements[key] ?? "");
 }
@@ -74,8 +91,8 @@ export async function runAdminAutomation() {
   if (publishError) throw publishError;
 
   const { error: seedError } = await supabase.from("communication_templates").upsert([
-    { name: "Pickup reminder email", channel: "email", event_key: "pickup_reminder", locale: "en", subject: "Your pickup tomorrow — {{booking_reference}}", body: "Hello {{customer_name}},\n\nYour {{tour_name}} is tomorrow ({{date}}). We will confirm the pickup time for {{hotel}} by WhatsApp.\n\nDaily Red Sea" },
-    { name: "Pickup reminder WhatsApp", channel: "whatsapp", event_key: "pickup_reminder", locale: "en", subject: null, body: "Hello {{customer_name}}! A reminder that {{tour_name}} is tomorrow ({{date}}). We will confirm your pickup at {{hotel}}. Reference: {{booking_reference}}." },
+    { name: "Pickup reminder email", channel: "email", event_key: "pickup_reminder", locale: "en", subject: "Your pickup tomorrow — {{booking_reference}}", body: "Hello {{customer_name}},\n\nYour {{tour_name}} is tomorrow ({{date}}). {{pickup_line}}\n\nDaily Red Sea" },
+    { name: "Pickup reminder WhatsApp", channel: "whatsapp", event_key: "pickup_reminder", locale: "en", subject: null, body: "Hello {{customer_name}}! A reminder that {{tour_name}} is tomorrow ({{date}}). {{pickup_line}} Reference: {{booking_reference}}." },
     { name: "Review request email", channel: "email", event_key: "review_request", locale: "en", subject: "How was your Daily Red Sea trip?", body: "Hello {{customer_name}},\n\nWe hope you enjoyed {{tour_name}}. Please share your experience: {{review_url}}\n\nThank you,\nDaily Red Sea" },
     { name: "Review request WhatsApp", channel: "whatsapp", event_key: "review_request", locale: "en", subject: null, body: "Hello {{customer_name}}! We hope you enjoyed {{tour_name}}. We would love your feedback: {{review_url}}" },
     ...reviewRequestTemplates.flatMap((entry) => [
@@ -87,10 +104,18 @@ export async function runAdminAutomation() {
 
   const [{ data: templates, error: templateError }, { data: pickupBookings, error: pickupError }, { data: reviewBookings, error: reviewError }] = await Promise.all([
     supabase.from("communication_templates").select("id,event_key,channel,subject,body,locale").eq("active", true).in("event_key", ["pickup_reminder", "review_request"]),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").is("archived_at", null).eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale,start_time").is("archived_at", null).eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
     supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").is("archived_at", null).eq("status", "completed").eq("date", dateOnly(yesterday)),
   ]);
   if (templateError || pickupError || reviewError) throw templateError || pickupError || reviewError;
+  const pickupIds = (pickupBookings || []).map((booking) => booking.id);
+  if (pickupIds.length) {
+    const { data: assignments, error: assignmentError } = await supabase.from("booking_assignments").select("booking_id,pickup_time").in("booking_id", pickupIds).neq("status", "cancelled").not("pickup_time", "is", null).order("pickup_time");
+    if (assignmentError) throw assignmentError;
+    const firstPickup = new Map<string, string>();
+    for (const row of assignments || []) if (!firstPickup.has(row.booking_id)) firstPickup.set(row.booking_id, row.pickup_time);
+    for (const booking of pickupBookings as Booking[]) booking.pickup_time = resolvePickupTime(firstPickup.get(booking.id), booking.start_time);
+  }
 
   const { data: completionEvents, error: completionError } = await supabase.from("referral_notification_events").select("booking_id").eq("event_type", "trip_completed");
   if (completionError) throw completionError;

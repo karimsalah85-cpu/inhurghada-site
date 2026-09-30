@@ -3,52 +3,50 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
-import { ArrowUpRight, ChevronDown, Search, X, PanelLeft, LayoutDashboard, CalendarDays, BookOpen, Users, Truck, Tag, Map, FileText, Star, ChartNoAxesCombined, ClipboardList, Wallet, Coins, Shield, Plug, Layers, History, UserRound } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Search, X, PanelLeft, LayoutDashboard, CalendarDays, BookOpen, Users, Truck, Tag, Map, FileText, Star, ChartNoAxesCombined, ClipboardList, Wallet, Coins, Shield, Plug, Layers, History, UserRound, TrendingUp, Percent, Building2, HandCoins, ReceiptText, Ban, Landmark, Banknote, Scale, type LucideIcon } from "lucide-react";
 import type { AdminPermission, AdminRole } from "@/lib/admin-auth";
 
 import styles from "./AdminShell.module.css";
 
-const navIcons = [LayoutDashboard, BookOpen, CalendarDays, Users, Truck, Tag, Map, FileText, Star, ChartNoAxesCombined, ClipboardList, Wallet, Coins, Shield, Users, Plug, Layers, History];
-
-type NavItem = { href: string; label: string; permissions?: AdminPermission[]; ownerOnly?: boolean };
+type NavItem = { href: string; label: string; icon: LucideIcon; permissions?: AdminPermission[]; ownerOnly?: boolean };
 type NavGroup = { label: string; items: NavItem[] };
 
 const groups: NavGroup[] = [
   { label: "Workspace", items: [
-    { href: "/admin", label: "Overview" },
+    { href: "/admin", label: "Overview", icon: LayoutDashboard },
   ] },
   { label: "Daily operations", items: [
-    { href: "/admin/bookings", label: "Bookings", permissions: ["bookings", "reports"] },
-    { href: "/admin/operations", label: "Calendar & operations", permissions: ["operations"] },
-    { href: "/admin/customers", label: "Customer notes", permissions: ["bookings", "operations"] },
-    { href: "/admin/suppliers", label: "Suppliers", permissions: ["suppliers", "finance"] },
+    { href: "/admin/bookings", label: "Bookings", icon: BookOpen, permissions: ["bookings", "reports"] },
+    { href: "/admin/operations", label: "Calendar & operations", icon: CalendarDays, permissions: ["operations"] },
+    { href: "/admin/customers", label: "Customer notes", icon: Users, permissions: ["bookings", "operations"] },
+    { href: "/admin/suppliers", label: "Suppliers", icon: Truck, permissions: ["suppliers", "finance"] },
   ] },
   { label: "Trips & content", items: [
-    { href: "/admin/promo-codes", label: "Promo codes", permissions: ["content"] },
-    { href: "/admin/trips", label: "Trips & listings", permissions: ["content"] },
-    { href: "/admin/content", label: "Trip content", permissions: ["content"] },
-    { href: "/admin/reviews", label: "Reviews", permissions: ["content"] },
+    { href: "/admin/promo-codes", label: "Promo codes", icon: Tag, permissions: ["content"] },
+    { href: "/admin/trips", label: "Trips & listings", icon: Map, permissions: ["content"] },
+    { href: "/admin/content", label: "Trip content", icon: FileText, permissions: ["content"] },
+    { href: "/admin/reviews", label: "Reviews", icon: Star, permissions: ["content"] },
   ] },
   { label: "Performance & finance", items: [
-    { href: "/admin/analytics", label: "Analytics", permissions: ["finance"] },
-    { href: "/admin/reports", label: "Reports", permissions: ["reports"] },
-    { href: "/admin/finance/reports", label: "Finance reports", permissions: ["finance"] },
-    { href: "/admin/finance", label: "Finance", permissions: ["finance"] },
-    { href: "/admin/finance/pnl", label: "Profit & loss", permissions: ["finance"] },
-    { href: "/admin/finance/margins", label: "Margins", permissions: ["finance"] },
-    { href: "/admin/finance/suppliers", label: "Supplier balances", permissions: ["finance"] },
-    { href: "/admin/finance/payments-to-record", label: "Payments to record", permissions: ["finance"] },
-    { href: "/admin/finance/credit-notes", label: "Credit notes", permissions: ["finance"] },
-    { href: "/admin/finance/cancellations", label: "Cancellations", permissions: ["finance"] },
-    { href: "/admin/finance/vat", label: "VAT", permissions: ["finance"] },
+    { href: "/admin/analytics", label: "Analytics", icon: ChartNoAxesCombined, permissions: ["finance"] },
+    { href: "/admin/reports", label: "Reports", icon: ClipboardList, permissions: ["reports"] },
+    { href: "/admin/finance/reports", label: "Finance reports", icon: Wallet, permissions: ["finance"] },
+    { href: "/admin/finance", label: "Finance", icon: Coins, permissions: ["finance"] },
+    { href: "/admin/finance/pnl", label: "Profit & loss", icon: TrendingUp, permissions: ["finance"] },
+    { href: "/admin/finance/margins", label: "Margins", icon: Percent, permissions: ["finance"] },
+    { href: "/admin/finance/suppliers", label: "Supplier balances", icon: Building2, permissions: ["finance"] },
+    { href: "/admin/finance/payments-to-record", label: "Payments to record", icon: HandCoins, permissions: ["finance"] },
+    { href: "/admin/finance/credit-notes", label: "Credit notes", icon: ReceiptText, permissions: ["finance"] },
+    { href: "/admin/finance/cancellations", label: "Cancellations", icon: Ban, permissions: ["finance"] },
+    { href: "/admin/finance/vat", label: "VAT", icon: Landmark, permissions: ["finance"] },
   ] },
   { label: "Settings & access", items: [
-    { href: "/admin/currency", label: "Currency settings", permissions: ["finance", "settings"] },
-    { href: "/admin/policies", label: "Terms & policies", permissions: ["settings"] },
-    { href: "/admin/users", label: "Users & roles", permissions: ["settings", "staff"] },
-    { href: "/admin/integrations", label: "Integrations", permissions: ["settings"] },
-    { href: "/admin/environments", label: "Environments", permissions: ["settings"] },
-    { href: "/admin/audit-log", label: "Audit log", permissions: ["settings"] },
+    { href: "/admin/currency", label: "Currency settings", icon: Banknote, permissions: ["finance", "settings"] },
+    { href: "/admin/policies", label: "Terms & policies", icon: Scale, permissions: ["settings"] },
+    { href: "/admin/users", label: "Users & roles", icon: Shield, permissions: ["settings", "staff"] },
+    { href: "/admin/integrations", label: "Integrations", icon: Plug, permissions: ["settings"] },
+    { href: "/admin/environments", label: "Environments", icon: Layers, permissions: ["settings"] },
+    { href: "/admin/audit-log", label: "Audit log", icon: History, permissions: ["settings"] },
   ] },
 ];
 
@@ -120,7 +118,7 @@ export default function AdminShell({ children, permissions, role, environment }:
             <h2 className={`${styles.label} px-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400`}>{group.label}</h2>
             <div className="mt-2 space-y-1">{group.items.map((item) => {
               const active = isActive(item.href);
-              const Icon = navIcons[groups.flatMap((group) => group.items).findIndex((entry) => entry.href === item.href)] || BookOpen;
+              const Icon = item.icon;
               return <Link key={item.href} href={item.href} onClick={closeMenu} aria-label={item.label} title={item.label} aria-current={active ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-cyan-300 ${active ? "bg-cyan-400 text-slate-950" : "text-slate-200 hover:bg-slate-800 hover:text-white"}`}><Icon size={20} className="shrink-0" aria-hidden="true"/><span className={styles.label}>{item.label}</span></Link>;
             })}</div>
           </section>)}
