@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import nodemailer from "nodemailer";
 
 export const customerEmailSender = {
@@ -69,26 +68,6 @@ export function addBooking(booking: BookingRecord) {
 
 export function findBooking(reference: string) {
   return getBookingStore().find((item) => item.reference === reference);
-}
-
-export function findBookingByEmail(email: string) {
-  const normalizedEmail = email.trim().toLowerCase();
-
-  if (!normalizedEmail) {
-    return undefined;
-  }
-
-  return getBookingStore().find((item) => item.customerEmail?.trim().toLowerCase() === normalizedEmail);
-}
-
-export function markBookingStatus(reference: string, status: BookingStatus) {
-  const booking = findBooking(reference);
-
-  if (booking) {
-    booking.status = status;
-  }
-
-  return booking;
 }
 
 export function buildBookingMessage(payload: Record<string, unknown>) {
@@ -262,84 +241,6 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
   };
 }
 
-export async function createStripeCheckoutSession(payload: {
-  bookingReference: string;
-  amount: number;
-  currency?: string;
-  customerEmail?: string;
-  bookingType: BookingType;
-  invoiceDetails?: {
-    customerName?: string;
-    customerPhone?: string;
-    date?: string;
-    guests?: string;
-    hotel?: string;
-    tourName?: string;
-  };
-}) {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "http://localhost:3000";
-
-  if (!secretKey) {
-    return { success: false, reason: "missing-stripe-config" };
-  }
-
-  const amountInCents = Math.round(Number(payload.amount || 0) * 100);
-
-  if (!Number.isFinite(amountInCents) || amountInCents <= 0) {
-    return { success: false, reason: "invalid-amount" };
-  }
-
-  const metadata = {
-    bookingReference: payload.bookingReference,
-    bookingType: payload.bookingType,
-    customerName: payload.invoiceDetails?.customerName,
-    customerPhone: payload.invoiceDetails?.customerPhone,
-    bookingDate: payload.invoiceDetails?.date,
-    guests: payload.invoiceDetails?.guests,
-    hotel: payload.invoiceDetails?.hotel,
-    tourName: payload.invoiceDetails?.tourName,
-  };
-
-  const formData = new URLSearchParams({
-    mode: "payment",
-    success_url: `${siteUrl}/checkout?status=success&booking=${encodeURIComponent(payload.bookingReference)}&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${siteUrl}/checkout?status=cancelled&booking=${encodeURIComponent(payload.bookingReference)}`,
-    "line_items[0][price_data][currency]": (payload.currency || "usd").toLowerCase(),
-    "line_items[0][price_data][product_data][name]": payload.invoiceDetails?.tourName || `Daily Red Sea ${payload.bookingType === "transfer" ? "Transfer" : "Tour"}`,
-    "line_items[0][price_data][unit_amount]": String(amountInCents),
-    "line_items[0][quantity]": "1",
-    ...(payload.customerEmail ? { customer_email: payload.customerEmail } : {}),
-  });
-
-  for (const [key, value] of Object.entries(metadata)) {
-    if (value) {
-      formData.set(`metadata[${key}]`, value);
-    }
-  }
-
-  const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: formData.toString(),
-  });
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    return { success: false, reason: data.error?.message || "stripe-session-failed", data };
-  }
-
-  return {
-    success: true,
-    url: data.url,
-    id: data.id,
-  };
-}
-
 export async function getStripeCheckoutSession(sessionId: string) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -359,38 +260,4 @@ export async function getStripeCheckoutSession(sessionId: string) {
   }
 
   return { success: true, session: data } as const;
-}
-
-export function verifyStripeSignature(payload: string, signature: string | null, secret: string | null) {
-  if (!signature || !secret) {
-    return false;
-  }
-
-  const elements = signature.split(",").reduce<Record<string, string>>((acc, item) => {
-    const [key, value] = item.split("=");
-
-    if (key && value) {
-      acc[key] = value;
-    }
-
-    return acc;
-  }, {});
-
-  const timestamp = elements.t;
-  const expectedSignature = elements.v1;
-
-  if (!timestamp || !expectedSignature) {
-    return false;
-  }
-
-  const timestampNumber = Number(timestamp);
-  if (!Number.isFinite(timestampNumber) || Math.abs(Math.floor(Date.now() / 1000) - timestampNumber) > 300) {
-    return false;
-  }
-
-  const signedPayload = `${timestamp}.${payload}`;
-  const digest = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex");
-  const supplied = Buffer.from(expectedSignature, "hex");
-  const expected = Buffer.from(digest, "hex");
-  return supplied.length === expected.length && crypto.timingSafeEqual(supplied, expected);
 }
