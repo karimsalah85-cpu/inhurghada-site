@@ -2,6 +2,7 @@ import AdminPageFrame from "@/components/admin/AdminPageFrame";
 import PickupManifest from "@/components/admin/PickupManifest";
 import { requireAdminPage } from "@/lib/admin-page-auth";
 import { buildManifest, type ManifestAssignment, type ManifestBooking, type ManifestPerson } from "@/lib/pickup-manifest";
+import { loadPickupZoneData } from "@/lib/pickup-zones";
 
 const cairoToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 const addDays = (date: string, days: number) => new Date(Date.parse(`${date}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
@@ -33,7 +34,10 @@ export default async function ManifestPage({ searchParams }: { searchParams: Pro
     ...((suppliers || []) as Array<{ id: string; name: string; phone: string | null; whatsapp: string | null }>).map((row) => ({ ...row, kind: "supplier" as const })),
     ...((staff || []) as Array<{ id: string; name: string; phone: string | null; staff_type: string | null }>).map((row) => ({ id: row.id, name: row.name, phone: row.phone, role: row.staff_type, kind: "staff" as const })),
   ];
-  const groups = buildManifest((bookings || []) as ManifestBooking[], (assignments || []) as ManifestAssignment[], people);
+  // Zone pickup times fill in stops with no assigned time; null (tables not migrated yet) keeps the old behaviour.
+  const tourSlugs = [...new Set((bookings || []).map((row) => row.tour_slug).filter(Boolean))] as string[];
+  const zoneData = await loadPickupZoneData(supabase, tourSlugs);
+  const groups = buildManifest((bookings || []) as ManifestBooking[], (assignments || []) as ManifestAssignment[], people, zoneData);
 
   return <AdminPageFrame eyebrow="Dispatch & calendar" title="Pickup manifest" description="Every pickup for the day, grouped by boat, vehicle or guide, in pickup-time order. Print it or send each list on WhatsApp.">
     {error ? <p role="alert" className="rounded-2xl bg-rose-50 p-4 text-rose-800">{error.message}</p> : <PickupManifest date={date} groups={groups} />}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildManifest, manifestText, whatsappLink, type ManifestBooking } from "@/lib/pickup-manifest";
+import type { PickupZoneData } from "@/lib/pickup-zones";
 
 const booking = (over: Partial<ManifestBooking>): ManifestBooking => ({ id: "b", reference: "DRS-1", type: "tour", customer_name: "Anna", phone: "+201001", tour_name: "Orange Bay", tour_slug: "orange-bay", date: "2026-10-02", start_time: null, hotel: "Steigenberger", notes: null, guests: 2, adults: 2, youth: 0, infants: 0, status: "confirmed", payment_status: "unpaid", amount: 60, currency: "USD", ...over });
 const people = [
@@ -50,6 +51,44 @@ describe("pickup manifest", () => {
     expect(manifestText("2026-10-02", group)).not.toContain("Collect");
     expect(manifestText("2026-10-02", group, { includeCash: true })).toContain("Collect: 60.00 USD");
     expect(manifestText("2026-10-02", group)).toContain("08:00 · Steigenberger");
+  });
+
+  describe("zone pickup times", () => {
+    const zoneData: PickupZoneData = {
+      zones: [{ id: "z1", name: "Sahl Hasheesh", destination: "hurghada", active: true }],
+      hotels: [{ id: "h1", name: "Baron Palace Sahl Hasheesh", normalized_name: "baron palace sahl hasheesh", aliases: [], zone_id: "z1", active: true }],
+      times: [{ zone_id: "z1", tour_slug: "orange-bay", pickup_time: "07:15:00" }],
+    };
+
+    it("uses assignment time, then zone time, then departure time", () => {
+      const [group] = buildManifest(
+        [
+          booking({ id: "b1", reference: "A", hotel: "baron palace sahl hasheesh hotel", start_time: "09:00:00" }),
+          booking({ id: "b2", reference: "B", hotel: "Baron Palace Sahl Hasheesh", start_time: "09:00:00" }),
+          booking({ id: "b3", reference: "C", hotel: "Unknown Hotel", start_time: "09:00:00" }),
+          booking({ id: "b4", reference: "D", hotel: "Baron Palace Sahl Hasheesh", tour_slug: "safari", start_time: "10:00:00" }),
+        ],
+        [{ booking_id: "b1", supplier_id: null, staff_member_id: null, assignment_type: "driver", pickup_time: "2026-10-02T04:30:00Z", status: "assigned", notes: null }],
+        people,
+        zoneData,
+      );
+      expect(group.stops.map((stop) => [stop.reference, stop.time, stop.timeSource, stop.zone])).toEqual([
+        ["A", "07:30", "assignment", "Sahl Hasheesh"],
+        ["B", "07:15", "zone", "Sahl Hasheesh"],
+        ["C", "09:00", "booking", null],
+        ["D", "10:00", "booking", "Sahl Hasheesh"],
+      ].sort((a, b) => String(a[1]).localeCompare(String(b[1]))));
+    });
+
+    it("behaves as before without zone data", () => {
+      const [group] = buildManifest([booking({ id: "b1", hotel: "Baron Palace Sahl Hasheesh", start_time: "09:00:00" })], [], people, null);
+      expect(group.stops[0]).toMatchObject({ time: "09:00", timeSource: "booking", zone: null });
+    });
+
+    it("shows the zone in shared text", () => {
+      const [group] = buildManifest([booking({ id: "b1", hotel: "Baron Palace Sahl Hasheesh" })], [], people, zoneData);
+      expect(manifestText("2026-10-02", group)).toContain("07:15 · Baron Palace Sahl Hasheesh (Sahl Hasheesh)");
+    });
   });
 
   it("builds WhatsApp links with digits only", () => {

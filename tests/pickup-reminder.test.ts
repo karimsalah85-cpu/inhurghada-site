@@ -18,6 +18,13 @@ describe("pickup reminder time", () => {
     expect(resolvePickupTime(null, "09:15:00")).toBe("09:15");
   });
 
+  it("uses the zone's standard time between the assignment and the departure time", () => {
+    expect(resolvePickupTime(null, "09:15:00", "07:45:00")).toBe("07:45");
+    expect(resolvePickupTime("2026-10-02T05:30:00Z", "09:15:00", "07:45")).toBe("08:30");
+    expect(resolvePickupTime(null, "09:15:00", "bad")).toBe("09:15");
+    expect(resolvePickupTime(null, null, "07:45")).toBe("07:45");
+  });
+
   it("returns null when nothing is known", () => {
     expect(resolvePickupTime(undefined, null)).toBeNull();
     expect(resolvePickupTime("not a date", "")).toBeNull();
