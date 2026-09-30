@@ -95,4 +95,16 @@ describe("pickup manifest", () => {
     expect(whatsappLink("+20 100 222", "hi")).toBe("https://wa.me/20100222?text=hi");
     expect(whatsappLink(null, "hi there")).toBe("https://wa.me/?text=hi%20there");
   });
+
+  it("puts a compact requirements summary first in the stop notes", () => {
+    const [group] = buildManifest([
+      booking({ id: "b1", notes: "Birthday", guest_requirements: { nonSwimmers: 1, dietary: "Veg", certification: "open_water" } }),
+      booking({ id: "b2", reference: "DRS-2", guest_requirements: {} }),
+      booking({ id: "b3", reference: "DRS-3" }),
+    ], [{ booking_id: "b1", supplier_id: null, staff_member_id: null, assignment_type: "driver", pickup_time: null, status: "assigned", notes: "Wheelchair" }], people);
+    expect(group.stops.find((stop) => stop.bookingId === "b1")?.notes).toBe("1 non-swimmer · Diet: Veg · OW cert · Birthday · Wheelchair");
+    expect(group.stops.find((stop) => stop.bookingId === "b2")?.notes).toBe("");
+    expect(group.stops.find((stop) => stop.bookingId === "b3")?.notes).toBe("");
+    expect(manifestText("2026-10-02", group)).toContain("Note: 1 non-swimmer · Diet: Veg · OW cert · Birthday · Wheelchair");
+  });
 });

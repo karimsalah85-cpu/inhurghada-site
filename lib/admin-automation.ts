@@ -6,6 +6,8 @@ import { getGoogleAdsReport, googleAdsConfiguration, isDeveloperTokenNotApproved
 import { pickTemplate } from "@/lib/communication-template";
 import { runFinanceAutomation } from "@/lib/finance/automation";
 import { createZoneLookup, loadPickupZoneData, shortTime } from "@/lib/pickup-zones";
+import { requiresWaiver } from "@/lib/waiver";
+import { waiverUrl } from "@/lib/waiver-token";
 
 type Template = { id: string; event_key: string; channel: "email" | "whatsapp"; subject: string | null; body: string; locale: string };
 type Booking = { id: string; reference: string; customer_name: string; customer_email: string | null; phone: string; tour_name: string | null; tour_slug?: string | null; date: string | null; hotel: string | null; locale: string; start_time?: string | null; pickup_time?: string | null };
@@ -42,6 +44,12 @@ export function pickupLine(booking: Pick<Booking, "hotel" | "pickup_time">) {
   return `We will confirm the pickup time${booking.hotel ? ` for ${booking.hotel}` : ""} by WhatsApp.`;
 }
 
+/** Signed waiver link for diving bookings; empty for everything else (or when signing is not configured). */
+export function waiverLinkFor(booking: Pick<Booking, "reference" | "date" | "tour_slug">) {
+  if (!booking.reference || !requiresWaiver(booking.tour_slug)) return "";
+  try { return waiverUrl(booking.reference, booking.date); } catch { return ""; }
+}
+
 export function render(value: string, booking: Booking) {
   const site = process.env.NEXT_PUBLIC_SITE_URL || "https://dailyredsea.com";
   const reviewQuery = new URLSearchParams({ lang: booking.locale || "en" });
@@ -57,6 +65,7 @@ export function render(value: string, booking: Booking) {
     review_url: reviewUrl,
     pickup_time: booking.pickup_time || "",
     pickup_line: pickupLine(booking),
+    waiver_link: waiverLinkFor(booking),
   };
   return value.replace(/{{\s*([a-z_]+)\s*}}/g, (_, key: string) => replacements[key] ?? "");
 }
@@ -109,7 +118,7 @@ export async function runAdminAutomation() {
   const [{ data: templates, error: templateError }, { data: pickupBookings, error: pickupError }, { data: reviewBookings, error: reviewError }] = await Promise.all([
     supabase.from("communication_templates").select("id,event_key,channel,subject,body,locale").eq("active", true).in("event_key", ["pickup_reminder", "review_request"]),
     supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,tour_slug,date,hotel,locale,start_time").is("archived_at", null).eq("status", "confirmed").eq("date", dateOnly(tomorrow)),
-    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,date,hotel,locale").is("archived_at", null).eq("status", "completed").eq("date", dateOnly(yesterday)),
+    supabase.from("bookings").select("id,reference,customer_name,customer_email,phone,tour_name,tour_slug,date,hotel,locale").is("archived_at", null).eq("status", "completed").eq("date", dateOnly(yesterday)),
   ]);
   if (templateError || pickupError || reviewError) throw templateError || pickupError || reviewError;
   const pickupIds = (pickupBookings || []).map((booking) => booking.id);
