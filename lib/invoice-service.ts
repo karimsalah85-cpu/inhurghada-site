@@ -8,6 +8,7 @@ import { buildWhatsAppLink } from "@/lib/booking-service";
 import { pdfColors, pdfPage } from "@/lib/pdf/theme";
 import { createPdfDocument, renderPdfToBuffer } from "@/lib/pdf/render";
 import { renderQrCodePng } from "@/lib/pdf/qrcode";
+import { maxTicketTrips, ticketUrl } from "@/lib/ticket-token";
 import { resolveHeroImage } from "@/lib/pdf/hero-image";
 import { PdfFlow, stampPdfFooters } from "@/lib/pdf/layout";
 import {
@@ -80,6 +81,7 @@ export type BookingStatusPdfData = {
 
 const confirmationCopy = {
   en: {
+    ticket: "Ticket", tickets: "Trip tickets", ticketNote: "Each trip has its own QR code. Show it to your guide or driver on the day of that trip.",
     confirmation: "Booking confirmation", issued: "Issued", cash: "Cash on arrival", reference: "Booking reference",
     keepReference: "Keep this reference for support.", guest: "Guest details", guestName: "Guest name", pending: "To be confirmed",
     experience: "Experience details", date: "Experience date", time: "Departure time", travelers: "Travelers", pickup: "Pickup / meeting point",
@@ -91,6 +93,7 @@ const confirmationCopy = {
     metaLabels: ["DATE", "DEPARTURE", "TRAVELERS", "MEETING POINT"],
   },
   de: {
+    ticket: "Ticket", tickets: "Ausflugstickets", ticketNote: "Jeder Ausflug hat einen eigenen QR-Code. Zeige ihn am Tag des Ausflugs deinem Guide oder Fahrer.",
     confirmation: "Buchungsbestätigung", issued: "Ausgestellt", cash: "Barzahlung vor Ort", reference: "Buchungsnummer",
     keepReference: "Bewahre diese Nummer für Rückfragen auf.", guest: "Gastdaten", guestName: "Name", pending: "Wird noch bestätigt",
     experience: "Erlebnisdetails", date: "Datum", time: "Abfahrtszeit", travelers: "Reisende", pickup: "Abholung / Treffpunkt",
@@ -107,6 +110,7 @@ const confirmationCopy = {
     metaLabels: ["DATUM", "ABFAHRT", "REISENDE", "TREFFPUNKT"],
   },
   ru: {
+    ticket: "Билет", tickets: "Билеты на поездки", ticketNote: "У каждой поездки свой QR-код. Покажите его гиду или водителю в день поездки.",
     confirmation: "Подтверждение бронирования", issued: "Дата выдачи", cash: "Оплата наличными на месте", reference: "Номер бронирования",
     keepReference: "Сохраните этот номер для связи с поддержкой.", guest: "Данные гостя", guestName: "Имя гостя", pending: "Будет подтверждено",
     experience: "Детали поездки", date: "Дата", time: "Время отправления", travelers: "Участники", pickup: "Трансфер / место встречи",
@@ -123,6 +127,7 @@ const confirmationCopy = {
     metaLabels: ["ДАТА", "ОТПРАВЛЕНИЕ", "УЧАСТНИКИ", "МЕСТО ВСТРЕЧИ"],
   },
   ar: {
+    ticket: "تذكرة", tickets: "تذاكر الرحلات", ticketNote: "لكل رحلة رمز QR خاص بها. أظهره للمرشد أو السائق في يوم الرحلة.",
     confirmation: "تأكيد الحجز", issued: "تاريخ الإصدار", cash: "الدفع نقداً عند الوصول", reference: "رقم الحجز",
     keepReference: "احتفظ بهذا الرقم عند التواصل مع الدعم.", guest: "بيانات الضيف", guestName: "اسم الضيف", pending: "سيتم التأكيد",
     experience: "تفاصيل الرحلة", date: "تاريخ الرحلة", time: "وقت المغادرة", travelers: "المسافرون", pickup: "الاستلام / نقطة التجمع",
@@ -139,6 +144,7 @@ const confirmationCopy = {
     metaLabels: ["التاريخ", "المغادرة", "المسافرون", "نقطة التجمع"],
   },
   pl: {
+    ticket: "Bilet", tickets: "Bilety na wycieczki", ticketNote: "Każda wycieczka ma własny kod QR. Pokaż go przewodnikowi lub kierowcy w dniu wycieczki.",
     confirmation: "Potwierdzenie rezerwacji", issued: "Wystawiono", cash: "Płatność gotówką na miejscu", reference: "Numer rezerwacji",
     keepReference: "Zachowaj ten numer do kontaktu z obsługą.", guest: "Dane gościa", guestName: "Imię i nazwisko", pending: "Do potwierdzenia",
     experience: "Szczegóły wycieczki", date: "Data", time: "Godzina wyjazdu", travelers: "Uczestnicy", pickup: "Odbiór / miejsce spotkania",
@@ -155,6 +161,7 @@ const confirmationCopy = {
     metaLabels: ["DATA", "WYJAZD", "UCZESTNICY", "MIEJSCE ZBIÓRKI"],
   },
   zh: {
+    ticket: "票券", tickets: "行程票券", ticketNote: "每个行程都有独立的二维码。请在该行程当天向导游或司机出示。",
     confirmation: "预订确认单", issued: "签发日期", cash: "到场现金支付", reference: "预订编号",
     keepReference: "联系客服时请保留此编号。", guest: "客人信息", guestName: "客人姓名", pending: "待确认",
     experience: "行程详情", date: "行程日期", time: "出发时间", travelers: "出行人数", pickup: "接送 / 集合地点",
@@ -175,8 +182,9 @@ const confirmationCopy = {
 /**
  * A self-contained, branded PDF voucher with embedded Unicode fonts so the
  * customer's booking language and entered details survive intact. The
- * booking-reference card uses the ticket/boarding-pass motif (a QR code that
- * opens a pre-filled WhatsApp support chat) — see lib/pdf/components.ts.
+ * booking-reference card uses the ticket/boarding-pass motif. Each trip gets
+ * its own signed QR code that opens the live ticket page (lib/ticket-token.ts);
+ * multi-trip bookings get one ticket row per trip on a following page.
  */
 export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const locale = bookingLocale(invoice.locale);
@@ -187,7 +195,9 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   const quantity = Math.max(Number(invoice.quantity) || 1, 1);
   const issuedDate = new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale, { day: "2-digit", month: "short", year: "numeric" }).format(invoice.issuedAt);
   const rtl = locale === "ar";
-  const qrPng = await renderQrCodePng(buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${invoice.reference}`));
+  const tripCount = Math.min(Math.max(invoice.tripLines?.length || 1, 1), maxTicketTrips);
+  const ticketQrs = await Promise.all(Array.from({ length: tripCount }, (_, index) => renderQrCodePng(ticketQrValue(invoice.reference, index))));
+  const qrPng = ticketQrs[0];
   const heroImage = resolveHeroImage(invoice.tourSlug, invoice.itemName);
 
   const doc = createPdfDocument({ title: `${t.confirmation} - ${invoice.reference}`, locale, createdAt: invoice.issuedAt });
@@ -229,7 +239,7 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
     drawPdfInfoItem(doc, { ...item, x: colX, y: metaY, width: metaColWidth, rtl });
   });
 
-  // Stub: reference, QR (opens a pre-filled WhatsApp chat), payment status, total.
+  // Stub: reference, trip-1 ticket QR (opens the live ticket page), payment status, total.
   const stubPad = 18;
   const stubInnerX = ticket.stubX + stubPad;
   const stubInnerWidth = ticket.stubWidth - stubPad * 2;
@@ -238,7 +248,9 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   stubY += 34;
   const qrSize = Math.min(76, stubInnerWidth);
   drawQrCodeBlock(doc, qrPng, stubInnerX + (stubInnerWidth - qrSize) / 2, stubY, qrSize);
-  stubY += qrSize + 16;
+  stubY += qrSize + 6;
+  pdfWrite(doc, tripCount > 1 ? `${t.ticket} 1 / ${tripCount}` : t.ticket, stubInnerX, stubY, stubInnerWidth, { size: 6.5, color: "#9FC3D6", align: "center", rtl, letterSpacing: 0.4 });
+  stubY += 10;
   drawStatusBadge(doc, t.cash, stubInnerX, stubY, stubInnerWidth, 22, "positive", rtl);
   stubY += 34;
   pdfWrite(doc, t.total, stubInnerX, stubY, stubInnerWidth, { size: 8, color: "#9FC3D6", rtl, letterSpacing: 0.3 });
@@ -260,16 +272,30 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
   doc.link(supportX, guestY, supportWidth, cardHeight, buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${invoice.reference}`));
   pdfWrite(doc, t.thanks, margin, guestY + cardHeight + 16, contentWidth, { size: 8, color: pdfColors.muted, align: "center", rtl });
 
-  // Preserve every itinerary entry from multi-trip bookings on flow-managed pages.
+  // Multi-trip bookings: one ticket row per trip, each with its own scannable QR.
   if (invoice.tripLines && invoice.tripLines.length > 1) {
-    const itinerary = new PdfFlow(doc, { header: { variant: "policy", title: t.metaLabels[0], rtl }, bottomMargin: 88 });
+    const itinerary = new PdfFlow(doc, { header: { variant: "policy", title: t.tickets, rtl }, bottomMargin: 88 });
     itinerary.newPage();
-    for (const line of invoice.tripLines) {
-      const height = pdfTextHeight(doc, line, contentWidth, 11, rtl, 3) + 20;
-      itinerary.ensure(height);
-      pdfWrite(doc, line, margin, itinerary.y, contentWidth, { size: 11, rtl, wrap: true, lineGap: 3 });
-      itinerary.advance(height);
-    }
+    const rowQr = 84;
+    const textWidth = contentWidth - rowQr - 40;
+    invoice.tripLines.forEach((line, index) => {
+      const qr = ticketQrs[index];
+      const height = Math.max(pdfTextHeight(doc, line, textWidth, 11, rtl, 3) + 34, rowQr) + 24;
+      itinerary.ensure(height + 12);
+      const top = itinerary.y;
+      doc.save().roundedRect(margin, top, contentWidth, height, 10).fillAndStroke("#ffffff", "#dbe4e8").restore();
+      const textX = rtl ? margin + 16 : margin + 16;
+      const qrX = rtl ? margin + contentWidth - rowQr - 12 : margin + contentWidth - rowQr - 12;
+      const labelX = rtl ? margin + rowQr + 24 : textX;
+      pdfWrite(doc, `${t.ticket} ${index + 1} / ${invoice.tripLines!.length}`, labelX, top + 14, textWidth, { size: 8, color: pdfColors.coral, rtl, bold: true, letterSpacing: 0.8 });
+      pdfWrite(doc, line, labelX, top + 30, textWidth, { size: 11, color: pdfColors.navy, rtl, wrap: true, lineGap: 3 });
+      if (qr) {
+        drawQrCodeBlock(doc, qr, rtl ? margin + 12 : qrX, top + (height - rowQr) / 2, rowQr);
+        doc.link(rtl ? margin + 12 : qrX, top + (height - rowQr) / 2, rowQr, rowQr, ticketQrValue(invoice.reference, index));
+      }
+      itinerary.advance(height + 12);
+    });
+    pdfWrite(doc, t.ticketNote, margin, itinerary.y + 4, contentWidth, { size: 8, color: pdfColors.muted, rtl, wrap: true, lineGap: 2 });
   }
 
   // --- Page 2: compact header + five policy rows (not paragraphs) + branded footer ---
@@ -291,6 +317,11 @@ export async function createInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
 
   doc.end();
   return renderPdfToBuffer(doc);
+}
+
+/** Signed ticket URL; falls back to the WhatsApp support chat if ticket signing is not configured. */
+function ticketQrValue(reference: string, tripIndex: number) {
+  try { return ticketUrl(reference, tripIndex); } catch { return buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${reference}`); }
 }
 
 function destinationCue(itemName: string) {

@@ -10,6 +10,9 @@ import {
   sendWhatsAppMessage,
 } from "@/lib/booking-service";
 import { createInvoicePdf } from "@/lib/invoice-service";
+import { renderQrCodePng } from "@/lib/pdf/qrcode";
+import { maxTicketTrips, ticketUrl } from "@/lib/ticket-token";
+import type { EmailAttachment } from "@/lib/booking-service";
 import { rateLimitShared } from "@/lib/rate-limit";
 import { validateBookingInput } from "@/lib/booking-validation";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
@@ -209,6 +212,11 @@ export async function POST(request: NextRequest) {
       tourSlug: body.tourSlug || undefined,
     });
     const confirmationAttachment = { filename: `daily-red-sea-booking-${reference}.pdf`, content: confirmationPdf };
+    const ticketLabels = (tripItems?.length ? tripItems.map((item, index) => {
+      const source = tours.find((tour) => tour.slug === body.cartItems[index]?.tourSlug);
+      return `${source ? localizeTour(source, locale).title : item.tourName} · ${item.date}`;
+    }) : [localizedItemName]).slice(0, maxTicketTrips);
+    const customerTickets = await buildEmailTickets(reference, ticketLabels);
 
     const booking = findBooking(reference) || addBooking({
       reference,
@@ -239,8 +247,10 @@ export async function POST(request: NextRequest) {
             locale, customerName, reference, itemName: localizedItemName, date: body.date,
             time: body.time || undefined, travelers: localizedGuestSummary,
             pickup: pickupOrMeetingPoint || undefined, amount, currency,
+            tickets: customerTickets.tickets,
+            whatsappUrl: buildWhatsAppLink(bookingWhatsApp, `Daily Red Sea booking ${reference}`),
           });
-          return sendBookingEmail(customerEmail, customerConfirmation.subject, customerConfirmation.html, confirmationAttachment);
+          return sendBookingEmail(customerEmail, customerConfirmation.subject, customerConfirmation.html, [confirmationAttachment, ...customerTickets.attachments]);
         })
         : Promise.resolve({ success: false, reason: "no-customer-email" }),
     ]);
@@ -264,6 +274,22 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Booking submission failed", error);
     return bookingJson({ success: false, error: "Booking submission failed" }, { status: 500 });
+  }
+}
+
+/** One signed ticket QR per trip, embedded inline (cid) so it shows without loading remote images. */
+async function buildEmailTickets(reference: string, labels: string[]) {
+  try {
+    const tickets = await Promise.all(labels.map(async (label, index) => {
+      const url = ticketUrl(reference, index);
+      const cid = `ticket-${index + 1}@dailyredsea.com`;
+      const attachment: EmailAttachment = { filename: `ticket-${index + 1}.png`, content: await renderQrCodePng(url, 264), cid, contentType: "image/png" };
+      return { ticket: { label, url, imageSrc: `cid:${cid}` }, attachment };
+    }));
+    return { tickets: tickets.map((item) => item.ticket), attachments: tickets.map((item) => item.attachment) };
+  } catch (error) {
+    console.error("Ticket QR generation failed", error);
+    return { tickets: [], attachments: [] };
   }
 }
 

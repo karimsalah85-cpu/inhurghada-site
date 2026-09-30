@@ -4,7 +4,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 const publicRouteRoots = new Set([
   "about", "admin", "api", "blog", "booking", "cart", "checkout", "contact",
   "destinations", "faq", "hurghada", "jeddah", "marsa-alam", "privacy-policy", "referrals", "reviews",
-  "terms-conditions", "tours", "transfers",
+  "terms-conditions", "ticket", "tours", "transfers",
 ]);
 
 const publicFiles = new Set(["/favicon.ico", "/llms.txt", "/robots.txt", "/sitemap.xml", "/manifest.webmanifest"]);
@@ -41,6 +41,8 @@ export function isKnownApplicationPath(pathname: string) {
   // There are no dynamic routes below the transfer hub. Reject unknown nested
   // paths before App Router streaming can turn notFound() into an HTTP 200.
   if (parts[0] === "transfers") return parts.length === 1;
+  // Signed trip tickets live only at /ticket/<token>, without a locale prefix.
+  if (parts[0] === "ticket") return !hasLocalePrefix && parts.length === 2;
   return true;
 }
 

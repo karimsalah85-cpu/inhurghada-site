@@ -178,7 +178,11 @@ export async function sendWhatsAppMessage(phone: string, body: string) {
 /** Customer communications are BCC'd to the shared inbox so staff keep a copy. */
 export const customerEmailBcc = customerEmailSender.email;
 
-export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: { filename: string; content: Buffer }, options: { bcc?: boolean } = {}) {
+/** `cid` marks an inline image referenced from the HTML as `src="cid:<cid>"`. */
+export type EmailAttachment = { filename: string; content: Buffer; cid?: string; contentType?: string };
+
+export async function sendBookingEmail(toEmail: string | undefined, subject: string, html: string, attachment?: EmailAttachment | EmailAttachment[], options: { bcc?: boolean } = {}) {
+  const attachments = attachment ? (Array.isArray(attachment) ? attachment : [attachment]) : [];
   const environment = process.env as Record<string, string | undefined>;
   const smtpAppPassword = normalizeGoogleAppPassword(environment.GMAIL_SMTP_APP_PASSWORD);
   const apiKey = process.env.RESEND_API_KEY;
@@ -207,7 +211,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
         bcc,
         subject,
         html: deliveredHtml,
-        attachments: attachment ? [attachment] : undefined,
+        attachments: attachments.length ? attachments.map(({ filename, content, cid, contentType }) => ({ filename, content, ...(cid ? { cid, contentDisposition: "inline" as const } : {}), ...(contentType ? { contentType } : {}) })) : undefined,
       });
 
       return { success: true, data: { messageId: result.messageId } };
@@ -245,7 +249,7 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
       ...(bcc ? { bcc: [bcc] } : {}),
       subject,
       html: deliveredHtml,
-      ...(attachment ? { attachments: [{ filename: attachment.filename, content: attachment.content.toString("base64") }] } : {}),
+      ...(attachments.length ? { attachments: attachments.map(({ filename, content, cid, contentType }) => ({ filename, content: content.toString("base64"), ...(cid ? { content_id: cid } : {}), ...(contentType ? { content_type: contentType } : {}) })) } : {}),
     }),
   });
 
