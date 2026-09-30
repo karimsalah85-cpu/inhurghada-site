@@ -36,4 +36,16 @@ describe("pickup reminder time", () => {
     const text = render("Tomorrow: {{tour_name}}. {{pickup_line}} ({{pickup_time}})", { ...booking, pickup_time: "08:30" });
     expect(text).toBe("Tomorrow: Orange Bay. Your pickup is at 08:30 from Steigenberger. Please be ready in the lobby 10 minutes early. (08:30)");
   });
+
+  it("fills {{waiver_link}} only for diving bookings", () => {
+    const previous = process.env.TICKET_SIGNING_SECRET;
+    process.env.TICKET_SIGNING_SECRET = "test-secret";
+    try {
+      expect(render("Sign: {{waiver_link}}", { ...booking, tour_slug: "orange-bay" })).toBe("Sign: ");
+      expect(render("Sign: {{waiver_link}}", booking)).toBe("Sign: ");
+      expect(render("Sign: {{waiver_link}}", { ...booking, tour_slug: "full-day-diving" })).toMatch(/^Sign: https:\/\/dailyredsea\.com\/waiver\/DRS-1\.[0-9a-z]+\.[A-Za-z0-9_-]{27}$/);
+    } finally {
+      if (previous === undefined) delete process.env.TICKET_SIGNING_SECRET; else process.env.TICKET_SIGNING_SECRET = previous;
+    }
+  });
 });

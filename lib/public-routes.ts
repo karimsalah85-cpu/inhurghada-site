@@ -4,7 +4,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 const publicRouteRoots = new Set([
   "about", "admin", "api", "blog", "booking", "cart", "checkout", "contact",
   "destinations", "faq", "hurghada", "jeddah", "marsa-alam", "privacy-policy", "referrals", "reviews",
-  "supplier", "terms-conditions", "ticket", "tours", "transfers",
+  "supplier", "terms-conditions", "ticket", "tours", "transfers", "waiver",
 ]);
 
 const publicFiles = new Set(["/favicon.ico", "/llms.txt", "/robots.txt", "/sitemap.xml", "/manifest.webmanifest"]);
@@ -45,6 +45,8 @@ export function isKnownApplicationPath(pathname: string) {
   if (parts[0] === "ticket") return !hasLocalePrefix && parts.length === 2;
   // Signed supplier booking-request links live only at /supplier/<token>.
   if (parts[0] === "supplier") return !hasLocalePrefix && parts.length === 2;
+  // Signed diving-waiver links live only at /waiver/<token>.
+  if (parts[0] === "waiver") return !hasLocalePrefix && parts.length === 2;
   return true;
 }
 

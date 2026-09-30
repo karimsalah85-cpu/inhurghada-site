@@ -1,3 +1,5 @@
+import { compactRequirementsSummary } from "@/lib/guest-requirements";
+
 export type ManifestBooking = {
   id: string;
   reference: string;
@@ -18,6 +20,8 @@ export type ManifestBooking = {
   payment_status: string | null;
   amount: number | null;
   currency: string | null;
+  /** bookings.guest_requirements; absent until the 20261001110000 migration is applied. */
+  guest_requirements?: unknown;
 };
 export type ManifestAssignment = { booking_id: string; supplier_id: string | null; staff_member_id: string | null; assignment_type: string | null; pickup_time: string | null; status: string | null; notes: string | null };
 export type ManifestPerson = { id: string; name: string; phone: string | null; whatsapp?: string | null; kind: "supplier" | "staff"; role?: string | null };
@@ -84,7 +88,7 @@ export function buildManifest(bookings: ManifestBooking[], assignments: Manifest
       phone: booking.phone?.trim() || "",
       tour: booking.tour_name?.trim() || booking.tour_slug || "Service",
       ...counts,
-      notes: [booking.notes?.trim(), extraNotes].filter(Boolean).join(" · "),
+      notes: [compactRequirementsSummary(booking.guest_requirements), booking.notes?.trim(), extraNotes].filter(Boolean).join(" · "),
       cashToCollect: booking.payment_status !== "paid" && Number(booking.amount) > 0 ? `${Number(booking.amount).toFixed(2)} ${booking.currency || "USD"}` : null,
       status: booking.status || "new",
     };
