@@ -5,7 +5,7 @@ import { CalendarRange, CloudRain, RotateCcw, Users } from "lucide-react";
 import { SEA_CATEGORIES, type BulkAvailabilityAction } from "@/lib/availability-bulk";
 
 type TourOption = { slug: string; title: string; category: string; destination: string };
-type Result = { preview?: boolean; updated: number; created: number; overbookedCount: number; overbooked: Array<{ tour_slug: string; service_date: string; reserved: number; capacity: number }> };
+type Result = { preview?: boolean; updated: number; created: number; stillClosed?: number; unknownMultiTrip?: string[]; overbookedCount: number; overbooked: Array<{ tour_slug: string; service_date: string; reserved: number; capacity: number }> };
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
@@ -86,6 +86,8 @@ export default function AvailabilityBulkEditor({ tours }: { tours: TourOption[] 
         {error ? <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm font-semibold text-rose-800">{error}</p> : null}
         {result && (!result.preview || previewCurrent) ? <div role="status" className={`rounded-xl p-3 text-sm ${result.preview ? "bg-cyan-50 text-cyan-950" : "bg-emerald-50 text-emerald-900"}`}>
           <p className="font-bold">{result.preview ? "This will change" : "Done:"} {result.updated} existing date{result.updated === 1 ? "" : "s"} and add {result.created} new.</p>
+          {result.stillClosed ? <p className="mt-2 text-xs">{result.stillClosed} closed date{result.stillClosed === 1 ? " stays" : "s stay"} closed. Use Reopen to open {result.stillClosed === 1 ? "it" : "them"}.</p> : null}
+          {result.unknownMultiTrip?.length ? <p className="mt-2 text-xs font-semibold text-amber-800">Could not read the trips in multi-trip booking{result.unknownMultiTrip.length === 1 ? "" : "s"} {result.unknownMultiTrip.join(", ")} — their guests are not counted. Check those dates by hand.</p> : null}
           {result.overbookedCount ? <p className="mt-2 font-semibold text-amber-800">{result.overbookedCount} date{result.overbookedCount === 1 ? " already has" : "s already have"} more guests than {capacity || 0} seats — no bookings are cancelled, but no new ones will be accepted there. {result.overbooked.slice(0, 5).map((row) => `${row.tour_slug} ${row.service_date} (${row.reserved})`).join(", ")}{result.overbookedCount > 5 ? "…" : ""}</p> : null}
         </div> : null}
         <div className="flex gap-2"><button type="button" disabled={busy || !selected.size} onClick={() => void submit(true)} className="flex-1 rounded-xl border border-slate-300 bg-white p-3 text-sm font-bold text-slate-800 disabled:opacity-50">Preview</button><button type="button" disabled={busy || !selected.size || !previewCurrent} onClick={() => void submit(false)} className="flex-1 rounded-xl bg-cyan-700 p-3 text-sm font-bold text-white disabled:opacity-50" title={!previewCurrent ? "Preview first" : undefined}>{busy ? "Working…" : "Apply"}</button></div>

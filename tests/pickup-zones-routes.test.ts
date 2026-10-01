@@ -21,7 +21,7 @@ vi.mock("@/utils/supabase/server", () => ({
       let op = "select";
       const result = () => mocks.results[`${table}:${op}`] ?? mocks.results[table] ?? { data: [], error: null };
       const chain: Record<string, unknown> = {};
-      for (const method of ["select", "eq", "neq", "is", "not", "gte", "in", "order", "limit"]) chain[method] = () => chain;
+      for (const method of ["select", "eq", "neq", "is", "not", "gte", "in", "order", "limit", "range"]) chain[method] = () => chain;
       for (const method of ["insert", "update", "upsert", "delete"]) chain[method] = (value?: unknown) => { op = method; mocks.writes.push({ table, op: method, value }); return chain; };
       chain.single = async () => result();
       chain.maybeSingle = async () => result();

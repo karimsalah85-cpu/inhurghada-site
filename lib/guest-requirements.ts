@@ -156,11 +156,15 @@ export function compactRequirementsSummary(value: unknown) {
 }
 
 /** Label/value rows for a supplier: full text, never contact details (emails are redacted by the caller's rules). */
-export function requirementRows(value: unknown): [label: string, value: string][] {
+/**
+ * `medical: "summary"` replaces the medical free text with a neutral pointer, for sharing with
+ * suppliers: health details are sensitive and are only sent when the admin explicitly ticks it.
+ */
+export function requirementRows(value: unknown, { medical = "full" }: { medical?: "full" | "summary" } = {}): [label: string, value: string][] {
   const requirements = readGuestRequirements(value);
   const rows: [string, string][] = [];
   if (requirements.nonSwimmers) rows.push(["Non-swimmers", String(requirements.nonSwimmers)]);
-  if (requirements.medical) rows.push(["Medical", requirements.medical]);
+  if (requirements.medical) rows.push(["Medical", medical === "full" ? requirements.medical : "Yes — ask the Daily Red Sea office for details"]);
   if (requirements.certification) {
     rows.push(["Diving certification", `${certificationLabels[requirements.certification]}${requirements.certificationNumber ? ` (#${requirements.certificationNumber})` : ""}`]);
   }

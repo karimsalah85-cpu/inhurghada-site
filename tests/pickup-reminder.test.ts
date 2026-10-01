@@ -11,23 +11,17 @@ const booking = { id: "b1", reference: "DRS-1", customer_name: "Anna", customer_
 
 describe("pickup reminder time", () => {
   it("prefers the assigned pickup time, shown in Cairo time", () => {
-    expect(resolvePickupTime("2026-10-02T05:30:00Z", "09:00:00")).toBe("08:30");
+    expect(resolvePickupTime("2026-10-02T05:30:00Z", "07:45")).toBe("08:30");
   });
 
-  it("falls back to the booking departure time", () => {
-    expect(resolvePickupTime(null, "09:15:00")).toBe("09:15");
+  it("uses the hotel zone's standard time when nothing is assigned", () => {
+    expect(resolvePickupTime(null, "07:45:00")).toBe("07:45");
+    expect(resolvePickupTime(null, "bad")).toBeNull();
   });
 
-  it("uses the zone's standard time between the assignment and the departure time", () => {
-    expect(resolvePickupTime(null, "09:15:00", "07:45:00")).toBe("07:45");
-    expect(resolvePickupTime("2026-10-02T05:30:00Z", "09:15:00", "07:45")).toBe("08:30");
-    expect(resolvePickupTime(null, "09:15:00", "bad")).toBe("09:15");
-    expect(resolvePickupTime(null, null, "07:45")).toBe("07:45");
-  });
-
-  it("returns null when nothing is known", () => {
+  it("never offers the departure time as a pickup time", () => {
     expect(resolvePickupTime(undefined, null)).toBeNull();
-    expect(resolvePickupTime("not a date", "")).toBeNull();
+    expect(resolvePickupTime("not a date", undefined)).toBeNull();
   });
 
   it("writes a concrete pickup line when the time is known", () => {

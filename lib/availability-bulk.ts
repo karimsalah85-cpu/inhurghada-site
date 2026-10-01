@@ -62,6 +62,8 @@ export type BulkPlan = {
   updates: Array<{ id: string; patch: Record<string, unknown> }>;
   inserts: Array<Record<string, unknown>>;
   overbooked: Array<{ tour_slug: string; service_date: string; reserved: number; capacity: number }>;
+  /** Closed dates in range that a "set seats" change leaves closed. */
+  stillClosed: number;
 };
 
 /**
@@ -83,10 +85,11 @@ export function planBulkAvailability(input: BulkAvailabilityInput, existing: Exi
     loadByKey.set(key, (loadByKey.get(key) || 0) + Math.max(0, Number(booking.guests || 0)));
   }
   const now = new Date().toISOString();
-  const plan: BulkPlan = { updates: [], inserts: [], overbooked: [] };
+  const plan: BulkPlan = { updates: [], inserts: [], overbooked: [], stillClosed: 0 };
   const patchFor = (): Record<string, unknown> => {
     const base: Record<string, unknown> = { updated_at: now };
-    if (input.action === "capacity") { base.capacity = input.capacity ?? null; base.blocked = false; }
+    // Setting seats never reopens a closed date (e.g. a weather closure inside the season range).
+    if (input.action === "capacity") base.capacity = input.capacity ?? null;
     if (input.action === "close") base.blocked = true;
     if (input.action === "reopen") base.blocked = false;
     if (input.note) base.notes = input.note;
@@ -98,6 +101,7 @@ export function planBulkAvailability(input: BulkAvailabilityInput, existing: Exi
     if (rows?.length) {
       for (const row of rows) {
         plan.updates.push({ id: row.id, patch: patchFor() });
+        if (input.action === "capacity" && row.blocked) plan.stillClosed += 1;
         if (input.action === "capacity" && input.capacity != null && row.reserved > input.capacity) plan.overbooked.push({ tour_slug, service_date, reserved: row.reserved, capacity: input.capacity });
       }
       continue;
@@ -105,8 +109,36 @@ export function planBulkAvailability(input: BulkAvailabilityInput, existing: Exi
     if (input.action === "reopen") continue; // nothing to reopen: a date without a row is already open
     if (input.action === "capacity" && input.capacity == null) continue; // unlimited is the default already
     const reserved = loadByKey.get(key) || 0;
-    plan.inserts.push({ tour_slug, service_date, start_time: null, reserved, currency: "USD", ...patchFor(), capacity: input.action === "capacity" ? input.capacity : null });
+    plan.inserts.push({ tour_slug, service_date, start_time: null, reserved, currency: "USD", blocked: false, ...patchFor(), capacity: input.action === "capacity" ? input.capacity : null });
     if (input.action === "capacity" && input.capacity != null && reserved > input.capacity) plan.overbooked.push({ tour_slug, service_date, reserved, capacity: input.capacity });
   }
   return plan;
+}
+
+type MultiTripBooking = { reference: string; pricing_snapshot: unknown };
+
+/**
+ * Multi-trip bookings are saved under tour_slug "multi-trip"; each leg is only in the pricing
+ * snapshot (name, date, participants). Legs are matched back to tours by title. Bookings whose
+ * legs can't be read are returned as `unknown` so the admin is warned rather than under-counting.
+ */
+export function multiTripLoads(bookings: MultiTripBooking[], slugByTitle: Map<string, string>, range: { from: string; to: string }) {
+  const loads: BookingLoad[] = [];
+  const unknown: string[] = [];
+  for (const booking of bookings) {
+    const trips = (booking.pricing_snapshot as { trips?: unknown } | null)?.trips;
+    if (!Array.isArray(trips) || !trips.length) { unknown.push(booking.reference); continue; }
+    let readable = true;
+    for (const trip of trips as Array<{ name?: unknown; date?: unknown; guests?: unknown; participants?: { adults?: unknown; youth?: unknown; infants?: unknown } }>) {
+      const slug = typeof trip.name === "string" ? slugByTitle.get(trip.name.trim().toLowerCase()) : undefined;
+      const date = typeof trip.date === "string" ? trip.date : null;
+      if (!slug || !date) { readable = false; continue; }
+      if (date < range.from || date > range.to) continue;
+      const participants = trip.participants || {};
+      const places = Number(participants.adults || 0) + Number(participants.youth || 0) + Number(participants.infants || 0) || Number(trip.guests || 0);
+      loads.push({ tour_slug: slug, date, guests: places });
+    }
+    if (!readable) unknown.push(booking.reference);
+  }
+  return { loads, unknown };
 }

@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { findUnmatchedHotels, isMissingTableError, type HotelRow } from "@/lib/pickup-zones";
 import { json, migrationRequired, pickupZonesAccess } from "@/lib/pickup-zones-admin";
 import { pickupTours } from "@/lib/pickup-zone-tours";
+import { fetchAllPages } from "@/lib/supabase-paging";
 
 const UNMATCHED_LOOKBACK_DAYS = 180;
 
@@ -13,10 +14,10 @@ export async function GET(request: NextRequest) {
   const { supabase } = access;
   const since = new Date(Date.now() - UNMATCHED_LOOKBACK_DAYS * 86_400_000).toISOString().slice(0, 10);
   const [zones, hotels, times, bookings] = await Promise.all([
-    supabase.from("pickup_zones").select("id,name,destination,notes,active,created_at,updated_at").order("destination").order("name").limit(1000),
-    supabase.from("hotels").select("id,name,normalized_name,aliases,zone_id,active,created_at,updated_at").order("name").limit(10_000),
-    supabase.from("zone_pickup_times").select("zone_id,tour_slug,pickup_time").limit(20_000),
-    supabase.from("bookings").select("hotel,date").is("archived_at", null).neq("status", "cancelled").gte("date", since).not("hotel", "is", null).limit(20_000),
+    fetchAllPages((from, to) => supabase.from("pickup_zones").select("id,name,destination,notes,active,created_at,updated_at").order("destination").order("name").order("id").range(from, to)),
+    fetchAllPages((from, to) => supabase.from("hotels").select("id,name,normalized_name,aliases,zone_id,active,created_at,updated_at").order("name").order("id").range(from, to)),
+    fetchAllPages((from, to) => supabase.from("zone_pickup_times").select("zone_id,tour_slug,pickup_time").order("id").range(from, to)),
+    fetchAllPages((from, to) => supabase.from("bookings").select("hotel,date").is("archived_at", null).neq("status", "cancelled").gte("date", since).not("hotel", "is", null).order("id").range(from, to)),
   ]);
   const missing = [zones.error, hotels.error, times.error].find((error) => isMissingTableError(error));
   if (missing) return migrationRequired();

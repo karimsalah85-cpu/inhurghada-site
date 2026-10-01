@@ -21,7 +21,7 @@ export async function loadWaiverBooking(database: SupabaseClient, reference: str
     .eq("reference", reference).maybeSingle();
   if (error || !booking || !requiresWaiver(booking.tour_slug)) return null;
   const { data: rows, error: waiverError } = await database.from("booking_waivers")
-    .select("participant_name,signed_at").eq("booking_id", booking.id).order("signed_at");
+    .select("participant_name,signed_at").eq("booking_id", booking.id).is("voided_at", null).order("signed_at");
   return {
     id: booking.id,
     reference: booking.reference,

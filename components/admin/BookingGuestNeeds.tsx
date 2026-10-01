@@ -7,7 +7,7 @@ import {
 
 type WaiverSummary = {
   id: string; participant_name: string; date_of_birth: string | null; certification: string | null; signature_name: string;
-  signed_at: string; waiver_version: string; photo_consent: boolean; medical_flagged: boolean; medical_yes: string[];
+  signed_at: string; waiver_version: string; photo_consent: boolean; medical_flagged: boolean; medical_yes: string[]; voided_at?: string | null; void_reason?: string | null;
 };
 type WaiverPayload =
   | { required: false }
@@ -35,6 +35,7 @@ export default function BookingGuestNeeds({ bookingId, requirements, migrated }:
   const [waivers, setWaivers] = useState<WaiverPayload | null>(null);
   const [waiverError, setWaiverError] = useState("");
 
+  const [reload, setReload] = useState(0);
   useEffect(() => {
     let active = true;
     fetch(`/api/admin/bookings/${bookingId}/waivers`, { cache: "no-store" })
@@ -42,7 +43,18 @@ export default function BookingGuestNeeds({ bookingId, requirements, migrated }:
       .then((data) => { if (active) setWaivers(data); })
       .catch((error) => { if (active) setWaiverError(error instanceof Error ? error.message : "Waivers could not be loaded."); });
     return () => { active = false; };
-  }, [bookingId]);
+  }, [bookingId, reload]);
+
+  async function voidWaiver(waiverId: string, name: string) {
+    const reason = window.prompt(`Void the signature for ${name}? The diver will be able to sign again.\n\nReason:`);
+    if (!reason || reason.trim().length < 3) return;
+    setMessage(null);
+    const response = await fetch(`/api/admin/bookings/${bookingId}/waivers`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ waiverId, reason }) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) { setMessage({ tone: "error", text: data.error || "Could not void this signature." }); return; }
+    setMessage({ tone: "ok", text: `Signature for ${name} voided.` });
+    setReload((value) => value + 1);
+  }
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
@@ -99,7 +111,7 @@ export default function BookingGuestNeeds({ bookingId, requirements, migrated }:
       <div className="flex flex-wrap items-center gap-2">
         <b className="text-sm">Diving waiver</b>
         {waivers.pending ? <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-bold text-slate-700">Database upgrade pending</span>
-          : <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${waivers.signed >= waivers.needed && waivers.needed > 0 ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{waivers.label}</span>}
+          : <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${waivers.signed >= waivers.needed ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{waivers.label}</span>}
         {!waivers.pending && waivers.waivers.some((w) => w.medical_flagged) ? <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-800"><Stethoscope size={14} aria-hidden="true" />Medical flag — doctor&apos;s clearance needed</span> : null}
       </div>
       {waivers.template_notice ? <p className="mt-2 rounded-lg bg-amber-100 p-2 text-xs font-semibold text-amber-900">⚠ {waivers.template_notice}</p> : null}
@@ -107,8 +119,8 @@ export default function BookingGuestNeeds({ bookingId, requirements, migrated }:
         <button type="button" onClick={() => copyLink(waivers.link!)} className="inline-flex items-center gap-1.5 rounded-lg border bg-white px-3 py-2 text-xs font-bold"><Copy size={14} aria-hidden="true" />Copy waiver link</button>
         {waivers.whatsapp_url ? <a href={waivers.whatsapp_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-700 px-3 py-2 text-xs font-bold text-white"><MessageCircle size={14} aria-hidden="true" />Send on WhatsApp</a> : <span className="self-center text-xs text-slate-500">No guest phone for WhatsApp</span>}
       </div> : null}
-      {!waivers.pending && waivers.waivers.length ? <ul className="mt-3 space-y-2">{waivers.waivers.map((w) => <li key={w.id} className={`rounded-xl bg-white p-3 text-sm ${w.medical_flagged ? "border-2 border-rose-300" : ""}`}>
-        <div className="flex flex-wrap justify-between gap-2"><b>{w.participant_name}</b><span className="text-xs text-slate-500">{stamp(w.signed_at)} · signed “{w.signature_name}”</span></div>
+      {!waivers.pending && waivers.waivers.length ? <ul className="mt-3 space-y-2">{waivers.waivers.map((w) => w.voided_at ? <li key={w.id} className="rounded-xl bg-slate-100 p-3 text-xs text-slate-500"><s>{w.participant_name}</s> · voided {stamp(w.voided_at)}{w.void_reason ? ` — ${w.void_reason}` : ""}</li> : <li key={w.id} className={`rounded-xl bg-white p-3 text-sm ${w.medical_flagged ? "border-2 border-rose-300" : ""}`}>
+        <div className="flex flex-wrap justify-between gap-2"><b>{w.participant_name}</b><span className="text-xs text-slate-500">{stamp(w.signed_at)} · signed “{w.signature_name}” · <button type="button" onClick={() => void voidWaiver(w.id, w.participant_name)} className="font-bold text-rose-700 underline">Void</button></span></div>
         <p className="text-xs text-slate-600">{w.certification ? certificationLabels[w.certification as keyof typeof certificationLabels] || w.certification : "Certification not given"}{w.date_of_birth ? ` · born ${w.date_of_birth}` : ""} · photos {w.photo_consent ? "OK" : "not OK"}{w.waiver_version !== waivers.current_version ? ` · version ${w.waiver_version}` : ""}</p>
         {w.medical_yes.length ? <div className="mt-1 text-rose-700"><p className="font-bold">Answered YES — doctor&apos;s clearance required:</p><ul className="list-disc pl-5">{w.medical_yes.map((q) => <li key={q}>{q}</li>)}</ul></div> : null}
       </li>)}</ul> : null}

@@ -165,7 +165,7 @@ function transferFrom(value: unknown): SupplierTransfer | null {
   };
 }
 
-export function buildSupplierBookingDetails(booking: SupplierBookingRow, options: { includeGuestPrice?: boolean } = {}): SupplierBookingDetails {
+export function buildSupplierBookingDetails(booking: SupplierBookingRow, options: { includeGuestPrice?: boolean; includeMedical?: boolean } = {}): SupplierBookingDetails {
   const notes = text(booking.notes, 1500);
   const amount = Number(booking.amount);
   const currency = (text(booking.currency, 3) || "USD").toUpperCase();
@@ -180,7 +180,7 @@ export function buildSupplierBookingDetails(booking: SupplierBookingRow, options
     trips: tripsFrom(booking),
     notes: notes ? redactEmails(notes) : null,
     transfer: transferFrom(booking.transfer_details),
-    requirements: requirementRows(booking.guest_requirements).map(([label, value]) => [label, redactEmails(value)]),
+    requirements: requirementRows(booking.guest_requirements, { medical: options.includeMedical ? "full" : "summary" }).map(([label, value]) => [label, redactEmails(value)]),
     guestPayment: options.includeGuestPrice && Number.isFinite(amount) ? { status: paymentStatus, amount, currency } : null,
   };
 }

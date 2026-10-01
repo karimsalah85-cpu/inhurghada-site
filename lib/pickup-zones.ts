@@ -1,3 +1,4 @@
+import { fetchAllPages } from "@/lib/supabase-paging";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -131,12 +132,13 @@ export const isMissingTableError = (error: { code?: string | null } | null | und
  */
 export async function loadPickupZoneData(supabase: SupabaseClient, tourSlugs?: string[]): Promise<PickupZoneData | null> {
   if (tourSlugs && !tourSlugs.length) return null;
-  let timesQuery = supabase.from("zone_pickup_times").select("zone_id,tour_slug,pickup_time");
-  if (tourSlugs) timesQuery = timesQuery.in("tour_slug", tourSlugs);
   const [zones, hotels, times] = await Promise.all([
-    supabase.from("pickup_zones").select("id,name,destination,active").limit(1000),
-    supabase.from("hotels").select("id,name,normalized_name,aliases,zone_id,active").limit(10_000),
-    timesQuery.limit(20_000),
+    fetchAllPages((from, to) => supabase.from("pickup_zones").select("id,name,destination,active").order("id").range(from, to)),
+    fetchAllPages((from, to) => supabase.from("hotels").select("id,name,normalized_name,aliases,zone_id,active").order("id").range(from, to)),
+    fetchAllPages((from, to) => {
+      const query = supabase.from("zone_pickup_times").select("zone_id,tour_slug,pickup_time");
+      return (tourSlugs ? query.in("tour_slug", tourSlugs) : query).order("id").range(from, to);
+    }),
   ]);
   const error = zones.error || hotels.error || times.error;
   if (error) {

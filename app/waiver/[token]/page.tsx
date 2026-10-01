@@ -62,7 +62,7 @@ export default async function WaiverPage({ params, searchParams }: { params: Pro
   const complete = signedCount >= booking.needed;
   const next = signedCount + 1;
   const action = `/api/waivers/${encodeURIComponent(token)}`;
-  const errorMessage = error ? pageErrors[error as WaiverError] || pageErrors.invalid : null;
+  const errorMessage = error ? (Object.hasOwn(pageErrors, error) ? pageErrors[error as WaiverError] : pageErrors.invalid) : null;
 
   return (
     <main className="min-h-screen bg-surface-muted px-4 py-8">

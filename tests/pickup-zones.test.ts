@@ -153,7 +153,7 @@ describe("loadPickupZoneData", () => {
   const client = (error: { code: string; message: string } | null) => {
     const result = { data: error ? null : [], error };
     const chain: Record<string, unknown> = {};
-    for (const method of ["select", "in", "limit"]) chain[method] = () => chain;
+    for (const method of ["select", "in", "limit", "order", "range"]) chain[method] = () => chain;
     chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve);
     return { from: () => chain } as unknown as Parameters<typeof loadPickupZoneData>[0];
   };

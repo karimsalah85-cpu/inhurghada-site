@@ -30,12 +30,12 @@ const cairoTime = (value: string) => new Intl.DateTimeFormat("en-GB", { hour: "2
 
 // Pickup time shown to guests: the assigned pickup time wins, then the standard time for the hotel's
 // pickup zone and the tour ("HH:MM", from Hotels & pickup times), then the booking's departure time.
-export function resolvePickupTime(assignmentPickup: string | null | undefined, startTime: string | null | undefined, zoneTime?: string | null) {
+// Pickup time told to the guest: the assigned pickup time, else the hotel zone's standard time.
+// The trip's departure time is deliberately NOT used — hotel pickup is usually well before
+// departure, and a guest told "pickup at 09:00" for a 09:00 boat would miss the bus.
+export function resolvePickupTime(assignmentPickup: string | null | undefined, zoneTime?: string | null) {
   if (assignmentPickup && !Number.isNaN(new Date(assignmentPickup).getTime())) return cairoTime(assignmentPickup);
-  const zone = shortTime(zoneTime);
-  if (zone) return zone;
-  if (startTime && /^\d{2}:\d{2}/.test(startTime)) return startTime.slice(0, 5);
-  return null;
+  return shortTime(zoneTime) || null;
 }
 
 export function pickupLine(booking: Pick<Booking, "hotel" | "pickup_time">) {
@@ -130,7 +130,7 @@ export async function runAdminAutomation() {
     // Standard zone pickup times; null when the hotels/zones tables are not migrated yet (old behaviour).
     const tourSlugs = [...new Set((pickupBookings as Booking[]).map((booking) => booking.tour_slug).filter(Boolean))] as string[];
     const zoneFor = createZoneLookup(await loadPickupZoneData(supabase, tourSlugs));
-    for (const booking of pickupBookings as Booking[]) booking.pickup_time = resolvePickupTime(firstPickup.get(booking.id), booking.start_time, zoneFor(booking.hotel, booking.tour_slug).time);
+    for (const booking of pickupBookings as Booking[]) booking.pickup_time = resolvePickupTime(firstPickup.get(booking.id), zoneFor(booking.hotel, booking.tour_slug).time);
   }
 
   const { data: completionEvents, error: completionError } = await supabase.from("referral_notification_events").select("booking_id").eq("event_type", "trip_completed");

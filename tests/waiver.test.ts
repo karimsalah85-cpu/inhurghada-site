@@ -155,7 +155,10 @@ describe("waiver migration", () => {
     expect(sql).not.toMatch(/\bdrop\s+(table|column)\b/i);
     expect(sql).toContain("enable row level security");
     expect(sql).toMatch(/revoke all on public\.booking_waivers from public, anon, authenticated/);
-    expect(sql).not.toMatch(/grant[^;]*(insert|update|delete)[^;]*to (anon|authenticated)/i);
+    expect(sql).not.toMatch(/grant[^;]*(insert|delete)[^;]*to (anon|authenticated)/i);
+    // The only write staff get is voiding a signature: three columns, nothing else.
+    const updates = sql.match(/grant update[^;]*to (anon|authenticated)/gi) || [];
+    expect(updates).toEqual(["grant update (voided_at, voided_by, void_reason) on public.booking_waivers to authenticated"]);
     expect(sql).toContain("on delete cascade");
     expect(sql).toContain("guest_requirements jsonb not null default '{}'");
   });
@@ -187,11 +190,42 @@ describe("booking_waivers schema", () => {
     const bookingId = await createBooking(db, { amount: 50, tour_slug: "full-day-diving" });
     const { rows } = await insert(bookingId);
     expect(rows[0].medical_flagged).toBe(true);
-    const clean = await insert(bookingId, { medical_declaration: JSON.stringify({ answers: { heart: "no" }, flagged: false }) });
+    const clean = await insert(bookingId, { participant_name: "Ben Müller", medical_declaration: JSON.stringify({ answers: { heart: "no" }, flagged: false }) });
     expect(clean.rows[0].medical_flagged).toBe(false);
     await expect(insert(bookingId, { accepted: false })).rejects.toThrow();
     await expect(insert(bookingId, { ip_hash: "203.0.113.9" })).rejects.toThrow();
     await expect(insert(bookingId, { certification: "instructor" })).rejects.toThrow();
+  });
+
+  const submit = (bookingId: string, name: string, needed = 2) => db.query<{ outcome: string }>(
+    "select public.submit_booking_waiver($1, $2, $3, null, null, $4::jsonb, $3, null, null, $5) as outcome",
+    [bookingId, needed, name, JSON.stringify({ answers: {}, flagged: false }), WAIVER_VERSION],
+  ).then((result) => result.rows[0].outcome);
+
+  it("signs through the locked function: one per name, never more than the divers", async () => {
+    const bookingId = await createBooking(db, { amount: 50, tour_slug: "full-day-diving" });
+    expect(await submit(bookingId, "Anna Müller")).toBe("signed");
+    expect(await submit(bookingId, "anna müller")).toBe("already");
+    expect(await submit(bookingId, "Ben Müller")).toBe("signed");
+    expect(await submit(bookingId, "Carl Müller")).toBe("complete");
+    await expect(insert(bookingId, { participant_name: "ANNA MÜLLER" })).rejects.toThrow();
+  });
+
+  it("frees the slot when a signature is voided", async () => {
+    const bookingId = await createBooking(db, { amount: 50, tour_slug: "full-day-diving" });
+    expect(await submit(bookingId, "Junk Name", 1)).toBe("signed");
+    expect(await submit(bookingId, "Real Diver", 1)).toBe("complete");
+    await db.query("update public.booking_waivers set voided_at = now(), void_reason = 'wrong person' where booking_id = $1", [bookingId]);
+    expect(await submit(bookingId, "Real Diver", 1)).toBe("signed");
+    expect(await submit(bookingId, "Junk Name", 1)).toBe("complete");
+  });
+
+  it("does not let the public or staff call the signing function directly", async () => {
+    const { rows } = await db.query<{ anon: boolean; authed: boolean; service: boolean }>(`select
+      has_function_privilege('anon', 'public.submit_booking_waiver(uuid, integer, text, date, text, jsonb, text, text, text, text)', 'execute') as anon,
+      has_function_privilege('authenticated', 'public.submit_booking_waiver(uuid, integer, text, date, text, jsonb, text, text, text, text)', 'execute') as authed,
+      has_function_privilege('service_role', 'public.submit_booking_waiver(uuid, integer, text, date, text, jsonb, text, text, text, text)', 'execute') as service`);
+    expect(rows[0]).toEqual({ anon: false, authed: false, service: true });
   });
 
   it("gives database clients read access only, through the booking permission", async () => {

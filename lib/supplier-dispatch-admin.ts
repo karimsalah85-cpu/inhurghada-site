@@ -24,6 +24,7 @@ export const createRequestSchema = z.object({
   channels,
   note: optionalNote,
   include_guest_price: z.boolean().default(false),
+  include_medical: z.boolean().default(false),
   amount_due: z.number().nonnegative().max(10_000_000).nullable().optional(),
   amount_due_currency: currency.nullable().optional(),
 }).refine((value) => value.amount_due == null || value.amount_due_currency != null, {
@@ -31,7 +32,7 @@ export const createRequestSchema = z.object({
 });
 
 export const requestActionSchema = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("resend"), channels, kind: z.enum(["reminder", "update"]).default("reminder"), refresh_details: z.boolean().default(false), include_guest_price: z.boolean().optional() }),
+  z.object({ action: z.literal("resend"), channels, kind: z.enum(["reminder", "update"]).default("reminder"), refresh_details: z.boolean().default(false), include_guest_price: z.boolean().optional(), include_medical: z.boolean().optional() }),
   z.object({ action: z.literal("cancel"), channels, note: optionalNote }),
   z.object({ action: z.literal("mark_confirmed"), note: optionalNote }),
   z.object({ action: z.literal("mark_declined"), note: optionalNote }),

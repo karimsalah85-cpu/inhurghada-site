@@ -69,7 +69,7 @@ function rowsOrSkip<T>({ data, error }: QueryResult<T>, table: string): T[] | un
 
 async function loadAdminAttention(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  access: { bookings: boolean; operations: boolean },
+  access: { bookings: boolean; operations: boolean; suppliers: boolean },
 ): Promise<AdminAttention> {
   const now = new Date();
   const tomorrow = cairoTomorrow(now);
@@ -79,8 +79,9 @@ async function loadAdminAttention(
   );
   const tomorrowIds = (tomorrowBookings || []).map((booking) => booking.id);
   // booking_assignments and communication_queue are readable under operations RLS;
-  // supplier requests are service-role only, so they are read after the permission check.
-  const database = access.bookings || access.operations ? createAdminClient() : null;
+  // supplier requests are service-role only, so they are read after the permission check —
+  // and only for roles that already see supplier activity (not a bookings-only Sales role).
+  const database = access.operations || access.suppliers ? createAdminClient() : null;
   const [assignments, requests, failed] = await Promise.all([
     access.operations && tomorrowBookings
       ? tomorrowIds.length
@@ -460,7 +461,7 @@ export default async function AdminPage({
   const canOperations = await permissionChecks.operations;
   const canBookingsEdit = await permissionChecks.bookings;
   const attention = workspace === "overview" && (canBookingsEdit || canOperations)
-    ? await loadAdminAttention(supabase, { bookings: canBookingsEdit, operations: canOperations })
+    ? await loadAdminAttention(supabase, { bookings: canBookingsEdit, operations: canOperations, suppliers: await permissionChecks.suppliers })
     : null;
   const titles: Record<AdminWorkspace, [string, string]> = {
     overview: ["Daily Red Sea Admin", "Today’s actionable overview."],

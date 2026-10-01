@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bulkDates, planBulkAvailability, validateBulkAvailability } from "@/lib/availability-bulk";
+import { bulkDates, multiTripLoads, planBulkAvailability, validateBulkAvailability } from "@/lib/availability-bulk";
 
 const base = { tourSlugs: ["orange-bay"], from: "2026-10-05", to: "2026-10-11", weekdays: [0, 1, 2, 3, 4, 5, 6], action: "capacity" as const, capacity: 40, note: "" };
 
@@ -39,7 +39,7 @@ describe("bulk availability", () => {
     const existing = [{ id: "a1", tour_slug: "orange-bay", service_date: "2026-10-05", start_time: "09:00:00", capacity: 60, reserved: 45, blocked: false }];
     const plan = planBulkAvailability({ ...base, to: "2026-10-05" }, existing, []);
     expect(plan.inserts).toHaveLength(0);
-    expect(plan.updates).toEqual([{ id: "a1", patch: expect.objectContaining({ capacity: 40, blocked: false }) }]);
+    expect(plan.updates).toEqual([{ id: "a1", patch: expect.objectContaining({ capacity: 40 }) }]);
     expect(plan.overbooked).toEqual([{ tour_slug: "orange-bay", service_date: "2026-10-05", reserved: 45, capacity: 40 }]);
   });
 
@@ -54,5 +54,32 @@ describe("bulk availability", () => {
   it("does not create rows just to say 'unlimited'", () => {
     const plan = planBulkAvailability({ ...base, capacity: null }, [], []);
     expect(plan.inserts).toHaveLength(0);
+  });
+
+  it("setting seats leaves weather closures closed", () => {
+    const existing = [{ id: "c1", tour_slug: "orange-bay", service_date: "2026-10-05", start_time: null, capacity: null, reserved: 0, blocked: true }];
+    const plan = planBulkAvailability({ ...base, to: "2026-10-05" }, existing, []);
+    expect(plan.updates[0].patch).not.toHaveProperty("blocked");
+    expect(plan.stillClosed).toBe(1);
+  });
+
+  it("counts multi-trip legs by tour and flags bookings it cannot read", () => {
+    const slugs = new Map([["orange bay island trip", "orange-bay"], ["giftun speedboat", "giftun"]]);
+    const result = multiTripLoads([
+      { reference: "M1", pricing_snapshot: { trips: [
+        { name: "Orange Bay Island Trip", date: "2026-10-06", participants: { adults: 2, youth: 1, infants: 0 } },
+        { name: "Giftun Speedboat", date: "2026-10-08", guests: 3 },
+        { name: "Orange Bay Island Trip", date: "2026-12-01", participants: { adults: 9 } },
+      ] } },
+      { reference: "OLD", pricing_snapshot: null },
+      { reference: "RENAMED", pricing_snapshot: { trips: [{ name: "A tour that no longer exists", date: "2026-10-06", guests: 2 }] } },
+    ], slugs, { from: "2026-10-05", to: "2026-10-11" });
+    expect(result.loads).toEqual([
+      { tour_slug: "orange-bay", date: "2026-10-06", guests: 3 },
+      { tour_slug: "giftun", date: "2026-10-08", guests: 3 },
+    ]);
+    expect(result.unknown).toEqual(["OLD", "RENAMED"]);
+    const plan = planBulkAvailability({ ...base, to: "2026-10-06" }, [], result.loads);
+    expect(plan.inserts.find((row) => row.service_date === "2026-10-06")).toMatchObject({ reserved: 3 });
   });
 });

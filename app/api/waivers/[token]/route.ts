@@ -47,22 +47,27 @@ export async function POST(request: NextRequest, context: { params: Promise<{ to
   if (booking.signed.some((row) => sameName(row.participantName))) return redirect("done", "already");
   if (booking.signed.length >= booking.needed) return redirect("error", "complete");
 
-  const { error } = await database.from("booking_waivers").insert({
-    booking_id: booking.id,
-    participant_name: submission.participantName,
-    date_of_birth: submission.dateOfBirth,
-    certification: submission.certification,
-    medical_declaration: { answers: submission.medicalAnswers, flagged: submission.medicalFlagged, photo_consent: submission.photoConsent },
-    accepted: true,
-    signature_name: submission.signatureName,
-    ip_hash: clientAddress === "unknown" ? null : hashIp(clientAddress),
-    user_agent: (request.headers.get("user-agent") || "").slice(0, 400) || null,
-    waiver_version: WAIVER_VERSION,
+  // The count check is repeated inside the database under a lock on the booking, so two
+  // people signing at the same moment cannot exceed the number of divers.
+  const { data: outcome, error } = await database.rpc("submit_booking_waiver", {
+    p_booking_id: booking.id,
+    p_needed: booking.needed,
+    p_participant_name: submission.participantName,
+    p_date_of_birth: submission.dateOfBirth,
+    p_certification: submission.certification,
+    p_medical_declaration: { answers: submission.medicalAnswers, flagged: submission.medicalFlagged, photo_consent: submission.photoConsent },
+    p_signature_name: submission.signatureName,
+    p_ip_hash: clientAddress === "unknown" ? null : hashIp(clientAddress),
+    p_user_agent: (request.headers.get("user-agent") || "").slice(0, 400) || null,
+    p_waiver_version: WAIVER_VERSION,
   });
   if (error) {
     console.error("Waiver not saved", { reference: booking.reference, code: error.code, message: error.message });
     return redirect("error", "unavailable");
   }
+  if (outcome === "already") return redirect("done", "already");
+  if (outcome === "complete") return redirect("error", "complete");
+  if (outcome !== "signed") return redirect("error", "missing");
 
   if (submission.medicalFlagged) {
     const questions = content.medicalQuestions.filter((question) => submission.medicalAnswers[question.id] === "yes").map((question) => `• ${question.text}`);
