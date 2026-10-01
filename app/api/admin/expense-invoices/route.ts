@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuthorization } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { expenseTypes } from "@/lib/admin-expense-write";
+import { stripNulChars } from "@/lib/strip-nul-chars";
 
 const STATUSES = new Set(["pending", "posted", "rejected"]);
 
@@ -42,7 +43,7 @@ export async function POST(request: NextRequest) {
   const { supabase, user, allowed } = await getAdminAuthorization("edit_expenses");
   if (!allowed) return json({ error: "Expense-editing permission required." }, 403);
 
-  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const body = stripNulChars((await request.json().catch(() => null)) as Record<string, unknown> | null);
   const filePath = String(body?.file_path || "").trim();
   const fileName = str(body?.file_name, 200);
   if (!/^pending\/[a-zA-Z0-9._/-]{6,200}$/.test(filePath) || !fileName) {
