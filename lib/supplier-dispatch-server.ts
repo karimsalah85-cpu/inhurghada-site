@@ -31,7 +31,7 @@ export type DeliveryResult = { channel: Channel; success: boolean; reason?: stri
 
 export async function loadBookingForSupplier(database: SupabaseClient, bookingId: string) {
   let { data, error } = await database.from("bookings").select(`${bookingColumnsForSupplier},guest_requirements`).eq("id", bookingId).maybeSingle();
-  // guest_requirements arrives with the 20261001110000 migration; the code may deploy first.
+  // guest_requirements arrives with the 20261001065646 migration; the code may deploy first.
   if (error && ["42703", "PGRST204"].includes(error.code || "")) ({ data, error } = await database.from("bookings").select(bookingColumnsForSupplier).eq("id", bookingId).maybeSingle());
   if (error) throw error;
   return data as (SupplierBookingRow & { id: string }) | null;

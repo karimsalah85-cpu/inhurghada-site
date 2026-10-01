@@ -150,7 +150,7 @@ describe("waiver content", () => {
 });
 
 describe("waiver migration", () => {
-  const sql = readFileSync("supabase/migrations/20261001110000_guest_requirements_and_waivers.sql", "utf8");
+  const sql = readFileSync("supabase/migrations/20261001065646_guest_requirements_and_waivers.sql", "utf8");
   it("is additive, enables RLS and gives the public no write access", () => {
     expect(sql).not.toMatch(/\bdrop\s+(table|column)\b/i);
     expect(sql).toContain("enable row level security");

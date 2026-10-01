@@ -55,7 +55,7 @@ describe("pickup zones admin API", () => {
     mocks.results.hotels = { data: null, error: { code: "PGRST205", message: "Could not find the table" } };
     const response = await GET(request("/api/admin/pickup-zones"));
     expect(response.status).toBe(409);
-    expect(await response.json()).toMatchObject({ configured: false, migration: "20261001100000_pickup_zones.sql" });
+    expect(await response.json()).toMatchObject({ configured: false, migration: "20261001065637_pickup_zones.sql" });
   });
 
   it("lists unmatched booking hotels", async () => {

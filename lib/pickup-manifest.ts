@@ -21,7 +21,7 @@ export type ManifestBooking = {
   payment_status: string | null;
   amount: number | null;
   currency: string | null;
-  /** bookings.guest_requirements; absent until the 20261001110000 migration is applied. */
+  /** bookings.guest_requirements; absent until the 20261001065646 migration is applied. */
   guest_requirements?: unknown;
 };
 export type ManifestAssignment = { booking_id: string; supplier_id: string | null; staff_member_id: string | null; assignment_type: string | null; pickup_time: string | null; status: string | null; notes: string | null };

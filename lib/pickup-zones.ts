@@ -7,7 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * booking's tour. Everything here except `loadPickupZoneData` is pure.
  */
 
-export const PICKUP_ZONES_MIGRATION = "20261001100000_pickup_zones.sql";
+export const PICKUP_ZONES_MIGRATION = "20261001065637_pickup_zones.sql";
 export const ZONE_DESTINATIONS = ["hurghada", "marsa-alam", "el-gouna", "jeddah"] as const;
 export type ZoneDestination = (typeof ZONE_DESTINATIONS)[number];
 

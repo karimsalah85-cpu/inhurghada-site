@@ -22,7 +22,7 @@ export default async function ManifestPage({ searchParams }: { searchParams: Pro
     .neq("status", "cancelled")
     .order("start_time", { nullsFirst: false });
   let { data: bookings, error } = await loadBookings(`${baseColumns},guest_requirements`);
-  // guest_requirements arrives with the 20261001110000 migration; the code may deploy first.
+  // guest_requirements arrives with the 20261001065646 migration; the code may deploy first.
   if (error && ["42703", "PGRST204"].includes(error.code || "")) ({ data: bookings, error } = await loadBookings(baseColumns));
   const rows = (bookings || []) as unknown as ManifestBooking[];
   const ids = rows.map((booking) => booking.id);
