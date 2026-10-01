@@ -41,6 +41,8 @@ const request = (url: string, method = "GET", body?: unknown) => new NextRequest
 beforeEach(() => {
   vi.clearAllMocks();
   vi.unstubAllEnvs();
+  // Vercel preview builds run these tests with VERCEL_ENV=preview, where writes are blocked on purpose.
+  vi.stubEnv("VERCEL_ENV", "production");
   mocks.results = {};
   mocks.writes = [];
   mocks.permission.mockResolvedValue(true);
@@ -63,6 +65,13 @@ describe("pickup zones admin API", () => {
     expect(body.configured).toBe(true);
     expect(body.unmatched.map((row: { text: string }) => row.text)).toEqual(["Jaz Aquamarine"]);
     expect(body.tours.some((tour: { slug: string }) => tour.slug === "orange-bay")).toBe(true);
+  });
+
+  it("refuses writes on preview deployments", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const response = await putTime(request("/api/admin/pickup-zones/times", "PUT", { zone_id: "00000000-0000-4000-8000-000000000001", tour_slug: "orange-bay", pickup_time: "08:00" }));
+    expect(response.status).toBe(503);
+    expect(mocks.writes).toHaveLength(0);
   });
 
   it("requires the operations permission", async () => {
