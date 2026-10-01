@@ -58,7 +58,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         const booking = await loadBookingForSupplier(database, row.booking_id).catch(() => null);
         if (!booking) return noStoreJson({ error: "Booking not found." }, 404);
         const includeGuestPrice = input.include_guest_price ?? Boolean(row.details?.guestPayment);
-        patch.details = buildSupplierBookingDetails(booking, { includeGuestPrice });
+        // Keep sharing medical details only if they were shared when the request was first sent.
+        const previouslyShared = Array.isArray(row.details?.requirements) && row.details.requirements.some((entry: unknown) => Array.isArray(entry) && entry[0] === "Medical" && !String(entry[1]).startsWith("Yes — ask the Daily Red Sea office"));
+        const includeMedical = input.include_medical ?? previouslyShared;
+        patch.details = buildSupplierBookingDetails(booking, { includeGuestPrice, includeMedical });
       }
       // An update asks the supplier to confirm again.
       if (input.kind === "update") Object.assign(patch, { status: "sent", responded_at: null, responded_by: null });

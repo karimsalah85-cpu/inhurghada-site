@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { toMetaEvent } from "@/lib/meta-events";
 
+type MetaErrorBody = { error?: { message?: unknown; type?: unknown; code?: unknown; error_subcode?: unknown; fbtrace_id?: unknown } };
+
+// Log only Meta's diagnostic fields: never the event payload (IP, user agent, click ids) or the access token.
+async function metaErrorSummary(response: Response, accessToken: string) {
+  const text = await response.text().catch(() => "");
+  const redact = (value: unknown) => (typeof value === "string" ? value.split(accessToken).join("[redacted]").slice(0, 500) : value);
+  let parsed: MetaErrorBody = {};
+  try {
+    parsed = JSON.parse(text) as MetaErrorBody;
+  } catch {
+    // Non-JSON error body; fall through to a truncated text summary.
+  }
+  const error = parsed.error;
+  if (!error) return { message: redact(text.slice(0, 200)) || undefined };
+  return { message: redact(error.message), type: redact(error.type), code: error.code, subcode: error.error_subcode, fbtraceId: redact(error.fbtrace_id) };
+}
+
 export async function POST(request: NextRequest) {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
   const accessToken = process.env.META_CONVERSIONS_API_ACCESS_TOKEN;
@@ -27,7 +44,10 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data: [{ event_name: eventName, event_time: eventTime, event_id: body.eventId, event_source_url: request.headers.get("referer") || "https://dailyredsea.com", action_source: "website", user_data: { client_ip_address: forwarded, client_user_agent: request.headers.get("user-agent") || undefined, fbp: request.cookies.get("_fbp")?.value, fbc }, custom_data: customData }] }),
     });
-    if (!response.ok) console.error("Meta Conversions API request failed", response.status);
+    if (!response.ok) {
+      console.error("Meta Conversions API rejected event", { status: response.status, event: eventName, error: await metaErrorSummary(response, accessToken) });
+      return new NextResponse(null, { status: 502 });
+    }
   } catch (error) {
     console.error("Meta Conversions API event failed", error);
   }

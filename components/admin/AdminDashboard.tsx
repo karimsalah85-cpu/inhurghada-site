@@ -29,6 +29,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
+import type { AdminAttention } from "@/lib/admin-attention";
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
 import AdminOperationsCenter from "@/components/admin/AdminOperationsCenter";
@@ -160,6 +161,7 @@ async function api<T>(url: string, options?: RequestInit): Promise<T> {
 export default function AdminDashboard({
   mode = "overview",
   initialTripStatusChanges = [],
+  attention = null,
   initialBookings,
   initialVisibleBookings,
   bookingView,
@@ -197,6 +199,8 @@ export default function AdminDashboard({
     listing_status: string;
     updated_at: string;
   }[];
+  /** Overview "needs attention" items; null when not loaded for this user or workspace. */
+  attention?: AdminAttention | null;
   initialBookings: Booking[];
   initialVisibleBookings: Booking[];
   bookingView: BookingView;
@@ -973,6 +977,7 @@ export default function AdminDashboard({
         metrics={metrics}
         rowsMayBeTruncated={rowsMayBeTruncated}
         tripChanges={initialTripStatusChanges}
+        attention={attention}
         onOpenBooking={setExpandedId}
       />
       {expandedId && initialBookings.find((item) => item.id === expandedId) ? (
@@ -2606,14 +2611,8 @@ export default function AdminDashboard({
         </section>
       ) : null}
       {mode === "suppliers" && can("operations") ? (
-        <div id="staff" className="scroll-mt-6">
-          <AdminControlCenter
-            initialTab="staff"
-            variant="content"
-            compact
-            title="Staff"
-            description="Guides, drivers, crew, and operations staff you assign to bookings. Not the same as sales people above, or admin login accounts (see Users & roles)."
-          />
+        <div id="supplier-prices" className="scroll-mt-6">
+          <AdminOperationsCenter lockedTab="suppliers" heading="Supplier cost prices & contracts" />
         </div>
       ) : null}
       {mode === "reports" && can("reports") ? (

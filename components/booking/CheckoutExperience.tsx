@@ -349,12 +349,11 @@ export default function CheckoutExperience() {
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
   const booking = searchParams.get("booking");
-  const sessionId = searchParams.get("session_id");
 
-  return <CheckoutContent key={booking} status={status} booking={booking} sessionId={sessionId} />;
+  return <CheckoutContent key={booking} status={status} booking={booking} />;
 }
 
-function CheckoutContent({ status, booking, sessionId }: { status: string | null; booking: string | null; sessionId: string | null }) {
+function CheckoutContent({ status, booking }: { status: string | null; booking: string | null }) {
   const { language } = useSiteSettings();
   const copy = COPY[language];
   const copyRef = useRef(copy);
@@ -446,14 +445,6 @@ function CheckoutContent({ status, booking, sessionId }: { status: string | null
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">{copy.bookingStatusEyebrow}</p>
                 <h3 className="mt-2 text-xl font-bold text-ink">{status === "success" ? copy.paymentConfirmedHeading : copy.paymentCancelledHeading}</h3>
                 <p className="mt-3 text-sm leading-7 text-ink">{confirmationMessage}</p>
-                {status === "success" && booking && sessionId ? (
-                  <a
-                    href={`/api/invoices/${encodeURIComponent(booking)}?session_id=${encodeURIComponent(sessionId)}`}
-                    className="mt-5 inline-flex items-center rounded-full bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800"
-                  >
-                    {copy.downloadInvoice}
-                  </a>
-                ) : null}
               </div>
             ) : null}
 

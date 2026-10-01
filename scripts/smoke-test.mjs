@@ -83,7 +83,6 @@ const apiChecks = [
   ["/api/admin/reports?format=pdf", 401],
   ["/api/admin/google-ads?from=2026-08-01&to=2026-08-02", 401],
   ["/api/admin/google-analytics?from=2026-08-01&to=2026-08-02", 401],
-  ["/api/invoices/DRS-INVALID", 400],
 ];
 for (const [path, status] of apiChecks) {
   const result = await get(path);

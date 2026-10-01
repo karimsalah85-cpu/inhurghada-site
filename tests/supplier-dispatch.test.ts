@@ -84,6 +84,22 @@ describe("supplier booking details", () => {
     expect(cancelled).not.toContain("https://dailyredsea.com/supplier/abc");
   });
 
+  it("keeps medical details private unless the admin chooses to share them", () => {
+    const details = buildSupplierBookingDetails({ ...booking, guest_requirements: { nonSwimmers: 1, medical: "Asthma" } });
+    expect(detailRows(details)).toEqual(expect.arrayContaining([["Medical", "Yes — ask the Daily Red Sea office for details"]]));
+    expect(JSON.stringify(details)).not.toContain("Asthma");
+  });
+
+  it("shares medical (when ticked), non-swimmer and certification needs, but never an email", () => {
+    const details = buildSupplierBookingDetails({ ...booking, guest_requirements: { nonSwimmers: 1, medical: "Asthma — ask anna@example.com", certification: "open_water", certificationNumber: "SSI-42", dietary: "Vegetarian" } }, { includeMedical: true });
+    const rows = detailRows(details);
+    expect(rows).toEqual(expect.arrayContaining([["Non-swimmers", "1"], ["Medical", "Asthma — ask [email hidden]"], ["Diving certification", "Open Water (#SSI-42)"], ["Dietary", "Vegetarian"]]));
+    expect(JSON.stringify(details)).not.toContain("anna@example.com");
+    expect(buildSupplierMessage({ kind: "request", supplierName: "Dive centre", details, link: "https://x" })).toContain("• Non-swimmers: 1");
+    // Requests created before requirements existed still render.
+    expect(() => detailRows({ ...details, requirements: undefined })).not.toThrow();
+  });
+
   it("escapes HTML in emails", () => {
     const details = buildSupplierBookingDetails({ ...booking, hotel: "<script>x</script>" });
     expect(buildSupplierEmail({ kind: "request", supplierName: "A&B", details, link: "https://x" }).html).not.toContain("<script>");

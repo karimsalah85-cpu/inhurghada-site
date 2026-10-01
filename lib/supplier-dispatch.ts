@@ -9,6 +9,7 @@
  * The guest's price is only shared when the admin explicitly ticks it (useful
  * when the supplier collects cash on arrival).
  */
+import { requirementRows } from "@/lib/guest-requirements";
 
 export type SupplierBookingRow = {
   reference: string;
@@ -30,6 +31,8 @@ export type SupplierBookingRow = {
   status?: string | null;
   pricing_snapshot?: unknown;
   transfer_details?: unknown;
+  /** bookings.guest_requirements (non-swimmers, medical, certification, dietary). */
+  guest_requirements?: unknown;
 };
 
 export type SupplierTrip = {
@@ -63,6 +66,12 @@ export type SupplierBookingDetails = {
   trips: SupplierTrip[];
   notes: string | null;
   transfer: SupplierTransfer | null;
+  /**
+   * Operational guest needs the supplier must know (non-swimmers, medical,
+   * diving certification, dietary). Absent on requests created before this
+   * field existed.
+   */
+  requirements?: [label: string, value: string][];
   /** Present only when the admin chose to share the guest's price. */
   guestPayment: { status: "paid" | "to_collect" | "refunded"; amount: number; currency: string } | null;
 };
@@ -156,7 +165,7 @@ function transferFrom(value: unknown): SupplierTransfer | null {
   };
 }
 
-export function buildSupplierBookingDetails(booking: SupplierBookingRow, options: { includeGuestPrice?: boolean } = {}): SupplierBookingDetails {
+export function buildSupplierBookingDetails(booking: SupplierBookingRow, options: { includeGuestPrice?: boolean; includeMedical?: boolean } = {}): SupplierBookingDetails {
   const notes = text(booking.notes, 1500);
   const amount = Number(booking.amount);
   const currency = (text(booking.currency, 3) || "USD").toUpperCase();
@@ -171,6 +180,7 @@ export function buildSupplierBookingDetails(booking: SupplierBookingRow, options
     trips: tripsFrom(booking),
     notes: notes ? redactEmails(notes) : null,
     transfer: transferFrom(booking.transfer_details),
+    requirements: requirementRows(booking.guest_requirements, { medical: options.includeMedical ? "full" : "summary" }).map(([label, value]) => [label, redactEmails(value)]),
     guestPayment: options.includeGuestPrice && Number.isFinite(amount) ? { status: paymentStatus, amount, currency } : null,
   };
 }
@@ -223,6 +233,9 @@ export function detailRows(details: SupplierBookingDetails, amountDue?: { amount
     if (t.luggage) rows.push(["Luggage", t.luggage]);
     if (t.childSeats) rows.push(["Child seats", t.childSeats]);
     if (t.wheelchair) rows.push(["Wheelchair", t.wheelchair]);
+  }
+  for (const [label, value] of Array.isArray(details.requirements) ? details.requirements : []) {
+    if (typeof label === "string" && typeof value === "string") rows.push([label, value]);
   }
   if (details.guestPayment) {
     const p = details.guestPayment;

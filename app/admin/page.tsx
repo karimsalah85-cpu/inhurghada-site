@@ -11,6 +11,19 @@ import {
   type AdminRole,
 } from "@/lib/admin-auth";
 import { hasLivePermission } from "@/lib/admin-permission";
+import {
+  buildAdminAttention,
+  cairoTomorrow,
+  failedMessagesSince,
+  supplierWaitCutoff,
+  SUPPLIER_WAITING_STATUSES,
+  type AdminAttention,
+  type AttentionAssignmentRow,
+  type AttentionBookingRow,
+  type AttentionQueueRow,
+  type AttentionSupplierRequestRow,
+} from "@/lib/admin-attention";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 type AdminSearchParams = {
   month?: string;
@@ -41,6 +54,61 @@ const archiveFilters = ["active", "archived", "all"] as const;
 // Marks when booking data was read, so cached client copies can detect later changes.
 function currentTimestamp() {
   return Date.now();
+}
+
+type QueryResult<T> = { data: T[] | null; error: { code?: string; message: string } | null };
+const attentionRowLimit = 500;
+const attentionBookingColumns = "id,reference,customer_name,tour_name,date,start_time,hotel,status,archived_at,guests,adults,youth,infants";
+
+/** Rows for a "needs attention" item, or undefined when the table is missing or unreadable (the item is then skipped). */
+function rowsOrSkip<T>({ data, error }: QueryResult<T>, table: string): T[] | undefined {
+  if (!error) return data || [];
+  if (error.code !== "42P01" && error.code !== "PGRST205") console.error("Overview attention query failed", { table, message: error.message });
+  return undefined;
+}
+
+async function loadAdminAttention(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  access: { bookings: boolean; operations: boolean; suppliers: boolean },
+): Promise<AdminAttention> {
+  const now = new Date();
+  const tomorrow = cairoTomorrow(now);
+  const tomorrowBookings = rowsOrSkip<AttentionBookingRow>(
+    await supabase.from("bookings").select(attentionBookingColumns).eq("date", tomorrow).is("archived_at", null).neq("status", "cancelled").limit(attentionRowLimit),
+    "bookings",
+  );
+  const tomorrowIds = (tomorrowBookings || []).map((booking) => booking.id);
+  // booking_assignments and communication_queue are readable under operations RLS;
+  // supplier requests are service-role only, so they are read after the permission check —
+  // and only for roles that already see supplier activity (not a bookings-only Sales role).
+  const database = access.operations || access.suppliers ? createAdminClient() : null;
+  const [assignments, requests, failed] = await Promise.all([
+    access.operations && tomorrowBookings
+      ? tomorrowIds.length
+        ? supabase.from("booking_assignments").select("booking_id,pickup_time,status").in("booking_id", tomorrowIds).then((result) => rowsOrSkip<AttentionAssignmentRow>(result as QueryResult<AttentionAssignmentRow>, "booking_assignments"))
+        : Promise.resolve([] as AttentionAssignmentRow[])
+      : Promise.resolve(undefined),
+    database
+      ? database.from("supplier_booking_requests").select("id,booking_id,supplier_id,status,sent_at,last_sent_at,responded_at").in("status", [...SUPPLIER_WAITING_STATUSES]).lte("last_sent_at", supplierWaitCutoff(now)).order("last_sent_at").limit(attentionRowLimit).then((result) => rowsOrSkip<AttentionSupplierRequestRow>(result as QueryResult<AttentionSupplierRequestRow>, "supplier_booking_requests"))
+      : Promise.resolve(undefined),
+    access.operations
+      ? supabase.from("communication_queue").select("id,booking_id,channel,recipient,attempts,scheduled_for,last_error").eq("status", "failed").gte("scheduled_for", failedMessagesSince(now)).order("scheduled_for", { ascending: false }).limit(attentionRowLimit).then((result) => rowsOrSkip<AttentionQueueRow>(result as QueryResult<AttentionQueueRow>, "communication_queue"))
+      : Promise.resolve(undefined),
+  ]);
+  let supplierRequests = requests;
+  let supplierRequestBookings: AttentionBookingRow[] | undefined;
+  if (database && requests?.length) {
+    const bookingIds = [...new Set(requests.map((row) => row.booking_id))];
+    const supplierIds = [...new Set(requests.map((row) => row.supplier_id))];
+    const [bookingRows, supplierRows] = await Promise.all([
+      database.from("bookings").select(attentionBookingColumns).in("id", bookingIds),
+      database.from("suppliers").select("id,name").in("id", supplierIds),
+    ]);
+    supplierRequestBookings = rowsOrSkip<AttentionBookingRow>(bookingRows as QueryResult<AttentionBookingRow>, "bookings");
+    const names = new Map(((supplierRows.data || []) as { id: string; name: string }[]).map((row) => [row.id, row.name]));
+    supplierRequests = requests.map((row) => ({ ...row, supplier_name: names.get(row.supplier_id) || null }));
+  } else if (requests) supplierRequestBookings = [];
+  return buildAdminAttention({ now, tomorrowBookings, tomorrowAssignments: assignments, supplierRequests, supplierRequestBookings, failedMessages: failed });
 }
 
 function first(value: string | string[] | undefined) {
@@ -390,6 +458,11 @@ export default async function AdminPage({
       ];
     })
     .slice(0, 6);
+  const canOperations = await permissionChecks.operations;
+  const canBookingsEdit = await permissionChecks.bookings;
+  const attention = workspace === "overview" && (canBookingsEdit || canOperations)
+    ? await loadAdminAttention(supabase, { bookings: canBookingsEdit, operations: canOperations, suppliers: await permissionChecks.suppliers })
+    : null;
   const titles: Record<AdminWorkspace, [string, string]> = {
     overview: ["Daily Red Sea Admin", "Today’s actionable overview."],
     bookings: [
@@ -397,10 +470,10 @@ export default async function AdminPage({
       "Search, filter, update, and inspect bookings.",
     ],
     analytics: [
-      "Analytics & advertising",
+      "Marketing",
       "Website audiences, booking demand, and advertising performance.",
     ],
-    finance: ["Finance", "Booking margins, expenses, and business costs."],
+    finance: ["Finance", "Expenses, booking costs and margins. Use the tabs above for P&L, balances, VAT and reports."],
     trips: [
       "Trips & listings",
       "Toggle a trip active, paused, or unlisted — or open one to edit its full content.",
@@ -411,24 +484,24 @@ export default async function AdminPage({
     ],
     policies: [
       "Terms & policies",
-      "Legal-category site settings only — cancellation rules and similar published text.",
+      "Cancellation rules and other published legal text.",
     ],
     currency: [
       "Currency settings",
-      "Currency-category site settings only — manual exchange-rate overrides.",
+      "Manual exchange-rate overrides used for price display.",
     ],
     customers: ["Customers", "Manage customer notes and operational context."],
     suppliers: [
-      "Suppliers",
-      "Manage suppliers, sales contacts, staff, and performance.",
+      "Partners & sales people",
+      "Boats, guides, drivers, hotels and companies that deliver trips, sales people and their commission, and supplier cost prices. Guides & staff and supplier balances have their own pages.",
     ],
     operations: [
       "Operations",
       "Manage calendars, communications, reports, and operational records.",
     ],
     reports: [
-      "Reports & statistics",
-      "Booking status, workload percentages, service performance, and exports.",
+      "Bookings report",
+      "Bookings by period, status and service, with exports.",
     ],
   };
   return (
@@ -453,6 +526,7 @@ export default async function AdminPage({
           <AdminDashboard
             mode={workspace}
             initialTripStatusChanges={tripStatusChanges || []}
+            attention={attention}
             key={Object.values(bookingView).join("|")}
             initialBookings={bookings || []}
             initialVisibleBookings={visibleBookingsWithCosts}

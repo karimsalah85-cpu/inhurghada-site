@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CalendarDays, CheckCircle2, Clock3, RefreshCw, UsersRound, WalletCards } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, Clock3, RefreshCw, Truck, UsersRound, WalletCards } from "lucide-react";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminPermission } from "@/lib/admin-auth";
 import { summarizeAdminWork, overviewGuestCount, type OverviewBooking } from "@/lib/admin-overview";
 import { moneyBreakdown } from "@/lib/admin-money";
+import type { AdminAttention } from "@/lib/admin-attention";
 
 type FinancialSummary = {
   projectedByCurrency: Record<string, number>;
@@ -23,19 +24,20 @@ type Props = {
   rowsMayBeTruncated: boolean;
   onOpenBooking: (id: string) => void;
   tripChanges: { id: string; title: string; listing_status: string; updated_at: string }[];
+  attention?: AdminAttention | null;
 };
 
 const tools: { title: string; description: string; href: string; permissions: AdminPermission[] }[] = [
   { title: "Bookings", description: "Confirm requests, update payments and manage guests.", href: "/admin/bookings", permissions: ["bookings", "reports"] },
-  { title: "Operations calendar", description: "Plan departures and coordinate daily delivery.", href: "/admin/operations", permissions: ["operations"] },
+  { title: "Dispatch & calendar", description: "Plan departures, assign guides and drivers, set pickup times.", href: "/admin/operations", permissions: ["operations"] },
   { title: "Trips & listings", description: "Manage availability, visibility and trip content.", href: "/admin/trips", permissions: ["content"] },
   { title: "Finance", description: "Record expenses and review monthly cash flow.", href: "/admin/finance", permissions: ["finance"] },
-  { title: "Suppliers & team", description: "Manage supplier contacts, sales people and staff.", href: "/admin/suppliers", permissions: ["suppliers", "finance"] },
-  { title: "Reports", description: "Review booking performance and export summaries.", href: "/admin/reports", permissions: ["reports"] },
-  { title: "Users & access", description: "Manage staff access and assigned roles.", href: "/admin/users", permissions: ["settings", "staff"] },
+  { title: "Partners & sales people", description: "Supplier contacts, cost prices, contracts and sales commission.", href: "/admin/suppliers", permissions: ["suppliers", "finance"] },
+  { title: "Insights", description: "Booking reports, marketing performance and booking profit.", href: "/admin/reports", permissions: ["reports"] },
+  { title: "Users & system", description: "Staff logins and roles, integrations, backups and audit log.", href: "/admin/users", permissions: ["settings", "staff"] },
 ];
 
-export default function AdminOverview({ bookings, permissions, day, metrics, rowsMayBeTruncated, onOpenBooking, tripChanges }: Props) {
+export default function AdminOverview({ bookings, permissions, day, metrics, rowsMayBeTruncated, onOpenBooking, tripChanges, attention = null }: Props) {
   const router = useRouter();
   const [refreshing, startRefresh] = useTransition();
   const can = (permission: AdminPermission) => permissions.includes(permission);
@@ -49,6 +51,7 @@ export default function AdminOverview({ bookings, permissions, day, metrics, row
       <button type="button" disabled={refreshing} onClick={() => startRefresh(() => router.refresh())} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50"><RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />{refreshing ? "Refreshing…" : "Refresh overview"}</button>
     </div>
     {rowsMayBeTruncated ? <div role="alert" className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"><strong>Partial data: some records may be missing.</strong><p className="mt-1">A record limit was reached. Counts, queues and totals below cover loaded records only and may understate activity.</p></div> : null}
+    {attention ? <AttentionList attention={attention} /> : null}
     {canReadBookings ? <>
       <section aria-labelledby="today-heading">
         <h2 id="today-heading" className="text-xl font-black text-slate-950">Today at a glance</h2>
@@ -89,6 +92,24 @@ export default function AdminOverview({ bookings, permissions, day, metrics, row
     </section> : null}
     {can("content") ? <section className="rounded-2xl border border-slate-200 bg-white p-5"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-lg font-black">Recent listing activity</h2><Link href="/admin/trips" className="text-sm font-bold text-cyan-800">Manage listings</Link></div>{tripChanges.length ? <ul className="mt-3 divide-y divide-slate-100">{tripChanges.map((item) => <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm"><span className="font-medium text-slate-800">{item.title}</span><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold capitalize text-slate-600">{item.listing_status}</span></li>)}</ul> : <p className="mt-3 text-sm text-slate-500">No recent listing visibility changes.</p>}</section> : null}
   </div>;
+}
+
+function AttentionList({ attention }: { attention: AdminAttention }) {
+  const { items, tomorrow } = attention;
+  return <section aria-labelledby="attention-heading" className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 p-5">
+      <div><h2 id="attention-heading" className="text-lg font-black">Needs attention</h2><p className="mt-1 text-sm text-slate-500">Dispatch gaps, silent suppliers and failed messages. Confirmations and unpaid trips are counted below.</p></div>
+      {tomorrow ? <Link href={tomorrow.href} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-50 px-3 text-sm font-bold text-slate-700 hover:bg-cyan-50 hover:text-cyan-900"><Truck size={16} className="text-cyan-700" aria-hidden="true" />Tomorrow&rsquo;s pickups: {tomorrow.bookings} booking{tomorrow.bookings === 1 ? "" : "s"} · {tomorrow.guests} guest{tomorrow.guests === 1 ? "" : "s"}<ArrowRight size={15} aria-hidden="true" /></Link> : null}
+    </div>
+    {items.length ? <ul className="divide-y divide-slate-100">{items.map((item) => <li key={item.id} className="p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3"><AlertTriangle size={19} className="mt-0.5 shrink-0 text-amber-600" aria-hidden="true" /><div className="min-w-0"><h3 className="text-sm font-bold text-slate-900">{item.label} <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold tabular-nums text-amber-900">{item.count}</span></h3><p className="mt-1 text-xs leading-5 text-slate-500">{item.note}</p></div></div>
+        <Link href={item.href} className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-cyan-800">{item.linkLabel} <ArrowRight size={15} aria-hidden="true" /></Link>
+      </div>
+      <ul className="mt-2 space-y-1 pl-8">{item.entries.map((entry) => <li key={entry.key}><Link href={entry.href} className="block rounded-lg px-2 py-1.5 text-sm hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-cyan-700"><span className="font-semibold text-slate-800">{entry.title}</span><span className="block break-words text-xs text-slate-500">{entry.detail}</span></Link></li>)}</ul>
+      {item.count > item.entries.length ? <p className="mt-1 pl-10 text-xs text-slate-500">+{item.count - item.entries.length} more</p> : null}
+    </li>)}</ul> : <p className="flex items-start gap-3 p-5 text-sm leading-6 text-slate-500"><CheckCircle2 size={20} className="mt-0.5 shrink-0 text-emerald-600" aria-hidden="true" />Nothing needs attention right now.</p>}
+  </section>;
 }
 
 function WorkMetric({ label, value, note, icon, attention = false }: { label: string; value: number | string; note: string; icon: React.ReactNode; attention?: boolean }) {

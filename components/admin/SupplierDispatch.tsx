@@ -60,7 +60,7 @@ export default function SupplierDispatch({ bookingId, bookingCurrency, bookingCa
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-  const [form, setForm] = useState({ supplier_id: "", whatsapp: true, email: true, note: "", amount_due: "", amount_due_currency: bookingCurrency || "USD", include_guest_price: false });
+  const [form, setForm] = useState({ supplier_id: "", whatsapp: true, email: true, note: "", amount_due: "", amount_due_currency: bookingCurrency || "USD", include_guest_price: false, include_medical: false });
 
   useEffect(() => {
     let active = true;
@@ -97,7 +97,7 @@ export default function SupplierDispatch({ bookingId, bookingCurrency, bookingCa
     void run(async () => {
       const result = await call<{ delivery: Delivery[]; requests: SupplierRequest[] }>(`/api/admin/bookings/${bookingId}/supplier-requests`, {
         method: "POST",
-        body: JSON.stringify({ supplier_id: form.supplier_id, channels, note: form.note, include_guest_price: form.include_guest_price, amount_due: amount, amount_due_currency: amount === null ? null : form.amount_due_currency }),
+        body: JSON.stringify({ supplier_id: form.supplier_id, channels, note: form.note, include_guest_price: form.include_guest_price, include_medical: form.include_medical, amount_due: amount, amount_due_currency: amount === null ? null : form.amount_due_currency }),
       });
       setForm((f) => ({ ...f, supplier_id: "", note: "", amount_due: "" }));
       return result;
@@ -149,6 +149,7 @@ export default function SupplierDispatch({ bookingId, bookingCurrency, bookingCa
               </div>
               <label className="block text-sm font-semibold">Note to supplier (optional)<textarea value={form.note} maxLength={1000} rows={2} onChange={(e) => setForm({ ...form, note: e.target.value })} className="mt-1 w-full rounded-xl border p-2 font-normal" /></label>
               <label className="inline-flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={form.include_guest_price} onChange={(e) => setForm({ ...form, include_guest_price: e.target.checked })} /><span>Share the guest&apos;s price / amount to collect <span className="text-slate-500">(only if the supplier collects cash)</span></span></label>
+              <label className="inline-flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" checked={form.include_medical} onChange={(e) => setForm({ ...form, include_medical: e.target.checked })} /><span>Share the guest&apos;s medical notes <span className="text-slate-500">(otherwise the supplier only sees &ldquo;Medical: yes — ask the office&rdquo;)</span></span></label>
             </>
           ) : null}
           <button disabled={busy || !form.supplier_id} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-violet-700 p-2.5 font-bold text-white disabled:opacity-50"><Send size={16} />{form.whatsapp || form.email ? "Send request" : "Create request"}</button>

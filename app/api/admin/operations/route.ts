@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
+import { tours } from "@/data/tours";
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 
@@ -82,7 +83,7 @@ export async function GET() {
   const incomeByType = groupByCurrency(activeBookings, (booking) => booking.type === "transfer" ? "Transfer" : "Tour", (booking) => booking.currency, (booking) => Number(booking.amount || 0));
   const expensesByType = groupByCurrency(expenses, (expense) => expenseTypeLabel.get(expense.expense_type) || expense.expense_type || "Other", (expense) => expense.currency, (expense) => Number(expense.amount || 0));
 
-  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType });
+  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType, tours: tours.map((tour) => ({ slug: tour.slug, title: tour.title })) });
 }
 
 export async function POST(request: NextRequest) {

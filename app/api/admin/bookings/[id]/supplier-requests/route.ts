@@ -79,7 +79,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   const { data: created, error } = await database.from("supplier_booking_requests").insert({
     booking_id: id,
     supplier_id: contact.id,
-    details: buildSupplierBookingDetails(booking, { includeGuestPrice: input.include_guest_price }),
+    details: buildSupplierBookingDetails(booking, { includeGuestPrice: input.include_guest_price, includeMedical: input.include_medical }),
     admin_note: input.note,
     amount_due: input.amount_due ?? null,
     amount_due_currency: input.amount_due == null ? null : input.amount_due_currency,
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     return noStoreJson({ error: "The request could not be saved." }, 500);
   }
   const row = created as SupplierRequestRow;
-  await recordEvent(database, row.id, "sent", actor, input.note, { channels: input.channels, include_guest_price: input.include_guest_price });
+  await recordEvent(database, row.id, "sent", actor, input.note, { channels: input.channels, include_guest_price: input.include_guest_price, include_medical: input.include_medical });
   const delivery = await deliverToSupplier(database, row, contact, "request", input.channels);
   return noStoreJson({ request_id: row.id, delivery, requests: await loadPresentedRequests(database, id) }, 201);
 }

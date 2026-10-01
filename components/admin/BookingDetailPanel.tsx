@@ -6,12 +6,13 @@ import BookingCancellation from "./BookingCancellation";
 import BookingPayments from "./finance/BookingPayments";
 import BookingPartners from "./finance/BookingPartners";
 import SupplierDispatch from "./SupplierDispatch";
+import BookingGuestNeeds from "./BookingGuestNeeds";
 import { readPricingSnapshot, validParticipantCounts, type BookingPricingSnapshot } from "@/lib/booking-pricing-snapshot";
 type Booking={id:string;reference:string;customer_name:string;tour_name:string|null;amount:number|string;currency:string;date:string|null;status?:string;phone?:string;customer_email?:string|null;hotel?:string|null;guests?:number|null;notes?:string|null;payment_status?:string;booking_source?:string;supplier_name?:string|null};
 type Expense={id:string;description:string;amount:number|string;currency:string;expense_date:string;category:string|null};
 type Assignment={id:string;assignment_type:string;staff_member_id:string|null;supplier_id:string|null};
 type TransferDetails={pricing_version:string|null;trip_type:string;direction:string;zone:string|null;passengers:{adults:number;children:number;infants:number;total:number};luggage:{large_bags:number;cabin_bags:number;oversized_items:{type:string;quantity:number;note?:string}[]};child_seats:Record<string,number>;wheelchair:string;hotel_name:string|null;flight_number:string|null;return_leg:{date:string|null;time:string|null;flight_number:string|null}|null;allocated_vehicles:{vehicle_class:string;count:number}[];vehicle_count:number;requires_manual_confirmation:boolean;manual_reason:string|null;fare:{subtotal:number;extras:number;total:number;persisted_amount:number};warnings:string[]};
-type Detail={booking?:{transfer_details?:TransferDetails|null;pricing_snapshot?:unknown;subtotal?:number|string|null;discount_amount?:number|string|null;promo_code?:string|null;guests?:number|null;adults?:number|null;youth?:number|null;infants?:number|null;referral_code?:string|null;referrer_customer_key?:string|null;referral_discount_percent?:number|string|null;referral_discount_amount?:number|string|null;cancellation_reason?:string|null;cancellation_note?:string|null;cancelled_at?:string|null};expenses:Expense[];assignments:Assignment[];staff:{id:string;name:string;staff_type:"guide"|"driver"}[];suppliers:{id:string;name:string;type?:string}[]};
+type Detail={booking?:{transfer_details?:TransferDetails|null;pricing_snapshot?:unknown;subtotal?:number|string|null;discount_amount?:number|string|null;promo_code?:string|null;guests?:number|null;adults?:number|null;youth?:number|null;infants?:number|null;referral_code?:string|null;referrer_customer_key?:string|null;referral_discount_percent?:number|string|null;referral_discount_amount?:number|string|null;cancellation_reason?:string|null;cancellation_note?:string|null;cancelled_at?:string|null;guest_requirements?:unknown};expenses:Expense[];assignments:Assignment[];staff:{id:string;name:string;staff_type:"guide"|"driver"}[];suppliers:{id:string;name:string;type?:string}[]};
 const today=()=>new Date().toLocaleDateString("en-CA",{timeZone:"Africa/Cairo"});
 export default function BookingDetailPanel({booking,onClose}:{booking:Booking;onClose:()=>void}){
  const dialogRef = useRef<HTMLDialogElement>(null);
@@ -50,6 +51,7 @@ export default function BookingDetailPanel({booking,onClose}:{booking:Booking;on
  {error?<p className="mt-4 rounded-xl bg-rose-50 p-3 text-rose-700" role="alert">{error}</p>:null}{!detail?<p role="status" className="mt-4">{error ? "Additional details could not be loaded." : "Loading booking details…"}</p>:<div className="mt-6 space-y-6">
  {detail.booking?.transfer_details?<TransferBlock t={detail.booking.transfer_details} money={money}/>:null}
  {booking.status==="cancelled"?<BookingCancellation bookingId={booking.id} reason={detail.booking?.cancellation_reason??null} note={detail.booking?.cancellation_note??null} cancelledAt={detail.booking?.cancelled_at??null}/>:null}
+ <BookingGuestNeeds bookingId={booking.id} requirements={detail.booking?.guest_requirements} migrated={Boolean(detail.booking&&Object.hasOwn(detail.booking,"guest_requirements"))}/>
  <BookingPayments bookingId={booking.id} bookingCurrency={booking.currency}/>
  <BookingPartners bookingId={booking.id}/>
  <SupplierDispatch bookingId={booking.id} bookingCurrency={booking.currency} bookingCancelled={booking.status==="cancelled"}/>
