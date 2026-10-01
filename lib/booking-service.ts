@@ -241,23 +241,3 @@ export async function sendBookingEmail(toEmail: string | undefined, subject: str
   };
 }
 
-export async function getStripeCheckoutSession(sessionId: string) {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-
-  if (!secretKey) {
-    return { success: false, reason: "missing-stripe-config" } as const;
-  }
-
-  const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}?expand[]=line_items&expand[]=payment_intent.payment_method`, {
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-    },
-  });
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    return { success: false, reason: data.error?.message || "stripe-session-not-found" } as const;
-  }
-
-  return { success: true, session: data } as const;
-}

@@ -53,4 +53,10 @@ describe("Twilio inbound webhook", () => {
     expect(response.status).toBe(500);
     expect(log).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ messageSid: "SM123", code: "42501" }));
   });
+
+  it("acknowledges a retried message that is already stored", async () => {
+    mocks.insert.mockResolvedValue({ error: { code: "23505", message: "duplicate key value" } });
+    const response = await POST(request(sign(params)));
+    expect(response.status).toBe(200);
+  });
 });
