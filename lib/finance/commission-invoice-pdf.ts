@@ -38,9 +38,9 @@ export async function createCommissionInvoicePdf(invoice: CommissionInvoice, ref
   flow.ensure(introHeight); pdfWrite(doc, intro, pdfPage.margin, flow.y, width, { size: 10 }); flow.advance(introHeight);
   const linked = Boolean(invoice.source);
   const columns: TableColumn[] = linked ? [
-    { label: "Date", width: 59 }, { label: "Booking / Trip", width: 180 }, { label: "Guests", width: 40, align: "right" },
-    { label: "Booked sales", width: 75, align: "right" }, { label: "Original due", width: 75, align: "right" },
-    { label: "DRS due", width: width - 429, align: "right" },
+    { label: "Date", width: 54 }, { label: "Booking / Trip", width: 140 }, { label: "Guests", width: 40, align: "right" },
+    { label: "Ticket price", width: 62, align: "right" }, { label: "Total sales", width: 66, align: "right" },
+    { label: "Original due", width: 70, align: "right" }, { label: "DRS due", width: width - 432, align: "right" },
   ] : [
     { label: "Date", width: 59 }, { label: "Trip", width: 114, align: "left" }, { label: "Customers", width: 62, align: "right" },
     { label: "Ticket price", width: 64, align: "right" }, { label: "Total sales", width: 74, align: "right" },
@@ -50,19 +50,19 @@ export async function createCommissionInvoicePdf(invoice: CommissionInvoice, ref
   header();
   for (const [index, row] of totals.rows.entries()) {
     const date = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "2-digit", timeZone: "UTC" }).format(new Date(`${row.date}T12:00:00Z`));
-    const values = linked ? [date, `${row.bookingReference}\n${row.trip}`, String(row.customers), formatMoney(row.sales, invoice.currency), `${row.nativeCommission} ${row.nativeCurrency}`, formatMoney(row.commission, invoice.currency)] : [date, row.trip, String(row.customers), formatMoney(row.ticketPrice, invoice.currency), formatMoney(row.sales, invoice.currency), `${row.commissionPercent}%`, formatMoney(row.commission, invoice.currency)];
+    const values = linked ? [date, `${row.bookingReference}\n${row.trip}`, String(row.customers), formatMoney(row.ticketPrice, invoice.currency), formatMoney(row.sales, invoice.currency), `${row.nativeCommission} ${row.nativeCurrency}`, formatMoney(row.commission, invoice.currency)] : [date, row.trip, String(row.customers), formatMoney(row.ticketPrice, invoice.currency), formatMoney(row.sales, invoice.currency), `${row.commissionPercent}%`, formatMoney(row.commission, invoice.currency)];
     const height = Math.max(...values.map((v, i) => pdfTextHeight(doc, v, columns[i].width - 10, 9))) + 16;
     if (flow.y + height > pdfPage.height - 80) { flow.newPage(); header(); }
     flow.advance(drawTableRow(doc, values, columns, pdfPage.margin, flow.y, { zebra: index % 2 === 1 }));
   }
   flow.ensure(100);
   flow.advance(14);
-  flow.advance(drawTableRow(doc, linked ? ["Total", "", String(totals.customers), formatMoney(totals.sales, invoice.currency), "", formatMoney(totals.commission, invoice.currency)] : ["Total", "", String(totals.customers), "", formatMoney(totals.sales, invoice.currency), "", formatMoney(totals.commission, invoice.currency)], columns, pdfPage.margin, flow.y, { header: true }));
+  flow.advance(drawTableRow(doc, linked ? ["Total", "", String(totals.customers), "", formatMoney(totals.sales, invoice.currency), "", formatMoney(totals.commission, invoice.currency)] : ["Total", "", String(totals.customers), "", formatMoney(totals.sales, invoice.currency), "", formatMoney(totals.commission, invoice.currency)], columns, pdfPage.margin, flow.y, { header: true }));
   flow.advance(22);
   pdfWrite(doc, `Payable to Daily Red Sea: ${formatMoney(totals.commission, invoice.currency)} ${invoice.currency}`, pdfPage.margin, flow.y, width, { size: 16, bold: true, color: pdfColors.navy });
   flow.advance(25);
   if (linked) {
-    const explanation = "Current unpaid commission after booking-linked payments. USD uses locked trip rates; original-currency balances are shown above. Record receipts in those currencies. Booked sales may differ from an agreed commission calculation basis.";
+    const explanation = "Current unpaid commission after booking-linked payments. USD uses locked trip rates; original-currency balances are shown above. Record receipts in those currencies. Ticket prices and sales are for reference; the amount due is the unpaid commission recorded per booking.";
     const height = pdfTextHeight(doc, explanation, width, 9) + 14;
     flow.ensure(height); pdfWrite(doc, explanation, pdfPage.margin, flow.y, width, { size: 9 }); flow.advance(height);
   }

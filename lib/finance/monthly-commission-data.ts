@@ -13,7 +13,7 @@ export async function loadMonthlyCommission(db: SupabaseClient, supplierId: stri
   const lines: CommissionLine[] = [];
   for (let offset = 0; ; offset += 500) {
     const result = await db.from("booking_financial_lines")
-      .select("id,trip_date,tour_name,guests,currency,recognised_revenue,fx_locked,fx_rate_to_usd,supplier_fx_locked,supplier_cost_source,destination,booking_financials(reference)")
+      .select("id,trip_date,tour_name,guests,currency,recognised_revenue,fx_locked,fx_rate_to_usd,supplier_fx_locked,supplier_cost_source,destination,collected_amount,booking_financials(reference)")
       .eq("supplier_id", supplierId).eq("collected_by", "supplier").eq("included", true)
       .gte("trip_date", start).lt("trip_date", end).order("id").range(offset, offset + 499);
     if (result.error) throw result.error;

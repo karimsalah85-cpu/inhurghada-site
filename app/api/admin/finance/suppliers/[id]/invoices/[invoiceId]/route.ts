@@ -8,7 +8,7 @@ import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { sendBookingEmail } from "@/lib/booking-service";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { loadMonthlyCommission } from "@/lib/finance/monthly-commission-data";
-import { assertCurrentCommission } from "@/lib/finance/monthly-commission";
+import { assertCurrentCommission, withTicketPrices } from "@/lib/finance/monthly-commission";
 
 export const runtime = "nodejs";
 type Context = { params: Promise<{ id: string; invoiceId: string }> };
@@ -92,7 +92,7 @@ export async function PATCH(request: NextRequest, context: Context) {
     if (result.data.status !== "draft") return financeJson({ error: "Only unsent drafts can be refreshed." }, 409);
     const old = commissionInvoiceSchema.parse(result.data.document);
     const current = await loadMonthlyCommission(supabase, id, old.period, old.currency);
-    let update = createRequiredAdminClient().from("supplier_commission_invoices").update({ document: { ...current, notes: old.source ? old.notes : "" } })
+    let update = createRequiredAdminClient().from("supplier_commission_invoices").update({ document: { ...withTicketPrices(current, old), notes: old.source ? old.notes : "" } })
       .eq("id", invoiceId).eq("supplier_id", id).eq("status", "draft");
     update = old.source ? update.eq("document->source->>fingerprint", old.source.fingerprint).eq("document->source->>generatedAt", old.source.generatedAt)
       : update.is("document->source", null);
