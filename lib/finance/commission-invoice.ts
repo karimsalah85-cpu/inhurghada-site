@@ -8,23 +8,33 @@ export const commissionInvoiceSchema = z.object({
   period: z.string().regex(/^20\d{2}-(0[1-9]|1[0-2])$/, "Choose a valid month."),
   currency: currencySchema,
   rows: z.array(z.object({
-    date: isoDateSchema, trip: text(140), customers: z.number().int().min(1).max(10000),
+    date: isoDateSchema, trip: text(140), customers: z.number().int().min(0).max(10000),
     ticketPrice: nonNegativeAmountSchema.refine(value => toMinor(value) <= 100000000n, "Ticket price is too large."),
     commissionPercent: z.string().regex(/^\d{1,3}(\.\d{1,2})?$/).refine(value => Number(value) <= 100, "Commission must be between 0 and 100%."),
-  })).min(1).max(100),
+    lineId: z.string().uuid().optional(),
+    bookingReference: z.string().max(100).optional(),
+    salesAmount: nonNegativeAmountSchema.optional(),
+    commissionAmount: nonNegativeAmountSchema.optional(),
+    nativeCurrency: currencySchema.optional(),
+    nativeCommission: nonNegativeAmountSchema.optional(),
+    exchangeRate: z.string().max(40).optional(),
+  })).min(1).max(1000),
   notes: z.string().trim().max(1000).default(""),
+  source: z.object({ kind: z.literal("ledger"), fingerprint: z.string().regex(/^[a-f0-9]{64}$/), generatedAt: z.string().datetime() }).optional(),
 }).superRefine((value, ctx) => {
   value.rows.forEach((row, index) => {
+    if (!value.source && row.customers < 1) ctx.addIssue({ code: "custom", path: ["rows", index, "customers"], message: "Enter at least one customer." });
     if (!row.date.startsWith(value.period)) ctx.addIssue({ code: "custom", path: ["rows", index, "date"], message: "Every trip date must be within the statement month." });
+    if (value.source && (!row.lineId || row.salesAmount === undefined || row.commissionAmount === undefined)) ctx.addIssue({ code: "custom", path: ["rows", index], message: "Load linked amounts from finance." });
   });
 });
 export type CommissionInvoice = z.infer<typeof commissionInvoiceSchema>;
 export function commissionTotals(invoice: CommissionInvoice) {
   let sales = 0n, commission = 0n, customers = 0;
   const rows = invoice.rows.map(row => {
-    const total = toMinor(row.ticketPrice) * BigInt(row.customers);
+    const total = invoice.source ? toMinor(row.salesAmount!) : toMinor(row.ticketPrice) * BigInt(row.customers);
     // Round each line half up to cents, then sum the displayed amounts.
-    const cut = (total * toMinor(row.commissionPercent) + 5000n) / 10000n;
+    const cut = invoice.source ? toMinor(row.commissionAmount!) : (total * toMinor(row.commissionPercent) + 5000n) / 10000n;
     sales += total; commission += cut; customers += row.customers;
     return { ...row, sales: fromMinor(total), commission: fromMinor(cut) };
   });

@@ -7,9 +7,10 @@ export function buildCommissionInvoiceEmail(invoice: CommissionInvoice, referenc
   const theme = emailTheme("en");
   const { palette } = theme;
   const money = (value: string) => escape(formatMoney(value, invoice.currency));
-  const headings = ["Date / Trip", "Customers", "Ticket price", "Total sales", "Rate", "DRS commission"];
+  const linked = Boolean(invoice.source);
+  const headings = linked ? ["Date / Booking / Trip", "Customers", "Booked sales", "Original amount due", "Due to Daily Red Sea"] : ["Date / Trip", "Customers", "Ticket price", "Total sales", "Rate", "DRS commission"];
   const rows = totals.rows.map(row => {
-    const values = [`${escape(row.date)}<br><strong>${escape(row.trip)}</strong>`, String(row.customers), money(row.ticketPrice), money(row.sales), `${escape(row.commissionPercent)}%`, money(row.commission)];
+    const values = linked ? [`${escape(row.date)}<br>${escape(row.bookingReference || "")}<br><strong>${escape(row.trip)}</strong>`, String(row.customers), money(row.sales), `${escape(row.nativeCommission || "")} ${escape(row.nativeCurrency || "")}`, money(row.commission)] : [`${escape(row.date)}<br><strong>${escape(row.trip)}</strong>`, String(row.customers), money(row.ticketPrice), money(row.sales), `${escape(row.commissionPercent)}%`, money(row.commission)];
     return `<tr class="trip-row">${values.map((value, index) => `<td class="${index === 0 ? "trip-name" : "trip-value"}" style="padding:16px 5px;border-bottom:1px solid ${palette.line};text-align:${index === 0 ? "left" : "right"};vertical-align:top;${index === 0 ? "line-height:20px;" : ""}">${index ? `<span class="mobile-label" style="display:none;mso-hide:all;color:${palette.body};">${headings[index]}</span>` : ""}${value}</td>`).join("")}</tr>`;
   }).join("");
 
@@ -24,14 +25,15 @@ export function buildCommissionInvoiceEmail(invoice: CommissionInvoice, referenc
     rows: [
       emailIntro(theme, { eyebrow: "Partner statement", headline: "Commission Statement", body: [
         emailParagraph(theme, `Hello ${invoice.partner},`, { strong: true }),
-        emailParagraph(theme, `Your commission statement for ${commissionPeriod(invoice.period)} is ready. The PDF is attached for your records.`, { last: true }),
+        emailParagraph(theme, `Thank you for your business. This statement details the commission payable by ${invoice.partner} to Daily Red Sea for ${commissionPeriod(invoice.period)}. Please pay Daily Red Sea the amount shown below. The PDF is attached for your records.`, { last: true }),
       ] }),
-      emailRow(emailCard(theme, `${emailCardTitle(theme, "Daily Red Sea commission")}<p style="margin:8px 0;font-size:32px;line-height:40px;font-weight:800;color:${palette.ink};">${money(totals.commission)} <span style="font-size:14px;">${escape(invoice.currency)}</span></p>${emailParagraph(theme, `${totals.customers} customers · ${formatMoney(totals.sales, invoice.currency)} total sales`, { last: true, small: true })}`), "0 42px 22px"),
+      emailRow(emailCard(theme, `${emailCardTitle(theme, "Commission payable to Daily Red Sea")}<p style="margin:8px 0;font-size:32px;line-height:40px;font-weight:800;color:${palette.ink};">${money(totals.commission)} <span style="font-size:14px;">${escape(invoice.currency)}</span></p>${emailParagraph(theme, `${totals.customers} customers · ${formatMoney(totals.sales, invoice.currency)} ${linked ? "booked sales" : "total sales"}`, { last: true, small: true })}`), "0 42px 22px"),
       emailRow(emailDetails(theme, [
-        { label: "Partner", value: invoice.partner }, { label: "Period", value: commissionPeriod(invoice.period) },
+        { label: "Payable by", value: invoice.partner }, { label: "Payable to", value: "Daily Red Sea" }, { label: "Period", value: commissionPeriod(invoice.period) },
         { label: "City", value: invoice.city }, { label: "Currency", value: invoice.currency === "USD" ? "US Dollar (USD)" : invoice.currency },
       ]), "0 42px 26px"),
-      emailRow(emailHeading(theme, "Trip breakdown") + tripTable + emailDetails(theme, [], { label: "Total commission", value: `${formatMoney(totals.commission, invoice.currency)} ${invoice.currency}` }), "0 42px 30px"),
+      emailRow(emailHeading(theme, "Trip breakdown") + tripTable + emailDetails(theme, [], { label: "Total payable to Daily Red Sea", value: `${formatMoney(totals.commission, invoice.currency)} ${invoice.currency}` }), "0 42px 30px"),
+      invoice.source ? emailRow(emailParagraph(theme, "Current unpaid commission for trips in this month, after payments allocated to each booking. USD amounts use locked trip exchange rates; original-currency amounts are shown above. Record receipts against those original-currency balances. Booked sales may differ from a separately agreed commission calculation basis.", { small: true }), "0 42px 20px") : "",
       invoice.notes ? emailRow(emailHeading(theme, "Payment instructions / notes") + emailParagraph(theme, invoice.notes), "0 42px 30px") : "",
       emailRow(emailPanel(theme, { lead: "Here to help.", body: "Questions about this statement? Reply to this email and our team will help." }), "0 42px 30px"),
     ],

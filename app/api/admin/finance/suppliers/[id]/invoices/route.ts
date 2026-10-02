@@ -4,6 +4,8 @@ import { financeAuthorization, financeDbError, financeJson, isUuid } from "@/lib
 import { commissionInvoiceSchema } from "@/lib/finance/commission-invoice";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
+import { loadMonthlyCommission } from "@/lib/finance/monthly-commission-data";
+import { assertCurrentCommission } from "@/lib/finance/monthly-commission";
 
 type Context = { params: Promise<{ id: string }> };
 export async function GET(_request: NextRequest, context: Context) {
@@ -33,7 +35,10 @@ export async function POST(request: NextRequest, context: Context) {
     const existing = await db.from("supplier_commission_invoices").select("*").eq("id", parsed.data.id).maybeSingle();
     if (existing.error) return financeDbError(existing.error);
     if (existing.data) return existing.data.supplier_id === id ? financeJson({ invoice: existing.data }) : financeJson({ error: "Invoice ID is already in use." }, 409);
-    const { data, error } = await db.from("supplier_commission_invoices").insert({ id: parsed.data.id, supplier_id: id, document: parsed.data.document, created_by: user.id }).select().single();
+    const current = await loadMonthlyCommission(supabase, id, parsed.data.document.period, parsed.data.document.currency);
+    assertCurrentCommission(parsed.data.document, current);
+    const document = { ...current, notes: parsed.data.document.notes };
+    const { data, error } = await db.from("supplier_commission_invoices").insert({ id: parsed.data.id, supplier_id: id, document, created_by: user.id }).select().single();
     return error ? financeDbError(error) : financeJson({ invoice: data }, 201);
   } catch (error) { return financeDbError(error); }
 }
