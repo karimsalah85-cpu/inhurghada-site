@@ -1,8 +1,11 @@
 import { getPostTripContext } from "@/lib/post-trip-context";
 import { createPostTripPdf } from "@/lib/post-trip-pdf";
 import { buildReferralMessage } from "@/lib/referral-messages";
-import { companyStatement, sendBookingEmail } from "@/lib/booking-service";
-import { createBookingStatusPdf } from "@/lib/invoice-service";
+import { buildWhatsAppLink, companyStatement, sendBookingEmail } from "@/lib/booking-service";
+import { whatsappNumber } from "@/lib/contact";
+import type { Locale } from "@/lib/i18n";
+import { emailCard, emailCardTitle, emailDetails, emailIntro, emailPanel, emailParagraph, emailRow, emailSignoff, emailTheme, emailWhatsappLabel, renderEmail } from "@/lib/email/layout";
+import { createBookingStatusPdf, statusPdfCopy } from "@/lib/invoice-service";
 import { bookingLocale } from "@/lib/booking-communications-i18n";
 
 export type StatusBooking = {
@@ -47,22 +50,54 @@ const paymentCopy: Record<string, { label: string; message: string }> = {
   refunded: { label: "Refunded", message: "Your payment is marked as refunded. Bank or card processing times may apply where relevant." },
 };
 
-const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({
-  "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
-})[character] || character);
+/**
+ * Lays a status message out like the booking-confirmation email: reference in
+ * the masthead, large headline, the details as hairline rows with the total
+ * set large, then the dark support panel with the WhatsApp button.
+ */
+function renderStatusEmail(input: { locale: Locale; reference: string; eyebrow: string; headline: string; greeting: string; notice?: { label: string; text: string } | null; messages: string[]; details: string[][]; total?: string[] | null; help: string }) {
+  const theme = emailTheme(input.locale);
+  return renderEmail(theme, {
+    title: input.headline,
+    preheader: `${input.eyebrow} · ${input.reference}`,
+    mastheadNote: { text: input.reference, ltr: true },
+    rows: [
+      emailIntro(theme, {
+        eyebrow: input.eyebrow,
+        headline: input.headline,
+        body: [
+          emailParagraph(theme, input.greeting, { strong: true }),
+          ...(input.notice ? [emailCard(theme, emailCardTitle(theme, input.notice.label, input.notice.text), "0 0 16px")] : []),
+          ...input.messages.map((message, index) => emailParagraph(theme, message, { last: index === input.messages.length - 1 })),
+        ],
+      }),
+      emailRow(emailDetails(theme, input.details.map(([label, value], index) => ({ label, value, ltr: index === 0 })), input.total ? { label: input.total[0], value: input.total[1] } : undefined), "0 42px 30px"),
+      emailRow(emailPanel(theme, { lead: input.help, button: { label: emailWhatsappLabel(input.locale), href: buildWhatsAppLink(whatsappNumber, `Daily Red Sea booking ${input.reference}`) } }), "0 42px 30px"),
+    ],
+    signoff: emailSignoff(input.locale),
+  });
+}
 
 export async function sendBookingStatusNotification(booking: StatusBooking, status: string) {
   if (!booking.customer_email) return { success: false, reason: "missing-recipient" };
   const copy = statusCopy[status];
   if (!copy) return { success: false, reason: "invalid-status" };
-  const details = [
-    ["Booking reference", booking.reference],
-    ["Experience", booking.tour_name || "Transfer"],
-    ["Date", booking.date || "To be confirmed"],
-    ["New status", copy.label],
-  ];
-  const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
-  const html = `<p>Hello ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(copy.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.</p>`;
+  const labels = localizedStatusLabels.en;
+  const html = renderStatusEmail({
+    locale: "en",
+    reference: booking.reference,
+    eyebrow: copy.label,
+    headline: statusPdfCopy.en.statusUpdate,
+    greeting: `${labels.hello} ${booking.customer_name},`,
+    messages: [copy.message],
+    details: [
+      ["Booking reference", booking.reference],
+      ["Experience", booking.tour_name || "Transfer"],
+      ["Date", booking.date || "To be confirmed"],
+      ["New status", copy.label],
+    ],
+    help: labels.help,
+  });
   return sendBookingEmail(booking.customer_email, `Booking ${booking.reference}: ${copy.label}`, html);
 }
 
@@ -72,6 +107,8 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
   if (!bookingStatus || !paymentStatus) return null;
   const locale = bookingLocale(booking.locale);
   const labels = localizedStatusLabels[locale];
+  // The voucher PDF already has these headings and status names in all six languages.
+  const pdfCopy = statusPdfCopy[locale];
   const amount = booking.amount == null
     ? null
     : new Intl.NumberFormat(locale, { style: "currency", currency: booking.currency || "USD" }).format(Number(booking.amount));
@@ -82,16 +119,26 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
     [labels.bookingStatus, bookingStatus.label],
     [labels.paymentStatus, paymentStatus.label],
     ...(booking.assignedPersonName ? [[`Assigned ${booking.assignedPersonRole || "guide/driver"}`, booking.assignedPersonName]] : []),
-    ...(amount ? [[labels.total, amount]] : []),
   ];
-  const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
+  const total = amount ? [labels.total, amount] : null;
   const change = booking.dateChange;
   const changeNotice = change
     ? `${change.tripName ? `${change.tripName}: ` : ""}${change.from ? labels.dateChangedFromTo(change.from, change.to) : labels.dateChangedTo(change.to)}`
     : null;
   return {
     subject: `${labels.subject} ${booking.reference}: ${change ? `${labels.dateChanged} · ` : ""}${bookingStatus.label} · ${labels.payment} ${paymentStatus.label}`,
-    html: `<div dir="${locale === "ar" ? "rtl" : "ltr"}" lang="${locale}"><p>${labels.hello} ${escapeHtml(booking.customer_name)},</p>${changeNotice ? `<p><strong>${escapeHtml(changeNotice)}</strong></p>` : ""}<p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>${labels.help}</p></div>`,
+    html: renderStatusEmail({
+      locale,
+      reference: booking.reference,
+      eyebrow: `${pdfCopy.statusLabel[booking.status || ""] || bookingStatus.label} · ${pdfCopy.paymentLabel[booking.payment_status || ""] || paymentStatus.label}`,
+      headline: pdfCopy.statusUpdate,
+      greeting: `${labels.hello} ${booking.customer_name},`,
+      notice: changeNotice ? { label: labels.dateChanged, text: changeNotice } : null,
+      messages: [bookingStatus.message, paymentStatus.message],
+      details,
+      total,
+      help: labels.help,
+    }),
     text: [
       `${labels.hello} ${booking.customer_name},`,
       "",
@@ -99,7 +146,7 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
       bookingStatus.message,
       paymentStatus.message,
       "",
-      ...details.map(([label, value]) => `${label}: ${value}`),
+      ...[...details, ...(total ? [total] : [])].map(([label, value]) => `${label}: ${value}`),
       "",
       labels.help,
       "",
@@ -161,6 +208,7 @@ export async function buildBookingStatusPdfAttachment(booking: StatusBooking) {
     assignedPersonName: booking.assignedPersonName,
     assignedPersonRole: booking.assignedPersonRole,
     locale: booking.locale || "en",
+    tourSlug: booking.tour_slug,
   });
   return { filename: `daily-red-sea-status-${filenameReference}.pdf`, content };
 }

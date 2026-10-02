@@ -10,6 +10,7 @@
  * when the supplier collects cash on arrival).
  */
 import { requirementRows } from "@/lib/guest-requirements";
+import { emailButton, emailCard, emailCardTitle, emailDetails, emailHeading, emailIntro, emailParagraph, emailRow, emailSignoff, emailTheme, renderEmail } from "@/lib/email/layout";
 
 export type SupplierBookingRow = {
   reference: string;
@@ -298,22 +299,49 @@ export function buildSupplierMessage(input: SupplierMessageInput) {
   return lines.join("\n");
 }
 
-const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c] || c);
+const supplierEyebrow: Record<MessageKind, string> = {
+  request: "Supplier request",
+  reminder: "Supplier reminder",
+  update: "Booking update",
+  cancelled: "Booking cancelled",
+  payment_sent: "Payment sent",
+};
 
+/** Supplier emails share the customer emails' layout (lib/email/layout.ts); the body stays English with the Arabic action line. */
 export function buildSupplierEmail(input: SupplierMessageInput) {
   const { details } = input;
   const subject = `${headline[input.kind]} · ${details.reference} · ${details.trips[0]?.name || "Booking"} · ${formatTripDate(details.trips[0]?.date ?? null)}`;
+  const theme = emailTheme("en");
   const rows = input.kind === "request" || input.kind === "reminder" || input.kind === "update" ? detailRows(details, input.amountDue) : [];
-  const table = rows.length
-    ? `<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:560px">${rows.map(([label, value]) => `<tr><th align="left" valign="top" style="padding:8px;border-bottom:1px solid #e2e8f0;color:#475569;width:140px">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0;white-space:pre-wrap">${escapeHtml(value)}</td></tr>`).join("")}</table>`
-    : "";
   const body = buildSupplierMessage(input).split("\n").slice(4);
-  const intro = input.kind === "cancelled" || input.kind === "payment_sent" ? `<p>${escapeHtml(body[0] || "")}</p>${input.kind === "payment_sent" ? "<p>Please confirm once you have received it.</p>" : ""}` : "<p>Please check the booking below and let us know if you can take it.</p>";
-  const note = input.adminNote ? `<p style="padding:12px;background:#fef9c3;border-radius:8px"><strong>Note from Daily Red Sea:</strong> ${escapeHtml(input.adminNote)}</p>` : "";
-  const button = input.kind === "cancelled"
-    ? ""
-    : `<p style="margin:24px 0"><a href="${escapeHtml(input.link)}" style="display:inline-block;padding:14px 22px;background:#0369a1;color:#fff;border-radius:10px;font-weight:bold;text-decoration:none">${input.kind === "payment_sent" ? "Confirm payment received" : "Confirm or decline"}</a></p><p dir="rtl" style="color:#475569">${escapeHtml(arabicAction[input.kind])}</p>`;
-  const html = `<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5"><p>Hello ${escapeHtml(input.supplierName)},</p>${intro}${table}${note}${button}<p style="color:#64748b;font-size:12px">This link is personal to you. Please do not forward it.</p></div>`;
+  const intro = input.kind === "cancelled" || input.kind === "payment_sent"
+    ? [body[0] || "", ...(input.kind === "payment_sent" ? ["Please confirm once you have received it."] : [])]
+    : ["Please check the booking below and let us know if you can take it."];
+  const action = input.kind === "cancelled"
+    ? emailParagraph(theme, arabicAction.cancelled, { dir: "rtl", last: true })
+    : `${emailParagraph(theme, { html: emailButton(theme, input.kind === "payment_sent" ? "Confirm payment received" : "Confirm or decline", input.link) })}
+          ${emailParagraph(theme, arabicAction[input.kind], { dir: "rtl" })}
+          ${emailParagraph(theme, "This link is personal to you. Please do not forward it.", { small: true, last: true })}`;
+  const html = renderEmail(theme, {
+    title: headline[input.kind],
+    preheader: `${details.reference} · ${details.trips[0]?.name || "Booking"} · ${formatTripDate(details.trips[0]?.date ?? null)}`,
+    mastheadNote: { text: details.reference, ltr: true },
+    rows: [
+      emailIntro(theme, {
+        eyebrow: supplierEyebrow[input.kind],
+        headline: headline[input.kind],
+        body: [
+          emailParagraph(theme, `Hello ${input.supplierName},`, { strong: true }),
+          ...intro.map((line, index) => emailParagraph(theme, line, { last: index === intro.length - 1 })),
+        ],
+      }),
+      rows.length ? emailRow(`${emailHeading(theme, "Booking details")}
+          ${emailDetails(theme, rows.map(([label, value]) => ({ label, value })))}`, "16px 42px 30px", { section: true }) : "",
+      input.adminNote ? emailRow(emailCard(theme, emailCardTitle(theme, "Note from Daily Red Sea", input.adminNote), "0"), "0 42px 26px") : "",
+      emailRow(action, "0 42px 34px"),
+    ],
+    signoff: emailSignoff("en"),
+  });
   return { subject, html, text: buildSupplierMessage(input) };
 }
 

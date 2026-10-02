@@ -15,7 +15,7 @@ describe("customer booking email signature", () => {
     expect(html).toContain("Daily Red Sea");
     expect(html).toContain("info@dailyredsea.com");
     expect(html).not.toContain("About Daily Red Sea");
-    expect(html).toContain("background:#f0f9ff");
+    expect(html).toContain("background:#E7F1EF");
   });
 
   it("does not duplicate an existing company statement", () => {

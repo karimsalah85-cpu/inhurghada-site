@@ -1,8 +1,11 @@
 /**
  * Single source of brand truth for every generated PDF. Every generator
- * (booking confirmation, status voucher, admin report, and any future
- * document) reads colors, spacing and fonts from here instead of hardcoding
- * its own hex values.
+ * (booking confirmation, status voucher, post-trip thank-you, admin report,
+ * supplier statement and any future document) reads colors, spacing and
+ * fonts from here instead of hardcoding its own hex values, and builds its
+ * pages from the booking confirmation's parts in lib/pdf/components.ts: the
+ * photographic hero and boarding-pass card on page 1, the white brand header
+ * and photo strip footer on text pages.
  */
 
 export const pdfColors = {

@@ -22,6 +22,7 @@ import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getCustomerVisibleAssignment } from "@/lib/booking-assignment";
 import { bookingRequestHash } from "@/lib/booking-idempotency";
 import { bookingLocale, buildCustomerConfirmationEmail } from "@/lib/booking-communications-i18n";
+import { buildOperatorBookingEmail } from "@/lib/email/messages";
 import { getLiveTours } from "@/lib/live-content";
 import { localizeTour } from "@/lib/tour-localization";
 import { calculateTransferQuote, type TransferQuote } from "@/lib/transfer-quote";
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
       hotel,
       message: bookingNotes,
     });
-    const emailHtml = buildBookingEmailHtml({
+    const operatorEmail = buildOperatorBookingEmail({
       bookingType,
       reference,
       customerName,
@@ -240,7 +241,7 @@ export async function POST(request: NextRequest) {
 
     const [whatsappResult, bookingEmailResult, customerEmailResult] = await Promise.all([
       deliverBookingNotification(supabase, bookingId, "operator_whatsapp", () => sendWhatsAppMessage(bookingWhatsApp, message)),
-      deliverBookingNotification(supabase, bookingId, "operator_email", () => sendBookingEmail(bookingEmail, `New ${bookingType} booking: ${reference}`, emailHtml, confirmationAttachment)),
+      deliverBookingNotification(supabase, bookingId, "operator_email", () => sendBookingEmail(bookingEmail, operatorEmail.subject, operatorEmail.html, confirmationAttachment)),
       customerEmail
         ? deliverBookingNotification(supabase, bookingId, "customer_email", () => {
           const customerConfirmation = buildCustomerConfirmationEmail({
@@ -392,48 +393,6 @@ async function deliverBookingNotification(
   });
   if (finishError) console.error("Booking notification completion failed", { kind, message: finishError.message });
   return result;
-}
-
-function buildBookingEmailHtml({
-  bookingType,
-  reference,
-  customerName,
-  phone,
-  customerEmail,
-  date,
-  guests,
-  hotel,
-  tourName,
-  message,
-}: Record<string, string | undefined>) {
-  const details = [
-    ["Reference", reference],
-    ["Type", bookingType],
-    ["Customer", customerName],
-    ["WhatsApp", phone],
-    ["Email", customerEmail],
-    ["Tour", tourName],
-    ["Date", date],
-    ["Guests", guests],
-    ["Pickup / hotel", hotel],
-    ["Notes", message],
-  ].filter(([, value]) => value);
-
-  const rows = details
-    .map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label || "")}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value || "")}</td></tr>`)
-    .join("");
-
-  return `<h2>New Daily Red Sea booking</h2><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table>`;
-}
-
-function escapeHtml(value: string) {
-  return value.replace(/[&<>'"]/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    '"': "&quot;",
-  })[character] || character);
 }
 
 function extractBookingValue(message: string, label: string) {

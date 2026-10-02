@@ -78,6 +78,32 @@ describe("PDF generators", () => {
     expect(output.length).toBeGreaterThan(1_500);
   });
 
+  it("embeds the footer photo once however many pages the report runs to", async () => {
+    const report = (count: number) => createReportPdf({
+      from: "2026-07-01", to: "2026-07-31", trip: "all", status: "all", generatedAt: "2026-07-22T12:00:00Z",
+      bookings: count, people: count, cancelled: 0, revenue: count * 10,
+      rows: Array.from({ length: count }, (_, index) => ({ reference: `DRS-${index}`, trip: "Orange Bay Island Snorkeling Boat Trip", serviceDate: "2026-07-23", people: 1, status: "confirmed", amount: 10, currency: "USD" })),
+    });
+    const [short, long] = await Promise.all([report(2), report(150)]);
+    const pages = (pdf: Buffer) => pdf.toString("binary").match(/\/Type \/Page\b/g)?.length ?? 0;
+    const images = (pdf: Buffer) => pdf.toString("binary").match(/\/Subtype \/Image\b/g)?.length ?? 0;
+    expect(pages(short)).toBe(1);
+    expect(pages(long)).toBeGreaterThan(4);
+    expect(images(long)).toBe(images(short));
+  });
+
+  it("gives the status voucher the confirmation's hero page plus a price-breakdown page", async () => {
+    const output = await createBookingStatusPdf({
+      reference: "DRS-20260727-STATUS", generatedAt: new Date("2026-07-27T12:00:00Z"), customerName: "Guest",
+      itemName: "Morning Quad Bike Safari", amount: 65, currency: "USD", bookingStatus: "confirmed", paymentStatus: "paid",
+    });
+    expect(output.toString("binary").match(/\/Type \/Page\b/g)?.length).toBe(2);
+    // Hero photo, wordmark and footer strip.
+    expect(output.toString("binary").match(/\/Subtype \/Image\b/g)?.length).toBeGreaterThanOrEqual(3);
+    // Print-sized photos keep the emailed attachment small.
+    expect(output.length).toBeLessThan(700_000);
+  });
+
   it("creates a valid customer booking status PDF", async () => {
     const output = await createBookingStatusPdf({
       reference: "DRS-20260727-STATUS",
