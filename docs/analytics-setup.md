@@ -40,6 +40,10 @@ The visitor dashboard uses the same OAuth client and refresh token. Enable the G
 
 Do not expose `META_CONVERSIONS_API_ACCESS_TOKEN` in any `NEXT_PUBLIC_` variable. Set `META_GRAPH_API_VERSION` to the active version shown in Meta Events Manager when the token is created.
 
+## Google Ads conversion tag (2 October 2026)
+
+Google Ads account 797-799-6095 shared the WhatsApp click conversion tag: Google tag `AW-18350927636` and event `AW-18350927636/k25CCLifvYYdEJTes65E`, value 1 EGP. It is installed through `NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID` and `NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_CONVERSION_LABEL`. Do not also paste Google's snippet, or each click will be counted twice. The Content-Security-Policy in `next.config.ts` allows the Google Ads domains from Google's tag CSP guide: `www.googleadservices.com`, `www.google.com`, `googleads.g.doubleclick.net`, `pagead2.googlesyndication.com` and the `td.doubleclick.net` frame.
+
 ## Provider configuration
 
 1. Create a GA4 Web data stream for `https://dailyredsea.com` and add its Measurement ID.
