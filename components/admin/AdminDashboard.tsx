@@ -537,6 +537,16 @@ export default function AdminDashboard({
     }
   }
 
+  // The detail panel moved a booking to another date: keep the list in step.
+  function applyRescheduledBooking(changed: { id: string; date: string | null; notes: string | null }) {
+    const merge = (items: Booking[]) =>
+      items.map((item) => (item.id === changed.id ? { ...item, date: changed.date, notes: changed.notes } : item));
+    setBookings(merge);
+    setVisibleBookings(merge);
+    notifyAdminBookingsChanged();
+    router.refresh();
+  }
+
   async function sendStatusEmail(booking: Booking) {
     if (!booking.customer_email) return;
     if (
@@ -985,6 +995,7 @@ export default function AdminDashboard({
           key={expandedId}
           booking={initialBookings.find((item) => item.id === expandedId)!}
           onClose={() => setExpandedId(null)}
+          onBookingChanged={applyRescheduledBooking}
         />
       ) : null}
     </>;
@@ -2625,6 +2636,7 @@ export default function AdminDashboard({
           key={expandedId}
           booking={(visibleBookings.find((item) => item.id === expandedId) || bookings.find((item) => item.id === expandedId))!}
           onClose={() => setExpandedId(null)}
+          onBookingChanged={applyRescheduledBooking}
         />
       ) : null}
     </>

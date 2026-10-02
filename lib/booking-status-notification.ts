@@ -30,6 +30,8 @@ export type StatusBooking = {
   assignedPersonName?: string;
   assignedPersonRole?: "guide" | "driver";
   locale?: string | null;
+  /** Set when staff moved the booking: the email then leads with the old and new date. */
+  dateChange?: { from: string | null; to: string; tripName?: string | null } | null;
 };
 
 const statusCopy: Record<string, { label: string; message: string }> = {
@@ -83,12 +85,17 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
     ...(amount ? [[labels.total, amount]] : []),
   ];
   const rows = details.map(([label, value]) => `<tr><th align="left" style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(label)}</th><td style="padding:8px;border-bottom:1px solid #e2e8f0">${escapeHtml(value)}</td></tr>`).join("");
+  const change = booking.dateChange;
+  const changeNotice = change
+    ? `${change.tripName ? `${change.tripName}: ` : ""}${change.from ? labels.dateChangedFromTo(change.from, change.to) : labels.dateChangedTo(change.to)}`
+    : null;
   return {
-    subject: `${labels.subject} ${booking.reference}: ${bookingStatus.label} · ${labels.payment} ${paymentStatus.label}`,
-    html: `<div dir="${locale === "ar" ? "rtl" : "ltr"}" lang="${locale}"><p>${labels.hello} ${escapeHtml(booking.customer_name)},</p><p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>${labels.help}</p></div>`,
+    subject: `${labels.subject} ${booking.reference}: ${change ? `${labels.dateChanged} · ` : ""}${bookingStatus.label} · ${labels.payment} ${paymentStatus.label}`,
+    html: `<div dir="${locale === "ar" ? "rtl" : "ltr"}" lang="${locale}"><p>${labels.hello} ${escapeHtml(booking.customer_name)},</p>${changeNotice ? `<p><strong>${escapeHtml(changeNotice)}</strong></p>` : ""}<p>${escapeHtml(bookingStatus.message)}</p><p>${escapeHtml(paymentStatus.message)}</p><table cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><p>${labels.help}</p></div>`,
     text: [
       `${labels.hello} ${booking.customer_name},`,
       "",
+      ...(changeNotice ? [changeNotice, ""] : []),
       bookingStatus.message,
       paymentStatus.message,
       "",
@@ -103,12 +110,12 @@ export function buildBookingAndPaymentStatusEmail(booking: StatusBooking) {
 }
 
 const localizedStatusLabels = {
-  en: { subject: "Booking", payment: "Payment", hello: "Hello", reference: "Booking reference", experience: "Experience", transfer: "Transfer", date: "Date", pending: "To be confirmed", bookingStatus: "Booking status", paymentStatus: "Payment status", total: "Booking total", help: "If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp." },
-  de: { subject: "Buchung", payment: "Zahlung", hello: "Hallo", reference: "Buchungsnummer", experience: "Erlebnis", transfer: "Transfer", date: "Datum", pending: "Wird noch bestätigt", bookingStatus: "Buchungsstatus", paymentStatus: "Zahlungsstatus", total: "Gesamtbetrag", help: "Bei Fragen antworte auf diese E-Mail oder kontaktiere Daily Red Sea über WhatsApp." },
-  ru: { subject: "Бронирование", payment: "Оплата", hello: "Здравствуйте", reference: "Номер бронирования", experience: "Поездка", transfer: "Трансфер", date: "Дата", pending: "Будет подтверждено", bookingStatus: "Статус бронирования", paymentStatus: "Статус оплаты", total: "Итого", help: "Если у вас есть вопросы, ответьте на это письмо или свяжитесь с Daily Red Sea в WhatsApp." },
-  ar: { subject: "الحجز", payment: "الدفع", hello: "مرحباً", reference: "رقم الحجز", experience: "الرحلة", transfer: "التوصيل", date: "التاريخ", pending: "سيتم التأكيد", bookingStatus: "حالة الحجز", paymentStatus: "حالة الدفع", total: "إجمالي الحجز", help: "لأي استفسار، يرجى الرد على هذا البريد أو التواصل مع ديلي رد سي عبر واتساب." },
-  pl: { subject: "Rezerwacja", payment: "Płatność", hello: "Dzień dobry", reference: "Numer rezerwacji", experience: "Wycieczka", transfer: "Transfer", date: "Data", pending: "Do potwierdzenia", bookingStatus: "Status rezerwacji", paymentStatus: "Status płatności", total: "Łączna kwota", help: "W razie pytań odpowiedz na tę wiadomość lub skontaktuj się z Daily Red Sea przez WhatsApp." },
-  zh: { subject: "预订", payment: "付款", hello: "您好", reference: "预订编号", experience: "行程", transfer: "接送", date: "日期", pending: "待确认", bookingStatus: "预订状态", paymentStatus: "付款状态", total: "预订总额", help: "如有问题，请回复此邮件或通过 WhatsApp 联系 Daily Red Sea。" },
+  en: { subject: "Booking", payment: "Payment", hello: "Hello", reference: "Booking reference", experience: "Experience", transfer: "Transfer", date: "Date", pending: "To be confirmed", bookingStatus: "Booking status", paymentStatus: "Payment status", total: "Booking total", help: "If you have any questions, reply to this email or contact Daily Red Sea on WhatsApp.", dateChanged: "New date", dateChangedFromTo: (from: string, to: string) => `Your booking date has changed from ${from} to ${to}.`, dateChangedTo: (to: string) => `Your booking date is now ${to}.` },
+  de: { subject: "Buchung", payment: "Zahlung", hello: "Hallo", reference: "Buchungsnummer", experience: "Erlebnis", transfer: "Transfer", date: "Datum", pending: "Wird noch bestätigt", bookingStatus: "Buchungsstatus", paymentStatus: "Zahlungsstatus", total: "Gesamtbetrag", help: "Bei Fragen antworte auf diese E-Mail oder kontaktiere Daily Red Sea über WhatsApp.", dateChanged: "Neues Datum", dateChangedFromTo: (from: string, to: string) => `Das Datum deiner Buchung wurde von ${from} auf ${to} geändert.`, dateChangedTo: (to: string) => `Das neue Datum deiner Buchung ist ${to}.` },
+  ru: { subject: "Бронирование", payment: "Оплата", hello: "Здравствуйте", reference: "Номер бронирования", experience: "Поездка", transfer: "Трансфер", date: "Дата", pending: "Будет подтверждено", bookingStatus: "Статус бронирования", paymentStatus: "Статус оплаты", total: "Итого", help: "Если у вас есть вопросы, ответьте на это письмо или свяжитесь с Daily Red Sea в WhatsApp.", dateChanged: "Новая дата", dateChangedFromTo: (from: string, to: string) => `Дата вашего бронирования изменена с ${from} на ${to}.`, dateChangedTo: (to: string) => `Новая дата вашего бронирования: ${to}.` },
+  ar: { subject: "الحجز", payment: "الدفع", hello: "مرحباً", reference: "رقم الحجز", experience: "الرحلة", transfer: "التوصيل", date: "التاريخ", pending: "سيتم التأكيد", bookingStatus: "حالة الحجز", paymentStatus: "حالة الدفع", total: "إجمالي الحجز", help: "لأي استفسار، يرجى الرد على هذا البريد أو التواصل مع ديلي رد سي عبر واتساب.", dateChanged: "تاريخ جديد", dateChangedFromTo: (from: string, to: string) => `تم تغيير تاريخ حجزك من ${from} إلى ${to}.`, dateChangedTo: (to: string) => `تاريخ حجزك الآن هو ${to}.` },
+  pl: { subject: "Rezerwacja", payment: "Płatność", hello: "Dzień dobry", reference: "Numer rezerwacji", experience: "Wycieczka", transfer: "Transfer", date: "Data", pending: "Do potwierdzenia", bookingStatus: "Status rezerwacji", paymentStatus: "Status płatności", total: "Łączna kwota", help: "W razie pytań odpowiedz na tę wiadomość lub skontaktuj się z Daily Red Sea przez WhatsApp.", dateChanged: "Nowa data", dateChangedFromTo: (from: string, to: string) => `Data Twojej rezerwacji została zmieniona z ${from} na ${to}.`, dateChangedTo: (to: string) => `Nowa data Twojej rezerwacji to ${to}.` },
+  zh: { subject: "预订", payment: "付款", hello: "您好", reference: "预订编号", experience: "行程", transfer: "接送", date: "日期", pending: "待确认", bookingStatus: "预订状态", paymentStatus: "付款状态", total: "预订总额", help: "如有问题，请回复此邮件或通过 WhatsApp 联系 Daily Red Sea。", dateChanged: "新日期", dateChangedFromTo: (from: string, to: string) => `您的预订日期已由 ${from} 改为 ${to}。`, dateChangedTo: (to: string) => `您的预订日期现为 ${to}。` },
 } as const;
 
 export async function sendBookingAndPaymentStatusNotification(booking: StatusBooking) {
