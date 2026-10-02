@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminInvitationRedirectUrl, escapeInvitationHtml, isPendingInvitation } from "@/lib/admin-invitations";
+import { adminInvitationRedirectUrl, isPendingInvitation } from "@/lib/admin-invitations";
+import { buildStaffInvitationEmail } from "@/lib/email/messages";
 import { isAdminOwner } from "@/lib/admin-auth";
 import { sendBookingEmail } from "@/lib/booking-service";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
@@ -37,12 +38,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json({ error: linkError?.message || "Could not create a new invitation link." }, { status: 502 });
   }
 
-  const displayName = escapeInvitationHtml(profile.display_name || profile.email);
-  const safeUrl = escapeInvitationHtml(invitationUrl);
+  const invitation = buildStaffInvitationEmail({ displayName: profile.display_name || profile.email, url: invitationUrl });
   const delivery = await sendBookingEmail(
     profile.email,
-    "Your Daily Red Sea admin invitation",
-    `<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.6"><h1 style="font-size:24px">Join the Daily Red Sea admin team</h1><p>Hello ${displayName},</p><p>Your invitation has been renewed. Use the button below to choose your password and access the admin area.</p><p style="margin:24px 0"><a href="${safeUrl}" style="display:inline-block;border-radius:10px;background:#0e7490;color:#fff;padding:12px 18px;text-decoration:none;font-weight:700">Accept invitation</a></p><p style="font-size:13px;color:#64748b">If you were not expecting this invitation, you can ignore this email.</p></div>`,
+    invitation.subject,
+    invitation.html,
     undefined,
     // Staff invitation links are personal credentials, not customer communication.
     { bcc: false },

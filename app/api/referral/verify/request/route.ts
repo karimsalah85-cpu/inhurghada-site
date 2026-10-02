@@ -1,5 +1,5 @@
 import { bookingLocale } from "@/lib/booking-communications-i18n";
-import { referralNotificationCopy } from "@/lib/referral-notification-copy";
+import { buildVerificationCodeEmail } from "@/lib/email/messages";
 import { NextRequest, NextResponse } from "next/server";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { rateLimitShared } from "@/lib/rate-limit";
@@ -36,11 +36,11 @@ export async function POST(request: NextRequest) {
       expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
     });
     if (insertError) return json({ error: "Verification is temporarily unavailable." }, 503);
-    const copy = referralNotificationCopy[bookingLocale(typeof body?.locale === "string" ? body.locale : "en")];
+    const message = buildVerificationCodeEmail({ locale: bookingLocale(typeof body?.locale === "string" ? body.locale : "en"), code });
     await sendBookingEmail(
       identity.customer_email,
-      copy.otpSubject,
-      `<p>${copy.otpSubject}</p><p style="font-size:28px;font-weight:800;letter-spacing:4px">${code}</p><p>${copy.otpBody}</p>`,
+      message.subject,
+      message.html,
       undefined,
       // One-time codes must not land in a shared inbox.
       { bcc: false },

@@ -4,6 +4,8 @@ import { sendBookingEmail, sendWhatsAppMessage } from "@/lib/booking-service";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
 import { getGoogleAdsReport, googleAdsConfiguration, isDeveloperTokenNotApproved } from "@/lib/google-ads";
 import { pickTemplate } from "@/lib/communication-template";
+import { bookingLocale } from "@/lib/booking-communications-i18n";
+import { buildAutomationEmail } from "@/lib/email/messages";
 import { runFinanceAutomation } from "@/lib/finance/automation";
 import { createZoneLookup, loadPickupZoneData, shortTime } from "@/lib/pickup-zones";
 import { requiresWaiver } from "@/lib/waiver";
@@ -23,7 +25,6 @@ const reviewRequestTemplates = [
   { locale: "zh", subject: "您的 Daily Red Sea 行程体验如何？", email: "您好 {{customer_name}}，\n\n希望您喜欢{{tour_name}}。欢迎分享您的体验：{{review_url}}\n\n谢谢，\nDaily Red Sea", whatsapp: "您好 {{customer_name}}！希望您喜欢{{tour_name}}。期待您的反馈：{{review_url}}" },
 ];
 
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const dateOnly = (date: Date) => date.toISOString().slice(0, 10);
 
 const cairoTime = (value: string) => new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Africa/Cairo" }).format(new Date(value));
@@ -173,7 +174,7 @@ export async function runAdminAutomation() {
     await supabase.from("communication_queue").update({ status: "processing", attempts: item.attempts + 1 }).eq("id", item.id).eq("status", "pending");
     const body = render(template.body, booking);
     const result = template.channel === "email"
-      ? await sendBookingEmail(item.recipient, render(template.subject || "Daily Red Sea booking update", booking), `<p>${escapeHtml(body).replace(/\n/g, "<br>")}</p>`)
+      ? await sendBookingEmail(item.recipient, render(template.subject || "Daily Red Sea booking update", booking), buildAutomationEmail({ subject: render(template.subject || "Daily Red Sea booking update", booking), body, locale: bookingLocale(template.locale), reference: booking.reference }).html)
       : await sendWhatsAppMessage(item.recipient, body);
     const success = result.success;
     await supabase.from("communication_queue").update({ status: success ? "sent" : "failed", sent_at: success ? new Date().toISOString() : null, last_error: success ? null : String("reason" in result ? result.reason : "delivery-failed") }).eq("id", item.id);

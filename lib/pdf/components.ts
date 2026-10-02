@@ -3,6 +3,7 @@ import { drawPdfLogo } from "@/lib/pdf/logo";
 import { rtlLabelText, rtlWrappableText, wrapArabicParagraph } from "@/lib/pdf/rtl-text";
 import { pickScriptFont } from "@/lib/pdf/script-font";
 import { iconCalendar, iconClock, iconPeople, iconPin, iconWhatsapp, iconAlert, iconWave, iconShield, iconDiveMask } from "@/lib/pdf/icons";
+import { resolveFooterImage } from "@/lib/pdf/hero-image";
 
 type Doc = PDFKit.PDFDocument;
 type Align = "left" | "right" | "center";
@@ -98,32 +99,44 @@ export function pdfPageBackground(doc: Doc) {
   doc.rect(0, 0, pdfPage.width, pdfPage.height).fill(pdfColors.sand);
 }
 
-export type PdfHeaderVariant = "hero" | "compact" | "policy";
+/**
+ * PDFKit only reuses an embedded image when it is handed the same opened
+ * image object; a raw Buffer is embedded again on every call. The footer
+ * photo is drawn on every text page, so open each photo once per document
+ * and a ten-page report carries one copy of it, not ten.
+ */
+const openedPhotos = new WeakMap<Doc, Map<Buffer, unknown>>();
+function drawCoverPhoto(doc: Doc, photo: Buffer, x: number, y: number, width: number, height: number) {
+  let perDoc = openedPhotos.get(doc);
+  if (!perDoc) { perDoc = new Map(); openedPhotos.set(doc, perDoc); }
+  let opened = perDoc.get(photo);
+  if (!opened) { opened = (doc as unknown as { openImage(src: Buffer): unknown }).openImage(photo); perDoc.set(photo, opened); }
+  doc.save();
+  doc.rect(x, y, width, height).clip();
+  doc.image(opened as Buffer, x, y, { cover: [width, height], align: "center", valign: "center" });
+  doc.restore();
+}
 
-/** Compact branded header band — the dark logo header used on text-heavy pages
- * (policy page, status voucher, admin report). See PdfHero for the large
- * photographic header used on page 1 of a customer-facing document. */
-export function drawPdfHeader(
-  doc: Doc,
-  options: { variant: PdfHeaderVariant; title: string; subtitle?: string; rtl?: boolean; logoWidth?: number },
-) {
-  const { title, subtitle, rtl = false, logoWidth = 130 } = options;
-  if (options.variant === "policy") {
-    doc.rect(0, 0, pdfPage.width, 115).fill(pdfColors.white);
-    drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: 24, width: 165, variant: "dark", align: rtl ? "right" : "left" });
-    doc.moveTo(pdfPage.margin, 62).lineTo(pdfPage.width - pdfPage.margin, 62).strokeColor(pdfColors.aqua).lineWidth(0.8).stroke();
-    pdfWrite(doc, title, pdfPage.margin, 76, pdfPage.width - pdfPage.margin * 2, { size: 18, color: pdfColors.navy, rtl, bold: true });
-    return 115;
-  }
-  const height = 78;
-  doc.rect(0, 0, pdfPage.width, height).fill(pdfColors.navy);
-  doc.rect(0, height, pdfPage.width, 3).fill(pdfColors.coral);
-  drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: 20, width: logoWidth, variant: "light", align: rtl ? "right" : "left" });
-  const textX = rtl ? pdfPage.margin : pdfPage.margin + logoWidth + 24;
-  const textWidth = pdfPage.width - pdfPage.margin * 2 - logoWidth - 24;
-  pdfWrite(doc, title, textX, 24, textWidth, { size: 13, color: pdfColors.white, rtl, align: rtl ? "left" : "right" });
-  if (subtitle) pdfWrite(doc, subtitle, textX, 42, textWidth, { size: 8.5, color: "#cfe3ee", rtl, align: rtl ? "left" : "right" });
-  return height + 3;
+/**
+ * The header of every text page (the ticket's policy page, the status
+ * voucher's price breakdown, the admin report, the supplier statement): a
+ * white band with the full-color wordmark, a thin aqua rule and the page
+ * title, with an optional muted subtitle (period, reference, generated date).
+ * Page 1 of a customer document uses the photographic drawPdfHero instead.
+ * Returns the header's height.
+ */
+export function drawPdfHeader(doc: Doc, options: { title: string; subtitle?: string; rtl?: boolean }) {
+  const { title, subtitle, rtl = false } = options;
+  const width = pdfPage.width - pdfPage.margin * 2;
+  const titleHeight = pdfTextHeight(doc, title, width, 18, rtl);
+  const subtitleHeight = subtitle ? pdfTextHeight(doc, subtitle, width, 9, rtl) : 0;
+  const height = Math.max(115, 76 + titleHeight + (subtitle ? subtitleHeight + 6 : 0) + 14);
+  doc.rect(0, 0, pdfPage.width, height).fill(pdfColors.white);
+  drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: 24, width: 165, variant: "dark", align: rtl ? "right" : "left" });
+  doc.moveTo(pdfPage.margin, 62).lineTo(pdfPage.width - pdfPage.margin, 62).strokeColor(pdfColors.aqua).lineWidth(0.8).stroke();
+  pdfWrite(doc, title, pdfPage.margin, 76, width, { size: 18, color: pdfColors.navy, rtl, bold: true, wrap: true });
+  if (subtitle) pdfWrite(doc, subtitle, pdfPage.margin, 76 + titleHeight + 4, width, { size: 9, color: pdfColors.muted, rtl, wrap: true });
+  return height;
 }
 
 /** One consistent footer: brand, site, WhatsApp/support line, page number, optional document reference. */
@@ -139,25 +152,18 @@ export function drawPdfFooter(
 }
 
 /**
- * A compact photographic strip footer (a thin marine-image band with a dark
- * overlay) for text-heavy pages, echoing the page-1 hero so every page still
- * reads as the same premium travel brand. Falls back to a plain navy strip
- * if no image is supplied.
+ * The photographic strip footer (a thin marine-image band with a dark
+ * overlay) on every text page, echoing the page-1 hero so each page still
+ * reads as the same travel brand. Falls back to a plain navy strip if the
+ * photo can't be read.
  */
-export function drawPdfImageFooter(doc: Doc, options: { image?: Buffer | null; reference?: string; page: number; totalPages: number; rtl?: boolean }) {
+export function drawPdfImageFooter(doc: Doc, options: { reference?: string; page: number; totalPages: number; rtl?: boolean }) {
   const height = 54;
   const y = pdfPage.height - height;
-  if (options.image) {
-    try {
-      doc.save();
-      doc.rect(0, y, pdfPage.width, height).clip();
-      doc.image(options.image, 0, y, { cover: [pdfPage.width, height], align: "center", valign: "center" });
-      doc.restore();
-    } catch {
-      doc.rect(0, y, pdfPage.width, height).fill(pdfColors.navy);
-    }
-  } else {
-    doc.rect(0, y, pdfPage.width, height).fill(pdfColors.navy);
+  const photo = resolveFooterImage();
+  doc.rect(0, y, pdfPage.width, height).fill(pdfColors.navy);
+  if (photo) {
+    try { drawCoverPhoto(doc, photo, 0, y, pdfPage.width, height); } catch { /* keep the navy strip */ }
   }
   doc.save();
   const overlay = doc.linearGradient(0, y, 0, y + height);
@@ -180,21 +186,9 @@ export function drawSectionTitle(doc: Doc, value: string, x: number, y: number, 
   pdfWrite(doc, value, x, y, width, { size: 10, color: pdfColors.navy, rtl, bold: true });
 }
 
-/** A single label/value pair — the smallest content unit (see InfoGrid for a row of these). */
+/** A single label/value pair — the smallest content unit. */
 export function drawInfoRow(doc: Doc, label: string, value: string, x: number, y: number, width: number, rtl = false) {
   pdfLabelValue(doc, label, value, x, y, width, { rtl });
-}
-
-/** A 2-column grid of InfoRows, auto-laid-out across `width`. Returns the height consumed. */
-export function drawInfoGrid(doc: Doc, rows: [string, string][], x: number, y: number, width: number, rtl = false, rowHeight = 38) {
-  const colWidth = width / 2 - 10;
-  rows.forEach(([label, value], index) => {
-    const row = Math.floor(index / 2);
-    const col = index % 2;
-    const colX = x + col * (colWidth + 20);
-    drawInfoRow(doc, label, value, colX, y + row * rowHeight, colWidth, rtl);
-  });
-  return Math.ceil(rows.length / 2) * rowHeight;
 }
 
 export type StatusTone = "positive" | "negative" | "warning" | "neutral";
@@ -216,14 +210,48 @@ export function drawStatusBadge(doc: Doc, label: string, x: number, y: number, w
   pdfWrite(doc, label, x + 6, y + (height - textHeight) / 2, width - 12, { size, color: fg, align: "center", rtl, wrap: true, lineGap: 1 });
 }
 
-/** The coral "total due" block — used by the status voucher; the booking
- * confirmation now shows its total inside ExperienceTicket's stub instead. */
+/** Height drawPriceBlock needs for its label and 22pt amount. */
+export const pdfPriceBlockHeight = 76;
+
+/** The navy total block: small label, large amount, optional note alongside. Draw it `pdfPriceBlockHeight` tall. */
 export function drawPriceBlock(doc: Doc, label: string, amount: string, note: string | undefined, x: number, y: number, width: number, height: number, rtl = false) {
   doc.roundedRect(x, y, width, height, pdfRadius.card).fill(pdfColors.navy);
-  const labelWidth = note ? width * 0.42 : width - 32;
-  pdfWrite(doc, label, x + 16, y + 17, labelWidth, { size: 9, color: "#cfe3ee", rtl });
-  pdfWrite(doc, amount, x + 16, y + 36, labelWidth, { size: 22, color: pdfColors.white, rtl });
-  if (note) pdfWrite(doc, note, x + width * 0.44, y + 25, width * 0.44, { size: 9, color: pdfColors.white, rtl, wrap: true });
+  const labelWidth = note ? width * 0.42 : width - 40;
+  const labelX = rtl && note ? x + width - 20 - labelWidth : x + 20;
+  pdfWrite(doc, label, labelX, y + 16, labelWidth, { size: 8, color: "#9FC3D6", rtl, letterSpacing: 0.3 });
+  pdfWrite(doc, amount, labelX, y + 31, labelWidth, { size: 22, color: pdfColors.white, rtl, bold: true });
+  if (note) pdfWrite(doc, note, rtl ? x + 20 : x + width * 0.5, y + 22, width * 0.5 - 20, { size: 8.5, color: "#cfe3ee", rtl, wrap: true, lineGap: 2 });
+}
+
+/**
+ * A white card with the ticket's outline and the aqua edge of the guest
+ * card, holding a two-column grid of label/value pairs — the summary block
+ * at the top of the admin report and the supplier statement. Returns the
+ * height consumed.
+ */
+export function drawPdfSummaryCard(doc: Doc, rows: [string, string][], x: number, y: number, width: number) {
+  const pad = 20;
+  const gap = 20;
+  const colWidth = (width - pad * 2 - gap) / 2;
+  const cellHeight = (index: number) => rows[index] ? 14 + pdfTextHeight(doc, rows[index][1], colWidth, 10.5) : 0;
+  const rowHeights: number[] = [];
+  for (let index = 0; index < rows.length; index += 2) rowHeights.push(Math.max(cellHeight(index), cellHeight(index + 1)) + 10);
+  const height = rowHeights.reduce((sum, value) => sum + value, 0) + pad * 2 - 10;
+  doc.roundedRect(x, y, width, height, pdfRadius.card).fill(pdfColors.white);
+  doc.roundedRect(x, y, width, height, pdfRadius.card).lineWidth(1).strokeColor(pdfColors.border).stroke();
+  doc.roundedRect(x, y + 12, 4, height - 24, 2).fill(pdfColors.aqua);
+  let cursor = y + pad;
+  rowHeights.forEach((rowHeight, row) => {
+    for (const col of [0, 1]) {
+      const entry = rows[row * 2 + col];
+      if (!entry) continue;
+      const cellX = x + pad + col * (colWidth + gap);
+      pdfWrite(doc, entry[0], cellX, cursor, colWidth, { size: 8, color: pdfColors.muted, letterSpacing: 0.3 });
+      pdfWrite(doc, entry[1], cellX, cursor + 14, colWidth, { size: 10.5, color: pdfColors.text, wrap: true });
+    }
+    cursor += rowHeight;
+  });
+  return height;
 }
 
 export type TableColumn = { label: string; width: number; align?: Align };
@@ -253,21 +281,15 @@ export function drawTableRow(doc: Doc, values: string[], columns: TableColumn[],
  * The large photographic header for page 1 of a customer-facing document: a
  * real destination/experience photo (see lib/pdf/hero-image.ts), a dark navy
  * gradient overlay for text legibility, the official logo top-left, and a
- * large "Booking Confirmed"-style title with a supporting line.
+ * large "Booking Confirmed"-style title with a supporting line. Pass the
+ * booking reference separately (not inside `subtitle`) so it stays readable
+ * in right-to-left documents.
  */
-export function drawPdfHero(doc: Doc, options: { image: Buffer | null; height: number; title: string; subtitle: string; rtl?: boolean }) {
-  const { image, height, title, subtitle, rtl = false } = options;
+export function drawPdfHero(doc: Doc, options: { image: Buffer | null; height: number; title: string; subtitle: string; reference?: string; rtl?: boolean }) {
+  const { image, height, title, subtitle, reference, rtl = false } = options;
+  doc.rect(0, 0, pdfPage.width, height).fill(pdfColors.navy);
   if (image) {
-    try {
-      doc.save();
-      doc.rect(0, 0, pdfPage.width, height).clip();
-      doc.image(image, 0, 0, { cover: [pdfPage.width, height], align: "center", valign: "center" });
-      doc.restore();
-    } catch {
-      doc.rect(0, 0, pdfPage.width, height).fill(pdfColors.navy);
-    }
-  } else {
-    doc.rect(0, 0, pdfPage.width, height).fill(pdfColors.navy);
+    try { drawCoverPhoto(doc, image, 0, 0, pdfPage.width, height); } catch { /* keep the navy band */ }
   }
   doc.save();
   const overlay = doc.linearGradient(0, 0, 0, height);
@@ -289,7 +311,15 @@ export function drawPdfHero(doc: Doc, options: { image: Buffer | null; height: n
   doc.roundedRect(heroLogoX - heroLogoPadX, heroLogoY - heroLogoPadY, heroLogoWidth + heroLogoPadX * 2, heroLogoHeight + heroLogoPadY * 2, 10).fill(pdfColors.white);
   drawPdfLogo(doc, { x: rtl ? pdfPage.width - pdfPage.margin : pdfPage.margin, y: heroLogoY, width: heroLogoWidth, variant: "dark", align: rtl ? "right" : "left" });
   pdfWrite(doc, title, pdfPage.margin, height - 92, pdfPage.width - pdfPage.margin * 2, { size: title.length > 40 ? 21 : 27, color: pdfColors.white, rtl, bold: true });
-  pdfWrite(doc, subtitle, pdfPage.margin, height - 38, pdfPage.width - pdfPage.margin * 2, { size: 11, color: "#dceaf1", rtl });
+  const lineWidth = pdfPage.width - pdfPage.margin * 2;
+  if (reference && rtl) {
+    // A Latin booking reference inside an Arabic line is laid out right-to-left with it, so
+    // "DRS-ABC123" printed as "321CBA-SRD". Draw it on its own at the opposite margin instead.
+    pdfWrite(doc, subtitle, pdfPage.margin, height - 38, lineWidth, { size: 11, color: "#dceaf1", rtl });
+    pdfWrite(doc, reference, pdfPage.margin, height - 38, lineWidth, { size: 11, color: "#dceaf1", align: "left" });
+  } else {
+    pdfWrite(doc, reference ? `${subtitle}  ·  ${reference}` : subtitle, pdfPage.margin, height - 38, lineWidth, { size: 11, color: "#dceaf1", rtl });
+  }
   return height;
 }
 
@@ -340,10 +370,10 @@ export function drawExperienceTicket(doc: Doc, options: { x: number; y: number; 
 }
 
 /** One column of the ticket's 4-column metadata row: small icon, uppercase label, value. */
-export function drawPdfInfoItem(doc: Doc, options: { icon: "calendar" | "clock" | "people" | "pin"; label: string; value: string; x: number; y: number; width: number; rtl?: boolean }) {
+export function drawPdfInfoItem(doc: Doc, options: { icon: "calendar" | "clock" | "people" | "pin" | "shield"; label: string; value: string; x: number; y: number; width: number; rtl?: boolean }) {
   const { icon, label, value, x, y, width, rtl = false } = options;
   const iconSize = 15;
-  const iconFn = { calendar: iconCalendar, clock: iconClock, people: iconPeople, pin: iconPin }[icon];
+  const iconFn = { calendar: iconCalendar, clock: iconClock, people: iconPeople, pin: iconPin, shield: iconShield }[icon];
   iconFn(doc, rtl ? x + width - iconSize : x, y, iconSize, pdfColors.aqua);
   const labelY = y + iconSize + 8;
   // The label can wrap in a narrow column (e.g. "Pickup / meeting point"), so the

@@ -3,9 +3,14 @@ import path from "node:path";
 
 /**
  * Resolves the PDF hero photo for a booking. Per-tour where a real photo
- * exists in /public/images, otherwise a keyword-based category fallback, so
- * only owned photography is embedded. Unknown tours use a neutral coast
- * photo, without suggesting it depicts their exact destination.
+ * exists, otherwise a keyword-based category fallback, so only owned
+ * photography is embedded. Unknown tours use a neutral coast photo, without
+ * suggesting it depicts their exact destination.
+ *
+ * The files are print-sized copies in assets/pdf-images (built from
+ * public/images/owned by scripts/build-pdf-images.mjs), not the website
+ * originals: those are up to 7 MB each and went straight into the emailed
+ * PDF. Add a photo here, then re-run that script.
  */
 const bySlug: Record<string, string> = {
   "jeddah-yacht-sunset-cruise": "jeddah-yacht-sunset-cruise.jpg",
@@ -25,8 +30,9 @@ const keywordFallbacks: [RegExp, string][] = [
   [/transfer/, "hurghada-transfer-road-sunset.jpg"],
 ];
 const DEFAULT_IMAGE = "red-sea-coast.jpg";
-export const pdfHeroAssetPaths = [...new Set([...Object.values(bySlug), ...keywordFallbacks.map(([, file]) => file), DEFAULT_IMAGE])].map(file => `./public/images/owned/${file}`);
-const imagesDir = path.join(process.cwd(), "public/images/owned");
+const FOOTER_IMAGE = "footer-strip.jpg";
+export const pdfHeroAssetPaths = [...new Set([...Object.values(bySlug), ...keywordFallbacks.map(([, file]) => file), DEFAULT_IMAGE, FOOTER_IMAGE])].map(file => `./assets/pdf-images/${file}`);
+const imagesDir = path.join(process.cwd(), "assets/pdf-images");
 
 let cache: Map<string, Buffer | null> | undefined;
 
@@ -57,4 +63,9 @@ export function resolveHeroImage(tourSlug?: string | null, itemName?: string | n
     }
   }
   return loadImageBuffer(DEFAULT_IMAGE);
+}
+
+/** The thin marine photo band drawn at the foot of every text page (see drawPdfImageFooter). */
+export function resolveFooterImage(): Buffer | null {
+  return loadImageBuffer(FOOTER_IMAGE);
 }

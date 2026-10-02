@@ -32,6 +32,8 @@ export async function createPostTripPdf(input: PostTripPdfData): Promise<Buffer>
   // Review QR has no personal contact information. The referral QR contains only the public token.
   const reviewY=y;
   doc.roundedRect(m,y,w,118,14).fill(pdfColors.white);
+  // Same hairline outline as the ticket card on the booking confirmation.
+  doc.roundedRect(m,y,w,118,14).lineWidth(1).strokeColor(pdfColors.border).stroke();
   const reviewX=rtl ? m+w-98 : m+18;
   drawQrCodeBlock(doc,reviewQr,reviewX,y+18,80);
   const textX=rtl ? m+18 : m+118;

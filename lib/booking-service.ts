@@ -7,8 +7,14 @@ export const customerEmailSender = {
 
 export const companyStatement = "Daily Red Sea connects travelers with trusted local operators across Red Sea destinations — with transparent pricing and direct support every step of the way.";
 
+/**
+ * Safety net for an email that was not built on the shared layout
+ * (lib/email/layout.ts, whose footer already carries the brand): the same
+ * colors and footer links as that layout, so a stray message still reads as
+ * Daily Red Sea.
+ */
 function customerEmailSignatureHtml() {
-  return `<div style="margin-top:28px;padding:18px 20px;border-top:3px solid #0284c7;background:#f0f9ff;color:#334155;font-family:Arial,sans-serif;font-size:13px;line-height:1.6"><p style="margin:0 0 8px;font-size:16px"><strong style="color:#0f172a">Daily Red Sea</strong></p><p style="margin:0 0 10px">${companyStatement}</p><p style="margin:0"><a href="https://dailyredsea.com" style="color:#0369a1;text-decoration:none;font-weight:600">dailyredsea.com</a><span style="color:#94a3b8"> &nbsp;|&nbsp; </span><a href="mailto:info@dailyredsea.com" style="color:#0369a1;text-decoration:none">info@dailyredsea.com</a></p></div>`;
+  return `<div style="margin-top:28px;padding:20px 22px;border-top:4px solid #167580;background:#E7F1EF;border-radius:0 0 14px 14px;color:#596467;font-family:Manrope,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:21px"><p style="margin:0 0 8px;font-size:17px;line-height:27px;font-weight:600;color:#123E47">Daily Red Sea</p><p style="margin:0 0 12px">${companyStatement}</p><p style="margin:0;font-size:11px"><a href="https://dailyredsea.com" style="color:#6C7977;letter-spacing:1px;text-decoration:none">dailyredsea.com</a> &nbsp;·&nbsp; <a href="mailto:info@dailyredsea.com" style="color:#6C7977;text-decoration:none">info@dailyredsea.com</a></p></div>`;
 }
 
 export function withCustomerEmailSignature(toEmail: string, html: string) {

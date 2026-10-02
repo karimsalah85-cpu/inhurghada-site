@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { customerEmailSender, sendBookingEmail, sendWhatsAppMessage } from "@/lib/booking-service";
+import { buildOfficeNoticeEmail } from "@/lib/email/messages";
 import {
   buildSupplierEmail, buildSupplierMessage, formatTripDate, whatsappDigits,
   type MessageKind, type PaymentStatus, type RequestStatus, type SupplierBookingDetails, type SupplierBookingRow,
@@ -133,9 +134,8 @@ export async function recordEvent(database: SupabaseClient, requestId: string, e
 
 /** Emails the office inbox when a supplier answers, so declines and payment problems are never missed. */
 export async function notifyOffice(subject: string, lines: string[]) {
-  const escape = (value: string) => value.replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c] || c);
   try {
-    const result = await sendBookingEmail(customerEmailSender.email, subject, `<div style="font-family:Arial,sans-serif">${lines.map((line) => `<p>${escape(line)}</p>`).join("")}</div>`, undefined, { bcc: false });
+    const result = await sendBookingEmail(customerEmailSender.email, subject, buildOfficeNoticeEmail({ subject, lines }).html, undefined, { bcc: false });
     if (!result.success) console.error("Office notification failed", { subject, reason: "reason" in result ? result.reason : "unknown" });
   } catch (error) {
     console.error("Office notification failed", { subject, message: error instanceof Error ? error.message : "unknown" });

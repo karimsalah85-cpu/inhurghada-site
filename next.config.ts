@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
     "/api/bookings": pdfAssets,
     "/api/invoices/*": pdfAssets,
     "/api/admin/bookings/**": pdfAssets,
+    "/api/admin/reports": pdfAssets,
+    "/api/admin/finance/suppliers/**": pdfAssets,
   },
   async redirects() {
     return [

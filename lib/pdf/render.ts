@@ -5,7 +5,7 @@ import type { Locale } from "@/lib/i18n";
 /**
  * Creates a PDFKit document with the settings every Daily Red Sea PDF needs:
  * A4, no default font (see the inline note below), and page buffering so
- * `PdfFlow.finishWithFooters()` can stamp "Page X of Y" once the final page
+ * `stampPdfFooters()` (lib/pdf/layout.ts) can stamp "Page X of Y" once the final page
  * count is known. Registers the embedded Unicode face for `locale` under the
  * shared "Noto" font name used throughout lib/pdf/components.ts.
  */
