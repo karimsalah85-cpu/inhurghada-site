@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import SupplierCommissionInvoices from "./SupplierCommissionInvoices";
 import { supplierCostFromSplit } from "@/lib/finance/booking-split";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { FINANCE_CURRENCIES, formatMoney, fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
@@ -14,7 +15,7 @@ type Detail = {
   canManage: boolean;
   supplier: {
     id: string; name: string; type: string; contact_name: string | null; phone: string | null; default_currency: string;
-    whatsapp?: string | null; payment_method?: string | null; payment_details?: string | null; vat_status?: string;
+    email?: string | null; whatsapp?: string | null; payment_method?: string | null; payment_details?: string | null; vat_status?: string;
   };
   ledger: LedgerRow[];
   lines: SupplierBookingRow[];
@@ -189,6 +190,7 @@ export default function FinanceSupplierDetail({ supplierId }: { supplierId: stri
     : <span className="text-slate-400">Settled</span>;
 
   return <div className="space-y-6">
+    <SupplierCommissionInvoices supplierId={supplierId} partner={data.supplier.name} email={data.supplier.email} canManage={data.canManage} />
     <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
