@@ -50,3 +50,8 @@ it("requires origin and management permission before saving", async () => {
   expect((await POST(req(), context)).status).toBe(403);
   expect(insert).not.toHaveBeenCalled();
 });
+it("keeps finance-edited ticket prices but recomputes everything else", async () => {
+  const edited = structuredClone(doc); edited.rows[0].ticketPrice = "110.00";
+  expect((await POST(req(edited), context)).status).toBe(201);
+  expect(insert.mock.calls[0][0].document.rows[0]).toMatchObject({ ticketPrice: "110.00", commissionAmount: "25.00" });
+});

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertCurrentCommission, buildMonthlyCommission, type CommissionBalance, type CommissionLine } from "@/lib/finance/monthly-commission";
+import { assertCurrentCommission, buildMonthlyCommission, withTicketPrices, type CommissionBalance, type CommissionLine } from "@/lib/finance/monthly-commission";
 import { commissionTotals } from "@/lib/finance/commission-invoice";
 import { buildCommissionInvoiceEmail } from "@/lib/finance/commission-invoice-email";
 import { createCommissionInvoicePdf } from "@/lib/finance/commission-invoice-pdf";
@@ -9,12 +9,12 @@ const supplier = { id: "45b9782c-c235-4db3-b9dc-124d49021a9f", name: "Al-Haddad"
 const line = (i: number, currency: "USD" | "SAR", revenue: string): CommissionLine => ({
   id: `45b9782c-c235-4db3-b9dc-124d49021a9${i}`, trip_date: "2026-09-23", tour_name: "Sunset", guests: 7,
   currency, recognised_revenue: revenue, fx_locked: true, fx_rate_to_usd: currency === "SAR" ? "0.266666666667" : "1",
-  supplier_fx_locked: true, supplier_cost_source: "manual_amount", destination: "Jeddah", reference: `DRS-${i}`,
+  supplier_fx_locked: true, supplier_cost_source: "manual_amount", destination: "jeddah", reference: `DRS-${i}`,
 });
-const lines = [
-  { ...line(1, "USD", "104.50"), trip_date: "2026-09-21", guests: 1, tour_name: "Bayada Daily Snorkeling Boat Trip from Jeddah", reference: "DRS-20260920-A1C9D9" },
-  { ...line(2, "USD", "152.00"), trip_date: "2026-09-21", guests: 5, reference: "DRS-20260920-ECBD64" },
-  { ...line(3, "SAR", "612.00"), reference: "DRS-20260914-C0EA8C" },
+const lines: CommissionLine[] = [
+  { ...line(1, "USD", "104.50"), trip_date: "2026-09-21", guests: 1, tour_name: "Bayada Daily Snorkeling Boat Trip from Jeddah", reference: "DRS-20260920-A1C9D9", collected_amount: "110.00" },
+  { ...line(2, "USD", "152.00"), trip_date: "2026-09-21", guests: 5, reference: "DRS-20260920-ECBD64", collected_amount: "160.00" },
+  { ...line(3, "SAR", "612.00"), reference: "DRS-20260914-C0EA8C", collected_amount: "841.52" },
 ];
 const balances: CommissionBalance[] = lines.map((l, i) => ({ line_id: l.id, currency: l.currency, balance: ["27.50", "40.00", "210.00"][i], obligation: ["27.50", "40.00", "210.00"][i] }));
 const build = (ls = lines, bs = balances) => buildMonthlyCommission(supplier, "2026-09", "USD", ls, bs);
@@ -30,9 +30,22 @@ describe("monthly commission from finance", () => {
       await writeFile("output/monthly-commission/al-haddad-preview.html", buildCommissionInvoiceEmail(doc, "DRS-COM-00000001").html);
     }
   });
-  it("reconciles mixed currencies and uses recorded sales, not invented ticket prices", () => {
+  it("defaults ticket prices to what customers paid and lets finance set the agreed price", () => {
     const doc = build();
-    expect(commissionTotals(doc)).toMatchObject({ sales: "419.70", commission: "123.50" });
+    expect(doc.city).toBe("Jeddah");
+    expect(doc.rows.map(r => r.ticketPrice)).toEqual(["110.00", "32.00", "32.06"]);
+    const edited = structuredClone(doc); edited.rows[2].ticketPrice = "32.00";
+    expect(() => assertCurrentCommission(edited, doc)).not.toThrow();
+    const saved = withTicketPrices(build(), edited);
+    expect(commissionTotals(saved)).toMatchObject({ customers: 13, sales: "494.00", commission: "123.50" });
+    expect(buildCommissionInvoiceEmail(saved, "DRS-COM-TEST").html).toContain("494.00");
+    expect(withTicketPrices(doc, { ...edited, source: undefined }).rows[2].ticketPrice).toBe("32.06");
+    const fallback = build([{ ...lines[0], collected_amount: null }]);
+    expect(fallback.rows[0].ticketPrice).toBe("104.50");
+  });
+  it("reconciles mixed currencies with exact commission", () => {
+    const doc = build();
+    expect(commissionTotals(doc).commission).toBe("123.50");
     expect(doc.rows[2]).toMatchObject({ nativeCurrency: "SAR", nativeCommission: "210.00", commissionAmount: "56.00" });
     const html = buildCommissionInvoiceEmail(doc, "DRS-COM-TEST").html;
     expect(html).toContain("Thank you for your business");

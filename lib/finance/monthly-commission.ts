@@ -16,7 +16,7 @@ export type CommissionLine = {
   currency: FinanceCurrency; recognised_revenue: string | number;
   fx_locked: boolean; fx_rate_to_usd: string | number | null;
   supplier_fx_locked: boolean; supplier_cost_source: string;
-  destination: string | null; reference: string;
+  destination: string | null; reference: string; collected_amount?: string | number | null;
 };
 export type CommissionBalance = { line_id: string; currency: FinanceCurrency; balance: string | number; obligation: string | number };
 
@@ -45,23 +45,38 @@ export function buildMonthlyCommission(supplier: { id: string; name: string }, p
     const rate = crossCurrency ? String(line.fx_rate_to_usd) : "1";
     const commission = fromMinor(convertMinor(due, rate));
     const sales = fromMinor(convertMinor(toMinor(line.recognised_revenue), rate));
+    // Default ticket price: what customers paid the supplier, per customer. Finance can edit it to the agreed price.
+    const paid = toMinor(line.collected_amount || 0) > 0n ? toMinor(line.collected_amount!) : toMinor(line.recognised_revenue);
+    const guests = BigInt(Math.max(1, line.guests));
+    const ticketPrice = fromMinor((convertMinor(paid, rate) * 2n + guests) / (2n * guests));
     if (toMinor(commission) === 0n) throw new CommissionSourceError(`The converted commission for ${line.reference} rounds to zero. Use its original currency.`);
     if (line.destination) cities.add(line.destination);
     rows.push({ date: line.trip_date, trip: (line.tour_name || "Trip").slice(0, 140), customers: Math.max(0, line.guests),
-      ticketPrice: "0.00", commissionPercent: "0", lineId: line.id, bookingReference: line.reference,
+      ticketPrice, commissionPercent: "0", lineId: line.id, bookingReference: line.reference,
       salesAmount: sales, commissionAmount: commission, nativeCurrency: line.currency,
       nativeCommission: fromMinor(due), exchangeRate: rate });
   }
   if (!rows.length) throw new CommissionSourceError("No unpaid supplier-collected commission for this month and currency.");
   if (rows.length > 1000) throw new CommissionSourceError("More than 1,000 outstanding trip entries. Create separate statements in the original currencies.");
-  const city = cities.size === 1 ? [...cities][0].slice(0, 60) : "All destinations";
-  const fingerprint = createHash("sha256").update(JSON.stringify({ supplierId: supplier.id, partner: supplier.name, period, currency, city, rows })).digest("hex");
+  const city = cities.size === 1 ? titleCase([...cities][0]).slice(0, 60) : "All destinations";
+  const fingerprint = createHash("sha256").update(JSON.stringify({ supplierId: supplier.id, partner: supplier.name, period, currency, city, rows: financeRows(rows) })).digest("hex");
   return commissionInvoiceSchema.parse({ partner: supplier.name, city, period, currency, rows, notes: "",
     source: { kind: "ledger", fingerprint, generatedAt } });
 }
 
+const titleCase = (value: string) => value.replace(/\b\p{L}/gu, letter => letter.toUpperCase());
+/** Rows without the finance-editable ticket price; everything else must match the ledger exactly. */
+const financeRows = (rows: CommissionInvoice["rows"]) => rows.map(row => ({ ...row, ticketPrice: undefined }));
+
+/** Keep ticket prices finance entered for the same booking lines; new lines keep their default. */
+export function withTicketPrices(current: CommissionInvoice, edited?: CommissionInvoice): CommissionInvoice {
+  if (!edited?.source) return current;
+  const prices = new Map(edited.rows.filter(row => row.lineId).map(row => [row.lineId!, row.ticketPrice]));
+  return { ...current, rows: current.rows.map(row => ({ ...row, ticketPrice: prices.get(row.lineId!) ?? row.ticketPrice })) };
+}
+
 export function assertCurrentCommission(saved: CommissionInvoice, current: CommissionInvoice) {
-  if (!saved.source || saved.source.fingerprint !== current.source?.fingerprint || JSON.stringify(saved.rows) !== JSON.stringify(current.rows)
+  if (!saved.source || saved.source.fingerprint !== current.source?.fingerprint || JSON.stringify(financeRows(saved.rows)) !== JSON.stringify(financeRows(current.rows))
     || saved.partner !== current.partner || saved.city !== current.city || saved.period !== current.period || saved.currency !== current.currency) {
     throw new CommissionSourceError("Finance has changed or this statement is not linked. Refresh the draft from finance and review it before sending.");
   }

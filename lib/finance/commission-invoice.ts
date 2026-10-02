@@ -32,7 +32,7 @@ export type CommissionInvoice = z.infer<typeof commissionInvoiceSchema>;
 export function commissionTotals(invoice: CommissionInvoice) {
   let sales = 0n, commission = 0n, customers = 0;
   const rows = invoice.rows.map(row => {
-    const total = invoice.source ? toMinor(row.salesAmount!) : toMinor(row.ticketPrice) * BigInt(row.customers);
+    const total = toMinor(row.ticketPrice) * BigInt(row.customers);
     // Round each line half up to cents, then sum the displayed amounts.
     const cut = invoice.source ? toMinor(row.commissionAmount!) : (total * toMinor(row.commissionPercent) + 5000n) / 10000n;
     sales += total; commission += cut; customers += row.customers;
