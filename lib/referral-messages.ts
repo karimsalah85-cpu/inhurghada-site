@@ -5,6 +5,7 @@ import { referralNotificationCopy } from "@/lib/referral-notification-copy";
 import { referralLink } from "@/lib/referral";
 import { googleReviewUrl } from "@/lib/contact";
 import { tripThankYouCopy } from "@/lib/trip-thank-you-copy";
+import { emailButton, emailIntro, emailLink, emailPanel, emailParagraph, emailRow, emailSignoff, emailTheme, renderEmail } from "@/lib/email/layout";
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 const inviteCopy = {
@@ -15,7 +16,6 @@ const inviteCopy = {
   pl: "Zaproś znajomych i rodzinę do odkrywania Morza Czerwonego. Dołącz do programu poleceń przez poniższy link.",
   zh: "邀请亲朋好友探索红海。通过下方链接参加我们的推荐计划。",
 };
-const buttonStyle = 'display:inline-block;padding:14px 20px;background:#0A2D57;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:bold';
 
 export type ReferralMessageInput = { event: "trip_completed" | "activated" | "reward_earned"; locale?: string | null; customerName: string; qualified: boolean; referralCode?: string | null; balanceUnits?: number; bookingReference?: string; trip?: { theme?: "sea" | "desert" | "culture"; title: string; image?: string; destination: string; url: string; related: Array<{ title: string; image?: string; url: string }> } };
 
@@ -87,6 +87,34 @@ export function buildReferralMessage(input: ReferralMessageInput) {
     return { subject, html, text: lines.join("\n\n") };
   }
   const lines = [input.customerName, subject, ...(input.event === "reward_earned" ? [note.balance(Math.max(0, input.balanceUnits || 0) * 5)] : []), copy.heading, inviteCopy[locale], input.qualified ? copy.tagline : program.locked, program.terms, ...(personalUrl ? [`${copy.copyLink}: ${personalUrl}`, `${copy.shareWhatsapp}: ${whatsapp}`] : []), `${program.viewRewards}: ${accountUrl}`];
-  const html = `<div dir="${locale === "ar" ? "rtl" : "ltr"}" lang="${locale}"><p>${escapeHtml(input.customerName)}</p><h2>${escapeHtml(subject)}</h2>${input.event === "reward_earned" ? `<p>${escapeHtml(note.balance(Math.max(0, input.balanceUnits || 0) * 5))}</p>` : ""}<h3>${escapeHtml(copy.heading)}</h3><p>${escapeHtml(inviteCopy[locale])}</p><p>${escapeHtml(input.qualified ? copy.tagline : program.locked)}</p><p>${escapeHtml(program.terms)}</p>${personalUrl ? `<p><a style="${buttonStyle}" href="${escapeHtml(whatsapp!)}">${escapeHtml(copy.shareWhatsapp)}</a></p><p>${escapeHtml(copy.copyLink)}: <a href="${escapeHtml(personalUrl)}">${escapeHtml(personalUrl)}</a></p>` : ""}<p><a style="${buttonStyle}" href="${accountUrl}">${escapeHtml(program.viewRewards)}</a></p></div>`;
+  // Program-unlocked and reward-earned notices: the confirmation email's layout (lib/email/layout.ts)
+  // with the same dark referral panel the post-trip thank-you ends on.
+  const theme = emailTheme(locale);
+  const panelExtra = [
+    ...(personalUrl ? [
+      `<p style="margin:0 0 14px;">${emailButton(theme, copy.shareWhatsapp, whatsapp!, "cream")}</p>`,
+      `<p style="margin:0 0 5px;font-size:11px;line-height:18px;color:#B6C8CB;">${escapeHtml(copy.copyLink)}</p>`,
+      `<p dir="ltr" style="margin:0 0 14px;overflow-wrap:anywhere;word-break:break-all;${theme.rtl ? "text-align:right;" : ""}"><a href="${escapeHtml(personalUrl)}" style="color:#FFFFFF;font-size:12px;line-height:20px;">${escapeHtml(personalUrl)}</a></p>`,
+    ] : []),
+    `<p style="margin:0 0 14px;">${emailLink(theme, program.viewRewards, accountUrl, theme.palette.cream)}</p>`,
+    `<p style="margin:0;padding-top:12px;border-top:1px solid #3C5360;font-size:10px;line-height:16px;color:#B6C8CB;">${escapeHtml(program.terms)}</p>`,
+  ].join("");
+  const html = renderEmail(theme, {
+    title: subject,
+    preheader: copy.heading,
+    rows: [
+      emailIntro(theme, {
+        eyebrow: copy.heading,
+        headline: subject,
+        body: [
+          emailParagraph(theme, `${input.customerName},`, { strong: true }),
+          ...(input.event === "reward_earned" ? [emailParagraph(theme, note.balance(Math.max(0, input.balanceUnits || 0) * 5))] : []),
+          emailParagraph(theme, inviteCopy[locale], { last: true }),
+        ],
+      }),
+      emailRow(emailPanel(theme, { lead: input.qualified ? copy.tagline : program.locked, extraHtml: panelExtra }), "0 42px 30px"),
+    ],
+    signoff: emailSignoff(locale),
+  });
   return { subject, html, text: lines.join("\n\n") };
 }

@@ -1,7 +1,7 @@
 import { pdfColors, pdfPage } from "@/lib/pdf/theme";
 import { createPdfDocument, renderPdfToBuffer } from "@/lib/pdf/render";
 import { PdfFlow, stampPdfFooters } from "@/lib/pdf/layout";
-import { drawInfoGrid, drawTableRow, pdfWrite, pdfTextHeight, type TableColumn } from "@/lib/pdf/components";
+import { drawPdfSummaryCard, drawTableRow, pdfWrite, pdfTextHeight, type TableColumn } from "@/lib/pdf/components";
 import { registerAllScriptFonts } from "@/lib/pdf/script-font";
 
 export type ReportPdfRow = {
@@ -32,20 +32,21 @@ type ReportPdfData = {
 };
 
 const columns: TableColumn[] = [
-  { label: "Reference", width: 85 },
-  { label: "Trip", width: 140 },
-  { label: "Service date", width: 62 },
-  { label: "People", width: 35, align: "right" },
-  { label: "Booking", width: 55 },
-  { label: "Payment", width: 52 },
-  { label: "Amount", width: 70, align: "right" },
+  { label: "Reference", width: 96, align: "left" },
+  { label: "Trip", width: 138, align: "left" },
+  { label: "Service date", width: 64, align: "left" },
+  { label: "People", width: 40, align: "right" },
+  { label: "Booking", width: 58, align: "left" },
+  { label: "Payment", width: 50, align: "left" },
+  { label: "Amount", width: 69, align: "right" },
 ];
 
 /**
  * Admin "situation report" export. Previously hand-wrote raw PDF bytes with
  * only the built-in Courier font (non-ASCII characters silently became "?");
- * now shares the same theme, header/footer and Table component as every
- * customer-facing PDF, and the embedded Noto font gives it real Unicode support.
+ * now it is laid out like the text pages of the booking confirmation — the
+ * same white brand header, summary card, table and photo strip footer — and
+ * the embedded Noto font gives it real Unicode support.
  */
 export async function createReportPdf(report: ReportPdfData): Promise<Buffer> {
   const doc = createPdfDocument({ title: "Daily Red Sea - Situation report", locale: "en" });
@@ -56,8 +57,7 @@ export async function createReportPdf(report: ReportPdfData): Promise<Buffer> {
   const margin = pdfPage.margin;
   const contentWidth = pdfPage.width - margin * 2;
   const flow = new PdfFlow(doc, {
-    header: { variant: "compact", title: "Situation report", subtitle: `Period: ${report.from} to ${report.to}  |  Generated: ${report.generatedAt}` },
-    bottomMargin: 48,
+    header: { title: "Situation report", subtitle: `Period: ${report.from} to ${report.to}   ·   Generated: ${report.generatedAt}` },
   });
 
   flow.newPage();
@@ -69,8 +69,8 @@ export async function createReportPdf(report: ReportPdfData): Promise<Buffer> {
     ["Revenue", report.revenueLabel || report.revenue.toFixed(2)],
     ["Filters", `Trip: ${report.trip}; Booking: ${report.status}; Payment: ${report.payment || "all"}`],
   ];
-  const summaryHeight = drawInfoGrid(doc, summaryRows, margin, flow.y, contentWidth, false, 34);
-  flow.advance(summaryHeight + 18);
+  const summaryHeight = drawPdfSummaryCard(doc, summaryRows, margin, flow.y, contentWidth);
+  flow.advance(summaryHeight + 20);
 
   const tableHeader = () => {
     const h = drawTableRow(doc, columns.map((column) => column.label), columns, margin, flow.y, { header: true });
@@ -85,7 +85,7 @@ export async function createReportPdf(report: ReportPdfData): Promise<Buffer> {
   for (const row of report.rows) {
     const values = [row.reference, row.trip, row.serviceDate, String(row.people), row.status, row.paymentStatus || "-", `${row.amount.toFixed(2)} ${row.currency}`];
     const needed = Math.max(...values.map((value, index) => pdfTextHeight(doc, value, columns[index].width - 10, 9))) + 16;
-    if (flow.y + needed > pdfPage.height - 48) {
+    if (flow.y + needed > flow.bottom) {
       flow.newPage();
       tableHeader();
       zebra = false;
@@ -95,7 +95,7 @@ export async function createReportPdf(report: ReportPdfData): Promise<Buffer> {
     zebra = !zebra;
   }
 
-  stampPdfFooters(doc);
+  stampPdfFooters(doc, { imageFromPage: 0 });
   doc.end();
   return renderPdfToBuffer(doc);
 }

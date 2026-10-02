@@ -4,7 +4,7 @@ import path from "node:path";
 /**
  * The official Daily Red Sea wordmark, in both the reversed/white variant
  * (for the photographic hero and other dark backgrounds) and the full-color
- * variant (for light backgrounds, e.g. the page-2 compact header). Both ship
+ * variant (for light backgrounds, e.g. the white text-page header). Both ship
  * as rasterized PNGs — PDFKit cannot embed SVG directly — matching the
  * source wordmark SVG's `viewBox="0 0 633 98"` aspect ratio so scaled draws
  * are never distorted. Never recreate the wordmark as text except as the
