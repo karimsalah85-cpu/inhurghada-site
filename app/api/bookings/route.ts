@@ -123,7 +123,12 @@ export async function POST(request: NextRequest) {
       return `${index + 1}. ${title} - ${item.date} - ${currencySymbol}${item.amount.toFixed(2)}`;
     });
     const tripSummary = tripItems?.map((item, index) => `${index + 1}. ${item.tourName}\nDate: ${item.date}\nTime: ${item.time}\nTravelers: ${item.guestSummary}\nTrip total: ${currencySymbol}${item.amount.toFixed(2)}`).join("\n\n");
-    let bookingNotes = [transferSummary, tripSummary, body.message ? `Customer note: ${body.message}` : ""].filter(Boolean).join("\n\n");
+    const excursionTransfers = tripItems
+      ? tripItems.map((item, index) => item.transferNote ? `${index + 1}. ${item.tourName} (${item.date}): ${item.transferNote}` : "").filter(Boolean).join("\n")
+      : "transferNote" in pricing.data ? pricing.data.transferNote : "";
+    // Keep the historical trip prefix parseable; supplementary details follow Customer note:.
+    const supplementaryNotes = [body.message, excursionTransfers].filter(Boolean).join("\n\n");
+    let bookingNotes = [transferSummary, tripSummary, supplementaryNotes ? `Customer note: ${supplementaryNotes}` : ""].filter(Boolean).join("\n\n");
     const bookingEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
     const bookingWhatsApp = whatsappNumber;
 

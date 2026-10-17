@@ -1,3 +1,4 @@
+import { excursionTransferAreas, excursionTransferQuote, marinaTransferAreas, offersExcursionTransfer, tourTransferNote } from "@/lib/tour-transfer";
 import { optionalExtraPrice } from "@/lib/tour-extras";
 import { tours, type Tour } from "@/data/tours";
 import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
@@ -83,7 +84,12 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   const allowedQuantityExtras = new Map((tour.bookingExtras || []).map((option) => [option.id, option]));
   if (Object.keys(quantities).some((id) => !allowedQuantityExtras.has(id))) return { error: "Choose valid quantity add-ons." as const };
   const quantityExtrasTotal = Object.entries(quantities).reduce((sum, [id, quantity]) => sum + (allowedQuantityExtras.get(id)?.price || 0) * quantity, 0);
-  if (tour.requiresMarinaTransferChoice && input.transferRequired && !["Hurghada Hotels", "Makadi Bay", "Sahl Hasheesh", "El Gouna", "Soma Bay", "Safaga"].includes(input.transferArea || "")) return { error: "Choose a valid marina transfer area." as const };
+  if (input.transferRequired) {
+    const areas: readonly string[] = tour.requiresMarinaTransferChoice ? marinaTransferAreas : excursionTransferAreas;
+    if (!offersExcursionTransfer(tour) || !areas.includes(input.transferArea || "")) {
+      return { error: tour.requiresMarinaTransferChoice ? "Choose a valid marina transfer area." : "Choose a valid trip transfer area." };
+    }
+  }
   const packages = tour.additionalPackages?.length ? [
     { id: "primary", price: Number(tour.packagePrice ?? tour.price), label: tour.packageName ?? tour.title },
     ...tour.additionalPackages.map((pkg, index) => ({ id: `package-${index}`, price: Number(pkg.price), label: pkg.name })),
@@ -99,7 +105,8 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     : tour.pricingMode === "per-booking"
     ? pricing.adults
     : input.adults * adultRate + input.youth * (pricing.youth ?? adultRate) + input.infants * (pricing.infants ?? 0);
-  const amount = Math.round((participantTotal + extrasTotal + quantityExtrasTotal) * 100) / 100;
+  const transferQuote = input.transferRequired ? excursionTransferQuote(input.transferArea, guests, tour.currency || "USD") : null;
+  const amount = Math.round((participantTotal + extrasTotal + quantityExtrasTotal + (transferQuote?.amount || 0)) * 100) / 100;
   const guestSummary = tour.pricingMode === "per-booking"
     ? `${guests} passenger${guests === 1 ? "" : "s"}${boat ? ` · ${boat.label}` : ""}`
     : `${input.adults} adult${input.adults === 1 ? "" : "s"}${pricing.youth !== undefined ? ` · ${input.youth} youth` : ""}${pricing.infants !== undefined ? ` · ${input.infants} infant${input.infants === 1 ? "" : "s"}` : ""}`;
@@ -123,11 +130,12 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     const extra = allowedQuantityExtras.get(id)!;
     if (quantity) lines.push(pricingLine("extra", quantity, extra.price, extra.label));
   }
+  if (transferQuote) lines.push(pricingLine("vehicle", transferQuote.cars, transferQuote.unitPrice, `${input.transferArea} ↔ Hurghada · round-trip sedan (up to 3 passengers per car)`));
   const pricingSnapshot: BookingPricingSnapshot = {
     version: 1, currency: tour.currency || "USD", subtotal: amount, pending: false,
     trips: [{ name: tour.title, guests, participants: { adults: input.adults, youth: input.youth, infants: input.infants }, lines }],
   };
-  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot } };
+  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot, transferNote: tourTransferNote(input, guests, tour.currency || "USD") } };
 }
 
 function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[]) {

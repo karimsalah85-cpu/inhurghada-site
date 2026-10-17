@@ -30,7 +30,7 @@ import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { useCart } from "@/components/cart/CartProvider";
 import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
-import { marinaTransferOptions } from "@/data/speedboat-booking";
+import { excursionTransferAreas, excursionTransferQuote, marinaTransferAreas, offersExcursionTransfer, transferCopy } from "@/lib/tour-transfer";
 import type { DestinationSlug } from "@/lib/destinations";
 import { isOperatingDate, isQuadTour, nextDepartures, nextOperatingDate, tourMinimumAge, type FulfillmentType } from "@/lib/tour-booking";
 import BookableDatePicker from "@/components/booking/BookableDatePicker";
@@ -271,7 +271,8 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     : pricingMode === "per-booking"
     ? adultPrice
     : adults * adultPrice + youth * (youthPrice ?? adultPrice) + infants * (infantPrice ?? 0);
-  const total = participantTotal + extrasTotal + configuredExtrasTotal;
+  const transferQuote = transferRequired ? excursionTransferQuote(transferArea, adults + youth + infants, currency) : null;
+  const total = participantTotal + extrasTotal + configuredExtrasTotal + (transferQuote?.amount || 0);
   const requestedPlaces = adults + youth + infants;
   const remainingPlaces = availability?.managed ? Math.max(...(availability.slots || []).map((slot) => slot.remaining ?? 9999), 0) : null;
   const unavailable = Boolean(availability?.soldOut || (remainingPlaces !== null && remainingPlaces < requestedPlaces));
@@ -283,6 +284,11 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
   const upcomingDepartures = nextDepartures(minimumDate, operatingWeekdays);
   const meetingPointProduct = fulfillmentType === "meeting_point";
   const pickupOptional = destinationSlug === "jeddah";
+  const showTransferChoice = offersExcursionTransfer({ destinationSlug, fulfillmentType, requiresMarinaTransferChoice });
+  const transferText = transferCopy(language);
+  const transferNotice = transferQuote ? transferText.priced : transferText.notice;
+  const transferSummary = transferQuote ? `${transferQuote.cars} × ${formatPrice(String(transferQuote.unitPrice), currency)} = ${formatPrice(String(transferQuote.amount), currency)}` : "";
+  const transferOptions = requiresMarinaTransferChoice ? marinaTransferAreas : excursionTransferAreas;
   const travelerText = de
     ? `${adults} Erwachsene${youthPrice !== undefined ? ` · ${youth} Kinder` : ""}${infantPrice !== undefined ? ` · ${infants} Kleinkinder` : ""}`
     : ru
@@ -293,7 +299,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
           type: "tour", locale: language, customerName: name.trim(), phone, customerEmail: email.trim(),
           tourName, tourSlug, extras: selectedExtras, selectedBoatOption, selectedPackageOption, extraQuantities, transferRequired, transferArea, location: location || "Hurghada", duration: duration || "Please confirm",
           price: `${formatPrice(String(total), currency)} total`, date, guests: travelerText, hotel,
-          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedBoat ? `\nBoat: ${selectedBoat.label}` : ""}${selectedPackage ? `\nPackage: ${selectedPackage.label}` : ""}${bookingExtras.some((option) => extraQuantities[option.id]) ? `\nQuantity extras: ${bookingExtras.filter((option) => extraQuantities[option.id]).map((option) => `${option.label} x${extraQuantities[option.id]}`).join(", ")}` : ""}${requiresMarinaTransferChoice ? `\nMarina transfer: ${transferRequired ? `Yes - ${transferArea}` : "No"}` : ""}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
+          message: `Time: ${time}\nGuide language: ${guideLanguage}${selectedBoat ? `\nBoat: ${selectedBoat.label}` : ""}${selectedPackage ? `\nPackage: ${selectedPackage.label}` : ""}${bookingExtras.some((option) => extraQuantities[option.id]) ? `\nQuantity extras: ${bookingExtras.filter((option) => extraQuantities[option.id]).map((option) => `${option.label} x${extraQuantities[option.id]}`).join(", ")}` : ""}${showTransferChoice ? `\nTrip transfer: ${transferRequired ? `Yes - ${transferArea}` : "No"}` : ""}${requiresDivingLicense ? "\nValid diving license: confirmed for every diver" : ""}${requiresQuadMinimumAge ? "\nQuad minimum age 9: confirmed for every participant" : ""}${selectedExtras.length ? `\nOptional extras: ${extraOptions.filter((option) => selectedExtras.includes(option.id)).map((option) => de ? option.de : ru ? option.ru : option.en).join(", ")}` : ""}${message ? `\nCustomer note: ${message}` : ""}`,
           adults, youth, infants,
           divingLicenseConfirmed,
           quadMinimumAgeConfirmed,
@@ -310,7 +316,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     if (invalidGroupSize) return setError(groupSizeNotice);
     if (boatOverCapacity) { setError(boatCapacityError(selectedBoat?.capacity)); return; }
     if (unavailableWeekday) { setError(tr("This excursion does not operate on the selected weekday. Choose another date.", "Dieser Ausflug findet am gewählten Wochentag nicht statt. Wähle ein anderes Datum.", "Экскурсия не проводится в выбранный день недели. Выберите другую дату.")); return; }
-    if (requiresMarinaTransferChoice && transferRequired && !transferArea) { setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера.")); return; }
+    if (showTransferChoice && transferRequired && !transferArea) { setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера.")); return; }
     if (requiresDivingLicense && !divingLicenseConfirmed) {
       setError(tr("Every diver must hold a valid diving license for this booking.", "Für diesen Tauchausflug muss jeder Taucher einen gültigen Tauchschein besitzen.", "Для этого погружения у каждого дайвера должен быть действующий сертификат."));
       return;
@@ -369,7 +375,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     if (invalidGroupSize) return setError(groupSizeNotice);
     if (boatOverCapacity) return setError(boatCapacityError(selectedBoat?.capacity));
     if (unavailable || unavailableWeekday) return;
-    if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера."));
+    if (showTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера."));
     trackEvent("checkout_started", { value: total, currency, item_name: tourName, destination: destinationSlug });
     trackEvent("booking_start", { value: total, currency, item_name: tourName, booking_type: "tour" });
     setStep("checkout");
@@ -392,8 +398,31 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         {packageOptions && packageOptions.length > 1 ? <fieldset className="mt-6 rounded-2xl border border-ocean-soft bg-ocean-tint/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Select your package", "Paket auswählen", "Выберите пакет")}</legend><div className="space-y-2">{packageOptions.map((option) => <label key={option.id} className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-white p-3 text-sm"><span className="flex items-center gap-3"><input type="radio" name="package-option" checked={selectedPackageOption === option.id} onChange={() => setSelectedPackageOption(option.id)} className="accent-ocean-dark"/><span>{option.label}</span></span><strong>{formatPrice(String(option.price), currency)}</strong></label>)}</div></fieldset> : null}
         <div className="mt-6 rounded-2xl border border-line bg-surface-muted/60 px-4"><p className="pt-4 text-sm font-bold text-ink">{tr("Travelers and island entrance", "Reisende und Insel-Eintritt", "Путешественники и вход на остров")}</p><Counter label={ageBands?.adults || tr("Adults", "Erwachsene", "Взрослые")} description={entrancePricing ? `${formatPrice(entrancePricing.adults)} ${tr("entrance each", "Eintritt pro Person", "билет за каждого")}` : pricingMode === "per-booking" ? `${formatPrice(String(adultPrice), currency)} ${tr("total per booking", "gesamt pro Buchung", "за всё бронирование")}` : `${formatPrice(String(adultPrice), currency)} ${tr("each", "pro Person", "за человека")}`} value={adults} onChange={setAdults}/>{groupPricing?.length ? <div className="pb-3 text-xs text-muted"><p className="font-bold text-ink">{tr("Group price per person", "Gruppenpreis pro Person", "Групповая цена за человека")}</p><ul className="mt-1 space-y-0.5">{groupTierRanges(groupPricing, groupSize).map((tier) => { const current = adults + youth >= tier.from && (tier.to === undefined || adults + youth <= tier.to); return <li key={tier.minTravelers} className={`flex justify-between ${current ? "font-bold text-ocean-dark" : ""}`}><span>{tier.label} {tr("travelers", "Reisende", "чел.")}</span><span>{formatPrice(String(tier.pricePerPerson), currency)}</span></li>; })}</ul></div> : null}{(entrancePricing || youthPrice !== undefined) && <Counter label={ageBands?.children || tr("Youth (4–10)", "Kinder (4–10)", "Дети (4–10)")} description={`${entrancePricing ? formatPrice(entrancePricing.youth) : formatPrice(String(youthPrice ?? 0), currency)} ${tr("each", "pro Kind", "за ребёнка")}`} value={youth} onChange={setYouth}/>} {infantPrice !== undefined && <Counter label={ageBands?.infants || tr("Infants", "Kleinkinder", "Младенцы")} description={tr("Free of charge", "Kostenlos", "Бесплатно")} value={infants} onChange={setInfants}/>} {invalidGroupSize ? <p className="pb-4 text-sm font-bold text-rose-700">{groupSizeNotice}</p> : null}{boatOverCapacity ? <p className="pb-4 text-sm font-bold text-rose-700">{boatCapacityNotice(selectedBoat?.capacity)}</p> : null}</div>
         {bookingExtras.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Optional add-ons", "Optionale Zusatzleistungen", "Дополнительные опции")}</legend>{bookingExtras.map((option) => <div key={option.id} className={`mt-2 rounded-xl bg-white px-3 transition ${(extraQuantities[option.id] || 0) > 0 ? "ring-2 ring-ocean-dark" : ""}`}><Counter label={option.label} description={`${formatPrice(option.price)} ${tr("per person", "pro Person", "за человека")}`} value={extraQuantities[option.id] || 0} onChange={(quantity) => setExtraQuantities((current) => ({ ...current, [option.id]: quantity }))}/></div>)}</fieldset> : null}
-        {requiresMarinaTransferChoice ? <fieldset className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Do you require transfer to Hurghada marina?", "Benötigst du einen Transfer zum Jachthafen Hurghada?", "Нужен ли вам трансфер до марины Хургады?")}</legend><div className="mt-2 flex gap-5 text-sm"><label><input type="radio" name="marina-transfer" checked={!transferRequired} onChange={() => { setTransferRequired(false); setTransferArea(""); }} className="mr-2 accent-emerald-700"/>{tr("No", "Nein", "Нет")}</label><label><input type="radio" name="marina-transfer" checked={transferRequired} onChange={() => setTransferRequired(true)} className="mr-2 accent-emerald-700"/>{tr("Yes", "Ja", "Да")}</label></div>{transferRequired ? <select required value={transferArea} onChange={(event) => setTransferArea(event.target.value)} className="mt-3 w-full rounded-xl border border-emerald-200 bg-white p-3 text-sm"><option value="">{tr("Select pickup area", "Abholbereich auswählen", "Выберите зону трансфера")}</option>{marinaTransferOptions.map((area) => <option key={area}>{area}</option>)}</select> : null}<p className="mt-2 text-xs text-emerald-900">{tr("Transfer price is confirmed by WhatsApp for the selected area.", "Der Transferpreis für den gewählten Bereich wird per WhatsApp bestätigt.", "Стоимость трансфера для выбранной зоны будет подтверждена в WhatsApp.")}</p></fieldset> : null}
+        {showTransferChoice ? (
+          <fieldset className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+            <legend className="px-1 text-sm font-black text-ink">
+              {requiresMarinaTransferChoice ? tr("Do you require transfer to Hurghada marina?", "Benötigst du einen Transfer zum Jachthafen Hurghada?", "Нужен ли вам трансфер до марины Хургады?") : transferText.title}
+            </legend>
+            <div className="mt-2 flex gap-5 text-sm">
+              <label><input type="radio" name="trip-transfer" checked={!transferRequired} onChange={() => { setTransferRequired(false); setTransferArea(""); }} className="mr-2 accent-emerald-700"/>{tr("No", "Nein", "Нет")}</label>
+              <label><input type="radio" name="trip-transfer" checked={transferRequired} onChange={() => setTransferRequired(true)} className="mr-2 accent-emerald-700"/>{tr("Yes", "Ja", "Да")}</label>
+            </div>
+            {transferRequired ? (
+              <>
+                <select aria-label={tr("Select pickup area", "Abholbereich auswählen", "Выберите зону трансфера")} required value={transferArea} onChange={(event) => setTransferArea(event.target.value)} className="mt-3 w-full rounded-xl border border-emerald-200 bg-white p-3 text-sm">
+                  <option value="">{tr("Select pickup area", "Abholbereich auswählen", "Выберите зону трансфера")}</option>
+                  {transferOptions.map((area) => {
+                    const quote = excursionTransferQuote(area, 1, currency);
+                    return <option key={area} value={area}>{area}{quote ? ` · ${formatPrice(String(quote.unitPrice), currency)} / ${ar ? "سيارة ذهاباً وإياباً" : "car round trip"}` : ""}</option>;
+                  })}
+                </select>
+                <p className="mt-2 text-xs text-emerald-900">{transferNotice}</p>
+              </>
+            ) : null}
+          </fieldset>
+        ) : null}
         {extraOptions.length ? <fieldset className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4"><legend className="px-1 text-sm font-black text-ink">{tr("Optional extras", "Optionale Extras", "Дополнительные опции")}</legend>{extraOptions.map((option) => { const selected = selectedExtras.includes(option.id); return <label key={option.id} className={`mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl border-2 bg-white p-3.5 text-sm transition ${selected ? "border-ocean-dark ring-2 ring-ocean-tint" : "border-transparent"}`}><span className="flex items-center gap-3"><input type="checkbox" checked={selected} onChange={(event) => setSelectedExtras((items) => event.target.checked ? [...items, option.id] : items.filter((item) => item !== option.id))} className="h-5 w-5 shrink-0 accent-ocean-dark" />{de ? option.de : ru ? option.ru : zh ? option.zh : option.en}</span><strong className="shrink-0 text-ocean-dark">+{formatPrice(String(option.price * (option.charge === "adult" ? adults : 1)), currency)}</strong></label>; })}</fieldset> : null}
+        {transferRequired ? <p className="mt-3 text-sm text-emerald-900">{transferText.selected}: {transferArea || "—"}.{transferSummary ? ` ${transferSummary}.` : ""} {transferNotice}</p> : null}
         <div className="mt-5 flex items-end justify-between gap-3 border-t pt-5"><div className="min-w-0"><p className="font-bold text-ink">{tr("Total", "Gesamtpreis", "Итого")}</p><p className="text-xs text-muted">{tr("Cash on arrival · no online payment", "Barzahlung bei Ankunft · keine Online-Zahlung", "Оплата наличными по прибытии · без онлайн-оплаты")}</p></div><p className="shrink-0 whitespace-nowrap text-2xl font-black text-ink sm:text-3xl">{formatPrice(String(promo.total), currency)}</p></div>
         {unavailableWeekday ? <p role="alert" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900">{tr("This excursion does not operate on the selected weekday. Choose another date.", "Dieser Ausflug findet am gewählten Wochentag nicht statt. Wähle ein anderes Datum.", "Экскурсия не проводится в выбранный день недели. Выберите другую дату.")}</p> : null}
         <button disabled={unavailable || boatOverCapacity || unavailableWeekday || invalidGroupSize} type="button" onClick={beginCheckout} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:cursor-not-allowed disabled:bg-muted">{unavailable ? tr("Sold out", "Ausverkauft", "Мест нет") : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
@@ -401,7 +430,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
           if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
           if (invalidGroupSize) return setError(groupSizeNotice);
           if (boatOverCapacity) return setError(boatCapacityError(selectedBoat?.capacity));
-          if (requiresMarinaTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера."));
+          if (showTransferChoice && transferRequired && !transferArea) return setError(tr("Choose your transfer pickup area.", "Wähle den Abholbereich für den Transfer.", "Выберите зону трансфера."));
           addItem({ tourSlug, tourName, destinationSlug, currency, date, time, adults, youth, infants, extras: selectedExtras, selectedBoatOption, selectedPackageOption, extraQuantities, transferRequired, transferArea, subtotal: total, requiresDivingLicense, requiresQuadMinimumAge });
           setCartMessage(tr("Added to your trip cart.", "Zum Reisewarenkorb hinzugefügt.", "Добавлено в корзину поездок.", "تمت الإضافة إلى سلة الرحلات."));
         }} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-ocean-soft bg-ocean-tint py-4 font-bold text-ocean-dark hover:bg-ocean-soft">{tr("Add to trip cart", "Zum Reisewarenkorb", "Добавить в корзину", "أضف إلى سلة الرحلات")} <ShoppingCart size={18}/></button>
@@ -409,6 +438,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         {error && <p role="alert" className="mt-3 text-center text-sm text-rose-600">{error}</p>}
       </> : <form onSubmit={submit} aria-busy={submitting} className="mt-6 space-y-4">
         <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+        {transferRequired ? <p className="text-sm text-emerald-900">{transferText.selected}: {transferArea}.{transferSummary ? ` ${transferSummary}.` : ""} {transferNotice}</p> : null}
         <div className="rounded-2xl border border-surface-muted bg-surface-muted p-4"><p className="font-bold text-ink">{tourName}</p><p className="mt-1 text-sm text-muted">{date} {tr("at", "um", "в")} {time} · {travelerText}</p><p className="mt-2 font-black text-ink">{formatPrice(String(promo.total), currency)} · {tr("Cash on arrival", "Barzahlung bei Ankunft", "оплата наличными по прибытии")}</p></div>
         <p className="border-b pb-2 text-lg font-black text-ink">{tr("Tell us about yourself", "Deine Angaben", "Ваши данные")}</p>
         <p className="text-xs text-muted"><RequiredMark/> {tr("Required field", "Pflichtfeld", "Обязательное поле")}</p>
