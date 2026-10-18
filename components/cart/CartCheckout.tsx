@@ -108,6 +108,7 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
             extraQuantities: item.extraQuantities,
             transferRequired: item.transferRequired,
             transferArea: item.transferArea,
+            transferTrip: item.transferTrip,
             divingLicenseConfirmed: item.requiresDivingLicense ? divingConfirmed : true,
             quadMinimumAgeConfirmed: tourMinimumAge(item.tourSlug) === undefined ? true : isQuadTour(item.tourSlug) ? quadConfirmed : riderAgeConfirmed,
           })),
@@ -176,10 +177,10 @@ export default function CartCheckout({ tours }: { tours: Tour[] }) {
         <div className="space-y-4">
           {items.map((item) => {
             const tour = tours.find((entry) => entry.slug === item.tourSlug);
-            const transferQuote = item.transferRequired ? excursionTransferQuote(item.transferArea, item.adults + item.youth + item.infants, item.currency) : null;
+            const transferQuote = item.transferRequired ? excursionTransferQuote(item.transferArea, item.adults + item.youth + item.infants, item.currency, item.transferTrip ?? "round_trip") : null;
             return <article key={item.id} className="grid gap-4 rounded-3xl border border-line bg-white p-4 shadow-sm sm:grid-cols-[140px_1fr_auto] sm:items-center">
               <div className="relative h-28 overflow-hidden rounded-2xl"><Image src={tour?.image || "/images/placeholders/sea-activity.svg"} alt="" fill sizes="140px" className="object-cover"/></div>
-              <div><h2 className="font-black text-ink">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-muted"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-muted">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-ink">{formatPrice(String(item.subtotal), item.currency)}</p>{item.transferRequired ? <p className="mt-2 text-sm text-emerald-900">{transferCopy(language).selected}: {item.transferArea}. {transferQuote ? `${transferQuote.cars} × ${formatPrice(String(transferQuote.unitPrice), item.currency)} = ${formatPrice(String(transferQuote.amount), item.currency)}. ${transferCopy(language).priced}` : transferCopy(language).notice}</p> : null}</div>
+              <div><h2 className="font-black text-ink">{item.tourName}</h2><p className="mt-2 flex items-center gap-2 text-sm text-muted"><CalendarDays size={16}/>{item.date} · {item.time}</p><p className="mt-1 text-sm text-muted">{item.adults} {tr("adults", "Erwachsene", "взр.", "بالغين")}{item.youth ? ` · ${item.youth} ${tr("youth", "Kinder", "дет.", "أطفال")}` : ""}{item.infants ? ` · ${item.infants} ${tr("infants", "Kleinkinder", "млад.", "رضّع")}` : ""}</p><p className="mt-2 font-black text-ink">{formatPrice(String(item.subtotal), item.currency)}</p>{item.transferRequired ? <p className="mt-2 text-sm text-emerald-900">{transferCopy(language).selected}: {item.transferArea} · {item.transferTrip === "one_way" ? transferCopy(language).oneWay : transferCopy(language).roundTrip}. {transferQuote ? `${transferQuote.cars} × ${formatPrice(String(transferQuote.unitPrice), item.currency)} = ${formatPrice(String(transferQuote.amount), item.currency)}. ${item.transferTrip === "one_way" ? transferCopy(language).pricedOneWay : transferCopy(language).priced}` : transferCopy(language).notice}</p> : null}</div>
               <div className="flex items-center gap-2">{item.tourSlug === "jeddah-yacht-sunset-cruise" ? <ShareTripButton locale={language} tourSlug={item.tourSlug} date={item.date} compact/> : null}<button type="button" onClick={() => removeItem(item.id)} aria-label={tr("Remove trip", "Ausflug entfernen", "Удалить поездку", "حذف الرحلة")} className="rounded-xl border border-rose-200 p-3 text-rose-600 hover:bg-rose-50"><Trash2 size={19}/></button></div>
             </article>;
           })}

@@ -1,3 +1,4 @@
+import { normalizeTransferTrip } from "@/lib/tour-transfer";
 import { normalizePromoCode } from "@/lib/promo-codes";
 import { minimumAgeError, tourMinimumAge } from "@/lib/tour-booking";
 import { isMarsaAlamTourSlug, marsaAlamTourSchedules, type TourSchedule } from "@/data/tour-schedules";
@@ -43,6 +44,7 @@ function cartItems(value: unknown) {
       extraQuantities: extraQuantities(item.extraQuantities),
       transferRequired: item.transferRequired === true,
       transferArea: text(item.transferArea, 80),
+      transferTrip: normalizeTransferTrip(item.transferTrip),
       divingLicenseConfirmed: item.divingLicenseConfirmed === true,
       quadMinimumAgeConfirmed: item.quadMinimumAgeConfirmed === true,
     };
@@ -218,6 +220,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       extraQuantities: extraQuantities(body.extraQuantities),
       transferRequired: body.transferRequired === true,
       transferArea: text(body.transferArea, 80),
+      transferTrip: normalizeTransferTrip(body.transferTrip),
       location: text(body.location, 100),
       duration: text(body.duration, 80),
       price: text(body.price, 60),

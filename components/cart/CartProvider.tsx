@@ -20,6 +20,7 @@ export type CartItem = {
   extraQuantities?: Record<string, number>;
   transferRequired?: boolean;
   transferArea?: string;
+  transferTrip?: "one_way" | "round_trip";
   subtotal: number;
   requiresDivingLicense: boolean;
   requiresQuadMinimumAge: boolean;
