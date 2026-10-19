@@ -52,5 +52,7 @@ describe("one tour price source", () => {
     visit(shell);
     expect(scripts.join("")).toContain('"price":"25"');
     expect(scripts.join("")).not.toContain('"price":"30"');
+    expect(scripts.join("")).toContain('"@type":"TouristTrip"');
+    expect(scripts.join("")).not.toContain('"aggregateRating"');
   });
 });
