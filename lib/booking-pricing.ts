@@ -1,4 +1,4 @@
-import { excursionTransferAreas, excursionTransferQuote, marinaTransferAreas, offersExcursionTransfer, tourTransferNote } from "@/lib/tour-transfer";
+import { excursionTransferAreas, excursionTransferQuote, marinaTransferAreas, normalizeTransferTrip, offersExcursionTransfer, SEDAN_PASSENGERS, tourTransferNote, transferTripLabel, type ExcursionTransferTrip } from "@/lib/tour-transfer";
 import { optionalExtraPrice } from "@/lib/tour-extras";
 import { tours, type Tour } from "@/data/tours";
 import { calculateSenzoQuote, calculateTransferQuote } from "@/lib/transfer-quote";
@@ -17,6 +17,7 @@ type PricingInput = {
   extraQuantities?: Record<string, number>;
   transferRequired?: boolean;
   transferArea?: string;
+  transferTrip?: ExcursionTransferTrip;
   /** Present for the per-vehicle airport transfer product; absent for legacy `service` transfers. */
   transfer?: ParsedTransferRequest;
   adults: number;
@@ -40,6 +41,7 @@ type PricingInput = {
     extraQuantities?: Record<string, number>;
     transferRequired?: boolean;
     transferArea?: string;
+    transferTrip?: ExcursionTransferTrip;
   }[];
 };
 
@@ -50,7 +52,7 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
   return Number.isInteger(value) && value >= minimum && value <= maximum;
 }
 
-function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "selectedPackageOption" | "extraQuantities" | "transferRequired" | "transferArea">, catalog: Tour[]) {
+function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "selectedPackageOption" | "extraQuantities" | "transferRequired" | "transferArea" | "transferTrip">, catalog: Tour[]) {
   const tour = catalog.find((item) => item.slug === input.tourSlug) || catalog.find((item) => item.title === input.tourName);
   if (!tour) return { error: "Choose a valid tour." as const };
   if (tour.listingStatus === "paused" || tour.listingStatus === "unlisted") return { error: "This tour is not accepting bookings yet." as const };
@@ -105,7 +107,8 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     : tour.pricingMode === "per-booking"
     ? pricing.adults
     : input.adults * adultRate + input.youth * (pricing.youth ?? adultRate) + input.infants * (pricing.infants ?? 0);
-  const transferQuote = input.transferRequired ? excursionTransferQuote(input.transferArea, guests, tour.currency || "USD") : null;
+  const transferTrip = normalizeTransferTrip(input.transferTrip);
+  const transferQuote = input.transferRequired ? excursionTransferQuote(input.transferArea, guests, tour.currency || "USD", transferTrip) : null;
   const amount = Math.round((participantTotal + extrasTotal + quantityExtrasTotal + (transferQuote?.amount || 0)) * 100) / 100;
   const guestSummary = tour.pricingMode === "per-booking"
     ? `${guests} passenger${guests === 1 ? "" : "s"}${boat ? ` · ${boat.label}` : ""}`
@@ -130,12 +133,12 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     const extra = allowedQuantityExtras.get(id)!;
     if (quantity) lines.push(pricingLine("extra", quantity, extra.price, extra.label));
   }
-  if (transferQuote) lines.push(pricingLine("vehicle", transferQuote.cars, transferQuote.unitPrice, `${input.transferArea} ↔ Hurghada · round-trip sedan (up to 3 passengers per car)`));
+  if (transferQuote) lines.push(pricingLine("vehicle", transferQuote.cars, transferQuote.unitPrice, `${input.transferArea} ${transferTrip === "one_way" ? "→" : "↔"} Hurghada · ${transferTripLabel(transferTrip).toLowerCase()} sedan (up to ${SEDAN_PASSENGERS} passengers per car)`));
   const pricingSnapshot: BookingPricingSnapshot = {
     version: 1, currency: tour.currency || "USD", subtotal: amount, pending: false,
     trips: [{ name: tour.title, guests, participants: { adults: input.adults, youth: input.youth, infants: input.infants }, lines }],
   };
-  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot, transferNote: tourTransferNote(input, guests, tour.currency || "USD") } };
+  return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot, transferNote: tourTransferNote({ ...input, transferTrip }, guests, tour.currency || "USD") } };
 }
 
 function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[]) {
