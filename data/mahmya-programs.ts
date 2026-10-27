@@ -9,6 +9,8 @@ const aLaCarte = "Food and drinks from the à la carte menu";
 export const mahmyaEnglish = {
   title: "Mahmya Island Snorkeling Boat Trip from Hurghada",
   currency: "EUR",
+  fulfillmentType: "meeting_point",
+  departureMarina: "Mahmya Beach Marina, Hurghada",
   price: "38",
   participantPricing: { adults: 38, youth: 19, infants: 0 },
   ageBands: { adults: "Adults (7+)", children: "Children (3–6)", infants: "Infants (under 3)" },
