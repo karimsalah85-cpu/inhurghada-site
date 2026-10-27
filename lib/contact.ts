@@ -21,7 +21,7 @@ export const whatsappNumber = resolveWhatsappNumber(process.env.NEXT_PUBLIC_WHAT
 export const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@dailyredsea.com";
 export const displayPhoneNumber = formatDisplayPhoneNumber(whatsappNumber);
 export const facebookUrl = "https://www.facebook.com/profile.php?id=61592247695069";
-export const instagramUrl = "https://www.instagram.com/dailyredsea.com7/";
+export const instagramUrl = "https://www.instagram.com/dailyredsea/";
 export const googleReviewUrl = "https://g.page/r/CZO2rT5pTQOXEAI/review";
 export const googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=Daily+Red+Sea&query_place_id=ChIJXZ9eh4x-YCURk7atPmlNA5c";
 

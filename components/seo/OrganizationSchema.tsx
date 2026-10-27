@@ -17,7 +17,7 @@ export default function OrganizationSchema() {
         telephone: `+${whatsappNumber}`,
         sameAs: [
           "https://www.facebook.com/profile.php?id=61592247695069",
-          "https://www.instagram.com/dailyredsea.com7/",
+          "https://www.instagram.com/dailyredsea/",
         ],
         address: {
           "@type": "PostalAddress",

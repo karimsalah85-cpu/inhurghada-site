@@ -102,8 +102,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     price: "41.96",
     originalPrice: "52.45",
 
-    rating: "5.0",
-    reviews: "30",
+    rating: "New",
+    reviews: "New",
 
     location: "Hurghada, Egypt",
 
@@ -240,8 +240,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
     // At the current EUR conversion rate, this displays as €120.00 per day.
     price: "137.02",
 
-    rating: "5.0",
-    reviews: "12",
+    rating: "New",
+    reviews: "New",
 
     location: "Hurghada, Egypt",
 

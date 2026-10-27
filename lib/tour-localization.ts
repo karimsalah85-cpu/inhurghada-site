@@ -1584,7 +1584,27 @@ const magawishSpeedboatTranslations: Partial<Record<Locale, Partial<Tour>>> = {
   zh: { title: "橙湾与马加维什岛私人快艇", description: "乘私人快艇游览橙湾和马加维什岛，体验珊瑚礁浮潜，并可为团队选择餐饮和接送服务。", highlights: ["团队专属快艇", "橙湾和马加维什岛", "含装备的浮潜", "八种快艇选择", "可选餐饮和码头接送"], included: ["所选私人快艇", "船长兼向导", "燃油", "浮潜装备", "救生衣和安全设备"], notIncluded: ["海岛门票 — 预订时添加", "未选择的餐饮", "未选择的酒店接送", "个人消费"], packageName: "橙湾与马加维什私人快艇", packageDescription: "选择快艇、海岛门票、餐饮和码头接送。", packageLabel: "私人快艇起价", seoTitle: "赫尔格达橙湾与马加维什私人快艇", metaDescription: "从赫尔格达乘私人快艇前往橙湾和马加维什岛，含浮潜并可选择餐饮和接送。" },
 };
 
+/**
+ * A locale override that translates the title but not the SEO title/description
+ * would otherwise inherit the English ones (e.g. a German page titled in English).
+ * Drop inherited English SEO copy so metadata falls back to the translated
+ * title and description instead.
+ */
+function dropInheritedEnglishSeo(source: Tour, localized: Tour, locale: Locale): Tour {
+  if (locale === "en") return localized;
+  const next = { ...localized };
+  const titleTranslated = localized.title !== source.title;
+  if (titleTranslated && source.seoTitle && localized.seoTitle === source.seoTitle) next.seoTitle = undefined;
+  const descriptionTranslated = localized.description !== source.description;
+  if (descriptionTranslated && source.metaDescription && localized.metaDescription === source.metaDescription) next.metaDescription = undefined;
+  return next;
+}
+
 export function localizeTour(tour: Tour, locale: Locale): Tour {
+  return dropInheritedEnglishSeo(tour, localizeTourContent(tour, locale), locale);
+}
+
+function localizeTourContent(tour: Tour, locale: Locale): Tour {
   // Media selection (lib/tour-media-safety.ts) falls back to matching English
   // category/title keywords for tours with no explicit slug mapping. Run it
   // against the original English tour so translated category/title text from
