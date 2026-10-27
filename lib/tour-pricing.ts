@@ -28,7 +28,7 @@ export function preserveTourPrices(source: Tour, translated: Tour): Tour {
     currency: source.currency, participantPricing: source.participantPricing,
     groupPricing: source.groupPricing, groupSize: source.groupSize,
     additionalPackages: source.additionalPackages?.map((pkg, index) => ({
-      ...pkg, ...translated.additionalPackages?.[index], price: pkg.price,
+      ...pkg, ...translated.additionalPackages?.[index], price: pkg.price, youthPrice: pkg.youthPrice,
     })),
   };
 }

@@ -23,7 +23,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
   const staticReviewCount = Number(tour.reviews);
   const hasReviews = hasLiveReviews || (Number.isFinite(staticReviewCount) && staticReviewCount > 0);
   const displayRating = hasLiveReviews ? liveReviews.average : tour.rating;
-  const polish: Record<string, string> = { "Arrange on WhatsApp": "Ustal przez WhatsApp", "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Start times": "Godziny startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
+  const polish: Record<string, string> = { "Arrange on WhatsApp": "Ustal przez WhatsApp", "Description": "Opis", "About this tour": "O wycieczce", "Duration": "Czas trwania", "Rating": "Ocena", "Price": "Cena", "per person": "za osobę", "Highlights": "Najważniejsze atrakcje", "Child": "Dziecko", "Includes": "Zawiera", "Excludes": "Nie zawiera", "Included": "W cenie", "Not included": "Poza ceną", "Know before you go": "Warto wiedzieć", "Select your package": "Wybierz pakiet", "Quotation": "Wycena", "Request price": "Zapytaj o cenę", "Price on request": "Cena na zapytanie", "Guest reviews": "Opinie gości", "What guests say about this trip": "Co goście mówią o tej wycieczce", "Leave a review": "Dodaj opinię", "No guest reviews for this trip yet. Booked this trip? Be the first to share your experience.": "Brak opinii gości o tej wycieczce. Masz rezerwację? Podziel się wrażeniami jako pierwszy.", "Start time": "Godzina startu", "Start times": "Godziny startu", "Pickup": "Odbiór", "Hotel pickup": "Odbiór z hotelu", "Meeting point": "Miejsce zbiórki" };
   const tr = (en: string, deText: string, ruText: string, arText: string, zhText = en) => de ? deText : ru ? ruText : ar ? arText : pl ? polish[en] || en : zh ? zhText : en;
   const displayPrice = (value: string) => formatPrice(value, tour.currency);
   const operatorLine = tour.operator
@@ -79,7 +79,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Included","Inklusive","Включено","يشمل","费用包含")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Included","Inklusive","Включено","يشمل","费用包含")}{tour.additionalPackages?.some(pkg => pkg.included) ? ` — ${tour.packageName}` : ""}</p>
           <ul className="mt-6 space-y-4">
             {(tour.included ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-line bg-surface-muted p-4 text-sm text-ink">
@@ -95,7 +95,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         </div>
 
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Not included","Nicht inklusive","Не включено","لا يشمل","费用不含")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Not included","Nicht inklusive","Не включено","لا يشمل","费用不含")}{tour.additionalPackages?.some(pkg => pkg.notIncluded) ? ` — ${tour.packageName}` : ""}</p>
           <ul className="mt-6 space-y-4">
             {(tour.notIncluded ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-line bg-surface-muted p-4 text-sm text-ink">
@@ -123,7 +123,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Select your package","Paket auswählen","Выберите пакет","اختر الباقة","选择套餐")}</p>
           <div className="mt-6 space-y-4">
-            {[{ name: tour.packageName ?? tour.title, description: tour.packageDescription ?? tour.description, price: tour.packagePrice ?? tour.price, label: tour.packageLabel }, ...(tour.additionalPackages ?? [])].map((pkg) => (
+            {[{ name: tour.packageName ?? tour.title, description: tour.packageDescription ?? tour.description, price: tour.packagePrice ?? tour.price, label: tour.packageLabel, youthPrice: tour.participantPricing?.youth, included: tour.additionalPackages?.some(pkg => pkg.included) ? tour.included : undefined, notIncluded: tour.additionalPackages?.some(pkg => pkg.notIncluded) ? tour.notIncluded : undefined }, ...(tour.additionalPackages ?? [])].map((pkg) => (
               <div key={pkg.name} className="rounded-2xl border border-ocean-soft bg-ocean-tint p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 basis-40">
@@ -135,6 +135,9 @@ export default function TourDetails({ tour }: { tour: Tour }) {
                     <p className="whitespace-nowrap text-2xl font-bold text-ocean-dark">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(pkg.price, tour.currency)}</p>
                   </div>
                 </div>
+                {pkg.youthPrice !== undefined && tour.additionalPackages?.some(pkg => pkg.youthPrice !== undefined) ? <p className="mt-3 text-sm font-semibold text-ocean-dark">{tr("Child", "Kind", "Ребёнок", "طفل", "儿童")}: {formatPrice(String(pkg.youthPrice), tour.currency)}</p> : null}
+                {pkg.included?.length ? <div className="mt-4"><p className="text-sm font-bold text-ink">{tr("Includes", "Inklusive", "Включено", "يشمل", "包含")}</p><ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-muted">{pkg.included.map(item => <li key={item}>{item}</li>)}</ul></div> : null}
+                {pkg.notIncluded?.length ? <div className="mt-4"><p className="text-sm font-bold text-ink">{tr("Excludes", "Nicht inklusive", "Не включено", "لا يشمل", "不包含")}</p><ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-muted">{pkg.notIncluded.map(item => <li key={item}>{item}</li>)}</ul></div> : null}
                 <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-ocean-dark">
                   <Compass size={16} /> {pkg.label ?? tr("Adult", "Erwachsener", "Взрослый", "بالغ", "成人")}
                 </div>
@@ -143,6 +146,13 @@ export default function TourDetails({ tour }: { tour: Tour }) {
           </div>
         </div>
       </div>
+
+      {tour.generalRules?.length ? <section className="rounded-3xl border border-line bg-white p-8 shadow-sm">
+        <h2 className="text-xl font-bold text-ink">{pl ? "Zasady ogólne" : tr("General Rules", "Allgemeine Regeln", "Общие правила", "القواعد العامة", "一般规定")}</h2>
+        <ul className="mt-6 list-disc space-y-3 ps-5 text-sm leading-7 text-ink">
+          {tour.generalRules.map(rule => <li key={rule}>{rule}</li>)}
+        </ul>
+      </section> : null}
 
       {tour.whatsappContactNotes?.length ? <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-emerald-800"><MessageCircle size={16} /> {tr("Arrange on WhatsApp", "Per WhatsApp vereinbaren", "Договоритесь в WhatsApp", "رتّب عبر واتساب", "通过 WhatsApp 安排")}</p><div className="mt-5 grid gap-4 lg:grid-cols-2">{tour.whatsappContactNotes.map((note) => <div key={note.cta} className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5"><p className="text-sm leading-6 text-ink">{note.text}</p><a href={whatsappUrl(note.message)} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { placement: "tour_details_request", item_name: tour.title })} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700"><MessageCircle size={17} /> {note.cta}</a></div>)}</div></section> : null}
 
