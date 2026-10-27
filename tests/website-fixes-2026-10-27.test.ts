@@ -47,7 +47,7 @@ describe("Orange Bay park fee disclosure", () => {
     const locales: Locale[] = ["en", "de", "ru", "pl", "ar", "zh"];
     for (const locale of locales) {
       const localized = localizeTour(tour, locale);
-      expect(localized.notIncluded.some((item) => /5/.test(item)), locale).toBe(true);
+      expect(localized.notIncluded?.some((item) => /5/.test(item)), locale).toBe(true);
     }
   });
 });
