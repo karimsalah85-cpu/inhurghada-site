@@ -147,6 +147,13 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         </div>
       </div>
 
+      {tour.generalRules?.length ? <section className="rounded-3xl border border-line bg-white p-8 shadow-sm">
+        <h2 className="text-xl font-bold text-ink">{pl ? "Zasady ogólne" : tr("General Rules", "Allgemeine Regeln", "Общие правила", "القواعد العامة", "一般规定")}</h2>
+        <ul className="mt-6 list-disc space-y-3 ps-5 text-sm leading-7 text-ink">
+          {tour.generalRules.map(rule => <li key={rule}>{rule}</li>)}
+        </ul>
+      </section> : null}
+
       {tour.whatsappContactNotes?.length ? <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8"><p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.22em] text-emerald-800"><MessageCircle size={16} /> {tr("Arrange on WhatsApp", "Per WhatsApp vereinbaren", "Договоритесь в WhatsApp", "رتّب عبر واتساب", "通过 WhatsApp 安排")}</p><div className="mt-5 grid gap-4 lg:grid-cols-2">{tour.whatsappContactNotes.map((note) => <div key={note.cta} className="flex flex-col justify-between gap-4 rounded-2xl bg-white p-5"><p className="text-sm leading-6 text-ink">{note.text}</p><a href={whatsappUrl(note.message)} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("whatsapp_click", { placement: "tour_details_request", item_name: tour.title })} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700"><MessageCircle size={17} /> {note.cta}</a></div>)}</div></section> : null}
 
       {tour.itinerary ? <TourItinerary items={tour.itinerary} /> : null}

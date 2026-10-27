@@ -1,3 +1,4 @@
+import { mahmyaRules } from "@/data/mahmya-rules";
 import type { Tour } from "@/data/tours";
 import type { Locale } from "@/lib/i18n";
 
@@ -26,6 +27,7 @@ export const mahmyaEnglish = {
     { name: "Day Use Program + Lunch", description: "The Day Use Program plus buffet-style lunch with free water and soft drinks during mealtime.", price: "60", youthPrice: 30, label: "Per adult", included: [...included, lunch], notIncluded: [aLaCarte, "Snorkeling trip"] },
     { name: "Full Program", description: "The Day Use Program plus buffet lunch and a boat snorkeling trip to Sabina Reef, including equipment.", price: "85", youthPrice: 42.5, label: "Per adult", included: [...included, lunch, snorkeling], notIncluded: [aLaCarte] },
   ],
+  generalRules: mahmyaRules.en,
   notes: ["Choose your program before booking. Lunch and snorkeling depend on the selected program.", "Children aged 7 and above pay the adult rate; children aged 3–6 pay the child rate; infants under 3 are free.", "Bring swimwear and sunscreen. A Mahmya towel is included."],
   itinerary: ["Boat transfer to Mahmya", "Beach time with reserved shaded seating", "Buffet lunch if included in your selected program", "Sabina Reef snorkeling if you choose the Full Program", "Boat transfer back from the island"],
   seoTitle: "Mahmya Island from Hurghada | 3 Programs from €38",
@@ -77,5 +79,5 @@ export function localizeMahmya(tour: Tour, locale: Locale): Tour {
   const [boat, beach, towel, meal, reef, menu] = copy.items;
   const base = [boat, beach, towel];
   const packages = tour.additionalPackages?.map((pkg, index) => ({ ...pkg, name: copy.names[index + 1], description: index === 0 ? meal : `${meal}. ${reef}.`, label: copy.label, included: index === 0 ? [...base, meal] : [...base, meal, reef], notIncluded: index === 0 ? [menu, reef] : [menu] }));
-  return { ...tour, title: copy.title, description: copy.description, highlights: [boat, beach, towel, copy.description], included: base, notIncluded: [menu, meal, reef], packageName: copy.names[0], packageDescription: base.join(". "), packageLabel: copy.label, additionalPackages: packages, ageBands: copy.ageBands, notes: [copy.description], itinerary: [boat, beach, copy.description], seoTitle: copy.title, metaDescription: copy.description };
+  return { ...tour, title: copy.title, description: copy.description, highlights: [boat, beach, towel, copy.description], included: base, notIncluded: [menu, meal, reef], packageName: copy.names[0], packageDescription: base.join(". "), packageLabel: copy.label, additionalPackages: packages, ageBands: copy.ageBands, notes: [copy.description], generalRules: mahmyaRules[locale], itinerary: [boat, beach, copy.description], seoTitle: copy.title, metaDescription: copy.description };
 }

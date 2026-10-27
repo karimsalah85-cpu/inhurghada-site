@@ -38,6 +38,7 @@ export type Tour = {
   included?: string[];
   notIncluded?: string[];
   notes?: string[];
+  generalRules?: string[];
   packageName?: string;
   packageDescription?: string;
   packagePrice?: string;
