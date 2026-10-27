@@ -68,7 +68,7 @@ function BookingSteps({ current, language }: { current: 1 | 2 | 3; language: Lan
 }
 
 type ParticipantPricing = { adults: number; youth?: number; infants?: number };
-type PackageOption = { id: string; label: string; price: number };
+type PackageOption = { id: string; label: string; price: number; youthPrice?: number };
 
 type BookingFormProps = {
   tourName: string;
@@ -206,7 +206,6 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
     : `This boat accepts up to ${capacity} passengers. Choose a larger boat or reduce the group.`;
   const bookingSubmissionFailedText = tr("Booking submission failed.", "Buchung konnte nicht gesendet werden.", "Не удалось отправить бронирование.");
   const baseAdultPrice = participantPricing?.adults ?? Number(price || 0);
-  const youthPrice = participantPricing?.youth;
   const infantPrice = participantPricing?.infants;
   const times = availableTimes?.length ? availableTimes : ["Time confirmed by WhatsApp"];
   const [step, setStep] = useState<"select" | "checkout">("select");
@@ -249,6 +248,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
   const extraOptions = (upsells[tourSlug] || []).map(option => ({ ...option, price: optionalExtraPrice(option.price, currency) }));
   const selectedBoat = boatOptions?.find((option) => option.id === selectedBoatOption) ?? boatOptions?.[0];
   const selectedPackage = packageOptions?.find((option) => option.id === selectedPackageOption) ?? packageOptions?.[0];
+  const youthPrice = selectedPackage?.youthPrice ?? participantPricing?.youth;
   const adultPrice = selectedPackage ? selectedPackage.price : groupRate(groupPricing, adults + youth) ?? baseAdultPrice;
   const setDisplayedPrice = useTourPricing()?.setPrice;
   const displayedPrice = selectedBoat?.price ?? adultPrice;

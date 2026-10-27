@@ -1,3 +1,4 @@
+import { mahmyaEnglish } from "@/data/mahmya-programs";
 import { normalizeTourPricing } from "@/lib/tour-pricing";
 import type { BoatOption, BookingExtra } from "@/data/speedboat-booking";
 import { eurToUsd, fullDayBoatOptions, halfDayBoatOptions, refreshments, speedboatMeals } from "@/data/speedboat-booking";
@@ -42,7 +43,7 @@ export type Tour = {
   packagePrice?: string;
   packageLabel?: string;
   /** Extra selectable packages shown alongside the primary one, for tours with more than one bookable option. */
-  additionalPackages?: { name: string; description: string; price: string; label?: string }[];
+  additionalPackages?: { name: string; description: string; price: string; label?: string; youthPrice?: number; included?: string[]; notIncluded?: string[] }[];
   priceUnit?: string;
   /** Per-booking prices are charged once regardless of the passenger counter. */
   pricingMode?: "per-person" | "per-booking";
@@ -483,10 +484,8 @@ const tourCatalog: Array<Omit<Tour, "destinationSlug"> & { destinationSlug?: Des
   },
 
   {
-    slug: "mahmya-island", title: "Mahmya Island Boat Trip", image: "/images/placeholders/sea-activity.svg", price: "75", rating: "4.9", reviews: "New", location: "Hurghada, Egypt", duration: "Full Day", category: "Island Trip", badge: "Premium",
-    seoTitle: "Mahmya Island Boat Trip from Hurghada | Premium Red Sea Experience", metaDescription: "Visit Mahmya Island from Hurghada for a premium Red Sea day with crystal-clear water, white sandy beaches and memorable snorkeling.",
-    description: "Discover the crystal-clear waters of Mahmya Island in the Giftun Island National Park. Relax on white sand, swim in turquoise water, and enjoy a premium island day from Hurghada.", participantPricing: { adults: 75, youth: 45, infants: 0 }, availableTimes: ["08:00"],
-    highlights: ["Premium island experience", "White sandy beach", "Crystal-clear water", "Snorkeling", "Lunch", "Boat cruise", "Hotel transfers"], included: ["Hotel pickup and return", "Boat cruise", "Island entry", "Lunch", "Soft drinks"], notIncluded: ["Personal expenses", "Photos and videos"], notes: ["Pickup time is confirmed by WhatsApp.", "Bring swimwear, sunscreen, and a towel."], packageName: "Mahmya Island day trip", packageDescription: "A premium full-day island experience with pickup, boat cruise and lunch.", packagePrice: "75", packageLabel: "Per person", itinerary: ["Hotel pickup", "Boat cruise", "Mahmya beach time", "Lunch", "Return to Hurghada"],
+    slug: "mahmya-island", image: "/images/mahmya-island-boats-sunset.jpeg", rating: "4.9", reviews: "New", location: "Hurghada, Egypt", duration: "Full Day", category: "Island Trip", badge: "Premium",
+    ...mahmyaEnglish,
   },
   {
     slug: "full-day-snorkeling", title: "Full Day Snorkeling Trip", image: "/images/placeholders/sea-activity.svg", price: "25", rating: "4.8", reviews: "New", location: "Hurghada, Egypt", duration: "8 Hours", category: "Snorkeling", badge: "Best Value",

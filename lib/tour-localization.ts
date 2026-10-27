@@ -1,3 +1,4 @@
+import { localizeMahmya } from "@/data/mahmya-programs";
 import { preserveTourPrices } from "@/lib/tour-pricing";
 import type { Tour } from "@/data/tours";
 import { localizeMarsaAlamTour } from "@/data/marsa-alam-tours-i18n";
@@ -1621,5 +1622,5 @@ function localizeTourContent(tour: Tour, locale: Locale): Tour {
     : locale === "pl" ? localizeTourPolish(tour)
     : tour;
   const withMagawish = tour.slug === "magawish-speedboat" ? { ...base, ...magawishSpeedboatTranslations[locale] } : base;
-  return { ...localizeSnorkelingBoatTrip(withMagawish, locale), ...mediaFields };
+  return { ...localizeMahmya(localizeSnorkelingBoatTrip(withMagawish, locale), locale), ...mediaFields };
 }

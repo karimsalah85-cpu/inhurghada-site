@@ -91,20 +91,21 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     }
   }
   const packages = tour.additionalPackages?.length ? [
-    { id: "primary", price: Number(tour.packagePrice ?? tour.price), label: tour.packageName ?? tour.title },
-    ...tour.additionalPackages.map((pkg, index) => ({ id: `package-${index}`, price: Number(pkg.price), label: pkg.name })),
+    { id: "primary", price: Number(tour.packagePrice ?? tour.price), youthPrice: pricing.youth, label: tour.packageName ?? tour.title },
+    ...tour.additionalPackages.map((pkg, index) => ({ id: `package-${index}`, price: Number(pkg.price), youthPrice: pkg.youthPrice, label: pkg.name })),
   ].sort((a, b) => a.price - b.price) : [];
   const selectedPackage = input.selectedPackageOption
     ? packages.find(pkg => pkg.id === input.selectedPackageOption)
     : packages[0];
   if (input.selectedPackageOption && !selectedPackage) return { error: "Choose a valid package." };
   const adultRate = selectedPackage?.price ?? groupRate(tour.groupPricing, input.adults + input.youth) ?? pricing.adults;
+  const youthRate = selectedPackage?.youthPrice ?? pricing.youth ?? adultRate;
   const entranceTotal = tour.entrancePricing ? input.adults * tour.entrancePricing.adults + input.youth * tour.entrancePricing.youth : 0;
   const participantTotal = boat
     ? boat.price + entranceTotal
     : tour.pricingMode === "per-booking"
     ? pricing.adults
-    : input.adults * adultRate + input.youth * (pricing.youth ?? adultRate) + input.infants * (pricing.infants ?? 0);
+    : input.adults * adultRate + input.youth * youthRate + input.infants * (pricing.infants ?? 0);
   const transferQuote = input.transferRequired ? excursionTransferQuote(input.transferArea, guests, tour.currency || "USD") : null;
   const amount = Math.round((participantTotal + extrasTotal + quantityExtrasTotal + (transferQuote?.amount || 0)) * 100) / 100;
   const guestSummary = tour.pricingMode === "per-booking"
@@ -119,7 +120,7 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
     }
   } else {
     if (input.adults) lines.push(pricingLine("adults", input.adults, adultRate, selectedPackage?.label));
-    if (input.youth) lines.push(pricingLine("youth", input.youth, pricing.youth ?? adultRate));
+    if (input.youth) lines.push(pricingLine("youth", input.youth, youthRate, selectedPackage?.label));
     if (input.infants) lines.push(pricingLine("infants", input.infants, pricing.infants ?? 0));
   }
   for (const id of selectedExtras) {

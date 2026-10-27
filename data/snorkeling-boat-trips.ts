@@ -1,3 +1,4 @@
+import { mahmyaEnglish } from "@/data/mahmya-programs";
 import type { Tour } from "@/data/tours";
 import type { Locale } from "@/lib/i18n";
 
@@ -35,17 +36,11 @@ export const snorkelingBoatEnglish: Record<SnorkelingBoatSlug, Partial<Tour>> = 
     imageAlt: "Sandy Hula Hula Island beach beside turquoise Red Sea water", galleryImageAlts: ["Boat arriving near Hula Hula Island", "Turquoise swimming water at Hula Hula Island", "Red Sea coral reef on the Hula Hula snorkeling trip", "Guests relaxing on Hula Hula Island beach"],
   },
   "mahmya-island": {
-    title: "Mahmya Island Snorkeling Boat Trip from Hurghada", price: "95", packagePrice: "95", duration: "Full Day", category: "Island Trip", categoryPath: hierarchy,
-    participantPricing: { adults: 95, youth: 50, infants: 0 }, ageBands: ages, availableTimes: ["08:00"],
-    description: "Discover a quieter side of the Red Sea on a premium boat journey from Hurghada to Mahmya Island. Enjoy an hour beside the white-sand shore, swim in clear turquoise water and visit two coral-reef sites with snorkeling equipment provided.",
-    highlights: ["Premium Mahmya Island experience", "One hour on the white-sand beach", "Two coral-reef snorkeling stops", "Lunch served on the island", "Hotel transfers and professional crew"],
-    included: ["Hotel pickup and drop-off", "Luxury boat cruise", "Mahmya Island access", "Lunch on Mahmya Island", "Two snorkeling stops", "Snorkeling equipment", "Water and soft drinks", "Coffee and tea", "Professional crew", "Safety equipment"],
-    notIncluded: ["Underwater photos", "Beach towels", "Swimwear"],
-    notes: ["The exact hotel pickup time is confirmed by WhatsApp.", "Reef sites may change according to sea conditions."],
-    itinerary: ["Hotel pickup and marina transfer", "Boat cruise to Mahmya Island", "One hour of beach time and swimming", "First coral-reef snorkeling stop", "Lunch and refreshments", "Second snorkeling stop", "Return cruise and hotel drop-off"],
-    packageName: "Mahmya Island Snorkeling Day", packageDescription: "Premium full-day island trip with beach time, two reef stops, island lunch, drinks, equipment and transfers.", packageLabel: "Adult",
-    seoTitle: "Mahmya Island Snorkeling Boat Trip from Hurghada", metaDescription: "Visit Mahmya Island from Hurghada on a premium Red Sea boat trip with beach time, two snorkeling stops, island lunch, drinks and hotel transfers.",
-    imageAlt: "Boat approaching Mahmya Island's white-sand shore near Hurghada", galleryImageAlts: ["Mahmya Island boats on the Red Sea", "White-sand beach and turquoise water at Mahmya Island", "Coral reef visited on the Mahmya snorkeling trip", "Guests enjoying a quiet Mahmya Island beach"],
+    ...mahmyaEnglish,
+    duration: "Full Day", category: "Island Trip", categoryPath: hierarchy,
+    availableTimes: ["08:00"],
+    imageAlt: "Mahmya Island beach and turquoise Red Sea water",
+    galleryImageAlts: ["Boat cruise to Mahmya", "Mahmya Island beach", "Red Sea coral reef", "Mahmya beach seating"],
   },
   "orange-bay": {
     currency: "EUR", pricingLockedToCode: true, title: "Orange Bay Island Snorkeling Boat Trip from Hurghada", price: "26.5", packagePrice: "26.5", originalPrice: undefined, duration: "8 Hours", category: "Island Trip", categoryPath: hierarchy,

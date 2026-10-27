@@ -79,7 +79,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Included","Inklusive","Включено","يشمل","费用包含")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Included","Inklusive","Включено","يشمل","费用包含")}{tour.additionalPackages?.some(pkg => pkg.included) ? ` — ${tour.packageName}` : ""}</p>
           <ul className="mt-6 space-y-4">
             {(tour.included ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-line bg-surface-muted p-4 text-sm text-ink">
@@ -95,7 +95,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         </div>
 
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Not included","Nicht inklusive","Не включено","لا يشمل","费用不含")}</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Not included","Nicht inklusive","Не включено","لا يشمل","费用不含")}{tour.additionalPackages?.some(pkg => pkg.notIncluded) ? ` — ${tour.packageName}` : ""}</p>
           <ul className="mt-6 space-y-4">
             {(tour.notIncluded ?? []).map((item) => (
               <li key={item} className="flex items-start gap-3 rounded-2xl border border-line bg-surface-muted p-4 text-sm text-ink">
@@ -123,7 +123,7 @@ export default function TourDetails({ tour }: { tour: Tour }) {
         <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-ocean-dark">{tr("Select your package","Paket auswählen","Выберите пакет","اختر الباقة","选择套餐")}</p>
           <div className="mt-6 space-y-4">
-            {[{ name: tour.packageName ?? tour.title, description: tour.packageDescription ?? tour.description, price: tour.packagePrice ?? tour.price, label: tour.packageLabel }, ...(tour.additionalPackages ?? [])].map((pkg) => (
+            {[{ name: tour.packageName ?? tour.title, description: tour.packageDescription ?? tour.description, price: tour.packagePrice ?? tour.price, label: tour.packageLabel, youthPrice: tour.participantPricing?.youth, included: tour.additionalPackages?.some(pkg => pkg.included) ? tour.included : undefined, notIncluded: tour.additionalPackages?.some(pkg => pkg.notIncluded) ? tour.notIncluded : undefined }, ...(tour.additionalPackages ?? [])].map((pkg) => (
               <div key={pkg.name} className="rounded-2xl border border-ocean-soft bg-ocean-tint p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="min-w-0 flex-1 basis-40">
@@ -135,6 +135,9 @@ export default function TourDetails({ tour }: { tour: Tour }) {
                     <p className="whitespace-nowrap text-2xl font-bold text-ocean-dark">{tour.bookingMode === "inquiry" ? tr("Request price", "Preis anfragen", "Узнать цену", "اطلب السعر", "咨询价格") : formatPrice(pkg.price, tour.currency)}</p>
                   </div>
                 </div>
+                {pkg.youthPrice !== undefined && tour.additionalPackages?.some(pkg => pkg.youthPrice !== undefined) ? <p className="mt-3 text-sm font-semibold text-ocean-dark">{tr("Child", "Kind", "Ребёнок", "طفل", "儿童")}: {formatPrice(String(pkg.youthPrice), tour.currency)}</p> : null}
+                {pkg.included?.length ? <div className="mt-4"><p className="text-sm font-bold text-ink">{tr("Includes", "Inklusive", "Включено", "يشمل", "包含")}</p><ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-muted">{pkg.included.map(item => <li key={item}>{item}</li>)}</ul></div> : null}
+                {pkg.notIncluded?.length ? <div className="mt-4"><p className="text-sm font-bold text-ink">{tr("Excludes", "Nicht inklusive", "Не включено", "لا يشمل", "不包含")}</p><ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-muted">{pkg.notIncluded.map(item => <li key={item}>{item}</li>)}</ul></div> : null}
                 <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-ocean-dark">
                   <Compass size={16} /> {pkg.label ?? tr("Adult", "Erwachsener", "Взрослый", "بالغ", "成人")}
                 </div>

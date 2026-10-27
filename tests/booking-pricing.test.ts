@@ -117,3 +117,24 @@ describe("authoritative booking pricing", () => {
     expect(result.error).toMatch(/valid marina transfer area/i);
   });
 });
+
+describe("Mahmya selectable programs", () => {
+  it.each([
+    ["primary", 38, 19, 57],
+    ["package-0", 60, 30, 90],
+    ["package-1", 85, 42.5, 127.5],
+  ])("prices %s adults, children and free infants in EUR", (selectedPackageOption, adult, child, total) => {
+    const result = calculateBookingPrice({ ...tour, tourSlug: "mahmya-island", selectedPackageOption, adults: 1, youth: 1, infants: 1 });
+    expect(result.data).toMatchObject({ amount: total, currency: "EUR", guests: 3 });
+    expect(result.data?.pricingSnapshot?.trips[0].lines).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "adults", unitPrice: adult }),
+      expect.objectContaining({ kind: "youth", unitPrice: child }),
+      expect.objectContaining({ kind: "infants", unitPrice: 0 }),
+    ]));
+  });
+
+  it("defaults to day use and rejects unknown programs", () => {
+    expect(calculateBookingPrice({ ...tour, tourSlug: "mahmya-island", youth: 1 }).data).toMatchObject({ amount: 57, currency: "EUR" });
+    expect(calculateBookingPrice({ ...tour, tourSlug: "mahmya-island", selectedPackageOption: "fake" }).error).toMatch(/valid package/i);
+  });
+});
