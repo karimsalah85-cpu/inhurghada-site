@@ -40,3 +40,14 @@ describe("website fixes 2026-10-27", () => {
     expect(localizeTour(tour, "en").seoTitle).toBe(tour.seoTitle);
   });
 });
+
+describe("Orange Bay park fee disclosure", () => {
+  it("lists the national park fee as not included in every language", () => {
+    const tour = tours.find((item) => item.slug === "orange-bay")!;
+    const locales: Locale[] = ["en", "de", "ru", "pl", "ar", "zh"];
+    for (const locale of locales) {
+      const localized = localizeTour(tour, locale);
+      expect(localized.notIncluded.some((item) => /5/.test(item)), locale).toBe(true);
+    }
+  });
+});
