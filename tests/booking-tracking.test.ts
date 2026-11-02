@@ -59,6 +59,24 @@ describe("booking tracking semantics", () => {
     expect(payload.eventId).toBe(fbq.mock.calls[0][3].eventID);
   });
 
+  it("delivers a consented server event even when the browser Pixel is unavailable", () => {
+    vi.stubGlobal("window", { gtag, localStorage: { getItem: () => JSON.stringify({ analytics: true, marketing: true }) } });
+    trackEvent("booking_complete", { transaction_id: "request-without-pixel", value: 25, currency: "USD" });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    const payload = JSON.parse(vi.mocked(fetch).mock.calls[0][1]?.body as string);
+    expect(payload.event).toBe("booking_complete");
+    expect(payload.data.transaction_id).toBe("request-without-pixel");
+    expect(payload.eventId).toEqual(expect.any(String));
+  });
+
+  it("does not fail the booking flow when the server event cannot be delivered", async () => {
+    vi.stubGlobal("window", { gtag, localStorage: { getItem: () => JSON.stringify({ analytics: true, marketing: true }) } });
+    vi.mocked(fetch).mockRejectedValueOnce(new Error("Network unavailable"));
+    expect(() => trackEvent("booking_complete", { transaction_id: "request-network-failure" })).not.toThrow();
+    await Promise.resolve();
+    expect(gtag).toHaveBeenCalledWith("event", "generate_lead", expect.any(Object));
+  });
+
   it("preserves checkout tracking for validated legacy transfer submissions", () => {
     vi.stubGlobal("window", { gtag, fbq, localStorage: { getItem: () => JSON.stringify({ analytics: true, marketing: true }) } });
     trackEvent("booking_start", { booking_type: "transfer", value: 25, currency: "USD" });

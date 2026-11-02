@@ -26,6 +26,7 @@ import {
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import type { Language } from "@/components/settings/SiteSettingsContext";
 import { trackEvent } from "@/lib/analytics";
+import { bookingSalesCopy } from "@/lib/booking-sales-copy";
 import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { useCart } from "@/components/cart/CartProvider";
@@ -305,6 +306,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
           quadMinimumAgeConfirmed,
           website,
         };
+  const salesCopy = bookingSalesCopy[language];
   const promo = usePromoCode(bookingInput, total, language, () => (idempotencyKey.current ||= crypto.randomUUID()));
   const referral = useReferralCode();
   const rewards = useReferralRewards(email, language);
@@ -425,6 +427,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         {transferRequired ? <p className="mt-3 text-sm text-emerald-900">{transferText.selected}: {transferArea || "—"}.{transferSummary ? ` ${transferSummary}.` : ""} {transferNotice}</p> : null}
         <div className="mt-5 flex items-end justify-between gap-3 border-t pt-5"><div className="min-w-0"><p className="font-bold text-ink">{tr("Total", "Gesamtpreis", "Итого")}</p><p className="text-xs text-muted">{tr("Cash on arrival · no online payment", "Barzahlung bei Ankunft · keine Online-Zahlung", "Оплата наличными по прибытии · без онлайн-оплаты")}</p></div><p className="shrink-0 whitespace-nowrap text-2xl font-black text-ink sm:text-3xl">{formatPrice(String(promo.total), currency)}</p></div>
         {unavailableWeekday ? <p role="alert" className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-bold text-amber-900">{tr("This excursion does not operate on the selected weekday. Choose another date.", "Dieser Ausflug findet am gewählten Wochentag nicht statt. Wähle ein anderes Datum.", "Экскурсия не проводится в выбранный день недели. Выберите другую дату.")}</p> : null}
+        {tourSlug === "orange-bay" ? <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">{salesCopy.parkFee}</p> : null}
         <button disabled={unavailable || boatOverCapacity || unavailableWeekday || invalidGroupSize} type="button" onClick={beginCheckout} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:cursor-not-allowed disabled:bg-muted">{unavailable ? tr("Sold out", "Ausverkauft", "Мест нет") : tr("Book now", "Jetzt buchen", "Забронировать")} <Users size={18}/></button>
         <button type="button" onClick={() => {
           if (!adults) return setError(tr("Please select at least one adult.", "Bitte wähle mindestens einen Erwachsenen.", "Выберите хотя бы одного взрослого."));
@@ -440,6 +443,7 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
         {transferRequired ? <p className="text-sm text-emerald-900">{transferText.selected}: {transferArea}.{transferSummary ? ` ${transferSummary}.` : ""} {transferNotice}</p> : null}
         <div className="rounded-2xl border border-surface-muted bg-surface-muted p-4"><p className="font-bold text-ink">{tourName}</p><p className="mt-1 text-sm text-muted">{date} {tr("at", "um", "в")} {time} · {travelerText}</p><p className="mt-2 font-black text-ink">{formatPrice(String(promo.total), currency)} · {tr("Cash on arrival", "Barzahlung bei Ankunft", "оплата наличными по прибытии")}</p></div>
+        {tourSlug === "orange-bay" ? <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">{salesCopy.parkFee}</p> : null}
         <p className="border-b pb-2 text-lg font-black text-ink">{tr("Tell us about yourself", "Deine Angaben", "Ваши данные")}</p>
         <p className="text-xs text-muted"><RequiredMark/> {tr("Required field", "Pflichtfeld", "Обязательное поле")}</p>
         <label className="block text-sm font-bold text-ink">{tr("Full name", "Vollständiger Name", "Полное имя")} <RequiredMark/><input required value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" className="mt-1 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none placeholder:text-muted focus:border-ocean focus:ring-4 focus:ring-ocean-tint" placeholder={tr("Enter your full name", "Vollständigen Namen eingeben", "Введите имя и фамилию")} /></label>
@@ -462,12 +466,17 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
         <label className="block text-sm font-bold text-ink">{tr("Special requests", "Besondere Wünsche", "Особые пожелания")} <span className="font-normal text-muted">({tr("optional", "optional", "необязательно")})</span><textarea value={message} onChange={(event) => setMessage(event.target.value)} className="mt-1 h-20 w-full rounded-xl border border-line bg-white p-3 font-normal text-ink outline-none placeholder:text-muted focus:border-ocean focus:ring-4 focus:ring-ocean-tint" placeholder={tr("Anything we should know?", "Gibt es etwas, das wir wissen sollten?", "Что нам нужно знать?")} /></label>
         <p className="rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">{tr("Before booking, please review our", "Bitte lies vor der Buchung unsere", "Перед бронированием ознакомьтесь с")} <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{tr("cancellation policy", "Stornierungsbedingungen", "правилами отмены")}</Link>. {tr("By submitting, you agree to our terms and conditions.", "Mit dem Absenden stimmst du unseren Allgemeinen Geschäftsbedingungen zu.", "Отправляя заявку, вы соглашаетесь с нашими условиями.")}</p>
         {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
-        <ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/>
-        <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
-        <ReferralCodeField referral={referral} locale={language} disabled={submitting}/>
-        <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:opacity-60">{submitting ? tr("Sending booking…", "Buchung wird gesendet…", "Отправка бронирования…") : `${tr("Confirm booking", "Buchung bestätigen", "Подтвердить бронирование")} · ${formatPrice(String(promo.total), currency)}`} <MessageCircle size={18}/></button>
+        <details className="rounded-xl border border-line p-3" open={Boolean(promo.needsApply || promo.busy || promo.quote || referral.code || rewards.redemption)}>
+          <summary className="cursor-pointer text-sm font-semibold text-ocean-dark">{salesCopy.discounts}</summary>
+          <div className="mt-4 space-y-4">
+            <ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/>
+            <PromoCodeField promo={promo} locale={language} disabled={submitting}/>
+            <ReferralCodeField referral={referral} locale={language} disabled={submitting}/>
+          </div>
+        </details>
+        <button disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-orange-cta py-4 font-bold text-white hover:brightness-90 disabled:opacity-60">{submitting ? tr("Sending booking…", "Buchung wird gesendet…", "Отправка бронирования…") : `${salesCopy.submit} · ${formatPrice(String(promo.total), currency)}`} <MessageCircle size={18}/></button>
         <button type="button" onClick={() => setStep("select")} className="w-full text-sm font-semibold text-muted hover:text-ocean-dark">← {tr("Change date or travelers", "Datum oder Reisende ändern", "Изменить дату или гостей")}</button>
-        <p className="text-center text-xs leading-5 text-muted">{meetingPointProduct || pickupOptional ? (ar ? "تم إرسال طلبك؛ سيؤكد فريقنا التوفر النهائي وتفاصيل نقطة التجمع عبر واتساب." : "Your request is submitted; our team confirms final availability and meeting details by WhatsApp.") : tr("Your booking request is submitted now. You pay cash when you arrive; we confirm pickup via WhatsApp.", "Deine Buchungsanfrage wird jetzt gesendet. Du bezahlst bei Ankunft bar; wir bestätigen die Abholung per WhatsApp.", "Заявка отправляется сейчас. Оплата наличными по прибытии; трансфер мы подтвердим в WhatsApp.")}</p>
+        <p className="text-center text-xs leading-5 text-muted">{salesCopy.afterSubmit}</p>
       </form>}
     </div>
   );

@@ -155,14 +155,14 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
   if (!preferences?.marketing) return;
 
   const metaEvent = toMetaEvent(event, cleanData);
-  if (metaEvent && window.fbq) {
-    window.fbq("track", metaEvent, cleanData, { eventID: id });
+  if (metaEvent) {
+    window.fbq?.("track", metaEvent, cleanData, { eventID: id });
     void fetch("/api/analytics/meta", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event, eventId: id, data: cleanData }),
       keepalive: true,
-    });
+    }).catch(() => undefined);
   }
 
   const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID;

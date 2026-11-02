@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { Clock3, Star } from "lucide-react";
 import type { Tour } from "@/data/tours";
 import { localePath, type Locale } from "@/lib/i18n";
@@ -24,10 +27,10 @@ export default function RelatedExperiences({
   viewAllHref: string;
   fromLabel: string;
 }) {
+  const { formatPrice } = useSiteSettings();
   if (!tours.length) return null;
 
-  const money = (value: string, currency?: string) =>
-    new Intl.NumberFormat(locale, { style: "currency", currency: currency || "USD", maximumFractionDigits: 0 }).format(Number(value));
+  const money = (value: string, currency?: Tour["currency"]) => formatPrice(value, currency);
 
   return (
     <div>
