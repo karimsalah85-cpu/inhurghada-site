@@ -23,6 +23,7 @@ import {
   type TransferZoneKey,
 } from "@/lib/transfer-config";
 import { calculateTransferQuote } from "@/lib/transfer-quote";
+import { hasUncontractedAirport, isHurghadaAirport } from "@/lib/transfer-airport";
 import { transferCancellationDeadline } from "@/lib/transfer-cancellation";
 
 type Locale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
@@ -142,6 +143,7 @@ const EN = {
   errRoute: "Choose your journey and accommodation.",
   errLead: "We need at least 1 hour to arrange your transfer. Choose a later pickup time.",
   errReturnLead: "The return transfer also needs at least 1 hour of notice.",
+  errReturnOrder: "Choose a return pickup after the outbound journey.",
   errPhone: "Please enter a valid WhatsApp phone number including the country code.",
   errGeneric: "Transfer request failed. Please try again.",
   errNetwork: "We could not reach the booking service. Check your connection and try again.",
@@ -273,6 +275,7 @@ const DE: CopyShape = {
   errRoute: "Wähle deine Fahrt und Unterkunft.",
   errLead: "Wir benötigen mindestens 1 Stunde, um deinen Transfer zu organisieren. Wähle eine spätere Abholzeit.",
   errReturnLead: "Auch der Rücktransfer benötigt mindestens 1 Stunde Vorlauf.",
+  errReturnOrder: "Wähle eine Rückfahrt nach der Hinfahrt.",
   errPhone: "Bitte gib eine gültige WhatsApp-Nummer inklusive Landesvorwahl ein.",
   errGeneric: "Transferanfrage fehlgeschlagen. Bitte versuche es erneut.",
   errNetwork: "Der Buchungsdienst ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
@@ -402,6 +405,7 @@ const RU: CopyShape = {
   errRoute: "Выберите поездку и место проживания.",
   errLead: "Нам нужно не менее 1 часа на организацию трансфера. Выберите более позднее время подачи.",
   errReturnLead: "Обратному трансферу также нужно не менее 1 часа.",
+  errReturnOrder: "Выберите время обратной поездки после поездки туда.",
   errPhone: "Введите действительный номер WhatsApp с кодом страны.",
   errGeneric: "Не удалось отправить заявку на трансфер. Попробуйте ещё раз.",
   errNetwork: "Не удалось связаться с сервисом бронирования. Проверьте соединение и попробуйте снова.",
@@ -531,6 +535,7 @@ const AR: CopyShape = {
   errRoute: "اختر رحلتك ومكان إقامتك.",
   errLead: "نحتاج ساعة واحدة على الأقل لترتيب النقل. اختر وقت استلام لاحقاً.",
   errReturnLead: "يحتاج نقل العودة أيضاً إلى مهلة ساعة واحدة على الأقل.",
+  errReturnOrder: "اختر موعد العودة بعد رحلة الذهاب.",
   errPhone: "يرجى إدخال رقم واتساب صحيح مع رمز الدولة.",
   errGeneric: "تعذّر إرسال طلب النقل. يرجى المحاولة مرة أخرى.",
   errNetwork: "تعذّر الوصول إلى خدمة الحجز. تحقق من اتصالك وحاول مرة أخرى.",
@@ -660,6 +665,7 @@ const PL: CopyShape = {
   errRoute: "Wybierz przejazd i zakwaterowanie.",
   errLead: "Potrzebujemy co najmniej 1 godziny na organizację transferu. Wybierz późniejszą godzinę odbioru.",
   errReturnLead: "Transfer powrotny również wymaga co najmniej 1 godziny wyprzedzenia.",
+  errReturnOrder: "Wybierz odbiór powrotny po podróży w pierwszą stronę.",
   errPhone: "Podaj prawidłowy numer WhatsApp wraz z numerem kierunkowym kraju.",
   errGeneric: "Nie udało się wysłać zapytania o transfer. Spróbuj ponownie.",
   errNetwork: "Nie udało się połączyć z usługą rezerwacji. Sprawdź połączenie i spróbuj ponownie.",
@@ -789,6 +795,7 @@ const ZH: CopyShape = {
   errRoute: "请选择行程和住宿。",
   errLead: "我们至少需要 1 小时安排接送，请选择更晚的上车时间。",
   errReturnLead: "返程接送也需要至少提前 1 小时。",
+  errReturnOrder: "请选择去程之后的返程接送时间。",
   errPhone: "请输入包含国家代码的有效 WhatsApp 号码。",
   errGeneric: "接送申请提交失败，请重试。",
   errNetwork: "无法连接预订服务，请检查网络后重试。",
@@ -898,7 +905,8 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
 
   const fromAirport = isAirportPlace(fromPlace);
   const toAirport = isAirportPlace(toPlace);
-  const direction: Direction = fromAirport && !toAirport ? "airport_to_hotel" : toAirport && !fromAirport ? "hotel_to_airport" : "hotel_to_hotel";
+  const uncontractedAirport = hasUncontractedAirport(fromPlace) || hasUncontractedAirport(toPlace);
+  const direction: Direction = uncontractedAirport ? "hotel_to_hotel" : fromAirport && !toAirport ? "airport_to_hotel" : toAirport && !fromAirport ? "hotel_to_airport" : "hotel_to_hotel";
   const hotelName = direction === "airport_to_hotel" ? toPlace : direction === "hotel_to_airport" ? fromPlace : `${fromPlace.trim()} → ${toPlace.trim()}`.slice(0, 200);
   const autoZone = mapHotelToZone(hotelName);
   const zone: TransferZoneKey | null = direction === "hotel_to_hotel" ? null : zoneOverride || autoZone;
@@ -990,6 +998,10 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
       alert(copy.errReturnLead);
       return;
     }
+    if (tripType === "round_trip" && `${returnDate}T${returnTime}` <= `${date}T${time}`) {
+      alert(copy.errReturnOrder);
+      return;
+    }
     const phoneCheck = validatePhoneNumber(phone, "EG");
     if (!phoneCheck.valid) {
       alert(copy.errPhone);
@@ -1023,6 +1035,8 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
         zone: zone ?? undefined,
         hotel: hotelName.trim(),
         hotelName: hotelName.trim(),
+        pickupPlaceText: fromPlace.trim(),
+        dropoffPlaceText: toPlace.trim(),
         date,
         time,
         flightNumber: flightNumber.trim(),
@@ -1142,6 +1156,10 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
     }
     if (tripType === "round_trip" && !isTransferLeadTimeValid(returnDate, returnTime)) {
       setTripError(copy.errReturnLead);
+      return false;
+    }
+    if (tripType === "round_trip" && `${returnDate}T${returnTime}` <= `${date}T${time}`) {
+      setTripError(copy.errReturnOrder);
       return false;
     }
     setTripError("");
@@ -1474,7 +1492,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
 }
 
 function isAirportPlace(value: string) {
-  return /\bhrg\b|airport|flughafen|аэропорт|مطار|lotnisk|机场/i.test(value);
+  return isHurghadaAirport(value);
 }
 
 function placeForMap(value: string) {

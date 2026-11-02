@@ -152,6 +152,9 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       return { error: "The return transfer also needs at least 1 hour of notice. Choose a later return pickup time." as const };
     }
   }
+  if (transfer?.tripType === "round_trip" && `${transfer.returnDate}T${transfer.returnTime}` <= `${date}T${time}`) {
+    return { error: "Choose a return pickup after the outbound journey." as const };
+  }
   const pickupOptional = type === "tour" && (tourSlug === "multi-trip"
     ? selectedCartItems.length > 0 && selectedCartItems.every((item) => isSaudiTour(item.tourSlug))
     : isSaudiTour(tourSlug));

@@ -230,6 +230,21 @@ describe("server authority: a client-sent price cannot change the fare", () => {
     expect(pricing.data.currency).toBe("USD");
   });
 
+  it("preserves both locations for an individually quoted private journey", () => {
+    const validation = validateBookingInput({ ...submitted, direction: "hotel_to_hotel", pickupPlaceText: "Hurghada Marina", dropoffPlaceText: "Port Ghalib Marina" }, now);
+    if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
+    expect(validation.data.transfer.pickupPlaceText).toBe("Hurghada Marina");
+    expect(validation.data.transfer.dropoffPlaceText).toBe("Port Ghalib Marina");
+    const pricing = calculateBookingPrice(validation.data);
+    if (!("data" in pricing) || !pricing.data) throw new Error("pricing failed");
+    expect(pricing.data.tourName).toContain("Hurghada Marina → Port Ghalib Marina");
+    expect(pricing.data.amount).toBe(0);
+  });
+
+  it("rejects a return pickup before the outbound journey", () => {
+    expect(validateBookingInput({ ...submitted, tripType: "round_trip", returnDate: "2026-01-31", returnTime: "12:00" }, now)).toEqual({ error: "Choose a return pickup after the outbound journey." });
+  });
+
   it("maps the hotel name to a pricing zone when no explicit zone is sent", () => {
     const validation = validateBookingInput({ ...submitted, zone: undefined, hotel: "Kempinski Hotel Soma Bay" }, now);
     if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
