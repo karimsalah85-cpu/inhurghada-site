@@ -93,12 +93,14 @@ export function parseTransferRequest(body: Record<string, unknown>): { data: Par
 
   const generalTransfer = body.transferProduct === "private-v3";
   let airport: TransferAirport | null = direction === "hotel_to_hotel" ? null : "HRG";
+  let rmfRoute: ReturnType<typeof resolveTransferRoute>["rmfRoute"] = null;
   if (generalTransfer) {
     if (!pickupPlaceText || !dropoffPlaceText) return { error: "Enter both pickup and drop-off locations." };
     if (pickupPlaceText.toLowerCase() === dropoffPlaceText.toLowerCase()) return { error: "Choose different pickup and drop-off locations." };
     const route = resolveTransferRoute(pickupPlaceText, dropoffPlaceText);
     direction = route.direction;
     airport = route.airport;
+    rmfRoute = route.rmfRoute;
     hotelName = route.hotelName;
   }
 
@@ -145,6 +147,7 @@ export function parseTransferRequest(body: Record<string, unknown>): { data: Par
   const quoteInput: TransferQuoteInput = {
     direction,
     airport,
+    rmfRoute,
     zone,
     tripType,
     adults,

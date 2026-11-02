@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { resolveTransferRoute } from "@/lib/transfer-routes";
 import { calculateTransferQuote, calculateSenzoQuote, allocateVehicles, type TransferQuoteInput } from "@/lib/transfer-quote";
 import { ROUTE_PRICING, VEHICLE_CLASSES, enabledVehicleClasses, lowestVehicleFare } from "@/lib/transfer-config";
 import { validateBookingInput } from "@/lib/booking-validation";
@@ -244,7 +245,7 @@ describe("server authority: a client-sent price cannot change the fare", () => {
   it.each([
     ["Hurghada Airport (HRG)", "Kempinski Hotel Soma Bay", "airport_to_hotel", "HRG", false],
     ["Kempinski Hotel Soma Bay", "Hurghada Airport (HRG)", "hotel_to_airport", "HRG", false],
-    ["Marsa Alam Airport (RMF)", "Port Ghalib Marina", "airport_to_hotel", "RMF", true],
+    ["Marsa Alam Airport (RMF)", "Some Hamata Resort", "airport_to_hotel", "RMF", true],
     ["Hurghada Marina", "Port Ghalib Marina", "hotel_to_hotel", null, true],
     ["Hurghada Airport (HRG)", "Marsa Alam Airport (RMF)", "hotel_to_hotel", null, true],
   ])("resolves %s → %s on the server", (pickup, dropoff, direction, airport, manual) => {
@@ -262,7 +263,9 @@ describe("server authority: a client-sent price cannot change the fare", () => {
     const validation = validateBookingInput({ ...submitted, transferProduct: "private-v3", pickupPlaceText: "Marsa Alam Airport (RMF)", dropoffPlaceText: "Port Ghalib Marina", zone: "hurghada_city" }, now);
     if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
     expect(validation.data.transfer.zone).toBeNull();
-    expect(calculateTransferQuote(validation.data.transfer.quoteInput).requiresManualConfirmation).toBe(true);
+    const pricing = calculateBookingPrice(validation.data);
+    if (!("data" in pricing) || !pricing.data) throw new Error("pricing failed");
+    expect(pricing.data.amount).toBe(28);
   });
 
   it("rejects a return pickup before the outbound journey", () => {
@@ -334,5 +337,27 @@ describe("allocateVehicles primitive", () => {
 
   it("returns null when demand cannot be met within the ceiling", () => {
     expect(allocateVehicles({ passengers: 40, largeBagUnits: 0, cabinBags: 0 })).toBeNull();
+  });
+});
+
+describe("airport route resolution", () => {
+  const quoteFor = (pickup: string, dropoff: string, overrides: Partial<TransferQuoteInput> = {}) => {
+    const route = resolveTransferRoute(pickup, dropoff);
+    return calculateTransferQuote({ ...base, direction: route.direction, zone: route.zone, airport: route.airport, rmfRoute: route.rmfRoute, ...overrides });
+  };
+
+  it("prices the three Marsa Alam Airport destinations by vehicle, both ways", () => {
+    expect(quoteFor("Marsa Alam Airport (RMF)", "Port Ghalib").total).toBe(28);
+    expect(quoteFor("Abu Dabbab", "Marsa Alam Airport (RMF)").total).toBe(43);
+    expect(quoteFor("Marsa Alam Airport (RMF)", "Marsa Alam City").total).toBe(60);
+    expect(quoteFor("Marsa Alam Airport (RMF)", "Port Ghalib", { adults: 4 }).total).toBe(33);
+    expect(quoteFor("Marsa Alam Airport (RMF)", "Marsa Alam City", { adults: 4, tripType: "round_trip" }).total).toBe(136);
+  });
+  it("never gives Marsa Alam Airport a Hurghada fare or guesses other hotels", () => {
+    expect(quoteFor("Marsa Alam Airport (RMF)", "Some Hamata Resort").requiresManualConfirmation).toBe(true);
+    expect(quoteFor("Marsa Alam Airport (RMF)", "El Quseir").requiresManualConfirmation).toBe(true);
+  });
+  it("keeps the Hurghada Airport fare to Port Ghalib", () => {
+    expect(quoteFor("Hurghada Airport (HRG)", "Port Ghalib").total).toBe(fare("port_ghalib", "sedan"));
   });
 });

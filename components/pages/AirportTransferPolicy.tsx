@@ -138,6 +138,7 @@ export default function AirportTransferPolicy({ locale = "en" }: { locale?: Loca
   const base = CONTENT[locale] ?? CONTENT.en;
   const copy = transferCopy[locale];
   const content = { ...base, title: copy.policyTitle, intro: copy.policyIntro, clauses: base.clauses.map((clause, index) => index === 1 ? { ...clause, p: copy.faqs[2].answer } : index === 12 ? { ...clause, p: copy.meeting } : clause) };
+  content.clauses = [...content.clauses, { h: copy.waitingTitle, p: copy.waitingText }];
   return (
     <section aria-labelledby="airport-transfer-policy-title" className="border-t border-line bg-white px-6 py-16 sm:py-20">
       <div className="mx-auto max-w-4xl">

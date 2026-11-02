@@ -20,6 +20,7 @@ import {
   OVERSIZED_LUGGAGE_EQUIVALENT,
   OVERSIZED_MANUAL_CONFIRMATION_THRESHOLD,
   PRICING_VERSION,
+  RMF_ROUTE_PRICING,
   ROUTE_PRICING,
   SENZO_MALL_FARE,
   SENZO_RESORT_SUPPLEMENT,
@@ -29,6 +30,7 @@ import {
   enabledVehicleClasses,
   type ChildSeatType,
   type OversizedItemType,
+  type RmfRouteKey,
   type TransferDirection,
   type TransferTripType,
   type TransferVehicleClass,
@@ -43,6 +45,8 @@ export type TransferQuoteInput = {
   direction: TransferDirection;
   /** Omitted only by the legacy Hurghada airport product. */
   airport?: "HRG" | "RMF" | null;
+  /** Set only for a priced Marsa Alam Airport destination. */
+  rmfRoute?: RmfRouteKey | null;
   /** Resolved pricing zone. `null` means the route could not be mapped. */
   zone: TransferZoneKey | null;
   tripType: TransferTripType;
@@ -239,10 +243,11 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
   if (input.direction === "hotel_to_hotel") {
     return manualQuote(input, "hotel_to_hotel", totalPassengers, ["hotel_to_hotel_manual"]);
   }
-  if (input.airport !== undefined && input.airport !== "HRG") {
+  const rmfFares = input.airport === "RMF" && input.rmfRoute ? RMF_ROUTE_PRICING[input.rmfRoute] : null;
+  if (input.airport !== undefined && input.airport !== "HRG" && !rmfFares) {
     return manualQuote(input, "route_not_mapped", totalPassengers, ["route_not_mapped"]);
   }
-  if (!input.zone) {
+  if (!input.zone && !rmfFares) {
     return manualQuote(input, "route_not_mapped", totalPassengers, ["route_not_mapped"]);
   }
   if (input.wheelchair === "powered_or_fixed") {
@@ -278,7 +283,7 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
   const legVehicles: AllocatedVehicle[] = [];
   for (const vehicleClass of allocation) {
     const config = VEHICLE_CLASSES[vehicleClass];
-    const legFare = ROUTE_PRICING[zone][vehicleClass];
+    const legFare = rmfFares ? rmfFares[vehicleClass] : ROUTE_PRICING[zone as TransferZoneKey][vehicleClass];
     if (typeof legFare !== "number") {
       return manualQuote(input, "zone_unpriced", totalPassengers, ["zone_unpriced"]);
     }
@@ -324,7 +329,7 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
     currency: TRANSFER_CURRENCY,
     pricingVersion: PRICING_VERSION,
     zone,
-    zoneLabelKey: ZONE_LABEL_KEYS[zone],
+    zoneLabelKey: zone ? ZONE_LABEL_KEYS[zone] : null,
     tripType: input.tripType,
     totalPassengers,
     largeBags: input.largeBags,

@@ -1,5 +1,5 @@
 import { isHurghadaAirport } from "@/lib/transfer-airport";
-import { mapHotelToZone, type TransferDirection } from "@/lib/transfer-config";
+import { mapHotelToZone, mapPlaceToRmfRoute, type TransferDirection } from "@/lib/transfer-config";
 
 export type TransferAirport = "HRG" | "RMF";
 export const TRANSFER_AIRPORTS: Record<TransferAirport, string> = {
@@ -29,8 +29,9 @@ export function resolveTransferRoute(pickup: string, dropoff: string) {
     airport,
     direction,
     hotelName,
-    // Existing fares are contracted for Hurghada Airport only.
+    // Zone fares apply to Hurghada Airport; Marsa Alam Airport has its own short list.
     zone: airport === "HRG" ? mapHotelToZone(hotelName) : null,
+    rmfRoute: airport === "RMF" ? mapPlaceToRmfRoute(hotelName) : null,
     hasAirport: Boolean(pickupAirport || dropoffAirport),
   };
 }

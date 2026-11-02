@@ -16,7 +16,7 @@
  *    snapshots remain auditable.
  */
 
-export const PRICING_VERSION = "2026-09-transfer-v1";
+export const PRICING_VERSION = "2026-11-transfer-v2";
 export const TRANSFER_CURRENCY = "USD" as const;
 
 export type TransferVehicleClass = "sedan" | "suv" | "minivan" | "hiace" | "minibus";
@@ -100,6 +100,34 @@ export const ROUTE_PRICING: Record<TransferZoneKey, Record<TransferVehicleClass,
   port_ghalib: { sedan: 75, suv: 80, minivan: 90, hiace: 110, minibus: null },
   marsa_alam: { sedan: 85, suv: 90, minivan: 105, hiace: 125, minibus: null },
 };
+
+/**
+ * PER-VEHICLE, ONE-WAY USD fares from Marsa Alam Airport (RMF). Owner-set selling
+ * prices, not contracted supplier rates. Only these destinations are priced
+ * because Marsa Alam hotels span a long coast; everything else needs a quote.
+ */
+export type RmfRouteKey = "port_ghalib" | "abu_dabbab" | "marsa_alam_city";
+export const RMF_ROUTE_PRICING: Record<RmfRouteKey, Partial<Record<TransferVehicleClass, number>>> = {
+  port_ghalib: { sedan: 28, hiace: 33 },
+  abu_dabbab: { sedan: 43, hiace: 48 },
+  marsa_alam_city: { sedan: 60, hiace: 68 },
+};
+export const RMF_ROUTE_PLACES: Record<RmfRouteKey, string> = {
+  port_ghalib: "Port Ghalib",
+  abu_dabbab: "Abu Dabbab",
+  marsa_alam_city: "Marsa Alam City",
+};
+const RMF_ROUTE_PATTERNS: { route: RmfRouteKey; patterns: string[] }[] = [
+  { route: "port_ghalib", patterns: ["port ghalib", "port-ghalib", "portghalib", "marina lodge"] },
+  { route: "abu_dabbab", patterns: ["abu dabbab", "abu dabab"] },
+  { route: "marsa_alam_city", patterns: ["marsa alam city", "marsa alam town"] },
+];
+
+export function mapPlaceToRmfRoute(place: string | undefined | null): RmfRouteKey | null {
+  const normalized = String(place ?? "").trim().toLowerCase();
+  if (!normalized) return null;
+  return RMF_ROUTE_PATTERNS.find((entry) => entry.patterns.some((pattern) => normalized.includes(pattern)))?.route ?? null;
+}
 
 export const ZONE_LABEL_KEYS: Record<TransferZoneKey, string> = {
   hurghada_city: "zone.hurghada_city",

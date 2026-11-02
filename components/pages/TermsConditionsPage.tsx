@@ -19,6 +19,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       { title: "Cancellations & Refunds", id: "cancellations", paragraphs: [
         "Free cancellation window: Cancellations made at least 48 hours before the scheduled trip or pickup time are eligible for a full refund (or no charge for cash-on-arrival bookings).",
         "Late cancellations and no-shows: Cancellations made within 48 hours are non-refundable. Arrival more than 15 minutes after the confirmed meeting time is treated as a no-show, with no refund, credit, or reschedule; group departures cannot be delayed.",
+        "Airport pickups: for private airport pickups, the 15-minute rule does not apply. Your driver waits up to 60 minutes free of charge after your flight lands.",
         "Cancellations by us: If we or our local supplier need to cancel or reschedule an activity (weather, safety, insufficient group size, or operational reasons), you'll be offered a full refund or the option to rebook another date or activity.",
         `How to cancel: Message us on WhatsApp at ${displayPhoneNumber} with your booking reference as soon as possible. We'll confirm your refund eligibility and, where applicable, process it to your original payment method within a stated number of business days (for example, 5–7 days)—for cash-on-arrival bookings, no charge is made.`,
       ] },
@@ -50,6 +51,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       { title: "Stornierungen & Rückerstattungen", id: "cancellations", paragraphs: [
         "Kostenlose Stornierungsfrist: Stornierungen mindestens 48 Stunden vor der geplanten Tour oder Abholzeit berechtigen zu einer vollständigen Rückerstattung. Bei Barzahlung vor Ort entstehen keine Kosten.",
         "Verspätete Stornierungen: Bei Stornierungen innerhalb von 48 Stunden vor der Abholung oder bei Nichterscheinen besteht kein Anspruch auf Rückerstattung, da lokale Anbieter deinen Platz reservieren und Kosten entstehen.",
+        "Flughafenabholungen: Dein Fahrer wartet nach der Landung bis zu 60 Minuten kostenlos.",
         "Stornierungen durch uns: Müssen wir oder ein lokaler Anbieter eine Aktivität wegen Wetter, Sicherheit, zu geringer Gruppengröße oder betrieblicher Gründe absagen oder verschieben, erhältst du eine vollständige Rückerstattung oder kannst einen anderen Termin beziehungsweise eine andere Aktivität wählen.",
         `So stornierst du: Sende uns so früh wie möglich deine Buchungsnummer per WhatsApp an ${displayPhoneNumber}. Wir bestätigen die Erstattungsberechtigung und veranlassen eine mögliche Rückzahlung innerhalb der genannten Bearbeitungszeit, zum Beispiel 5–7 Werktage, über die ursprüngliche Zahlungsmethode. Bei Barzahlung vor Ort wird nichts berechnet.`,
       ] },
@@ -78,6 +80,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       { title: "Отмена и возврат средств", id: "cancellations", paragraphs: [
         "Бесплатная отмена: При отмене не позднее чем за 48 часов до поездки или запланированного трансфера предоставляется полный возврат. При оплате наличными по прибытии плата не взимается.",
         "Поздняя отмена: При отмене менее чем за 48 часов до трансфера или при неявке возврат не предоставляется, поскольку местные поставщики резервируют место и несут расходы.",
+        "Встреча в аэропорту: Водитель бесплатно ждёт до 60 минут после посадки рейса.",
         "Отмена с нашей стороны: Если мы или местный поставщик вынуждены отменить или перенести мероприятие из-за погоды, безопасности, недостаточного количества участников или операционных причин, вам предложат полный возврат либо перенос на другую дату или мероприятие.",
         `Как отменить: Как можно раньше отправьте нам номер бронирования через WhatsApp на номер ${displayPhoneNumber}. Мы подтвердим право на возврат и, если он положен, вернём средства исходным способом оплаты в течение указанного количества рабочих дней, например 5–7 дней. При оплате наличными по прибытии плата не взимается.`,
       ] },
@@ -106,6 +109,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       { title: "الإلغاء واسترداد المبالغ", id: "cancellations", paragraphs: [
         "الإلغاء المجاني: يحق لك استرداد كامل عند الإلغاء قبل موعد الرحلة أو الاستلام بـ48 ساعة على الأقل. لا تُحصّل أي رسوم للحجوزات المدفوعة نقداً عند الوصول.",
         "الإلغاء المتأخر: لا يحق استرداد المبلغ عند الإلغاء خلال 48 ساعة من موعد الاستلام أو عدم الحضور، لأن المورد المحلي يحجز مكانك ويتحمل تكاليف.",
+        "الاستقبال من المطار: ينتظرك السائق حتى 60 دقيقة مجاناً بعد هبوط رحلتك.",
         "الإلغاء من طرفنا: إذا اضطررنا نحن أو المورد المحلي للإلغاء أو إعادة الجدولة بسبب الطقس أو السلامة أو أسباب تشغيلية، سنعرض استرداداً كاملاً أو موعداً أو نشاطاً بديلاً.",
         `طريقة الإلغاء: أرسل رقم الحجز عبر واتساب على الرقم ‎${displayPhoneNumber} في أسرع وقت. سنؤكد استحقاق الاسترداد ونعيده إلى طريقة الدفع الأصلية خلال المدة الموضحة، عادةً من 5 إلى 7 أيام عمل.`,
       ] },
@@ -134,6 +138,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       { title: "取消与退款", id: "cancellations", paragraphs: [
         "免费取消期限：在计划行程或接送时间至少 48 小时前取消，可获得全额退款；抵达后现金付款的预订不会收费。",
         "逾期取消：在接送前 48 小时内取消或未到场，因本地供应商已保留名额并产生成本，不予退款。",
+        "机场接机：司机在航班落地后免费等候最多 60 分钟。",
         "由我们取消：如我们或本地供应商因天气、安全、人数不足或运营原因取消或改期，您可选择全额退款，或改订其他日期或活动。",
         `取消方式：请尽快通过 WhatsApp（${displayPhoneNumber}）发送预订编号。我们会确认退款资格，并在所述工作日内（例如 5–7 个工作日）按原付款方式处理；抵达后现金付款的预订不会收费。`,
       ] },
@@ -162,6 +167,7 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
       { title: "Anulacje i zwroty", id: "cancellations", paragraphs: [
         "Bezpłatne anulowanie: Anulacje dokonane co najmniej 48 godzin przed planowaną wycieczką lub odbiorem uprawniają do pełnego zwrotu (lub nie wiążą się z opłatą przy płatności gotówką na miejscu).",
         "Późne anulacje: Anulacje dokonane w ciągu 48 godzin przed odbiorem oraz niestawienie się nie uprawniają do zwrotu, ponieważ lokalni dostawcy rezerwują dla Ciebie miejsce i ponoszą związane z tym koszty.",
+        "Odbiór z lotniska: Kierowca czeka bezpłatnie do 60 minut po lądowaniu.",
         "Anulacje z naszej strony: Jeśli my lub nasz lokalny dostawca musimy odwołać lub przełożyć aktywność (z powodu pogody, bezpieczeństwa, niewystarczającej liczby uczestników lub przyczyn operacyjnych), zaproponujemy pełny zwrot środków lub możliwość zmiany terminu bądź aktywności.",
         `Jak anulować: Napisz do nas na WhatsApp pod numer ${displayPhoneNumber}, podając numer rezerwacji, najszybciej jak to możliwe. Potwierdzimy Twoje uprawnienie do zwrotu i, jeśli ma to zastosowanie, zrealizujemy go na pierwotną metodę płatności w podanej liczbie dni roboczych (na przykład 5–7 dni) — w przypadku rezerwacji z płatnością gotówką po przyjeździe nie pobiera się żadnej opłaty.`,
       ] },

@@ -15,6 +15,8 @@ import { isTransferLeadTimeValid, minimumTransferSlot } from "@/lib/booking-vali
 import PhoneNumberInput from "@/components/booking/PhoneNumberInput";
 import { validatePhoneNumber } from "@/lib/phone";
 import {
+  RMF_ROUTE_PLACES,
+  RMF_ROUTE_PRICING,
   TRANSFER_ZONE_KEYS,
   enabledVehicleClasses,
   routeFare,
@@ -179,6 +181,11 @@ const EN = {
   trustCash: "Pay cash on arrival",
   trustCancel: "Free cancellation up to 48 hours",
   trustSeats: "Free child seats on request",
+  trustWait: "60 minutes free airport waiting",
+  trustFlight: "We check your flight arrival",
+  trustFees: "Airport fees included",
+  trustLuggage: "Driver helps with your luggage",
+  trustWater: "Free bottle of water",
   errTrip: "Add your route, date and time.",
   oversizedLabels: {
     golf_bag: "Golf bag",
@@ -311,6 +318,11 @@ const DE: CopyShape = {
   trustCash: "Barzahlung bei Ankunft",
   trustCancel: "Kostenlos stornierbar bis 48 Stunden vorher",
   trustSeats: "Kindersitze kostenlos auf Anfrage",
+  trustWait: "60 Minuten kostenlose Wartezeit am Flughafen",
+  trustFlight: "Wir prüfen deine Flugankunft",
+  trustFees: "Flughafengebühren inklusive",
+  trustLuggage: "Fahrer hilft beim Gepäck",
+  trustWater: "Gratis Flasche Wasser",
   errTrip: "Gib Strecke, Datum und Uhrzeit an.",
   oversizedLabels: {
     golf_bag: "Golfbag",
@@ -441,6 +453,11 @@ const RU: CopyShape = {
   trustCash: "Оплата наличными на месте",
   trustCancel: "Бесплатная отмена за 48 часов",
   trustSeats: "Детские кресла бесплатно по запросу",
+  trustWait: "60 минут бесплатного ожидания в аэропорту",
+  trustFlight: "Проверяем прибытие вашего рейса",
+  trustFees: "Сборы аэропорта включены",
+  trustLuggage: "Водитель поможет с багажом",
+  trustWater: "Бесплатная бутылка воды",
   errTrip: "Укажите маршрут, дату и время.",
   oversizedLabels: {
     golf_bag: "Сумка для гольфа",
@@ -571,6 +588,11 @@ const AR: CopyShape = {
   trustCash: "الدفع نقداً عند الوصول",
   trustCancel: "إلغاء مجاني حتى 48 ساعة قبل الموعد",
   trustSeats: "مقاعد أطفال مجانية عند الطلب",
+  trustWait: "60 دقيقة انتظار مجاني في المطار",
+  trustFlight: "نتابع موعد وصول رحلتك",
+  trustFees: "رسوم المطار مشمولة",
+  trustLuggage: "السائق يساعدك في الأمتعة",
+  trustWater: "زجاجة مياه مجانية",
   errTrip: "أدخل المسار والتاريخ والوقت.",
   oversizedLabels: {
     golf_bag: "حقيبة غولف",
@@ -701,6 +723,11 @@ const PL: CopyShape = {
   trustCash: "Płatność gotówką na miejscu",
   trustCancel: "Bezpłatne anulowanie do 48 godzin przed",
   trustSeats: "Bezpłatne foteliki na życzenie",
+  trustWait: "60 minut bezpłatnego oczekiwania na lotnisku",
+  trustFlight: "Sprawdzamy przylot Twojego samolotu",
+  trustFees: "Opłaty lotniskowe w cenie",
+  trustLuggage: "Kierowca pomoże z bagażem",
+  trustWater: "Bezpłatna butelka wody",
   errTrip: "Podaj trasę, datę i godzinę.",
   oversizedLabels: {
     golf_bag: "Torba golfowa",
@@ -831,6 +858,11 @@ const ZH: CopyShape = {
   trustCash: "抵达时现金支付",
   trustCancel: "提前 48 小时可免费取消",
   trustSeats: "儿童座椅可免费申请",
+  trustWait: "机场免费等候 60 分钟",
+  trustFlight: "我们会核对您的航班抵达时间",
+  trustFees: "已含机场费用",
+  trustLuggage: "司机协助搬运行李",
+  trustWater: "免费瓶装水",
   errTrip: "请填写路线、日期和时间。",
   oversizedLabels: {
     golf_bag: "高尔夫球包",
@@ -904,7 +936,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
   const [website, setWebsite] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { direction, airport, hotelName, zone: autoZone, hasAirport } = useMemo(() => resolveTransferRoute(fromPlace, toPlace), [fromPlace, toPlace]);
+  const { direction, airport, hotelName, zone: autoZone, hasAirport, rmfRoute } = useMemo(() => resolveTransferRoute(fromPlace, toPlace), [fromPlace, toPlace]);
   const zone: TransferZoneKey | null = airport === "HRG" ? zoneOverride || autoZone : null;
   const samePlace = fromPlace.trim().toLowerCase() === toPlace.trim().toLowerCase();
 
@@ -921,6 +953,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
       calculateTransferQuote({
         direction,
         airport,
+        rmfRoute,
         zone,
         tripType,
         adults,
@@ -932,7 +965,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
         childSeats: { infant: infantSeat, child: childSeat, booster: boosterSeat },
         wheelchair,
       }),
-    [direction, airport, zone, tripType, adults, children, infants, largeBags, cabinBags, oversizedItems, infantSeat, childSeat, boosterSeat, wheelchair],
+    [direction, airport, rmfRoute, zone, tripType, adults, children, infants, largeBags, cabinBags, oversizedItems, infantSeat, childSeat, boosterSeat, wheelchair],
   );
 
   const totalPassengers = adults + children + infants;
@@ -950,7 +983,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
 
   const quoteSignature = quote.requiresManualConfirmation
     ? `manual:${quote.reason}:${zone ?? "unmapped"}`
-    : `${quote.allocatedVehicles.map((entry) => `${entry.vehicleClass}x${entry.count}`).join("+")}:${quote.total}:${zone ?? ""}`;
+    : `${quote.allocatedVehicles.map((entry) => `${entry.vehicleClass}x${entry.count}`).join("+")}:${quote.total}:${zone ?? rmfRoute ?? ""}`;
   useEffect(() => {
     if (quote.requiresManualConfirmation) {
       trackEvent("transfer_manual_quote_requested", { booking_type: "transfer", reason: quote.reason ?? "unknown", destination: zone ?? "unmapped", traveler_count: totalPassengers });
@@ -1251,7 +1284,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
             </div>
 
             <datalist id={locationListId}>
-              {Object.values(TRANSFER_AIRPORTS).map((place) => <option key={place} value={place} />)}
+              {[...Object.values(TRANSFER_AIRPORTS), ...Object.values(RMF_ROUTE_PLACES)].map((place) => <option key={place} value={place} />)}
               {["Hurghada Marina", "Port Ghalib Marina", "Marsa Alam", "El Gouna"].map((place) => <option key={place} value={place} />)}
               {TRANSFER_ZONE_KEYS.map((key) => <option key={key} value={ZONE_LABELS[key]} />)}
             </datalist>
@@ -1314,7 +1347,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
                 {enabledVehicleClasses().map((vehicle) => {
                   const count = priceShown && priced ? legVehicleCount(vehicle.vehicleClass) : 0;
-                  const fare = zone ? routeFare(zone, vehicle.vehicleClass) : null;
+                  const fare = rmfRoute ? RMF_ROUTE_PRICING[rmfRoute][vehicle.vehicleClass] : zone ? routeFare(zone, vehicle.vehicleClass) : null;
                   const fits = totalPassengers <= vehicle.passengerCapacity;
                   return (
                     <div key={vehicle.vehicleClass} className={`rounded-2xl border p-4 ${count ? "border-ocean bg-ocean-tint ring-2 ring-ocean-tint" : "border-line"}`}>
@@ -1375,6 +1408,11 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
               <TrustItem icon={<Banknote size={16} />} text={copy.trustCash} />
               <TrustItem icon={<CalendarX2 size={16} />} text={copy.trustCancel} />
               <TrustItem icon={<Users size={16} />} text={copy.trustSeats} />
+              <TrustItem icon={<Clock3 size={16} />} text={copy.trustWait} />
+              <TrustItem icon={<Plane size={16} />} text={copy.trustFlight} />
+              <TrustItem icon={<ShieldCheck size={16} />} text={copy.trustFees} />
+              <TrustItem icon={<Luggage size={16} />} text={copy.trustLuggage} />
+              <TrustItem icon={<Check size={16} />} text={copy.trustWater} />
             </ul>
           </div>
         </div>
