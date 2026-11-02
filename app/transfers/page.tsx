@@ -70,7 +70,7 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
 
       <section className="
         relative
-        h-[60vh]
+        h-[42vh]
         bg-cover
         bg-center
       "
@@ -127,15 +127,14 @@ export default function TransfersPage({ locale = "en" }: { locale?: "en" | "de" 
 
       </section>
 
-      <section id="book-transfer" className="bg-surface-muted px-6 py-20">
-        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-          <div>
+      <section id="book-transfer" className="scroll-mt-24 bg-surface-muted px-4 py-12 md:px-6 md:py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8 max-w-3xl">
             <p className="font-semibold uppercase tracking-[0.24em] text-ocean-dark">{de ? "Private Transfers" : ru ? "Частные трансферы" : ar ? "تنقلات خاصة" : pl ? "Prywatne transfery" : zh ? "私人接送" : "Private transfers"}</p>
-            <h2 className="mt-3 text-4xl font-bold text-ink">{de ? "Bequem von Tür zu Tür reisen" : ru ? "Комфортная поездка от двери до двери" : ar ? "تنقل مريح من الباب إلى الباب" : pl ? "Wygodna podróż od drzwi do drzwi" : zh ? "舒适的门到门出行" : "Travel comfortably from door to door"}</h2>
+            <h2 className="mt-3 text-3xl font-bold text-ink md:text-4xl">{de ? "Bequem von Tür zu Tür reisen" : ru ? "Комфортная поездка от двери до двери" : ar ? "تنقل مريح من الباب إلى الباب" : pl ? "Wygodna podróż od drzwi do drzwi" : zh ? "舒适的门到门出行" : "Travel comfortably from door to door"}</h2>
             <p className="mt-5 text-lg leading-relaxed text-muted">{de ? "Sende uns deine Route und Reisedaten. Unser Team antwortet per WhatsApp mit Verfügbarkeit und einem klaren Preis, bevor etwas bestätigt wird." : ru ? "Отправьте маршрут и данные поездки. Команда ответит в WhatsApp, подтвердит наличие и понятную цену до оформления." : ar ? "أرسل مسارك وتفاصيل الرحلة. سيرد فريقنا عبر واتساب بالتوفر والسعر الواضح قبل التأكيد." : pl ? "Wyślij trasę i dane podróży. Nasz zespół odpowie przez WhatsApp, potwierdzając dostępność i jasną cenę przed rezerwacją." : zh ? "发送您的路线和出行信息。确认前，我们的团队会通过 WhatsApp 回复名额和透明报价。" : "Send your route and travel details. Our team will reply on WhatsApp with availability and a clear quote before anything is confirmed."}</p>
-            <ul className="mt-7 space-y-3 text-ink"><li>✓ {de ? "Ankunft und Abfahrt am Flughafen" : ru ? "Встреча и выезд из аэропорта" : ar ? "الاستقبال والمغادرة من المطار" : pl ? "Przyloty i odloty z lotniska" : zh ? "机场抵达与出发接送" : "Airport arrivals and departures"}</li><li>✓ {de ? "Abholung an Hotels, Resorts und Marinas" : ru ? "Трансфер из отелей, курортов и марин" : ar ? "الاستلام من الفنادق والمنتجعات والمراسي" : pl ? "Odbiór z hoteli, kurortów i marin" : zh ? "酒店、度假村和码头接送" : "Hotel, resort and marina pickups"}</li><li>✓ {de ? "Passende Privatfahrzeuge für deine Gruppe" : ru ? "Частный автомобиль по размеру группы" : ar ? "سيارة خاصة تناسب عدد أفراد مجموعتك" : pl ? "Prywatny samochód dopasowany do grupy" : zh ? "适合您团队人数的私人车辆" : "Flexible private vehicles for your group"}</li></ul>
           </div>
-          <AirportTransferForm />
+          <AirportTransferForm wide />
         </div>
       </section>
 

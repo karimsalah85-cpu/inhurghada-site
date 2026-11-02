@@ -49,7 +49,7 @@ function cartItems(value: unknown) {
   });
 }
 
-function cairoDateTimeParts(value: Date) {
+export function cairoDateTimeParts(value: Date) {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Africa/Cairo",
     year: "numeric",

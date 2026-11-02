@@ -6,7 +6,7 @@ import ReferralCodeField, { useReferralCode } from "@/components/booking/Referra
 import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Car, Clock3, Hotel, Luggage, MessageCircle, Plane, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpDown, Banknote, BusFront, CalendarDays, CalendarX2, Car, Check, Clock3, Luggage, MapPin, MessageCircle, Plane, ShieldCheck, Tag, Users } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import { localePath } from "@/lib/i18n";
@@ -16,11 +16,14 @@ import PhoneNumberInput from "@/components/booking/PhoneNumberInput";
 import { validatePhoneNumber } from "@/lib/phone";
 import {
   TRANSFER_ZONE_KEYS,
+  enabledVehicleClasses,
   mapHotelToZone,
+  routeFare,
   type OversizedItemType,
   type TransferZoneKey,
 } from "@/lib/transfer-config";
 import { calculateTransferQuote } from "@/lib/transfer-quote";
+import { transferCancellationDeadline } from "@/lib/transfer-cancellation";
 
 type Locale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
 
@@ -142,6 +145,39 @@ const EN = {
   errPhone: "Please enter a valid WhatsApp phone number including the country code.",
   errGeneric: "Transfer request failed. Please try again.",
   errNetwork: "We could not reach the booking service. Check your connection and try again.",
+  from_: "From",
+  to: "To",
+  airportName: "Hurghada International Airport (HRG)",
+  swap: "Swap pickup and drop-off",
+  tripStep: "Trip & price",
+  detailsStep: "Your details",
+  confirmStep: "Confirmation",
+  withReturn: "With return",
+  vehicleTitle: "Your vehicle",
+  upToPeople: "Up to {n} people",
+  fitsBags: "Fits {n} large suitcases",
+  tooSmall: "Too small for your group",
+  seePrice: "See price",
+  continueBtn: "Continue",
+  back: "Back",
+  chooseToSeePrice: "Enter your route, date and time to see the price.",
+  summary: "Your transfer",
+  pickup: "Pick-up",
+  dropoff: "Drop-off",
+  departure: "Departure",
+  returnLeg: "Return",
+  transferCost: "Transfer cost",
+  payCash: "Pay cash on arrival. No online payment.",
+  freeUntil: "Free cancellation until {date}",
+  nonRefundable: "This pickup is less than 48 hours away, so this booking is non-refundable.",
+  flightSection: "Flight details",
+  extrasSection: "Optional items",
+  trustFixed: "Fixed price per vehicle",
+  trustPrivate: "Private, never shared",
+  trustCash: "Pay cash on arrival",
+  trustCancel: "Free cancellation up to 48 hours",
+  trustSeats: "Free child seats on request",
+  errTrip: "Add your route, date and time.",
   oversizedLabels: {
     golf_bag: "Golf bag",
     kitesurf: "Kite-surfing equipment",
@@ -240,6 +276,39 @@ const DE: CopyShape = {
   errPhone: "Bitte gib eine gültige WhatsApp-Nummer inklusive Landesvorwahl ein.",
   errGeneric: "Transferanfrage fehlgeschlagen. Bitte versuche es erneut.",
   errNetwork: "Der Buchungsdienst ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+  from_: "Von",
+  to: "Nach",
+  airportName: "Flughafen Hurghada (HRG)",
+  swap: "Abholort und Ziel tauschen",
+  tripStep: "Fahrt & Preis",
+  detailsStep: "Deine Daten",
+  confirmStep: "Bestätigung",
+  withReturn: "Mit Rückfahrt",
+  vehicleTitle: "Dein Fahrzeug",
+  upToPeople: "Bis zu {n} Personen",
+  fitsBags: "Platz für {n} große Koffer",
+  tooSmall: "Zu klein für deine Gruppe",
+  seePrice: "Preis anzeigen",
+  continueBtn: "Weiter",
+  back: "Zurück",
+  chooseToSeePrice: "Gib Strecke, Datum und Uhrzeit ein, um den Preis zu sehen.",
+  summary: "Dein Transfer",
+  pickup: "Abholung",
+  dropoff: "Ziel",
+  departure: "Hinfahrt",
+  returnLeg: "Rückfahrt",
+  transferCost: "Transferpreis",
+  payCash: "Barzahlung bei Ankunft. Keine Online-Zahlung.",
+  freeUntil: "Kostenlose Stornierung bis {date}",
+  nonRefundable: "Die Abholung ist weniger als 48 Stunden entfernt, daher ist diese Buchung nicht erstattungsfähig.",
+  flightSection: "Flugdaten",
+  extrasSection: "Optionale Angaben",
+  trustFixed: "Festpreis pro Fahrzeug",
+  trustPrivate: "Privat, nie geteilt",
+  trustCash: "Barzahlung bei Ankunft",
+  trustCancel: "Kostenlos stornierbar bis 48 Stunden vorher",
+  trustSeats: "Kindersitze kostenlos auf Anfrage",
+  errTrip: "Gib Strecke, Datum und Uhrzeit an.",
   oversizedLabels: {
     golf_bag: "Golfbag",
     kitesurf: "Kitesurf-Ausrüstung",
@@ -336,6 +405,39 @@ const RU: CopyShape = {
   errPhone: "Введите действительный номер WhatsApp с кодом страны.",
   errGeneric: "Не удалось отправить заявку на трансфер. Попробуйте ещё раз.",
   errNetwork: "Не удалось связаться с сервисом бронирования. Проверьте соединение и попробуйте снова.",
+  from_: "Откуда",
+  to: "Куда",
+  airportName: "Международный аэропорт Хургады (HRG)",
+  swap: "Поменять местами",
+  tripStep: "Поездка и цена",
+  detailsStep: "Ваши данные",
+  confirmStep: "Подтверждение",
+  withReturn: "Туда и обратно",
+  vehicleTitle: "Ваш автомобиль",
+  upToPeople: "До {n} человек",
+  fitsBags: "Вмещает {n} больших чемоданов",
+  tooSmall: "Мал для вашей группы",
+  seePrice: "Узнать цену",
+  continueBtn: "Продолжить",
+  back: "Назад",
+  chooseToSeePrice: "Укажите маршрут, дату и время, чтобы увидеть цену.",
+  summary: "Ваш трансфер",
+  pickup: "Подача",
+  dropoff: "Высадка",
+  departure: "Поездка",
+  returnLeg: "Обратно",
+  transferCost: "Цена трансфера",
+  payCash: "Оплата наличными на месте. Без онлайн-оплаты.",
+  freeUntil: "Бесплатная отмена до {date}",
+  nonRefundable: "До подачи менее 48 часов, поэтому это бронирование не подлежит возврату.",
+  flightSection: "Данные рейса",
+  extrasSection: "Дополнительно",
+  trustFixed: "Фиксированная цена за автомобиль",
+  trustPrivate: "Только для вашей группы",
+  trustCash: "Оплата наличными на месте",
+  trustCancel: "Бесплатная отмена за 48 часов",
+  trustSeats: "Детские кресла бесплатно по запросу",
+  errTrip: "Укажите маршрут, дату и время.",
   oversizedLabels: {
     golf_bag: "Сумка для гольфа",
     kitesurf: "Кайт-снаряжение",
@@ -432,6 +534,39 @@ const AR: CopyShape = {
   errPhone: "يرجى إدخال رقم واتساب صحيح مع رمز الدولة.",
   errGeneric: "تعذّر إرسال طلب النقل. يرجى المحاولة مرة أخرى.",
   errNetwork: "تعذّر الوصول إلى خدمة الحجز. تحقق من اتصالك وحاول مرة أخرى.",
+  from_: "من",
+  to: "إلى",
+  airportName: "مطار الغردقة الدولي (HRG)",
+  swap: "تبديل نقطتي الاستلام والوصول",
+  tripStep: "الرحلة والسعر",
+  detailsStep: "بياناتك",
+  confirmStep: "التأكيد",
+  withReturn: "ذهاب وعودة",
+  vehicleTitle: "مركبتك",
+  upToPeople: "حتى {n} أشخاص",
+  fitsBags: "تتسع لـ {n} حقائب كبيرة",
+  tooSmall: "صغيرة على مجموعتك",
+  seePrice: "عرض السعر",
+  continueBtn: "متابعة",
+  back: "رجوع",
+  chooseToSeePrice: "أدخل المسار والتاريخ والوقت لعرض السعر.",
+  summary: "رحلة النقل",
+  pickup: "الاستلام",
+  dropoff: "الوصول",
+  departure: "الذهاب",
+  returnLeg: "العودة",
+  transferCost: "سعر النقل",
+  payCash: "الدفع نقداً عند الوصول. لا يوجد دفع عبر الإنترنت.",
+  freeUntil: "إلغاء مجاني حتى {date}",
+  nonRefundable: "يتبقى أقل من 48 ساعة على الاستلام، لذا هذا الحجز غير قابل للاسترداد.",
+  flightSection: "بيانات الرحلة الجوية",
+  extrasSection: "عناصر اختيارية",
+  trustFixed: "سعر ثابت لكل مركبة",
+  trustPrivate: "خاص وغير مشترك",
+  trustCash: "الدفع نقداً عند الوصول",
+  trustCancel: "إلغاء مجاني حتى 48 ساعة قبل الموعد",
+  trustSeats: "مقاعد أطفال مجانية عند الطلب",
+  errTrip: "أدخل المسار والتاريخ والوقت.",
   oversizedLabels: {
     golf_bag: "حقيبة غولف",
     kitesurf: "معدات الطائرة الشراعية",
@@ -528,6 +663,39 @@ const PL: CopyShape = {
   errPhone: "Podaj prawidłowy numer WhatsApp wraz z numerem kierunkowym kraju.",
   errGeneric: "Nie udało się wysłać zapytania o transfer. Spróbuj ponownie.",
   errNetwork: "Nie udało się połączyć z usługą rezerwacji. Sprawdź połączenie i spróbuj ponownie.",
+  from_: "Skąd",
+  to: "Dokąd",
+  airportName: "Międzynarodowe lotnisko w Hurghadzie (HRG)",
+  swap: "Zamień miejsce odbioru i cel",
+  tripStep: "Przejazd i cena",
+  detailsStep: "Twoje dane",
+  confirmStep: "Potwierdzenie",
+  withReturn: "W obie strony",
+  vehicleTitle: "Twój pojazd",
+  upToPeople: "Do {n} osób",
+  fitsBags: "Mieści {n} duże walizki",
+  tooSmall: "Za mały dla Twojej grupy",
+  seePrice: "Zobacz cenę",
+  continueBtn: "Dalej",
+  back: "Wstecz",
+  chooseToSeePrice: "Podaj trasę, datę i godzinę, aby zobaczyć cenę.",
+  summary: "Twój transfer",
+  pickup: "Odbiór",
+  dropoff: "Cel",
+  departure: "Przejazd",
+  returnLeg: "Powrót",
+  transferCost: "Cena transferu",
+  payCash: "Płatność gotówką na miejscu. Bez płatności online.",
+  freeUntil: "Bezpłatne anulowanie do {date}",
+  nonRefundable: "Do odbioru zostało mniej niż 48 godzin, więc ta rezerwacja jest bezzwrotna.",
+  flightSection: "Dane lotu",
+  extrasSection: "Opcje dodatkowe",
+  trustFixed: "Stała cena za pojazd",
+  trustPrivate: "Prywatnie, bez współpasażerów",
+  trustCash: "Płatność gotówką na miejscu",
+  trustCancel: "Bezpłatne anulowanie do 48 godzin przed",
+  trustSeats: "Bezpłatne foteliki na życzenie",
+  errTrip: "Podaj trasę, datę i godzinę.",
   oversizedLabels: {
     golf_bag: "Torba golfowa",
     kitesurf: "Sprzęt do kitesurfingu",
@@ -624,6 +792,39 @@ const ZH: CopyShape = {
   errPhone: "请输入包含国家代码的有效 WhatsApp 号码。",
   errGeneric: "接送申请提交失败，请重试。",
   errNetwork: "无法连接预订服务，请检查网络后重试。",
+  from_: "出发地",
+  to: "目的地",
+  airportName: "赫尔格达国际机场 (HRG)",
+  swap: "交换上车点和目的地",
+  tripStep: "行程与价格",
+  detailsStep: "您的信息",
+  confirmStep: "确认",
+  withReturn: "往返",
+  vehicleTitle: "您的车辆",
+  upToPeople: "最多 {n} 人",
+  fitsBags: "可放 {n} 件大行李箱",
+  tooSmall: "不足以容纳您的团队",
+  seePrice: "查看价格",
+  continueBtn: "继续",
+  back: "返回",
+  chooseToSeePrice: "请输入路线、日期和时间以查看价格。",
+  summary: "您的接送",
+  pickup: "上车点",
+  dropoff: "下车点",
+  departure: "去程",
+  returnLeg: "返程",
+  transferCost: "接送价格",
+  payCash: "抵达时现金支付，无需在线付款。",
+  freeUntil: "{date} 前可免费取消",
+  nonRefundable: "距离上车不足 48 小时，此预订不可退款。",
+  flightSection: "航班信息",
+  extrasSection: "可选项目",
+  trustFixed: "按车固定价格",
+  trustPrivate: "私人专车，绝不拼车",
+  trustCash: "抵达时现金支付",
+  trustCancel: "提前 48 小时可免费取消",
+  trustSeats: "儿童座椅可免费申请",
+  errTrip: "请填写路线、日期和时间。",
   oversizedLabels: {
     golf_bag: "高尔夫球包",
     kitesurf: "风筝冲浪装备",
@@ -646,7 +847,10 @@ function useCopy(language: Locale) {
 type Direction = "airport_to_hotel" | "hotel_to_airport" | "hotel_to_hotel";
 type Wheelchair = "none" | "folding_manual" | "powered_or_fixed";
 
-export default function AirportTransferForm() {
+const MAPS_EMBED_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY?.trim() || "";
+
+/** `wide` lays the steps out in two columns; the tour-page sidebar stays stacked. */
+export default function AirportTransferForm({ wide = false }: { wide?: boolean }) {
   const router = useRouter();
   const { language } = useSiteSettings();
   const copy = useCopy(language as Locale);
@@ -654,8 +858,12 @@ export default function AirportTransferForm() {
   const minimumSlot = minimumTransferSlot();
 
   const [tripType, setTripType] = useState<"one_way" | "round_trip">("one_way");
-  const [direction, setDirection] = useState<Direction>("airport_to_hotel");
-  const [hotelName, setHotelName] = useState("");
+  const [fromPlace, setFromPlace] = useState(copy.airportName);
+  const [toPlace, setToPlace] = useState("");
+  const [step, setStep] = useState<"trip" | "details">("trip");
+  const [priceShown, setPriceShown] = useState(false);
+  const [tripError, setTripError] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
   const [zoneOverride, setZoneOverride] = useState<TransferZoneKey | "">("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -688,6 +896,10 @@ export default function AirportTransferForm() {
   const [website, setWebsite] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const fromAirport = isAirportPlace(fromPlace);
+  const toAirport = isAirportPlace(toPlace);
+  const direction: Direction = fromAirport && !toAirport ? "airport_to_hotel" : toAirport && !fromAirport ? "hotel_to_airport" : "hotel_to_hotel";
+  const hotelName = direction === "airport_to_hotel" ? toPlace : direction === "hotel_to_airport" ? fromPlace : `${fromPlace.trim()} → ${toPlace.trim()}`.slice(0, 200);
   const autoZone = mapHotelToZone(hotelName);
   const zone: TransferZoneKey | null = direction === "hotel_to_hotel" ? null : zoneOverride || autoZone;
 
@@ -766,7 +978,7 @@ export default function AirportTransferForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (direction !== "hotel_to_hotel" && !hotelName.trim()) {
+    if (!fromPlace.trim() || !toPlace.trim()) {
       alert(copy.errRoute);
       return;
     }
@@ -890,221 +1102,400 @@ export default function AirportTransferForm() {
   }
 
   const reasonKey = quote.reason ? (`reason_${quote.reason}` as keyof CopyShape) : null;
+  const priced = !quote.requiresManualConfirmation;
+  const cancellation = transferCancellationDeadline(date, time);
+  const dateFormat = (value: string, clock: string) =>
+    new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(new Date(`${value}T${clock}:00Z`));
+  const cancellationLine = cancellation.eligible
+    ? copy.freeUntil.replace("{date}", dateFormat(cancellation.date, cancellation.time))
+    : copy.nonRefundable;
+  const legVehicleCount = (vehicleClass: string) => quote.legVehicles.filter((entry) => entry.vehicleClass === vehicleClass).length;
+  const mapUrl = MAPS_EMBED_KEY && fromPlace.trim() && toPlace.trim()
+    ? `https://www.google.com/maps/embed/v1/directions?key=${encodeURIComponent(MAPS_EMBED_KEY)}&mode=driving&origin=${encodeURIComponent(placeForMap(fromPlace))}&destination=${encodeURIComponent(placeForMap(toPlace))}`
+    : "";
+
+  function changeTrip(update: () => void) {
+    update();
+    setTripError("");
+  }
+
+  function setHotelSide(update: () => void) {
+    setZoneOverride("");
+    changeTrip(update);
+  }
+
+  function swapPlaces() {
+    setHotelSide(() => {
+      setFromPlace(toPlace);
+      setToPlace(fromPlace);
+    });
+  }
+
+  function tripIsComplete() {
+    if (!fromPlace.trim() || !toPlace.trim() || !date || !time || (tripType === "round_trip" && (!returnDate || !returnTime))) {
+      setTripError(copy.errTrip);
+      return false;
+    }
+    if (!isTransferLeadTimeValid(date, time)) {
+      setTripError(copy.errLead);
+      return false;
+    }
+    if (tripType === "round_trip" && !isTransferLeadTimeValid(returnDate, returnTime)) {
+      setTripError(copy.errReturnLead);
+      return false;
+    }
+    setTripError("");
+    return true;
+  }
+
+  function showPrice() {
+    if (tripIsComplete()) setPriceShown(true);
+  }
+
+  function goToStep(next: "trip" | "details") {
+    if (next === "details" && !tripIsComplete()) return;
+    setStep(next);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  const priceSummary = (
+    <aside className={`rounded-2xl border border-line bg-surface-muted p-5 ${wide ? "lg:sticky lg:top-24" : ""}`}>
+      <h3 className="text-lg font-bold text-ink">{copy.summary}</h3>
+      {priced ? (
+        <div className="mt-3 flex items-start gap-3">
+          <span className="rounded-xl bg-ocean-tint p-2.5 text-ocean-dark"><Car size={22} /></span>
+          <div>
+            {quote.allocatedVehicles.map((entry) => (
+              <p key={entry.vehicleClass} className="font-bold text-ink">{entry.count}× {VEHICLE_LABELS[entry.vehicleClass] ?? entry.vehicleClass}</p>
+            ))}
+            <p className="text-sm text-muted">{tripType === "round_trip" ? copy.withReturn : copy.oneWay} · {totalPassengers} {copy.passengers}</p>
+            <p className="text-xs font-medium text-emerald-700">{copy.privateNotShared}</p>
+          </div>
+        </div>
+      ) : null}
+      <dl className="mt-4 space-y-3 border-t border-line pt-4 text-sm">
+        <SummaryRow label={copy.pickup} value={fromPlace} />
+        <SummaryRow label={copy.dropoff} value={toPlace} />
+        {date && time ? <SummaryRow label={tripType === "round_trip" ? copy.departure : copy.time} value={dateFormat(date, time)} /> : null}
+        {tripType === "round_trip" && returnDate && returnTime ? <SummaryRow label={copy.returnLeg} value={dateFormat(returnDate, returnTime)} /> : null}
+      </dl>
+      {date && time ? <p className={`mt-4 rounded-xl p-3 text-sm font-medium ${cancellation.eligible ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"}`}>{cancellationLine}</p> : null}
+      {priced ? (
+        <>
+          <div className="mt-4 flex items-center justify-between gap-4 border-t border-line pt-4">
+            <span className="font-bold capitalize text-ink">{copy.total}</span>
+            <span className="text-2xl font-black text-ocean-dark">${quote.total.toFixed(2)}</span>
+          </div>
+          <p className="mt-1 text-xs text-muted">{copy.payCash}</p>
+        </>
+      ) : (
+        <div className="mt-4 border-t border-line pt-4">
+          <p className="font-bold text-ink">{copy.manualTitle}</p>
+          {reasonKey ? <p className="mt-1 text-sm text-ink">{copy[reasonKey] as string}</p> : null}
+        </div>
+      )}
+      {quote.warnings.length && priced ? (
+        <ul className="mt-3 space-y-1 border-t border-line pt-3 text-sm text-ink">
+          {quote.warnings.map((warning) => {
+            const key = `warn_${warning}` as keyof CopyShape;
+            return copy[key] ? <li key={warning}>• {copy[key] as string}</li> : null;
+          })}
+        </ul>
+      ) : null}
+    </aside>
+  );
 
   return (
-    <form onSubmit={submit} aria-busy={submitting} className="rounded-3xl bg-white p-6 shadow-2xl md:p-8">
+    <form ref={formRef} onSubmit={submit} aria-busy={submitting} className="scroll-mt-24 rounded-3xl bg-white p-4 shadow-2xl sm:p-6 md:p-8">
       <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
-      <div className="flex items-start gap-4">
-        <div className="rounded-xl bg-ocean-tint p-3 text-ocean-dark"><Car /></div>
-        <div>
-          <h2 className="text-2xl font-bold text-ink">{copy.heading}</h2>
-          <p className="mt-1 text-sm text-muted">{copy.sub}</p>
-        </div>
-      </div>
+      <ol className="flex items-center gap-2 border-b border-line pb-4 text-sm font-bold">
+        {[copy.tripStep, copy.detailsStep, copy.confirmStep].map((label, index) => {
+          const current = (step === "trip" ? 0 : 1) === index;
+          const done = step === "details" && index === 0;
+          return (
+            <li key={label} aria-current={current ? "step" : undefined} className={`flex min-w-0 flex-1 items-center gap-2 ${current || done ? "text-ocean-dark" : "text-muted"}`}>
+              <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border ${current ? "border-ocean bg-ocean text-white" : done ? "border-ocean bg-ocean-tint" : "border-line"}`}>{done ? <Check size={15} /> : index + 1}</span>
+              <span className={current ? "truncate" : "hidden truncate sm:inline"}>{label}</span>
+            </li>
+          );
+        })}
+      </ol>
 
-      {/* Step 1 — Journey */}
-      <fieldset className="mt-7">
-        <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">1 · {copy.journey}</legend>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {(["one_way", "round_trip"] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setTripType(value)}
-              aria-pressed={tripType === value}
-              className={`rounded-2xl border p-4 text-start font-bold transition ${tripType === value ? "border-ocean bg-ocean-tint ring-2 ring-ocean-tint" : "border-line hover:border-ocean-soft"}`}
-            >
-              {value === "one_way" ? copy.oneWay : copy.roundTrip}
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Labelled icon={<Plane />} label={copy.direction}>
-            <select value={direction} onChange={(event) => setDirection(event.target.value as Direction)}>
-              <option value="airport_to_hotel">{copy.airportToHotel}</option>
-              <option value="hotel_to_airport">{copy.hotelToAirport}</option>
-              <option value="hotel_to_hotel">{copy.hotelToHotel}</option>
-            </select>
-          </Labelled>
-          <Labelled icon={<Hotel />} label={copy.hotel} required>
-            <input type="text" value={hotelName} onChange={(event) => setHotelName(event.target.value)} placeholder={copy.hotelPlaceholder} required={direction !== "hotel_to_hotel"} />
-          </Labelled>
-          {direction !== "hotel_to_hotel" ? (
-            <Labelled icon={<Car />} label={copy.zone}>
-              <select value={zoneOverride} onChange={(event) => setZoneOverride(event.target.value as TransferZoneKey | "")}>
-                <option value="">{autoZone ? `${copy.zoneAuto}: ${ZONE_LABELS[autoZone]}` : copy.zoneManual}</option>
-                {TRANSFER_ZONE_KEYS.map((key) => (
-                  <option key={key} value={key}>{ZONE_LABELS[key]}</option>
-                ))}
-              </select>
-            </Labelled>
-          ) : null}
-          <Labelled icon={<CalendarDays />} label={copy.date} required>
-            <input type="date" value={date} min={minimumSlot.date} onChange={(event) => setDate(event.target.value)} required />
-          </Labelled>
-          <Labelled icon={<Clock3 />} label={copy.time} required>
-            <input type="time" value={time} min={date === minimumSlot.date ? minimumSlot.time : undefined} onChange={(event) => { setTime(event.target.value); if (event.target.value) trackEvent("date_selected", { booking_type: "transfer" }); }} required />
-            <p className="mt-2 text-xs leading-5 text-amber-700">{copy.leadTime}</p>
-          </Labelled>
-          <Labelled icon={<Plane />} label={copy.flight}>
-            <input type="text" value={flightNumber} onChange={(event) => setFlightNumber(event.target.value)} placeholder="U2 1234" />
-          </Labelled>
-          {tripType === "round_trip" ? (
-            <>
-              <Labelled icon={<CalendarDays />} label={copy.returnDate} required>
-                <input type="date" value={returnDate} min={date || minimumSlot.date} onChange={(event) => setReturnDate(event.target.value)} required />
-              </Labelled>
-              <Labelled icon={<Clock3 />} label={copy.returnTime} required>
-                <input type="time" value={returnTime} onChange={(event) => setReturnTime(event.target.value)} required />
-                <p className="mt-2 text-xs leading-5 text-muted">{copy.returnHint}</p>
-              </Labelled>
-              <Labelled icon={<Plane />} label={copy.returnFlight}>
-                <input type="text" value={returnFlightNumber} onChange={(event) => setReturnFlightNumber(event.target.value)} placeholder="U2 1235" />
-              </Labelled>
-            </>
-          ) : null}
-        </div>
-      </fieldset>
-
-      {/* Step 2 — Passengers & luggage */}
-      <fieldset className="mt-8">
-        <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">2 · {copy.paxLuggage}</legend>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          <Stepper label={copy.adults} value={adults} min={1} onChange={(value) => { setAdults(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: value + children + infants }); }} />
-          <Stepper label={copy.children} value={children} min={0} onChange={(value) => { setChildren(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + value + infants }); }} />
-          <Stepper label={copy.infants} value={infants} min={0} onChange={(value) => { setInfants(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + children + value }); }} />
-        </div>
-        <p className="mt-2 text-xs text-muted">{copy.paxNote}</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <Stepper label={copy.largeBags} value={largeBags} min={0} icon={<Luggage size={16} />} onChange={setLargeBags} />
-          <Stepper label={copy.cabinBags} value={cabinBags} min={0} icon={<Luggage size={16} />} onChange={setCabinBags} />
-        </div>
-
-        <label className="mt-4 flex items-center gap-2 text-sm font-medium text-ink">
-          <input type="checkbox" checked={oversizedOpen} onChange={(event) => setOversizedOpen(event.target.checked)} />
-          {copy.oversizedToggle}
-        </label>
-        {oversizedOpen ? (
-          <div className="mt-3 rounded-2xl border border-line p-4">
-            <p className="text-xs text-muted">{copy.oversizedNote}</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {OVERSIZED_TYPES.map((type) => (
-                <div key={type} className="flex items-center justify-between gap-2 rounded-xl bg-surface-muted px-3 py-2">
-                  <span className="text-sm text-ink">{copy.oversizedLabels[type]}</span>
-                  <MiniStepper value={oversized[type] ?? 0} onChange={(delta) => bumpOversized(type, delta)} label={copy.oversizedLabels[type]} />
-                </div>
+      {step === "trip" ? (
+        <div className={`mt-6 grid gap-6 ${wide ? "lg:grid-cols-2" : ""}`}>
+          <div>
+            <div className="grid grid-cols-2 gap-2 rounded-2xl bg-surface-muted p-1.5">
+              {(["one_way", "round_trip"] as const).map((value) => (
+                <button key={value} type="button" onClick={() => changeTrip(() => setTripType(value))} aria-pressed={tripType === value} className={`rounded-xl px-3 py-2.5 text-sm font-bold transition ${tripType === value ? "bg-white text-ocean-dark shadow" : "text-muted hover:text-ink"}`}>
+                  {value === "one_way" ? copy.oneWay : copy.withReturn}
+                </button>
               ))}
             </div>
-            {(oversized.other ?? 0) > 0 ? (
-              <label className="mt-3 block text-sm font-medium text-ink">
-                {copy.otherLabel}
-                <input type="text" value={otherNote} onChange={(event) => setOtherNote(event.target.value)} className="mt-1 w-full rounded-xl border border-line p-2 outline-none focus:border-ocean" />
-              </label>
+
+            <datalist id="transfer-places">
+              <option value={copy.airportName} />
+              {TRANSFER_ZONE_KEYS.map((key) => <option key={key} value={ZONE_LABELS[key]} />)}
+            </datalist>
+            <div className="relative mt-4 space-y-3">
+              <Labelled icon={<MapPin size={18} />} label={copy.from_} required>
+                <input type="text" list="transfer-places" value={fromPlace} onChange={(event) => { const value = event.target.value; setHotelSide(() => setFromPlace(value)); }} placeholder={copy.hotelPlaceholder} autoComplete="off" required />
+              </Labelled>
+              <Labelled icon={<MapPin size={18} />} label={copy.to} required>
+                <input type="text" list="transfer-places" value={toPlace} onChange={(event) => { const value = event.target.value; setHotelSide(() => setToPlace(value)); }} placeholder={copy.hotelPlaceholder} autoComplete="off" required />
+              </Labelled>
+              <button type="button" onClick={swapPlaces} aria-label={copy.swap} title={copy.swap} className="absolute end-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-line bg-white text-ocean-dark shadow hover:bg-ocean-tint"><ArrowUpDown size={16} /></button>
+            </div>
+            {direction !== "hotel_to_hotel" && hotelName.trim() ? (
+              <div className="mt-3">
+                <Labelled icon={<Car size={18} />} label={copy.zone}>
+                  <select value={zoneOverride} onChange={(event) => changeTrip(() => setZoneOverride(event.target.value as TransferZoneKey | ""))}>
+                    <option value="">{autoZone ? `${copy.zoneAuto}: ${ZONE_LABELS[autoZone]}` : copy.zoneManual}</option>
+                    {TRANSFER_ZONE_KEYS.map((key) => <option key={key} value={key}>{ZONE_LABELS[key]}</option>)}
+                  </select>
+                </Labelled>
+              </div>
             ) : null}
-          </div>
-        ) : null}
 
-        <label className="mt-4 flex items-center gap-2 text-sm font-medium text-ink">
-          <input type="checkbox" checked={seatsOpen} onChange={(event) => setSeatsOpen(event.target.checked)} />
-          {copy.seatsToggle}
-        </label>
-        {seatsOpen ? (
-          <div className="mt-3 rounded-2xl border border-line p-4">
-            <p className="text-xs text-muted">{copy.seatsNote}</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              <Stepper label={copy.infantSeat} value={infantSeat} min={0} onChange={setInfantSeat} />
-              <Stepper label={copy.childSeat} value={childSeat} min={0} onChange={setChildSeat} />
-              <Stepper label={copy.boosterSeat} value={boosterSeat} min={0} onChange={setBoosterSeat} />
+            <div className="mt-4 grid grid-cols-2 items-end gap-3">
+              <Labelled icon={<CalendarDays size={18} />} label={copy.date} required>
+                <input type="date" value={date} min={minimumSlot.date} onChange={(event) => { const value = event.target.value; changeTrip(() => setDate(value)); }} required />
+              </Labelled>
+              <Labelled icon={<Clock3 size={18} />} label={copy.time} required>
+                <input type="time" value={time} min={date === minimumSlot.date ? minimumSlot.time : undefined} onChange={(event) => { const value = event.target.value; changeTrip(() => setTime(value)); if (value) trackEvent("date_selected", { booking_type: "transfer" }); }} required />
+              </Labelled>
+              {tripType === "round_trip" ? (
+                <>
+                  <Labelled icon={<CalendarDays size={18} />} label={copy.returnDate} required>
+                    <input type="date" value={returnDate} min={date || minimumSlot.date} onChange={(event) => { const value = event.target.value; changeTrip(() => setReturnDate(value)); }} required />
+                  </Labelled>
+                  <Labelled icon={<Clock3 size={18} />} label={copy.returnTime} required>
+                    <input type="time" value={returnTime} onChange={(event) => { const value = event.target.value; changeTrip(() => setReturnTime(value)); }} required />
+                  </Labelled>
+                  <p className="col-span-2 text-xs leading-5 text-muted">{copy.returnHint}</p>
+                </>
+              ) : null}
             </div>
-          </div>
-        ) : null}
+            <p className="mt-2 text-xs leading-5 text-amber-700">{copy.leadTime}</p>
 
-        <fieldset className="mt-4">
-          <legend className="text-sm font-medium text-ink">{copy.wheelchair}</legend>
-          <div className="mt-2 space-y-2">
-            {(["none", "folding_manual", "powered_or_fixed"] as const).map((value) => (
-              <label key={value} className="flex items-start gap-2 text-sm text-ink">
-                <input type="radio" name="wheelchair" value={value} checked={wheelchair === value} onChange={() => setWheelchair(value)} className="mt-1" />
-                <span>{value === "none" ? copy.wcNone : value === "folding_manual" ? copy.wcFolding : copy.wcPowered}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      </fieldset>
-
-      {/* Step 3 — Vehicle & price */}
-      <section aria-live="polite" className="mt-8 rounded-2xl border border-ocean-soft bg-ocean-tint p-5">
-        <p className="text-sm font-bold uppercase tracking-wide text-ocean-dark">3 · {copy.vehiclePrice}</p>
-        {quote.requiresManualConfirmation ? (
-          <div className="mt-3">
-            <p className="text-lg font-bold text-ink">{copy.manualTitle}</p>
-            {reasonKey ? <p className="mt-1 text-sm text-ink">{copy[reasonKey] as string}</p> : null}
-            <p className="mt-2 text-sm leading-6 text-muted">{copy.manualBody}</p>
-          </div>
-        ) : (
-          <div className="mt-3">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                {quote.allocatedVehicles.map((entry) => (
-                  <p key={entry.vehicleClass} className="text-lg font-bold text-ink">
-                    {entry.count}× {VEHICLE_LABELS[entry.vehicleClass] ?? entry.vehicleClass}
-                  </p>
-                ))}
-                <p className="mt-1 text-sm text-muted">
-                  {copy.yourGroup}: {totalPassengers} {copy.passengers} · {largeBags} {copy.suitcases}
-                </p>
-                <p className="mt-1 text-xs font-medium text-emerald-700">{copy.privateNotShared}</p>
-              </div>
-              <div className="text-end">
-                <p className="text-sm text-muted">{copy.totalLabel}</p>
-                <p className="text-3xl font-black text-ocean-dark">${quote.total.toFixed(2)}</p>
-                <p className="text-xs text-muted">{copy.total}</p>
-              </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <Stepper label={copy.adults} value={adults} min={1} onChange={(value) => { setAdults(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: value + children + infants }); }} />
+              <Stepper label={copy.children} value={children} min={0} onChange={(value) => { setChildren(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + value + infants }); }} />
+              <Stepper label={copy.infants} value={infants} min={0} onChange={(value) => { setInfants(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + children + value }); }} />
+              <Stepper label={copy.largeBags} value={largeBags} min={0} icon={<Luggage size={16} />} onChange={setLargeBags} />
+              <Stepper label={copy.cabinBags} value={cabinBags} min={0} icon={<Luggage size={16} />} onChange={setCabinBags} />
             </div>
-            {quote.vehicleCount > 1 ? <p className="mt-3 text-sm font-semibold text-ink">{copy.twoVehicles}</p> : null}
-            {quote.warnings.length ? (
-              <ul className="mt-3 space-y-1 border-t border-line pt-3 text-sm text-ink">
-                {quote.warnings.map((warning) => {
-                  const key = `warn_${warning}` as keyof CopyShape;
-                  return copy[key] ? <li key={warning}>• {copy[key] as string}</li> : null;
+            <p className="mt-2 text-xs text-muted">{copy.paxNote}</p>
+          </div>
+
+          <div className="space-y-4">
+            <div aria-live="polite">
+              <p className="text-sm font-bold text-ink">{copy.vehicleTitle}</p>
+              <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                {enabledVehicleClasses().map((vehicle) => {
+                  const count = priceShown && priced ? legVehicleCount(vehicle.vehicleClass) : 0;
+                  const fare = zone ? routeFare(zone, vehicle.vehicleClass) : null;
+                  const fits = totalPassengers <= vehicle.passengerCapacity;
+                  return (
+                    <div key={vehicle.vehicleClass} className={`rounded-2xl border p-4 ${count ? "border-ocean bg-ocean-tint ring-2 ring-ocean-tint" : "border-line"}`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-ocean-dark">{vehicle.vehicleClass === "sedan" ? <Car size={30} /> : <BusFront size={30} />}</span>
+                        {count ? <span className="flex items-center gap-1 text-sm font-bold text-ocean-dark"><Check size={16} />{count > 1 ? `${count}×` : ""}</span> : null}
+                      </div>
+                      <p className="mt-2 font-bold text-ink">{VEHICLE_LABELS[vehicle.vehicleClass]}</p>
+                      <p className="mt-1 text-xs text-muted">{copy.upToPeople.replace("{n}", String(vehicle.passengerCapacity))}</p>
+                      <p className="text-xs text-muted">{copy.fitsBags.replace("{n}", String(vehicle.largeBagCapacity))}</p>
+                      {priceShown && priced && typeof fare === "number" ? <p className="mt-2 text-sm font-bold text-ocean-dark">${fare}</p> : null}
+                      {priceShown && !fits && !count ? <p className="mt-1 text-xs font-medium text-amber-700">{copy.tooSmall}</p> : null}
+                    </div>
+                  );
                 })}
-              </ul>
-            ) : null}
+              </div>
+            </div>
+
+            {mapUrl ? <iframe title={`${copy.from_} → ${copy.to}`} src={mapUrl} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" className="h-56 w-full rounded-2xl border border-line" /> : null}
+
+            {tripError ? <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm font-medium text-rose-700">{tripError}</p> : null}
+
+            {priceShown ? (
+              <div aria-live="polite" className="rounded-2xl border border-ocean-soft bg-ocean-tint p-4">
+                {priced ? (
+                  <>
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-muted">{copy.totalLabel}</p>
+                        <p className="whitespace-nowrap text-3xl font-black text-ocean-dark">${quote.total.toFixed(2)}</p>
+                      </div>
+                      <p className="text-end text-xs font-medium text-emerald-700">{copy.privateNotShared}</p>
+                    </div>
+                    {quote.vehicleCount > 1 && quote.legVehicles.length > 1 ? <p className="mt-2 text-sm font-semibold text-ink">{copy.twoVehicles}</p> : null}
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-bold text-ink">{copy.manualTitle}</p>
+                    {reasonKey ? <p className="mt-1 text-sm text-ink">{copy[reasonKey] as string}</p> : null}
+                    <p className="mt-2 text-sm leading-6 text-muted">{copy.manualBody}</p>
+                  </>
+                )}
+                {date && time ? <p className={`mt-2 text-sm font-medium ${cancellation.eligible ? "text-emerald-700" : "text-amber-800"}`}>{cancellationLine}</p> : null}
+                <button type="button" onClick={() => goToStep("details")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-6 py-3.5 font-bold text-white transition hover:bg-ocean-dark">
+                  {copy.continueBtn}<ArrowRight size={18} className="rtl:rotate-180" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <button type="button" onClick={showPrice} className="flex w-full items-center justify-center gap-2 rounded-xl bg-ocean px-6 py-3.5 font-bold text-white transition hover:bg-ocean-dark"><Tag size={18} />{copy.seePrice}</button>
+                <p className="text-center text-xs text-muted">{copy.chooseToSeePrice}</p>
+              </>
+            )}
+
+            <ul className="grid gap-2 text-sm text-ink sm:grid-cols-2">
+              <TrustItem icon={<Tag size={16} />} text={copy.trustFixed} />
+              <TrustItem icon={<ShieldCheck size={16} />} text={copy.trustPrivate} />
+              <TrustItem icon={<Banknote size={16} />} text={copy.trustCash} />
+              <TrustItem icon={<CalendarX2 size={16} />} text={copy.trustCancel} />
+              <TrustItem icon={<Users size={16} />} text={copy.trustSeats} />
+            </ul>
           </div>
-        )}
-      </section>
-
-      {/* Step 4 — Customer details */}
-      <fieldset className="mt-8">
-        <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">4 · {copy.contact}</legend>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Labelled icon={<Users />} label={copy.name} required>
-            <input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required />
-          </Labelled>
-          <Labelled icon={<MessageCircle />} label={copy.phone} required>
-            <PhoneNumberInput defaultCountry="EG" value={phone} onChange={setPhone} language={language} required ariaLabel={copy.phone} />
-            <p className="mt-2 text-xs leading-5 text-muted">{copy.phoneHint}</p>
-          </Labelled>
-          <Labelled icon={<MessageCircle />} label={copy.email} required>
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required />
-          </Labelled>
         </div>
-        <label className="mt-4 block text-sm font-medium text-ink" htmlFor="transfer-notes">{copy.notes}</label>
-        <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-line bg-white p-3 text-ink outline-none placeholder:text-muted focus:border-ocean" />
-      </fieldset>
+      ) : (
+        <div className={`mt-6 grid gap-6 ${wide ? "lg:grid-cols-[1.3fr_0.7fr] lg:items-start" : ""}`}>
+          <div>
+            <button type="button" onClick={() => goToStep("trip")} className="flex items-center gap-1.5 text-sm font-bold text-ocean-dark hover:underline"><ArrowLeft size={16} className="rtl:rotate-180" />{copy.back}</button>
 
-      {/* Step 5 — Review & submit */}
-      <p className="mt-6 rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">
-        {copy.cancellationBefore}{" "}
-        <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{copy.cancellation}</Link>. {copy.agree}
-      </p>
-      {!quote.requiresManualConfirmation ? <div className="mt-4 space-y-4"><ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/><ReferralCodeField referral={referral} locale={language} disabled={submitting}/></div> : null}
-      <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60">
-        <MessageCircle size={20} />
-        {submitting ? copy.submitting : quote.requiresManualConfirmation ? copy.submit : `${copy.submit} · $${quote.total.toFixed(2)}`}
-      </button>
+            <fieldset className="mt-4">
+              <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">{copy.contact}</legend>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                <Labelled icon={<Users size={18} />} label={copy.name} required>
+                  <input type="text" value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required />
+                </Labelled>
+                <Labelled icon={<MessageCircle size={18} />} label={copy.email} required>
+                  <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" placeholder="you@example.com" required />
+                </Labelled>
+                <div className="sm:col-span-2">
+                  <Labelled icon={<MessageCircle size={18} />} label={copy.phone} required>
+                    <PhoneNumberInput defaultCountry="EG" value={phone} onChange={setPhone} language={language} required ariaLabel={copy.phone} />
+                    <p className="mt-2 text-xs leading-5 text-muted">{copy.phoneHint}</p>
+                  </Labelled>
+                </div>
+              </div>
+            </fieldset>
+
+            {direction !== "hotel_to_hotel" || tripType === "round_trip" ? (
+              <fieldset className="mt-7">
+                <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">{copy.flightSection}</legend>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <Labelled icon={<Plane size={18} />} label={copy.flight}>
+                    <input type="text" value={flightNumber} onChange={(event) => setFlightNumber(event.target.value)} placeholder="U2 1234" />
+                  </Labelled>
+                  {tripType === "round_trip" ? (
+                    <Labelled icon={<Plane size={18} />} label={copy.returnFlight}>
+                      <input type="text" value={returnFlightNumber} onChange={(event) => setReturnFlightNumber(event.target.value)} placeholder="U2 1235" />
+                    </Labelled>
+                  ) : null}
+                </div>
+              </fieldset>
+            ) : null}
+
+            <fieldset className="mt-7">
+              <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">{copy.extrasSection}</legend>
+              <label className="mt-3 flex items-center gap-2 text-sm font-medium text-ink">
+                <input type="checkbox" checked={oversizedOpen} onChange={(event) => setOversizedOpen(event.target.checked)} />
+                {copy.oversizedToggle}
+              </label>
+              {oversizedOpen ? (
+                <div className="mt-3 rounded-2xl border border-line p-4">
+                  <p className="text-xs text-muted">{copy.oversizedNote}</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {OVERSIZED_TYPES.map((type) => (
+                      <div key={type} className="flex items-center justify-between gap-2 rounded-xl bg-surface-muted px-3 py-2">
+                        <span className="text-sm text-ink">{copy.oversizedLabels[type]}</span>
+                        <MiniStepper value={oversized[type] ?? 0} onChange={(delta) => bumpOversized(type, delta)} label={copy.oversizedLabels[type]} />
+                      </div>
+                    ))}
+                  </div>
+                  {(oversized.other ?? 0) > 0 ? (
+                    <label className="mt-3 block text-sm font-medium text-ink">
+                      {copy.otherLabel}
+                      <input type="text" value={otherNote} onChange={(event) => setOtherNote(event.target.value)} className="mt-1 w-full rounded-xl border border-line p-2 outline-none focus:border-ocean" />
+                    </label>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <label className="mt-3 flex items-center gap-2 text-sm font-medium text-ink">
+                <input type="checkbox" checked={seatsOpen} onChange={(event) => setSeatsOpen(event.target.checked)} />
+                {copy.seatsToggle}
+              </label>
+              {seatsOpen ? (
+                <div className="mt-3 rounded-2xl border border-line p-4">
+                  <p className="text-xs text-muted">{copy.seatsNote}</p>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <Stepper label={copy.infantSeat} value={infantSeat} min={0} onChange={setInfantSeat} />
+                    <Stepper label={copy.childSeat} value={childSeat} min={0} onChange={setChildSeat} />
+                    <Stepper label={copy.boosterSeat} value={boosterSeat} min={0} onChange={setBoosterSeat} />
+                  </div>
+                </div>
+              ) : null}
+
+              <fieldset className="mt-4">
+                <legend className="text-sm font-medium text-ink">{copy.wheelchair}</legend>
+                <div className="mt-2 space-y-2">
+                  {(["none", "folding_manual", "powered_or_fixed"] as const).map((value) => (
+                    <label key={value} className="flex items-start gap-2 text-sm text-ink">
+                      <input type="radio" name="wheelchair" value={value} checked={wheelchair === value} onChange={() => setWheelchair(value)} className="mt-1" />
+                      <span>{value === "none" ? copy.wcNone : value === "folding_manual" ? copy.wcFolding : copy.wcPowered}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label className="mt-4 block text-sm font-medium text-ink" htmlFor="transfer-notes">{copy.notes}</label>
+              <textarea id="transfer-notes" value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 min-h-24 w-full rounded-xl border border-line bg-white p-3 text-ink outline-none placeholder:text-muted focus:border-ocean" />
+            </fieldset>
+          </div>
+
+          <div className="space-y-4">
+            {priceSummary}
+            {priced ? <div className="space-y-4"><ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/><ReferralCodeField referral={referral} locale={language} disabled={submitting}/></div> : null}
+            <p className="rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">
+              {copy.cancellationBefore}{" "}
+              <Link href={localePath(language, "/terms-conditions#cancellations")} target="_blank" className="font-bold text-ocean-dark underline">{copy.cancellation}</Link>. {copy.agree}
+            </p>
+            <button type="submit" disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60">
+              <MessageCircle size={20} />
+              {submitting ? copy.submitting : priced ? `${copy.submit} · $${quote.total.toFixed(2)}` : copy.submit}
+            </button>
+          </div>
+        </div>
+      )}
     </form>
+  );
+}
+
+function isAirportPlace(value: string) {
+  return /\bhrg\b|airport|flughafen|аэропорт|مطار|lotnisk|机场/i.test(value);
+}
+
+function placeForMap(value: string) {
+  return isAirportPlace(value) ? "Hurghada International Airport, Egypt" : `${value.split("/")[0].trim()}, Red Sea, Egypt`;
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs font-bold uppercase tracking-wide text-muted">{label}</dt>
+      <dd className="mt-0.5 font-medium text-ink">{value}</dd>
+    </div>
+  );
+}
+
+function TrustItem({ icon, text }: { icon: ReactNode; text: string }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span className="text-ocean-dark">{icon}</span>
+      {text}
+    </li>
   );
 }
 
