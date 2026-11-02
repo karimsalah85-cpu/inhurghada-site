@@ -1,3 +1,4 @@
+import { transferCopy } from "@/lib/transfer-copy";
 import { lowestVehicleFare } from "@/lib/transfer-config";
 
 type Locale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
@@ -134,7 +135,9 @@ const CONTENT: Record<Locale, { title: string; intro: string; clauses: Clause[] 
 };
 
 export default function AirportTransferPolicy({ locale = "en" }: { locale?: Locale }) {
-  const content = CONTENT[locale] ?? CONTENT.en;
+  const base = CONTENT[locale] ?? CONTENT.en;
+  const copy = transferCopy[locale];
+  const content = { ...base, title: copy.policyTitle, intro: copy.policyIntro, clauses: base.clauses.map((clause, index) => index === 1 ? { ...clause, p: copy.faqs[2].answer } : index === 12 ? { ...clause, p: copy.meeting } : clause) };
   return (
     <section aria-labelledby="airport-transfer-policy-title" className="border-t border-line bg-white px-6 py-16 sm:py-20">
       <div className="mx-auto max-w-4xl">

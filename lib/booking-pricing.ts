@@ -278,13 +278,15 @@ const VEHICLE_NAMES: Record<string, string> = {
 
 function transferJourneyName(request: ParsedTransferRequest) {
   const zoneName = request.zone ? ZONE_NAMES[request.zone] : "your accommodation";
-  const airportSide = "Hurghada Airport";
-  const label = request.direction === "hotel_to_airport"
+  const airportSide = request.airport === "RMF" ? "Marsa Alam Airport" : "Hurghada Airport";
+  const label = request.pickupPlaceText && request.dropoffPlaceText
+    ? `${request.pickupPlaceText} → ${request.dropoffPlaceText}`
+    : request.direction === "hotel_to_airport"
     ? `${zoneName} → ${airportSide}`
     : request.direction === "hotel_to_hotel"
     ? `${request.pickupPlaceText || "Hotel"} → ${request.dropoffPlaceText || "Hotel"}`
     : `${airportSide} → ${zoneName}`;
-  return `Private airport transfer: ${label}${request.tripType === "round_trip" ? " (round trip)" : ""}`;
+  return `Private transfer: ${label}${request.tripType === "round_trip" ? " (round trip)" : ""}`;
 }
 
 /**

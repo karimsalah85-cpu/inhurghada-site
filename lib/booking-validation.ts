@@ -144,7 +144,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   }
 
   let transfer: ParsedTransferRequest | undefined;
-  if (type === "transfer" && body.transferProduct === "airport-v2") {
+  if (type === "transfer" && ["airport-v2", "private-v3"].includes(String(body.transferProduct))) {
     const parsed = parseTransferRequest(body);
     if ("error" in parsed) return { error: parsed.error };
     transfer = parsed.data;
@@ -158,7 +158,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
   const pickupOptional = type === "tour" && (tourSlug === "multi-trip"
     ? selectedCartItems.length > 0 && selectedCartItems.every((item) => isSaudiTour(item.tourSlug))
     : isSaudiTour(tourSlug));
-  if (!hotel && !pickupOptional) return { error: "Enter a pickup location." as const };
+  if (!hotel && !transfer && !pickupOptional) return { error: "Enter a pickup location." as const };
   if (type === "tour") {
     const schedule = isMarsaAlamTourSlug(tourSlug) ? marsaAlamTourSchedules[tourSlug] : undefined;
     if (schedule) {
@@ -234,7 +234,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       dropoff: text(body.dropoff, 80),
       passengers: number(body.passengers),
       travelBags: number(body.travelBags),
-      transferProduct: transfer ? "airport-v2" as const : undefined,
+      transferProduct: transfer ? body.transferProduct === "private-v3" ? "private-v3" as const : "airport-v2" as const : undefined,
       transfer,
     },
   };

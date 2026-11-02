@@ -21,6 +21,8 @@ import {
 } from "@/lib/transfer-config";
 import { calculateTransferQuote, type TransferQuote, type TransferQuoteInput } from "@/lib/transfer-quote";
 
+import { resolveTransferRoute, type TransferAirport } from "@/lib/transfer-routes";
+
 const OVERSIZED_TYPES = new Set<OversizedItemType>([
   "golf_bag",
   "kitesurf",
@@ -49,6 +51,7 @@ function text(value: unknown, maxLength: number): string {
 export type ParsedTransferRequest = {
   tripType: TransferTripType;
   direction: TransferDirection;
+  airport: TransferAirport | null;
   zone: TransferZoneKey | null;
   zoneResolvedFrom: "explicit" | "hotel" | "unmapped";
   adults: number;
@@ -72,7 +75,7 @@ export type ParsedTransferRequest = {
 
 export function parseTransferRequest(body: Record<string, unknown>): { data: ParsedTransferRequest } | { error: string } {
   const tripType: TransferTripType = body.tripType === "round_trip" ? "round_trip" : "one_way";
-  const direction: TransferDirection = DIRECTIONS.has(body.direction as TransferDirection)
+  let direction: TransferDirection = DIRECTIONS.has(body.direction as TransferDirection)
     ? (body.direction as TransferDirection)
     : "airport_to_hotel";
 
@@ -84,16 +87,27 @@ export function parseTransferRequest(body: Record<string, unknown>): { data: Par
   const largeBags = whole(body.largeBags, 0, ALLOCATION_CONFIG.maxLargeBags);
   const cabinBags = whole(body.cabinBags, 0, ALLOCATION_CONFIG.maxCabinBags);
 
-  const hotelName = text(body.hotelName ?? body.hotel, 200);
+  let hotelName = text(body.hotelName ?? body.hotel, 200);
   const pickupPlaceText = text(body.pickupPlaceText ?? body.pickup, 200);
   const dropoffPlaceText = text(body.dropoffPlaceText ?? body.dropoff, 200);
 
+  const generalTransfer = body.transferProduct === "private-v3";
+  let airport: TransferAirport | null = direction === "hotel_to_hotel" ? null : "HRG";
+  if (generalTransfer) {
+    if (!pickupPlaceText || !dropoffPlaceText) return { error: "Enter both pickup and drop-off locations." };
+    if (pickupPlaceText.toLowerCase() === dropoffPlaceText.toLowerCase()) return { error: "Choose different pickup and drop-off locations." };
+    const route = resolveTransferRoute(pickupPlaceText, dropoffPlaceText);
+    direction = route.direction;
+    airport = route.airport;
+    hotelName = route.hotelName;
+  }
+
   let zone: TransferZoneKey | null = null;
   let zoneResolvedFrom: ParsedTransferRequest["zoneResolvedFrom"] = "unmapped";
-  if (isTransferZoneKey(body.zone)) {
+  if ((!generalTransfer || airport === "HRG") && isTransferZoneKey(body.zone)) {
     zone = body.zone;
     zoneResolvedFrom = "explicit";
-  } else if (direction !== "hotel_to_hotel") {
+  } else if (direction !== "hotel_to_hotel" && airport === "HRG") {
     const mapped = mapHotelToZone(hotelName || pickupPlaceText || dropoffPlaceText);
     if (mapped) {
       zone = mapped;
@@ -130,6 +144,7 @@ export function parseTransferRequest(body: Record<string, unknown>): { data: Par
 
   const quoteInput: TransferQuoteInput = {
     direction,
+    airport,
     zone,
     tripType,
     adults,
@@ -146,6 +161,7 @@ export function parseTransferRequest(body: Record<string, unknown>): { data: Par
     data: {
       tripType,
       direction,
+      airport,
       zone,
       zoneResolvedFrom,
       adults,
@@ -186,6 +202,9 @@ export function buildTransferDetails(transfer: ParsedTransferRequest, quote: Tra
     currency: "USD",
     trip_type: transfer.tripType,
     direction: transfer.direction,
+    airport: transfer.airport,
+    pickup_location: transfer.pickupPlaceText || null,
+    dropoff_location: transfer.dropoffPlaceText || null,
     zone: transfer.zone,
     zone_resolved_from: transfer.zoneResolvedFrom,
     passengers: {

@@ -1,3 +1,4 @@
+import { transferCopy } from "@/lib/transfer-copy";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { tours as fallbackTours } from "@/data/tours";
@@ -16,7 +17,7 @@ import { categoryLabels, getTourCategory, tourCategories } from "@/lib/tour-cate
 import HomePage from "@/components/home/HomePage";
 
 export const dynamic = "force-dynamic";
-import TransfersPage from "@/app/transfers/page";
+import TransfersPage from "@/components/pages/TransfersPage";
 import BookingPage from "@/app/booking/page";
 import CheckoutPage from "@/app/checkout/page";
 import BookingConfirmationPage from "@/app/booking/confirmation/page";
@@ -82,8 +83,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认" }[locale];
   const referralTitle = referralCopy[locale].heading;
   const referralDescription = referralCopy[locale].tagline;
-  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: dictionary.transfersTitle, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ`, referrals: referralTitle };
-  const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: dictionary.transfersText, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription, referrals: referralDescription };
+  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: transferCopy[locale].title, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ`, referrals: referralTitle };
+  const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: transferCopy[locale].description, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription, referrals: referralDescription };
   const destinationCopy = kind === "destination" ? destinationCopyByLocale[path[1] as DestinationSlug]?.[locale] : undefined;
   const categoryDestination = category ? getDestination(path[0]) : undefined;
   const categoryDestinationName = locale === "ar" && categoryDestination?.slug === "jeddah" ? "جدة" : categoryDestination?.name || "Hurghada";

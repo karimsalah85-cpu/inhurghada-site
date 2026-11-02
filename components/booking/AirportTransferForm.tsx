@@ -3,7 +3,7 @@
 import ReferralRewardsField, { useReferralRewards } from "@/components/booking/ReferralRewardsField";
 import ReferralCodeField, { useReferralCode } from "@/components/booking/ReferralCodeField";
 
-import { type FormEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpDown, Banknote, BusFront, CalendarDays, CalendarX2, Car, Check, Clock3, Luggage, MapPin, MessageCircle, Plane, ShieldCheck, Tag, Users } from "lucide-react";
@@ -17,13 +17,13 @@ import { validatePhoneNumber } from "@/lib/phone";
 import {
   TRANSFER_ZONE_KEYS,
   enabledVehicleClasses,
-  mapHotelToZone,
   routeFare,
   type OversizedItemType,
   type TransferZoneKey,
 } from "@/lib/transfer-config";
 import { calculateTransferQuote } from "@/lib/transfer-quote";
-import { hasUncontractedAirport, isHurghadaAirport } from "@/lib/transfer-airport";
+import { resolveTransferRoute, TRANSFER_AIRPORTS, type TransferAirport } from "@/lib/transfer-routes";
+import { transferCopy } from "@/lib/transfer-copy";
 import { transferCancellationDeadline } from "@/lib/transfer-cancellation";
 
 type Locale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
@@ -851,21 +851,22 @@ function useCopy(language: Locale) {
   return useMemo(() => COPY[language] ?? EN, [language]);
 }
 
-type Direction = "airport_to_hotel" | "hotel_to_airport" | "hotel_to_hotel";
 type Wheelchair = "none" | "folding_manual" | "powered_or_fixed";
 
 const MAPS_EMBED_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY?.trim() || "";
 
 /** `wide` lays the steps out in two columns; the tour-page sidebar stays stacked. */
-export default function AirportTransferForm({ wide = false }: { wide?: boolean }) {
+export default function AirportTransferForm({ wide = false, initialAirport }: { wide?: boolean; initialAirport?: TransferAirport }) {
   const router = useRouter();
   const { language } = useSiteSettings();
   const copy = useCopy(language as Locale);
+  const routeCopy = transferCopy[language as Locale];
+  const locationListId = useId();
   const idempotencyKey = useRef<string | null>(null);
   const minimumSlot = minimumTransferSlot();
 
   const [tripType, setTripType] = useState<"one_way" | "round_trip">("one_way");
-  const [fromPlace, setFromPlace] = useState(copy.airportName);
+  const [fromPlace, setFromPlace] = useState(initialAirport ? TRANSFER_AIRPORTS[initialAirport] : "");
   const [toPlace, setToPlace] = useState("");
   const [step, setStep] = useState<"trip" | "details">("trip");
   const [priceShown, setPriceShown] = useState(false);
@@ -903,13 +904,9 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
   const [website, setWebsite] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const fromAirport = isAirportPlace(fromPlace);
-  const toAirport = isAirportPlace(toPlace);
-  const uncontractedAirport = hasUncontractedAirport(fromPlace) || hasUncontractedAirport(toPlace);
-  const direction: Direction = uncontractedAirport ? "hotel_to_hotel" : fromAirport && !toAirport ? "airport_to_hotel" : toAirport && !fromAirport ? "hotel_to_airport" : "hotel_to_hotel";
-  const hotelName = direction === "airport_to_hotel" ? toPlace : direction === "hotel_to_airport" ? fromPlace : `${fromPlace.trim()} → ${toPlace.trim()}`.slice(0, 200);
-  const autoZone = mapHotelToZone(hotelName);
-  const zone: TransferZoneKey | null = direction === "hotel_to_hotel" ? null : zoneOverride || autoZone;
+  const { direction, airport, hotelName, zone: autoZone, hasAirport } = useMemo(() => resolveTransferRoute(fromPlace, toPlace), [fromPlace, toPlace]);
+  const zone: TransferZoneKey | null = airport === "HRG" ? zoneOverride || autoZone : null;
+  const samePlace = fromPlace.trim().toLowerCase() === toPlace.trim().toLowerCase();
 
   const oversizedItems = useMemo(
     () =>
@@ -923,6 +920,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
     () =>
       calculateTransferQuote({
         direction,
+        airport,
         zone,
         tripType,
         adults,
@@ -934,7 +932,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
         childSeats: { infant: infantSeat, child: childSeat, booster: boosterSeat },
         wheelchair,
       }),
-    [direction, zone, tripType, adults, children, infants, largeBags, cabinBags, oversizedItems, infantSeat, childSeat, boosterSeat, wheelchair],
+    [direction, airport, zone, tripType, adults, children, infants, largeBags, cabinBags, oversizedItems, infantSeat, childSeat, boosterSeat, wheelchair],
   );
 
   const totalPassengers = adults + children + infants;
@@ -986,8 +984,8 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!fromPlace.trim() || !toPlace.trim()) {
-      alert(copy.errRoute);
+    if (!fromPlace.trim() || !toPlace.trim() || samePlace) {
+      alert(routeCopy.routeError);
       return;
     }
     if (!isTransferLeadTimeValid(date, time)) {
@@ -1008,7 +1006,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
       return;
     }
 
-    const journeyName = `Private airport transfer (${tripType === "round_trip" ? "round trip" : "one way"})`;
+    const journeyName = `Private transfer (${tripType === "round_trip" ? "round trip" : "one way"})`;
     trackEvent("booking_start", {
       booking_type: "transfer",
       item_name: journeyName,
@@ -1022,7 +1020,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
       const payload = {
         idempotencyKey: idempotencyKey.current,
         type: "transfer" as const,
-        transferProduct: "airport-v2" as const,
+        transferProduct: "private-v3" as const,
         locale: language,
         customerName: name.trim(),
         phone: phoneCheck.e164,
@@ -1033,16 +1031,16 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
         tripType,
         direction,
         zone: zone ?? undefined,
-        hotel: hotelName.trim(),
+        hotel: hotelName.trim() || fromPlace.trim(),
         hotelName: hotelName.trim(),
         pickupPlaceText: fromPlace.trim(),
         dropoffPlaceText: toPlace.trim(),
         date,
         time,
-        flightNumber: flightNumber.trim(),
+        flightNumber: hasAirport ? flightNumber.trim() : "",
         returnDate: tripType === "round_trip" ? returnDate : "",
         returnTime: tripType === "round_trip" ? returnTime : "",
-        returnFlightNumber: tripType === "round_trip" ? returnFlightNumber.trim() : "",
+        returnFlightNumber: hasAirport && tripType === "round_trip" ? returnFlightNumber.trim() : "",
         adults,
         children,
         infants,
@@ -1131,6 +1129,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
   function changeTrip(update: () => void) {
     update();
     setTripError("");
+    idempotencyKey.current = null;
   }
 
   function setHotelSide(update: () => void) {
@@ -1146,7 +1145,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
   }
 
   function tripIsComplete() {
-    if (!fromPlace.trim() || !toPlace.trim() || !date || !time || (tripType === "round_trip" && (!returnDate || !returnTime))) {
+    if (!fromPlace.trim() || !toPlace.trim() || samePlace || !date || !time || (tripType === "round_trip" && (!returnDate || !returnTime))) {
       setTripError(copy.errTrip);
       return false;
     }
@@ -1209,7 +1208,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
       ) : (
         <div className="mt-4 border-t border-line pt-4">
           <p className="font-bold text-ink">{copy.manualTitle}</p>
-          {reasonKey ? <p className="mt-1 text-sm text-ink">{copy[reasonKey] as string}</p> : null}
+          {reasonKey ? <p className="mt-1 text-sm text-ink">{quote.reason === "route_not_mapped" ? routeCopy.manualRoute : quote.reason === "hotel_to_hotel" ? routeCopy.manualPrivate : copy[reasonKey] as string}</p> : null}
         </div>
       )}
       {quote.warnings.length && priced ? (
@@ -1232,9 +1231,9 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
           const current = (step === "trip" ? 0 : 1) === index;
           const done = step === "details" && index === 0;
           return (
-            <li key={label} aria-current={current ? "step" : undefined} className={`flex min-w-0 flex-1 items-center gap-2 ${current || done ? "text-ocean-dark" : "text-muted"}`}>
+            <li key={label} aria-current={current ? "step" : undefined} className={`flex min-w-0 items-center gap-2 ${current ? "flex-[3] sm:flex-1" : "flex-1"} ${current || done ? "text-ocean-dark" : "text-muted"}`}>
               <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border ${current ? "border-ocean bg-ocean text-white" : done ? "border-ocean bg-ocean-tint" : "border-line"}`}>{done ? <Check size={15} /> : index + 1}</span>
-              <span className={current ? "truncate" : "hidden truncate sm:inline"}>{label}</span>
+              <span className={current ? "min-w-0 text-xs leading-4 sm:text-sm" : "hidden sm:inline"}>{label}</span>
             </li>
           );
         })}
@@ -1251,20 +1250,23 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
               ))}
             </div>
 
-            <datalist id="transfer-places">
-              <option value={copy.airportName} />
+            <datalist id={locationListId}>
+              {Object.values(TRANSFER_AIRPORTS).map((place) => <option key={place} value={place} />)}
+              {["Hurghada Marina", "Port Ghalib Marina", "Marsa Alam", "El Gouna"].map((place) => <option key={place} value={place} />)}
               {TRANSFER_ZONE_KEYS.map((key) => <option key={key} value={ZONE_LABELS[key]} />)}
             </datalist>
-            <div className="relative mt-4 space-y-3">
-              <Labelled icon={<MapPin size={18} />} label={copy.from_} required>
-                <input type="text" list="transfer-places" value={fromPlace} onChange={(event) => { const value = event.target.value; setHotelSide(() => setFromPlace(value)); }} placeholder={copy.hotelPlaceholder} autoComplete="off" required />
+            <h2 className="mt-5 text-xl font-bold text-ink">{routeCopy.book}</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">{routeCopy.routeHint}</p>
+            <div className="relative mt-4 space-y-3 pe-14">
+              <Labelled icon={<MapPin size={18} />} label={routeCopy.pickup} required>
+                <input type="text" list={locationListId} value={fromPlace} onChange={(event) => { const value = event.target.value; setHotelSide(() => setFromPlace(value)); }} placeholder={routeCopy.placeholder} maxLength={200} autoComplete="off" required />
               </Labelled>
-              <Labelled icon={<MapPin size={18} />} label={copy.to} required>
-                <input type="text" list="transfer-places" value={toPlace} onChange={(event) => { const value = event.target.value; setHotelSide(() => setToPlace(value)); }} placeholder={copy.hotelPlaceholder} autoComplete="off" required />
+              <Labelled icon={<MapPin size={18} />} label={routeCopy.dropoff} required>
+                <input type="text" list={locationListId} value={toPlace} onChange={(event) => { const value = event.target.value; setHotelSide(() => setToPlace(value)); }} placeholder={routeCopy.placeholder} maxLength={200} autoComplete="off" required />
               </Labelled>
-              <button type="button" onClick={swapPlaces} aria-label={copy.swap} title={copy.swap} className="absolute end-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-line bg-white text-ocean-dark shadow hover:bg-ocean-tint"><ArrowUpDown size={16} /></button>
+              <button type="button" onClick={swapPlaces} aria-label={routeCopy.swap} title={routeCopy.swap} className="absolute end-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-line bg-white text-ocean-dark shadow hover:bg-ocean-tint"><ArrowUpDown size={16} /></button>
             </div>
-            {direction !== "hotel_to_hotel" && hotelName.trim() ? (
+            {airport === "HRG" && hotelName.trim() ? (
               <div className="mt-3">
                 <Labelled icon={<Car size={18} />} label={copy.zone}>
                   <select value={zoneOverride} onChange={(event) => changeTrip(() => setZoneOverride(event.target.value as TransferZoneKey | ""))}>
@@ -1275,11 +1277,11 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
               </div>
             ) : null}
 
-            <div className="mt-4 grid grid-cols-2 items-end gap-3">
-              <Labelled icon={<CalendarDays size={18} />} label={copy.date} required>
+            <div className="mt-4 grid grid-cols-1 items-end gap-3 min-[380px]:grid-cols-2">
+              <Labelled icon={<CalendarDays size={18} />} label={routeCopy.date} required>
                 <input type="date" value={date} min={minimumSlot.date} onChange={(event) => { const value = event.target.value; changeTrip(() => setDate(value)); }} required />
               </Labelled>
-              <Labelled icon={<Clock3 size={18} />} label={copy.time} required>
+              <Labelled icon={<Clock3 size={18} />} label={routeCopy.time} required>
                 <input type="time" value={time} min={date === minimumSlot.date ? minimumSlot.time : undefined} onChange={(event) => { const value = event.target.value; changeTrip(() => setTime(value)); if (value) trackEvent("date_selected", { booking_type: "transfer" }); }} required />
               </Labelled>
               {tripType === "round_trip" ? (
@@ -1290,13 +1292,13 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
                   <Labelled icon={<Clock3 size={18} />} label={copy.returnTime} required>
                     <input type="time" value={returnTime} onChange={(event) => { const value = event.target.value; changeTrip(() => setReturnTime(value)); }} required />
                   </Labelled>
-                  <p className="col-span-2 text-xs leading-5 text-muted">{copy.returnHint}</p>
+                  <p className="min-[380px]:col-span-2 text-xs leading-5 text-muted">{routeCopy.returnHint}</p>
                 </>
               ) : null}
             </div>
             <p className="mt-2 text-xs leading-5 text-amber-700">{copy.leadTime}</p>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
               <Stepper label={copy.adults} value={adults} min={1} onChange={(value) => { setAdults(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: value + children + infants }); }} />
               <Stepper label={copy.children} value={children} min={0} onChange={(value) => { setChildren(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + value + infants }); }} />
               <Stepper label={copy.infants} value={infants} min={0} onChange={(value) => { setInfants(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + children + value }); }} />
@@ -1351,7 +1353,7 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
                 ) : (
                   <>
                     <p className="text-lg font-bold text-ink">{copy.manualTitle}</p>
-                    {reasonKey ? <p className="mt-1 text-sm text-ink">{copy[reasonKey] as string}</p> : null}
+                    {reasonKey ? <p className="mt-1 text-sm text-ink">{quote.reason === "route_not_mapped" ? routeCopy.manualRoute : quote.reason === "hotel_to_hotel" ? routeCopy.manualPrivate : copy[reasonKey] as string}</p> : null}
                     <p className="mt-2 text-sm leading-6 text-muted">{copy.manualBody}</p>
                   </>
                 )}
@@ -1399,11 +1401,11 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
               </div>
             </fieldset>
 
-            {direction !== "hotel_to_hotel" || tripType === "round_trip" ? (
+            {hasAirport ? (
               <fieldset className="mt-7">
                 <legend className="text-sm font-bold uppercase tracking-wide text-ocean-dark">{copy.flightSection}</legend>
                 <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                  <Labelled icon={<Plane size={18} />} label={copy.flight}>
+                  <Labelled icon={<Plane size={18} />} label={routeCopy.flight}>
                     <input type="text" value={flightNumber} onChange={(event) => setFlightNumber(event.target.value)} placeholder="U2 1234" />
                   </Labelled>
                   {tripType === "round_trip" ? (
@@ -1424,9 +1426,9 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
               {oversizedOpen ? (
                 <div className="mt-3 rounded-2xl border border-line p-4">
                   <p className="text-xs text-muted">{copy.oversizedNote}</p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="mt-3 grid gap-2">
                     {OVERSIZED_TYPES.map((type) => (
-                      <div key={type} className="flex items-center justify-between gap-2 rounded-xl bg-surface-muted px-3 py-2">
+                      <div key={type} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-muted px-3 py-2">
                         <span className="text-sm text-ink">{copy.oversizedLabels[type]}</span>
                         <MiniStepper value={oversized[type] ?? 0} onChange={(delta) => bumpOversized(type, delta)} label={copy.oversizedLabels[type]} />
                       </div>
@@ -1491,19 +1493,15 @@ export default function AirportTransferForm({ wide = false }: { wide?: boolean }
   );
 }
 
-function isAirportPlace(value: string) {
-  return isHurghadaAirport(value);
-}
-
 function placeForMap(value: string) {
-  return isAirportPlace(value) ? "Hurghada International Airport, Egypt" : `${value.split("/")[0].trim()}, Red Sea, Egypt`;
+  return `${value.trim()}, Egypt`;
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <dt className="text-xs font-bold uppercase tracking-wide text-muted">{label}</dt>
-      <dd className="mt-0.5 font-medium text-ink">{value}</dd>
+      <dd className="mt-0.5 break-words font-medium text-ink">{value}</dd>
     </div>
   );
 }
@@ -1519,13 +1517,13 @@ function TrustItem({ icon, text }: { icon: ReactNode; text: string }) {
 
 function Labelled({ icon, label, children, required = false }: { icon: ReactNode; label: string; children: ReactNode; required?: boolean }) {
   return (
-    <label className="block text-sm font-medium text-ink">
+    <label className="block min-w-0 text-sm font-medium text-ink">
       <span className="mb-2 flex items-center gap-2 text-ink">
         <span className="text-ocean">{icon}</span>
         {label}
         {required ? <span aria-hidden="true" className="text-rose-600">*</span> : null}
       </span>
-      <div className="[&>input]:w-full [&>input]:rounded-xl [&>input]:border [&>input]:border-line [&>input]:p-3 [&>input]:outline-none [&>input]:focus:border-ocean [&>select]:w-full [&>select]:rounded-xl [&>select]:border [&>select]:border-line [&>select]:bg-white [&>select]:p-3 [&>select]:outline-none [&>select]:focus:border-ocean">
+      <div className="[&>input]:min-w-0 [&>input]:max-w-full [&>input]:w-full [&>input]:rounded-xl [&>input]:border [&>input]:border-line [&>input]:p-3 [&>input]:outline-none [&>input]:focus:border-ocean [&>select]:min-w-0 [&>select]:max-w-full [&>select]:w-full [&>select]:rounded-xl [&>select]:border [&>select]:border-line [&>select]:bg-white [&>select]:p-3 [&>select]:outline-none [&>select]:focus:border-ocean">
         {children}
       </div>
     </label>
@@ -1534,12 +1532,12 @@ function Labelled({ icon, label, children, required = false }: { icon: ReactNode
 
 function Stepper({ label, value, min, onChange, icon }: { label: string; value: number; min: number; onChange: (value: number) => void; icon?: ReactNode }) {
   return (
-    <div className="rounded-xl border border-line p-3">
+    <div className="min-w-0 rounded-xl border border-line p-3">
       <span className="flex items-center gap-1.5 text-sm font-medium text-ink">{icon}{label}</span>
       <div className="mt-2 flex items-center justify-between">
-        <button type="button" aria-label={`${label} −`} onClick={() => onChange(Math.max(min, value - 1))} className="h-9 w-9 rounded-lg border border-line text-lg font-bold text-ink hover:bg-surface-muted">−</button>
+        <button type="button" aria-label={`${label} −`} onClick={() => onChange(Math.max(min, value - 1))} className="h-11 w-11 shrink-0 rounded-lg border border-line text-lg font-bold text-ink hover:bg-surface-muted">−</button>
         <span aria-live="polite" className="min-w-8 text-center text-lg font-bold text-ink">{value}</span>
-        <button type="button" aria-label={`${label} +`} onClick={() => onChange(value + 1)} className="h-9 w-9 rounded-lg border border-line text-lg font-bold text-ink hover:bg-surface-muted">+</button>
+        <button type="button" aria-label={`${label} +`} onClick={() => onChange(value + 1)} className="h-11 w-11 shrink-0 rounded-lg border border-line text-lg font-bold text-ink hover:bg-surface-muted">+</button>
       </div>
     </div>
   );
@@ -1547,10 +1545,10 @@ function Stepper({ label, value, min, onChange, icon }: { label: string; value: 
 
 function MiniStepper({ value, onChange, label }: { value: number; onChange: (delta: number) => void; label: string }) {
   return (
-    <span className="flex items-center gap-2">
-      <button type="button" aria-label={`${label} −`} onClick={() => onChange(-1)} className="h-7 w-7 rounded-md border border-line font-bold text-ink hover:bg-white">−</button>
+    <span className="flex shrink-0 items-center gap-2">
+      <button type="button" aria-label={`${label} −`} onClick={() => onChange(-1)} className="h-11 w-11 shrink-0 rounded-md border border-line font-bold text-ink hover:bg-white">−</button>
       <span aria-live="polite" className="min-w-6 text-center text-sm font-bold text-ink">{value}</span>
-      <button type="button" aria-label={`${label} +`} onClick={() => onChange(1)} className="h-7 w-7 rounded-md border border-line font-bold text-ink hover:bg-white">+</button>
+      <button type="button" aria-label={`${label} +`} onClick={() => onChange(1)} className="h-11 w-11 shrink-0 rounded-md border border-line font-bold text-ink hover:bg-white">+</button>
     </span>
   );
 }

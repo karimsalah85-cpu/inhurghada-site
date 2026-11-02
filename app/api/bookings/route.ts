@@ -328,11 +328,14 @@ const TRANSFER_VEHICLE_NAMES: Record<string, string> = {
 
 function buildTransferSummary(transfer: ParsedTransferRequest, quote: TransferQuote | undefined, guestSummary: string, price: string) {
   const zoneName = transfer.zone ? TRANSFER_ZONE_NAMES[transfer.zone] : "your accommodation";
-  const journey = transfer.direction === "hotel_to_airport"
-    ? `${zoneName} → Hurghada Airport`
+  const airportName = transfer.airport === "RMF" ? "Marsa Alam Airport" : "Hurghada Airport";
+  const journey = transfer.pickupPlaceText && transfer.dropoffPlaceText
+    ? `${transfer.pickupPlaceText} → ${transfer.dropoffPlaceText}`
+    : transfer.direction === "hotel_to_airport"
+    ? `${zoneName} → ${airportName}`
     : transfer.direction === "hotel_to_hotel"
     ? `${transfer.pickupPlaceText || "Hotel"} → ${transfer.dropoffPlaceText || "Hotel"}`
-    : `Hurghada Airport → ${zoneName}`;
+    : `${airportName} → ${zoneName}`;
   const passengers = `${transfer.adults} adults` + (transfer.children ? ` · ${transfer.children} children` : "") + (transfer.infants ? ` · ${transfer.infants} infants` : "") + ` (Total: ${transfer.adults + transfer.children + transfer.infants})`;
   const luggage = [`${transfer.largeBags} large suitcases`, `${transfer.cabinBags} cabin bags`]
     .concat(transfer.oversizedItems.map((item) => `${item.quantity}× ${item.type.replace(/_/g, " ")}${item.note ? ` (${item.note})` : ""}`))
@@ -342,7 +345,7 @@ function buildTransferSummary(transfer: ParsedTransferRequest, quote: TransferQu
     ? quote.allocatedVehicles.map((entry) => `${entry.count}× ${TRANSFER_VEHICLE_NAMES[entry.vehicleClass] ?? entry.vehicleClass}`).join(" + ") + ` (${quote.vehicleCount} vehicle${quote.vehicleCount === 1 ? "" : "s"})`
     : "Quote requested — vehicle and fare to be confirmed by the team";
   const lines = [
-    "PRIVATE AIRPORT TRANSFER",
+    "PRIVATE TRANSFER",
     `Journey: ${journey}${transfer.tripType === "round_trip" ? " (round trip)" : " (one way)"}`,
     `Passengers: ${passengers}`,
     `Luggage: ${luggage}`,

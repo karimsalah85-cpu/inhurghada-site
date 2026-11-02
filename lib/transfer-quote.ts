@@ -41,6 +41,8 @@ export type ChildSeatInput = Partial<Record<ChildSeatType, number>>;
 
 export type TransferQuoteInput = {
   direction: TransferDirection;
+  /** Omitted only by the legacy Hurghada airport product. */
+  airport?: "HRG" | "RMF" | null;
   /** Resolved pricing zone. `null` means the route could not be mapped. */
   zone: TransferZoneKey | null;
   tripType: TransferTripType;
@@ -236,6 +238,9 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
 
   if (input.direction === "hotel_to_hotel") {
     return manualQuote(input, "hotel_to_hotel", totalPassengers, ["hotel_to_hotel_manual"]);
+  }
+  if (input.airport !== undefined && input.airport !== "HRG") {
+    return manualQuote(input, "route_not_mapped", totalPassengers, ["route_not_mapped"]);
   }
   if (!input.zone) {
     return manualQuote(input, "route_not_mapped", totalPassengers, ["route_not_mapped"]);

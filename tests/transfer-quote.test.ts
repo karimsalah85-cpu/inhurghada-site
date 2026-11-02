@@ -241,6 +241,30 @@ describe("server authority: a client-sent price cannot change the fare", () => {
     expect(pricing.data.amount).toBe(0);
   });
 
+  it.each([
+    ["Hurghada Airport (HRG)", "Kempinski Hotel Soma Bay", "airport_to_hotel", "HRG", false],
+    ["Kempinski Hotel Soma Bay", "Hurghada Airport (HRG)", "hotel_to_airport", "HRG", false],
+    ["Marsa Alam Airport (RMF)", "Port Ghalib Marina", "airport_to_hotel", "RMF", true],
+    ["Hurghada Marina", "Port Ghalib Marina", "hotel_to_hotel", null, true],
+    ["Hurghada Airport (HRG)", "Marsa Alam Airport (RMF)", "hotel_to_hotel", null, true],
+  ])("resolves %s → %s on the server", (pickup, dropoff, direction, airport, manual) => {
+    const validation = validateBookingInput({ ...submitted, transferProduct: "private-v3", pickupPlaceText: pickup, dropoffPlaceText: dropoff, zone: undefined, hotel: "" }, now);
+    if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
+    expect(validation.data.transfer.direction).toBe(direction);
+    expect(validation.data.transfer.airport).toBe(airport);
+    const pricing = calculateBookingPrice(validation.data);
+    if (!("data" in pricing) || !pricing.data) throw new Error("pricing failed");
+    expect(pricing.data.amount).toBe(manual ? 0 : fare("soma_bay", "sedan"));
+    expect(pricing.data.tourName).toContain(`${pickup} → ${dropoff}`);
+  });
+
+  it("ignores a client-supplied Hurghada zone for Marsa Alam Airport", () => {
+    const validation = validateBookingInput({ ...submitted, transferProduct: "private-v3", pickupPlaceText: "Marsa Alam Airport (RMF)", dropoffPlaceText: "Port Ghalib Marina", zone: "hurghada_city" }, now);
+    if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
+    expect(validation.data.transfer.zone).toBeNull();
+    expect(calculateTransferQuote(validation.data.transfer.quoteInput).requiresManualConfirmation).toBe(true);
+  });
+
   it("rejects a return pickup before the outbound journey", () => {
     expect(validateBookingInput({ ...submitted, tripType: "round_trip", returnDate: "2026-01-31", returnTime: "12:00" }, now)).toEqual({ error: "Choose a return pickup after the outbound journey." });
   });
