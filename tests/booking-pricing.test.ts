@@ -101,7 +101,7 @@ describe("authoritative booking pricing", () => {
       transferRequired: true,
       transferArea: "Hurghada Hotels",
     });
-    const expected = eurToUsd(120) + eurToUsd(10) * 2 + eurToUsd(5) + eurToUsd(15) * 2 + eurToUsd(6) * 3;
+    const expected = eurToUsd(120) + eurToUsd(10) * 2 + eurToUsd(5) + eurToUsd(15) * 2 + eurToUsd(6) * 3 + eurToUsd(20);
     expect(result.data).toMatchObject({ amount: Math.round(expected * 100) / 100, guests: 3 });
   });
 

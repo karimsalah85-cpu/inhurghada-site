@@ -44,12 +44,33 @@ describe("round-trip excursion sedan transfers", () => {
     expect(calculateBookingPrice({ ...base, transferRequired: false, transferArea: "El Gouna" }).data?.amount).toBe(calculateBookingPrice(base).data?.amount);
   });
 
+  it.each([
+    ["El Ahyaa", 15], ["Sahl Hasheesh", 15], ["Makadi Bay", 20], ["El Gouna", 20], ["Soma Bay", 25],
+  ] as const)("prices %s at €%i one way and double for a round trip", (area, oneWay) => {
+    expect(excursionTransferQuote(area, 2, "EUR", "one_way")).toMatchObject({ cars: 1, unitPrice: oneWay, amount: oneWay, legs: 1 });
+    expect(excursionTransferQuote(area, 2, "EUR", "round_trip")).toMatchObject({ cars: 1, unitPrice: oneWay * 2, amount: oneWay * 2, legs: 2 });
+    expect(excursionTransferQuote(area, 2, "EUR")?.amount).toBe(oneWay * 2);
+  });
+
+  it("prices transport within Hurghada at €10 one way for marina-transfer trips", () => {
+    expect(excursionTransferQuote("Hurghada Hotels", 3, "EUR", "one_way")).toMatchObject({ cars: 1, amount: 10 });
+    expect(excursionTransferQuote("Hurghada Hotels", 4, "EUR", "round_trip")).toMatchObject({ cars: 2, unitPrice: 20, amount: 40 });
+  });
+
+  it("charges a one-way fare per car and labels it in the snapshot and note", () => {
+    const original = calculateBookingPrice(base).data!;
+    const priced = calculateBookingPrice({ ...base, transferRequired: true, transferArea: "Soma Bay", transferTrip: "one_way" }).data!;
+    expect(priced.amount).toBeCloseTo(original.amount + 25);
+    expect(priced.pricingSnapshot.trips[0].lines.at(-1)).toMatchObject({ kind: "vehicle", quantity: 1, unitPrice: 25 });
+    expect("transferNote" in priced && priced.transferNote).toContain("One-way sedan transfer");
+  });
+
   it.each(["", "Unknown", "Hurghada Hotels"])("rejects an unsupported remote area %s", (transferArea) => {
     expect(calculateBookingPrice({ ...base, transferRequired: true, transferArea }).error).toMatch(/transfer area/);
   });
 
   it("preserves quote requests for unpriced areas without inventing fees", () => {
-    const priced = calculateBookingPrice({ ...base, transferRequired: true, transferArea: "Soma Bay" }).data!;
+    const priced = calculateBookingPrice({ ...base, transferRequired: true, transferArea: "Safaga" }).data!;
     expect(priced.amount).toBe(calculateBookingPrice(base).data?.amount);
     expect("transferNote" in priced && priced.transferNote).toContain("Extra fee not included");
   });
