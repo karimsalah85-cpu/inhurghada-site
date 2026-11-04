@@ -4,7 +4,9 @@ export const siteUrl = "https://dailyredsea.com";
 export const siteName = "Daily Red Sea";
 export const defaultDescription =
   "Book Red Sea tours in Hurghada, Marsa Alam, El Gouna and Jeddah, including diving, boat trips, desert adventures and private transfers with local support.";
-export const defaultSocialImage = "/og-image.svg";
+// A versioned raster URL lets sharing apps fetch the new artwork instead of
+// reusing the old SVG thumbnail. Keep the 1200×630 dimensions in app/layout.tsx.
+export const defaultSocialImage = "/brand/dailyredsea-social-v2.jpg";
 export const localizedDefaultDescriptions: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
   en: defaultDescription,
   ar: "احجز رحلات الغردقة البحرية والسنوركلينج والغوص والسفاري الصحراوي والتنقلات الخاصة مع أسعار واضحة ودعم محلي.",

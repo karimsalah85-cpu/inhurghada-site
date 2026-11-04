@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#071a2f" stop-opacity="0.99"/>
+      <stop offset="0.43" stop-color="#071a2f" stop-opacity="0.94"/>
+      <stop offset="0.72" stop-color="#071a2f" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#071a2f" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <image href="{{photo}}" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="1200" height="630" fill="url(#shade)"/>
+  <image href="{{logo}}" x="72" y="65" width="450" height="70"/>
+  <rect x="72" y="190" width="64" height="6" rx="3" fill="#FF5A3C"/>
+  <g fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="72" y="285" font-size="64">Discover the</text>
+    <text x="72" y="375" font-size="88">Red Sea.</text>
+  </g>
+  <text x="76" y="437" fill="#e1f5f8" font-family="Arial, Helvetica, sans-serif" font-size="25">Tours · Boat trips · Private transfers</text>
+  <text x="76" y="546" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Book direct. Explore more.</text>
+  <rect x="0" y="618" width="1200" height="12" fill="#00B5C8"/>
+</svg>
