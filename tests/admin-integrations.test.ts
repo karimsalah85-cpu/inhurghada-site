@@ -17,7 +17,7 @@ describe("admin integrations status", () => {
   it("no longer lists Stripe and covers the operational integrations", () => {
     const names = integrations.map((item) => item.name);
     expect(names.some((name) => /stripe/i.test(name))).toBe(false);
-    expect(names).toEqual(expect.arrayContaining(["Supabase service role", "Scheduled automation (cron)", "Managed backups check", "Meta Conversions API", "Google Places reviews", "Google Analytics"]));
+    expect(names).toEqual(expect.arrayContaining(["Supabase service role", "Scheduled automation (cron)", "Managed backups check", "Meta Conversions API", "Google review excerpts", "Google Analytics"]));
   });
 
   it("does not require Google Ads-only keys for Google Analytics", () => {

@@ -75,9 +75,9 @@ export const integrations: IntegrationDefinition[] = [
     missing: allOf("NEXT_PUBLIC_META_PIXEL_ID", "META_CONVERSIONS_API_ACCESS_TOKEN", "META_GRAPH_API_VERSION"),
   },
   {
-    name: "Google Places reviews",
-    description: "Live Google Business reviews on the public site (Places API New).",
-    missing: allOf("GOOGLE_PLACES_API_KEY"),
+    name: "Google review excerpts",
+    description: "Manually maintained Google review excerpts. No paid API or billing account is required.",
+    missing: () => [],
   },
 ];
 

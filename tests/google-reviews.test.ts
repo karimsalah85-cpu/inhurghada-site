@@ -14,3 +14,21 @@ describe("Google review normalization", () => {
     expect(result).not.toHaveProperty("secret");
   });
 });
+
+// A configured legacy key must never cause a paid request after this change.
+import { afterEach, vi } from "vitest";
+import { GET } from "@/app/api/google-reviews/route";
+
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+
+describe("zero-cost review delivery", () => {
+  it("retires the live endpoint without contacting Google", async () => {
+    vi.stubEnv("GOOGLE_PLACES_API_KEY", "legacy-key-must-not-be-used");
+    const fetch = vi.fn(() => { throw new Error("No external API calls allowed"); });
+    vi.stubGlobal("fetch", fetch);
+    const response = await GET();
+    expect(response.status).toBe(410);
+    expect(await response.json()).toMatchObject({ source: "manual", code: "LIVE_FEED_RETIRED" });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+});
