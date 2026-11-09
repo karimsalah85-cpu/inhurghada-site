@@ -4,13 +4,14 @@ import Image from "@/components/media/WatermarkedImage";
 import { getLiveBlogPosts } from "@/lib/live-content";
 import { localizeBlogPosts } from "@/lib/blog-localization";
 import { pageMetadata } from "@/lib/seo";
-import { localePath } from "@/lib/i18n";
+import { blogPath } from "@/lib/blog-languages";
+import { languageAlternates } from "@/lib/i18n";
 
-export const metadata: Metadata = pageMetadata({
+export const metadata: Metadata = { ...pageMetadata({
   title: "Hurghada Travel Guides & Tips | Daily Red Sea Blog",
   description: "Practical guides to Hurghada tours, snorkeling, diving, desert safaris and transfers - written by a local operator.",
   path: "/blog",
-});
+}), alternates: { canonical: "/blog", languages: { ...languageAlternates("/blog"), "x-default": "/blog" } } };
 
 type BlogLocale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
 
@@ -74,7 +75,7 @@ export async function LocalizedBlogIndex({ locale = "en" }: { locale?: BlogLocal
         {posts.map((post) => (
           <Link
             key={post.slug}
-            href={localePath(locale, `/blog/${post.slug}`)}
+            href={blogPath(post.slug, locale)}
             className="rounded-3xl border border-line bg-white p-6 shadow-sm transition hover:border-ocean"
           >
             <div className="relative -mx-6 -mt-6 mb-5 h-52 overflow-hidden rounded-t-3xl bg-surface-muted">

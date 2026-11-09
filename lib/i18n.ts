@@ -1,3 +1,5 @@
+import { blogPath } from "@/lib/blog-languages";
+
 export const locales = ["en", "ar", "de", "ru", "pl", "zh"] as const;
 export type Locale = (typeof locales)[number];
 
@@ -126,6 +128,7 @@ const localizedRouteRoots = new Set([
 export function localeSwitchPath(pathname: string, locale: Locale) {
   const parts = pathname.split("/").filter(Boolean);
   if (parts[0] && isLocale(parts[0])) parts.shift();
+  if (parts[0] === "blog" && parts.length === 2) return blogPath(parts[1], locale);
   const canPreservePath = !parts.length || localizedRouteRoots.has(parts[0]);
   return localePath(locale, canPreservePath ? `/${parts.join("/")}` : "");
 }

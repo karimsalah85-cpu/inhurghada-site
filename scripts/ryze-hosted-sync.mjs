@@ -1,5 +1,6 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const root = process.cwd();
 // Keep the legacy hosted blog as the migration source until every article lives on dailyredsea.com.
@@ -9,14 +10,14 @@ const imageDir = path.join(root, "public", "images", "ryze-blog");
 const manualFile = path.join(root, "data", "blog-posts.ts");
 
 function decodeHtml(value = "") {
-  return String(value)
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, decimal) => String.fromCodePoint(Number(decimal)))
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;|&#39;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+  const entities = { quot: '"', apos: "'", amp: "&", lt: "<", gt: ">" };
+  return String(value).replace(/&(quot|apos|amp|lt|gt|#x[0-9a-f]+|#\d+);/gi, (entity, code) => {
+    if (!code.startsWith("#")) return entities[code.toLowerCase()];
+    const point = /^#x/i.test(code) ? parseInt(code.slice(2), 16) : Number(code.slice(1));
+    return point > 0 && point <= 0x10ffff && !(point >= 0xd800 && point <= 0xdfff)
+      ? String.fromCodePoint(point)
+      : "\ufffd";
+  });
 }
 
 function textOnly(value = "") {
@@ -41,7 +42,26 @@ function jsonLd(html) {
   return values;
 }
 
-function parseArticle(html) {
+function inlineText(html) {
+  const links = [];
+  const text = textOnly(html.replace(/<a\b[^>]*\shref=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, rawHref, label) => {
+    const text = textOnly(label);
+    try {
+      const url = new URL(decodeHtml(rawHref), sourceSite);
+      if (!["https:", "http:"].includes(url.protocol)) return text;
+      const href = url.origin === new URL(sourceSite).origin
+        ? `https://dailyredsea.com/blog${url.pathname === "/" ? "" : url.pathname}${url.search}${url.hash}`
+        : url.href;
+      // Protect URLs and already-decoded labels from the outer HTML cleanup.
+      // Otherwise encoded angle brackets are stripped and entities decode twice.
+      links.push(`[${text}](${href})`);
+      return `DRSHOSTEDLINK${links.length - 1}END`;
+    } catch { return text; }
+  }));
+  return text.replace(/DRSHOSTEDLINK(\d+)END/g, (token, index) => links[Number(index)] ?? token);
+}
+
+export function parseArticle(html) {
   const title = textOnly(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "");
   const metaDescription = attribute(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
   const heroUrl = attribute(html, /<meta\s+property=["']og:image["']\s+content=["']([^"']*)["']/i);
@@ -56,10 +76,11 @@ function parseArticle(html) {
 
   for (const match of articleBody.matchAll(/<(h2|h3|p|li)\b[^>]*>([\s\S]*?)<\/\1>/gi)) {
     const tag = match[1].toLowerCase();
-    const text = textOnly(match[2]);
+    const text = tag === "h2" || tag === "h3" ? textOnly(match[2]) : inlineText(match[2]);
     if (!text) continue;
     if (tag === "h2" || tag === "h3") {
-      skipSection = /^(faq|frequently asked questions|related guides)$/i.test(text);
+      if (tag === "h3" && skipSection) continue;
+      skipSection = /^(faq|frequently asked questions)$/i.test(text);
       if (!skipSection) {
         current = { heading: text, body: [] };
         sections.push(current);
@@ -154,4 +175,4 @@ async function main() {
   console.log(`Generated ${posts.length} hosted Ryze blog post(s).`);
 }
 
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

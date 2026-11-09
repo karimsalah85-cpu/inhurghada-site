@@ -18,8 +18,9 @@ describe("localized SEO routing", () => {
     expect(localeSwitchPath("/ar/booking/confirmation", "de")).toBe("/de/booking/confirmation");
   });
 
-  it("preserves localized blog routes now that articles have translated equivalents", () => {
-    expect(localeSwitchPath("/blog/orange-bay-guide", "ar")).toBe("/ar/blog/orange-bay-guide");
+  it("preserves translated blog routes and uses English for untranslated articles", () => {
+    expect(localeSwitchPath("/blog/egypt-visa-guide-2026", "ar")).toBe("/ar/blog/egypt-visa-guide-2026");
+    expect(localeSwitchPath("/blog/orange-bay-guide", "ar")).toBe("/blog/orange-bay-guide");
   });
 
   it("preserves Jeddah category routes when switching languages", () => {

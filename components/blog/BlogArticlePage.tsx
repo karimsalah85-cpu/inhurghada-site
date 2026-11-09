@@ -4,7 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blogPosts } from "@/data/blog-posts";
 import { getLiveBlogPosts, getLiveTours } from "@/lib/live-content";
-import { localizeBlogPost } from "@/lib/blog-localization";
+import { blogLanguageAlternates, localizeBlogPost } from "@/lib/blog-localization";
+import { blogPath } from "@/lib/blog-languages";
+import BlogInlineText from "@/components/blog/BlogInlineText";
+import { relatedBlogPosts } from "@/lib/related-blog-posts";
 import { absoluteUrl, pageMetadata, siteName } from "@/lib/seo";
 import { localePath } from "@/lib/i18n";
 import TrackedExternalLink from "@/components/analytics/TrackedExternalLink";
@@ -52,7 +55,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const post = (await getLiveBlogPosts()).find((item) => item.slug === slug);
   if (!post) return {};
-  return pageMetadata({ title: `${post.title} | Daily Red Sea`, description: post.metaDescription, path: `/blog/${post.slug}`, image: post.heroImage });
+  return { ...pageMetadata({ title: `${post.title} | Daily Red Sea`, description: post.metaDescription, path: blogPath(post.slug), image: post.heroImage }), alternates: { canonical: blogPath(post.slug), languages: blogLanguageAlternates(post.slug) } };
 }
 
 export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps & { locale?: BlogLocale }) {
@@ -62,6 +65,8 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
   const rawPost = posts.find((item) => item.slug === slug);
   if (!rawPost) notFound();
   const post = localizeBlogPost(rawPost, locale);
+  const hasGuideLinks = [post.intro, ...post.sections.flatMap((section) => section.body)].some((text) => /\]\([^)]*\/blog\//.test(text));
+  const guides = hasGuideLinks ? [] : relatedBlogPosts(rawPost, posts, locale).map((guide) => localizeBlogPost(guide, locale));
 
   const relatedTours = post.relatedTourSlugs.map((tourSlug) => tours.find((tour) => tour.slug === tourSlug)).filter(Boolean) as typeof tours;
 
@@ -71,9 +76,9 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-          { "@type": "ListItem", position: 2, name: "Blog", item: absoluteUrl("/blog") },
-          { "@type": "ListItem", position: 3, name: post.title, item: absoluteUrl(`/blog/${post.slug}`) },
+          { "@type": "ListItem", position: 1, name: copy.home, item: absoluteUrl(localePath(locale)) },
+          { "@type": "ListItem", position: 2, name: copy.blog, item: absoluteUrl(localePath(locale, "/blog")) },
+          { "@type": "ListItem", position: 3, name: post.title, item: absoluteUrl(blogPath(post.slug, locale)) },
         ],
       },
       {
@@ -82,6 +87,7 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
         description: post.metaDescription,
         image: absoluteUrl(post.heroImage),
         datePublished: post.publishedAt,
+        mainEntityOfPage: absoluteUrl(blogPath(post.slug, locale)),
         author: { "@type": "Organization", name: siteName },
         publisher: { "@type": "Organization", name: siteName },
       },
@@ -112,12 +118,12 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
         <div className="relative mt-8 h-72 overflow-hidden rounded-[2rem]">
           <Image src={post.heroImage} alt={post.title} fill sizes="(max-width: 1024px) 100vw, 800px" className="object-cover" priority />
         </div>
-        <p className="mt-8 text-lg leading-8 text-ink">{post.intro}</p>
+        <p className="mt-8 text-lg leading-8 text-ink"><BlogInlineText text={post.intro} /></p>
         {post.sections.map((section) => (
           <section key={section.heading} className="mt-10">
             <h2 className="text-2xl font-black">{section.heading}</h2>
             {section.body.map((paragraph, index) => (
-              <p key={index} className="mt-4 leading-8 text-ink">{paragraph}</p>
+              <p key={index} className="mt-4 leading-8 text-ink"><BlogInlineText text={paragraph} /></p>
             ))}
           </section>
         ))}
@@ -148,6 +154,17 @@ export async function LocalizedBlogArticle({ params, locale = "en" }: PageProps 
             ))}
           </div>
         </section>
+
+        {guides.length > 0 && (
+          <section className="mt-12" aria-labelledby="related-guides">
+            <h2 id="related-guides" className="text-2xl font-black">{copy.moreGuides}</h2>
+            <ul className="mt-5 space-y-3">
+              {guides.map((guide) => (
+                <li key={guide.slug}><Link href={blogPath(guide.slug, locale)} className="font-semibold text-ocean-dark underline underline-offset-4">{guide.title}</Link></li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <div className="mt-10 flex flex-wrap gap-4">
           <TrackedExternalLink href={whatsappUrl()} event="whatsapp_click" eventData={{ placement: "blog_article" }} target="_blank" rel="noopener noreferrer" className="rounded-full bg-green-600 px-7 py-4 font-bold text-white">{copy.whatsapp}</TrackedExternalLink>

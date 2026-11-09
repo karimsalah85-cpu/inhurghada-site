@@ -1,9 +1,10 @@
 import type { BlogPost } from "@/data/blog-posts";
-import type { Locale } from "@/lib/i18n";
+import { locales, type Locale } from "@/lib/i18n";
+import { blogPath, hasBlogTranslation, type TranslatedBlogSlug } from "@/lib/blog-languages";
 
 type BlogTranslation = Partial<Pick<BlogPost, "title" | "metaDescription" | "intro" | "sections" | "faqs">>;
 
-const translations: Partial<Record<string, Partial<Record<Exclude<Locale, "en">, BlogTranslation>>>> = {
+const translations: Record<TranslatedBlogSlug, Record<Exclude<Locale, "en">, BlogTranslation>> = {
   "egypt-visa-guide-2026": {
     ar: {
       title: "دليل تأشيرة مصر 2026: ما تحتاج معرفته قبل السفر",
@@ -746,10 +747,17 @@ const translations: Partial<Record<string, Partial<Record<Exclude<Locale, "en">,
 
 export function localizeBlogPost(post: BlogPost, locale: Locale): BlogPost {
   if (locale === "en") return post;
-  const t = translations[post.slug]?.[locale];
+  const t = translations[post.slug as TranslatedBlogSlug]?.[locale];
   return t ? { ...post, ...t } : post;
 }
 
 export function localizeBlogPosts(posts: BlogPost[], locale: Locale): BlogPost[] {
   return posts.map((post) => localizeBlogPost(post, locale));
+}
+
+export function blogLanguageAlternates(slug: string) {
+  return Object.fromEntries([
+    ...locales.filter((locale) => hasBlogTranslation(slug, locale)).map((locale) => [locale, blogPath(slug, locale)]),
+    ["x-default", blogPath(slug)],
+  ]);
 }
