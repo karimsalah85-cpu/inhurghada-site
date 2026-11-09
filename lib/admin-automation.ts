@@ -193,9 +193,15 @@ export async function runAdminAutomation() {
         const externalReference = `google-ads:${report.customerId}:${reportDate}`;
         // Plain insert, not upsert: external_reference is guarded by a *partial*
         // unique index, which ON CONFLICT (external_reference) cannot target (42P10).
-        // A unique violation (23505) means this day was already imported.
+        // Confirm the day's row on a unique violation, so unrelated constraint
+        // failures cannot silently mark an unsuccessful import as healthy.
         const { error } = await supabase.from("expenses").insert({ description: `Google Ads spend ${reportDate}`, amount: report.totals.cost, currency: report.currency, expense_date: reportDate, category: "Google Ads API", expense_type: "google_ads", source: "google_ads", source_ref: externalReference, external_reference: externalReference });
         if (error && error.code !== "23505") throw error;
+        if (error) {
+          const { data: existing, error: lookupError } = await supabase.from("expenses").select("id").eq("external_reference", externalReference).maybeSingle();
+          if (lookupError) throw lookupError;
+          if (!existing) throw error;
+        }
         if (!error) googleAdsSpendImported = report.totals.cost;
       }
       googleAdsStatus = "ok";
