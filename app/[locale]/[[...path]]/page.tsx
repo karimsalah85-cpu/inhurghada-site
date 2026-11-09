@@ -39,6 +39,8 @@ import { ToursPage } from "@/components/pages/ToursPage";
 import { destinations, getDestination, type DestinationSlug } from "@/lib/destinations";
 import { destinationCopyByLocale } from "@/lib/destination-i18n";
 import { referralCopy } from "@/lib/referral-i18n";
+import { blogPath, hasBlogTranslation } from "@/lib/blog-languages";
+import { blogLanguageAlternates, localizeBlogPost } from "@/lib/blog-localization";
 
 type LocalizedPageProps = { params: Promise<{ locale: string; path?: string[] }> };
 
@@ -61,7 +63,7 @@ function pageKind(path: string[]) {
 export async function generateStaticParams() {
   const destinationCategoryPaths = destinations.flatMap((destination) => tourCategories.filter((category) => category.slug !== "excursions" && fallbackTours.some((tour) => tour.destinationSlug === destination.slug && category.matches(tour))).map((category) => [destination.slug, category.slug]));
   const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ["referrals"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...destinationCategoryPaths, ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
-  return locales.flatMap((locale) => paths.map((path) => ({ locale, path })));
+  return locales.flatMap((locale) => paths.filter((path) => path[0] !== "blog" || path.length !== 2 || hasBlogTranslation(path[1], locale)).map((path) => ({ locale, path })));
 }
 
 export async function generateMetadata({ params }: LocalizedPageProps): Promise<Metadata> {
@@ -77,7 +79,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
     : undefined;
   const tour = sourceTour ? localizeTour(sourceTour, locale) : undefined;
   if (kind === "tour" && !tour) notFound();
-  const blogPost = kind === "blog-post" ? (await getLiveBlogPosts()).find((post) => post.slug === path[1]) : undefined;
+  const rawBlogPost = kind === "blog-post" ? (await getLiveBlogPosts()).find((post) => post.slug === path[1]) : undefined;
+  const blogPost = rawBlogPost ? localizeBlogPost(rawBlogPost, locale) : undefined;
   if (kind === "blog-post" && !blogPost) notFound();
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
   const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认" }[locale];
@@ -113,13 +116,13 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
             : `Compare ${categoryLabels[locale][category.slug]} in ${categoryDestinationName} with clear prices, schedules, meeting details and local booking support.`
           : destinationCopy?.description || descriptions[kind || "home"];
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");
-  const canonical = localePath(locale, pathname);
+  const canonical = blogPost ? blogPath(blogPost.slug, locale) : localePath(locale, pathname);
   const normalizedTitle = normalizeMetaTitle(title, locale);
   const normalizedDescription = normalizeMetaDescription(description, localizedDefaultDescriptions[locale], locale);
   return {
     title: normalizedTitle,
     description: normalizedDescription,
-    alternates: { canonical, languages: { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
+    alternates: { canonical, languages: blogPost ? blogLanguageAlternates(blogPost.slug) : { ...languageAlternates(pathname), "x-default": localePath("en", pathname) } },
     robots: tour?.listingStatus === "paused"
       ? { index: false, follow: true }
       : kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" || kind === "referrals"

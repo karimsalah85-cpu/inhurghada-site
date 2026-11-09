@@ -4,6 +4,8 @@ import { absoluteUrl, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
+import { blogPath, hasBlogTranslation } from "@/lib/blog-languages";
+import { blogLanguageAlternates } from "@/lib/blog-localization";
 
 // Published articles are loaded from the live content store. Metadata routes are
 // static by default, so force a fresh read whenever a crawler requests the sitemap.
@@ -50,18 +52,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
   );
   const blogEntries: MetadataRoute.Sitemap = [
-    {
-      url: `${siteUrl}/blog`,
+    ...locales.map((locale) => ({
+      url: `${siteUrl}${localePath(locale, "/blog")}`,
       ...(postDates.length ? { lastModified: new Date(Math.max(...postDates.map((date) => date.getTime()))) } : {}),
-      changeFrequency: "weekly",
+      alternates: { languages: Object.fromEntries([...Object.entries(languageAlternates("/blog")).map(([language, path]) => [language, `${siteUrl}${path}`]), ["x-default", `${siteUrl}/blog`]]) },
+      changeFrequency: "weekly" as const,
       priority: 0.75,
-    },
-    ...posts.map((post) => ({
-      url: `${siteUrl}/blog/${post.slug}`,
+    })),
+    ...posts.flatMap((post) => locales.filter((locale) => hasBlogTranslation(post.slug, locale)).map((locale) => ({
+      url: `${siteUrl}${blogPath(post.slug, locale)}`,
       lastModified: publishedAt(post.publishedAt),
       changeFrequency: "monthly" as const,
       priority: 0.7,
-    })),
+      alternates: { languages: Object.fromEntries(Object.entries(blogLanguageAlternates(post.slug)).map(([language, path]) => [language, `${siteUrl}${path}`])) },
+    }))),
   ];
   const editorialEntries: MetadataRoute.Sitemap = [
     {

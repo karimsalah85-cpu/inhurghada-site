@@ -1,5 +1,6 @@
 import { mkdir, readFile, readdir, writeFile, access } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const root = process.cwd();
 const inputDir = path.join(root, "blog", "data");
@@ -7,17 +8,23 @@ const outputFile = path.join(root, "data", "ryze-blog-posts.ts");
 const imageDir = path.join(root, "public", "images", "ryze-blog");
 const manualFile = path.join(root, "data", "blog-posts.ts");
 
-function cleanInline(value = "") {
-  return String(value)
+function cleanInline(value = "", preserveLinks = false) {
+  const links = [];
+  const text = String(value)
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]+)\]\(([^\s)]+)\)/g, (_, label, href) => {
+      if (!preserveLinks) return label;
+      links.push(`[${cleanInline(label)}](${href})`);
+      return `DRSLINKTOKEN${links.length - 1}END`;
+    })
     .replace(/<[^>]+>/g, " ")
     .replace(/[`*_~]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+  return text.replace(/DRSLINKTOKEN(\d+)END/g, (_, index) => links[Number(index)]);
 }
 
-function parseMarkdown(markdown = "") {
+export function parseMarkdown(markdown = "") {
   const lines = String(markdown).replace(/\r/g, "").split("\n");
   const introParts = [];
   const sections = [];
@@ -69,7 +76,7 @@ function parseMarkdown(markdown = "") {
       continue;
     }
 
-    const text = cleanInline(line.replace(/^[-*+]\s+/, "• ").replace(/^\d+[.)]\s+/, ""));
+    const text = cleanInline(line.replace(/^[-*+]\s+/, "• ").replace(/^\d+[.)]\s+/, ""), !faqMode);
     if (!text) continue;
     if (faqMode && pendingQuestion) pendingQuestion.answer.push(text);
     else if (current) current.body.push(text);
@@ -155,4 +162,4 @@ async function main() {
   console.log(`Generated ${posts.length} merged Ryze blog post(s).`);
 }
 
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

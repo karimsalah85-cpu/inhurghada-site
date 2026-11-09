@@ -1,5 +1,6 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const root = process.cwd();
 // Keep the legacy hosted blog as the migration source until every article lives on dailyredsea.com.
@@ -41,7 +42,21 @@ function jsonLd(html) {
   return values;
 }
 
-function parseArticle(html) {
+function inlineText(html) {
+  return textOnly(html.replace(/<a\b[^>]*\bhref=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, rawHref, label) => {
+    const text = textOnly(label);
+    try {
+      const url = new URL(decodeHtml(rawHref), sourceSite);
+      if (!["https:", "http:"].includes(url.protocol)) return text;
+      const href = url.origin === new URL(sourceSite).origin
+        ? `https://dailyredsea.com/blog${url.pathname === "/" ? "" : url.pathname}${url.search}${url.hash}`
+        : url.href;
+      return `[${text}](${href})`;
+    } catch { return text; }
+  }));
+}
+
+export function parseArticle(html) {
   const title = textOnly(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "");
   const metaDescription = attribute(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
   const heroUrl = attribute(html, /<meta\s+property=["']og:image["']\s+content=["']([^"']*)["']/i);
@@ -56,10 +71,10 @@ function parseArticle(html) {
 
   for (const match of articleBody.matchAll(/<(h2|h3|p|li)\b[^>]*>([\s\S]*?)<\/\1>/gi)) {
     const tag = match[1].toLowerCase();
-    const text = textOnly(match[2]);
+    const text = tag === "h2" || tag === "h3" ? textOnly(match[2]) : inlineText(match[2]);
     if (!text) continue;
     if (tag === "h2" || tag === "h3") {
-      skipSection = /^(faq|frequently asked questions|related guides)$/i.test(text);
+      skipSection = /^(faq|frequently asked questions)$/i.test(text);
       if (!skipSection) {
         current = { heading: text, body: [] };
         sections.push(current);
@@ -154,4 +169,4 @@ async function main() {
   console.log(`Generated ${posts.length} hosted Ryze blog post(s).`);
 }
 
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();
