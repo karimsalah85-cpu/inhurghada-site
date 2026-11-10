@@ -28,7 +28,10 @@ import {
   UsersRound,
   WalletCards,
 } from "lucide-react";
+import ReadOnlyBookings from "@/components/admin/ReadOnlyBookings";
+import { bookingSearchHref } from "@/lib/admin-search";
 import AdminOverview from "@/components/admin/AdminOverview";
+import type { OverviewSetup } from "@/lib/admin-overview";
 import type { AdminAttention } from "@/lib/admin-attention";
 import SituationReports from "@/components/admin/SituationReports";
 import AdminControlCenter from "@/components/admin/AdminControlCenter";
@@ -162,6 +165,7 @@ export default function AdminDashboard({
   mode = "overview",
   initialTripStatusChanges = [],
   attention = null,
+  overviewSetup = null,
   initialBookings,
   initialVisibleBookings,
   bookingView,
@@ -201,6 +205,7 @@ export default function AdminDashboard({
   }[];
   /** Overview "needs attention" items; null when not loaded for this user or workspace. */
   attention?: AdminAttention | null;
+  overviewSetup?: OverviewSetup | null;
   initialBookings: Booking[];
   initialVisibleBookings: Booking[];
   bookingView: BookingView;
@@ -231,9 +236,15 @@ export default function AdminDashboard({
 }) {
   const router = useRouter();
   const [bookings, setBookings] = useState(initialBookings);
+  const [previousServerBookings, setPreviousServerBookings] = useState(initialBookings);
   const [visibleBookings, setVisibleBookings] = useState(
     initialVisibleBookings,
   );
+  if (previousServerBookings !== initialBookings) {
+    setPreviousServerBookings(initialBookings);
+    setBookings(initialBookings);
+    setVisibleBookings(initialVisibleBookings);
+  }
   const [expenses, setExpenses] = useState(initialExpenses);
   const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>(
     initialExpenseTypes.length
@@ -302,13 +313,13 @@ export default function AdminDashboard({
     effectivePermissions.includes(permission);
 
   const metrics = useMemo(() => {
-    const active = initialBookings.filter(
+    const active = bookings.filter(
       (booking) =>
         booking.status !== "cancelled" && booking.payment_status !== "refunded",
     );
     const projectedByCurrency = sumByCurrency(active);
     const collectedByCurrency = sumByCurrency(
-      initialBookings.filter((booking) => booking.payment_status === "paid"),
+      bookings.filter((booking) => booking.payment_status === "paid"),
     );
     const expenseByCurrency = sumByCurrency(initialExpenses);
     const currenciesInPlay = new Set([
@@ -326,7 +337,7 @@ export default function AdminDashboard({
       expenseByCurrency,
       profitByCurrency,
     };
-  }, [initialBookings, initialExpenses]);
+  }, [bookings, initialExpenses]);
 
   const financeMetrics = useMemo(() => {
     const monthStart = `${bookingView.month}-01`;
@@ -538,9 +549,9 @@ export default function AdminDashboard({
   }
 
   // The detail panel moved a booking to another date: keep the list in step.
-  function applyRescheduledBooking(changed: { id: string; date: string | null; notes: string | null }) {
+  function applyRescheduledBooking(changed: { id: string; date: string | null; notes: string | null } & Record<string, unknown>) {
     const merge = (items: Booking[]) =>
-      items.map((item) => (item.id === changed.id ? { ...item, date: changed.date, notes: changed.notes } : item));
+      items.map((item) => (item.id === changed.id ? { ...item, ...changed } : item));
     setBookings(merge);
     setVisibleBookings(merge);
     notifyAdminBookingsChanged();
@@ -981,19 +992,27 @@ export default function AdminDashboard({
   if (mode === "overview") {
     return <>
       <AdminOverview
-        bookings={initialBookings}
+        bookings={bookings}
         permissions={permissions}
+        role={currentRole}
         day={today()}
         metrics={metrics}
         rowsMayBeTruncated={rowsMayBeTruncated}
         tripChanges={initialTripStatusChanges}
         attention={attention}
-        onOpenBooking={setExpandedId}
+        setup={overviewSetup}
+        onOpenBooking={(id) => {
+          if (can("bookings")) setExpandedId(id);
+          else {
+            const booking = bookings.find((item) => item.id === id);
+            if (booking) router.push(bookingSearchHref(booking.reference, booking.date, Boolean(booking.archived_at)));
+          }
+        }}
       />
-      {expandedId && initialBookings.find((item) => item.id === expandedId) ? (
+      {expandedId && bookings.find((item) => item.id === expandedId) ? (
         <BookingDetailPanel
           key={expandedId}
-          booking={initialBookings.find((item) => item.id === expandedId)!}
+          booking={bookings.find((item) => item.id === expandedId)!}
           onClose={() => setExpandedId(null)}
           onBookingChanged={applyRescheduledBooking}
         />
@@ -1193,6 +1212,7 @@ export default function AdminDashboard({
             onFeedback={feedback}
           />
         ) : null}
+        {mode === "bookings" && !can("bookings") && can("reports") ? <ReadOnlyBookings bookings={visibleBookings} month={bookingView.month} search={bookingView.search} /> : null}
         {mode === "bookings" && can("bookings") ? (
           <section
             id="bookings"

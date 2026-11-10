@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowUpRight, ChevronDown, Search, X, PanelLeft, UserRound } from "lucide-react";
 import type { AdminPermission, AdminRole } from "@/lib/admin-auth";
-import { activeNavPage, visibleNav } from "@/components/admin/admin-nav";
+import { activeNavPage, searchAdminNav, visibleNav } from "@/components/admin/admin-nav";
 import { ADMIN_SEARCH_MIN_LENGTH, normalizeSearchQuery, type AdminSearchResult } from "@/lib/admin-search";
 
 import styles from "./AdminShell.module.css";
@@ -91,10 +91,7 @@ export default function AdminShell({ children, permissions, role, environment }:
   const isActive = (label: string) => active?.section.label === label;
   const currentPage = active ? (active.section.pages.length > 1 ? `${active.section.label} · ${active.page.label}` : active.section.label) : (pathname === "/admin/account" ? "Account & security" : "Admin workspace");
   const needle = query.trim().toLowerCase();
-  const visibleGroups = permittedGroups.map((group) => ({
-    ...group,
-    sections: group.sections.filter((section) => `${group.label} ${section.label} ${section.pages.map((page) => page.label).join(" ")} ${section.keywords || ""}`.toLowerCase().includes(needle)),
-  })).filter((group) => group.sections.length);
+  const visibleGroups = searchAdminNav(permittedGroups, query);
   const sectionTabs = active && active.section.pages.length > 1 ? active.section.pages : null;
   const closeMenu = () => { setMenuOpen(false); setQuery(""); };
   const bookingResults = searchTerm && bookingSearch?.term === searchTerm ? bookingSearch : null;
@@ -134,9 +131,9 @@ export default function AdminShell({ children, permissions, role, environment }:
           {visibleGroups.map((group) => <section key={group.label}>
             <h2 className={`${styles.label} px-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-400`}>{group.label}</h2>
             <div className="mt-2 space-y-1">{group.sections.map((section) => {
-              const current = isActive(section.label);
+              const current = needle ? active?.page.href === section.pages[0].href : isActive(section.label);
               const Icon = section.icon;
-              return <Link key={section.label} href={section.pages[0].href} onClick={closeMenu} aria-label={section.label} title={section.label} aria-current={current ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-cyan-300 ${current ? "bg-cyan-400 text-slate-950" : "text-slate-200 hover:bg-slate-800 hover:text-white"}`}><Icon size={20} className="shrink-0" aria-hidden="true"/><span className={styles.label}>{section.label}</span></Link>;
+              return <Link key={section.label} href={section.pages[0].href} onClick={closeMenu} aria-label={needle ? section.pages[0].label : section.label} title={needle ? section.pages[0].label : section.label} aria-current={current ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-cyan-300 ${current ? "bg-cyan-400 text-slate-950" : "text-slate-200 hover:bg-slate-800 hover:text-white"}`}><Icon size={20} className="shrink-0" aria-hidden="true"/><span className={styles.label}>{needle ? section.pages[0].label : section.label}</span></Link>;
             })}</div>
           </section>)}
         </nav>

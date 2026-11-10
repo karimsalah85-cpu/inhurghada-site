@@ -1,3 +1,5 @@
+import { readAdminRows } from "@/lib/admin-query";
+import { adminNav, canSeePage } from "@/components/admin/admin-nav";
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { tourDimensions } from "@/lib/finance/dimensions";
@@ -279,6 +281,10 @@ export default async function AdminPage({
       ? (user?.app_metadata?.admin_role as AdminRole)
       : "operator";
 
+  const workspacePath = workspace === "overview" ? "/admin" : `/admin/${workspace}`;
+  const destination = adminNav.flatMap((group) => group.sections.flatMap((section) => section.pages)).find((page) => page.href === workspacePath);
+  if (destination && !canSeePage(destination, permissions, role)) redirect("/admin");
+
   // Generous but bounded row caps: PostgREST silently truncates unbounded queries at its
   // own default limit, which would otherwise corrupt stats with no indication in the UI.
   const bookingsRowLimit = 5000;
@@ -290,11 +296,12 @@ export default async function AdminPage({
 
   let bookingListQuery = supabase
     .from("bookings")
-    .select("*")
-    .gte("date", `${month}-01`)
-    .lt("date", `${nextMonth(month)}-01`)
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
-    .limit(bookingsRowLimit);
+    .order("id");
+  // Undated requests found by global search must remain reachable in the monthly list.
+  if (search) bookingListQuery = bookingListQuery.or(`and(date.gte.${month}-01,date.lt.${nextMonth(month)}-01),date.is.null`);
+  else bookingListQuery = bookingListQuery.gte("date", `${month}-01`).lt("date", `${nextMonth(month)}-01`);
   if (status !== "all")
     bookingListQuery = bookingListQuery.eq("status", status);
   if (payment !== "all")
@@ -310,35 +317,37 @@ export default async function AdminPage({
 
   const bookingsLoadedAt = currentTimestamp();
   const [
-    { data: bookings, error: bookingsError },
-    { data: bookingList, error: bookingListError },
-    { data: expenses, error: expensesError },
-    { data: suppliers, error: suppliersError },
-    { data: salesPeople, error: salesPeopleError },
+    { data: bookings, error: bookingsError, truncated: bookingsTruncated },
+    { data: bookingList, error: bookingListError, truncated: bookingListTruncated },
+    { data: expenses, error: expensesError, truncated: expensesTruncated },
+    { data: suppliers, error: suppliersError, truncated: suppliersTruncated },
+    { data: salesPeople, error: salesPeopleError, truncated: salesPeopleTruncated },
     { data: expenseTypes },
   ] = await Promise.all([
     needsDashboardData && canBookings
-      ? supabase
+      ? readAdminRows((from, to) => supabase
           .from("bookings")
-          .select("*")
+          .select("*", { count: "exact" })
           .is("archived_at", null)
           .order("created_at", { ascending: false })
-          .limit(bookingsRowLimit)
-      : Promise.resolve({ data: [], error: null }),
-    needsDashboardData && canBookings ? bookingListQuery : Promise.resolve({ data: [], error: null }),
+          .order("id")
+          .range(from, to), bookingsRowLimit)
+      : Promise.resolve({ data: [], error: null, truncated: false }),
+    needsDashboardData && canBookings ? readAdminRows((from, to) => bookingListQuery.range(from, to), bookingsRowLimit) : Promise.resolve({ data: [], error: null, truncated: false }),
     needsDashboardData && canFinance
-      ? supabase
+      ? readAdminRows((from, to) => supabase
           .from("expenses")
-          .select("*, bookings(status,reference)")
+          .select("*, bookings(status,reference)", { count: "exact" })
           .order("expense_date", { ascending: false })
-          .limit(expensesRowLimit)
-      : Promise.resolve({ data: [], error: null }),
+          .order("id")
+          .range(from, to), expensesRowLimit)
+      : Promise.resolve({ data: [], error: null, truncated: false }),
     needsDashboardData && canSuppliers
-      ? supabase.from("suppliers").select("*").order("name").limit(partnersRowLimit)
-      : Promise.resolve({ data: [], error: null }),
+      ? readAdminRows((from, to) => supabase.from("suppliers").select("*", { count: "exact" }).order("name").order("id").range(from, to), partnersRowLimit)
+      : Promise.resolve({ data: [], error: null, truncated: false }),
     needsDashboardData && canFinance
-      ? supabase.from("sales_people").select("*").order("name").limit(partnersRowLimit)
-      : Promise.resolve({ data: [], error: null }),
+      ? readAdminRows((from, to) => supabase.from("sales_people").select("*", { count: "exact" }).order("name").order("id").range(from, to), partnersRowLimit)
+      : Promise.resolve({ data: [], error: null, truncated: false }),
     needsDashboardData && canFinance
       ? supabase
           .from("expense_types")
@@ -346,14 +355,11 @@ export default async function AdminPage({
           .order("is_system", { ascending: false })
           .order("sort_order", { ascending: true })
           .order("label", { ascending: true })
-      : Promise.resolve({ data: [], error: null }),
+      : Promise.resolve({ data: [], error: null, truncated: false }),
   ]);
   const rowsMayBeTruncated = Boolean(
-    (bookings && bookings.length >= bookingsRowLimit) ||
-      (bookingList && bookingList.length >= bookingsRowLimit) ||
-      (expenses && expenses.length >= expensesRowLimit) ||
-      (suppliers && suppliers.length >= partnersRowLimit) ||
-      (salesPeople && salesPeople.length >= partnersRowLimit),
+    bookingsTruncated || bookingListTruncated || expensesTruncated ||
+      suppliersTruncated || salesPeopleTruncated,
   );
   const error =
     bookingsError?.message ||
@@ -459,6 +465,14 @@ export default async function AdminPage({
     })
     .slice(0, 6);
   const canOperations = await permissionChecks.operations;
+  const overviewSetup = workspace === "overview" && canOperations ? await (async () => {
+    const day = new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
+    const [capacity, zones] = await Promise.all([
+      supabase.from("tour_availability").select("id", { count: "exact", head: true }).gte("service_date", day).not("capacity", "is", null),
+      supabase.from("pickup_zones").select("id", { count: "exact", head: true }),
+    ]);
+    return { capacityDates: capacity.error ? null : capacity.count, pickupZones: zones.error ? null : zones.count };
+  })() : null;
   const canBookingsEdit = await permissionChecks.bookings;
   const attention = workspace === "overview" && (canBookingsEdit || canOperations)
     ? await loadAdminAttention(supabase, { bookings: canBookingsEdit, operations: canOperations, suppliers: await permissionChecks.suppliers })
@@ -527,6 +541,7 @@ export default async function AdminPage({
             mode={workspace}
             initialTripStatusChanges={tripStatusChanges || []}
             attention={attention}
+            overviewSetup={overviewSetup}
             key={Object.values(bookingView).join("|")}
             initialBookings={bookings || []}
             initialVisibleBookings={visibleBookingsWithCosts}

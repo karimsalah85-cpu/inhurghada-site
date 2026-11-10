@@ -48,3 +48,45 @@ describe("admin overview workload", () => {
     expect(result.overdue).toHaveLength(1);
   });
 });
+
+describe("seven-day workload", () => {
+  it("covers today plus six days across month/year boundaries, excluding completed and missing dates", () => {
+    const result = summarizeAdminWork([
+      booking({ date: "2026-12-31", guests: 2 }),
+      booking({ date: "2027-01-06", guests: null, adults: 3 }),
+      booking({ date: "2027-01-01", guests: null }),
+      booking({ date: "2027-01-07", guests: 99 }),
+      booking({ date: "2026-12-30" }), booking({ date: null }),
+      booking({ date: "2027-01-01", status: "completed" }),
+      booking({ date: "2027-01-01", status: "cancelled" }),
+    ], "2026-12-31");
+    expect(result.nextWeek).toHaveLength(3);
+    expect(result.nextWeekGuests).toBe(5);
+    expect(result.nextWeekMissingGuestCounts).toBe(1);
+  });
+  it("sorts unpaid follow-ups by oldest service date, retaining completed unpaid work", () => {
+    const result = summarizeAdminWork([
+      booking({ date: "2026-09-12" }),
+      booking({ date: "2026-08-01", status: "completed" }),
+    ], "2026-09-13");
+    expect(result.overdue.map((row) => row.date)).toEqual(["2026-08-01", "2026-09-12"]);
+  });
+});
+
+it("counts each multi-trip leg on its own date with its own travelers, but unpaid money once", () => {
+  const result = summarizeAdminWork([booking({
+    tour_slug: "multi-trip", date: "2026-09-12", amount: 250, guests: 9,
+    pricing_snapshot: { trips: [
+      { name: "Island", date: "2026-09-13", guests: 2 },
+      { name: "Safari", date: "2026-09-14", participants: { adults: 3, youth: 1, infants: 0 } },
+      { name: "Diving", date: "2026-09-15" },
+    ] },
+  })], "2026-09-13");
+  expect(result.today).toHaveLength(1);
+  expect(result.today[0].tour_name).toBe("Island");
+  expect(result.todayGuests).toBe(2);
+  expect(result.nextWeek).toHaveLength(3);
+  expect(result.nextWeekGuests).toBe(6);
+  expect(result.nextWeekMissingGuestCounts).toBe(1);
+  expect(result.outstandingByCurrency).toEqual({ USD: 250 });
+});

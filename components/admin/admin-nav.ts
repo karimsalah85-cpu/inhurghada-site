@@ -30,7 +30,7 @@ export const adminNav: AdminNavGroup[] = [
     { label: "Reviews", icon: Star, pages: [{ href: "/admin/reviews", label: "Reviews", permissions: ["content"] }] },
   ] },
   { label: "Partners & team", sections: [
-    { label: "Partners & sales people", icon: Truck, pages: [{ href: "/admin/suppliers", label: "Partners & sales people", permissions: ["suppliers", "finance"] }], keywords: "suppliers boats drivers hotels commission contracts prices" },
+    { label: "Partners & sales people", icon: Truck, pages: [{ href: "/admin/suppliers", label: "Partners & sales people", permissions: ["suppliers", "finance", "operations"] }], keywords: "suppliers boats drivers hotels commission contracts prices" },
     { label: "Guides & staff", icon: UserRoundCog, pages: [{ href: "/admin/staff", label: "Guides & staff", permissions: ["operations"] }], keywords: "guides drivers crew check-in pin assignments" },
   ] },
   { label: "Money", sections: [
@@ -59,7 +59,7 @@ export const adminNav: AdminNavGroup[] = [
       { href: "/admin/settings/redirects", label: "Redirects", permissions: ["content"] },
     ], keywords: "currency exchange rates policies terms redirects contact social announcement" },
     { label: "Users & system", icon: Shield, pages: [
-      { href: "/admin/users", label: "Users & roles", permissions: ["settings", "staff"] },
+      { href: "/admin/users", label: "Users & roles", permissions: ["settings"] },
       { href: "/admin/integrations", label: "Integrations", permissions: ["settings"] },
       { href: "/admin/system", label: "SEO & backups", permissions: ["settings"] },
       { href: "/admin/environments", label: "Environment", permissions: ["settings"] },
@@ -95,4 +95,21 @@ export function activeNavPage(pathname: string, groups: AdminNavGroup[] = adminN
     if (pathMatches(pathname, page.href) && (!best || page.href.length > best.page.href.length)) best = { section, page };
   }
   return best;
+}
+
+/** Search individual destinations before section keywords, so VAT opens VAT, not Overview. */
+export function searchAdminNav(groups: AdminNavGroup[], query: string): AdminNavGroup[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return groups;
+  const hasPageMatch = groups.some((group) => group.sections.some((section) => section.pages.some((page) => page.label.toLowerCase().includes(needle))));
+  return groups.map((group) => ({
+    ...group,
+    sections: group.sections.flatMap((section) => {
+      const pages = section.pages.filter((page) => page.label.toLowerCase().includes(needle));
+      if (pages.length) return [{ ...section, pages }];
+      if (hasPageMatch) return [];
+      const context = `${group.label} ${section.label} ${section.keywords || ""}`.toLowerCase();
+      return context.includes(needle) ? [section] : [];
+    }),
+  })).filter((group) => group.sections.length > 0);
 }
