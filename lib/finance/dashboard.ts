@@ -1,4 +1,5 @@
 import "server-only";
+import { summarizeCashFlow, type CashMovement } from "@/lib/finance/cash-flow";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
 import { computePnl, marginsBy } from "@/lib/finance/pnl";
@@ -23,7 +24,7 @@ export async function financeDashboard(supabase: SupabaseClient, range: { from: 
     reportExpenses(supabase, range),
     expenseTypeLabels(supabase),
     marginThreshold(supabase),
-    rows(supabase.from("finance_cash_flow").select("*").gte("month", monthFrom).lte("month", range.to).order("month")),
+    cashFlowInRange(supabase, range),
     rows(supabase.from("finance_cancellation_impact").select("bookings,lost_sales_usd,retained_usd,partner_fees_usd,net_cost_usd,reason").gte("month", monthFrom).lte("month", range.to)),
     rows(supabase.from("finance_vat_summary").select("output_vat_usd,input_vat_usd,net_vat_usd").gte("month", monthFrom).lte("month", range.to)),
     supplierSummaries(supabase),
@@ -95,4 +96,25 @@ export async function transactionsInRange(supabase: SupabaseClient, range: { fro
     all.push(...page);
     if (page.length < 1000) return all;
   }
+}
+
+/** Page through only actual cash movements within the exact selected dates. */
+export async function cashFlowInRange(supabase: SupabaseClient, range: { from: string; to: string }) {
+  const movements: CashMovement[] = [];
+  for (;;) {
+    const { data, error, count } = await supabase.from("finance_transactions")
+      .select("occurred_on,cash_effect_usd", { count: "exact" })
+      .eq("is_cash", true).gte("occurred_on", range.from).lte("occurred_on", range.to)
+      .order("occurred_on").order("source_table").order("source_id")
+      .range(movements.length, movements.length + 499);
+    if (error) throw Object.assign(new Error(error.message), { code: error.code });
+    movements.push(...(data || []));
+    if (count != null && movements.length >= count) break;
+    if (!data?.length) {
+      if (count != null && movements.length < count) throw new Error("Cash flow is incomplete. Refresh to try again.");
+      break;
+    }
+    if (count == null && data.length < 500) break;
+  }
+  return summarizeCashFlow(movements, range);
 }

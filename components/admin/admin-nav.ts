@@ -36,6 +36,7 @@ export const adminNav: AdminNavGroup[] = [
   { label: "Money", sections: [
     { label: "Finance", icon: Coins, pages: [
       { href: "/admin/finance", label: "Overview & expenses", permissions: ["finance"] },
+      { href: "/admin/finance/cash-flow", label: "Cash flow", permissions: ["finance"] },
       { href: "/admin/finance/reports", label: "Reports", permissions: ["finance"] },
       { href: "/admin/finance/pnl", label: "Profit & loss", permissions: ["finance"] },
       { href: "/admin/finance/margins", label: "Margins", permissions: ["finance"] },

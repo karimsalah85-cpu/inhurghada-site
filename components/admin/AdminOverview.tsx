@@ -1,5 +1,6 @@
 "use client";
 
+import WeeklyWorkloadChart from "@/components/admin/WeeklyWorkloadChart";
 import Link from "next/link";
 import { AlertTriangle, ArrowRight, CalendarDays, CheckCircle2, Clock3, RefreshCw, Truck, UsersRound, WalletCards } from "lucide-react";
 import { useTransition } from "react";
@@ -48,7 +49,7 @@ export default function AdminOverview({ bookings, permissions, role, day, metric
     {setup && can("operations") ? <section aria-labelledby="setup-heading" className="rounded-2xl border border-slate-200 bg-white p-5">
       <h2 id="setup-heading" className="text-lg font-black">Dispatch setup</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <Link href="/admin/availability" className="min-w-0 rounded-xl border border-slate-200 p-4 hover:border-cyan-500"><h3 className="font-bold">Future dates with seat limits: {setup.capacityDates ?? "Unavailable"}</h3><p className="mt-1 text-sm text-slate-600">{setup.capacityDates === 0 ? "No future seat limits are configured. Set real capacities before relying on overbooking protection." : setup.capacityDates == null ? "Capacity settings could not be checked. Open availability to review them." : "Configured dates across tours; review coverage and set each tour’s actual capacity."}</p><span className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-cyan-800">Manage availability <ArrowRight size={15} /></span></Link>
+        <Link href="/admin/availability" className="min-w-0 rounded-xl border border-slate-200 p-4 hover:border-cyan-500"><h3 className="font-bold">Future dates with seat limits: {setup.capacityDates ?? "Unavailable"}</h3><p className="mt-1 text-sm text-slate-600">{setup.capacityDates === 0 ? "All dates are open by default. Add a seat limit or close a date only when needed." : setup.capacityDates == null ? "Capacity settings could not be checked. Open availability to review them." : "These dates have admin-set limits. Other dates stay open unless an admin closes them."}</p><span className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-cyan-800">Manage limits & closures <ArrowRight size={15} /></span></Link>
         <Link href="/admin/operations/pickup-zones" className="min-w-0 rounded-xl border border-slate-200 p-4 hover:border-cyan-500"><h3 className="font-bold">Pickup zones: {setup.pickupZones ?? "Unavailable"}</h3><p className="mt-1 text-sm text-slate-600">{setup.pickupZones === 0 ? "No zones are configured. Add hotels and standard pickup times to support dispatch." : setup.pickupZones == null ? "Pickup zones could not be checked. Open hotels and pickup times to review them." : "Review hotel mappings and the standard pickup time for each trip."}</p><span className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-cyan-800">Hotels & pickup times <ArrowRight size={15} /></span></Link>
       </div>
     </section> : null}
@@ -66,6 +67,7 @@ export default function AdminOverview({ bookings, permissions, role, day, metric
           <WorkMetric label="Past-date not marked paid" value={work.overdue.length} note="Trip date before today" icon={<WalletCards size={19} />} attention={work.overdue.length > 0} />
         </div>
       </section>
+      <WeeklyWorkloadChart days={work.dailyForecast} canDispatch={can("operations")} />
       {work.undatedDepartures ? <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">{work.undatedDepartures} trip leg(s) have no recorded date and are excluded from daily and seven-day totals. Review the booking dates before planning dispatch.</p> : null}
       <div className="grid items-start gap-6 xl:grid-cols-[1.25fr_1fr]">
         <section aria-labelledby="upcoming-heading" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

@@ -1,5 +1,6 @@
 "use client";
 
+import ProfitLossChart from "@/components/admin/ProfitLossChart";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FINANCE_CURRENCIES, formatMoney, toMinor, type FinanceCurrency } from "@/lib/finance/money";
@@ -20,20 +21,20 @@ type Dashboard = {
 };
 
 const field = "mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 text-base font-normal sm:text-sm";
-const monthStart = () => `${new Date().toISOString().slice(0, 8)}01`;
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
+const monthStart = () => `${today().slice(0, 7)}-01`;
 const monthLabel = (month: string) => new Date(`${month}T00:00:00Z`).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
 const presets = [
   ["This month", () => [monthStart(), today()]],
-  ["Last month", () => { const d = new Date(); const first = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 1, 1)); const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 0)); return [first.toISOString().slice(0, 10), last.toISOString().slice(0, 10)]; }],
-  ["This year", () => [`${new Date().getUTCFullYear()}-01-01`, today()]],
+  ["Last month", () => { const d = new Date(`${today()}T12:00:00Z`); const first = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 1, 1)); const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 0)); return [first.toISOString().slice(0, 10), last.toISOString().slice(0, 10)]; }],
+  ["This year", () => [`${today().slice(0, 4)}-01-01`, today()]],
 ] as const;
 
 function Tile({ label, value, note, tone, className = "" }: { label: string; value: string; note?: string; tone?: "good" | "bad"; className?: string }) {
   return (
     <div className={`min-w-0 rounded-2xl border border-slate-200 bg-white p-4 ${className}`}>
       <p className="text-xs font-semibold text-slate-500">{label}</p>
-      <p className={`mt-1 whitespace-nowrap text-lg font-black tabular-nums sm:text-2xl ${tone === "bad" ? "text-rose-700" : "text-slate-950"}`}>{value}</p>
+      <p className={`mt-1 break-words text-lg font-black tabular-nums sm:text-2xl ${tone === "bad" ? "text-rose-700" : "text-slate-950"}`}>{value}</p>
       {note ? <p className="mt-1 text-xs text-slate-500">{note}</p> : null}
     </div>
   );
@@ -67,7 +68,7 @@ function Bars({ rows, money, empty }: { rows: MarginRow[]; money: (usd: Amount) 
   );
 }
 
-export default function FinanceDashboard() {
+export default function FinanceDashboard({ cashOnly = false }: { cashOnly?: boolean }) {
   const [from, setFrom] = useState(monthStart());
   const [to, setTo] = useState(today());
   const [data, setData] = useState<Dashboard | null>(null);
@@ -77,18 +78,19 @@ export default function FinanceDashboard() {
   const [rate, setRate] = useState("1");
 
   useEffect(() => {
+    const controller = new AbortController();
     const timeout = window.setTimeout(() => {
       setLoading(true);
-      fetch(`/api/admin/finance/dashboard?${new URLSearchParams({ from, to })}`, { cache: "no-store" })
+      fetch(`/api/admin/finance/dashboard?${new URLSearchParams({ from, to })}`, { cache: "no-store", signal: controller.signal })
         .then(async (response) => {
           const body = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(body.error || "Could not load the reports.");
           setError(""); setData(body);
         })
-        .catch((reason: Error) => setError(reason.message))
-        .finally(() => setLoading(false));
+        .catch((reason: Error) => { if (!controller.signal.aborted) setError(reason.message); })
+        .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     }, 200);
-    return () => window.clearTimeout(timeout);
+    return () => { window.clearTimeout(timeout); controller.abort(); };
   }, [from, to]);
 
   function chooseCurrency(next: FinanceCurrency) {
@@ -104,7 +106,7 @@ export default function FinanceDashboard() {
   }, [currency, rate, rateOk]);
 
   const totals = data?.pnl.totals;
-  const pending = data ? data.pnl.pending.lines + data.pnl.pending.expenses + data.cashFlow.usd_pending : 0;
+  const pending = data ? (cashOnly ? 0 : data.pnl.pending.lines + data.pnl.pending.expenses) + data.cashFlow.usd_pending : 0;
 
   return (
     <div className="space-y-6">
@@ -142,7 +144,7 @@ export default function FinanceDashboard() {
         <div className={`space-y-6 ${loading ? "opacity-60" : ""}`} aria-busy={loading}>
           {pending ? <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{pending} item(s) are waiting for an exchange rate and are not in these totals yet.</p> : null}
 
-          <section>
+          {!cashOnly ? <section>
             <div className="flex items-baseline justify-between gap-2"><h2 className="text-lg font-black">Profit & loss</h2><Link href="/admin/finance/pnl" className="text-sm font-semibold text-cyan-800 underline">Full P&amp;L</Link></div>
             <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-5">
               <Tile label="Revenue excl. VAT" value={money(totals.revenue ?? totals.net_sales)} note={`${data.pnl.bookings} booking(s), by trip date`} />
@@ -151,18 +153,20 @@ export default function FinanceDashboard() {
               <Tile label="Business expenses" value={money(totals.opex)} />
               <Tile label="Net profit" value={money(totals.net_profit)} tone={toMinor(totals.net_profit) < 0n ? "bad" : undefined} note="after commissions & fees" className="col-span-2 lg:col-span-1" />
             </div>
-          </section>
+          </section> : null}
 
           <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-black">Cash in vs cash out</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-black">Cash flow · cash in vs cash out</h2>{!cashOnly ? <Link href="/admin/finance/cash-flow" className="text-sm font-bold text-cyan-800 underline">Open cash flow</Link> : null}</div>
             <p className="text-sm text-slate-600">Money that actually moved: guest payments and refunds, partner payments and receipts, expenses. Credit notes are not cash.</p>
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Tile label="Cash in" value={money(data.cashFlow.cash_in_usd)} />
               <Tile label="Cash out" value={money(data.cashFlow.cash_out_usd)} />
               <Tile label="Net cash" value={money(data.cashFlow.net_cash_usd)} tone={toMinor(data.cashFlow.net_cash_usd) < 0n ? "bad" : undefined} className="col-span-2 sm:col-span-1" />
             </div>
-            {data.cashFlow.months.length > 1 ? (
-              <table className="mt-4 w-full text-sm">
+            <p className="mt-4 text-xs text-slate-500">Monthly movements within {from} to {to}. Net cash is movement during this period, not an opening or closing bank balance.{data.cashFlow.months.length > 12 ? " Graph shows the latest 12 months; totals and table cover the whole selected period." : ""}</p>
+            <div className="mt-4 overflow-x-auto"><div className={data.cashFlow.months.length > 3 ? "min-w-[560px]" : ""}><ProfitLossChart rows={data.cashFlow.months.slice(-12).map((month) => ({ month: month.month.slice(0, 7), revenue: Number(month.cash_in_usd || 0), costs: Number(month.cash_out_usd || 0), profit: Number(month.net_cash_usd || 0) }))} formatValue={money} labels={{ revenue: "Cash in", costs: "Cash out", profit: "Net cash" }} /></div></div>
+            {data.cashFlow.months.length ? (
+              <div className="overflow-x-auto"><table className="mt-4 w-full text-sm">
                 <thead><tr className="border-b text-left text-xs text-slate-500"><th className="py-2">Month</th><th className="text-right">In</th><th className="text-right">Out</th><th className="text-right">Net</th></tr></thead>
                 <tbody>{data.cashFlow.months.map((month) => (
                   <tr key={month.month} className="border-b last:border-0 tabular-nums">
@@ -170,10 +174,11 @@ export default function FinanceDashboard() {
                     <td className={`text-right font-bold ${toMinor(month.net_cash_usd ?? 0) < 0n ? "text-rose-700" : ""}`}>{money(month.net_cash_usd)}</td>
                   </tr>
                 ))}</tbody>
-              </table>
+              </table></div>
             ) : null}
           </section>
 
+          {!cashOnly ? <>
           <section className="rounded-3xl bg-white p-4 shadow-sm sm:p-6">
             <div className="flex items-baseline justify-between gap-2"><h2 className="text-lg font-black">Partner balances today</h2><Link href="/admin/finance/suppliers" className="text-sm font-semibold text-cyan-800 underline">All partners</Link></div>
             <div className="mt-3 grid grid-cols-2 gap-3">
@@ -220,6 +225,7 @@ export default function FinanceDashboard() {
               </div>
             </section>
           </div>
+          </> : null}
         </div>
       )}
     </div>

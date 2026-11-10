@@ -90,3 +90,15 @@ it("counts each multi-trip leg on its own date with its own travelers, but unpai
   expect(result.nextWeekMissingGuestCounts).toBe(1);
   expect(result.outstandingByCurrency).toEqual({ USD: 250 });
 });
+
+it("provides seven zero-filled graph dates and counts each multi-trip leg on its service day", () => {
+  const result = summarizeAdminWork([booking({ tour_slug: "multi-trip", pricing_snapshot: { trips: [
+    { name: "Island", date: "2026-09-13", guests: 2 },
+    { name: "Safari", date: "2026-09-15", guests: 3 },
+  ] } })], "2026-09-13");
+  expect(result.dailyForecast).toHaveLength(7);
+  expect(result.dailyForecast[0]).toEqual({ date: "2026-09-13", departures: 1, guests: 2, missing: 0 });
+  expect(result.dailyForecast[1].departures).toBe(0);
+  expect(result.dailyForecast[2].guests).toBe(3);
+  expect(result.dailyForecast.reduce((sum, day) => sum + day.departures, 0)).toBe(result.nextWeek.length);
+});

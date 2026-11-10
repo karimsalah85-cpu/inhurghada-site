@@ -58,6 +58,13 @@ export function summarizeAdminWork<T extends OverviewBooking>(bookings: T[], day
   const overdue = unpaid.filter((booking) => booking.date && booking.date < day).sort(byDate);
   return {
     today, pending, upcoming, unpaid, overdue, nextWeek,
+    dailyForecast: Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(`${day}T12:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + index);
+      const key = date.toISOString().slice(0, 10);
+      const departures = nextWeek.filter((booking) => booking.date === key);
+      return { date: key, departures: departures.length, guests: departures.reduce((sum, booking) => sum + (overviewGuestCount(booking) ?? 0), 0), missing: departures.filter((booking) => overviewGuestCount(booking) == null).length };
+    }),
     undatedDepartures: departures.filter((booking) => !booking.date).length,
     nextWeekGuests: nextWeek.reduce((total, booking) => total + (overviewGuestCount(booking) ?? 0), 0),
     nextWeekMissingGuestCounts: nextWeek.filter((booking) => overviewGuestCount(booking) == null).length,

@@ -1142,6 +1142,7 @@ export default function AdminDashboard({
 
       {mode === "finance" && can("finance") ? (
         <div className="mt-8">
+          <Link href="/admin/finance/cash-flow" className="mb-5 flex min-h-11 flex-wrap items-center justify-between gap-2 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 font-bold text-cyan-950"><span>Cash flow · received, paid out & net movement</span><span className="text-sm text-cyan-800">Open graph & report →</span></Link>
           <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
             {new Intl.DateTimeFormat("en", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${bookingView.month}-01T00:00:00Z`))} · scoped to the month selected below
           </p>

@@ -41,10 +41,20 @@ Read-only checks against the configured Supabase project on 10 November 2026 fou
 
 Booking, waiver, assignment and pickup-zone tables were present. Counts do not establish complete workflow health. No database records, schema, seat limits, hotels or pickup times were changed.
 
-Real capacities and hotel/pickup-zone timings are still required from operations before relying on those features. The admin links now expose that setup work.
+Capacity is open by default. Admins may optionally limit or close dates. Hotel/pickup-zone timings can be configured when standard pickup scheduling is needed. The admin links expose those settings.
 
 ## Production boundary
 
 The existing signed-in Chrome tab initially displayed the live booking-profit report. Subsequent native-browser navigation reached the overview/bookings/report URLs but displayed a blank content area, including after retry. The browser extension access host was unavailable, preventing DOM-based diagnosis in that signed-in session. This is an unresolved observation, not evidence that the local changes are deployed or that all live workflows work.
 
 No push, merge, deployment, customer messages, booking mutations or stored permission changes were performed. Authenticated production smoke checks are still required after an authorized release.
+
+## Requested graph and cash-flow release update
+
+The follow-up request authorizes production deployment and clarifies that capacity is open unless an admin closes or limits a date. The setup copy now reflects that rule; existing availability behavior already follows it.
+
+- Added a seven-day statistics graph with departures/guest-place switching, zero-filled days, readable daily figures and direct pickup-manifest links.
+- Added Finance → Cash flow, a prominent finance-overview link, cash-in/out graphs, net movement, currency display, date presets and transaction export.
+- Cash totals now use actual cash transactions within the exact selected dates rather than whole-month aggregates. Refunds and reversals keep their signed cash effect; credit notes and voided expenses stay excluded by the existing transaction view. Missing FX is reported separately. Net cash is period movement, not a bank balance.
+- The full release suite passed 125 files / 1,109 tests. Graph interaction, EUR conversion and LTR/RTL layouts at 320/390/1,440 pixels passed with sample data. The temporary sample route was removed.
+- No schema migration is required. Source is based on current production, with unrelated unpublished SEO commits excluded. Final deployment evidence is recorded separately after release.
