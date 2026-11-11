@@ -136,6 +136,17 @@ export const categoryLabels: Record<Locale, Record<TourCategory["slug"], string>
     "airport-transfers": "机场接送",
     "private-transfers": "私人接送",
   },
+  it: {
+    excursions: "Tour ed escursioni",
+    "speedboat-trips": "Gite in motoscafo",
+    "island-trips": "Gite alle isole",
+    "diving-snorkeling": "Immersioni e snorkeling",
+    "boat-cruises": "Crociere in barca e yacht",
+    "desert-safaris": "Safari nel deserto",
+    "historical-tours": "Tour storici",
+    "airport-transfers": "Transfer aeroportuali",
+    "private-transfers": "Transfer privati",
+  },
 };
 
 export function getTourCategory(slug: string) {

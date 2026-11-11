@@ -43,7 +43,7 @@ export default function OrganizationSchema() {
         url: absoluteUrl(),
         name: siteName,
         description: "Red Sea tours and local experiences in Hurghada, Marsa Alam, El Gouna and Jeddah, including diving, boat trips, horse riding, desert adventures and private transfers.",
-        inLanguage: ["en", "ar", "de", "ru", "pl", "zh"],
+        inLanguage: ["en", "ar", "de", "ru", "pl", "zh", "it"],
         publisher: { "@id": organizationId },
       },
     ],

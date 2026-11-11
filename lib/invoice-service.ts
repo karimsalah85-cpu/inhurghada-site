@@ -179,9 +179,26 @@ const confirmationCopy = {
     policyHeadings: ["取消", "迟到和未到场", "运营商变更", "如何取消或更改"],
     metaLabels: ["日期", "出发时间", "出行人数", "集合地点"],
   },
+  it: {
+    ticket: "Biglietto", tickets: "Biglietti delle escursioni", ticketNote: "Ogni escursione ha il proprio codice QR. Mostralo alla guida o all'autista il giorno dell'escursione.",
+    confirmation: "Conferma di prenotazione", issued: "Emessa il", cash: "Contanti all'arrivo", reference: "Riferimento della prenotazione",
+    keepReference: "Conserva questo riferimento per l'assistenza.", guest: "Dati dell'ospite", guestName: "Nome dell'ospite", pending: "Da confermare",
+    experience: "Dettagli dell'esperienza", date: "Data dell'esperienza", time: "Orario di partenza", travelers: "Viaggiatori", pickup: "Prelievo / punto d'incontro",
+    total: "Totale da pagare", paymentNote: "Pagamento in contanti all'arrivo. Non è stato addebitato alcun pagamento online.", next: "Che cosa succede ora",
+    steps: "Conserva questa conferma. Ti confermeremo via WhatsApp la disponibilità definitiva e i dettagli del prelievo o del punto d'incontro. Mostra il riferimento della prenotazione quando richiesto.",
+    thanks: "Grazie per aver scelto Daily Red Sea.", policy: "Condizioni di cancellazione e rimborso",
+    policyParagraphs: [
+      "Si applicano le condizioni di cancellazione indicate nella pagina dell'attività prenotata. Se non è indicato un termine diverso, cancella almeno 48 ore prima dell'orario di prelievo previsto per ottenere il rimborso completo. Con il pagamento in contanti all'arrivo, in tal caso non è dovuto alcun importo.",
+      "Per cancellazioni successive, ritardi o mancata presentazione non è previsto alcun rimborso, perché gli operatori locali riservano i posti e sostengono dei costi. Per tour privati, barche a capienza limitata ed esperienze di terzi possono valere termini più lunghi o condizioni particolari, se indicati prima della prenotazione.",
+      "Se Daily Red Sea o l'operatore locale annulla per meteo, sicurezza, numero insufficiente di partecipanti o motivi operativi, puoi scegliere tra il rimborso completo e una data alternativa disponibile o un'altra attività.",
+      "Per cancellare o modificare, contatta Daily Red Sea il prima possibile via WhatsApp indicando il riferimento della prenotazione. I rimborsi approvati su carta o online avvengono tramite il metodo di pagamento originale; alle prenotazioni con pagamento in contanti all'arrivo non viene addebitato nulla.",
+    ],
+    policyHeadings: ["Cancellazione", "Ritardo e mancata presentazione", "Modifiche dell'operatore", "Come cancellare o modificare"],
+    metaLabels: ["DATA", "PARTENZA", "VIAGGIATORI", "PUNTO D'INCONTRO"],
+  },
 } as const;
 
-const whatsappCta: Record<Locale, string> = { en: "Chat with us on WhatsApp", de: "Schreib uns auf WhatsApp", ru: "Напишите нам в WhatsApp", ar: "تواصل معنا عبر واتساب", pl: "Napisz do nas na WhatsApp", zh: "通过 WhatsApp 联系我们" };
+const whatsappCta: Record<Locale, string> = { en: "Chat with us on WhatsApp", de: "Schreib uns auf WhatsApp", ru: "Напишите нам в WhatsApp", ar: "تواصل معنا عبر واتساب", pl: "Napisz do nas na WhatsApp", zh: "通过 WhatsApp 联系我们", it: "Scrivici su WhatsApp" };
 
 /**
  * A self-contained, branded PDF voucher with embedded Unicode fonts so the
@@ -412,6 +429,18 @@ export const statusPdfCopy: Record<Locale, StatusPdfCopy> = {
     statusLabel: { new: "已收到", confirmed: "已确认", completed: "已完成", cancelled: "已取消" },
     paymentLabel: { unpaid: "未付款", paid: "已付款", refunded: "已退款" },
     paymentNote: { paid: "已收到付款 - 谢谢。", refunded: "付款已记录为退款。", default: "除非另有约定，请于到场时以现金支付。" },
+  },
+  it: {
+    statusUpdate: "Aggiornamento dello stato della prenotazione", generated: "Aggiornato", reference: "Riferimento della prenotazione",
+    subtitle: "Le informazioni più recenti su prenotazione e pagamento", current: "Stato attuale", booking: "Prenotazione", payment: "Pagamento",
+    guest: "Dati dell'ospite", guestName: "Nome dell'ospite", pending: "Da confermare", bookingDetails: "Dettagli della prenotazione",
+    date: "Data", travelers: "Viaggiatori", pickup: "Prelievo / punto d'incontro",
+    assignedGuide: "Guida assegnata", assignedDriver: "Autista assegnato", total: "Totale della prenotazione",
+    help: "Hai bisogno di aiuto?", helpBody: "Rispondi all'e-mail che conteneva questo PDF o contattaci su WhatsApp.",
+    policyLine: "Condizioni di cancellazione e rimborso",
+    statusLabel: { new: "Ricevuta", confirmed: "Confermata", completed: "Completata", cancelled: "Annullata" },
+    paymentLabel: { unpaid: "Non pagato", paid: "Pagato", refunded: "Rimborsato" },
+    paymentNote: { paid: "Pagamento ricevuto - grazie.", refunded: "Pagamento registrato come rimborsato.", default: "Pagamento in contanti all'arrivo, salvo diverso accordo." },
   },
 };
 

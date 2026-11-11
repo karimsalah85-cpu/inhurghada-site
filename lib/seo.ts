@@ -7,13 +7,14 @@ export const defaultDescription =
 // A versioned raster URL lets sharing apps fetch the new artwork instead of
 // reusing the old SVG thumbnail. Keep the 1200×630 dimensions in app/layout.tsx.
 export const defaultSocialImage = "/brand/dailyredsea-social-v2.jpg";
-export const localizedDefaultDescriptions: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
+export const localizedDefaultDescriptions: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh" | "it", string> = {
   en: defaultDescription,
   ar: "احجز رحلات الغردقة البحرية والسنوركلينج والغوص والسفاري الصحراوي والتنقلات الخاصة مع أسعار واضحة ودعم محلي.",
   de: "Buche Bootstouren, Schnorcheln, Tauchen, Wüstensafaris und private Transfers in Hurghada mit klaren Preisen und lokaler Betreuung.",
   ru: "Бронируйте морские прогулки, сноркелинг, дайвинг, сафари и частные трансферы в Хургаде с понятными ценами и местной поддержкой.",
   pl: "Rezerwuj rejsy, snorkeling, nurkowanie, safari i prywatne transfery w Hurghadzie z jasnymi cenami i lokalnym wsparciem.",
   zh: "预订赫尔格达游船、浮潜、深潜、沙漠探险和私人接送，价格透明并提供本地支持。",
+  it: "Prenota gite in barca, snorkeling, immersioni, safari nel deserto e transfer privati a Hurghada, con prezzi chiari e assistenza locale.",
 };
 
 type PageMetadataInput = {
@@ -22,7 +23,7 @@ type PageMetadataInput = {
   path: string;
   image?: string;
   noIndex?: boolean;
-  locale?: "en" | "ar" | "de" | "ru" | "pl" | "zh";
+  locale?: "en" | "ar" | "de" | "ru" | "pl" | "zh" | "it";
 };
 
 export function pageMetadata({
@@ -64,13 +65,14 @@ export function absoluteUrl(path = "/") {
 
 const metadataTitleSuffix = " | Daily Red Sea";
 
-const metadataSupportCopy: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh", string> = {
+const metadataSupportCopy: Record<"en" | "ar" | "de" | "ru" | "pl" | "zh" | "it", string> = {
   en: "Clear prices, pickup confirmation and local WhatsApp support from Daily Red Sea.",
   ar: "أسعار واضحة وتأكيد الاستلام ودعم محلي عبر واتساب من Daily Red Sea.",
   de: "Klare Preise, bestätigte Abholung und lokale WhatsApp-Betreuung von Daily Red Sea.",
   ru: "Понятные цены, подтверждённый трансфер и местная поддержка в WhatsApp от Daily Red Sea.",
   pl: "Jasne ceny, potwierdzony odbiór i lokalne wsparcie WhatsApp od Daily Red Sea.",
   zh: "价格透明、接送确认，并由 Daily Red Sea 提供 WhatsApp 本地支持。",
+  it: "Prezzi chiari, conferma del prelievo e assistenza locale via WhatsApp con Daily Red Sea.",
 };
 
 function shortenMetadata(value: string, maxLength: number) {
@@ -83,7 +85,7 @@ function shortenMetadata(value: string, maxLength: number) {
 }
 
 /** Keeps route titles between the audit minimum and maximum without relying on a root title template. */
-export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en") {
+export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" | "it" = "en") {
   void locale; // Retained for callers; the brand suffix is destination-neutral.
   let title = value.replace(/\s+/g, " ").trim();
   if (title.length < 30) title = `${title}${metadataTitleSuffix}`;
@@ -94,7 +96,7 @@ export function normalizeMetaTitle(value: string, locale: "en" | "ar" | "de" | "
 export function normalizeMetaDescription(
   value: string,
   fallback = defaultDescription,
-  locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" = "en",
+  locale: "en" | "ar" | "de" | "ru" | "pl" | "zh" | "it" = "en",
 ) {
   let description = value.replace(/\s+/g, " ").trim() || fallback.trim();
   if (description.length < 90) {

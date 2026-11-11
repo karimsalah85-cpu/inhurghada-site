@@ -14,12 +14,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact", languages: { ...languageAlternates("/contact"), "x-default": localePath("en", "/contact") } },
 };
 
-export function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" }) {
+export function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "ar" | "pl" | "zh" | "it" }) {
   const de = locale === "de";
   const ru = locale === "ru";
   const ar = locale === "ar";
   const pl = locale === "pl";
   const zh = locale === "zh";
+  const it = locale === "it";
+  const italian: Record<string, string> = {"We are here to help": "Siamo qui per aiutarti", "Contact Daily Red Sea": "Contatta Daily Red Sea", "For the fastest response, send your travel date, hotel, number of adults and children, and the tour or transfer you are considering.": "Per una risposta più rapida indicaci data del viaggio, hotel, numero di adulti e bambini e l'escursione o il transfer che ti interessa.", "Hello Daily Red Sea, I need help with a booking.": "Ciao Daily Red Sea, ho bisogno di aiuto per una prenotazione.", "Fastest": "Il più rapido", "Tour advice, availability, pickup changes, and booking help.": "Consigli sulle escursioni, disponibilità, modifiche al prelievo e aiuto con le prenotazioni.", "Useful for detailed requests and documents.": "Utile per richieste dettagliate e documenti.", "Telephone": "Telefono", "For urgent same-day assistance.": "Per assistenza urgente in giornata.", "Already booked?": "Hai già prenotato?", "Include your booking reference when contacting us. For pickup changes or urgent questions close to departure, use WhatsApp so the team can identify your booking quickly.": "Quando ci contatti indica il riferimento della prenotazione. Per modifiche al prelievo o domande urgenti a ridosso della partenza usa WhatsApp, così il team individua subito la tua prenotazione.", "Find my booking": "Trova la mia prenotazione"};
   const arabic: Record<string, string> = {
     "We are here to help": "نحن هنا لمساعدتك",
     "Contact Daily Red Sea": "تواصل مع Daily Red Sea",
@@ -52,7 +54,7 @@ export function ContactPage({ locale = "en" }: { locale?: "en" | "de" | "ru" | "
     "We are here to help": "我们随时为您提供帮助", "Contact Daily Red Sea": "联系 Daily Red Sea", "For the fastest response, send your travel date, hotel, number of adults and children, and the tour or transfer you are considering.": "为了更快获得回复，请发送出行日期、酒店、成人和儿童人数，以及您考虑的旅游或接送服务。",
     "Hello Daily Red Sea, I need help with a booking.": "您好 Daily Red Sea，我需要预订帮助。", "Fastest": "最快回复", "Tour advice, availability, pickup changes, and booking help.": "旅游建议、名额查询、接送变更和预订帮助。", "Useful for detailed requests and documents.": "适合详细咨询和发送文件。", "Telephone": "电话", "For urgent same-day assistance.": "适合当天紧急协助。", "Already booked?": "已经预订？", "Include your booking reference when contacting us. For pickup changes or urgent questions close to departure, use WhatsApp so the team can identify your booking quickly.": "联系我们时请提供预订编号。如需更改接送或在出发前有紧急问题，请使用 WhatsApp，以便团队快速找到您的预订。", "Find my booking": "查找我的预订",
   };
-  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : ar ? arabic[en] || en : pl ? polish[en] || en : zh ? chinese[en] || en : en;
+  const tr = (en: string, deText: string, ruText: string) => de ? deText : ru ? ruText : ar ? arabic[en] || en : pl ? polish[en] || en : zh ? chinese[en] || en : it ? italian[en] || en : en;
   return (
     <main className="min-h-screen bg-surface-muted px-6 pb-20 pt-32 sm:px-8">
       <div className="mx-auto max-w-5xl">

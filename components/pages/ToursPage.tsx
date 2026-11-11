@@ -19,6 +19,7 @@ const copy: Record<Locale, { eyebrow: string; title: string; description: string
   ar: { eyebrow: "دليل ديلي رد سي", title: "اختر تجربتك في البحر الأحمر", description: "ابحث في الرحلات المتاحة وقارن الأسعار والمدة ثم افتح الرحلة للاطلاع على البرنامج وتفاصيل الحجز." },
   pl: { eyebrow: "Katalog Daily Red Sea", title: "Znajdź swoją przygodę nad Morzem Czerwonym", description: "Przeszukaj dostępne wycieczki, porównaj ceny i czas trwania, a następnie sprawdź program i szczegóły rezerwacji." },
   zh: { eyebrow: "Daily Red Sea 行程目录", title: "寻找您的红海体验", description: "搜索当前可预订的行程，比较价格和时长，并查看完整行程与预订详情。" },
+  it: { eyebrow: "Catalogo Daily Red Sea", title: "Trova la tua esperienza sul Mar Rosso", description: "Cerca tra tutte le escursioni disponibili, confronta prezzi e durata, poi apri un'escursione per vedere programma completo e dettagli di prenotazione." },
 };
 
 type ToursPageProps = { searchParams?: Promise<{ search?: string; destination?: string }> };

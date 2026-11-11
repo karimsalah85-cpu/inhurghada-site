@@ -28,6 +28,7 @@ export default function TourGallery({ title, mainImage, galleryImages, imageAlt,
     ru: ["Закрыть галерею", "Предыдущее изображение", "Следующее изображение", "Увеличить изображение", "изображение галереи"],
     pl: ["Zamknij galerię", "Poprzednie zdjęcie", "Następne zdjęcie", "Powiększ zdjęcie", "zdjęcie w galerii"],
     zh: ["关闭图库", "上一张图片", "下一张图片", "放大图片", "图库图片"],
+    it: ["Chiudi galleria", "Immagine precedente", "Immagine successiva", "Ingrandisci immagine", "immagine della galleria"],
   }[locale];
   const [closeLabel, previousLabel, nextLabel, openLabel, galleryImageLabel] = copy;
   const rtl = locale === "ar";

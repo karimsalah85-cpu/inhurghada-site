@@ -14,6 +14,7 @@ const copyByLocale = {
   ru: { eyebrow: "Сохранено на этом устройстве", title: "Продолжите планировать поездку", open: "Посмотреть сохранённые поездки", clear: "Очистить" },
   pl: { eyebrow: "Zapisane na tym urządzeniu", title: "Kontynuuj planowanie podróży", open: "Przejrzyj zapisane wycieczki", clear: "Wyczyść" },
   zh: { eyebrow: "已保存到此设备", title: "继续规划你的行程", open: "查看收藏的行程", clear: "清除" },
+  it: { eyebrow: "Salvato su questo dispositivo", title: "Continua a pianificare il viaggio", open: "Rivedi le escursioni salvate", clear: "Cancella" },
 } as const;
 
 export default function ContinuePlanningRail({ tours }: { tours: Tour[] }) {

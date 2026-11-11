@@ -305,6 +305,7 @@ function formatTravelerSummary(adults: number, youth: number, infants: number, l
     en: ["adult", "youth", "infant"], de: ["Erwachsene", "Kinder", "Kleinkinder"],
     ru: ["взрослых", "детей", "младенцев"], ar: ["بالغ", "طفل", "رضيع"],
     pl: ["dorosłych", "dzieci", "niemowląt"], zh: ["位成人", "位儿童", "位婴儿"],
+    it: ["adulti", "ragazzi", "neonati"],
   }[locale] ?? ["adult", "youth", "infant"];
   return (Object.values(counts) as number[])
     .map((count, index) => count > 0 ? `${count} ${labels[index]}${locale === "en" && count !== 1 && index !== 1 ? "s" : ""}` : "")
@@ -313,7 +314,7 @@ function formatTravelerSummary(adults: number, youth: number, infants: number, l
 }
 
 function formatPassengerSummary(passengers: number, locale: string) {
-  const label = { en: "passenger", de: "Fahrgäste", ru: "пассажиров", ar: "مسافر", pl: "pasażerów", zh: "位乘客" }[locale] || "passenger";
+  const label = { en: "passenger", de: "Fahrgäste", ru: "пассажиров", ar: "مسافر", pl: "pasażerów", zh: "位乘客", it: "passeggeri" }[locale] || "passenger";
   return `${passengers} ${label}${locale === "en" && passengers !== 1 ? "s" : ""}`;
 }
 
@@ -362,13 +363,13 @@ function buildTransferSummary(transfer: ParsedTransferRequest, quote: TransferQu
 }
 
 function localizedTransferName(service: string, locale: string) {
-  const airport = { en: "Hurghada Airport one-way transfer", de: "Einfacher Transfer zum Flughafen Hurghada", ru: "Трансфер в одну сторону до аэропорта Хургады", ar: "خدمة نقل باتجاه واحد من أو إلى مطار الغردقة", pl: "Transfer w jedną stronę na lotnisko w Hurghadzie", zh: "赫尔格达机场单程接送" };
-  const senzo = { en: "Senzo Mall one-way transfer", de: "Einfacher Transfer zur Senzo Mall", ru: "Трансфер в одну сторону до Senzo Mall", ar: "خدمة نقل باتجاه واحد من أو إلى سنزو مول", pl: "Transfer w jedną stronę do Senzo Mall", zh: "Senzo Mall 单程接送" };
+  const airport = { en: "Hurghada Airport one-way transfer", de: "Einfacher Transfer zum Flughafen Hurghada", ru: "Трансфер в одну сторону до аэропорта Хургады", ar: "خدمة نقل باتجاه واحد من أو إلى مطار الغردقة", pl: "Transfer w jedną stronę na lotnisko w Hurghadzie", zh: "赫尔格达机场单程接送", it: "Transfer di sola andata per l'aeroporto di Hurghada" };
+  const senzo = { en: "Senzo Mall one-way transfer", de: "Einfacher Transfer zur Senzo Mall", ru: "Трансфер в одну сторону до Senzo Mall", ar: "خدمة نقل باتجاه واحد من أو إلى سنزو مول", pl: "Transfer w jedną stronę do Senzo Mall", zh: "Senzo Mall 单程接送", it: "Transfer di sola andata per il Senzo Mall" };
   return (service === "airport" ? airport : senzo)[locale as keyof typeof airport] || (service === "airport" ? airport.en : senzo.en);
 }
 
 function localizedMultiTripName(locale: string) {
-  return { en: "Multi-trip booking", de: "Buchung mehrerer Ausflüge", ru: "Бронирование нескольких экскурсий", ar: "حجز رحلات متعددة", pl: "Rezerwacja wielu wycieczek", zh: "多行程预订" }[locale] || "Multi-trip booking";
+  return { en: "Multi-trip booking", de: "Buchung mehrerer Ausflüge", ru: "Бронирование нескольких экскурсий", ar: "حجز رحلات متعددة", pl: "Rezerwacja wielu wycieczek", zh: "多行程预订", it: "Prenotazione di più escursioni" }[locale] || "Multi-trip booking";
 }
 
 async function deliverBookingNotification(

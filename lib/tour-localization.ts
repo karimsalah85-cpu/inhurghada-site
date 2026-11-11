@@ -7,6 +7,7 @@ import { luxorTourTranslations } from "@/data/luxor-tours-i18n";
 import type { Locale } from "@/lib/i18n";
 import { localizeSnorkelingBoatTrip } from "@/data/snorkeling-boat-trips";
 import { applyTourMediaSafety } from "@/lib/tour-media-safety";
+import { italianMagawishSpeedboat, italianTourOverrides } from "@/lib/tour-localization-it";
 
 const arabicTourOverrides: Record<string, Partial<Tour>> = {
   "orange-bay": {
@@ -1577,7 +1578,14 @@ export function localizeTourPolish(tour: Tour): Tour {
   return preserveTourPrices(tour, { ...tour, ...polishTourOverrides[tour.slug] });
 }
 
+Object.assign(italianTourOverrides, luxorTourTranslations.it);
+
+export function localizeTourItalian(tour: Tour): Tour {
+  return preserveTourPrices(tour, { ...tour, ...italianTourOverrides[tour.slug] });
+}
+
 const magawishSpeedboatTranslations: Partial<Record<Locale, Partial<Tour>>> = {
+  it: italianMagawishSpeedboat,
   de: { title: "Private Speedboot-Tour zu Orange Bay und Magawish", description: "Entdecke Orange Bay und Magawish mit einem privaten Speedboot, einem Schnorchelstopp und frei wählbaren Extras für deine Gruppe.", highlights: ["Privates Speedboot für deine Gruppe", "Orange Bay und Magawish", "Schnorchelstopp mit Ausrüstung", "Acht Bootsgrößen", "Optionale Verpflegung und Marina-Transfer"], included: ["Gewähltes Privatboot", "Skipper/Guide", "Treibstoff", "Schnorchelausrüstung", "Schwimmwesten und Sicherheitsausrüstung"], notIncluded: ["Inseleintritte — werden bei der Buchung hinzugefügt", "Essen und Getränke, sofern nicht gewählt", "Hoteltransfer, sofern nicht gewählt", "Persönliche Ausgaben"], packageName: "Privates Speedboot Orange Bay & Magawish", packageDescription: "Wähle Boot, Inseleintritte, optionale Verpflegung und Marina-Transfer.", packageLabel: "Privatboot ab", seoTitle: "Orange Bay & Magawish Speedboot ab Hurghada", metaDescription: "Private Speedboot-Tour ab Hurghada zu Orange Bay und Magawish mit wählbarem Boot, Schnorcheln und optionaler Verpflegung." },
   ru: { title: "Частный катер на Orange Bay и Магавиш", description: "Посетите Orange Bay и Магавиш на частном скоростном катере со сноркелингом и дополнительными услугами для вашей группы.", highlights: ["Частный катер", "Orange Bay и Магавиш", "Сноркелинг со снаряжением", "Восемь вариантов катера", "Дополнительное питание и трансфер"], included: ["Выбранный катер", "Капитан-гид", "Топливо", "Снаряжение", "Спасательное оборудование"], notIncluded: ["Вход на острова — добавляется при бронировании", "Питание, если не выбрано", "Трансфер из отеля, если не выбран", "Личные расходы"], packageName: "Частный катер Orange Bay и Магавиш", packageDescription: "Выберите катер, входные билеты, питание и трансфер до марины.", packageLabel: "Катер от", seoTitle: "Orange Bay и Магавиш на катере из Хургады", metaDescription: "Частная поездка на катере из Хургады к Orange Bay и Магавишу со сноркелингом и дополнительным питанием." },
   ar: { title: "قارب سريع خاص إلى أورانج باي ومجاويش", description: "اكتشف أورانج باي ومجاويش بقارب سريع خاص مع محطة سنوركلينج وإضافات اختيارية لمجموعتك.", highlights: ["قارب خاص للمجموعة", "أورانج باي ومجاويش", "سنوركلينج مع المعدات", "ثمانية خيارات للقارب", "طعام وتوصيل اختياريان"], included: ["القارب المختار", "القبطان والمرشد", "الوقود", "معدات السنوركلينج", "معدات السلامة"], notIncluded: ["دخول الجزيرتين — يضاف عند الحجز", "الطعام والمشروبات ما لم تُختر", "توصيل الفندق ما لم يُختر", "المصاريف الشخصية"], packageName: "قارب أورانج باي ومجاويش الخاص", packageDescription: "اختر القارب ورسوم دخول الجزر والطعام والتوصيل إلى المارينا.", packageLabel: "القارب الخاص من", seoTitle: "قارب أورانج باي ومجاويش من الغردقة", metaDescription: "رحلة قارب سريع خاصة من الغردقة إلى أورانج باي ومجاويش مع سنوركلينج وإضافات اختيارية." },
@@ -1620,6 +1628,7 @@ function localizeTourContent(tour: Tour, locale: Locale): Tour {
     : locale === "ar" ? localizeTourArabic(tour)
     : locale === "zh" ? localizeTourChinese(tour)
     : locale === "pl" ? localizeTourPolish(tour)
+    : locale === "it" ? localizeTourItalian(tour)
     : tour;
   const withMagawish = tour.slug === "magawish-speedboat" ? { ...base, ...magawishSpeedboatTranslations[locale] } : base;
   return { ...localizeMahmya(localizeSnorkelingBoatTrip(withMagawish, locale), locale), ...mediaFields };

@@ -71,6 +71,13 @@ const translations = {
     description: "Wybierz dzień na plaży, program z lunchem lub pełny program z lunchem i snorkelingiem przy rafie Sabina.",
     ageBands: { adults: "Dorośli (od 7 lat)", children: "Dzieci (3–6 lat)", infants: "Niemowlęta (poniżej 3 lat)" }, label: "Za dorosłego",
   },
+  it: {
+    title: "Gita in barca all'isola di Mahmya da Hurghada",
+    names: ["Programma giornaliero", "Programma giornaliero + pranzo", "Programma completo"],
+    items: ["Trasferimento in barca da e per l'isola", "Uso della spiaggia con posto riservato all'ombra", "Telo Mahmya", "Pranzo a buffet con acqua e bibite gratuite durante il pasto", "Uscita snorkeling in barca alla barriera di Sabina, attrezzatura inclusa", "Cibo e bevande dal menu alla carta"],
+    description: "Scegli la giornata in spiaggia, la giornata con pranzo oppure il programma completo con pranzo e snorkeling alla barriera di Sabina.",
+    ageBands: { adults: "Adulti (da 7 anni)", children: "Bambini (3–6 anni)", infants: "Neonati (sotto i 3 anni)" }, label: "Per adulto",
+  },
 };
 
 export function localizeMahmya(tour: Tour, locale: Locale): Tour {

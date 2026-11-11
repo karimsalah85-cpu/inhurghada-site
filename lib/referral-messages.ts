@@ -15,6 +15,7 @@ const inviteCopy = {
   ru: "Пригласите друзей и семью открыть Красное море. Участвуйте в нашей реферальной программе по ссылке ниже.",
   pl: "Zaproś znajomych i rodzinę do odkrywania Morza Czerwonego. Dołącz do programu poleceń przez poniższy link.",
   zh: "邀请亲朋好友探索红海。通过下方链接参加我们的推荐计划。",
+  it: "Invita amici e familiari a scoprire con te il Mar Rosso. Partecipa al nostro programma referral con il link qui sotto.",
 };
 
 export type ReferralMessageInput = { event: "trip_completed" | "activated" | "reward_earned"; locale?: string | null; customerName: string; qualified: boolean; referralCode?: string | null; balanceUnits?: number; bookingReference?: string; trip?: { theme?: "sea" | "desert" | "culture"; title: string; image?: string; destination: string; url: string; related: Array<{ title: string; image?: string; url: string }> } };

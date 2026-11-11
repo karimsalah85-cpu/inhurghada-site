@@ -15,7 +15,7 @@ page.on("pageerror", error => errors.push(error.message));
 page.on("console", message => { if (/hydration|hydrating|did not match|cannot be a descendant/i.test(message.text())) errors.push(message.text()); });
 const results = [];
 try {
-  for (const locale of ["en", "ar", "de", "ru", "pl", "zh"]) {
+  for (const locale of ["en", "ar", "de", "ru", "pl", "zh", "it"]) {
     for (const width of [375, 768, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(`${base}/${locale === "en" ? "" : locale}`, { waitUntil: "domcontentloaded" });

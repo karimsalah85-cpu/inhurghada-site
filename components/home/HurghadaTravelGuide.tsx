@@ -82,6 +82,19 @@ const copy = {
       ["保护海洋", "请勿触摸珊瑚或海洋生物，遵守船员的安全说明，并仅在自身培训和经验范围内潜水。"],
     ],
   },
+  it: {
+    eyebrow: "Pianifica la tua esperienza sul Mar Rosso",
+    title: "Cosa fare sul Mar Rosso",
+    intro: "Ogni destinazione del Mar Rosso ha il suo carattere: gite in barca alle isole, snorkeling e immersioni, avventure nel deserto, escursioni culturali e pratici transfer privati. Scegli la destinazione più adatta al tuo hotel e ai tuoi programmi.",
+    detail: "Hurghada, Marsa Alam ed El Gouna si trovano sulla costa egiziana del Mar Rosso, mentre Gedda apre il versante saudita dello stesso mare; altre destinazioni arriveranno. Confronta destinazione, durata, servizi inclusi, dettagli del prelievo e prezzi trasparenti prima di prenotare.",
+    items: [
+      ["In acqua", "Il Mar Rosso è noto per l'acqua calda e limpida e per le barriere coralline vicine alla riva. Scegli esperienze di snorkeling e immersione adatte al tuo livello e alle condizioni del mare del giorno."],
+      ["Oltre la spiaggia", "Ogni destinazione è molto più della sua costa. Giornate sulle isole e marine, centri storici, mercati e siti archeologici sono di solito facilmente raggiungibili dal tuo hotel."],
+      ["Cultura locale", "L'ospitalità intorno al Mar Rosso è calorosa e conviviale. Assaggia la cucina regionale, mangia dove mangia la gente del posto e vestiti in modo rispettoso lontano dalla spiaggia."],
+      ["Organizzati con comodità", "Metti in valigia strati leggeri, costume, cappello, occhiali da sole e una protezione solare rispettosa della barriera. Controlla i dettagli del prelievo il giorno prima dell'attività."],
+      ["Rispetta il mare", "Non toccare coralli né animali marini, segui il briefing di sicurezza dell'equipaggio e immergiti solo entro i limiti della tua formazione ed esperienza."],
+    ],
+  },
 };
 
 const icons = [Fish, MapPin, Utensils, Sun, ShieldCheck];

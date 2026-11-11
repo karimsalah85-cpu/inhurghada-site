@@ -8,6 +8,7 @@ const labels = {
   ru: ["Промокод", "Применить", "Удалить", "Скидка", "Проверка…", "Примените или удалите код перед подтверждением.", "Заполните данные бронирования и примените код."],
   pl: ["Kod promocyjny", "Zastosuj", "Usuń", "Rabat", "Sprawdzanie…", "Zastosuj lub usuń kod przed potwierdzeniem.", "Uzupełnij dane rezerwacji, a następnie zastosuj kod."],
   zh: ["优惠码", "应用", "移除", "优惠", "正在验证…", "请在确认前应用或移除优惠码。", "请填写预订信息，然后应用优惠码。"],
+  it: ["Codice promo", "Applica", "Rimuovi", "Sconto", "Verifica in corso…", "Applica il codice o rimuovilo prima di confermare.", "Completa i dati della prenotazione, poi applica il codice."],
 };
 type Quote = { code: string; subtotal: number; discount: number; total: number; currency: string };
 export function usePromoCode(input: Record<string, unknown>, subtotal: number, locale: Locale, getIdempotencyKey: () => string) {

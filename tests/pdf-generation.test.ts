@@ -125,7 +125,7 @@ describe("PDF generators", () => {
   });
 
   it("renders confirmation and status PDFs per booking language across every locale", async () => {
-    const locales = ["en", "de", "ru", "ar", "pl", "zh"] as const;
+    const locales = ["en", "de", "ru", "ar", "pl", "zh", "it"] as const;
     const statusBase = {
       reference: "DRS-L10N-1", generatedAt: new Date("2026-08-14T00:00:00Z"), customerName: "Guest",
       itemName: "Glass-bottom boat", amount: 50, currency: "USD", bookingStatus: "completed", paymentStatus: "paid",

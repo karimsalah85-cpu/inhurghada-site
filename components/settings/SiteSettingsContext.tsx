@@ -12,6 +12,7 @@ export const languages = [
   { code: "ru", label: "Русский" },
   { code: "pl", label: "Polski" },
   { code: "zh", label: "简体中文" },
+  { code: "it", label: "Italiano" },
 ] as const;
 
 export const currencies = ["USD", "EUR", "GBP", "EGP", "SAR"] as const;
@@ -79,6 +80,13 @@ const translations: Record<Language, Record<string, string>> = {
     discoverHurghada: "探索红海", heroTitle: "逐个目的地，发现红海精彩体验", heroDescription: "选择红海行程和日期，直接在我们的网站预订。抵达时支付现金，WhatsApp 提供本地支持。",
     privateTransfers: "私人接送", boatTrips: "游船和浮潜", desertAdventures: "沙漠探险", destination: "目的地", destinationQuestion: "您想去哪里？", travelDate: "出行日期", guests: "游客", searchTours: "搜索旅游项目",
     chooseExperience: "选择您的体验", exploreAdventure: "探索赫尔格达", viewAllTours: "查看所有项目", popularTours: "热门旅游项目", popularToursDescription: "探索深潜、浮潜、Orange Bay 巡游和红海探险。", searchPlaceholder: "搜索旅游项目、地点或活动...", bestSeller: "热销", everyDay: "每天", perPerson: "每人", bookYourTrip: "预订行程", fullName: "姓名", whatsappNumber: "WhatsApp 号码", emailAddress: "电子邮箱", pickupLocation: "酒店 / 接送地点", specialRequests: "特殊要求", sendBooking: "发送预订请求", cashOnArrival: "抵达时现金支付",
+  },
+  it: {
+    home: "Home", tours: "Escursioni", transfers: "Transfer", booking: "Prenotazione", checkout: "Checkout", about: "Chi siamo", bookNow: "Prenota ora", whatsappBooking: "Prenota su WhatsApp", goodMorning: "Buongiorno", goodAfternoon: "Buon pomeriggio", goodEvening: "Buonasera",
+    explore: "Esplora", myTrips: "I miei viaggi", plan: "Pianifica", planYourTrip: "Pianifica il viaggio", quickNavigation: "Navigazione rapida", bookThisTrip: "Prenota questa escursione", from: "Da",
+    discoverHurghada: "Scopri il Mar Rosso", heroTitle: "Scopri tour ed esperienze sul Mar Rosso", heroDescription: "Scegli la tua escursione sul Mar Rosso, seleziona una data e prenota sul nostro sito. Paghi in contanti all'arrivo, con assistenza locale su WhatsApp.",
+    privateTransfers: "Transfer privati", boatTrips: "Gite in barca e snorkeling", desertAdventures: "Avventure nel deserto", destination: "Destinazione", destinationQuestion: "Dove vuoi andare?", travelDate: "Data del viaggio", guests: "Ospiti", searchTours: "Cerca escursioni",
+    chooseExperience: "Scegli la tua esperienza", exploreAdventure: "Esplora il Mar Rosso per tipo di avventura", viewAllTours: "Vedi tutte le escursioni", popularTours: "Escursioni più richieste", popularToursDescription: "Scopri immersioni, snorkeling, crociere a Orange Bay e avventure sul Mar Rosso.", searchPlaceholder: "Scegli una destinazione", bestSeller: "Più venduto", everyDay: "Tutti i giorni", perPerson: "a persona", bookYourTrip: "Prenota la tua escursione", fullName: "Nome e cognome", whatsappNumber: "Numero WhatsApp", emailAddress: "Indirizzo e-mail", pickupLocation: "Nome dell'hotel / luogo di prelievo", specialRequests: "Richieste particolari", sendBooking: "Invia richiesta di prenotazione", cashOnArrival: "Paga in contanti all'arrivo",
   },
 };
 

@@ -25,7 +25,7 @@ describe("website fixes 2026-10-27", () => {
   });
 
   it("never leaves a translated tour with the untouched English SEO title", () => {
-    const locales: Locale[] = ["de", "ru", "pl", "ar", "zh"];
+    const locales: Locale[] = ["de", "ru", "pl", "ar", "zh", "it"];
     for (const tour of tours) {
       if (!tour.seoTitle) continue;
       for (const locale of locales) {
@@ -44,7 +44,7 @@ describe("website fixes 2026-10-27", () => {
 describe("Orange Bay park fee disclosure", () => {
   it("lists the national park fee as not included in every language", () => {
     const tour = tours.find((item) => item.slug === "orange-bay")!;
-    const locales: Locale[] = ["en", "de", "ru", "pl", "ar", "zh"];
+    const locales: Locale[] = ["en", "de", "ru", "pl", "ar", "zh", "it"];
     for (const locale of locales) {
       const localized = localizeTour(tour, locale);
       expect(localized.notIncluded?.some((item) => /5/.test(item)), locale).toBe(true);

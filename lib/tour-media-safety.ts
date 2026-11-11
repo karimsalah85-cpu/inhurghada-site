@@ -1,5 +1,6 @@
 import type { Tour } from "@/data/tours";
 import type { Locale } from "@/lib/i18n";
+import { italianAlt } from "@/lib/tour-media-alt-it";
 
 type SafeMedia = {
   image: string;
@@ -9,14 +10,14 @@ type SafeMedia = {
   galleryAlts?: Record<Locale, string[]>;
 };
 
-const localizedAlt = (en: string): Record<Locale, string> => ({ en, ar: en, de: en, ru: en, pl: en, zh: en });
+const localizedAlt = (en: string): Record<Locale, string> => ({ en, ar: en, de: en, ru: en, pl: en, zh: en, it: italianAlt(en) });
 
 const ownedMedia: Record<string, SafeMedia> = {
   dolphin: {
     image: "/images/owned/dolphin-house-pod.jpg",
     alt: localizedAlt("Wild dolphins swimming in clear Red Sea water; sightings on wildlife trips are not guaranteed"),
     gallery: ["/images/owned/dolphin-house-close.jpg", "/images/owned/dolphin-house-portrait.jpg", "/images/owned/dolphin-house-pair.jpg"],
-    galleryAlts: { en: ["A pod of dolphins swimming near the surface", "A dolphin swimming toward the camera with snorkellers above", "Two dolphins swimming together in clear water"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["A pod of dolphins swimming near the surface", "A dolphin swimming toward the camera with snorkellers above", "Two dolphins swimming together in clear water"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   senzo: { image: "/images/owned/senzo-mall.jpg", alt: localizedAlt("Senzo Mall shopping, dining and indoor public areas") },
   cairo: {
@@ -31,7 +32,7 @@ const ownedMedia: Record<string, SafeMedia> = {
       "/images/owned/cairo-gem-stone-head-owner.jpg",
       "/images/owned/cairo-gem-seated-statue-owner.jpg",
     ],
-    galleryAlts: { en: ["Ancient Egyptian colossus in the Grand Egyptian Museum hall", "Tutankhamun's gold funerary mask", "Tutankhamun's decorated golden throne", "Monumental ancient Egyptian statue in the Grand Egyptian Museum", "Profile of Tutankhamun's gold funerary mask", "Ancient Egyptian stone sarcophagus", "Carved ancient Egyptian stone head", "Seated ancient Egyptian statue in the Grand Egyptian Museum"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Ancient Egyptian colossus in the Grand Egyptian Museum hall", "Tutankhamun's gold funerary mask", "Tutankhamun's decorated golden throne", "Monumental ancient Egyptian statue in the Grand Egyptian Museum", "Profile of Tutankhamun's gold funerary mask", "Ancient Egyptian stone sarcophagus", "Carved ancient Egyptian stone head", "Seated ancient Egyptian statue in the Grand Egyptian Museum"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   quadMorning: { image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes on a desert safari") },
   quadDesertRide: {
@@ -43,6 +44,7 @@ const ownedMedia: Record<string, SafeMedia> = {
       ru: "Гости в синих шлемах едут на зелёном и красном квадроциклах по пустынной трассе у Хургады",
       pl: "Goście w niebieskich kaskach jadą zielonym i czerwonym quadem po pustynnym szlaku koło Hurghady",
       zh: "戴着蓝色头盔的游客在赫尔格达附近的沙漠小道上驾驶绿色和红色四轮摩托",
+      it: italianAlt("Guests in blue helmets riding green and red quad bikes along a desert track near Hurghada"),
     },
     focal: { x: 0.5, y: 0.5 },
     gallery: ["/images/owned/quad-safari-sunset-beach.jpg", "/images/owned/desert-camel-front.jpg"],
@@ -53,6 +55,7 @@ const ownedMedia: Record<string, SafeMedia> = {
       ru: ["Двое гостей на квадроциклах посылают друг другу воздушные поцелуи на берегу Красного моря в золотом свете", "Верблюд смотрит в камеру в пустынном лагере"],
       pl: ["Dwoje jeźdźców na quadach przesyła sobie całusy na brzegu Morza Czerwonego w złotym świetle", "Wielbłąd patrzący w obiektyw w pustynnym obozie"],
       zh: ["两位骑手坐在四轮摩托上，在金色阳光下的红海岸边互送飞吻", "沙漠营地里一头正对镜头的骆驼"],
+      it: ["Two riders on quad bikes blowing kisses on the Red Sea shore in golden light", "A camel facing the camera at a desert camp"].map(italianAlt),
     },
   },
   quadSunsetBeach: {
@@ -64,6 +67,7 @@ const ownedMedia: Record<string, SafeMedia> = {
       ru: "Двое гостей на квадроциклах посылают друг другу воздушные поцелуи на берегу Красного моря в золотом вечернем свете",
       pl: "Dwoje jeźdźców na quadach przesyła sobie całusy na brzegu Morza Czerwonego w złotym wieczornym świetle",
       zh: "两位骑手坐在四轮摩托上，在金色傍晚阳光下的红海岸边互送飞吻",
+      it: italianAlt("Two riders on quad bikes blowing kisses on the Red Sea shore in golden evening light"),
     },
     focal: { x: 0.5, y: 0.4 },
     gallery: ["/images/owned/quad-safari-desert-ride.jpg", "/images/owned/desert-camel-front.jpg"],
@@ -74,63 +78,64 @@ const ownedMedia: Record<string, SafeMedia> = {
       ru: ["Гости в синих шлемах едут на зелёном и красном квадроциклах по пустынной трассе у Хургады", "Верблюд смотрит в камеру в пустынном лагере"],
       pl: ["Goście w niebieskich kaskach jadą zielonym i czerwonym quadem po pustynnym szlaku koło Hurghady", "Wielbłąd patrzący w obiektyw w pustynnym obozie"],
       zh: ["戴着蓝色头盔的游客在赫尔格达附近的沙漠小道上驾驶绿色和红色四轮摩托", "沙漠营地里一头正对镜头的骆驼"],
+      it: ["Guests in blue helmets riding green and red quad bikes along a desert track near Hurghada", "A camel facing the camera at a desert camp"].map(italianAlt),
     },
   },
   desertAdventure: {
     image: "/images/owned/quad-safari-morning.jpg", alt: localizedAlt("Guests riding red quad bikes during a Hurghada desert adventure"),
     gallery: ["/images/owned/desert-camel-front.jpg"],
-    galleryAlts: { en: ["A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["A camel facing the camera at a desert camp"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   camelAdventure: {
     image: "/images/owned/desert-camel-front.jpg", alt: localizedAlt("A camel facing the camera at a desert camp near Hurghada"),
     gallery: ["/images/owned/quad-safari-morning.jpg"],
-    galleryAlts: { en: ["Guests riding red quad bikes during a Hurghada desert adventure"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Guests riding red quad bikes during a Hurghada desert adventure"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   airport: { image: "/images/owned/hurghada-airport-flight.png", alt: localizedAlt("Aerial view of the Red Sea coast from an arriving aircraft") },
   speedboat: {
     image: "/images/owned/speedboat-action-wide.jpg", alt: localizedAlt("A Daily Red Sea speedboat carrying guests across clear Red Sea water"),
     gallery: ["/images/owned/speedboat-action.jpg", "/images/owned/speedboat-guests.jpg", "/images/owned/speedboat-shallows.jpg", "/images/owned/speedboat-marina.jpg"],
-    galleryAlts: { en: ["A speedboat travelling across turquoise water", "Guests enjoying a Red Sea speedboat trip", "A white speedboat moored in shallow clear water", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["A speedboat travelling across turquoise water", "Guests enjoying a Red Sea speedboat trip", "A white speedboat moored in shallow clear water", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   speedboatGuests: {
     image: "/images/owned/speedboat-guests.jpg", alt: localizedAlt("Guests enjoying a private speedboat trip across clear Red Sea water"),
     gallery: ["/images/owned/speedboat-action-wide.jpg", "/images/owned/speedboat-action.jpg", "/images/owned/speedboat-shallows.jpg", "/images/owned/speedboat-marina.jpg"],
-    galleryAlts: { en: ["A speedboat carrying guests across turquoise water", "A speedboat travelling across the Red Sea", "A white speedboat moored in shallow clear water", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["A speedboat carrying guests across turquoise water", "A speedboat travelling across the Red Sea", "A white speedboat moored in shallow clear water", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   speedboatShallows: {
     image: "/images/owned/speedboat-shallows.jpg", alt: localizedAlt("A private white speedboat in clear shallow Red Sea water"),
     gallery: ["/images/owned/speedboat-action-wide.jpg", "/images/owned/speedboat-action.jpg", "/images/owned/speedboat-guests.jpg", "/images/owned/speedboat-marina.jpg"],
-    galleryAlts: { en: ["A speedboat carrying guests across turquoise water", "A speedboat travelling across the Red Sea", "Guests enjoying a Red Sea speedboat trip", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["A speedboat carrying guests across turquoise water", "A speedboat travelling across the Red Sea", "Guests enjoying a Red Sea speedboat trip", "Speedboats moored in a Red Sea marina"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   diving: {
     image: "/images/owned/red-sea-diver-coral.jpg", alt: localizedAlt("Scuba diver beside a colourful Red Sea coral reef"),
     gallery: ["/images/owned/red-sea-diver-fish.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg", "/images/owned/beginner-scuba-diving-group.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
-    galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Scuba diver surrounded by small reef fish", "Scuba diver underwater in the Red Sea", "Scuba diver swimming above a coral reef", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   underwaterPhotographer: {
     image: "/images/owned/red-sea-diver-fish.jpg", alt: localizedAlt("Underwater Red Sea photograph of a scuba diver surrounded by reef fish"),
     gallery: ["/images/owned/red-sea-diver-coral.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-diver-reef.jpg"],
-    galleryAlts: { en: ["Underwater photograph of a diver beside colourful coral", "Underwater portrait of a Red Sea scuba diver", "Scuba diver photographed above a Red Sea coral reef"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Underwater photograph of a diver beside colourful coral", "Underwater portrait of a Red Sea scuba diver", "Scuba diver photographed above a Red Sea coral reef"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   snorkeling: {
     image: "/images/owned/red-sea-reef-panorama.jpg", alt: localizedAlt("Clear Red Sea water and coral reef at a snorkeling area"),
     gallery: ["/images/owned/red-sea-coral-closeup.jpg", "/images/owned/red-sea-coast.jpg"],
-    galleryAlts: { en: ["Red Sea coral with small reef fish", "Clear shallow Red Sea water along the coast"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Red Sea coral with small reef fish", "Clear shallow Red Sea water along the coast"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   orangeBay: {
     image: "/images/owned/red-sea-reef-panorama.jpg", alt: localizedAlt("Turquoise Red Sea water and coral reef on the Orange Bay snorkeling route"),
     gallery: ["/images/owned/red-sea-coral-closeup.jpg", "/images/owned/red-sea-coast.jpg"],
-    galleryAlts: { en: ["Coral and reef fish on the Orange Bay snorkeling route", "Clear Red Sea water near Orange Bay"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Coral and reef fish on the Orange Bay snorkeling route", "Clear Red Sea water near Orange Bay"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   diveTraining: {
     image: "/images/owned/diving-training-seabed.jpg", alt: localizedAlt("Scuba students practising skills with instructors underwater"),
     gallery: ["/images/owned/diving-training-instructor.jpg", "/images/owned/red-sea-diver-coral.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
-    galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   beginnerScuba: {
     image: "/images/owned/beginner-scuba-diving-group.jpg", alt: localizedAlt("Beginner scuba divers underwater with their instructor in the Red Sea"),
     gallery: ["/images/owned/diving-training-seabed.jpg", "/images/owned/diving-training-instructor.jpg", "/images/owned/red-sea-diver.jpg", "/images/owned/red-sea-coral-closeup.jpg"],
-    galleryAlts: { en: ["Scuba students practising skills underwater", "A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Scuba students practising skills underwater", "A diving instructor supervising an underwater training exercise", "A group of scuba divers at the surface beside a dive boat", "Red Sea coral with small reef fish"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
   glassBottomBoat: {
     image: "/images/owned/hurghada-glass-bottom-boat.jpg",
@@ -139,26 +144,26 @@ const ownedMedia: Record<string, SafeMedia> = {
   },
   mahmya: { image: "/images/owned/mahmya-island-boats-owner.jpg", alt: localizedAlt("Mahmya excursion boats moored on the Red Sea at sunset"), focal: { x: 0.5, y: 0.62 } },
   luxor: {
-    image: "/images/owned/luxor-branded.jpg", alt: { en: "Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall", ar: "تصميم Daily Red Sea للأقصر يظهر جدار معبد مصري قديم", de: "Daily-Red-Sea-Luxor-Grafik mit einer altägyptischen Tempelwand", ru: "Иллюстрация Daily Red Sea о Луксоре со стеной древнеегипетского храма", pl: "Grafika Daily Red Sea o Luksorze ze ścianą starożytnej egipskiej świątyni", zh: "Daily Red Sea 卢克索主题图，展示古埃及神庙墙壁" }, focal: { x: 0.5, y: 0.42 },
+    image: "/images/owned/luxor-branded.jpg", alt: { en: "Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall", ar: "تصميم Daily Red Sea للأقصر يظهر جدار معبد مصري قديم", de: "Daily-Red-Sea-Luxor-Grafik mit einer altägyptischen Tempelwand", ru: "Иллюстрация Daily Red Sea о Луксоре со стеной древнеегипетского храма", pl: "Grafika Daily Red Sea o Luksorze ze ścianą starożytnej egipskiej świątyni", zh: "Daily Red Sea 卢克索主题图，展示古埃及神庙墙壁", it: italianAlt("Daily Red Sea Luxor artwork featuring an ancient Egyptian temple wall") }, focal: { x: 0.5, y: 0.42 },
     gallery: ["/images/owned/luxor-temple-facade.jpg", "/images/owned/luxor-temple-reliefs.jpg", "/images/owned/luxor-temple-columns.jpg", "/images/owned/luxor-hieroglyphs.jpg"],
-    galleryAlts: { en: ["Ancient Egyptian temple facade with carved figures", "Temple wall reliefs beside the Nile", "Hieroglyph-covered columns at an ancient Egyptian temple", "Close view of carved figures and hieroglyphs on a temple wall"], ar: [], de: [], ru: [], pl: [], zh: [] },
+    galleryAlts: { en: ["Ancient Egyptian temple facade with carved figures", "Temple wall reliefs beside the Nile", "Hieroglyph-covered columns at an ancient Egyptian temple", "Close view of carved figures and hieroglyphs on a temple wall"], ar: [], de: [], ru: [], pl: [], zh: [], it: [] },
   },
 };
 
 const categoryMedia: Record<string, SafeMedia> = {
-  sea: { image: "/images/placeholders/sea-activity.svg", alt: { en: "Illustrated placeholder for a Red Sea activity", ar: "رسم توضيحي مؤقت لنشاط في البحر الأحمر", de: "Illustrierter Platzhalter für eine Aktivität am Roten Meer", ru: "Иллюстрированная заглушка для отдыха на Красном море", pl: "Ilustrowana grafika zastępcza dla atrakcji nad Morzem Czerwonym", zh: "红海活动插画占位图" } },
-  island: { image: "/images/placeholders/island-trip.svg", alt: { en: "Illustrated placeholder for a Red Sea island trip", ar: "رسم توضيحي مؤقت لرحلة جزيرة في البحر الأحمر", de: "Illustrierter Platzhalter für einen Inselausflug am Roten Meer", ru: "Иллюстрированная заглушка для поездки на остров Красного моря", pl: "Ilustrowana grafika zastępcza dla wycieczki na wyspę Morza Czerwonego", zh: "红海海岛游插画占位图" } },
-  diving: { image: "/images/placeholders/diving.svg", alt: { en: "Illustrated placeholder for a Red Sea diving experience", ar: "رسم توضيحي مؤقت لتجربة غوص في البحر الأحمر", de: "Illustrierter Platzhalter für ein Taucherlebnis am Roten Meer", ru: "Иллюстрированная заглушка для дайвинга в Красном море", pl: "Ilustrowana grafika zastępcza dla nurkowania w Morzu Czerwonym", zh: "红海潜水体验插画占位图" } },
-  desert: { image: "/images/placeholders/desert-experience.svg", alt: { en: "Illustrated placeholder for a Hurghada desert experience", ar: "رسم توضيحي مؤقت لتجربة في صحراء الغردقة", de: "Illustrierter Platzhalter für ein Wüstenerlebnis in Hurghada", ru: "Иллюстрированная заглушка для поездки в пустыню Хургады", pl: "Ilustrowana grafika zastępcza dla atrakcji na pustyni w Hurghadzie", zh: "赫尔格达沙漠体验插画占位图" } },
-  transfer: { image: "/images/placeholders/private-transfer.svg", alt: { en: "Illustrated placeholder for a private transfer", ar: "رسم توضيحي مؤقت لخدمة توصيل خاصة", de: "Illustrierter Platzhalter für einen privaten Transfer", ru: "Иллюстрированная заглушка для частного трансфера", pl: "Ilustrowana grafika zastępcza dla prywatnego transferu", zh: "私人接送插画占位图" } },
-  culture: { image: "/images/placeholders/cultural-trip.svg", alt: { en: "Illustrated placeholder for an Egyptian cultural day trip", ar: "رسم توضيحي مؤقت لرحلة ثقافية في مصر", de: "Illustrierter Platzhalter für einen kulturellen Tagesausflug in Ägypten", ru: "Иллюстрированная заглушка для культурной поездки по Египту", pl: "Ilustrowana grafika zastępcza dla wycieczki kulturowej po Egipcie", zh: "埃及文化一日游插画占位图" } },
-  quad: { image: "/images/placeholders/quad-safari.svg", alt: { en: "Illustrated placeholder for a quad bike desert safari", ar: "رسم توضيحي مؤقت لرحلة سفاري بالدراجة الرباعية في الصحراء", de: "Illustrierter Platzhalter für eine Quad-Safari in der Wüste", ru: "Иллюстрированная заглушка для сафари на квадроциклах в пустыне", pl: "Ilustrowana grafika zastępcza dla pustynnego safari na quadach", zh: "沙漠四轮摩托之旅插画占位图" } },
-  senzo: { image: "/images/placeholders/senzo-transfer.svg", alt: { en: "Illustrated placeholder for a private Senzo Mall transfer", ar: "رسم توضيحي مؤقت لانتقال خاص إلى سنزو مول", de: "Illustrierter Platzhalter für einen privaten Transfer zur Senzo Mall", ru: "Иллюстрированная заглушка для частного трансфера в Senzo Mall", pl: "Ilustrowana grafika zastępcza dla prywatnego transferu do Senzo Mall", zh: "Senzo Mall 私人接送插画占位图" } },
-  dolphin: { image: "/images/placeholders/dolphin-house.svg", alt: { en: "Illustrated placeholder for a Dolphin House snorkeling boat trip; wildlife sightings are not guaranteed", ar: "رسم توضيحي مؤقت لرحلة قارب للغطس في دولفين هاوس؛ مشاهدة الدلافين غير مضمونة", de: "Illustrierter Platzhalter für eine Schnorchelfahrt zum Dolphin House; Wildtiersichtungen sind nicht garantiert", ru: "Иллюстрированная заглушка для снорклинг-тура в Dolphin House; встречи с дельфинами не гарантированы", pl: "Ilustrowana grafika zastępcza dla rejsu snorkelingowego do Dolphin House; obserwacje delfinów nie są gwarantowane", zh: "海豚屋浮潜船行程插画占位图；不保证看到野生海豚" } },
-  horse: { image: "/images/placeholders/horse-riding.svg", alt: { en: "Illustrated placeholder for a guided horse-riding experience", ar: "رسم توضيحي مؤقت لتجربة ركوب خيل بصحبة مرشد", de: "Illustrierter Platzhalter für einen geführten Ausritt", ru: "Иллюстрированная заглушка для конной прогулки с гидом", pl: "Ilustrowana grafika zastępcza dla jazdy konnej z przewodnikiem", zh: "向导陪同骑马体验插画占位图" } },
-  cairo: { image: "/images/placeholders/cairo-giza.svg", alt: { en: "Illustrated placeholder for a Cairo and Giza cultural day trip", ar: "رسم توضيحي مؤقت لرحلة ثقافية إلى القاهرة والجيزة", de: "Illustrierter Platzhalter für einen Kulturausflug nach Kairo und Gizeh", ru: "Иллюстрированная заглушка для культурной поездки в Каир и Гизу", pl: "Ilustrowana grafika zastępcza dla wycieczki kulturowej do Kairu i Gizy", zh: "开罗和吉萨文化一日游插画占位图" } },
-  elGouna: { image: "/images/placeholders/el-gouna.svg", alt: { en: "Illustrated placeholder for an El Gouna lagoon and city tour", ar: "رسم توضيحي مؤقت لجولة البحيرات والمدينة في الجونة", de: "Illustrierter Platzhalter für eine Lagunen- und Stadttour in El Gouna", ru: "Иллюстрированная заглушка для тура по лагунам и городу Эль-Гуна", pl: "Ilustrowana grafika zastępcza dla wycieczki po lagunach i mieście El Gouna", zh: "埃尔古纳泻湖与城市游插画占位图" } },
-  spa: { image: "/images/placeholders/wellness-spa.svg", alt: { en: "Illustrated placeholder for a Turkish bath and wellness experience", ar: "رسم توضيحي مؤقت لتجربة الحمام التركي والعناية الصحية", de: "Illustrierter Platzhalter für ein Hamam- und Wellness-Erlebnis", ru: "Иллюстрированная заглушка для турецкой бани и спа", pl: "Ilustrowana grafika zastępcza dla łaźni tureckiej i spa", zh: "土耳其浴与康体体验插画占位图" } },
+  sea: { image: "/images/placeholders/sea-activity.svg", alt: { en: "Illustrated placeholder for a Red Sea activity", ar: "رسم توضيحي مؤقت لنشاط في البحر الأحمر", de: "Illustrierter Platzhalter für eine Aktivität am Roten Meer", ru: "Иллюстрированная заглушка для отдыха на Красном море", pl: "Ilustrowana grafika zastępcza dla atrakcji nad Morzem Czerwonym", zh: "红海活动插画占位图", it: italianAlt("Illustrated placeholder for a Red Sea activity") } },
+  island: { image: "/images/placeholders/island-trip.svg", alt: { en: "Illustrated placeholder for a Red Sea island trip", ar: "رسم توضيحي مؤقت لرحلة جزيرة في البحر الأحمر", de: "Illustrierter Platzhalter für einen Inselausflug am Roten Meer", ru: "Иллюстрированная заглушка для поездки на остров Красного моря", pl: "Ilustrowana grafika zastępcza dla wycieczki na wyspę Morza Czerwonego", zh: "红海海岛游插画占位图", it: italianAlt("Illustrated placeholder for a Red Sea island trip") } },
+  diving: { image: "/images/placeholders/diving.svg", alt: { en: "Illustrated placeholder for a Red Sea diving experience", ar: "رسم توضيحي مؤقت لتجربة غوص في البحر الأحمر", de: "Illustrierter Platzhalter für ein Taucherlebnis am Roten Meer", ru: "Иллюстрированная заглушка для дайвинга в Красном море", pl: "Ilustrowana grafika zastępcza dla nurkowania w Morzu Czerwonym", zh: "红海潜水体验插画占位图", it: italianAlt("Illustrated placeholder for a Red Sea diving experience") } },
+  desert: { image: "/images/placeholders/desert-experience.svg", alt: { en: "Illustrated placeholder for a Hurghada desert experience", ar: "رسم توضيحي مؤقت لتجربة في صحراء الغردقة", de: "Illustrierter Platzhalter für ein Wüstenerlebnis in Hurghada", ru: "Иллюстрированная заглушка для поездки в пустыню Хургады", pl: "Ilustrowana grafika zastępcza dla atrakcji na pustyni w Hurghadzie", zh: "赫尔格达沙漠体验插画占位图", it: italianAlt("Illustrated placeholder for a Hurghada desert experience") } },
+  transfer: { image: "/images/placeholders/private-transfer.svg", alt: { en: "Illustrated placeholder for a private transfer", ar: "رسم توضيحي مؤقت لخدمة توصيل خاصة", de: "Illustrierter Platzhalter für einen privaten Transfer", ru: "Иллюстрированная заглушка для частного трансфера", pl: "Ilustrowana grafika zastępcza dla prywatnego transferu", zh: "私人接送插画占位图", it: italianAlt("Illustrated placeholder for a private transfer") } },
+  culture: { image: "/images/placeholders/cultural-trip.svg", alt: { en: "Illustrated placeholder for an Egyptian cultural day trip", ar: "رسم توضيحي مؤقت لرحلة ثقافية في مصر", de: "Illustrierter Platzhalter für einen kulturellen Tagesausflug in Ägypten", ru: "Иллюстрированная заглушка для культурной поездки по Египту", pl: "Ilustrowana grafika zastępcza dla wycieczki kulturowej po Egipcie", zh: "埃及文化一日游插画占位图", it: italianAlt("Illustrated placeholder for an Egyptian cultural day trip") } },
+  quad: { image: "/images/placeholders/quad-safari.svg", alt: { en: "Illustrated placeholder for a quad bike desert safari", ar: "رسم توضيحي مؤقت لرحلة سفاري بالدراجة الرباعية في الصحراء", de: "Illustrierter Platzhalter für eine Quad-Safari in der Wüste", ru: "Иллюстрированная заглушка для сафари на квадроциклах в пустыне", pl: "Ilustrowana grafika zastępcza dla pustynnego safari na quadach", zh: "沙漠四轮摩托之旅插画占位图", it: italianAlt("Illustrated placeholder for a quad bike desert safari") } },
+  senzo: { image: "/images/placeholders/senzo-transfer.svg", alt: { en: "Illustrated placeholder for a private Senzo Mall transfer", ar: "رسم توضيحي مؤقت لانتقال خاص إلى سنزو مول", de: "Illustrierter Platzhalter für einen privaten Transfer zur Senzo Mall", ru: "Иллюстрированная заглушка для частного трансфера в Senzo Mall", pl: "Ilustrowana grafika zastępcza dla prywatnego transferu do Senzo Mall", zh: "Senzo Mall 私人接送插画占位图", it: italianAlt("Illustrated placeholder for a private Senzo Mall transfer") } },
+  dolphin: { image: "/images/placeholders/dolphin-house.svg", alt: { en: "Illustrated placeholder for a Dolphin House snorkeling boat trip; wildlife sightings are not guaranteed", ar: "رسم توضيحي مؤقت لرحلة قارب للغطس في دولفين هاوس؛ مشاهدة الدلافين غير مضمونة", de: "Illustrierter Platzhalter für eine Schnorchelfahrt zum Dolphin House; Wildtiersichtungen sind nicht garantiert", ru: "Иллюстрированная заглушка для снорклинг-тура в Dolphin House; встречи с дельфинами не гарантированы", pl: "Ilustrowana grafika zastępcza dla rejsu snorkelingowego do Dolphin House; obserwacje delfinów nie są gwarantowane", zh: "海豚屋浮潜船行程插画占位图；不保证看到野生海豚", it: italianAlt("Illustrated placeholder for a Dolphin House snorkeling boat trip; wildlife sightings are not guaranteed") } },
+  horse: { image: "/images/placeholders/horse-riding.svg", alt: { en: "Illustrated placeholder for a guided horse-riding experience", ar: "رسم توضيحي مؤقت لتجربة ركوب خيل بصحبة مرشد", de: "Illustrierter Platzhalter für einen geführten Ausritt", ru: "Иллюстрированная заглушка для конной прогулки с гидом", pl: "Ilustrowana grafika zastępcza dla jazdy konnej z przewodnikiem", zh: "向导陪同骑马体验插画占位图", it: italianAlt("Illustrated placeholder for a guided horse-riding experience") } },
+  cairo: { image: "/images/placeholders/cairo-giza.svg", alt: { en: "Illustrated placeholder for a Cairo and Giza cultural day trip", ar: "رسم توضيحي مؤقت لرحلة ثقافية إلى القاهرة والجيزة", de: "Illustrierter Platzhalter für einen Kulturausflug nach Kairo und Gizeh", ru: "Иллюстрированная заглушка для культурной поездки в Каир и Гизу", pl: "Ilustrowana grafika zastępcza dla wycieczki kulturowej do Kairu i Gizy", zh: "开罗和吉萨文化一日游插画占位图", it: italianAlt("Illustrated placeholder for a Cairo and Giza cultural day trip") } },
+  elGouna: { image: "/images/placeholders/el-gouna.svg", alt: { en: "Illustrated placeholder for an El Gouna lagoon and city tour", ar: "رسم توضيحي مؤقت لجولة البحيرات والمدينة في الجونة", de: "Illustrierter Platzhalter für eine Lagunen- und Stadttour in El Gouna", ru: "Иллюстрированная заглушка для тура по лагунам и городу Эль-Гуна", pl: "Ilustrowana grafika zastępcza dla wycieczki po lagunach i mieście El Gouna", zh: "埃尔古纳泻湖与城市游插画占位图", it: italianAlt("Illustrated placeholder for an El Gouna lagoon and city tour") } },
+  spa: { image: "/images/placeholders/wellness-spa.svg", alt: { en: "Illustrated placeholder for a Turkish bath and wellness experience", ar: "رسم توضيحي مؤقت لتجربة الحمام التركي والعناية الصحية", de: "Illustrierter Platzhalter für ein Hamam- und Wellness-Erlebnis", ru: "Иллюстрированная заглушка для турецкой бани и спа", pl: "Ilustrowana grafika zastępcza dla łaźni tureckiej i spa", zh: "土耳其浴与康体体验插画占位图", it: italianAlt("Illustrated placeholder for a Turkish bath and wellness experience") } },
 };
 
 const mediaBySlug: Record<string, SafeMedia> = {
@@ -173,6 +178,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
       ru: "Яхта Shorouk Sat плывёт по бухте Обхур в Джидде на закате",
       pl: "Jacht Shorouk Sat płynący przez zatokę Obhur w Dżuddzie o zachodzie słońca",
       zh: "Shorouk Sat游艇在日落时分航行于吉达奥布尔湾",
+      it: italianAlt("Shorouk Sat yacht cruising through Jeddah's Obhur Bay at sunset"),
     },
     focal: { x: 0.53, y: 0.5 },
   },
@@ -185,6 +191,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
       ru: "Сноркелер показывает знак мира под водой над рифом Красного моря недалеко от Джидды",
       pl: "Osoba nurkująca z rurką pokazuje pod wodą znak pokoju nad rafą Morza Czerwonego koło Dżuddy",
       zh: "浮潜者在吉达附近红海礁石上方水下比出胜利手势",
+      it: italianAlt("Snorkeler giving peace signs underwater above a Red Sea reef near Jeddah"),
     },
     focal: { x: 0.5, y: 0.4 },
     gallery: ["/images/owned/jeddah-bayada-family-snorkeling.jpg"],
@@ -195,6 +202,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
       ru: ["Семья вместе занимается сноркелингом над коралловым рифом в прозрачном Красном море"],
       pl: ["Rodzina nurkująca razem z rurką nad rafą koralową w przejrzystym Morzu Czerwonym"],
       zh: ["一家人在清澈的红海中一起在珊瑚礁上方浮潜"],
+      it: ["Family snorkeling together over a coral reef in the clear Red Sea"].map(italianAlt),
     },
   },
   "orange-bay": ownedMedia.orangeBay,
@@ -223,6 +231,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
       ru: "Две улыбающиеся всадницы на рыжей и серой лошадях в бирюзовой воде Красного моря в Эль-Гуне",
       pl: "Dwie uśmiechnięte amazonki na kasztanowatym i siwym koniu w turkusowej wodzie Morza Czerwonego w El Gounie",
       zh: "两位面带笑容的骑手骑着栗色马和灰马，在埃尔古纳碧绿的红海海水中涉水前行",
+      it: italianAlt("Two smiling riders on a chestnut and a grey horse wading through turquoise Red Sea water in El Gouna"),
     },
     focal: { x: 0.5, y: 0.6 },
     gallery: ["/images/owned/el-gouna-horse-riding-desert-sunset.jpg", "/images/owned/el-gouna-horse-riding-sea-swim.jpg", "/images/owned/el-gouna-horse-riding-beach-walk.jpg"],
@@ -233,6 +242,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
       ru: ["Всадники в шлемах на групповой прогулке с гидом по пустыне у Эль-Гуны в золотом вечернем свете", "Две всадницы на серых лошадях на мелководье Красного моря", "Всадница в шлеме шагом едет на пегой лошади по влажному берегу, отражаясь в воде"],
       pl: ["Jeźdźcy w kaskach podczas grupowej przejażdżki z przewodnikiem po pustyni koło El Gouny w złotym wieczornym świetle", "Dwie amazonki na siwych koniach w płytkiej wodzie Morza Czerwonego", "Amazonka w kasku jedzie stępem na srokatym koniu po mokrym brzegu, a koń odbija się w wodzie"],
       zh: ["骑手们戴着头盔，在金色傍晚光线下跟随向导穿越埃尔古纳附近的沙漠", "两位骑手坐在灰马上，站在红海浅水中", "一位戴头盔的骑手骑着花斑马沿湿润的海岸缓行，倒影映在水中"],
+      it: ["Riders in helmets on a guided group horse ride across the desert near El Gouna in golden evening light", "Two riders sitting on grey horses standing in the shallow Red Sea", "A rider in a helmet walking a skewbald horse along the wet shoreline, its reflection in the water"].map(italianAlt),
     },
   },
   "marsa-mubarak-snorkeling": ownedMedia.snorkeling,
@@ -249,7 +259,7 @@ const mediaBySlug: Record<string, SafeMedia> = {
 const localizedGalleryAlts = (media: SafeMedia, locale: Locale) => {
   const english = media.galleryAlts?.en || [];
   const translated = media.galleryAlts?.[locale] || [];
-  return english.map((alt, index) => translated[index] || alt);
+  return english.map((alt, index) => translated[index] || (locale === "it" ? italianAlt(alt) : alt));
 };
 
 export function applyTourMediaSafety(tour: Tour, locale: Locale = "en"): Tour {

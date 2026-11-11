@@ -15,6 +15,7 @@ const copyByLocale = {
   ru: { title: "Сохранённые поездки", device: "Сохранено на этом устройстве", empty: "Сохранённых поездок пока нет. Нажмите на сердечко у любой поездки, чтобы сохранить её здесь.", clear: "Очистить всё", close: "Закрыть сохранённые поездки", remove: "Удалить", from: "От" },
   pl: { title: "Zapisane wycieczki", device: "Zapisane na tym urządzeniu", empty: "Nie masz jeszcze zapisanych wycieczek. Kliknij serce przy dowolnej wycieczce, aby ją tu zachować.", clear: "Wyczyść wszystko", close: "Zamknij zapisane wycieczki", remove: "Usuń", from: "Od" },
   zh: { title: "收藏的行程", device: "已保存到此设备", empty: "还没有收藏的行程。点击任意行程上的爱心即可收藏到这里。", clear: "全部清除", close: "关闭收藏的行程", remove: "移除", from: "起价" },
+  it: { title: "Escursioni salvate", device: "Salvato su questo dispositivo", empty: "Nessuna escursione salvata. Tocca il cuore su un'escursione per ritrovarla qui.", clear: "Cancella tutto", close: "Chiudi le escursioni salvate", remove: "Rimuovi", from: "Da" },
 } as const;
 
 export default function SavedTripsPanel() {

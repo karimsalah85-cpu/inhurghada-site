@@ -13,7 +13,7 @@ export const metadata: Metadata = { ...pageMetadata({
   path: "/blog",
 }), alternates: { canonical: "/blog", languages: { ...languageAlternates("/blog"), "x-default": "/blog" } } };
 
-type BlogLocale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
+type BlogLocale = "en" | "de" | "ru" | "ar" | "pl" | "zh" | "it";
 
 const blogIndexCopy: Record<BlogLocale, { eyebrow: string; heading: string; subtitle: string; readMore: string; dateLocale: string }> = {
   en: {
@@ -57,6 +57,13 @@ const blogIndexCopy: Record<BlogLocale, { eyebrow: string; heading: string; subt
     subtitle: "关于赫尔格达旅游、浮潜、潜水和沙漠探险的实用解答，来自每天带团的本地团队。",
     readMore: "阅读更多 →",
     dateLocale: "zh-CN",
+  },
+  it: {
+    eyebrow: "Daily Red Sea · Guide",
+    heading: "Guide e consigli di viaggio per Hurghada",
+    subtitle: "Risposte chiare su escursioni, snorkeling, immersioni e safari nel deserto a Hurghada, da un team locale che organizza queste uscite ogni giorno.",
+    readMore: "Leggi tutto →",
+    dateLocale: "it-IT",
   },
 };
 

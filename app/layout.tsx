@@ -106,7 +106,7 @@ export const metadata: Metadata = {
 // The document starts as en/ltr; the inline script below and SiteSettingsProvider
 // (which reads the pathname on the client) set lang/dir before first paint for the
 // localized routes.
-const localeDirScript = `(function(){try{var s=location.pathname.split('/')[1];var rtl=s==='ar';var l=['ar','de','ru','pl','zh'].indexOf(s)>-1?s:'en';var e=document.documentElement;e.lang=l;e.dir=rtl?'rtl':'ltr';}catch(_){}})();`;
+const localeDirScript = `(function(){try{var s=location.pathname.split('/')[1];var rtl=s==='ar';var l=['ar','de','ru','pl','zh','it'].indexOf(s)>-1?s:'en';var e=document.documentElement;e.lang=l;e.dir=rtl?'rtl':'ltr';}catch(_){}})();`;
 
 export default function RootLayout({
   children,

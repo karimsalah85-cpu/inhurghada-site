@@ -40,6 +40,7 @@ const cardCopy = {
   ru: { request: "Запросить цену", from: "От", entrance: "вход от", person: "чел.", inquire: "Подробнее и запрос", book: "Проверить доступность", newTour: "Новый тур", reviews: "отзывов" },
   pl: { request: "Zapytaj o cenę", from: "Od", entrance: "wstęp od", person: "osoba", inquire: "Zobacz i zapytaj", book: "Sprawdź dostępność", newTour: "Nowa wycieczka", reviews: "opinii" },
   zh: { request: "咨询价格", from: "起价", entrance: "门票起价", person: "每人", inquire: "查看并咨询", book: "查看可订情况", newTour: "新行程", reviews: "条评价" },
+  it: { request: "Richiedi il prezzo", from: "Da", entrance: "ingresso da", person: "persona", inquire: "Vedi e richiedi", book: "Verifica disponibilità", newTour: "Nuova escursione", reviews: "recensioni" },
 } as const;
 
 export default function TourCard({

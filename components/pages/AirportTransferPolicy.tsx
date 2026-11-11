@@ -1,7 +1,7 @@
 import { transferCopy } from "@/lib/transfer-copy";
 import { lowestVehicleFare } from "@/lib/transfer-config";
 
-type Locale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
+type Locale = "en" | "de" | "ru" | "ar" | "pl" | "zh" | "it";
 type Clause = { h: string; p: string };
 
 const fromFare = `$${lowestVehicleFare()}`;
@@ -130,6 +130,26 @@ const CONTENT: Record<Locale, { title: string; intro: string; clauses: Clause[] 
       { h: "航班信息", p: "机场接机时我们会收集您的航班号，以便团队根据最新到达信息核对接机时间。" },
       { h: "接机", p: "司机会按赫尔格达机场现行流程在约定地点持 Daily Red Sea 姓名牌迎接您。" },
       { h: "变更", p: "如乘客人数、行李或装备有变化，请尽快联系我们，这可能改变所需车辆和价格。" },
+    ],
+  },
+  it: {
+    title: "Regolamento passeggeri e veicoli per i transfer aeroportuali",
+    intro: "Regole in parole semplici su come calcoliamo il prezzo dei transfer aeroportuali e scegliamo il veicolo.",
+    clauses: [
+      { h: "Transfer privato", p: "La prenotazione è privata per il tuo gruppo. Non aggiungiamo altri passeggeri." },
+      { h: "Prezzi", p: `I prezzi sono a veicolo e a viaggio, non a persona, salvo diversa indicazione esplicita in una pagina. I transfer di sola andata all'interno di Hurghada partono da ${fromFare} a veicolo.` },
+      { h: "Numero di passeggeri", p: "Adulti, bambini e neonati contano tutti ai fini dei posti del veicolo." },
+      { h: "Assegnazione del veicolo", p: "Selezioniamo automaticamente un veicolo adatto a passeggeri e bagagli. Assegnazione tipica: 1–3 ospiti berlina privata; 4–10 ospiti Hiace / minivan privato; da 11 ospiti più veicoli in base al gruppo e ai bagagli. Marca e modello possono variare: può essere fornito un veicolo equivalente o più grande." },
+      { h: "Bagagli", p: "L'assegnazione standard presuppone un normale bagaglio aereo. Avvisaci se porti un numero insolitamente elevato di bagagli, così inviamo il veicolo giusto." },
+      { h: "Bagagli fuori misura", p: "Sacche da golf, attrezzatura da kite, tavole da surf, biciclette, casse per attrezzatura subacquea e oggetti simili vanno dichiarati in fase di prenotazione. Può essere necessario un veicolo più grande o aggiuntivo." },
+      { h: "Neonati e bambini", p: "Bambini e neonati contano come passeggeri. Ovetti, seggiolini e rialzi vanno richiesti prima del transfer e sono soggetti a disponibilità." },
+      { h: "Passeggini", p: "I passeggini pieghevoli sono ammessi ma vanno dichiarati, perché occupano spazio bagagli." },
+      { h: "Sedie a rotelle", p: "Le sedie a rotelle manuali pieghevoli possono essere accettate se c'è spazio sufficiente per i bagagli. Sedie a rotelle elettriche, scooter per la mobilità e ospiti che necessitano di un trasporto accessibile richiedono una conferma anticipata: non promettiamo un veicolo adatto prima che il team lo confermi." },
+      { h: "Capienza massima", p: "Non superiamo mai la capienza legale o configurata di un veicolo." },
+      { h: "Due o più veicoli", p: "Inviamo veicoli aggiuntivi quando il gruppo supera i posti di un veicolo, i bagagli superano lo spazio di carico sicuro, l'attrezzatura fuori misura non entra o lo richiedono esigenze di accessibilità. Il prezzo visualizzato comprende tutti i veicoli assegnati." },
+      { h: "Dati del volo", p: "Per i prelievi in aeroporto chiediamo il numero di volo, così il team può verificare il prelievo in base alle informazioni di arrivo più aggiornate." },
+      { h: "Accoglienza", p: "L'autista ti aspetta al punto d'incontro concordato, secondo le procedure in vigore all'aeroporto di Hurghada, con un cartello Daily Red Sea con il tuo nome." },
+      { h: "Modifiche", p: "Contattaci il prima possibile se cambiano numero di passeggeri, bagagli o attrezzature: potrebbero cambiare il veicolo necessario e il prezzo." },
     ],
   },
 };

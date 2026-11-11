@@ -67,4 +67,15 @@ export const mahmyaRules: Record<Locale, string[]> = {
     "Zgodnie z zasadami Mahmya dla niani lub opiekunki należy zarezerwować program dzienny + lunch.",
     "Pływanie jest dozwolone wyłącznie w strefie wyznaczonej bojami.",
   ],
+  it: [
+    "Il giorno della gita è obbligatorio portare un documento valido (carta d'identità egiziana per i cittadini egiziani / passaporto per gli stranieri) o una copia digitale leggibile.",
+    "Effettua il check-in con il team Mahmya prima di dirigerti alle barche.",
+    "Gli animali domestici non sono ammessi.",
+    "È vietato portare cibo o bevande dall'esterno.",
+    "È richiesto un costume da bagno adeguato in ogni momento.",
+    "In caso di condizioni meteo sfavorevoli, Mahmya si riserva il diritto di annullare e rimborsare la gita il giorno della partenza o fino a un giorno prima.",
+    "Gli altoparlanti non sono ammessi.",
+    "Secondo il regolamento Mahmya, per tata o babysitter va prenotato il Programma giornaliero + pranzo.",
+    "Il bagno è consentito solo all'interno dell'area delimitata dalle boe.",
+  ],
 };

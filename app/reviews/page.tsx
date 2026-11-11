@@ -19,6 +19,7 @@ const copy = {
   ar: { eyebrow: "رأيك بعد الرحلة", title: "قيّم رحلتك مع Daily Red Sea", intro: "شكراً لسفرك معنا. رأيك الصادق يساعد الضيوف الآخرين ويساعد فريقنا على تحسين كل تجربة.", rateHeading: "قيّم الرحلة التي حجزتها", rateNote: "يراجع فريقنا هذا التقييم ويظهر على صفحة الرحلة بعد الموافقة عليه. وهو متاح فقط للضيوف الذين لديهم حجز مكتمل.", googleHeading: "تفضّل عبر Google؟", googleCta: "اكتب تقييمك على Google", googleNote: "تُرسل التقييمات مباشرة إلى Google وفق سياسات Google. لا يمكن لـ Daily Red Sea تعديل تقييمك.", back: "العودة إلى الرحلات" },
   pl: { eyebrow: "Opinia po wycieczce", title: "Oceń swoją wycieczkę z Daily Red Sea", intro: "Dziękujemy za podróż z nami. Twoja szczera opinia pomaga przyszłym gościom i naszemu zespołowi ulepszać każde doświadczenie.", rateHeading: "Oceń zarezerwowaną wycieczkę", rateNote: "Opinia jest sprawdzana przez nasz zespół i po zatwierdzeniu pojawia się na stronie wycieczki. Mogą ją dodać tylko goście z zakończoną rezerwacją.", googleHeading: "Wolisz Google?", googleCta: "Napisz opinię w Google", googleNote: "Opinie są przesyłane bezpośrednio do Google zgodnie z zasadami Google. Daily Red Sea nie może edytować Twojej opinii.", back: "Wróć do wycieczek" },
   zh: { eyebrow: "行程后反馈", title: "评价您的 Daily Red Sea 行程", intro: "感谢您与我们同行。您的真实反馈能帮助其他客人，也帮助我们的团队改进每一次体验。", rateHeading: "评价您预订的行程", rateNote: "该评价由我们的团队审核，通过后会显示在对应行程页面。仅限已完成预订的客人提交。", googleHeading: "想用 Google？", googleCta: "撰写 Google 评价", googleNote: "评价将根据 Google 政策直接提交至 Google。Daily Red Sea 无法编辑您的评价。", back: "返回行程列表" },
+  it: { eyebrow: "Recensione dopo il viaggio", title: "Valuta la tua escursione con Daily Red Sea", intro: "Grazie per aver viaggiato con noi. Il tuo parere sincero aiuta i futuri ospiti e il nostro team a migliorare ogni esperienza.", rateHeading: "Valuta l'escursione prenotata", rateNote: "La recensione viene verificata dal nostro team e, una volta approvata, compare nella pagina dell'escursione. Possono inviarla solo gli ospiti con una prenotazione completata.", googleHeading: "Preferisci Google?", googleCta: "Scrivi una recensione su Google", googleNote: "Le recensioni vengono inviate direttamente a Google secondo le sue regole. Daily Red Sea non può modificare la tua recensione.", back: "Torna alle escursioni" },
 };
 
 export default async function ReviewsPage({ searchParams }: { searchParams: Promise<{ ref?: string; email?: string; lang?: string }> }) {
@@ -26,7 +27,7 @@ export default async function ReviewsPage({ searchParams }: { searchParams: Prom
   // This route has no /<locale> path prefix, so the proxy always reports "en".
   // A ?lang= hint (set on review links and in the review-request email) wins.
   const requested = params.lang || (await headers()).get("x-daily-red-sea-locale") || "en";
-  const locale = (["en", "ar", "de", "ru", "pl", "zh"].includes(requested) ? requested : "en") as keyof typeof copy;
+  const locale = (["en", "ar", "de", "ru", "pl", "zh", "it"].includes(requested) ? requested : "en") as keyof typeof copy;
   const t = copy[locale];
   const rtl = locale === "ar";
   return <main dir={rtl ? "rtl" : "ltr"} className="min-h-screen bg-surface-muted px-6 pb-20 pt-32">

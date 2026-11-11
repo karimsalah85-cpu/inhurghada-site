@@ -18,7 +18,7 @@ describe("Mahmya program content", () => {
     expect(tour.additionalPackages?.[1].notIncluded).toHaveLength(1);
   });
 
-  it.each<Locale>(["en", "de", "ru", "ar", "zh", "pl"])("preserves all package prices and age bands in %s", locale => {
+  it.each<Locale>(["en", "de", "ru", "ar", "zh", "pl", "it"])("preserves all package prices and age bands in %s", locale => {
     const tour = localizeTour(mahmya, locale);
     expect(tour).toMatchObject({ currency: "EUR", price: "38", packagePrice: "38", participantPricing: { adults: 38, youth: 19, infants: 0 } });
     expect(tour.additionalPackages).toMatchObject([{ price: "60", youthPrice: 30 }, { price: "85", youthPrice: 42.5 }]);

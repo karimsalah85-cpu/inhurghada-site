@@ -46,9 +46,9 @@ describe("Jeddah destination", () => {
 
   it("fully localizes every customer-facing yacht field in each available non-English language", () => {
     const listing = tours.find((tour) => tour.slug === "jeddah-yacht-sunset-cruise")!;
-    const expectedPriceUnits = { ar: "للبالغ", de: "pro Erwachsenem", ru: "за взрослого", pl: "za osobę dorosłą", zh: "每位成人" } as const;
+    const expectedPriceUnits = { ar: "للبالغ", de: "pro Erwachsenem", ru: "за взрослого", pl: "za osobę dorosłą", zh: "每位成人", it: "per adulto" } as const;
 
-    for (const locale of ["ar", "de", "ru", "pl", "zh"] as const) {
+    for (const locale of ["ar", "de", "ru", "pl", "zh", "it"] as const) {
       const localized = localizeTour(listing, locale);
       expect(localized.title).not.toBe(listing.title);
       expect(localized.description).not.toBe(listing.description);

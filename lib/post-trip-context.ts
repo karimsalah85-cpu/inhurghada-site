@@ -9,6 +9,7 @@ const destinationNames: Partial<Record<string, Record<DestinationSlug, string>>>
   ar: { hurghada: "الغردقة", "marsa-alam": "مرسى علم", "el-gouna": "الجونة", jeddah: "جدة" },
   ru: { hurghada: "Хургада", "marsa-alam": "Марса-Алам", "el-gouna": "Эль-Гуна", jeddah: "Джидда" },
   zh: { hurghada: "赫尔格达", "marsa-alam": "马萨阿拉姆", "el-gouna": "艾尔古纳", jeddah: "吉达" },
+  it: { hurghada: "Hurghada", "marsa-alam": "Marsa Alam", "el-gouna": "El Gouna", jeddah: "Gedda" },
 };
 function tripTheme(tour: Tour): "sea" | "desert" | "culture" {
   const category = `${tour.category || ""} ${tour.slug}`.toLowerCase();

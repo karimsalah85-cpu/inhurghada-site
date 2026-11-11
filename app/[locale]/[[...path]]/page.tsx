@@ -83,14 +83,14 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const blogPost = rawBlogPost ? localizeBlogPost(rawBlogPost, locale) : undefined;
   if (kind === "blog-post" && !blogPost) notFound();
   const category = kind === "category" ? getTourCategory(path[1]) : undefined;
-  const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认" }[locale];
+  const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认", it: "Conferma di prenotazione" }[locale];
   const referralTitle = referralCopy[locale].heading;
   const referralDescription = referralCopy[locale].tagline;
   const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: transferCopy[locale].title, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ`, referrals: referralTitle };
   const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: transferCopy[locale].description, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription, referrals: referralDescription };
   const destinationCopy = kind === "destination" ? destinationCopyByLocale[path[1] as DestinationSlug]?.[locale] : undefined;
   const categoryDestination = category ? getDestination(path[0]) : undefined;
-  const categoryDestinationName = locale === "ar" && categoryDestination?.slug === "jeddah" ? "جدة" : categoryDestination?.name || "Hurghada";
+  const categoryDestinationName = locale === "ar" && categoryDestination?.slug === "jeddah" ? "جدة" : locale === "it" && categoryDestination?.slug === "jeddah" ? "Gedda" : categoryDestination?.name || "Hurghada";
   const title = tour ? tour.seoTitle || tour.title : blogPost ? `${blogPost.title} | ${siteName}` : category ? `${categoryLabels[locale][category.slug]} · ${categoryDestinationName} | ${siteName}` : destinationCopy?.title || titles[kind || "home"];
   const germanSeoDescriptions: Record<string, string> = {
     home: "Ausflüge Hurghada direkt beim lokalen Anbieter buchen: Hurghada Bootstour, Quad Tour Hurghada, Orange Bay Hurghada Tickets und Flughafentransfer Hurghada.",
@@ -113,6 +113,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
         : category
           ? locale === "ar" && path[0] === "jeddah"
             ? `${categoryLabels.ar[category.slug]} في جدة مع أسعار واضحة بالريال السعودي ومواعيد وتفاصيل تجمع ودعم مباشر للحجز.`
+            : locale === "it"
+              ? `Confronta ${categoryLabels.it[category.slug].toLowerCase()} a ${categoryDestinationName} con prezzi chiari, orari, dettagli sul punto d'incontro e assistenza locale per la prenotazione.`
             : `Compare ${categoryLabels[locale][category.slug]} in ${categoryDestinationName} with clear prices, schedules, meeting details and local booking support.`
           : destinationCopy?.description || descriptions[kind || "home"];
   const pathname = `/${path.join("/")}`.replace(/\/$/, "");

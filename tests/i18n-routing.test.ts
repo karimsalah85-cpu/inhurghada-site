@@ -31,7 +31,7 @@ describe("localized SEO routing", () => {
   it("builds a reciprocal alternate set for canonical routes", () => {
     expect(languageAlternates("/tours/orange-bay")).toEqual({
       en: "/tours/orange-bay", ar: "/ar/tours/orange-bay", de: "/de/tours/orange-bay",
-      ru: "/ru/tours/orange-bay", pl: "/pl/tours/orange-bay", zh: "/zh/tours/orange-bay",
+      ru: "/ru/tours/orange-bay", pl: "/pl/tours/orange-bay", zh: "/zh/tours/orange-bay", it: "/it/tours/orange-bay",
     });
   });
 });

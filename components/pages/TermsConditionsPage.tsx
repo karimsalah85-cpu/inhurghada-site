@@ -2,7 +2,7 @@ import Link from "next/link";
 import { localePath, type Locale } from "@/lib/i18n";
 import { displayPhoneNumber } from "@/lib/contact";
 
-type TermsLocale = Extract<Locale, "en" | "de" | "ru" | "ar" | "zh" | "pl">;
+type TermsLocale = Extract<Locale, "en" | "de" | "ru" | "ar" | "zh" | "pl" | "it">;
 type Section = { title: string; id?: string; paragraphs: string[] };
 
 const copy: Record<TermsLocale, { legal: string; title: string; intro: string; back: string; sections: Section[] }> = {
@@ -151,6 +151,38 @@ const copy: Record<TermsLocale, { legal: string; title: string; intro: string; b
         "如服务商取消活动，或活动因天气或海况无法进行，我们会协助您安排退款，或改订其他日期或活动。",
         "服务商可因安全或运营原因调整路线、行程和时间；我们会尽早通知重大变更。",
         "本条款不排除适用法律规定不得排除的责任。",
+      ] },
+    ],
+  },
+  it: {
+    legal: "Note legali",
+    title: "Termini e condizioni",
+    intro: "Prenotando un'escursione, un transfer o un'attività con Daily Red Sea accetti i termini riportati di seguito. Questi termini si applicano insieme alle eventuali condizioni specifiche indicate nella pagina della singola escursione.",
+    back: "Torna alla home",
+    sections: [
+      { title: "Prenotazioni e conferma", paragraphs: ["Una richiesta inviata tramite il nostro sito o WhatsApp non è confermata finché non ricevi la conferma del nostro team, con prezzo finale, dettagli del prelievo e metodo di pagamento. Controlla con attenzione la conferma e avvisaci subito se qualche dato non è corretto."] },
+      { title: "Prezzi e pagamento", paragraphs: ["I prezzi sono indicati a persona o a prenotazione, nella valuta selezionata, e comprendono i servizi elencati nella pagina dell'escursione. Salvo diversa indicazione, il pagamento avviene in contanti all'arrivo; alcune escursioni possono richiedere un pagamento anticipato online o un acconto, chiaramente indicati prima della conferma. Non aggiungiamo costi nascosti al prezzo indicato."] },
+      { title: "Prelievo e partecipazione", paragraphs: ["Gli orari di prelievo sono stime confermate via WhatsApp il giorno prima (o la mattina stessa) dell'attività e possono variare per traffico, meteo o posizione dell'hotel. Alcune attività prevedono requisiti di età, salute, capacità natatoria o forma fisica indicati nella pagina dell'escursione: leggili prima di prenotare e segnalaci in anticipo eventuali condizioni mediche rilevanti."] },
+      { title: "Modifiche alle prenotazioni", paragraphs: ["Se devi cambiare data, numero di persone o dettagli del prelievo, contattaci su WhatsApp il prima possibile. Le modifiche sono soggette a disponibilità e non sempre sono possibili a ridosso della data dell'attività."] },
+      { title: "Cancellazioni e rimborsi", id: "cancellations", paragraphs: [
+        "Cancellazione gratuita: le cancellazioni effettuate almeno 48 ore prima dell'orario previsto dell'escursione o del prelievo danno diritto al rimborso completo (o a nessun addebito per le prenotazioni con pagamento in contanti all'arrivo).",
+        "Cancellazioni tardive e mancata presentazione: le cancellazioni effettuate entro le 48 ore non sono rimborsabili. Un arrivo con oltre 15 minuti di ritardo rispetto all'orario di ritrovo confermato è considerato mancata presentazione, senza rimborso, credito né cambio data; le partenze di gruppo non possono essere ritardate.",
+        "Prelievi in aeroporto: per i prelievi privati in aeroporto la regola dei 15 minuti non si applica. L'autista attende gratuitamente fino a 60 minuti dopo l'atterraggio.",
+        "Cancellazioni da parte nostra: se noi o il nostro fornitore locale dobbiamo annullare o riprogrammare un'attività (meteo, sicurezza, numero insufficiente di partecipanti o motivi operativi), ti verrà offerto il rimborso completo o la possibilità di prenotare un'altra data o attività.",
+        `Come cancellare: scrivici su WhatsApp al ${displayPhoneNumber} indicando il riferimento della prenotazione il prima possibile. Confermeremo il tuo diritto al rimborso e, ove applicabile, lo elaboreremo sul metodo di pagamento originale entro un numero di giorni lavorativi indicato (ad esempio 5–7 giorni); per le prenotazioni con pagamento in contanti all'arrivo non viene effettuato alcun addebito.`,
+      ] },
+      { title: "Sicurezza, immersioni e attrezzatura", paragraphs: [
+        "Gli ospiti devono seguire tutte le istruzioni di sicurezza di istruttori ed equipaggio, confermare di essere in condizioni di salute idonee, dichiarare prima della partenza patologie o allergie rilevanti e assicurarsi che nessun divieto di viaggio o restrizione legale impedisca la partecipazione. Percorsi, programmi e siti d'immersione possono cambiare per meteo, condizioni del mare o motivi di sicurezza; la decisione finale sulla sicurezza spetta al responsabile dell'uscita.",
+        "Chi partecipa alle immersioni deve firmare la liberatoria richiesta e i subacquei brevettati devono presentare un brevetto valido. Per le attività riservate ai brevettati sono incluse bombole e pesi. L'attrezzatura subacquea personale (GAV, erogatore, muta, maschera e pinne) non è inclusa e può essere noleggiata su richiesta; gli ospiti sono responsabili dello smarrimento o del danneggiamento dell'attrezzatura noleggiata.",
+      ] },
+      { title: "Responsabilità", paragraphs: [
+        "Daily Red Sea opera come agente di prenotazione e coordinamento. Mettiamo in contatto i viaggiatori con fornitori locali a Hurghada, Marsa Alam, El Gouna e Gedda, gestiamo prenotazioni e comunicazioni e assistiamo gli ospiti prima, durante e dopo l'attività.",
+        "Ogni attività è gestita da un fornitore locale indipendente e autorizzato, come un operatore di barche, un centro immersioni, una società di safari o un autista. Il fornitore è responsabile di sicurezza, attrezzatura, assicurazione ed erogazione del servizio, nel rispetto delle normative locali applicabili.",
+        "Durante l'attività si applicano le regole di sicurezza del fornitore. La partecipazione ad attività in acqua (snorkeling, immersioni, gite in barca) e a terra (quad, safari nel deserto) comporta rischi intrinseci. Gli ospiti partecipano a proprio rischio e devono seguire in ogni momento il briefing di sicurezza del fornitore e le istruzioni dell'equipaggio o della guida.",
+        "Daily Red Sea non è responsabile di atti od omissioni dei fornitori, di cancellazioni dovute a meteo o condizioni del mare, né di lesioni, perdite, malattie o danni derivanti dal mancato rispetto delle istruzioni di sicurezza da parte dell'ospite, da condizioni mediche preesistenti non dichiarate alla prenotazione o da eventi al di fuori del nostro ragionevole controllo (compresi eventi naturali, atti di terzi o cause di forza maggiore).",
+        "Se un fornitore annulla un'attività o questa non può svolgersi per meteo o condizioni del mare, ti aiuteremo a ottenere il rimborso o a prenotare un'altra data o attività.",
+        "Programmi, percorsi e orari possono essere modificati dal fornitore per motivi di sicurezza od operativi; cercheremo di comunicarti le modifiche rilevanti il prima possibile.",
+        "Nulla di quanto previsto in questi termini esclude responsabilità che non possono essere escluse per legge.",
       ] },
     ],
   },

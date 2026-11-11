@@ -18,10 +18,11 @@ export default function ShareTripButton({ locale, tourSlug, tourTitle, destinati
     typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("date"),
   );
   const ar = locale === "ar";
+  const it = locale === "it";
   const selectedDate = date || urlDate || undefined;
   const url = typeof window === "undefined" ? "" : buildTripShareUrl(window.location.origin, locale, tourSlug, selectedDate);
   const text = tripShareText(locale, tourTitle);
-  const shareTitle = tourTitle || (ar ? "رحلة غروب جدة" : "Jeddah sunset cruise");
+  const shareTitle = tourTitle || (ar ? "رحلة غروب جدة" : it ? "Crociera al tramonto a Gedda" : "Jeddah sunset cruise");
   useEffect(() => {
     const key = `${tourSlug}:${window.location.search}`;
     if (isSharedTripUrl(window.location.search) && !trackedSharedLinks.has(key)) {
@@ -40,11 +41,11 @@ export default function ShareTripButton({ locale, tourSlug, tourTitle, destinati
     try { await navigator.clipboard.writeText(url); setCopied(true); trackEvent("share_copy_link", { item_id: tourSlug }); trackEvent("share_completed", { method: "copy", item_id: tourSlug }); } catch { setCopied(false); }
   }
   return <div className="relative inline-flex">
-    <button type="button" onClick={nativeShare} className={`${compact ? "p-3" : "gap-2 px-4 py-3"} inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-white font-bold text-ink shadow-sm hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean-soft`} aria-expanded={open}><Share2 size={18}/>{compact ? <span className="sr-only">{ar ? "مشاركة الرحلة" : "Share trip"}</span> : ar ? "مشاركة الرحلة" : "Share trip"}</button>
+    <button type="button" onClick={nativeShare} className={`${compact ? "p-3" : "gap-2 px-4 py-3"} inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-white font-bold text-ink shadow-sm hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean-soft`} aria-expanded={open}><Share2 size={18}/>{compact ? <span className="sr-only">{ar ? "مشاركة الرحلة" : it ? "Condividi" : "Share trip"}</span> : ar ? "مشاركة الرحلة" : it ? "Condividi" : "Share trip"}</button>
     {open ? <div className="absolute end-0 top-full z-40 mt-2 w-56 rounded-2xl border border-line bg-white p-2 text-sm shadow-xl" role="menu">
-      <button type="button" onClick={copy} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-surface-muted" role="menuitem">{copied ? <Check size={17}/> : <Copy size={17}/>} {copied ? (ar ? "تم نسخ الرابط" : "Link copied") : (ar ? "نسخ الرابط" : "Copy link")}</button>
+      <button type="button" onClick={copy} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-surface-muted" role="menuitem">{copied ? <Check size={17}/> : <Copy size={17}/>} {copied ? (ar ? "تم نسخ الرابط" : it ? "Link copiato" : "Link copied") : (ar ? "نسخ الرابط" : it ? "Copia link" : "Copy link")}</button>
       <a href={whatsappShareUrl(text, url)} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent("share_whatsapp", { item_id: tourSlug }); trackEvent("share_completed", { method: "whatsapp", item_id: tourSlug }); }} className="flex items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-surface-muted" role="menuitem">WhatsApp</a>
-      <a href={`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`} onClick={() => trackEvent("share_email", { item_id: tourSlug })} className="flex items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-surface-muted" role="menuitem"><Mail size={17}/>{ar ? "البريد الإلكتروني" : "Email"}</a>
+      <a href={`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`} onClick={() => trackEvent("share_email", { item_id: tourSlug })} className="flex items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-surface-muted" role="menuitem"><Mail size={17}/>{ar ? "البريد الإلكتروني" : it ? "E-mail" : "Email"}</a>
     </div> : null}
   </div>;
 }

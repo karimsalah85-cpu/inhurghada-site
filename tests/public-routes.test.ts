@@ -6,14 +6,14 @@ describe("public route guard", () => {
     expect(isKnownApplicationPath("/tours/orange-bay")).toBe(true);
     expect(isKnownApplicationPath("/de/tours/orange-bay")).toBe(true);
     expect(isKnownApplicationPath("/sitemap.xml")).toBe(true);
-    for (const locale of ["en", "ar", "de", "ru", "pl", "zh"]) {
+    for (const locale of ["en", "ar", "de", "ru", "pl", "zh", "it"]) {
       expect(isKnownApplicationPath(`/${locale}`)).toBe(true);
       expect(isKnownApplicationPath(`/${locale}/`)).toBe(true);
     }
   });
 
   it("keeps the localized route contract intact for every supported locale", () => {
-    const locales = ["en", "ar", "de", "ru", "pl", "zh"];
+    const locales = ["en", "ar", "de", "ru", "pl", "zh", "it"];
     const validPaths = ["", "/about", "/contact", "/faq", "/transfers", "/hurghada/excursions", "/tours/orange-bay"];
     for (const locale of locales) {
       for (const path of validPaths) {

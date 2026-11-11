@@ -60,6 +60,8 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
   const ar = language === "ar";
   const zh = language === "zh";
   const pl = language === "pl";
+  const it = language === "it";
+  const italianCopy: Record<string, string> = {"Islands, reefs & desert": "Isole, barriere coralline e deserto", "Wild reefs & marine life": "Barriere incontaminate e vita marina", "Beach & desert horse riding": "A cavallo tra spiaggia e deserto", "Coastal diving": "Immersioni lungo la costa", "Egypt": "Egitto", "Red Sea Governorate": "Governatorato del Mar Rosso", "Red Sea tours, transfers, and local experiences": "Escursioni, transfer ed esperienze locali sul Mar Rosso", "Untouched reefs, desert landscapes, and southern Red Sea adventures": "Barriere intatte, paesaggi desertici e avventure nel sud del Mar Rosso", "Lagoons, beaches and relaxed Red Sea activities": "Lagune, spiagge e attività rilassanti sul Mar Rosso", "Saudi Arabia": "Arabia Saudita", "Makkah Province": "Provincia della Mecca", "Red Sea diving and coastal experiences in Jeddah": "Immersioni ed esperienze sulla costa del Mar Rosso a Gedda", "Clear prices": "Prezzi chiari", "Clear prices before you book": "Prezzi chiari prima di prenotare", "Hotel pickup": "Prelievo in hotel", "Hotel pickup where available": "Prelievo in hotel dove disponibile", "WhatsApp help": "Aiuto su WhatsApp", "Local help on WhatsApp": "Assistenza locale su WhatsApp", "Where are you staying?": "Dove alloggi?", "from": "da", "Why Daily Red Sea": "Perché Daily Red Sea", "Local knowledge, easy booking, clear support.": "Conoscenza del territorio, prenotazione facile, assistenza chiara.", "We help you choose the right experience for your Red Sea destination with direct local support before your day begins.": "Ti aiutiamo a scegliere l'esperienza giusta per la tua destinazione sul Mar Rosso, con assistenza locale diretta prima dell'inizio della giornata.", "Trusted local partners": "Partner locali affidabili", "Carefully selected crews, guides and drivers.": "Equipaggi, guide e autisti selezionati con cura.", "Book on our website": "Prenota sul nostro sito", "Fast help for pickup, changes and questions.": "Aiuto rapido per prelievo, modifiche e domande.", "Helpful support": "Assistenza attenta", "Clear communication before your tour.": "Comunicazione chiara prima dell'escursione.", "Your Red Sea adventure, made easy": "La tua avventura sul Mar Rosso, resa semplice", "Why travel with us": "Perché viaggiare con noi", "Plan with local Red Sea experts": "Pianifica con esperti locali del Mar Rosso", "Helpful answers": "Risposte utili", "Red Sea excursions FAQ": "Domande frequenti sulle escursioni sul Mar Rosso", "Start planning": "Inizia a pianificare", "Ready for your Red Sea adventure?": "Pronto per la tua avventura sul Mar Rosso?", "Message our local team and we’ll help you find the right tour for your stay.": "Scrivi al nostro team locale: ti aiutiamo a trovare l'escursione giusta per il tuo soggiorno.", "Choose a trip & book online": "Scegli un'escursione e prenota online", "Hello Daily Red Sea, I would like help planning my trip.": "Ciao Daily Red Sea, vorrei un aiuto per organizzare il mio viaggio.", "Plan on WhatsApp": "Pianifica su WhatsApp", "Tours, excursions and private transfers for unforgettable days on the Red Sea.": "Tour, escursioni e transfer privati per giornate indimenticabili sul Mar Rosso.", "Explore": "Esplora", "Need help?": "Hai bisogno di aiuto?", "Chat on WhatsApp": "Scrivici su WhatsApp", "Review us on Google": "Recensiscici su Google", "Privacy Policy": "Informativa sulla privacy", "Terms & Conditions": "Termini e condizioni", "Contact us": "Contattaci", "All rights reserved.": "Tutti i diritti riservati."};
   const sharedLocaleCopy: Record<string, Partial<Record<"ar" | "pl" | "zh", string>>> = {
     "Why Daily Red Sea": { ar: "لماذا Daily Red Sea؟", pl: "Dlaczego Daily Red Sea?", zh: "为什么选择 Daily Red Sea？" },
     "Local knowledge, easy booking, clear support.": { ar: "خبرة محلية وحجز سهل ودعم واضح.", pl: "Lokalna wiedza, łatwa rezerwacja i jasne wsparcie.", zh: "本地经验、轻松预订和清晰支持。" },
@@ -80,7 +82,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
     "Contact us": { ar: "تواصل معنا", pl: "Skontaktuj się z nami", zh: "联系我们" },
     "All rights reserved.": { ar: "جميع الحقوق محفوظة.", pl: "Wszelkie prawa zastrzeżone.", zh: "版权所有。" },
   };
-  const tr = (en: string, deText: string, ruText: string, arText = sharedLocaleCopy[en]?.ar || en, plText = sharedLocaleCopy[en]?.pl || en, zhText = sharedLocaleCopy[en]?.zh || en) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
+  const tr = (en: string, deText: string, ruText: string, arText = sharedLocaleCopy[en]?.ar || en, plText = sharedLocaleCopy[en]?.pl || en, zhText = sharedLocaleCopy[en]?.zh || en) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : it ? italianCopy[en] || en : en;
   const router = useRouter();
   const toursSection = useRef<HTMLDivElement>(null);
 
@@ -218,7 +220,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
               <Link key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} className="group w-[38%] min-w-[140px] shrink-0 snap-start rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ocean sm:w-auto sm:min-w-0">
                 <span className="relative block h-44 overflow-hidden rounded-2xl bg-surface-muted sm:h-52">
                   <Image src={homeDestinationCardImages[destination.slug] ?? destination.image} alt={`${destination.name}, ${destination.country}`} fill sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 40vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                  {destination.status === "coming-soon" ? <span className="absolute left-2 top-2 rounded-full bg-brand-orange-soft px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-orange-cta">{de ? "Demnächst" : ru ? "Скоро" : ar ? "قريباً" : pl ? "Wkrótce" : zh ? "即将推出" : "Coming soon"}</span> : null}
+                  {destination.status === "coming-soon" ? <span className="absolute left-2 top-2 rounded-full bg-brand-orange-soft px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-brand-orange-cta">{de ? "Demnächst" : ru ? "Скоро" : ar ? "قريباً" : pl ? "Wkrótce" : zh ? "即将推出" : it ? "Prossimamente" : "Coming soon"}</span> : null}
                 </span>
                 <span className="mt-2 flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
                   <span className="text-[15px] font-black text-ink sm:text-lg">{destination.name}</span>
@@ -413,7 +415,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
                     tracking-[0.35em]
                     text-ocean
                   ">
-                    {de ? "Transfers" : ru ? "Трансферы" : ar ? "التنقلات" : pl ? "Transfery" : zh ? "接送服务" : "Transfers"}
+                    {de ? "Transfers" : ru ? "Трансферы" : ar ? "التنقلات" : pl ? "Transfery" : zh ? "接送服务" : it ? "Transfer" : "Transfers"}
                   </p>
 
 
@@ -427,7 +429,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
                     leading-tight
                     sm:text-4xl
                   ">
-                    {de ? "Flughafen- und Hoteltransfer" : ru ? "Трансферы из аэропорта и отелей" : ar ? "تنقلات المطار والفنادق" : pl ? "Transfery lotniskowe i hotelowe" : zh ? "机场与酒店接送" : "Airport & Hotel Transfers"}
+                    {de ? "Flughafen- und Hoteltransfer" : ru ? "Трансферы из аэропорта и отелей" : ar ? "تنقلات المطار والفنادق" : pl ? "Transfery lotniskowe i hotelowe" : zh ? "机场与酒店接送" : it ? "Transfer per aeroporto e hotel" : "Airport & Hotel Transfers"}
                   </h3>
 
 
@@ -437,7 +439,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
                     mt-4
                     text-muted
                   ">
-                    {de ? "Private Transfers zwischen dem Flughafen Hurghada und den Hotels am Roten Meer." : ru ? "Частные трансферы между аэропортом Хургады и отелями Красного моря." : ar ? "تنقلات خاصة بين مطار الغردقة وفنادق البحر الأحمر." : pl ? "Prywatne przejazdy między lotniskiem w Hurghadzie a hotelami nad Morzem Czerwonym." : zh ? "赫尔格达机场与红海酒店之间的私人接送。" : "Private transfers between Hurghada Airport and Red Sea hotels."}
+                    {de ? "Private Transfers zwischen dem Flughafen Hurghada und den Hotels am Roten Meer." : ru ? "Частные трансферы между аэропортом Хургады и отелями Красного моря." : ar ? "تنقلات خاصة بين مطار الغردقة وفنادق البحر الأحمر." : pl ? "Prywatne przejazdy między lotniskiem w Hurghadzie a hotelami nad Morzem Czerwonym." : zh ? "赫尔格达机场与红海酒店之间的私人接送。" : it ? "Transfer privati tra l'aeroporto di Hurghada e gli hotel sul Mar Rosso." : "Private transfers between Hurghada Airport and Red Sea hotels."}
                   </p>
 
 
@@ -465,7 +467,7 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
                 sm:w-auto
                 "
               >
-                {de ? "Transfer buchen" : ru ? "Заказать трансфер" : ar ? "احجز التنقل" : pl ? "Zarezerwuj transfer" : zh ? "预订接送" : "Book Transfer"}
+                {de ? "Transfer buchen" : ru ? "Заказать трансфер" : ar ? "احجز التنقل" : pl ? "Zarezerwuj transfer" : zh ? "预订接送" : it ? "Prenota il transfer" : "Book Transfer"}
               </Link>
 
 
@@ -496,7 +498,7 @@ text-ink
 "
 >
 
-{de ? "Gefunden:" : ru ? "Найдено:" : ar ? "تم العثور على:" : pl ? "Znaleziono:" : zh ? "找到：" : "Found"}
+{de ? "Gefunden:" : ru ? "Найдено:" : ar ? "تم العثور على:" : pl ? "Znaleziono:" : zh ? "找到：" : it ? "Trovate:" : "Found"}
 
 <span className="
 mx-2
@@ -508,9 +510,9 @@ text-ocean
 
 </span>
 
-{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : ar ? "رحلات" : pl ? (filteredTours.length === 1 ? "wycieczkę" : "wycieczki") : zh ? "个行程" : `tour${filteredTours.length === 1 ? "" : "s"}`}
+{de ? (filteredTours.length === 1 ? "Ausflug" : "Ausflüge") : ru ? "экскурсий" : ar ? "رحلات" : pl ? (filteredTours.length === 1 ? "wycieczkę" : "wycieczki") : zh ? "个行程" : it ? (filteredTours.length === 1 ? "escursione" : "escursioni") : `tour${filteredTours.length === 1 ? "" : "s"}`}
 
-{de ? "für:" : ru ? "по запросу:" : ar ? "للبحث:" : pl ? "dla:" : zh ? "搜索：" : "for:"}
+{de ? "für:" : ru ? "по запросу:" : ar ? "للبحث:" : pl ? "dla:" : zh ? "搜索：" : it ? "per:" : "for:"}
 
 <span className="
 ml-2
@@ -591,7 +593,7 @@ text-ocean
                 text-muted
               ">
 
-                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : ar ? "لم يتم العثور على رحلات مناسبة" : pl ? "Nie znaleziono pasujących wycieczek" : zh ? "未找到符合条件的旅游项目" : "No tours found"}
+                {de ? "Keine passenden Ausflüge gefunden" : ru ? "Подходящие экскурсии не найдены" : ar ? "لم يتم العثور على رحلات مناسبة" : pl ? "Nie znaleziono pasujących wycieczek" : zh ? "未找到符合条件的旅游项目" : it ? "Nessuna escursione trovata" : "No tours found"}
 
               </div>
 
@@ -620,7 +622,7 @@ text-ocean
 
       <HurghadaTravelGuide />
 
-      <section className="bg-surface-muted px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-ocean-dark">{tr("Helpful answers","Hilfreiche Antworten","Полезные ответы")}</p><h2 className="mt-3 text-center text-4xl font-black text-ink">{tr("Red Sea excursions FAQ","FAQ zu Ausflügen am Roten Meer","Вопросы об экскурсиях на Красном море")}</h2><div className="mt-8 divide-y divide-line rounded-3xl border border-line bg-white px-6">{(de ? [["Wie buche ich einen Ausflug?","Wähle einen Ausflug, Datum und Reisende und sende deine Buchung. Die Details bestätigen wir per WhatsApp."],["Ist die Hotelabholung verfügbar?","Viele Ausflüge beinhalten oder bieten eine Hotelabholung. Prüfe die Ausflugsdetails und gib dein Hotel bei der Buchung an."],["Wann bezahle ich?","Barzahlung bei Ankunft wird vor der Bestätigung klar angezeigt. Gesamtpreis und Zahlungsstatus stehen auch in der PDF-Bestätigung."],["Kann ich meine Buchung ändern?","Kontaktiere uns so früh wie möglich per WhatsApp. Wir prüfen die Verfügbarkeit und helfen dir."]] : ru ? [["Как забронировать экскурсию?","Выберите экскурсию, дату и гостей, затем отправьте заявку. Детали мы подтвердим в WhatsApp."],["Есть ли трансфер из отеля?","Многие экскурсии включают или предлагают трансфер. Проверьте описание и укажите отель при бронировании."],["Когда оплачивать?","Оплата наличными по прибытии ясно указывается перед подтверждением. Сумма и статус оплаты также есть в PDF."],["Можно изменить бронирование?","Свяжитесь с нами в WhatsApp как можно раньше. Мы проверим наличие мест и поможем."]] : ar ? [["كيف أحجز رحلة؟","اختر رحلة وحدد التاريخ وعدد المسافرين ثم أرسل طلب الحجز. سنؤكد لك التفاصيل العملية عبر واتساب."],["هل الاستلام من الفندق متاح؟","تتضمن أو تقدم العديد من رحلاتنا خدمة الاستلام من الفندق. تحقق من تفاصيل الرحلة وأضف اسم فندقك عند الحجز."],["متى أدفع؟","يتم توضيح حجوزات الدفع النقدي عند الوصول بشكل واضح قبل التأكيد. يظهر إجمالي المبلغ وحالة الدفع أيضًا في تأكيد الحجز بصيغة PDF."],["هل يمكنني تغيير حجزي؟","تواصل معنا عبر واتساب في أقرب وقت ممكن. سنتحقق من التوفر ونساعدك قدر الإمكان."]] : pl ? [["Jak zarezerwować wycieczkę?","Wybierz wycieczkę, datę i liczbę uczestników, a następnie wyślij rezerwację. Szczegóły potwierdzimy z Tobą na WhatsApp."],["Czy dostępny jest odbiór z hotelu?","Wiele naszych wycieczek zawiera lub oferuje odbiór z hotelu. Sprawdź szczegóły wycieczki i podaj nazwę hotelu podczas rezerwacji."],["Kiedy płacę?","Rezerwacje z płatnością gotówką na miejscu są wyraźnie oznaczone przed potwierdzeniem. Łączna kwota i status płatności widoczne są także w potwierdzeniu PDF."],["Czy mogę zmienić rezerwację?","Skontaktuj się z nami na WhatsApp jak najwcześniej. Sprawdzimy dostępność i pomożemy, jeśli to możliwe."]] : zh ? [["如何预订旅游项目？","选择行程、日期和出行人数，然后提交预订。我们会通过 WhatsApp 与您确认具体细节。"],["是否提供酒店接送？","许多行程包含或提供酒店接送服务。请查看行程详情，并在预订时填写您的酒店名称。"],["何时付款？","到店现付的预订会在确认前清楚标明。总价和付款状态也会显示在您的 PDF 确认单中。"],["我可以更改预订吗？","请尽早通过 WhatsApp 联系我们，我们会为您查询可用性并尽力提供帮助。"]] : [["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]]).map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-ink">{question}</summary><p className="mt-3 leading-7 text-muted">{answer}</p></details>)}</div></div></section>
+      <section className="bg-surface-muted px-6 py-20 sm:px-8"><div className="mx-auto max-w-3xl"><p className="text-center font-semibold uppercase tracking-[0.24em] text-ocean-dark">{tr("Helpful answers","Hilfreiche Antworten","Полезные ответы")}</p><h2 className="mt-3 text-center text-4xl font-black text-ink">{tr("Red Sea excursions FAQ","FAQ zu Ausflügen am Roten Meer","Вопросы об экскурсиях на Красном море")}</h2><div className="mt-8 divide-y divide-line rounded-3xl border border-line bg-white px-6">{(de ? [["Wie buche ich einen Ausflug?","Wähle einen Ausflug, Datum und Reisende und sende deine Buchung. Die Details bestätigen wir per WhatsApp."],["Ist die Hotelabholung verfügbar?","Viele Ausflüge beinhalten oder bieten eine Hotelabholung. Prüfe die Ausflugsdetails und gib dein Hotel bei der Buchung an."],["Wann bezahle ich?","Barzahlung bei Ankunft wird vor der Bestätigung klar angezeigt. Gesamtpreis und Zahlungsstatus stehen auch in der PDF-Bestätigung."],["Kann ich meine Buchung ändern?","Kontaktiere uns so früh wie möglich per WhatsApp. Wir prüfen die Verfügbarkeit und helfen dir."]] : ru ? [["Как забронировать экскурсию?","Выберите экскурсию, дату и гостей, затем отправьте заявку. Детали мы подтвердим в WhatsApp."],["Есть ли трансфер из отеля?","Многие экскурсии включают или предлагают трансфер. Проверьте описание и укажите отель при бронировании."],["Когда оплачивать?","Оплата наличными по прибытии ясно указывается перед подтверждением. Сумма и статус оплаты также есть в PDF."],["Можно изменить бронирование?","Свяжитесь с нами в WhatsApp как можно раньше. Мы проверим наличие мест и поможем."]] : ar ? [["كيف أحجز رحلة؟","اختر رحلة وحدد التاريخ وعدد المسافرين ثم أرسل طلب الحجز. سنؤكد لك التفاصيل العملية عبر واتساب."],["هل الاستلام من الفندق متاح؟","تتضمن أو تقدم العديد من رحلاتنا خدمة الاستلام من الفندق. تحقق من تفاصيل الرحلة وأضف اسم فندقك عند الحجز."],["متى أدفع؟","يتم توضيح حجوزات الدفع النقدي عند الوصول بشكل واضح قبل التأكيد. يظهر إجمالي المبلغ وحالة الدفع أيضًا في تأكيد الحجز بصيغة PDF."],["هل يمكنني تغيير حجزي؟","تواصل معنا عبر واتساب في أقرب وقت ممكن. سنتحقق من التوفر ونساعدك قدر الإمكان."]] : pl ? [["Jak zarezerwować wycieczkę?","Wybierz wycieczkę, datę i liczbę uczestników, a następnie wyślij rezerwację. Szczegóły potwierdzimy z Tobą na WhatsApp."],["Czy dostępny jest odbiór z hotelu?","Wiele naszych wycieczek zawiera lub oferuje odbiór z hotelu. Sprawdź szczegóły wycieczki i podaj nazwę hotelu podczas rezerwacji."],["Kiedy płacę?","Rezerwacje z płatnością gotówką na miejscu są wyraźnie oznaczone przed potwierdzeniem. Łączna kwota i status płatności widoczne są także w potwierdzeniu PDF."],["Czy mogę zmienić rezerwację?","Skontaktuj się z nami na WhatsApp jak najwcześniej. Sprawdzimy dostępność i pomożemy, jeśli to możliwe."]] : zh ? [["如何预订旅游项目？","选择行程、日期和出行人数，然后提交预订。我们会通过 WhatsApp 与您确认具体细节。"],["是否提供酒店接送？","许多行程包含或提供酒店接送服务。请查看行程详情，并在预订时填写您的酒店名称。"],["何时付款？","到店现付的预订会在确认前清楚标明。总价和付款状态也会显示在您的 PDF 确认单中。"],["我可以更改预订吗？","请尽早通过 WhatsApp 联系我们，我们会为您查询可用性并尽力提供帮助。"]] : it ? [["Come prenoto un'escursione?","Scegli un'escursione, seleziona data e viaggiatori e invia la prenotazione. Confermiamo con te i dettagli pratici su WhatsApp."],["È disponibile il prelievo in hotel?","Molte escursioni includono o offrono il prelievo in hotel. Controlla i dettagli dell'escursione e indica il tuo hotel in fase di prenotazione."],["Quando si paga?","Le prenotazioni con pagamento in contanti all'arrivo sono indicate chiaramente prima della conferma. Totale e stato del pagamento compaiono anche nella conferma PDF."],["Posso modificare la prenotazione?","Contattaci su WhatsApp il prima possibile. Verificheremo la disponibilità e ti aiuteremo dove possibile."]] : [["How do I book a tour?","Choose a tour, select your date and travelers, then submit your booking. We confirm practical details with you on WhatsApp."],["Is hotel pickup available?","Many tours include or offer hotel pickup. Check the tour details and add your hotel during booking."],["When do I pay?","Cash-on-arrival bookings are clearly shown before you confirm. Your total and payment status also appear on your PDF confirmation."],["Can I change my booking?","Contact us on WhatsApp as early as possible. We will check availability and help where possible."]]).map(([question,answer]) => <details key={question} className="py-5"><summary className="cursor-pointer font-bold text-ink">{question}</summary><p className="mt-3 leading-7 text-muted">{answer}</p></details>)}</div></div></section>
 
       {language === "en" && (
         <section className="border-t border-line bg-white px-6 py-16 sm:px-8">

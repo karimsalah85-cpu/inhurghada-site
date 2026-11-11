@@ -204,7 +204,7 @@ export function validateBookingInput(input: unknown, now = new Date()) {
       ...(referralCode ? { referralCode } : {}),
       redeemReferralUnits,
       type,
-      locale: ["en", "ar", "de", "ru", "pl", "zh"].includes(String(body.locale)) ? String(body.locale) : "en",
+      locale: ["en", "ar", "de", "ru", "pl", "zh", "it"].includes(String(body.locale)) ? String(body.locale) : "en",
       customerName,
       phone,
       customerEmail,

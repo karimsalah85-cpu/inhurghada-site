@@ -201,12 +201,13 @@ const signoffs: Record<Locale, { warm: string; team: string }> = {
   ar: { warm: "نراك قريباً،\nفريق ديلي رد سي", team: "فريق ديلي رد سي" },
   pl: { warm: "Do zobaczenia,\nzespół Daily Red Sea", team: "Zespół Daily Red Sea" },
   zh: { warm: "期待与您相见，\nDaily Red Sea 团队", team: "Daily Red Sea 团队" },
+  it: { warm: "A presto,\nIl team Daily Red Sea", team: "Il team Daily Red Sea" },
 };
 
 export const emailSignoff = (locale: Locale, tone: "warm" | "team" = "team") => signoffs[locale][tone];
 
 const whatsappLabels: Record<Locale, string> = {
-  en: "Chat on WhatsApp", de: "Auf WhatsApp schreiben", ru: "Написать в WhatsApp", ar: "تواصل عبر واتساب", pl: "Napisz na WhatsApp", zh: "通过 WhatsApp 联系",
+  en: "Chat on WhatsApp", de: "Auf WhatsApp schreiben", ru: "Написать в WhatsApp", ar: "تواصل عبر واتساب", pl: "Napisz na WhatsApp", zh: "通过 WhatsApp 联系", it: "Scrivici su WhatsApp",
 };
 
 export const emailWhatsappLabel = (locale: Locale) => whatsappLabels[locale];

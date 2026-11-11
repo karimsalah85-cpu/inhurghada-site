@@ -74,7 +74,7 @@ type Booking = {
   created_at: string;
   type: "tour" | "transfer";
   booking_source?: "website" | "manual";
-  locale?: "en" | "ar" | "de" | "ru" | "pl" | "zh";
+  locale?: "en" | "ar" | "de" | "ru" | "pl" | "zh" | "it";
   sales_person_id?: string | null;
   sales_commission_percent?: number | string | null;
   expense_total?: number;

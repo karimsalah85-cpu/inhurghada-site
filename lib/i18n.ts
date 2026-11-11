@@ -1,14 +1,14 @@
 import { blogPath } from "@/lib/blog-languages";
 
-export const locales = ["en", "ar", "de", "ru", "pl", "zh"] as const;
+export const locales = ["en", "ar", "de", "ru", "pl", "zh", "it"] as const;
 export type Locale = (typeof locales)[number];
 
 export const localeNames: Record<Locale, string> = {
-  en: "English", ar: "العربية", de: "Deutsch", ru: "Русский", pl: "Polski", zh: "简体中文",
+  en: "English", ar: "العربية", de: "Deutsch", ru: "Русский", pl: "Polski", zh: "简体中文", it: "Italiano",
 };
 
 export const localeOg: Record<Locale, string> = {
-  en: "en_US", ar: "ar_EG", de: "de_DE", ru: "ru_RU", pl: "pl_PL", zh: "zh_CN",
+  en: "en_US", ar: "ar_EG", de: "de_DE", ru: "ru_RU", pl: "pl_PL", zh: "zh_CN", it: "it_IT",
 };
 
 export const isLocale = (value: string): value is Locale => locales.includes(value as Locale);
@@ -101,6 +101,19 @@ export const dictionaries: Record<Locale, Dictionary> = {
     termsTitle: "条款与条件", termsText: "团队审核请求后确认名额。价格、取消条件、接送详情及运营商要求将在服务前确认。客户须提供准确信息并遵守安全指示。",
     legalNotice: "英文版本为具有法律效力的文本。其他语言版本仅为方便阅读。",
     checkoutTitle: "完成预订", checkoutText: "请先选择体验，然后填写日期、出行人数和接送地点。确认信息将通过电子邮件或 WhatsApp 发送。", included: "费用包含", contact: "联系我们的团队", backHome: "返回首页",
+  },
+  it: {
+    siteDescription: "Prenota gite in barca, snorkeling, immersioni, safari nel deserto e transfer privati a Hurghada, con prezzi chiari e assistenza locale.",
+    home: "Home", tours: "Escursioni", transfers: "Transfer", booking: "Prenotazione", about: "Chi siamo",
+    heroTitle: "Scopri le migliori escursioni e attività a Hurghada", heroDescription: "Gite alle isole, snorkeling, immersioni, safari nel deserto e transfer privati, con prenotazione semplice via WhatsApp e pagamento in contanti all'arrivo.",
+    bookNow: "Prenota ora", popularTours: "Esperienze più richieste", from: "Da", perPerson: "a persona",
+    whyTitle: "Perché prenotare con Daily Red Sea?", whyText: "Prezzi chiari, operatori locali selezionati con cura e assistenza rapida prima e durante il viaggio.", cash: "Pagamento all'arrivo", support: "Assistenza WhatsApp", local: "Servizio locale affidabile",
+    bookingTitle: "Prenota la tua esperienza a Hurghada", bookingText: "Indicaci esperienza, data, hotel e numero di persone. Il nostro team conferma disponibilità e dettagli del prelievo via WhatsApp.", bookingCta: "Inizia a prenotare",
+    transfersTitle: "Transfer privati a Hurghada", transfersText: "Transfer affidabili da e per aeroporto, hotel e in città con veicoli privati, prezzi chiari e conferma del prelievo.",
+    privacyTitle: "Informativa sulla privacy", privacyText: "Raccogliamo solo i dati di contatto, di prenotazione e di pagamento necessari per fornire il servizio richiesto, comunicare con te e adempiere agli obblighi di legge. Non vendiamo dati personali. Contattaci per richiedere accesso, rettifica o cancellazione, ove applicabile.",
+    termsTitle: "Termini e condizioni", termsText: "La disponibilità viene confermata dopo la verifica della richiesta da parte del nostro team. Prezzi, condizioni di cancellazione, dettagli del prelievo e requisiti dell'operatore vengono confermati prima del servizio. I clienti devono fornire informazioni corrette e seguire le istruzioni di sicurezza.",
+    legalNotice: "La versione inglese è il testo giuridicamente vincolante. Le altre versioni linguistiche sono fornite per comodità.",
+    checkoutTitle: "Completa la prenotazione", checkoutText: "Scegli prima un'esperienza, poi indica data, partecipanti e luogo di prelievo. Riceverai la conferma via e-mail o WhatsApp.", included: "Cosa è incluso", contact: "Contatta il nostro team", backHome: "Torna alla home",
   },
 };
 

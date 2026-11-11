@@ -38,7 +38,7 @@ const adminLogin = await get("/admin/login");
 assert.equal(adminLogin.response.status, 200, "Admin login page must return 200");
 assert.match(adminLogin.body, /Admin sign in/, "Admin login page must render its sign-in form");
 
-for (const locale of ["ar", "de", "ru", "pl", "zh"]) {
+for (const locale of ["ar", "de", "ru", "pl", "zh", "it"]) {
   const localizedHome = await get(`/${locale}`);
   assert.equal(localizedHome.response.status, 200, `/${locale} homepage must return 200`);
   assert.match(localizedHome.body, new RegExp(`<html[^>]+lang="${locale}"`), `/${locale} must declare html lang=${locale}`);
@@ -66,7 +66,7 @@ for (let offset = 0; offset < urls.length; offset += 10) {
       const body = await response.text();
       const pathname = new URL(response.url).pathname;
       const first = pathname.split("/").filter(Boolean)[0];
-      const expectedLanguage = ["ar", "de", "ru", "pl", "zh"].includes(first) ? first : "en";
+      const expectedLanguage = ["ar", "de", "ru", "pl", "zh", "it"].includes(first) ? first : "en";
       if (response.status !== 200) failures.push(`${url}: HTTP ${response.status}`);
       if (!/<title>[^<]+<\/title>/.test(body)) failures.push(`${url}: missing title`);
       if (!/rel="canonical"/.test(body)) failures.push(`${url}: missing canonical`);

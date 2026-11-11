@@ -51,6 +51,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
   const ar = language === "ar";
   const pl = language === "pl";
   const zh = language === "zh";
+  const it = language === "it";
+  const italianTransferCopy: Record<string, string> = { "2 private vehicles": "2 veicoli privati", "Private van (up to 10)": "Minivan privato (fino a 10)", "Private car (up to 3)": "Auto privata (fino a 3)", "Small car": "Auto compatta", "Larger vehicle": "Veicolo più grande", "Private car": "Auto privata", "Airport transfers must start or finish at Hurghada Airport.": "I transfer aeroportuali devono partire dall'aeroporto di Hurghada o terminare lì.", "Senzo transfers must start or finish at Senzo Mall.": "I transfer Senzo devono partire dal Senzo Mall o terminare lì.", "We need at least 1 hour to arrange your transfer. Please choose a later pickup time.": "Ci serve almeno 1 ora per organizzare il transfer. Scegli un orario di prelievo successivo.", "Message us on WhatsApp to arrange a Senzo transfer for a group this size.": "Scrivici su WhatsApp per organizzare un transfer Senzo per un gruppo di queste dimensioni.", "The small car allows a maximum of 2 travel bags. Reduce the bags or add a third passenger to request a larger vehicle.": "L'auto compatta consente al massimo 2 valigie. Riduci i bagagli o aggiungi un terzo passeggero per richiedere un veicolo più grande.", "The larger vehicle allows a maximum of 2 travel bags per passenger.": "Il veicolo più grande consente al massimo 2 valigie per passeggero.", "Please enter a valid WhatsApp phone number including the country code.": "Inserisci un numero WhatsApp valido, completo di prefisso internazionale.", "Transfer request failed. Please try again.": "Richiesta di transfer non riuscita. Riprova.", "We could not reach the booking service. Check your connection and try again.": "Non siamo riusciti a raggiungere il servizio di prenotazione. Controlla la connessione e riprova.", "Book a private Senzo Mall transfer": "Prenota un transfer privato per il Senzo Mall", "Priced per vehicle by group size — see your fare before you book.": "Prezzo a veicolo in base al gruppo: vedi la tariffa prima di prenotare.", "Required field": "Campo obbligatorio", "Pickup location": "Luogo di prelievo", "Pickup hotel / full address": "Hotel di prelievo / indirizzo completo", "Required pickup details": "Dettagli di prelievo obbligatori", "Drop-off location": "Luogo di arrivo", "Transfer date": "Data del transfer", "Pickup time": "Orario di prelievo", "Please book at least 1 hour before pickup.": "Prenota almeno 1 ora prima del prelievo.", "Passengers": "Passeggeri", "Travel bags": "Valigie", "Flight number (optional)": "Numero di volo (facoltativo)", "Your name": "Il tuo nome", "WhatsApp number": "Numero WhatsApp", "We'll use this number for booking confirmation and pickup details.": "Useremo questo numero per la conferma della prenotazione e i dettagli del prelievo.", "Email address": "Indirizzo e-mail", "Airport one-way fare": "Tariffa aeroporto solo andata", "Senzo Mall one-way fare": "Tariffa Senzo Mall solo andata", "Hurghada base zone—no supplement.": "Zona base di Hurghada: nessun supplemento.", "Vehicle:": "Veicolo:", "1–2 passengers: small car, maximum 2 bags. More than 2 passengers: larger vehicle, maximum 2 bags per person.": "1–2 passeggeri: auto compatta, massimo 2 valigie. Più di 2 passeggeri: veicolo più grande, massimo 2 valigie a persona.", "Price is per vehicle, not per person. 1–3 passengers travel by private car, 4–10 by private van. Travel bags are not carried on this service.": "Il prezzo è a veicolo, non a persona. 1–3 passeggeri viaggiano in auto privata, 4–10 in minivan privato. Questo servizio non prevede il trasporto di valigie.", "Notes (optional)": "Note (facoltativo)", "Add luggage, child seat, or any special request.": "Indica bagagli, seggiolino o altre richieste particolari.", "Before booking, please review our": "Prima di prenotare, consulta le nostre", "cancellation policy": "condizioni di cancellazione", "By submitting, you agree to our terms and conditions.": "Inviando la richiesta accetti i nostri termini e condizioni.", "Sending transfer request…": "Invio della richiesta in corso…", "Book one way": "Prenota solo andata", "Book a private transfer": "Prenota un transfer privato", "Choose your service and see the fixed one-way fare instantly.": "Scegli il servizio e vedi subito la tariffa fissa di sola andata.", "Airport transfer": "Transfer aeroportuale", "Senzo Mall transfer": "Transfer Senzo Mall", "one way within Hurghada": "solo andata all'interno di Hurghada", " (maximum 4)": " (massimo 4)", "Maximum 4 passengers. Travel bags are not accepted.": "Massimo 4 passeggeri. Le valigie non sono ammesse." };
   const tr = (
     en: string,
     deText: string,
@@ -58,7 +60,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
     arText = arabicTransferCopy[en] || en,
     plText = polishTransferCopy[en] || en,
     zhText = chineseTransferCopy[en] || en,
-  ) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : en;
+  ) => de ? deText : ru ? ruText : ar ? arText : pl ? plText : zh ? zhText : it ? italianTransferCopy[en] || en : en;
   const resortSupplementText = (area: string) => de
     ? `Enthält den Zuschlag von $7 für ${area}.`
     : ru
@@ -69,6 +71,8 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
     ? `Zawiera dopłatę 7 USD za ${area}.`
     : zh
     ? `包含 ${area} 的 7 美元附加费。`
+    : it
+    ? `Comprende il supplemento di 7 $ per ${area}.`
     : `Includes the $7 supplement for ${area}.`;
   const [service] = useState<TransferService>(initialService);
   const [name, setName] = useState("");
@@ -201,7 +205,7 @@ export default function TransferBookingForm({ initialService = "airport" }: { in
         serviceName,
         date,
         time,
-        travelers: `${passengers} ${de ? "Fahrgäste" : ru ? "пасс." : ar ? "ركاب" : pl ? "pasażerów" : zh ? "位乘客" : "passengers"}`,
+        travelers: `${passengers} ${de ? "Fahrgäste" : ru ? "пасс." : ar ? "ركاب" : pl ? "pasażerów" : zh ? "位乘客" : it ? "passeggeri" : "passengers"}`,
         total: `$${total.toFixed(2)}`,
         customerEmailSent: Boolean(data.customerEmailSent),
         whatsappSent: Boolean(data.whatsappSent),

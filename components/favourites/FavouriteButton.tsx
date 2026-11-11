@@ -11,6 +11,7 @@ const labels = {
   ru: { add: "Сохранить поездку", remove: "Удалить из сохранённых поездок" },
   pl: { add: "Zapisz wycieczkę", remove: "Usuń z zapisanych wycieczek" },
   zh: { add: "收藏此行程", remove: "从收藏中移除" },
+  it: { add: "Salva questa escursione", remove: "Rimuovi dalle escursioni salvate" },
 } as const;
 
 export default function FavouriteButton({ item, compact = false }: { item: FavouriteItem; compact?: boolean }) {

@@ -23,6 +23,7 @@ const reviewRequestTemplates = [
   { locale: "ar", subject: "كيف كانت رحلتك مع Daily Red Sea؟", email: "مرحباً {{customer_name}}،\n\nنأمل أن تكون قد استمتعت بـ {{tour_name}}. شاركنا تجربتك: {{review_url}}\n\nشكراً لك،\nDaily Red Sea", whatsapp: "مرحباً {{customer_name}}! نأمل أن تكون قد استمتعت بـ {{tour_name}}. يسعدنا سماع رأيك: {{review_url}}" },
   { locale: "pl", subject: "Jak minęła Twoja wycieczka z Daily Red Sea?", email: "Dzień dobry {{customer_name}},\n\nmamy nadzieję, że {{tour_name}} się podobała. Podziel się opinią: {{review_url}}\n\nDziękujemy,\nDaily Red Sea", whatsapp: "Dzień dobry {{customer_name}}! Mamy nadzieję, że {{tour_name}} się podobała. Chętnie poznamy Twoją opinię: {{review_url}}" },
   { locale: "zh", subject: "您的 Daily Red Sea 行程体验如何？", email: "您好 {{customer_name}}，\n\n希望您喜欢{{tour_name}}。欢迎分享您的体验：{{review_url}}\n\n谢谢，\nDaily Red Sea", whatsapp: "您好 {{customer_name}}！希望您喜欢{{tour_name}}。期待您的反馈：{{review_url}}" },
+  { locale: "it", subject: "Com'è andata la tua escursione con Daily Red Sea?", email: "Ciao {{customer_name}},\n\nsperiamo che {{tour_name}} ti sia piaciuta. Racconta la tua esperienza: {{review_url}}\n\nGrazie,\nDaily Red Sea", whatsapp: "Ciao {{customer_name}}! Speriamo che {{tour_name}} ti sia piaciuta. Ci farebbe piacere ricevere il tuo parere: {{review_url}}" },
 ];
 
 const dateOnly = (date: Date) => date.toISOString().slice(0, 10);

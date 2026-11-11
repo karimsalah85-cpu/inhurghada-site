@@ -15,7 +15,7 @@ import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 import { destinations } from "@/lib/destinations";
 import { useScrolledPast } from "@/components/layout/scroll-chrome";
 
-const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظة", de: "Gespeicherte Trips", ru: "Сохранённые поездки", pl: "Zapisane wycieczki", zh: "收藏的行程" } as const;
+const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظة", de: "Gespeicherte Trips", ru: "Сохранённые поездки", pl: "Zapisane wycieczki", zh: "收藏的行程", it: "Escursioni salvate" } as const;
 
 
 export default function Navbar() {
@@ -38,7 +38,7 @@ export default function Navbar() {
   const { count: savedCount, openPanel: openSavedTrips } = useFavourites();
   const savedTripsLabel = savedTripsLabels[language];
   const ui = publicInterfaceCopy[language];
-  const destinationsLabel = language === "ar" ? "الوجهات" : language === "de" ? "Reiseziele" : language === "ru" ? "Направления" : language === "pl" ? "Kierunki" : language === "zh" ? "目的地" : "Destinations";
+  const destinationsLabel = language === "ar" ? "الوجهات" : language === "de" ? "Reiseziele" : language === "ru" ? "Направления" : language === "pl" ? "Kierunki" : language === "zh" ? "目的地" : language === "it" ? "Destinazioni" : "Destinations";
 
 
   function closeMenu() {
@@ -198,7 +198,7 @@ export default function Navbar() {
             hover:brightness-105
             "
           >
-            {language === "ar" ? "خطط لرحلتك" : language === "de" ? "Reise planen" : language === "ru" ? "Спланировать" : language === "pl" ? "Zaplanuj podróż" : language === "zh" ? "规划行程" : "Plan your trip"}
+            {language === "ar" ? "خطط لرحلتك" : language === "de" ? "Reise planen" : language === "ru" ? "Спланировать" : language === "pl" ? "Zaplanuj podróż" : language === "zh" ? "规划行程" : language === "it" ? "Pianifica il viaggio" : "Plan your trip"}
           </Link>
 
           <button type="button" onClick={openSavedTrips} aria-label={savedCount ? `${savedTripsLabel} (${savedCount})` : savedTripsLabel} className="relative rounded-xl border border-line bg-white p-2.5 text-ink shadow-sm transition hover:border-brand-orange-cta hover:text-brand-orange-cta">
@@ -279,7 +279,7 @@ export default function Navbar() {
           </MobileLink>
 
           <MobileLink href={localePath(language, "/cart")} close={closeMenu}>
-            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "pl" ? "Koszyk wycieczek" : language === "zh" ? "行程购物车" : "Trip cart"}</span><span className="rounded-full bg-ocean-tint px-2 py-0.5 text-sm font-bold text-ocean-dark">{items.length}</span></span>
+            <span className="flex items-center justify-between"><span>{language === "de" ? "Reisewarenkorb" : language === "ru" ? "Корзина поездок" : language === "ar" ? "سلة الرحلات" : language === "pl" ? "Koszyk wycieczek" : language === "zh" ? "行程购物车" : language === "it" ? "Carrello escursioni" : "Trip cart"}</span><span className="rounded-full bg-ocean-tint px-2 py-0.5 text-sm font-bold text-ocean-dark">{items.length}</span></span>
           </MobileLink>
 
           <button

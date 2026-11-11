@@ -64,7 +64,9 @@ export default function BookableDatePicker({ value, minimumDate, operatingWeekda
           ? { choose: "Wybierz datę wycieczki", available: "Dostępne terminy", unavailable: "Niedostępne" }
           : locale === "zh"
             ? { choose: "选择行程日期", available: "可预订日期", unavailable: "不可预订" }
-            : { choose: "Choose your trip date", available: "Bookable dates", unavailable: "Unavailable" };
+            : locale === "it"
+              ? { choose: "Scegli la data dell'escursione", available: "Date prenotabili", unavailable: "Non disponibile" }
+              : { choose: "Choose your trip date", available: "Bookable dates", unavailable: "Unavailable" };
 
   return (
     <div ref={container} className="relative mt-1" dir={rtl ? "rtl" : "ltr"}>

@@ -11,6 +11,7 @@ const messages = {
   ru: { check: "Проверить подтверждённые вознаграждения", verify: "Подтвердить email бронирования", unavailable: "Подтвердите email бронирования для доступа к вознаграждениям или повторите подтверждение, если сеанс истёк.", apply: "Использовать доступные вознаграждения", pending: "Окончательная доступная скидка подтверждается при создании бронирования." },
   pl: { check: "Sprawdź moje zweryfikowane nagrody", verify: "Zweryfikuj e-mail rezerwacji", unavailable: "Zweryfikuj e-mail rezerwacji, aby uzyskać dostęp do nagród, lub zweryfikuj ponownie, jeśli sesja wygasła.", apply: "Zastosuj dostępne nagrody", pending: "Ostateczna dostępna zniżka zostanie potwierdzona przy tworzeniu rezerwacji." },
   zh: { check: "查看已验证的奖励", verify: "验证预订邮箱", unavailable: "请验证预订邮箱以查看奖励；如果会话已过期，请重新验证。", apply: "使用可用奖励", pending: "最终适用折扣将在创建预订时确认。" },
+  it: { check: "Controlla i miei premi verificati", verify: "Verifica l'e-mail della prenotazione", unavailable: "Verifica l'e-mail della prenotazione per accedere ai premi, oppure verificala di nuovo se la sessione è scaduta.", apply: "Applica i premi disponibili", pending: "Lo sconto definitivo viene confermato alla creazione della prenotazione." },
 } satisfies Record<Locale, Record<string, string>>;
 
 export function verifiedRewardSelection(account: { email: string; token: string; balanceUnits: number } | null, email: string, selected: boolean) {

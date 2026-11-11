@@ -15,6 +15,7 @@ export const referralCopy: Record<Locale, ReferralCopy> = {
   ru: { heading: "ПОДАРИ 5% — ЗАРАБОТАЙ 5%", tagline: "Подарите друзьям скидку 5% на первое подходящее бронирование. После завершения их поездки вы получите скидку 5% на будущее бронирование.", yourCode: "Ваш реферальный код", copyCode: "Скопировать код", copied: "Скопировано!", copyLink: "Скопировать реферальную ссылку", shareWhatsapp: "Поделиться в WhatsApp", whatsappMessage: "Откройте для себя Красное море с Daily Red Sea! Используйте мою ссылку и получите скидку 5% на первое подходящее бронирование.", available: "Доступные вознаграждения", maxPerBooking: "Максимум на одно бронирование", pending: "В ожидании", qualified: "Успешные рефералы", sendCode: "Отправить код подтверждения", enterCodeLabel: "Код подтверждения", verify: "Подтвердить", invalidCode: "Код неверен или истёк.", applyPrompt: (percent) => `У вас есть ${percent}% реферальных вознаграждений. Применить к этому бронированию?`, applyButton: "Применить к этому бронированию", applied: "Реферальное вознаграждение применено", noRewardsYet: "Пока нет реферальных вознаграждений — поделитесь ссылкой, чтобы начать зарабатывать.", checkoutCodeLabel: "Реферальный код", checkoutApply: "Применить", checkoutRemove: "Удалить", checkoutDiscount: "Реферальная скидка", checkoutHint: "Есть реферальный код друга? Введите его здесь." },
   pl: { heading: "DAJ 5% — ZYSKAJ 5%", tagline: "Daj znajomym 5% zniżki na pierwszą kwalifikującą się rezerwację. Po zakończeniu ich wycieczki ty zyskujesz 5% zniżki na kolejną rezerwację.", yourCode: "Twój kod polecający", copyCode: "Kopiuj kod", copied: "Skopiowano!", copyLink: "Kopiuj link polecający", shareWhatsapp: "Udostępnij w WhatsApp", whatsappMessage: "Odkryj Morze Czerwone z Daily Red Sea! Użyj mojego linku i zyskaj 5% zniżki na pierwszą kwalifikującą się rezerwację.", available: "Dostępne nagrody", maxPerBooking: "Maksymalnie do wykorzystania w jednej rezerwacji", pending: "Oczekujące", qualified: "Skuteczne polecenia", sendCode: "Wyślij kod weryfikacyjny", enterCodeLabel: "Kod weryfikacyjny", verify: "Zweryfikuj", invalidCode: "Ten kod jest nieprawidłowy lub wygasł.", applyPrompt: (percent) => `Masz ${percent}% nagród polecających. Zastosować do tej rezerwacji?`, applyButton: "Zastosuj do tej rezerwacji", applied: "Nagroda polecająca zastosowana", noRewardsYet: "Brak jeszcze nagród polecających — udostępnij swój link, aby zacząć zarabiać.", checkoutCodeLabel: "Kod polecający", checkoutApply: "Zastosuj", checkoutRemove: "Usuń", checkoutDiscount: "Zniżka polecająca", checkoutHint: "Masz kod polecający znajomego? Wpisz go tutaj." },
   zh: { heading: "赠 5% — 赚 5%", tagline: "邀请好友享受首次符合条件预订的 5% 折扣。好友完成行程后，您将获得未来预订的 5% 折扣。", yourCode: "您的推荐码", copyCode: "复制推荐码", copied: "已复制！", copyLink: "复制推荐链接", shareWhatsapp: "通过 WhatsApp 分享", whatsappMessage: "与 Daily Red Sea 一起探索红海！使用我的链接，即可在首次符合条件的预订中享受 5% 折扣。", available: "可用奖励", maxPerBooking: "单次预订最多可用", pending: "待定", qualified: "成功推荐", sendCode: "发送验证码", enterCodeLabel: "验证码", verify: "验证", invalidCode: "验证码不正确或已过期。", applyPrompt: (percent) => `您有 ${percent}% 的推荐奖励，是否应用到本次预订？`, applyButton: "应用到本次预订", applied: "已应用推荐奖励", noRewardsYet: "暂无推荐奖励——分享您的链接即可开始赚取。", checkoutCodeLabel: "推荐码", checkoutApply: "应用", checkoutRemove: "移除", checkoutDiscount: "推荐折扣", checkoutHint: "有朋友的推荐码？在此输入。" },
+  it: { heading: "REGALA IL 5% — OTTIENI IL 5%", tagline: "Regala agli amici il 5% di sconto sulla loro prima prenotazione idonea. Quando avranno completato l'esperienza, ottieni il 5% di sconto su una prenotazione futura.", yourCode: "Il tuo codice referral", copyCode: "Copia codice", copied: "Copiato!", copyLink: "Copia link referral", shareWhatsapp: "Condividi su WhatsApp", whatsappMessage: "Scopri il Mar Rosso con Daily Red Sea! Usa il mio link e ottieni il 5% di sconto sulla tua prima prenotazione idonea.", available: "Premi disponibili", maxPerBooking: "Massimo utilizzabile per prenotazione", pending: "In attesa", qualified: "Referral riusciti", sendCode: "Invia codice di verifica", enterCodeLabel: "Codice di verifica", verify: "Verifica", invalidCode: "Il codice non è corretto o è scaduto.", applyPrompt: (percent) => `Hai il ${percent}% di premi referral. Vuoi applicarlo a questa prenotazione?`, applyButton: "Applica a questa prenotazione", applied: "Premio referral applicato", noRewardsYet: "Ancora nessun premio referral — condividi il tuo link per iniziare.", checkoutCodeLabel: "Codice referral", checkoutApply: "Applica", checkoutRemove: "Rimuovi", checkoutDiscount: "Sconto referral", checkoutHint: "Hai il codice referral di un amico? Inseriscilo qui." },
 };
 
 export const referralProgramCopy = {
@@ -119,7 +120,24 @@ export const referralProgramCopy = {
     "viewRewards": "查看我的推荐奖励",
     "continueBooking": "继续预订",
     "stackingPolicy": "奖励将在结账时验证。适用更优惠的折扣；百分比折扣不可叠加。"
-  }
+  },
+  "it": {
+    "locked": "Completa la tua prima esperienza Daily Red Sea a pagamento per attivare i referral.",
+    "emailLabel": "E-mail usata per la prenotazione",
+    "verifyIntro": "Verifica l'e-mail della prenotazione per vedere il tuo link referral e i tuoi premi.",
+    "codeSentNotice": "Se questa e-mail è idonea alla verifica, riceverai un codice di 6 cifre. Controlla anche la cartella spam.",
+    "resend": "Invia un altro codice",
+    "requestError": "Qualcosa è andato storto. Riprova.",
+    "copyError": "Copia non riuscita. Riprova o usa WhatsApp.",
+    "terms": "I premi referral sono sconti sulle prenotazioni future idonee, non denaro. Non possono essere prelevati né trasferiti. Puoi usare fino al 15% per prenotazione; i premi non utilizzati restano disponibili.",
+    "howItWorks": "Come funziona",
+    "stepOne": "Completa e paga il tuo primo viaggio per sbloccare il tuo link personale.",
+    "stepTwo": "Regala a un amico davvero nuovo il 5% di sconto sulla sua prima prenotazione idonea.",
+    "stepThree": "Quando il suo viaggio è completato e pagato, ottieni un altro 5%. I premi si accumulano.",
+    "viewRewards": "Vedi i miei premi referral",
+    "continueBooking": "Continua con la prenotazione",
+    "stackingPolicy": "I tuoi premi vengono verificati al checkout. Si applica lo sconto idoneo più vantaggioso; gli sconti percentuali non sono cumulabili."
+  },
 } satisfies Record<Locale, Record<string, string>>;
 
 export const referralRemainingCopy: Record<Locale, (percent: number) => string> = {
@@ -129,4 +147,5 @@ export const referralRemainingCopy: Record<Locale, (percent: number) => string> 
   ru: (percent) => `Если использовать это вознаграждение, ${percent}% останется для будущего бронирования.`,
   pl: (percent) => `Jeśli wykorzystasz tę nagrodę, ${percent}% pozostanie na przyszłą rezerwację.`,
   zh: (percent) => `使用此奖励后，仍有 ${percent}% 可用于未来预订。`,
+  it: (percent) => `Se usi questo premio, il ${percent}% resterà disponibile per una prenotazione futura.`,
 };

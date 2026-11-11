@@ -14,9 +14,10 @@ export default function GoogleReviews({ className = "" }: { className?: string }
     ar: { eyebrow: "تقييمات Google", title: "ماذا يقول ضيوفنا", read: "قراءة الكل على Google", write: "اكتب تقييماً", view: "عرض على Google", note: "مقتطفات مختارة من التقييمات يُحدّثها فريق Daily Red Sea. جميع التقييمات والتقييم الحالي متاحة على Google.", empty: "اكتشف تجارب ضيوفنا على Google وشارك تجربتك بعد رحلتك." },
     pl: { eyebrow: "Opinie Google", title: "Co mówią nasi goście", read: "Wszystkie opinie w Google", write: "Napisz opinię", view: "Zobacz w Google", note: "Wybrane fragmenty opinii, aktualizowane przez Daily Red Sea. Wszystkie opinie i aktualna ocena są dostępne w Google.", empty: "Poznaj doświadczenia naszych gości w Google i podziel się swoimi po wycieczce." },
     zh: { eyebrow: "Google 评价", title: "客人怎么说", read: "在 Google 查看全部", write: "撰写评价", view: "在 Google 查看", note: "由 Daily Red Sea 手动维护的精选评价摘录。请前往 Google 查看所有评价和当前评分。", empty: "在 Google 上了解客人的体验，并在旅行后分享您自己的感受。" },
+    it: { eyebrow: "Recensioni Google", title: "Cosa dicono i nostri ospiti", read: "Leggi tutte su Google", write: "Scrivi una recensione", view: "Vedi su Google", note: "Estratti di recensioni selezionati e aggiornati da Daily Red Sea. Su Google trovi tutte le recensioni e la valutazione attuale.", empty: "Scopri su Google le esperienze dei nostri ospiti e racconta la tua dopo l'escursione." },
   };
   const labels = translations[language as keyof typeof translations] || translations.en;
-  const translationCredit = { en: "Translated by Google", de: "Von Google übersetzt", ru: "Переведено Google", ar: "ترجمة Google", pl: "Przetłumaczone przez Google", zh: "由 Google 翻译" };
+  const translationCredit = { en: "Translated by Google", de: "Von Google übersetzt", ru: "Переведено Google", ar: "ترجمة Google", pl: "Przetłumaczone przez Google", zh: "由 Google 翻译", it: "Tradotto da Google" };
   const translatedLabel = translationCredit[language as keyof typeof translationCredit] || translationCredit.en;
 
   return <section className={`rounded-[2rem] border border-ocean-tint bg-white p-7 shadow-sm sm:p-10 ${className}`}>

@@ -29,7 +29,7 @@ describe("Luxor two-day trip and balloon ride", () => {
 
   it("fully localizes every customer-facing field in each non-English language", () => {
     for (const listing of [twoDay, balloon]) {
-      for (const locale of ["ar", "de", "ru", "pl", "zh"] as const) {
+      for (const locale of ["ar", "de", "ru", "pl", "zh", "it"] as const) {
         const localized = localizeTour(listing, locale);
         for (const field of translatedFields) {
           if (listing[field as keyof Tour] === undefined) continue;

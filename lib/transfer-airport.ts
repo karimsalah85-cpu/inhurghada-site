@@ -8,10 +8,11 @@ export function isHurghadaAirport(value: string) {
     "مطار الغردقة الدولي hrg", "مطار الغردقة الدولي", "مطار الغردقة",
     "międzynarodowe lotnisko w hurghadzie hrg", "międzynarodowe lotnisko w hurghadzie",
     "赫尔格达国际机场 hrg", "赫尔格达国际机场",
+    "aeroporto internazionale di hurghada hrg", "aeroporto internazionale di hurghada", "aeroporto di hurghada",
   ].includes(normalized);
 }
 
 /** Unknown airports cannot use a contracted Hurghada-to-hotel fare. */
 export function hasUncontractedAirport(value: string) {
-  return !isHurghadaAirport(value) && /\brmf\b|airport|flughafen|аэропорт|مطار|lotnisk|机场/i.test(value);
+  return !isHurghadaAirport(value) && /\brmf\b|airport|aeroporto|flughafen|аэропорт|مطار|lotnisk|机场/i.test(value);
 }

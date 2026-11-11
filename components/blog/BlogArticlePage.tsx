@@ -13,7 +13,7 @@ import { localePath } from "@/lib/i18n";
 import TrackedExternalLink from "@/components/analytics/TrackedExternalLink";
 import { whatsappUrl } from "@/lib/contact";
 
-type BlogLocale = "en" | "de" | "ru" | "ar" | "pl" | "zh";
+type BlogLocale = "en" | "de" | "ru" | "ar" | "pl" | "zh" | "it";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -44,6 +44,10 @@ const blogArticleCopy: Record<BlogLocale, {
   zh: {
     home: "首页", blog: "博客", bookExperience: "预订体验", viewDetails: "查看详情 →",
     from: "起价", perPerson: "每人", faqHeading: "常见问题", whatsapp: "通过 WhatsApp 联系我们", moreGuides: "更多指南", dateLocale: "zh-CN",
+  },
+  it: {
+    home: "Home", blog: "Blog", bookExperience: "Prenota l'esperienza", viewDetails: "Vedi i dettagli →",
+    from: "Da", perPerson: "a persona", faqHeading: "Domande frequenti", whatsapp: "Scrivici su WhatsApp", moreGuides: "Altre guide", dateLocale: "it-IT",
   },
 };
 

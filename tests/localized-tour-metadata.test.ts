@@ -4,7 +4,7 @@ import { tours } from "@/data/tours";
 import { localizeTour } from "@/lib/tour-localization";
 import type { Locale } from "@/lib/i18n";
 
-const locales: Locale[] = ["en", "ar", "de", "ru", "pl", "zh"];
+const locales: Locale[] = ["en", "ar", "de", "ru", "pl", "zh", "it"];
 
 describe("localized tour metadata", () => {
   it.each(locales)("publishes complete, real Marsa Alam alternates and localized social metadata for %s", async (locale) => {
@@ -18,6 +18,7 @@ describe("localized tour metadata", () => {
       ru: "/ru/destinations/marsa-alam",
       pl: "/pl/destinations/marsa-alam",
       zh: "/zh/destinations/marsa-alam",
+      it: "/it/destinations/marsa-alam",
       "x-default": "/destinations/marsa-alam",
     });
     expect(metadata.openGraph?.title).toBe(metadata.title);

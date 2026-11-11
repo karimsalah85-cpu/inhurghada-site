@@ -5,7 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 
 describe("post-trip PDF", () => {
   it("creates one branded invitation page in every supported language", async () => {
-    for (const locale of ["en","de","ru","ar","pl","zh"]) {
+    for (const locale of ["en","de","ru","ar","pl","zh","it"]) {
       const pdf=await createPostTripPdf({reference:"DRS-SAMPLE",customerName:locale==="ar"?"ضيف ديلي رد سي":"Sample Guest",itemName:"Jeddah Yacht Sunset Cruise",tourSlug:"jeddah-yacht-sunset-cruise",locale,qualified:true,referralCode:"DRS-SAMPLE",generatedAt:new Date("2026-09-21T12:00:00Z")});
       expect(pdf.subarray(0,5).toString()).toBe("%PDF-");
       expect(pdf.toString("binary")).toContain("https://dailyredsea.com/reviews?lang="+locale+"&ref=DRS-SAMPLE");
