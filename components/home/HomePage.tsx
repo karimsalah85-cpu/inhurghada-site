@@ -237,14 +237,15 @@ function HomeContent({ initialTours }: { initialTours: Tour[] }) {
       <section
  ref={toursSection}
  id="tours"
- className="bg-white pb-20 pt-4 sm:py-24"
+ className="bg-white pb-20 pt-4 sm:pb-24 sm:pt-10"
 >
 
 
         <div className="
           mx-auto
           max-w-7xl
-          px-8
+          px-5
+          sm:px-8
         ">
 
 

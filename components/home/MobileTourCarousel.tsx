@@ -33,7 +33,7 @@ export default function MobileTourCarousel({ children, label }: { children: Reac
 
   return (
     <div aria-label={label} aria-roledescription="carousel">
-      <div ref={trackRef} onScroll={updateActiveCard} className="-mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-8 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3">
+      <div ref={trackRef} onScroll={updateActiveCard} className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 px-5 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-2 md:gap-8 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3">
         {items.map((item, index) => <div key={index} className="min-w-[calc(100%-1.5rem)] snap-center md:min-w-0">{item}</div>)}
       </div>
       {items.length > 1 ? <div className="mt-3 flex items-center justify-center gap-4 md:hidden">
