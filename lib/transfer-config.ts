@@ -16,7 +16,7 @@
  *    snapshots remain auditable.
  */
 
-export const PRICING_VERSION = "2026-11-transfer-v2";
+export const PRICING_VERSION = "2026-11-transfer-v3";
 export const TRANSFER_CURRENCY = "USD" as const;
 
 export type TransferVehicleClass = "sedan" | "suv" | "minivan" | "hiace" | "minibus";
@@ -100,6 +100,12 @@ export const ROUTE_PRICING: Record<TransferZoneKey, Record<TransferVehicleClass,
   port_ghalib: { sedan: 75, suv: 80, minivan: 90, hiace: 110, minibus: null },
   marsa_alam: { sedan: 85, suv: 90, minivan: 105, hiace: 125, minibus: null },
 };
+
+/** Owner-approved one-way fares between El Gouna and Hurghada city. */
+export const CITY_ROUTE_PRICING = {
+  el_gouna_hurghada: { sedan: 20, hiace: 35 } as Partial<Record<TransferVehicleClass, number>>,
+};
+export type CityRouteKey = keyof typeof CITY_ROUTE_PRICING;
 
 /**
  * PER-VEHICLE, ONE-WAY USD fares from Marsa Alam Airport (RMF). Owner-set selling
@@ -235,7 +241,7 @@ export const ALLOCATION_CONFIG = {
 const HOTEL_ZONE_PATTERNS: { zone: TransferZoneKey; patterns: string[] }[] = [
   { zone: "makadi_bay", patterns: ["makadi"] },
   { zone: "sahl_hasheesh", patterns: ["sahl hasheesh", "sahl hashish", "citadel azur", "pyramisa beach", "premier le reve", "tropitel sahl"] },
-  { zone: "el_gouna", patterns: ["el gouna", "elgouna", "el-gouna", "gouna", "abu tig", "mosaique", "steigenberger golf", "captain's inn", "captains inn"] },
+  { zone: "el_gouna", patterns: ["el gouna", "elgouna", "el-gouna", "gouna", "casa cook", "casacook", "abu tig", "mosaique", "steigenberger golf", "captain's inn", "captains inn"] },
   { zone: "soma_bay", patterns: ["soma bay", "somabay", "kempinski soma", "sheraton soma", "la residence des cascades", "the breakers"] },
   { zone: "safaga", patterns: ["safaga", "safage", "lotus bay", "shams safaga", "menaville"] },
   { zone: "el_quseir", patterns: ["quseir", "qusseir", "el qoseir", "movenpick el quseir", "flamenco beach"] },

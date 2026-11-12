@@ -16,6 +16,8 @@
 
 import {
   ALLOCATION_CONFIG,
+  CITY_ROUTE_PRICING,
+  type CityRouteKey,
   EXTRAS_CONFIG,
   OVERSIZED_LUGGAGE_EQUIVALENT,
   OVERSIZED_MANUAL_CONFIRMATION_THRESHOLD,
@@ -47,6 +49,7 @@ export type TransferQuoteInput = {
   airport?: "HRG" | "RMF" | null;
   /** Set only for a priced Marsa Alam Airport destination. */
   rmfRoute?: RmfRouteKey | null;
+  cityRoute?: CityRouteKey | null;
   /** Resolved pricing zone. `null` means the route could not be mapped. */
   zone: TransferZoneKey | null;
   tripType: TransferTripType;
@@ -240,14 +243,16 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
     return manualQuote(input, "invalid_passengers", totalPassengers, ["add_passengers"]);
   }
 
-  if (input.direction === "hotel_to_hotel") {
+  const cityFares = input.direction === "hotel_to_hotel" && input.cityRoute
+    ? CITY_ROUTE_PRICING[input.cityRoute] : null;
+  if (input.direction === "hotel_to_hotel" && !cityFares) {
     return manualQuote(input, "hotel_to_hotel", totalPassengers, ["hotel_to_hotel_manual"]);
   }
   const rmfFares = input.airport === "RMF" && input.rmfRoute ? RMF_ROUTE_PRICING[input.rmfRoute] : null;
-  if (input.airport !== undefined && input.airport !== "HRG" && !rmfFares) {
+  if (input.airport !== undefined && input.airport !== "HRG" && !rmfFares && !cityFares) {
     return manualQuote(input, "route_not_mapped", totalPassengers, ["route_not_mapped"]);
   }
-  if (!input.zone && !rmfFares) {
+  if (!input.zone && !rmfFares && !cityFares) {
     return manualQuote(input, "route_not_mapped", totalPassengers, ["route_not_mapped"]);
   }
   if (input.wheelchair === "powered_or_fixed") {
@@ -283,7 +288,7 @@ export function calculateTransferQuote(rawInput: TransferQuoteInput): TransferQu
   const legVehicles: AllocatedVehicle[] = [];
   for (const vehicleClass of allocation) {
     const config = VEHICLE_CLASSES[vehicleClass];
-    const legFare = rmfFares ? rmfFares[vehicleClass] : ROUTE_PRICING[zone as TransferZoneKey][vehicleClass];
+    const legFare = cityFares ? cityFares[vehicleClass] : rmfFares ? rmfFares[vehicleClass] : ROUTE_PRICING[zone as TransferZoneKey][vehicleClass];
     if (typeof legFare !== "number") {
       return manualQuote(input, "zone_unpriced", totalPassengers, ["zone_unpriced"]);
     }

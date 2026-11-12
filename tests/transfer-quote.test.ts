@@ -259,6 +259,33 @@ describe("server authority: a client-sent price cannot change the fare", () => {
     expect(pricing.data.tourName).toContain(`${pickup} → ${dropoff}`);
   });
 
+  it.each([
+    ["casacook el gouna", "hurghada", 2, 2, "one_way", 20],
+    ["Hurghada Marina", "Casa Cook El Gouna", 4, 2, "one_way", 35],
+    ["Casa Cook", "Hurghada", 2, 3, "one_way", 35],
+    ["Casa Cook El Gouna", "Hurghada", 2, 2, "round_trip", 40],
+  ])("prices the approved city route %s → %s", (pickup, dropoff, adults, largeBags, tripType, expected) => {
+    const validation = validateBookingInput({ ...submitted, transferProduct: "private-v3", pickupPlaceText: pickup, dropoffPlaceText: dropoff, adults, largeBags, tripType, returnDate: "2026-02-02", returnTime: "12:00" }, now);
+    if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
+    expect(validation.data.transfer.quoteInput.cityRoute).toBe("el_gouna_hurghada");
+    const pricing = calculateBookingPrice(validation.data);
+    if (!("data" in pricing) || !pricing.data) throw new Error("pricing failed");
+    expect(pricing.data.amount).toBe(expected);
+    const route = resolveTransferRoute(pickup, dropoff);
+    const browserQuote = calculateTransferQuote({ ...base, ...route, adults, largeBags, cabinBags: 1, tripType: tripType as "one_way" | "round_trip" });
+    expect(browserQuote.total).toBe(expected);
+    expect(browserQuote.requiresManualConfirmation).toBe(false);
+  });
+
+  it("ignores a forged city route for a journey without an approved fare", () => {
+    const validation = validateBookingInput({ ...submitted, transferProduct: "private-v3", pickupPlaceText: "Port Ghalib Marina", dropoffPlaceText: "Hurghada", cityRoute: "el_gouna_hurghada" }, now);
+    if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");
+    expect(validation.data.transfer.quoteInput.cityRoute).toBeNull();
+    const pricing = calculateBookingPrice(validation.data);
+    if (!("data" in pricing) || !pricing.data) throw new Error("pricing failed");
+    expect(pricing.data.amount).toBe(0);
+  });
+
   it("ignores a client-supplied Hurghada zone for Marsa Alam Airport", () => {
     const validation = validateBookingInput({ ...submitted, transferProduct: "private-v3", pickupPlaceText: "Marsa Alam Airport (RMF)", dropoffPlaceText: "Port Ghalib Marina", zone: "hurghada_city" }, now);
     if (!("data" in validation) || !validation.data?.transfer) throw new Error("validation failed");

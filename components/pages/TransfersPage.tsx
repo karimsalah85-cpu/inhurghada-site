@@ -19,18 +19,18 @@ export default function TransfersPage({ locale = "en" }: { locale?: Locale }) {
   return (
     <main className="bg-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
-      <section className="relative bg-ink bg-cover bg-center px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-20 sm:pt-40" style={{ backgroundImage: "linear-gradient(90deg,rgba(4,24,39,.9),rgba(4,24,39,.55)),url('/images/owned/hurghada-transfer-road-sunset.jpg')" }}>
+      <section className="relative bg-ink bg-cover bg-center px-4 pb-8 pt-24 text-white sm:px-8 sm:pb-20 sm:pt-40" style={{ backgroundImage: "linear-gradient(90deg,rgba(4,24,39,.9),rgba(4,24,39,.55)),url('/images/owned/hurghada-transfer-road-sunset.jpg')" }}>
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-bold uppercase tracking-widest text-ocean-soft">{copy.intro}</p>
-          <h1 className="mt-4 max-w-4xl text-4xl font-black leading-tight sm:text-6xl">{copy.title}</h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-white/90">{copy.description}</p>
+          <p className="hidden text-sm font-bold uppercase tracking-widest text-ocean-soft sm:block">{copy.intro}</p>
+          <h1 className="mt-3 max-w-4xl text-3xl font-black leading-tight sm:text-6xl">{copy.title}</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-6 sm:text-lg sm:leading-8 text-white/90">{copy.description}</p>
           <a href="#book-transfer" className="mt-7 inline-flex min-h-12 items-center rounded-xl bg-cta px-6 py-3 font-bold text-white hover:bg-cta-dark">{copy.book}</a>
-          <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3 text-sm font-semibold">
+          <ul className="mt-5 flex flex-wrap gap-x-7 gap-y-2 text-sm font-semibold">
             {copy.benefits.map((benefit) => <li key={benefit} className="flex items-center gap-2"><BadgeCheck size={18} aria-hidden="true" />{benefit}</li>)}
           </ul>
         </div>
       </section>
-      <section id="book-transfer" className="scroll-mt-24 bg-surface-muted px-5 py-10 sm:px-8 sm:py-16">
+      <section id="book-transfer" className="scroll-mt-24 bg-surface-muted px-3 py-6 sm:px-8 sm:py-16">
         <div className="mx-auto grid max-w-6xl items-start gap-8 lg:gap-12">
           <div className="order-2 min-w-0">
             <h2 className="text-3xl font-black text-ink">{copy.routeTitle}</h2>

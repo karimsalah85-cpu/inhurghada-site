@@ -1,5 +1,5 @@
 import { isHurghadaAirport } from "@/lib/transfer-airport";
-import { mapHotelToZone, mapPlaceToRmfRoute, type TransferDirection } from "@/lib/transfer-config";
+import { mapHotelToZone, mapPlaceToRmfRoute, type TransferDirection, type CityRouteKey } from "@/lib/transfer-config";
 
 export type TransferAirport = "HRG" | "RMF";
 export const TRANSFER_AIRPORTS: Record<TransferAirport, string> = {
@@ -24,6 +24,12 @@ export function resolveTransferRoute(pickup: string, dropoff: string) {
   const direction: TransferDirection = airport
     ? pickupAirport ? "airport_to_hotel" : "hotel_to_airport"
     : "hotel_to_hotel";
+  const pickupZone = !airport ? mapHotelToZone(pickup) : null;
+  const dropoffZone = !airport ? mapHotelToZone(dropoff) : null;
+  const cityRoute: CityRouteKey | null = !pickupAirport && !dropoffAirport && (
+    (pickupZone === "el_gouna" && dropoffZone === "hurghada_city") ||
+    (pickupZone === "hurghada_city" && dropoffZone === "el_gouna")
+  ) ? "el_gouna_hurghada" : null;
   const hotelName = airport ? pickupAirport ? dropoff.trim() : pickup.trim() : "";
   return {
     airport,
@@ -32,6 +38,7 @@ export function resolveTransferRoute(pickup: string, dropoff: string) {
     // Zone fares apply to Hurghada Airport; Marsa Alam Airport has its own short list.
     zone: airport === "HRG" ? mapHotelToZone(hotelName) : null,
     rmfRoute: airport === "RMF" ? mapPlaceToRmfRoute(hotelName) : null,
+    cityRoute,
     hasAirport: Boolean(pickupAirport || dropoffAirport),
   };
 }
