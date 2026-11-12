@@ -1026,7 +1026,7 @@ const MAPS_EMBED_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY?.trim() || 
 /** `wide` lays the steps out in two columns; the tour-page sidebar stays stacked. */
 export default function AirportTransferForm({ wide = false, initialAirport }: { wide?: boolean; initialAirport?: TransferAirport }) {
   const router = useRouter();
-  const { language } = useSiteSettings();
+  const { language, currency, formatPrice } = useSiteSettings();
   const copy = useCopy(language as Locale);
   const routeCopy = transferCopy[language as Locale];
   const locationListId = useId();
@@ -1275,7 +1275,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
           date,
           time,
           travelers: `${totalPassengers} ${copy.passengers}`,
-          total: quote.requiresManualConfirmation ? copy.manualTitle : `$${quote.total.toFixed(2)}`,
+          total: quote.requiresManualConfirmation ? copy.manualTitle : formatPrice(quote.total, "USD"),
           customerEmailSent: Boolean(data.customerEmailSent),
           whatsappSent: Boolean(data.whatsappSent),
           bookingConfirmationPdf: String(data.bookingConfirmationPdf || ""),
@@ -1378,7 +1378,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
         <>
           <div className="mt-4 flex items-center justify-between gap-4 border-t border-line pt-4">
             <span className="font-bold capitalize text-ink">{copy.total}</span>
-            <span className="text-2xl font-black text-ocean-dark">${quote.total.toFixed(2)}</span>
+            <span className="text-2xl font-black text-ocean-dark">{formatPrice(quote.total, "USD")}</span>
           </div>
           <p className="mt-1 text-xs text-muted">{copy.payCash}</p>
         </>
@@ -1488,7 +1488,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
                       <p className="mt-2 font-bold text-ink">{VEHICLE_LABELS[vehicle.vehicleClass]}</p>
                       <p className="mt-1 text-xs text-muted">{copy.upToPeople.replace("{n}", String(vehicle.passengerCapacity))}</p>
                       <p className="text-xs text-muted">{copy.fitsBags.replace("{n}", String(vehicle.largeBagCapacity))}</p>
-                      {priceShown && priced && typeof fare === "number" ? <p className="mt-2 text-sm font-bold text-ocean-dark">${fare}</p> : null}
+                      {priceShown && priced && typeof fare === "number" ? <p className="mt-2 text-sm font-bold text-ocean-dark">{formatPrice(fare, "USD")}</p> : null}
                       {priceShown && !fits && !count ? <p className="mt-1 text-xs font-medium text-amber-700">{copy.tooSmall}</p> : null}
                     </div>
                   );
@@ -1507,8 +1507,8 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
                     <>
                       <div className="flex flex-wrap items-end justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold text-ink">{copy.totalLabel} · USD</p>
-                          <p className="whitespace-nowrap text-3xl font-black text-ocean-dark">${quote.total.toFixed(2)}</p>
+                          <p className="text-sm font-semibold text-ink">{copy.totalLabel} · {currency}</p>
+                          <p className="whitespace-nowrap text-3xl font-black text-ocean-dark">{formatPrice(quote.total, "USD")}</p>
                         </div>
                         <p className="text-end text-xs font-medium text-emerald-700">{tripType === "round_trip" ? copy.withReturn : copy.oneWay} · {totalPassengers} {copy.passengers}</p>
                       </div>
@@ -1682,7 +1682,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
             </p>
             <button type="submit" disabled={submitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-4 font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60">
               <MessageCircle size={20} />
-              {submitting ? copy.submitting : priced ? `${copy.submit} · $${quote.total.toFixed(2)}` : copy.submit}
+              {submitting ? copy.submitting : priced ? `${copy.submit} · ${formatPrice(quote.total, "USD")}` : copy.submit}
             </button>
           </div>
         </div>
