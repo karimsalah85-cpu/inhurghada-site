@@ -164,7 +164,7 @@ const EN = {
   seePrice: "See price",
   continueBtn: "Continue",
   back: "Back",
-  chooseToSeePrice: "Enter your route, date and time to see the price.",
+  chooseToSeePrice: "Enter your pickup and drop-off to see the price.",
   summary: "Your transfer",
   pickup: "Pick-up",
   dropoff: "Drop-off",
@@ -301,7 +301,7 @@ const DE: CopyShape = {
   seePrice: "Preis anzeigen",
   continueBtn: "Weiter",
   back: "Zurück",
-  chooseToSeePrice: "Gib Strecke, Datum und Uhrzeit ein, um den Preis zu sehen.",
+  chooseToSeePrice: "Gib Abholort und Ziel ein, um den Preis zu sehen.",
   summary: "Dein Transfer",
   pickup: "Abholung",
   dropoff: "Ziel",
@@ -436,7 +436,7 @@ const RU: CopyShape = {
   seePrice: "Узнать цену",
   continueBtn: "Продолжить",
   back: "Назад",
-  chooseToSeePrice: "Укажите маршрут, дату и время, чтобы увидеть цену.",
+  chooseToSeePrice: "Укажите место отправления и назначения, чтобы увидеть цену.",
   summary: "Ваш трансфер",
   pickup: "Подача",
   dropoff: "Высадка",
@@ -571,7 +571,7 @@ const AR: CopyShape = {
   seePrice: "عرض السعر",
   continueBtn: "متابعة",
   back: "رجوع",
-  chooseToSeePrice: "أدخل المسار والتاريخ والوقت لعرض السعر.",
+  chooseToSeePrice: "أدخل مكان الاستلام والوصول لعرض السعر.",
   summary: "رحلة النقل",
   pickup: "الاستلام",
   dropoff: "الوصول",
@@ -706,7 +706,7 @@ const PL: CopyShape = {
   seePrice: "Zobacz cenę",
   continueBtn: "Dalej",
   back: "Wstecz",
-  chooseToSeePrice: "Podaj trasę, datę i godzinę, aby zobaczyć cenę.",
+  chooseToSeePrice: "Podaj miejsce odbioru i cel podróży, aby zobaczyć cenę.",
   summary: "Twój transfer",
   pickup: "Odbiór",
   dropoff: "Cel",
@@ -841,7 +841,7 @@ const ZH: CopyShape = {
   seePrice: "查看价格",
   continueBtn: "继续",
   back: "返回",
-  chooseToSeePrice: "请输入路线、日期和时间以查看价格。",
+  chooseToSeePrice: "请输入上车点和下车点以查看价格。",
   summary: "您的接送",
   pickup: "上车点",
   dropoff: "下车点",
@@ -976,7 +976,7 @@ const IT: CopyShape = {
   seePrice: "Vedi il prezzo",
   continueBtn: "Continua",
   back: "Indietro",
-  chooseToSeePrice: "Inserisci percorso, data e orario per vedere il prezzo.",
+  chooseToSeePrice: "Inserisci prelievo e destinazione per vedere il prezzo.",
   summary: "Il tuo transfer",
   pickup: "Prelievo",
   dropoff: "Arrivo",
@@ -1152,6 +1152,10 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (step !== "details" || !priceShown) {
+      showPrice();
+      return;
+    }
     if (!fromPlace.trim() || !toPlace.trim() || samePlace) {
       alert(routeCopy.routeError);
       return;
@@ -1334,7 +1338,12 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
   }
 
   function showPrice() {
-    if (tripIsComplete()) setPriceShown(true);
+    if (!fromPlace.trim() || !toPlace.trim() || samePlace) {
+      setTripError(routeCopy.routeError);
+      return;
+    }
+    setTripError("");
+    setPriceShown(true);
   }
 
   function goToStep(next: "trip" | "details") {
@@ -1466,7 +1475,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
             </div>
             <p className="mt-2 text-xs leading-5 text-amber-700">{copy.leadTime}</p>
 
-            <div className="mt-4 grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
               <Stepper label={copy.adults} value={adults} min={1} onChange={(value) => { setAdults(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: value + children + infants }); }} />
               <Stepper label={copy.children} value={children} min={0} onChange={(value) => { setChildren(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + value + infants }); }} />
               <Stepper label={copy.infants} value={infants} min={0} onChange={(value) => { setInfants(value); trackEvent("transfer_passengers_changed", { booking_type: "transfer", traveler_count: adults + children + value }); }} />
@@ -1476,8 +1485,8 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
             <p className="mt-2 text-xs text-muted">{copy.paxNote}</p>
           </div>
 
-          <div className="space-y-4">
-            <div aria-live="polite">
+          <div className="flex min-w-0 flex-col gap-4">
+            <div aria-live="polite" className="order-2">
               <p className="text-sm font-bold text-ink">{copy.vehicleTitle}</p>
               <div className="mt-2 grid gap-3 sm:grid-cols-2">
                 {enabledVehicleClasses().map((vehicle) => {
@@ -1501,7 +1510,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
               </div>
             </div>
 
-            {mapUrl ? <iframe title={`${copy.from_} → ${copy.to}`} src={mapUrl} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" className="h-56 w-full rounded-2xl border border-line" /> : null}
+            {mapUrl ? <iframe title={`${copy.from_} → ${copy.to}`} src={mapUrl} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" className="order-3 h-56 w-full rounded-2xl border border-line" /> : null}
 
             {tripError ? <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm font-medium text-rose-700">{tripError}</p> : null}
 
@@ -1514,8 +1523,9 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
                         <p className="text-sm text-muted">{copy.totalLabel}</p>
                         <p className="whitespace-nowrap text-3xl font-black text-ocean-dark">${quote.total.toFixed(2)}</p>
                       </div>
-                      <p className="text-end text-xs font-medium text-emerald-700">{copy.privateNotShared}</p>
+                      <p className="text-end text-xs font-medium text-emerald-700">{tripType === "round_trip" ? copy.withReturn : copy.oneWay} · {totalPassengers} {copy.passengers}</p>
                     </div>
+                    <p className="mt-2 text-xs text-muted">{copy.payCash}</p>
                     {quote.vehicleCount > 1 && quote.legVehicles.length > 1 ? <p className="mt-2 text-sm font-semibold text-ink">{copy.twoVehicles}</p> : null}
                   </>
                 ) : (
@@ -1537,7 +1547,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
               </>
             )}
 
-            <ul className="grid gap-2 text-sm text-ink sm:grid-cols-2">
+            <ul className="order-4 grid gap-2 text-sm text-ink sm:grid-cols-2">
               <TrustItem icon={<Tag size={16} />} text={copy.trustFixed} />
               <TrustItem icon={<ShieldCheck size={16} />} text={copy.trustPrivate} />
               <TrustItem icon={<Banknote size={16} />} text={copy.trustCash} />
@@ -1553,6 +1563,7 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
         </div>
       ) : (
         <div className={`mt-6 grid gap-6 ${wide ? "lg:grid-cols-[1.3fr_0.7fr] lg:items-start" : ""}`}>
+          <div className={wide ? "lg:hidden" : ""}>{priceSummary}</div>
           <div>
             <button type="button" onClick={() => goToStep("trip")} className="flex items-center gap-1.5 text-sm font-bold text-ocean-dark hover:underline"><ArrowLeft size={16} className="rtl:rotate-180" />{copy.back}</button>
 
@@ -1648,8 +1659,8 @@ export default function AirportTransferForm({ wide = false, initialAirport }: { 
             </fieldset>
           </div>
 
-          <div className="space-y-4">
-            {priceSummary}
+          <div className="min-w-0 space-y-4">
+            <div className={wide ? "hidden lg:block" : "hidden"}>{priceSummary}</div>
             {priced ? <div className="space-y-4"><ReferralRewardsField rewards={rewards} locale={language} disabled={submitting}/><ReferralCodeField referral={referral} locale={language} disabled={submitting}/></div> : null}
             <p className="rounded-xl border border-line bg-surface-muted p-3 text-xs leading-5 text-muted">
               {copy.cancellationBefore}{" "}
@@ -1705,9 +1716,9 @@ function Labelled({ icon, label, children, required = false }: { icon: ReactNode
 
 function Stepper({ label, value, min, onChange, icon }: { label: string; value: number; min: number; onChange: (value: number) => void; icon?: ReactNode }) {
   return (
-    <div className="min-w-0 rounded-xl border border-line p-3">
+    <div className="flex min-w-0 items-center justify-between gap-2 rounded-xl border border-line p-3 sm:block">
       <span className="flex items-center gap-1.5 text-sm font-medium text-ink">{icon}{label}</span>
-      <div className="mt-2 flex items-center justify-between">
+      <div className="flex shrink-0 items-center justify-between gap-2 sm:mt-2">
         <button type="button" aria-label={`${label} −`} onClick={() => onChange(Math.max(min, value - 1))} className="h-11 w-11 shrink-0 rounded-lg border border-line text-lg font-bold text-ink hover:bg-surface-muted">−</button>
         <span aria-live="polite" className="min-w-8 text-center text-lg font-bold text-ink">{value}</span>
         <button type="button" aria-label={`${label} +`} onClick={() => onChange(value + 1)} className="h-11 w-11 shrink-0 rounded-lg border border-line text-lg font-bold text-ink hover:bg-surface-muted">+</button>
