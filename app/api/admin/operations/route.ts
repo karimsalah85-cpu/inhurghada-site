@@ -3,6 +3,9 @@ import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { tours } from "@/data/tours";
+import { TRIP_PARTNER_ROLES, type TripPartnerRole } from "@/lib/finance/partner-roles";
+
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 
@@ -29,6 +32,9 @@ export async function GET() {
     supabase.from("seo_checks").select("*").order("checked_at", { ascending: false }).limit(200),
     supabase.from("backup_checks").select("*").order("checked_at", { ascending: false }).limit(50),
   ]);
+  // Loaded on its own: the trip setup is optional and must never hide the rest of operations.
+  const tourPartnersResult = await supabase.from("tour_partners").select("id,tour_slug,supplier_id,role,note,created_at").order("tour_slug").order("role");
+  const tourPartners = tourPartnersResult.error ? [] : tourPartnersResult.data || [];
   const migrationError = results.find((result) => result.error && ["42P01", "42703", "PGRST205"].includes(result.error.code || ""))?.error;
   if (migrationError) return json({ configured: false, migration: "202608010002_complete_admin_operations.sql" });
   const error = results.find((result) => result.error)?.error;
@@ -83,7 +89,7 @@ export async function GET() {
   const incomeByType = groupByCurrency(activeBookings, (booking) => booking.type === "transfer" ? "Transfer" : "Tour", (booking) => booking.currency, (booking) => Number(booking.amount || 0));
   const expensesByType = groupByCurrency(expenses, (expense) => expenseTypeLabel.get(expense.expense_type) || expense.expense_type || "Other", (expense) => expense.currency, (expense) => Number(expense.amount || 0));
 
-  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType, tours: tours.map((tour) => ({ slug: tour.slug, title: tour.title })) });
+  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, tourPartners, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType, tours: tours.map((tour) => ({ slug: tour.slug, title: tour.title })) });
 }
 
 export async function POST(request: NextRequest) {
@@ -97,6 +103,35 @@ export async function POST(request: NextRequest) {
   else if (action === "customer_profile") { table = "customer_profiles"; record = { customer_key: body?.customer_key, name: body?.name || null, email: body?.email || null, phone: body?.phone || null, preferred_language: body?.preferred_language || "en", preferences: body?.preferences || null, tags: String(body?.tags || "").split(",").map((item) => item.trim()).filter(Boolean), updated_at: new Date().toISOString() }; }
   else if (action === "message") { table = "communication_messages"; record = { booking_id: body?.booking_id || null, customer_key: body?.customer_key || null, channel: body?.channel, direction: body?.direction || "outbound", recipient: body?.recipient || null, sender: user?.email || null, subject: body?.subject || null, body: body?.message, delivery_status: "recorded" }; }
   else if (action === "backup_check") { table = "backup_checks"; record = { backup_type: "supabase", status: body?.status || "warning", backup_created_at: body?.backup_created_at || null, restore_verified_at: body?.restore_verified_at || null, summary: body?.summary || "Manual backup verification", details: { recorded_by: user?.email } }; }
+  else if (action === "tour_partner") {
+    const tourSlug = String(body?.tour_slug || "");
+    const supplierId = String(body?.supplier_id || "");
+    const role = String(body?.role || "") as TripPartnerRole;
+    if (!tours.some((tour) => tour.slug === tourSlug)) return json({ error: "Choose a trip." }, 400);
+    if (!uuidPattern.test(supplierId)) return json({ error: "Choose a supplier." }, 400);
+    if (!TRIP_PARTNER_ROLES.includes(role)) return json({ error: "Choose the supplier's role on this trip." }, 400);
+    const note = String(body?.note || "").trim().slice(0, 500) || null;
+    const { data: before } = await supabase.from("tour_partners").select("*").eq("tour_slug", tourSlug).eq("supplier_id", supplierId).maybeSingle();
+    if (role === "main") {
+      const { data: currentMain } = await supabase.from("tour_partners").select("id,supplier_id").eq("tour_slug", tourSlug).eq("role", "main").maybeSingle();
+      if (currentMain && currentMain.supplier_id !== supplierId) return json({ error: "This trip already has a main partner. Remove it or change its role first." }, 400);
+    }
+    const result = before
+      ? await supabase.from("tour_partners").update({ role, note }).eq("id", before.id).select().single()
+      : await supabase.from("tour_partners").insert({ tour_slug: tourSlug, supplier_id: supplierId, role, note }).select().single();
+    if (result.error) return json({ error: result.error.code === "42501" ? "Supplier-management permission required." : result.error.message }, 400);
+    await supabase.rpc("record_admin_audit", { action_name: before ? "update" : "create", resource_name: "tour_partner", resource_identifier: result.data.id, summary_text: `Set ${role} partner on ${tourSlug}`, before_value: before, after_value: { ...result.data, actor: user?.email } });
+    return json({ record: result.data }, before ? 200 : 201);
+  }
+  else if (action === "tour_partner_remove") {
+    const id = String(body?.id || "");
+    if (!uuidPattern.test(id)) return json({ error: "Invalid trip partner." }, 400);
+    const { data, error } = await supabase.from("tour_partners").delete().eq("id", id).select().maybeSingle();
+    if (error) return json({ error: error.code === "42501" ? "Supplier-management permission required." : error.message }, 400);
+    if (!data) return json({ error: "Trip partner not found." }, 404);
+    await supabase.rpc("record_admin_audit", { action_name: "delete", resource_name: "tour_partner", resource_identifier: id, summary_text: `Removed partner from ${data.tour_slug}`, before_value: data });
+    return json({ record: data });
+  }
   else if (action === "supplier_update") {
     const id = String(body?.supplier_id || "");
     const { data, error } = await supabase.from("suppliers").update({ emergency_contact_name: body?.emergency_contact_name || null, emergency_contact_phone: body?.emergency_contact_phone || null, contract_url: body?.contract_url || null, default_currency: String(body?.currency || "USD").toUpperCase(), active: body?.active !== false }).eq("id", id).select().single();
