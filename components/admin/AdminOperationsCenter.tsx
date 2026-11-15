@@ -116,7 +116,7 @@ function ProfitPanel({data}:{data:Extract<Data,{configured:true}>}) {
   const expenseItems = data.expensesByType.filter(row=>String(row.currency||"USD")===activeCurrency).map(row=>({label:String(row.label),value:Number(row.amount||0)}));
   const monthRows = data.profitByMonth.filter(row=>row.profit != null && String(row.currency||"USD")===activeCurrency).map(row=>({month:String(row.label),revenue:Number(row.revenue||0),costs:Number(row.costs||0),profit:Number(row.profit||0)}));
 
-  if (data.financeError) return <p role="alert" className="mt-5 rounded-xl bg-amber-50 p-4">{data.financeError} <a href="/admin/finance" className="underline">Open Finance</a></p>;
+  if (data.financeError) return <p role="alert" className="mt-5 rounded-xl bg-amber-50 p-4">{data.financeError} <Link href="/admin/finance" className="underline">Open Finance</Link></p>;
   return <div className="mt-5">
     <div className="grid gap-3 sm:grid-cols-3"><Metric icon={<CircleDollarSign/>} label="Trip margin before VAT" value={data.bookingProfit.some(i=>i.profit == null) ? "Pending costs" : moneyBreakdown(profitByCurrency)}/><Metric label="Bookings costed" value={String(data.bookingProfit.filter(i=>Number(i.costs)>0).length)}/><Metric label="Outstanding" value={data.bookingProfit.some(i=>i.outstanding == null) ? "Unavailable" : moneyBreakdown(outstandingByCurrency)}/></div>
 
