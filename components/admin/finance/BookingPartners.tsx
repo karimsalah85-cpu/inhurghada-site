@@ -5,6 +5,7 @@ import { Pencil, UserMinus } from "lucide-react";
 import { notifyAdminBookingsChanged } from "@/lib/admin-booking-events";
 import { FINANCE_CURRENCIES, formatMoney, fromMinor, toMinor, type FinanceCurrency } from "@/lib/finance/money";
 import { partnerTypeLabels, type PartnerKind } from "@/lib/partner-record";
+import { partnerRoleLabels, type PartnerRole } from "@/lib/finance/partner-roles";
 import TaxRateSelect, { useTaxRates } from "@/components/admin/finance/TaxRateSelect";
 
 type Amount = string | number;
@@ -17,15 +18,15 @@ type Line = {
   sales_tax_rate_id: string | null; sales_tax_amount: Amount; purchase_tax_rate_id: string | null; purchase_tax_amount: Amount;
 };
 type PartnerCost = {
-  id: string; line_id: string; supplier_id: string; role: PartnerKind; cost: Amount; currency: FinanceCurrency; cancellation_fee: Amount;
+  id: string; line_id: string; supplier_id: string; role: PartnerRole; cost: Amount; currency: FinanceCurrency; cancellation_fee: Amount;
   cost_source: string; status: "active" | "removed"; removed_reason: string | null; note: string | null; recognised_cost: Amount;
-  tax_rate_id: string | null; tax_amount: Amount;
+  tax_rate_id: string | null; tax_amount: Amount; from_trip_setup?: boolean;
   suppliers: { name: string } | { name: string }[] | null;
 };
 type Supplier = { id: string; name: string; type: string; active: boolean; default_currency: string };
 type Data = { lines: Line[]; partnerCosts: PartnerCost[]; suppliers: Supplier[]; canManage: boolean };
 
-const roles = Object.entries(partnerTypeLabels) as [PartnerKind, string][];
+const roles = Object.entries(partnerRoleLabels) as [PartnerRole, string][];
 const field = "mt-1 w-full rounded-xl border border-slate-200 bg-white p-3 text-base font-normal sm:text-sm";
 const show = (amount: Amount, currency: FinanceCurrency) => formatMoney(fromMinor(toMinor(amount)), currency);
 const partnerName = (row: PartnerCost) => (Array.isArray(row.suppliers) ? row.suppliers[0]?.name : row.suppliers?.name) || "Partner";
@@ -165,7 +166,7 @@ export default function BookingPartners({ bookingId }: { bookingId: string }) {
                 <li key={row.id} className={`py-2 ${row.status === "removed" ? "opacity-60" : ""}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-semibold">{partnerName(row)} <span className="text-xs font-normal text-slate-500">{partnerTypeLabels[row.role] ?? row.role}{row.cost_source === "supplier_price" ? " · price list" : ""}</span>
+                      <p className="font-semibold">{partnerName(row)} <span className="text-xs font-normal text-slate-500">{partnerRoleLabels[row.role] ?? row.role}{row.cost_source === "supplier_price" ? " · price list" : ""}{row.from_trip_setup ? " · from trip setup" : ""}</span>
                         {row.status === "removed" ? <span className="ml-2 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600">Removed</span> : null}</p>
                       <p className="text-xs text-slate-500">
                         Cost {show(row.cost, row.currency)}{toMinor(row.cancellation_fee) > 0n ? ` · cancellation fee ${show(row.cancellation_fee, row.currency)}` : ""}

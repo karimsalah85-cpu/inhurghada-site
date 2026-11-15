@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { FINANCE_CURRENCIES, fromMinor, toMinor } from "@/lib/finance/money";
+import { PARTNER_ROLES } from "./partner-roles";
 
 /**
  * The single server-side validation layer for every finance write. Each
@@ -224,7 +225,7 @@ export const cancellationSchema = z.object({
 // ---------------------------------------------------------------------------
 // Extra partners on a trip (guide, driver, hotel ... next to the main partner).
 // ---------------------------------------------------------------------------
-export const PARTNER_ROLES = ["boat", "guide", "driver", "hotel", "company", "other"] as const;
+export { PARTNER_ROLES };
 
 export const partnerCostAddSchema = z.object({
   supplier_id: idSchema,
