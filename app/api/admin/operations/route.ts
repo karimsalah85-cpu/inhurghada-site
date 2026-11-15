@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
+import { loadBookingReports } from "@/lib/finance/load-booking-report";
 import { tours } from "@/data/tours";
 import { TRIP_PARTNER_ROLES, type TripPartnerRole } from "@/lib/finance/partner-roles";
 
@@ -16,7 +17,7 @@ async function authorized() {
 }
 
 export async function GET() {
-  const { supabase, allowed } = await authorized();
+  const { supabase, user, allowed } = await authorized();
   if (!allowed) return json({ error: "Unauthorized" }, 401);
   const results = await Promise.all([
     supabase.from("tour_availability").select("*").order("service_date").limit(500),
@@ -41,34 +42,25 @@ export async function GET() {
   if (error) return json({ error: error.message }, 500);
   const [availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, expenses, expenseTypes, messages, seo, backups] = results.map((result) => result.data || []);
   const expenseTypeLabel = new Map(expenseTypes.map((type) => [type.key, type.label]));
-  // Costs are tracked per currency: an expense or assignment can be recorded in a different
-  // currency than the booking it's linked to, so they must never be summed together blindly.
-  const costsByBookingByCurrency = new Map<string, Record<string, number>>();
-  const addCost = (bookingId: string | null | undefined, currency: string | null | undefined, amount: unknown) => {
-    if (!bookingId) return;
-    const byCurrency = costsByBookingByCurrency.get(bookingId) || {};
-    const key = currency || "USD";
-    byCurrency[key] = (byCurrency[key] || 0) + Number(amount || 0);
-    costsByBookingByCurrency.set(bookingId, byCurrency);
-  };
-  for (const expense of expenses) addCost(expense.booking_id, expense.currency, expense.amount);
-  for (const assignment of assignments) addCost(assignment.booking_id, assignment.currency, assignment.internal_cost);
-  const bookingProfit = bookings.map((booking) => {
-    const costsByCurrency = costsByBookingByCurrency.get(booking.id) || {};
-    const costs = costsByCurrency[booking.currency] || 0;
-    const otherCurrencyCosts = Object.fromEntries(Object.entries(costsByCurrency).filter(([currency]) => currency !== booking.currency));
-    const revenue = booking.status === "cancelled" || booking.payment_status === "refunded" ? 0 : Number(booking.amount || 0);
-    return { id: booking.id, reference: booking.reference, tour: booking.tour_name || "Transfer", month: (booking.date || booking.created_at).slice(0, 7), currency: booking.currency, revenue, costs, otherCurrencyCosts, profit: revenue - costs };
+  const canViewFinance = await hasLivePermission(supabase, user, "view_finance");
+  let finance: Awaited<ReturnType<typeof loadBookingReports>> = {};
+  let financeError = canViewFinance ? "" : "Finance permission required.";
+  if (canViewFinance) {
+    try { finance = await loadBookingReports(supabase, bookings.map(b => b.id)); }
+    catch { financeError = "Financial totals unavailable. Check Finance."; }
+  }
+  const bookingProfit = bookings.map(booking => {
+    const f = finance[booking.id];
+    return { id: booking.id, reference: booking.reference, tour: booking.tour_name || "Transfer",
+      month: (booking.date || booking.created_at).slice(0, 7), currency: booking.currency,
+      revenue: f?.revenue ?? null, costs: f?.costs ?? null, profit: f?.margin ?? null,
+      outstanding: f?.outstanding ?? null, pending: !f?.costComplete };
   });
-  // Grouped by label AND currency, so a tour or month sold in more than one currency
-  // produces one row per currency rather than adding incompatible totals together.
-  const summarize = (key: "tour" | "month") => Object.values(bookingProfit.reduce<Record<string, { label: string; currency: string; revenue: number; costs: number; profit: number }>>((totals, item) => {
-    const label = item[key];
-    const groupKey = `${label}::${item.currency}`;
-    totals[groupKey] ||= { label, currency: item.currency, revenue: 0, costs: 0, profit: 0 };
-    totals[groupKey].revenue += item.revenue;
-    totals[groupKey].costs += item.costs;
-    totals[groupKey].profit += item.profit;
+  const summarize = (key: "tour" | "month") => Object.values(bookingProfit.reduce<Record<string, { label: string; currency: string; revenue: number | null; costs: number | null; profit: number | null }>>((totals, item) => {
+    const group = `${item[key]}::${item.currency}`;
+    const row = totals[group] ||= { label: item[key], currency: item.currency, revenue: 0, costs: 0, profit: 0 };
+    for (const field of ["revenue", "costs", "profit"] as const)
+      row[field] = row[field] == null || item[field] == null ? null : Math.round((row[field]! + item[field]!) * 100) / 100;
     return totals;
   }, {}));
   const bookingMap = new Map(bookings.map((booking) => [booking.id, booking]));
@@ -86,10 +78,10 @@ export async function GET() {
       return totals;
     }, {}));
   const activeBookings = bookings.filter((booking) => booking.status !== "cancelled" && booking.payment_status !== "refunded");
-  const incomeByType = groupByCurrency(activeBookings, (booking) => booking.type === "transfer" ? "Transfer" : "Tour", (booking) => booking.currency, (booking) => Number(booking.amount || 0));
+  const incomeByType = groupByCurrency(activeBookings, (booking) => booking.type === "transfer" ? "Transfer" : "Tour", (booking) => booking.currency, (booking) => Number(finance[booking.id]?.revenue || 0));
   const expensesByType = groupByCurrency(expenses, (expense) => expenseTypeLabel.get(expense.expense_type) || expense.expense_type || "Other", (expense) => expense.currency, (expense) => Number(expense.amount || 0));
 
-  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, tourPartners, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType, tours: tours.map((tour) => ({ slug: tour.slug, title: tour.title })) });
+  return json({ configured: true, availability, assignments, bookings, customers, profiles, suppliers, supplierPrices, tourPartners, financeError, supplierPerformance, expenses, messages, seo, backups, bookingProfit, profitByTour: summarize("tour"), profitByMonth: summarize("month"), incomeByType, expensesByType, tours: tours.map((tour) => ({ slug: tour.slug, title: tour.title })) });
 }
 
 export async function POST(request: NextRequest) {

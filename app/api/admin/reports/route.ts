@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { createReportPdf } from "@/lib/report-service";
 import { getAdminAuthorization } from "@/lib/admin-permission";
+import { loadBookingReports } from "@/lib/finance/load-booking-report";
+import { hasLivePermission } from "@/lib/admin-permission";
 import { countDistinctCustomers } from "@/lib/customer-count";
 
 export const runtime = "nodejs";
@@ -19,13 +21,18 @@ type ReportRow = {
   Amount: number;
   Currency: string;
   Supplier: unknown;
-  Expenses: number;
-  Margin: number;
+  Expenses: number | string;
+  Margin: number | string;
+  "Net revenue": number | string;
+  Received: number;
+  "Refunds / credits": number;
+  "Net paid": number;
+  Outstanding: number;
   "Other currency costs": unknown;
 };
 
 export async function GET(request: NextRequest) {
-  const { supabase, allowed } = await getAdminAuthorization("view_reports");
+  const { supabase, user, allowed } = await getAdminAuthorization("view_reports");
   if (!allowed) return NextResponse.json({ error: "Reports permission required." }, { status: 403, headers: { "Cache-Control": "private, no-store" } });
 
   const { searchParams } = request.nextUrl;
@@ -56,21 +63,24 @@ export async function GET(request: NextRequest) {
   if (status !== "all") query = query.eq("status", status);
   if (payment !== "all") query = query.eq("payment_status", payment);
 
-  const { data, error } = await query;
-  if (error) {
-    return NextResponse.json({ error: "Could not generate report." }, { status: 500 });
+  const data: { id: string; reference: string; tour_name: string | null; date: string | null; guests: number | null; status: string; payment_status: string; amount: number; currency: string; created_at: string; phone: string | null; customer_email: string | null }[] = [];
+  for (let offset = 0; offset < reportRowLimit; offset += 500) {
+    const page = await query.order("id").range(offset, offset + 499);
+    if (page.error) return NextResponse.json({ error: "Could not generate report." }, { status: 500 });
+    data.push(...(page.data || []));
+    if (!page.data || page.data.length < 500) break;
   }
-  const rowsMayBeTruncated = (data?.length || 0) >= reportRowLimit;
+  const rowsMayBeTruncated = data.length >= reportRowLimit;
 
   const bookingIds = (data || []).map(item => item.id).filter(Boolean);
-  const { data: expenseRows } = bookingIds.length ? await supabase.from("expenses").select("booking_id,amount,currency,supplier_id,suppliers(name)").in("booking_id", bookingIds).is("voided_at", null) : { data: [] };
-  const linkedExpenses = new Map<string, { byCurrency: Record<string, number>; suppliers: Set<string> }>();
-  for (const expense of expenseRows || []) { if (!expense.booking_id) continue; const summary = linkedExpenses.get(expense.booking_id) || { byCurrency: {}, suppliers: new Set<string>() }; const currency = expense.currency || "USD"; summary.byCurrency[currency] = (summary.byCurrency[currency] || 0) + Number(expense.amount || 0); const relation = expense.suppliers as unknown as { name?: string } | Array<{ name?: string }> | null; const supplier = Array.isArray(relation) ? relation[0]?.name : relation?.name; if (supplier) summary.suppliers.add(supplier); linkedExpenses.set(expense.booking_id, summary); }
+  if (!await hasLivePermission(supabase, user, "view_finance"))
+    return NextResponse.json({ error: "Finance permission required for financial exports." }, { status: 403 });
+  let finance: Awaited<ReturnType<typeof loadBookingReports>>;
+  try { finance = await loadBookingReports(supabase, bookingIds); }
+  catch { return NextResponse.json({ error: "Finance unavailable. Report not generated." }, { status: 503 }); }
+  if (bookingIds.some(id => !finance[id])) return NextResponse.json({ error: "Finance data incomplete. Check Finance before exporting." }, { status: 503 });
   const rows: ReportRow[] = (data || []).map((item) => {
-    const costs = linkedExpenses.get(item.id) || { byCurrency: {}, suppliers: new Set<string>() };
-    const bookingCurrency = item.currency || "USD";
-    const sameCurrencyExpenses = costs.byCurrency[bookingCurrency] || 0;
-    const otherCurrencyEntries = Object.entries(costs.byCurrency).filter(([currency]) => currency !== bookingCurrency);
+    const f = finance[item.id];
     return ({
     Reference: safeCell(item.reference),
     Trip: safeCell(item.tour_name || "Private transfer"),
@@ -80,10 +90,16 @@ export async function GET(request: NextRequest) {
     Payment: item.payment_status,
     Amount: Number(item.amount || 0),
     Currency: item.currency,
-    Supplier: safeCell([...costs.suppliers].join(", ") || "Unassigned"),
-    Expenses: sameCurrencyExpenses,
-    Margin: Number(item.amount || 0) - sameCurrencyExpenses,
-    "Other currency costs": safeCell(otherCurrencyEntries.length ? otherCurrencyEntries.map(([currency, amount]) => `${amount.toFixed(2)} ${currency}`).join(" + ") : ""),
+    Supplier: "See Finance partner balances",
+    Expenses: f.costs ?? "Pending costs",
+    Margin: f.margin ?? "Pending costs",
+    "Net revenue": f.revenue ?? "Unavailable",
+    Received: f.received,
+    "Refunds / credits": f.refunded,
+    "Net paid": f.netPaid,
+    Outstanding: f.outstanding,
+    "Other currency costs": "Converted by Finance into booking currency",
+
   }); });
   const active = rows.filter((item) => item.Status !== "cancelled" && item.Payment !== "refunded");
   const customers = countDistinctCustomers((data || []).filter((item) => item.status !== "cancelled" && item.payment_status !== "refunded"));
@@ -92,6 +108,11 @@ export async function GET(request: NextRequest) {
     return totals;
   }, {});
   const revenueLabel = Object.entries(revenueByCurrency).map(([currency, amount]) => `${amount.toFixed(2)} ${currency}`).join(" + ") || "0.00 USD";
+  const financialLabel = (field: "Received" | "Refunds / credits" | "Net paid" | "Outstanding") => {
+    const totals = rows.reduce<Record<string, number>>((sum, row) => { sum[row.Currency] = Math.round(((sum[row.Currency] || 0) + row[field]) * 100) / 100; return sum; }, {});
+    return Object.entries(totals).map(([currency, amount]) => `${amount.toFixed(2)} ${currency}`).join(" + ") || "0.00 USD";
+  };
+  const paymentSummary: [string, string][] = (["Received", "Refunds / credits", "Net paid", "Outstanding"] as const).map(key => [key, financialLabel(key)]);
   const summary = [
     ["Situation report"],
     ["Period", `${from} to ${to}`],
@@ -100,11 +121,13 @@ export async function GET(request: NextRequest) {
     ["Bookings", rows.length],
     ["Customers (excluding cancelled)", customers],
     ["People (excluding cancelled)", active.reduce((sum, item) => sum + Number(item.People), 0)],
-    ["Cancelled", rows.length - active.length],
+    ["Cancelled", rows.filter(row => row.Status === "cancelled").length],
     [
-      "Revenue (excluding cancelled)",
+      "Booking value before refunds (excluding cancelled/refunded)",
       revenueLabel,
     ],
+    ...paymentSummary,
+    ["Basis", "Service date; payment entries for selected bookings. Trip margin before VAT and overhead; Pending costs are not zero."],
     ...(rowsMayBeTruncated
       ? [["Warning", `This report hit its ${reportRowLimit}-row safety limit — narrow the date range to confirm totals are complete.`]]
       : []),
@@ -146,9 +169,10 @@ export async function GET(request: NextRequest) {
       bookings: rows.length,
       customers,
       people: active.reduce((sum, item) => sum + Number(item.People), 0),
-      cancelled: rows.length - active.length,
+      cancelled: rows.filter(row => row.Status === "cancelled").length,
       revenue: active.reduce((sum, item) => sum + Number(item.Amount), 0),
       revenueLabel,
+      paymentSummary,
       rows: rows.map((row) => ({
         reference: String(row.Reference ?? ""),
         trip: String(row.Trip ?? ""),

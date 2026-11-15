@@ -28,6 +28,7 @@ type ReportPdfData = {
   cancelled: number;
   revenue: number;
   revenueLabel?: string;
+  paymentSummary?: [string, string][];
   rows: ReportPdfRow[];
 };
 
@@ -66,7 +67,9 @@ export async function createReportPdf(report: ReportPdfData): Promise<Buffer> {
     ["Customers", String(report.customers ?? report.bookings)],
     ["Guests", String(report.people)],
     ["Cancelled", String(report.cancelled)],
-    ["Revenue", report.revenueLabel || report.revenue.toFixed(2)],
+    ["Booking value before refunds", report.revenueLabel || report.revenue.toFixed(2)],
+    ...(report.paymentSummary || []),
+    ["Basis", "Service date; recorded payments for selected bookings. Amounts in booking currency."],
     ["Filters", `Trip: ${report.trip}; Booking: ${report.status}; Payment: ${report.payment || "all"}`],
   ];
   const summaryHeight = drawPdfSummaryCard(doc, summaryRows, margin, flow.y, contentWidth);
