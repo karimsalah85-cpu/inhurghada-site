@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { tours } from "@/data/tours";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
-import { normalizeTourPricing, mergeTourPricing } from "@/lib/tour-pricing";
+import { adminCanEditPrice, normalizeTourPricing, mergeTourPricing } from "@/lib/tour-pricing";
 import { codeControlledTourFields } from "@/lib/live-content";
 import { localizeTour } from "@/lib/tour-localization";
 import { locales } from "@/lib/i18n";
@@ -15,7 +15,25 @@ const rates: Record<string, number[]> = {
 const input = { type: "tour" as const, tourName: "", adults: 2, youth: 0, infants: 0, service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 };
 
 describe("September 27 owner prices", () => {
-  it.each(Object.entries(rates))("keeps %s rates in EUR through CMS and every locale", (slug, prices) => {
+  it.each(Object.entries(rates).filter(([slug]) => adminCanEditPrice(tours.find(t => t.slug === slug))))("lets the admin change the %s price, in EUR, in every locale", (slug) => {
+    const source = tours.find(t => t.slug === slug)!;
+    const merged = normalizeTourPricing({ ...source, price: "45", packagePrice: "45", participantPricing: { adults: 45 }, currency: "USD", ...codeControlledTourFields(source) });
+    for (const locale of locales) {
+      const tour = localizeTour(merged, locale);
+      expect(tour.currency).toBe("EUR");
+      expect(Number(tour.price)).toBe(45);
+      const quote = calculateBookingPrice({ ...input, tourSlug: slug, adults: 2 }, [tour]);
+      expect(quote.data?.amount).toBe(90);
+      expect(quote.data?.pricingSnapshot.currency).toBe("EUR");
+    }
+  });
+  it("leaves trips priced by boat, group size or vehicle fixed in code", () => {
+    const fixed = tours.filter(t => (t.pricingLockedToCode || t.boatOptions?.length) && !adminCanEditPrice(t));
+    expect(fixed.map(t => t.slug)).toEqual(expect.arrayContaining(["luxor-private-day-trip", "cairo-giza-day-trip-bus", "senzo-transfer", "hurghada-airport-transfer", "orange-bay-half-day-speedboat"]));
+    for (const tour of fixed) expect(codeControlledTourFields(tour), tour.slug).toMatchObject({ price: tour.price, participantPricing: tour.participantPricing });
+    for (const slug of ["orange-bay", "safari", "paradise-island", "jeddah-yacht-sunset-cruise"]) expect(codeControlledTourFields(tours.find(t => t.slug === slug)), slug).not.toHaveProperty("price");
+  });
+  it.each(Object.entries(rates).filter(([slug]) => !adminCanEditPrice(tours.find(t => t.slug === slug))))("keeps %s group rates in EUR through CMS and every locale", (slug, prices) => {
     const source = tours.find(t => t.slug === slug)!;
     const merged = normalizeTourPricing({ ...source, price: "999", participantPricing: { adults: 888 }, ...codeControlledTourFields(source) });
     for (const locale of locales) {

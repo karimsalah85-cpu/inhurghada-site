@@ -1,5 +1,5 @@
 import "server-only";
-import { mergeTourPricing, normalizeTourPricing } from "@/lib/tour-pricing";
+import { adminCanEditPrice, mergeTourPricing, normalizeTourPricing } from "@/lib/tour-pricing";
 
 import { cache } from "react";
 import { blogPosts, type BlogPost } from "@/data/blog-posts";
@@ -30,11 +30,15 @@ export function codeControlledTourFields(fallback: Tour | undefined) {
   if (!fallback?.pricingLockedToCode && !fallback?.boatOptions?.length) return {};
   return {
     ...(fallback.boatOptions?.length ? { boatOptions: fallback.boatOptions } : {}),
-    price: fallback.price,
-    packagePrice: fallback.packagePrice,
-    originalPrice: fallback.originalPrice,
+    // Single-price trips take their prices from the admin trip editor; currency, schedule
+    // and fulfilment below stay fixed in code.
+    ...(adminCanEditPrice(fallback) ? {} : {
+      price: fallback.price,
+      packagePrice: fallback.packagePrice,
+      originalPrice: fallback.originalPrice,
+      participantPricing: fallback.participantPricing,
+    }),
     currency: fallback.currency,
-    participantPricing: fallback.participantPricing,
     groupPricing: fallback.groupPricing,
     groupSize: fallback.groupSize,
     entrancePricing: fallback.entrancePricing,

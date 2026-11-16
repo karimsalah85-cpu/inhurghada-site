@@ -12,6 +12,18 @@ export function normalizeTourPricing(tour: Tour): Tour {
   return { ...tour, price: Number(tour.price) === price ? tour.price : String(price), packagePrice: tour.packagePrice === undefined ? undefined : Number(tour.packagePrice) === price ? tour.packagePrice : String(price) };
 }
 
+type PricedBy = Pick<Tour, "boatOptions" | "groupPricing" | "additionalPackages" | "priceUnit">;
+
+/**
+ * Whether the admin trip editor's price fields decide what guests pay. True for trips with one
+ * adult/child/infant price. Trips priced per boat, per group-size tier, per package or per
+ * vehicle are charged from tables the editor has no fields for, so a price typed there would
+ * only change the advertised figure and disagree with checkout.
+ */
+export function adminCanEditPrice(tour: PricedBy | undefined) {
+  return Boolean(tour) && !tour!.boatOptions?.length && !tour!.groupPricing?.length && !tour!.additionalPackages?.length && tour!.priceUnit !== "per vehicle";
+}
+
 /** A CMS price-only edit must not inherit an older adult rate from the fallback. */
 export function mergeTourPricing(fallback: Tour | undefined, body: Partial<Tour>): Partial<Tour> {
   if (body.participantPricing || body.price === undefined) return body;
