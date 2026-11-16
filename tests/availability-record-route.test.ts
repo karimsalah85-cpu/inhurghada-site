@@ -78,6 +78,8 @@ const patch = (id: string, body: Row) => PATCH(request("PATCH", body), context(i
 const availability = () => db.tables.tour_availability;
 
 beforeEach(() => {
+  // Vercel preview builds run these tests with VERCEL_ENV=preview, where writes are blocked on purpose.
+  vi.stubEnv("VERCEL_ENV", "production");
   db.deleteError = null;
   db.writes = [];
   db.tables = {
@@ -177,5 +179,16 @@ describe("deleting an availability record", () => {
     const response = await DELETE(request("DELETE"), context("a1"));
     expect(response.status).toBe(409);
     expect((await response.json()).error).toMatch(/Multi-trip bookings hold places/);
+  });
+});
+
+describe("on a preview deployment", () => {
+  it("refuses to create, edit or delete availability", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    expect((await create({ tour_slug: slug, service_date: "2026-12-26", capacity: "5" })).status).toBe(503);
+    expect((await patch("a2", { capacity: "5" })).status).toBe(503);
+    expect((await DELETE(request("DELETE"), context("a2"))).status).toBe(503);
+    expect(db.writes).toHaveLength(0);
+    expect(availability()).toHaveLength(2);
   });
 });
