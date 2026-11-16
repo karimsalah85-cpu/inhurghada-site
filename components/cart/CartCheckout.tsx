@@ -15,6 +15,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { useSiteSettings } from "@/components/settings/SiteSettingsContext";
 import type { Tour } from "@/data/tours";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
+import { useDatePrices } from "@/lib/use-date-prices";
 import { localePath } from "@/lib/i18n";
 import { confirmationStorageKey } from "@/lib/booking-confirmation";
 import { trackEvent } from "@/lib/analytics";
@@ -25,7 +26,8 @@ import { isQuadTour, tourMinimumAge } from "@/lib/tour-booking";
 export default function CartCheckout({ tours }: { tours: Tour[] }) {
   const idempotencyKey = useRef<string | null>(null);
   const { items: savedItems, removeItem, clearCart } = useCart();
-  const quotes = savedItems.map((item) => calculateBookingPrice({ ...item, type: "tour", service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 }, tours));
+  const datePrices = useDatePrices(savedItems);
+  const quotes = savedItems.map((item) => calculateBookingPrice({ ...item, type: "tour", service: "", pickup: "", dropoff: "", passengers: 0, travelBags: 0 }, tours, datePrices));
   const priceError = quotes.find((quote) => quote.error)?.error;
   const items = savedItems.map((item, index) => ({ ...item, subtotal: quotes[index].data?.amount ?? item.subtotal, currency: tours.find((tour) => tour.slug === item.tourSlug)?.currency ?? "USD" }));
   const total = items.reduce((sum, item) => sum + item.subtotal, 0);

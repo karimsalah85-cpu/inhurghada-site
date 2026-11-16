@@ -5,6 +5,7 @@ import { useTourPricing } from "@/components/tours/TourPricingContext";
 import { optionalExtraPrice } from "@/lib/tour-extras";
 import PromoCodeField, { usePromoCode } from "@/components/booking/PromoCodeField";
 import { groupRate, groupTierRanges, type GroupPriceTier } from "@/lib/group-pricing";
+import { datePriceRates, pickDatePrice, supportsDatePrice } from "@/lib/date-pricing";
 import ReferralRewardsField, { useReferralRewards } from "@/components/booking/ReferralRewardsField";
 import ReferralCodeField, { useReferralCode } from "@/components/booking/ReferralCodeField";
 
@@ -241,20 +242,23 @@ export default function BookingForm({ tourName, tourSlug, destinationSlug = "hur
   const [error, setError] = useState("");
   const [website, setWebsite] = useState("");
   const [cartMessage, setCartMessage] = useState("");
-  const [availability, setAvailability] = useState<{ managed: boolean; soldOut?: boolean; slots?: Array<{ remaining: number | null }> } | null>(null);
+  const [availability, setAvailability] = useState<{ managed: boolean; soldOut?: boolean; forDate?: string; slots?: Array<{ remaining: number | null; start_time?: string | null; price_override?: number | string | null }> } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
     fetch(`/api/availability?tour=${encodeURIComponent(tourSlug)}&date=${encodeURIComponent(date)}`, { signal: controller.signal })
-      .then((response) => response.ok ? response.json() : null).then((result) => setAvailability(result)).catch(() => undefined);
+      .then((response) => response.ok ? response.json() : null).then((result) => setAvailability(result ? { ...result, forDate: date } : null)).catch(() => undefined);
     return () => controller.abort();
   }, [date, tourSlug]);
 
   const extraOptions = (upsells[tourSlug] || []).map(option => ({ ...option, price: optionalExtraPrice(option.price, currency) }));
   const selectedBoat = boatOptions?.find((option) => option.id === selectedBoatOption) ?? boatOptions?.[0];
   const selectedPackage = packageOptions?.find((option) => option.id === selectedPackageOption) ?? packageOptions?.[0];
-  const youthPrice = selectedPackage?.youthPrice ?? participantPricing?.youth;
-  const adultPrice = selectedPackage ? selectedPackage.price : groupRate(groupPricing, adults + youth) ?? baseAdultPrice;
+  // A price set for this date in the admin replaces the normal rate; checkout applies the same rule.
+  const datePrice = supportsDatePrice({ boatOptions, additionalPackages: packageOptions, groupPricing }) && availability?.forDate === date ? pickDatePrice(availability.slots, time) : undefined;
+  const dateRates = datePriceRates(baseAdultPrice, participantPricing?.youth, datePrice);
+  const youthPrice = selectedPackage?.youthPrice ?? dateRates.youth;
+  const adultPrice = selectedPackage ? selectedPackage.price : groupRate(groupPricing, adults + youth) ?? dateRates.adult;
   const setDisplayedPrice = useTourPricing()?.setPrice;
   const displayedPrice = selectedBoat?.price ?? adultPrice;
   useEffect(() => { setDisplayedPrice?.(displayedPrice); }, [setDisplayedPrice, displayedPrice]);

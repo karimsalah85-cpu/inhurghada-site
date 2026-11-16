@@ -6,11 +6,15 @@ import type { ParsedTransferRequest } from "@/lib/transfer-request";
 import { pricingLine, type BookingPricingSnapshot, type PricingLine } from "@/lib/booking-pricing-snapshot";
 import { groupRate } from "@/lib/group-pricing";
 import { EXTRAS_CONFIG, SENZO_MALL_FARE, type ChildSeatType } from "@/lib/transfer-config";
+import { datePriceRates, supportsDatePrice, type DatePriceLookup } from "@/lib/date-pricing";
 
 type PricingInput = {
   type: "tour" | "transfer";
   tourName: string;
   tourSlug?: string;
+  /** Service date and start time, used to find a price set for that date. */
+  date?: string;
+  time?: string;
   extras?: string[];
   selectedBoatOption?: string;
   selectedPackageOption?: string;
@@ -52,7 +56,7 @@ function wholeNumber(value: number, minimum: number, maximum: number) {
   return Number.isInteger(value) && value >= minimum && value <= maximum;
 }
 
-function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "selectedPackageOption" | "extraQuantities" | "transferRequired" | "transferArea" | "transferTrip">, catalog: Tour[]) {
+function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "date" | "time" | "extras" | "adults" | "youth" | "infants" | "selectedBoatOption" | "selectedPackageOption" | "extraQuantities" | "transferRequired" | "transferArea" | "transferTrip">, catalog: Tour[], datePrices?: DatePriceLookup) {
   const tour = catalog.find((item) => item.slug === input.tourSlug) || catalog.find((item) => item.title === input.tourName);
   if (!tour) return { error: "Choose a valid tour." as const };
   if (tour.listingStatus === "paused" || tour.listingStatus === "unlisted") return { error: "This tour is not accepting bookings yet." as const };
@@ -63,7 +67,11 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   if (tour.groupSize && (input.adults + input.youth < tour.groupSize.min || input.adults + input.youth > tour.groupSize.max)) {
     return { error: `Choose ${tour.groupSize.min}–${tour.groupSize.max} travelers for this group rate. Contact us for other group sizes.` };
   }
-  const pricing = tour.participantPricing || { adults: Number(tour.price) };
+  const normalPricing = tour.participantPricing || { adults: Number(tour.price) };
+  // A price the admin set for this date replaces the adult rate (child rate keeps its proportion).
+  const datePrice = input.date && supportsDatePrice(tour) ? datePrices?.(tour.slug, input.date, input.time) : undefined;
+  const dateRates = datePriceRates(normalPricing.adults, normalPricing.youth, datePrice);
+  const pricing = { ...normalPricing, adults: dateRates.adult, youth: dateRates.youth };
   if (input.youth && pricing.youth === undefined && !tour.entrancePricing) return { error: "Youth pricing is not available for this tour." as const };
   if (input.infants && pricing.infants === undefined) return { error: "Infant pricing is not available for this tour." as const };
   const allowedExtras: Record<string, Record<string, { price: number; charge: "booking" | "adult" }>> = {
@@ -142,13 +150,13 @@ function calculateTourItem(input: Pick<PricingInput, "tourName" | "tourSlug" | "
   return { data: { amount, guests, guestSummary, tourName: tour.title, currency: tour.currency || "USD", pricingSnapshot, transferNote: tourTransferNote({ ...input, transferTrip }, guests, tour.currency || "USD") } };
 }
 
-function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[]) {
+function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[], datePrices?: DatePriceLookup) {
   if (input.type === "tour") {
     if (input.tourSlug === "multi-trip") {
       if (!input.cartItems || input.cartItems.length < 1) return { error: "Add at least one valid trip." as const };
       const pricedItems = [];
       for (const item of input.cartItems) {
-        const result = calculateTourItem({ ...item, tourName: "" }, catalog);
+        const result = calculateTourItem({ ...item, tourName: "" }, catalog, datePrices);
         if (!result.data) return { error: result.error };
         pricedItems.push({ ...result.data, date: item.date, time: item.time });
       }
@@ -169,7 +177,7 @@ function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[]) {
         } satisfies BookingPricingSnapshot,
       } };
     }
-    const result = calculateTourItem(input, catalog);
+    const result = calculateTourItem(input, catalog, datePrices);
     if (!result.data) return result;
     return { data: { ...result.data, price: `${result.data.currency === "EUR" ? "€" : "$"}${result.data.amount.toFixed(2)} total` } };
   }
@@ -227,8 +235,12 @@ function calculateBookingPriceInternal(input: PricingInput, catalog: Tour[]) {
   return { data: { amount, guests: input.passengers, guestSummary: `${input.passengers} passenger${input.passengers === 1 ? "" : "s"}`, tourName: "Hurghada Airport one-way transfer", price: `$${amount.toFixed(2)} fixed one-way fare`, currency: "USD" } };
 }
 
-export function calculateBookingPrice(input: PricingInput, catalog: Tour[] = tours) {
-  const result = calculateBookingPriceInternal(input, catalog);
+/**
+ * `datePrices` supplies prices set for single dates in Availability & pricing. Checkout passes
+ * it so those dates are charged at their own price; without it every date uses the normal price.
+ */
+export function calculateBookingPrice(input: PricingInput, catalog: Tour[] = tours, datePrices?: DatePriceLookup) {
+  const result = calculateBookingPriceInternal(input, catalog, datePrices);
   if (!result.data) return result;
   if ("pricingSnapshot" in result.data && result.data.pricingSnapshot) return { data: { ...result.data, pricingSnapshot: result.data.pricingSnapshot }, error: undefined };
   const data = result.data;

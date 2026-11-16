@@ -16,6 +16,7 @@ import type { EmailAttachment } from "@/lib/booking-service";
 import { rateLimitShared } from "@/lib/rate-limit";
 import { validateBookingInput } from "@/lib/booking-validation";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
+import { bookingTripDates, loadDatePrices } from "@/lib/date-pricing-load";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { whatsappNumber } from "@/lib/contact";
 import { createRequiredAdminClient } from "@/utils/supabase/admin";
@@ -96,7 +97,11 @@ export async function POST(request: NextRequest) {
     const bookingType = body.type;
     const { customerName, phone, customerEmail, hotel } = body;
     const tours = await getLiveTours();
-    const pricing = calculateBookingPrice(body, tours);
+    const supabase = createRequiredAdminClient();
+    // Dates with their own price in Availability & pricing are charged at that price.
+    const datePrices = await loadDatePrices(supabase, bookingTripDates(body, tours));
+    if (datePrices.error) return bookingJson({ success: false, error: datePrices.error }, { status: 503 });
+    const pricing = calculateBookingPrice(body, tours, datePrices.lookup);
     if (!pricing.data) return bookingJson({ success: false, error: pricing.error }, { status: 400 });
     const { amount: calculatedAmount, guests: guestCount, guestSummary, tourName, price, currency } = pricing.data;
     const tripItems = "items" in pricing.data ? pricing.data.items : undefined;
@@ -133,7 +138,6 @@ export async function POST(request: NextRequest) {
     const bookingWhatsApp = whatsappNumber;
 
     const proposedReference = `${bookingType === "transfer" ? "DRS-T" : "DRS"}-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${randomBytes(3).toString("hex").toUpperCase()}`;
-    const supabase = createRequiredAdminClient();
     const { idempotencyKey, ...materialRequest } = body;
     const requestHash = bookingRequestHash(materialRequest);
     const { data: reservation, error: bookingError } = await supabase.rpc("reserve_booking_with_referral", {

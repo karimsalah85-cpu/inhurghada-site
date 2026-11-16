@@ -4,7 +4,7 @@ import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { createClient } from "@/utils/supabase/server";
 import { multiTripLoads, planBulkAvailability, validateBulkAvailability } from "@/lib/availability-bulk";
 import { fetchAllPages } from "@/lib/supabase-paging";
-import { tours } from "@/data/tours";
+import { tourSlugByTitle } from "@/lib/availability-tours";
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 
@@ -26,20 +26,21 @@ export async function POST(request: NextRequest) {
   // Multi-trip legs can fall up to two weeks after the booking's own (first-leg) date.
   const multiFrom = new Date(Date.parse(`${input.from}T00:00:00Z`) - 14 * 86_400_000).toISOString().slice(0, 10);
   const [existingResult, bookingResult, multiResult] = await Promise.all([
-    fetchAllPages((from, to) => supabase.from("tour_availability").select("id,tour_slug,service_date,start_time,capacity,reserved,blocked").in("tour_slug", input.tourSlugs).gte("service_date", input.from).lte("service_date", input.to).order("id").range(from, to)),
+    fetchAllPages((from, to) => supabase.from("tour_availability").select("id,tour_slug,service_date,start_time,capacity,reserved,blocked,notes").in("tour_slug", input.tourSlugs).gte("service_date", input.from).lte("service_date", input.to).order("id").range(from, to)),
     fetchAllPages((from, to) => supabase.from("bookings").select("tour_slug,date,guests").in("tour_slug", input.tourSlugs).gte("date", input.from).lte("date", input.to).neq("status", "cancelled").order("id").range(from, to)),
     fetchAllPages((from, to) => supabase.from("bookings").select("reference,pricing_snapshot").eq("tour_slug", "multi-trip").gte("date", multiFrom).lte("date", input.to).neq("status", "cancelled").order("id").range(from, to)),
   ]);
   const failed = existingResult.error || bookingResult.error || multiResult.error;
   if (failed) return json({ error: failed.message }, 500);
-  const slugByTitle = new Map(tours.map((tour) => [tour.title.trim().toLowerCase(), tour.slug]));
+  const slugByTitle = await tourSlugByTitle(supabase);
   const multi = multiTripLoads((multiResult.data || []) as Array<{ reference: string; pricing_snapshot: unknown }>, slugByTitle, input);
   const wanted = new Set(input.tourSlugs);
   const loads = [...(bookingResult.data || []), ...multi.loads.filter((load) => load.tour_slug && wanted.has(load.tour_slug))];
 
   const plan = planBulkAvailability(input, existingResult.data || [], loads);
-  const summary = { updated: plan.updates.length, created: plan.inserts.length, overbooked: plan.overbooked.slice(0, 50), overbookedCount: plan.overbooked.length, stillClosed: plan.stillClosed, unknownMultiTrip: multi.unknown.slice(0, 20) };
+  const summary = { updated: plan.updates.length, created: plan.inserts.length, overbooked: plan.overbooked.slice(0, 50), overbookedCount: plan.overbooked.length, stillClosed: plan.stillClosed, closingBooked: plan.closingBooked.slice(0, 50), closingBookedCount: plan.closingBooked.length, closingGuests: plan.closingBooked.reduce((sum, row) => sum + row.guests, 0), unknownMultiTrip: multi.unknown.slice(0, 20) };
   if (preview) return json({ preview: true, ...summary });
+  if (!plan.updates.length && !plan.inserts.length) return json({ ok: true, ...summary });
 
   // Group identical patches so each distinct change is one update statement.
   const byPatch = new Map<string, { patch: Record<string, unknown>; ids: string[] }>();

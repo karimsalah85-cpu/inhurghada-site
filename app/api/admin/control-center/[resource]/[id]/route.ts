@@ -5,6 +5,9 @@ import { isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
 import { hasLivePermission } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { revalidatePath } from "next/cache";
+import { movesReservedPlaces, validateAvailabilityRecord } from "@/lib/availability-record";
+import { availabilityTourOptions, knownTourSlugs } from "@/lib/availability-tours";
+import { DATE_PRICE_UNSUPPORTED } from "@/lib/date-pricing";
 
 const tables = { content: "content_items", media: "media_assets", availability: "tour_availability", staff: "staff_members", assignments: "booking_assignments", notes: "customer_notes", templates: "communication_templates", queue: "communication_queue", settings: "site_settings", redirects: "redirect_rules" } as const;
 const permissions: Record<keyof typeof tables, AdminPermission> = { content:"content",media:"content",availability:"operations",staff:"operations",assignments:"operations",notes:"operations",templates:"operations",queue:"operations",settings:"settings",redirects:"content" };
@@ -31,6 +34,22 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
     media: ["storage_path", "public_url", "file_name", "mime_type", "alt_text", "credit", "source_url", "creator", "license_type", "license_url", "attribution_text", "attribution_required", "rights_status", "authenticity", "focal_x", "focal_y"], availability: ["tour_slug", "service_date", "start_time", "capacity", "blocked", "price_override", "currency", "notes"], staff: ["name", "staff_type", "phone", "languages", "active", "notes"], assignments: ["booking_id", "supplier_id", "staff_member_id", "assignment_type", "pickup_time", "internal_cost", "currency", "status", "notes"], notes: ["customer_key", "customer_name", "note", "tags"], templates: ["name", "channel", "event_key", "locale", "subject", "body", "active"], queue: ["booking_id", "template_id", "channel", "recipient", "scheduled_for", "status"], settings: ["value", "category", "public", "description"], redirects: ["source_path", "destination_path", "permanent", "active"],
   };
   const update = Object.fromEntries(allowed[resource].filter((field) => Object.hasOwn(body, field)).map((field) => [field, body[field]]));
+  if (resource === "availability") {
+    // Clearing a field sends "", which the database rejects for numbers and times; normalise first.
+    const parsed = validateAvailabilityRecord(update, { partial: true, knownSlugs: Object.hasOwn(update, "tour_slug") && update.tour_slug !== before.tour_slug ? await knownTourSlugs(supabase) : undefined });
+    if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
+    for (const field of Object.keys(update)) delete update[field];
+    Object.assign(update, parsed.value);
+    // `reserved` belongs to this tour, date and time. Moving the record would carry those
+    // places to a date the guests are not on, and leave their real date uncounted.
+    // Guests are charged the date price in the trip's own currency.
+    const priced = (await availabilityTourOptions(supabase)).find((option) => option.slug === (parsed.value.tour_slug ?? before.tour_slug));
+    if ((parsed.value.price_override ?? null) != null && priced && !priced.datePrice) return NextResponse.json({ error: DATE_PRICE_UNSUPPORTED }, { status: 400 });
+    if (priced) update.currency = priced.currency;
+    if (Number(before.reserved || 0) > 0 && movesReservedPlaces(before, parsed.value)) {
+      return NextResponse.json({ error: `${before.reserved} place(s) are already booked on this record, so its tour, date and start time are fixed. Add a new record for the other date instead.` }, { status: 409 });
+    }
+  }
   if (resource === "content" && Object.hasOwn(update, "trip_id")) {
     try { update.trip_id = normalizeTripId(update.trip_id); }
     catch (error) { return NextResponse.json({ error: (error as Error).message }, { status: 400 }); }
@@ -57,7 +76,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ r
     return NextResponse.json({ record: data }, { headers: { "Cache-Control": "private, no-store" } });
   }
   const { data, error } = await supabase.from(table).update(update).eq(key, id).select().single();
-  if (error) return NextResponse.json({ error: error.code === "23505" ? "This Trip ID or URL slug is already in use." : error.message }, { status: 400 });
+  if (error) return NextResponse.json({ error: error.code === "23505" ? (resource === "availability" ? "This tour already has a record for that date and start time. Edit that record instead." : "This Trip ID or URL slug is already in use.") : error.message }, { status: 400 });
   await supabase.rpc("record_admin_audit", { action_name: "update", resource_name: resource, resource_identifier: id, summary_text: `Updated ${resource} record`, before_value: before, after_value: data });
   if (resource === "content") {
     revalidatePath("/", "layout");
@@ -99,6 +118,8 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     return NextResponse.json({ deleted: false, cancelled: true }, { headers: { "Cache-Control": "private, no-store" } });
   }
   const { error } = await supabase.from(table).delete().eq(key, id);
+  // Multi-trip bookings hold their places against the record itself, so it cannot be removed under them.
+  if (error && resource === "availability" && error.code === "23503") return NextResponse.json({ error: "Multi-trip bookings hold places on this date, so the record cannot be deleted. Clear its seat limit or reopen it instead." }, { status: 409 });
   if (error) return NextResponse.json({ error: error.code === "23505" ? "This Trip ID or URL slug is already in use." : error.message }, { status: 400 });
   await supabase.rpc("record_admin_audit", { action_name: "delete", resource_name: resource, resource_identifier: id, summary_text: `Deleted ${resource} record`, before_value: before });
   return NextResponse.json({ deleted: true }, { headers: { "Cache-Control": "private, no-store" } });

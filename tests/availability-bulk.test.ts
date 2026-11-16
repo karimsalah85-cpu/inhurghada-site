@@ -63,6 +63,32 @@ describe("bulk availability", () => {
     expect(plan.stillClosed).toBe(1);
   });
 
+  it("leaves dates alone when the change would alter nothing", () => {
+    const existing = [
+      { id: "d1", tour_slug: "orange-bay", service_date: "2026-10-05", start_time: null, capacity: 40, reserved: 0, blocked: false },
+      { id: "d2", tour_slug: "orange-bay", service_date: "2026-10-06", start_time: null, capacity: 40, reserved: 0, blocked: true },
+    ];
+    expect(planBulkAvailability({ ...base, to: "2026-10-05" }, existing, []).updates).toHaveLength(0);
+    const reopen = planBulkAvailability({ ...base, action: "reopen", capacity: null, to: "2026-10-06" }, existing, []);
+    expect(reopen.updates.map((update) => update.id)).toEqual(["d2"]);
+    const close = planBulkAvailability({ ...base, action: "close", capacity: null, to: "2026-10-06" }, existing, []);
+    expect(close.updates.map((update) => update.id)).toEqual(["d1"]);
+  });
+
+  it("warns about guests already booked on dates being closed", () => {
+    const existing = [
+      { id: "e1", tour_slug: "orange-bay", service_date: "2026-10-05", start_time: null, capacity: 40, reserved: 7, blocked: false },
+      { id: "e2", tour_slug: "orange-bay", service_date: "2026-10-07", start_time: null, capacity: 40, reserved: 4, blocked: true },
+    ];
+    const plan = planBulkAvailability({ ...base, action: "close", capacity: null, to: "2026-10-07" }, existing, [{ tour_slug: "orange-bay", date: "2026-10-06", guests: 2 }]);
+    // 10-05 has a record with guests, 10-06 has bookings but no record yet, 10-07 is already closed.
+    expect(plan.closingBooked).toEqual([
+      { tour_slug: "orange-bay", service_date: "2026-10-05", guests: 7 },
+      { tour_slug: "orange-bay", service_date: "2026-10-06", guests: 2 },
+    ]);
+    expect(planBulkAvailability({ ...base, to: "2026-10-07" }, existing, []).closingBooked).toEqual([]);
+  });
+
   it("counts multi-trip legs by tour and flags bookings it cannot read", () => {
     const slugs = new Map([["orange bay island trip", "orange-bay"], ["giftun speedboat", "giftun"]]);
     const result = multiTripLoads([

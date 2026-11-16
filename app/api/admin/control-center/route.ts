@@ -5,6 +5,10 @@ import { isAuthorizedAdmin, type AdminPermission } from "@/lib/admin-auth";
 import { hasLivePermission as permitted } from "@/lib/admin-permission";
 import { hasValidRequestOrigin } from "@/lib/request-origin";
 import { tours } from "@/data/tours";
+import { validateAvailabilityRecord } from "@/lib/availability-record";
+import { bookedPlaces } from "@/lib/availability-load";
+import { availabilityTourOptions, knownTourSlugs, tourSlugByTitle } from "@/lib/availability-tours";
+import { DATE_PRICE_UNSUPPORTED } from "@/lib/date-pricing";
 
 const resources = {
   content: "content_items",
@@ -23,6 +27,7 @@ type Resource = keyof typeof resources;
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "private, no-store" } });
 const text = (value: unknown, max: number) => String(value || "").trim().slice(0, max);
 const previewMutationBlocked = () => process.env.VERCEL_ENV === "preview";
+const cairoToday = () => new Date().toLocaleDateString("en-CA", { timeZone: "Africa/Cairo" });
 
 async function authorized() {
   const supabase = await createClient();
@@ -45,7 +50,8 @@ export async function GET() {
     canContent ? supabase.from("media_assets").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canContent ? supabase.from("media_asset_localizations").select("asset_id,locale,alt_text,caption").limit(1000) : Promise.resolve({data:[],error:null}),
     canContent ? supabase.from("media_usages").select("id,asset_id,owner_type,owner_key,role,sort_order,crop_profile").order("sort_order").limit(1000) : Promise.resolve({data:[],error:null}),
-    canOperations ? supabase.from("tour_availability").select("*").order("service_date").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
+    // Upcoming dates first: bulk edits create thousands of rows, and the oldest 100 would all be in the past.
+    canOperations ? supabase.from("tour_availability").select("*").gte("service_date", cairoToday()).order("service_date").order("tour_slug").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canOperations ? supabase.from("staff_members").select("*").order("name").limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canOperations ? supabase.from("booking_assignments").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
     canOperations ? supabase.from("customer_notes").select("*").order("created_at", { ascending: false }).limit(CAP + 1) : Promise.resolve({data:[],error:null}),
@@ -98,8 +104,17 @@ export async function POST(request: NextRequest) {
     if (!record.storage_path || !record.file_name) return json({ error: "Enter an image URL/path and file name." }, 400);
     if (!Number.isFinite(record.focal_x) || !Number.isFinite(record.focal_y) || Number(record.focal_x) < 0 || Number(record.focal_x) > 1 || Number(record.focal_y) < 0 || Number(record.focal_y) > 1) return json({ error: "Focal points must be between 0 and 1." }, 400);
   } else if (resource === "availability") {
-    record = { tour_slug: text(body.tour_slug, 160), service_date: text(body.service_date, 10), start_time: text(body.start_time, 8) || null, capacity: body.capacity === "" || body.capacity == null ? null : Number(body.capacity), blocked: Boolean(body.blocked), price_override: body.price_override === "" || body.price_override == null ? null : Number(body.price_override), currency: text(body.currency, 3).toUpperCase() || "USD", notes: text(body.notes, 500) || null };
-    if (!record.tour_slug || !/^\d{4}-\d{2}-\d{2}$/.test(String(record.service_date))) return json({ error: "Choose a tour and valid service date." }, 400);
+    const parsed = validateAvailabilityRecord(body, { knownSlugs: await knownTourSlugs(supabase) });
+    if (!parsed.ok) return json({ error: parsed.error }, 400);
+    record = { blocked: false, currency: "USD", start_time: null, capacity: null, price_override: null, notes: null, ...parsed.value };
+    // Guests are charged the date price in the trip's own currency.
+    const priced = (await availabilityTourOptions(supabase)).find((option) => option.slug === record.tour_slug);
+    if (record.price_override != null && priced && !priced.datePrice) return json({ error: DATE_PRICE_UNSUPPORTED }, 400);
+    if (priced) record.currency = priced.currency;
+    // Start from the places already booked, so a new seat limit is measured against real demand.
+    const load = await bookedPlaces(supabase, record as { tour_slug: string; service_date: string; start_time: string | null }, await tourSlugByTitle(supabase));
+    if (load.error) return json({ error: load.error }, 500);
+    record.reserved = load.places;
   } else if (resource === "staff") {
     record = { name: text(body.name, 120), staff_type: text(body.staff_type, 20), phone: text(body.phone, 40) || null, languages: text(body.languages, 200).split(",").map((item) => item.trim()).filter(Boolean), active: body.active !== false, notes: text(body.notes, 500) || null };
     if (!record.name || !["guide", "driver", "crew", "operations"].includes(String(record.staff_type))) return json({ error: "Enter a staff name and type." }, 400);
@@ -132,7 +147,7 @@ export async function POST(request: NextRequest) {
     ? supabase.from(table).upsert(record, { onConflict: "key" }).select().single()
     : supabase.from(table).insert(record).select().single();
   const { data, error } = await query;
-  if (error) return json({ error: error.code === "23505" ? "A record with this key already exists." : error.message }, 400);
+  if (error) return json({ error: error.code === "23505" ? (resource === "availability" ? "This tour already has a record for that date and start time. Edit that record instead." : "A record with this key already exists.") : error.message }, 400);
   await supabase.rpc("record_admin_audit", { action_name: "create", resource_name: resource, resource_identifier: String((data as { id?: string; key?: string }).id || (data as { key?: string }).key || ""), summary_text: `Created ${resource} record`, after_value: data });
   return json({ record: data }, 201);
 }

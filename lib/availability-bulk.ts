@@ -55,7 +55,7 @@ export function bulkDates({ from, to, weekdays }: Pick<BulkAvailabilityInput, "f
   return dates;
 }
 
-type ExistingRow = { id: string; tour_slug: string; service_date: string; start_time: string | null; capacity: number | null; reserved: number; blocked: boolean };
+type ExistingRow = { id: string; tour_slug: string; service_date: string; start_time: string | null; capacity: number | null; reserved: number; blocked: boolean; notes?: string | null };
 type BookingLoad = { tour_slug: string | null; date: string | null; guests: number | null };
 
 export type BulkPlan = {
@@ -64,10 +64,13 @@ export type BulkPlan = {
   overbooked: Array<{ tour_slug: string; service_date: string; reserved: number; capacity: number }>;
   /** Closed dates in range that a "set seats" change leaves closed. */
   stillClosed: number;
+  /** Dates being closed that already have guests booked: those guests need to be contacted. */
+  closingBooked: Array<{ tour_slug: string; service_date: string; guests: number }>;
 };
 
 /**
- * Works out the row changes. Existing rows for a tour and date (any start time) are updated;
+ * Works out the row changes. Existing rows for a tour and date (any start time) are updated
+ * when the change would actually alter them (reopening an open date is not a change);
  * dates with no row get a whole-day row whose `reserved` counts bookings already taken, so a
  * new capacity limit is measured against real demand rather than starting from zero.
  */
@@ -85,7 +88,7 @@ export function planBulkAvailability(input: BulkAvailabilityInput, existing: Exi
     loadByKey.set(key, (loadByKey.get(key) || 0) + Math.max(0, Number(booking.guests || 0)));
   }
   const now = new Date().toISOString();
-  const plan: BulkPlan = { updates: [], inserts: [], overbooked: [], stillClosed: 0 };
+  const plan: BulkPlan = { updates: [], inserts: [], overbooked: [], stillClosed: 0, closingBooked: [] };
   const patchFor = (): Record<string, unknown> => {
     const base: Record<string, unknown> = { updated_at: now };
     // Setting seats never reopens a closed date (e.g. a weather closure inside the season range).
@@ -99,8 +102,16 @@ export function planBulkAvailability(input: BulkAvailabilityInput, existing: Exi
     const key = `${tour_slug}|${service_date}`;
     const rows = rowsByKey.get(key);
     if (rows?.length) {
+      if (input.action === "close" && rows.some((row) => !row.blocked)) {
+        const guests = Math.max(loadByKey.get(key) || 0, rows.reduce((sum, row) => sum + Math.max(0, Number(row.reserved || 0)), 0));
+        if (guests > 0) plan.closingBooked.push({ tour_slug, service_date, guests });
+      }
       for (const row of rows) {
-        plan.updates.push({ id: row.id, patch: patchFor() });
+        const changed = (input.action === "capacity" && row.capacity !== (input.capacity ?? null))
+          || (input.action === "close" && !row.blocked)
+          || (input.action === "reopen" && row.blocked)
+          || (Boolean(input.note) && row.notes !== undefined && row.notes !== input.note);
+        if (changed) plan.updates.push({ id: row.id, patch: patchFor() });
         if (input.action === "capacity" && row.blocked) plan.stillClosed += 1;
         if (input.action === "capacity" && input.capacity != null && row.reserved > input.capacity) plan.overbooked.push({ tour_slug, service_date, reserved: row.reserved, capacity: input.capacity });
       }
@@ -109,6 +120,7 @@ export function planBulkAvailability(input: BulkAvailabilityInput, existing: Exi
     if (input.action === "reopen") continue; // nothing to reopen: a date without a row is already open
     if (input.action === "capacity" && input.capacity == null) continue; // unlimited is the default already
     const reserved = loadByKey.get(key) || 0;
+    if (input.action === "close" && reserved > 0) plan.closingBooked.push({ tour_slug, service_date, guests: reserved });
     plan.inserts.push({ tour_slug, service_date, start_time: null, reserved, currency: "USD", blocked: false, ...patchFor(), capacity: input.action === "capacity" ? input.capacity : null });
     if (input.action === "capacity" && input.capacity != null && reserved > input.capacity) plan.overbooked.push({ tour_slug, service_date, reserved, capacity: input.capacity });
   }
