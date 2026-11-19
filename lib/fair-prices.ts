@@ -4,21 +4,52 @@
  * Ranges are researched from 2026 travel guides, Numbeo and OTA listings and
  * reviewed by Daily Red Sea before publishing. `ripoffAbove` is an editorial
  * judgement, not an official tariff. Update `fairPricesReviewedOn` whenever a
- * number changes.
+ * number changes. Visitor-facing wording lives in lib/fair-prices-i18n.ts.
  */
 
 export const fairPricesReviewedOn = "2026-11-19";
+
+/** Egypt's single-entry visa rises from $30 to $33 (ETAA circular 173/2026). */
+export const visaFeeBeforeIncreaseUsd = 30;
+export const visaFeeAfterIncreaseUsd = 33;
+/** 2027-01-01 00:00 in Cairo (UTC+2). */
+export const visaFeeIncreaseAt = Date.UTC(2026, 11, 31, 22, 0, 0);
+
+export function visaFeeHasIncreased(now: Date) {
+  return now.getTime() >= visaFeeIncreaseAt;
+}
+
+export function visaFeeUsd(now: Date) {
+  return visaFeeHasIncreased(now) ? visaFeeAfterIncreaseUsd : visaFeeBeforeIncreaseUsd;
+}
 
 export type FairPriceCurrency = "USD" | "EUR" | "EGP";
 
 export type FairPriceCategory = "arrival" | "transport" | "trips" | "food";
 
+export const fairPriceCategoryIds: FairPriceCategory[] = ["arrival", "transport", "trips", "food"];
+
+export type FairPriceItemId =
+  | "visa-on-arrival"
+  | "tourist-sim"
+  | "airport-uber-central"
+  | "airport-taxi-central"
+  | "airport-taxi-makadi-sahl"
+  | "airport-taxi-el-gouna"
+  | "town-taxi"
+  | "orange-bay"
+  | "snorkeling-boat"
+  | "dolphin-house"
+  | "quad-safari"
+  | "intro-dive"
+  | "luxor-private-day"
+  | "local-beer"
+  | "shisha"
+  | "water";
+
 export type FairPriceItem = {
-  id: string;
+  id: FairPriceItemId;
   category: FairPriceCategory;
-  name: string;
-  /** Who/what the price covers, e.g. "per person" or "per car". */
-  unit: string;
   currency: FairPriceCurrency;
   fairMin: number;
   fairMax: number;
@@ -26,206 +57,34 @@ export type FairPriceItem = {
   ripoffAbove: number;
   /** Official fixed fee: anything above fairMax is a rip-off, with no "a bit high" band. */
   fixed?: boolean;
-  tip: string;
   /** Daily Red Sea tour that covers this purchase, shown with its live price. */
   tourSlug?: string;
 };
 
-export const fairPriceCategories: { id: FairPriceCategory; label: string }[] = [
-  { id: "arrival", label: "Arrival essentials" },
-  { id: "transport", label: "Taxis & transfers" },
-  { id: "trips", label: "Boat trips, safaris & excursions" },
-  { id: "food", label: "Drinks & everyday prices" },
+export const fairPriceItems: FairPriceItem[] = [
+  { id: "visa-on-arrival", category: "arrival", currency: "USD", fairMin: visaFeeBeforeIncreaseUsd, fairMax: visaFeeBeforeIncreaseUsd, ripoffAbove: visaFeeBeforeIncreaseUsd, fixed: true },
+  { id: "tourist-sim", category: "arrival", currency: "EGP", fairMin: 450, fairMax: 700, ripoffAbove: 1200 },
+  { id: "airport-uber-central", category: "transport", currency: "EGP", fairMin: 150, fairMax: 300, ripoffAbove: 500 },
+  { id: "airport-taxi-central", category: "transport", currency: "EGP", fairMin: 250, fairMax: 750, ripoffAbove: 1000, tourSlug: "hurghada-airport-transfer" },
+  { id: "airport-taxi-makadi-sahl", category: "transport", currency: "EGP", fairMin: 400, fairMax: 1250, ripoffAbove: 1800, tourSlug: "hurghada-airport-transfer" },
+  { id: "airport-taxi-el-gouna", category: "transport", currency: "EGP", fairMin: 500, fairMax: 1500, ripoffAbove: 2200, tourSlug: "hurghada-airport-transfer" },
+  { id: "town-taxi", category: "transport", currency: "EGP", fairMin: 50, fairMax: 150, ripoffAbove: 300 },
+  { id: "orange-bay", category: "trips", currency: "USD", fairMin: 20, fairMax: 40, ripoffAbove: 55, tourSlug: "orange-bay" },
+  { id: "snorkeling-boat", category: "trips", currency: "USD", fairMin: 20, fairMax: 35, ripoffAbove: 50, tourSlug: "full-day-snorkeling" },
+  { id: "dolphin-house", category: "trips", currency: "USD", fairMin: 25, fairMax: 45, ripoffAbove: 65, tourSlug: "dolphin-house-snorkeling" },
+  { id: "quad-safari", category: "trips", currency: "USD", fairMin: 15, fairMax: 30, ripoffAbove: 50, tourSlug: "safari" },
+  { id: "intro-dive", category: "trips", currency: "USD", fairMin: 40, fairMax: 65, ripoffAbove: 90, tourSlug: "beginner-scuba-diving" },
+  { id: "luxor-private-day", category: "trips", currency: "USD", fairMin: 150, fairMax: 220, ripoffAbove: 300, tourSlug: "luxor-private-day-trip" },
+  { id: "local-beer", category: "food", currency: "EGP", fairMin: 80, fairMax: 150, ripoffAbove: 300 },
+  { id: "shisha", category: "food", currency: "EGP", fairMin: 100, fairMax: 200, ripoffAbove: 400 },
+  { id: "water", category: "food", currency: "EGP", fairMin: 10, fairMax: 25, ripoffAbove: 50 },
 ];
 
-export const fairPriceItems: FairPriceItem[] = [
-  {
-    id: "visa-on-arrival",
-    category: "arrival",
-    name: "Egypt visa on arrival (single entry)",
-    unit: "per person",
-    currency: "USD",
-    fairMin: 30,
-    fairMax: 30,
-    ripoffAbove: 30,
-    fixed: true,
-    tip: "Buy it yourself at the bank counter before passport control, cash in US dollars. The online e-visa costs $25. Nobody needs to “help” you for a fee.",
-  },
-  {
-    id: "tourist-sim",
-    category: "arrival",
-    name: "Tourist SIM card at the airport (30–40 GB)",
-    unit: "per SIM",
-    currency: "EGP",
-    fairMin: 450,
-    fairMax: 700,
-    ripoffAbove: 1200,
-    tip: "Buy only at the official Vodafone, Orange, Etisalat or WE counters after baggage claim, with your passport. Avoid SIMs sold in souvenir shops.",
-  },
-  {
-    id: "airport-uber-central",
-    category: "transport",
-    name: "Airport → central Hurghada hotel by Uber or Careem",
-    unit: "per car",
-    currency: "EGP",
-    fairMin: 150,
-    fairMax: 300,
-    ripoffAbove: 500,
-    tip: "The app shows the price before you ride. Walk to the pickup zone outside arrivals and check the number plate.",
-  },
-  {
-    id: "airport-taxi-central",
-    category: "transport",
-    name: "Airport → central Hurghada hotel by taxi or private car",
-    unit: "per car",
-    currency: "EGP",
-    fairMin: 250,
-    fairMax: 750,
-    ripoffAbove: 1000,
-    tip: "Agree the total price and currency before you get in, and confirm it is per car, not per person. Pre-booking fixes the price.",
-    tourSlug: "hurghada-airport-transfer",
-  },
-  {
-    id: "airport-taxi-makadi-sahl",
-    category: "transport",
-    name: "Airport → Makadi Bay or Sahl Hasheesh",
-    unit: "per car",
-    currency: "EGP",
-    fairMin: 400,
-    fairMax: 1250,
-    ripoffAbove: 1800,
-    tip: "These resorts are 20–40 minutes away. Prices quoted in euros at the taxi rank are usually the most inflated.",
-    tourSlug: "hurghada-airport-transfer",
-  },
-  {
-    id: "airport-taxi-el-gouna",
-    category: "transport",
-    name: "Airport → El Gouna",
-    unit: "per car",
-    currency: "EGP",
-    fairMin: 500,
-    fairMax: 1500,
-    ripoffAbove: 2200,
-    tip: "El Gouna is about 30–40 minutes north. Ride-hailing apps are often cheapest; confirm the drop-off gate for your hotel.",
-    tourSlug: "hurghada-airport-transfer",
-  },
-  {
-    id: "town-taxi",
-    category: "transport",
-    name: "Short taxi ride inside Hurghada (3–5 km)",
-    unit: "per car",
-    currency: "EGP",
-    fairMin: 50,
-    fairMax: 150,
-    ripoffAbove: 300,
-    tip: "Street taxis rarely use the meter. Agree the price first, or use Uber/Careem to see a fixed fare.",
-  },
-  {
-    id: "orange-bay",
-    category: "trips",
-    name: "Orange Bay group boat trip with lunch",
-    unit: "per adult",
-    currency: "USD",
-    fairMin: 20,
-    fairMax: 40,
-    ripoffAbove: 55,
-    tip: "Most prices exclude the Giftun national park fee (about $5, cash on the day). Ask whether hotel pickup and lunch are included.",
-    tourSlug: "orange-bay",
-  },
-  {
-    id: "snorkeling-boat",
-    category: "trips",
-    name: "Snorkeling boat trip with lunch (2–3 reef stops)",
-    unit: "per adult",
-    currency: "USD",
-    fairMin: 20,
-    fairMax: 35,
-    ripoffAbove: 50,
-    tip: "Check that snorkel gear, lunch and hotel pickup are included, and that the boat carries life jackets in your size.",
-    tourSlug: "full-day-snorkeling",
-  },
-  {
-    id: "dolphin-house",
-    category: "trips",
-    name: "Dolphin House snorkeling trip",
-    unit: "per adult",
-    currency: "USD",
-    fairMin: 25,
-    fairMax: 45,
-    ripoffAbove: 65,
-    tip: "Dolphins are wild and never guaranteed. Be wary of anyone who “guarantees” swimming with them or charges extra to get closer.",
-    tourSlug: "dolphin-house-snorkeling",
-  },
-  {
-    id: "quad-safari",
-    category: "trips",
-    name: "Quad bike safari with camel ride (2–3 hours)",
-    unit: "per adult",
-    currency: "USD",
-    fairMin: 15,
-    fairMax: 30,
-    ripoffAbove: 50,
-    tip: "Ask whether the quad is shared or single, and whether dinner or a show is included — that explains most price differences.",
-    tourSlug: "safari",
-  },
-  {
-    id: "intro-dive",
-    category: "trips",
-    name: "Beginner intro dive by boat (no licence needed)",
-    unit: "per person",
-    currency: "USD",
-    fairMin: 40,
-    fairMax: 65,
-    ripoffAbove: 90,
-    tip: "Make sure an instructor stays with you in the water, and that equipment and the marine park fee are included.",
-    tourSlug: "beginner-scuba-diving",
-  },
-  {
-    id: "luxor-private-day",
-    category: "trips",
-    name: "Luxor private day trip from Hurghada (2 travellers)",
-    unit: "per person",
-    currency: "USD",
-    fairMin: 150,
-    fairMax: 220,
-    ripoffAbove: 300,
-    tip: "Confirm which entry tickets are included — the Valley of the Kings and special tombs are often extra.",
-    tourSlug: "luxor-private-day-trip",
-  },
-  {
-    id: "local-beer",
-    category: "food",
-    name: "Local beer (0.5 L) in a bar outside hotels",
-    unit: "per beer",
-    currency: "EGP",
-    fairMin: 80,
-    fairMax: 150,
-    ripoffAbove: 300,
-    tip: "Ask for the menu with prices before ordering. Hotel and nightclub prices are higher.",
-  },
-  {
-    id: "shisha",
-    category: "food",
-    name: "Shisha in a café",
-    unit: "per shisha",
-    currency: "EGP",
-    fairMin: 100,
-    fairMax: 200,
-    ripoffAbove: 400,
-    tip: "Check whether service charge and tax are added to the bill.",
-  },
-  {
-    id: "water",
-    category: "food",
-    name: "Bottled water (1.5 L) in a shop",
-    unit: "per bottle",
-    currency: "EGP",
-    fairMin: 10,
-    fairMax: 25,
-    ripoffAbove: 50,
-    tip: "Supermarkets print prices on the shelf. Kiosks near hotels often charge tourists double.",
-  },
-];
+/** The index as it applies on `now` — the visa fee switches automatically on 1 January 2027. */
+export function fairPriceItemsAt(now: Date): FairPriceItem[] {
+  const visaFee = visaFeeUsd(now);
+  return fairPriceItems.map((item) => item.id === "visa-on-arrival" ? { ...item, fairMin: visaFee, fairMax: visaFee, ripoffAbove: visaFee } : item);
+}
 
 export type ExchangeRates = Record<FairPriceCurrency, number>;
 
@@ -251,12 +110,12 @@ export function fairPriceVerdict(item: FairPriceItem, amount: number, currency: 
   return "fair";
 }
 
-export function formatFairAmount(amount: number, currency: FairPriceCurrency) {
+export function formatFairAmount(amount: number, currency: FairPriceCurrency, intlLocale = "en") {
   const fractionDigits = currency === "EGP" || Number.isInteger(amount) ? 0 : 2;
-  return new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: fractionDigits, minimumFractionDigits: fractionDigits }).format(currency === "EGP" ? Math.round(amount) : amount);
+  return new Intl.NumberFormat(intlLocale, { style: "currency", currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: fractionDigits, minimumFractionDigits: fractionDigits }).format(currency === "EGP" ? Math.round(amount) : amount);
 }
 
-export function formatFairRange(item: FairPriceItem) {
-  if (item.fairMin === item.fairMax) return formatFairAmount(item.fairMin, item.currency);
-  return `${formatFairAmount(item.fairMin, item.currency)} – ${formatFairAmount(item.fairMax, item.currency)}`;
+export function formatFairRange(item: FairPriceItem, intlLocale = "en") {
+  if (item.fairMin === item.fairMax) return formatFairAmount(item.fairMin, item.currency, intlLocale);
+  return `${formatFairAmount(item.fairMin, item.currency, intlLocale)} – ${formatFairAmount(item.fairMax, item.currency, intlLocale)}`;
 }

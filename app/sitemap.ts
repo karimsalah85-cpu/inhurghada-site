@@ -69,17 +69,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   const editorialEntries: MetadataRoute.Sitemap = [
     {
-      url: `${siteUrl}/hurghada/fair-prices`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-      alternates: { languages: { en: `${siteUrl}/hurghada/fair-prices`, "x-default": `${siteUrl}/hurghada/fair-prices` } },
-    },
-    {
       url: `${siteUrl}/hurghada/marine-life`,
       changeFrequency: "monthly",
       priority: 0.75,
       alternates: { languages: { en: `${siteUrl}/hurghada/marine-life`, "x-default": `${siteUrl}/hurghada/marine-life` } },
     },
   ];
-  return [...localizedEntries, ...editorialEntries, ...blogEntries];
+  const fairPriceEntries: MetadataRoute.Sitemap = locales.map((locale) => ({
+    url: `${siteUrl}${localePath(locale, "/hurghada/fair-prices")}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+    alternates: { languages: Object.fromEntries([...Object.entries(languageAlternates("/hurghada/fair-prices")).map(([language, path]) => [language, `${siteUrl}${path}`]), ["x-default", `${siteUrl}/hurghada/fair-prices`]]) },
+  }));
+  return [...localizedEntries, ...editorialEntries, ...fairPriceEntries, ...blogEntries];
 }
