@@ -669,6 +669,7 @@ text-ocean
               <Link className="block hover:text-white" href={localePath(language, "/checkout")}>{t("checkout")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/about")}>{t("about")}</Link>
               <Link className="block hover:text-white" href={localePath(language, "/faq")}>FAQ</Link>
+              <Link className="block hover:text-white" href="/hurghada/fair-prices">{tr("Fair price guide","Faire Preise in Hurghada","Честные цены в Хургаде","دليل الأسعار العادلة","Uczciwe ceny w Hurghadzie","赫尔格达公道价格")}</Link>
             </div>
           </div>
           <div>

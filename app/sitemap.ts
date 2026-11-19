@@ -69,6 +69,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   const editorialEntries: MetadataRoute.Sitemap = [
     {
+      url: `${siteUrl}/hurghada/fair-prices`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      alternates: { languages: { en: `${siteUrl}/hurghada/fair-prices`, "x-default": `${siteUrl}/hurghada/fair-prices` } },
+    },
+    {
       url: `${siteUrl}/hurghada/marine-life`,
       changeFrequency: "monthly",
       priority: 0.75,
