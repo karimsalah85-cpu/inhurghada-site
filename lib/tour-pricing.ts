@@ -24,6 +24,48 @@ export function adminCanEditPrice(tour: PricedBy | undefined) {
   return Boolean(tour) && !tour!.boatOptions?.length && !tour!.groupPricing?.length && !tour!.additionalPackages?.length && tour!.priceUnit !== "per vehicle";
 }
 
+/** Boat id → prices, and group tier (its `minTravelers`) → price per person, as typed in the admin trip editor. */
+export type AdminBoatPrices = Record<string, { price?: number; extraHourPrice?: number }>;
+export type AdminGroupPrices = Record<string, number>;
+
+const money = (value: unknown) => {
+  const amount = typeof value === "string" && value.trim() === "" ? NaN : Number(value);
+  return value != null && Number.isFinite(amount) && amount > 0 && amount <= 1_000_000 ? Math.round(amount * 100) / 100 : undefined;
+};
+
+/** Keeps only usable entries: positive amounts for boats and tiers that exist on the trip. */
+export function cleanAdminPriceTables(tour: Pick<Tour, "boatOptions" | "groupPricing"> | undefined, raw: { adminBoatPrices?: unknown; adminGroupPrices?: unknown }) {
+  const boats: AdminBoatPrices = {};
+  const boatInput = (raw.adminBoatPrices && typeof raw.adminBoatPrices === "object" ? raw.adminBoatPrices : {}) as Record<string, { price?: unknown; extraHourPrice?: unknown } | undefined>;
+  for (const option of tour?.boatOptions || []) {
+    const price = money(boatInput[option.id]?.price);
+    const extraHourPrice = option.extraHourPrice === undefined ? undefined : money(boatInput[option.id]?.extraHourPrice);
+    if (price !== undefined || extraHourPrice !== undefined) boats[option.id] = { ...(price !== undefined ? { price } : {}), ...(extraHourPrice !== undefined ? { extraHourPrice } : {}) };
+  }
+  const groups: AdminGroupPrices = {};
+  const groupInput = (raw.adminGroupPrices && typeof raw.adminGroupPrices === "object" ? raw.adminGroupPrices : {}) as Record<string, unknown>;
+  for (const tier of tour?.groupPricing || []) {
+    const price = money(groupInput[String(tier.minTravelers)]);
+    if (price !== undefined) groups[String(tier.minTravelers)] = price;
+  }
+  return { adminBoatPrices: boats, adminGroupPrices: groups };
+}
+
+/**
+ * Applies boat and group-size prices set in the admin trip editor on top of the tables in code.
+ * The boats, their capacities and the group-size steps stay as coded; only the amounts change,
+ * and anything left empty keeps its coded price.
+ */
+export function applyAdminPriceTables<T extends Pick<Tour, "boatOptions" | "groupPricing">>(tour: T, body: { adminBoatPrices?: unknown; adminGroupPrices?: unknown }): T {
+  const { adminBoatPrices, adminGroupPrices } = cleanAdminPriceTables(tour, body);
+  if (!Object.keys(adminBoatPrices).length && !Object.keys(adminGroupPrices).length) return tour;
+  return {
+    ...tour,
+    boatOptions: tour.boatOptions?.map((option) => ({ ...option, ...adminBoatPrices[option.id] })),
+    groupPricing: tour.groupPricing?.map((tier) => ({ ...tier, pricePerPerson: adminGroupPrices[String(tier.minTravelers)] ?? tier.pricePerPerson })),
+  };
+}
+
 /** A CMS price-only edit must not inherit an older adult rate from the fallback. */
 export function mergeTourPricing(fallback: Tour | undefined, body: Partial<Tour>): Partial<Tour> {
   if (body.participantPricing || body.price === undefined) return body;
