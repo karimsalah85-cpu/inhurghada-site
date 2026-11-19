@@ -118,3 +118,18 @@ describe("fair price index", () => {
     }
   });
 });
+
+describe("fair price index tour links", () => {
+  it("shows translated tour names on non-English pages", async () => {
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    const { default: FairPriceIndex } = await import("@/components/fair-prices/FairPriceIndex");
+    const german = renderToStaticMarkup(await FairPriceIndex({ locale: "de" }));
+    expect(german).toContain("Privater Flughafentransfer Hurghada");
+    expect(german).toContain("Schnuppertauchen für Anfänger");
+    expect(german).not.toContain("Daily Red Sea: Hurghada Airport Private Transfer");
+    const arabic = renderToStaticMarkup(await FairPriceIndex({ locale: "ar" }));
+    expect(arabic).toContain("توصيل خاص من مطار الغردقة");
+    const english = renderToStaticMarkup(await FairPriceIndex({ locale: "en" }));
+    expect(english).toContain("Hurghada Airport Private Transfer");
+  });
+});

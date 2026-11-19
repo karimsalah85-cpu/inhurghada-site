@@ -2,6 +2,7 @@ import Link from "next/link";
 import PriceChecker, { type PriceCheckerItem, type PriceCheckerTourPrice } from "@/components/fair-prices/PriceChecker";
 import { getLiveTours } from "@/lib/live-content";
 import { localePath, type Locale } from "@/lib/i18n";
+import { localizeTour } from "@/lib/tour-localization";
 import { absoluteUrl, siteName } from "@/lib/seo";
 import {
   fairPriceCategoryIds,
@@ -48,7 +49,9 @@ async function loadTourPrices(locale: Locale, items: PriceCheckerItem[], copy: F
       if (!Number.isFinite(price) || price <= 0) return [];
       const from = fillFairCopy(copy.tourFrom, { price: formatFairAmount(price, tour.currency === "EUR" ? "EUR" : "USD", copy.intlLocale) });
       const unit = copy.tourUnits[tour.priceUnit || "per person"];
-      return [[tour.slug, { slug: tour.slug, href: localePath(locale, `/tours/${tour.slug}`), title: tour.title, label: unit ? `${from} ${unit}` : from }]];
+      // Same localisation the tour pages use, so the link text matches the page it opens.
+      const title = locale === "en" ? tour.title : localizeTour(tour, locale).title;
+      return [[tour.slug, { slug: tour.slug, href: localePath(locale, `/tours/${tour.slug}`), title, label: unit ? `${from} ${unit}` : from }]];
     }));
   } catch (error) {
     console.error("Fair price index could not load live tour prices", error);
