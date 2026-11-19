@@ -51,7 +51,7 @@ export type ConsentPreferences = { analytics: boolean; marketing: boolean };
 export const consentStorageKey = "daily-red-sea-cookie-consent";
 
 const attributionStorageKey = "daily-red-sea-attribution";
-const attributionKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid"] as const;
+const attributionKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "fbclid", "gclid", "gbraid", "wbraid"] as const;
 let landingAttribution: AnalyticsEventData = {};
 
 export function captureLandingAttribution(preferences: ConsentPreferences | null = null) {
@@ -170,10 +170,12 @@ export function trackEvent(event: AnalyticsEventName, data: AnalyticsEventData =
   if (googleAdsId && label) {
     gtag("event", "conversion", {
       send_to: `${googleAdsId}/${label}`,
-      value: typeof cleanData.value === "number" ? cleanData.value : 1,
+      ...(typeof cleanData.value === "number" && Number.isFinite(cleanData.value) && cleanData.value >= 0 && typeof cleanData.currency === "string"
+        ? { value: cleanData.value, currency: cleanData.currency }
+        : event !== "booking_complete" ? { value: 1, currency: "EGP" } : {}),
       // Contact clicks carry no price; match the Google Ads account (EGP, value 1) so each counts as 1.
-      currency: typeof cleanData.currency === "string" ? cleanData.currency : "EGP",
-      transaction_id: cleanData.transaction_id || id,
+      ...(typeof cleanData.transaction_id === "string" && cleanData.transaction_id.trim()
+        ? { transaction_id: cleanData.transaction_id } : {}),
     });
   }
 }

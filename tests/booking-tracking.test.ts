@@ -111,6 +111,15 @@ describe("booking tracking semantics", () => {
     }));
   });
 
+  it("does not fabricate a value or transaction for a booking missing pricing and identity", () => {
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID", "AW-test");
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL", "lead-label");
+    vi.stubGlobal("window", { gtag, localStorage: { getItem: () => JSON.stringify({ marketing: true }) } });
+    trackEvent("booking_complete");
+    const payload = gtag.mock.calls.find((call) => call[1] === "conversion")?.[2];
+    expect(payload).toEqual({ send_to: "AW-test/lead-label" });
+  });
+
   it.each([null, "invalid", JSON.stringify({ analytics: false, marketing: false })])("does not send marketing conversions without consent (%s)", (storedConsent) => {
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_CONVERSION_ID", "AW-test");
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_ADS_BOOKING_CONVERSION_LABEL", "lead-label");
