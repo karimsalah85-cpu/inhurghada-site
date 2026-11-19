@@ -58,6 +58,10 @@ const canonicalAliases: Record<string, string> = {
   "/tours/desert-safari-hurghada": "/tours/safari",
   "/tours/luxor-day-trip-from-hurghada": "/tours/luxor-private-day-trip",
   "/tours/mahmya-island-boat-trip": "/tours/mahmya-island",
+  // Retired private speedboat products (unlisted in data/tours.ts); send visitors and old links
+  // to the private speedboat trip that is still sold. Remove an entry if its trip is relisted.
+  "/tours/orange-bay-full-day-speedboat": "/tours/orange-bay-half-day-speedboat",
+  "/tours/magawish-speedboat": "/tours/orange-bay-half-day-speedboat",
   "/transfers/hurghada-airport-transfer": "/tours/hurghada-airport-transfer",
   "/transfers/hurghada-to-makadi-bay": "/transfers",
   "/transfers/hurghada-to-el-gouna": "/transfers",

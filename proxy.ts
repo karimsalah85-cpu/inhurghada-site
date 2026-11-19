@@ -3,6 +3,7 @@ import { updateSession } from "@/utils/supabase/proxy";
 import { canonicalAliasTarget, isKnownApplicationPath, isStaticAssetPath } from "@/lib/public-routes";
 import { recordServerHit } from "@/lib/server-hit-counter";
 import { lookupRedirectRule } from "@/lib/redirect-rules";
+import { isPublishedContentPath } from "@/lib/known-content";
 
 // A raw, consent-independent page-view counter. Counts one hit per real
 // public document navigation (not prefetches, assets, API calls, or the admin
@@ -29,19 +30,23 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   }
   const aliasTarget = canonicalAliasTarget(pathname);
   if (aliasTarget) return NextResponse.redirect(new URL(aliasTarget, request.url), 301);
-  if (!isKnownApplicationPath(pathname)) {
-    return new NextResponse(
-      "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Page not found | Daily Red Sea</title></head><body><main><h1>Page not found</h1><p>The requested Daily Red Sea page does not exist.</p><p><a href=\"/\">Return to the homepage</a></p></main></body></html>",
-      { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" } },
-    );
-  }
+  if (!isKnownApplicationPath(pathname)) return notFoundResponse();
   if (isCountableNavigation(request, pathname)) event.waitUntil(recordServerHit());
 
   if (!pathname.startsWith("/api/") && !pathname.startsWith("/admin")) {
     const rule = await lookupRedirectRule(pathname);
     if (rule) return NextResponse.redirect(new URL(rule.destination_path, request.url), rule.permanent ? 308 : 307);
+    // A missing trip or article must answer 404 here: once the page streams it can only send 200.
+    if (!(await isPublishedContentPath(pathname))) return notFoundResponse();
   }
   return updateSession(request);
+}
+
+function notFoundResponse() {
+  return new NextResponse(
+    "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"robots\" content=\"noindex\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Page not found | Daily Red Sea</title></head><body><main><h1>Page not found</h1><p>The requested Daily Red Sea page does not exist.</p><p><a href=\"/\">Return to the homepage</a></p></main></body></html>",
+    { status: 404, headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex" } },
+  );
 }
 
 export const config = {
