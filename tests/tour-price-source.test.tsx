@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { tours, type Tour } from "@/data/tours";
 import { locales } from "@/lib/i18n";
 import { localizeTour } from "@/lib/tour-localization";
+import { absoluteUrl } from "@/lib/seo";
 import { calculateBookingPrice } from "@/lib/booking-pricing";
 import Home from "@/app/page";
 import LocalizedPage from "@/app/[locale]/[[...path]]/page";
@@ -39,7 +40,8 @@ describe("one tour price source", () => {
     vi.mocked(getLiveTours).mockResolvedValue([live]);
     const page = await TourPage({ params: Promise.resolve({ slug: live.slug }) });
     expect(page.props.tour.price).toBe(live.price);
-    const shell = TourPageShell({ tour: localizeTour(live, "en") });
+    const localizedTour = localizeTour(live, "en");
+    const shell = TourPageShell({ tour: { ...localizedTour, galleryImages: [localizedTour.image, "", "   ", ...(localizedTour.galleryImages || []), absoluteUrl(localizedTour.image)] } });
     // Inspect the JSON-LD element without rendering client booking components.
     const scripts: string[] = [];
     function visit(value: unknown) {
@@ -54,5 +56,9 @@ describe("one tour price source", () => {
     expect(scripts.join("")).not.toContain('"price":"30"');
     expect(scripts.join("")).toContain('"@type":"TouristTrip"');
     expect(scripts.join("")).not.toContain('"aggregateRating"');
+    const trip = scripts.flatMap((script) => JSON.parse(script)["@graph"] || []).find((node) => node["@type"] === "TouristTrip");
+    expect(Array.isArray(trip.image)).toBe(true);
+    expect(trip.image).toEqual([...new Set([localizedTour.image, ...(localizedTour.galleryImages || [])].map((image) => absoluteUrl(image)))]);
+    expect(trip.image[0]).toBe(absoluteUrl(localizedTour.image));
   });
 });

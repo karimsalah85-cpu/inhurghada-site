@@ -1,4 +1,4 @@
-import { absoluteUrl, siteName } from "@/lib/seo";
+import { absoluteUrl, defaultSocialImage, siteName } from "@/lib/seo";
 import { whatsappNumber } from "@/lib/contact";
 
 export default function OrganizationSchema() {
@@ -12,7 +12,7 @@ export default function OrganizationSchema() {
         name: siteName,
         url: absoluteUrl(),
         logo: absoluteUrl("/images/logo.png"),
-        image: absoluteUrl("/og-image.svg"),
+        image: absoluteUrl(defaultSocialImage),
         email: "info@dailyredsea.com",
         telephone: `+${whatsappNumber}`,
         sameAs: [
