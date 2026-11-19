@@ -18,6 +18,7 @@ export default function OrganizationSchema() {
         sameAs: [
           "https://www.facebook.com/profile.php?id=61592247695069",
           "https://www.instagram.com/dailyredsea/",
+          "https://maps.app.goo.gl/n2DrWyR8eAAvP6d17",
         ],
         address: {
           "@type": "PostalAddress",
