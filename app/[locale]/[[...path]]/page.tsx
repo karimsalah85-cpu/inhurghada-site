@@ -6,6 +6,7 @@ import { blogPosts as fallbackBlogPosts } from "@/data/blog-posts";
 import { getLiveTours, getLiveBlogPosts } from "@/lib/live-content";
 import { dictionaries, isLocale, languageAlternates, localeOg, localePath, locales } from "@/lib/i18n";
 import {
+  absoluteUrl,
   defaultSocialImage,
   localizedDefaultDescriptions,
   normalizeMetaDescription,
@@ -121,6 +122,7 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const canonical = blogPost ? blogPath(blogPost.slug, locale) : localePath(locale, pathname);
   const normalizedTitle = normalizeMetaTitle(title, locale);
   const normalizedDescription = normalizeMetaDescription(description, localizedDefaultDescriptions[locale], locale);
+  const socialImage = absoluteUrl(tour?.image || blogPost?.heroImage || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage);
   return {
     title: normalizedTitle,
     description: normalizedDescription,
@@ -130,8 +132,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
       : kind === "booking" || kind === "booking/confirmation" || kind === "checkout" || kind === "cart" || kind === "referrals"
         ? { index: false, follow: false }
         : { index: true, follow: true },
-    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: tour?.image || blogPost?.heroImage || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage, alt: tour?.imageAlt || destinationCopy?.imageAlt || normalizedTitle }] },
-    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [tour?.image || blogPost?.heroImage || (destinationCopy ? getDestination(path[1])?.seo.ogImage : undefined) || defaultSocialImage] },
+    openGraph: { title: normalizedTitle, description: normalizedDescription, url: `${siteUrl}${canonical}`, siteName, locale: localeOg[locale], type: "website", images: [{ url: socialImage, alt: tour?.imageAlt || destinationCopy?.imageAlt || normalizedTitle }] },
+    twitter: { card: "summary_large_image", title: normalizedTitle, description: normalizedDescription, images: [socialImage] },
   };
 }
 

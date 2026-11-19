@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { tours } from "@/data/tours";
 import { getLiveTours } from "@/lib/live-content";
 import TourPageShell from "@/components/tours/TourPageShell";
-import { normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
+import { absoluteUrl, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
 import { localizeTour } from "@/lib/tour-localization";
 import { getDestination } from "@/lib/destinations";
@@ -40,13 +40,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       siteName,
       locale: "en_US",
       type: "website",
-      images: [{ url: tour.image, alt: tour.imageAlt || `${tour.title} in ${destinationName}` }],
+      images: [{ url: absoluteUrl(tour.image), alt: tour.imageAlt || `${tour.title} in ${destinationName}` }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [tour.image],
+      images: [absoluteUrl(tour.image)],
     },
   };
 }

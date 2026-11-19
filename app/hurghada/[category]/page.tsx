@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import TourCategoryView from "@/components/categories/TourCategoryView";
 import { getTourCategory, tourCategories } from "@/lib/tour-categories";
-import { absoluteUrl, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
+import { absoluteUrl, defaultSocialImage, normalizeMetaDescription, normalizeMetaTitle, siteName } from "@/lib/seo";
 import { languageAlternates, localePath } from "@/lib/i18n";
+import { getDestination } from "@/lib/destinations";
 
 type PageProps = { params: Promise<{ category: string }> };
 
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: { canonical: path, languages: { ...languageAlternates(path), "x-default": localePath("en", path) } },
-    openGraph: { title, description, url: absoluteUrl(path), siteName, type: "website" },
+    openGraph: { title, description, url: absoluteUrl(path), siteName, type: "website", images: [{ url: absoluteUrl(getDestination("hurghada")?.seo.ogImage || defaultSocialImage), alt: `${category.title} in Hurghada` }] },
   };
 }
 
