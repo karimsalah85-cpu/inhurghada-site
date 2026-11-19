@@ -84,7 +84,7 @@ async function loadAdminAttention(
   // supplier requests are service-role only, so they are read after the permission check —
   // and only for roles that already see supplier activity (not a bookings-only Sales role).
   const database = access.operations || access.suppliers ? createAdminClient() : null;
-  const [assignments, requests, failed] = await Promise.all([
+  const [assignments, requests, failed, quoteRequests] = await Promise.all([
     access.operations && tomorrowBookings
       ? tomorrowIds.length
         ? supabase.from("booking_assignments").select("booking_id,pickup_time,status").in("booking_id", tomorrowIds).then((result) => rowsOrSkip<AttentionAssignmentRow>(result as QueryResult<AttentionAssignmentRow>, "booking_assignments"))
@@ -95,6 +95,9 @@ async function loadAdminAttention(
       : Promise.resolve(undefined),
     access.operations
       ? supabase.from("communication_queue").select("id,booking_id,channel,recipient,attempts,scheduled_for,last_error").eq("status", "failed").gte("scheduled_for", failedMessagesSince(now)).order("scheduled_for", { ascending: false }).limit(attentionRowLimit).then((result) => rowsOrSkip<AttentionQueueRow>(result as QueryResult<AttentionQueueRow>, "communication_queue"))
+      : Promise.resolve(undefined),
+    access.bookings
+      ? supabase.from("bookings").select(attentionBookingColumns).eq("type", "transfer").eq("amount", 0).is("archived_at", null).in("status", ["new", "confirmed"]).order("date").limit(attentionRowLimit).then((result) => rowsOrSkip<AttentionBookingRow>(result as QueryResult<AttentionBookingRow>, "bookings"))
       : Promise.resolve(undefined),
   ]);
   let supplierRequests = requests;
@@ -110,7 +113,7 @@ async function loadAdminAttention(
     const names = new Map(((supplierRows.data || []) as { id: string; name: string }[]).map((row) => [row.id, row.name]));
     supplierRequests = requests.map((row) => ({ ...row, supplier_name: names.get(row.supplier_id) || null }));
   } else if (requests) supplierRequestBookings = [];
-  return buildAdminAttention({ now, tomorrowBookings, tomorrowAssignments: assignments, supplierRequests, supplierRequestBookings, failedMessages: failed });
+  return buildAdminAttention({ now, tomorrowBookings, tomorrowAssignments: assignments, supplierRequests, supplierRequestBookings, failedMessages: failed, quoteRequests });
 }
 
 function first(value: string | string[] | undefined) {

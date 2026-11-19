@@ -8,6 +8,7 @@ import BookingPartners from "./finance/BookingPartners";
 import SupplierDispatch from "./SupplierDispatch";
 import BookingGuestNeeds from "./BookingGuestNeeds";
 import BookingReschedule, { type RescheduledBooking } from "./BookingReschedule";
+import TransferQuotation from "./TransferQuotation";
 import { readPricingSnapshot, validParticipantCounts, type BookingPricingSnapshot } from "@/lib/booking-pricing-snapshot";
 type Booking={id:string;reference:string;customer_name:string;tour_name:string|null;amount:number|string;currency:string;date:string|null;status?:string;phone?:string;customer_email?:string|null;hotel?:string|null;guests?:number|null;notes?:string|null;payment_status?:string;booking_source?:string;supplier_name?:string|null};
 type Expense={id:string;description:string;amount:number|string;currency:string;expense_date:string;category:string|null};
@@ -51,6 +52,7 @@ export default function BookingDetailPanel({booking,onClose,onBookingChanged}:{b
  <ReferralReviewPanel bookingId={booking.id}/>
  {error?<p className="mt-4 rounded-xl bg-rose-50 p-3 text-rose-700" role="alert">{error}</p>:null}{!detail?<p role="status" className="mt-4">{error ? "Additional details could not be loaded." : "Loading booking details…"}</p>:<div className="mt-6 space-y-6">
  {detail.booking?<BookingReschedule bookingId={booking.id} status={booking.status} customerEmail={booking.customer_email} detail={detail.booking} onChanged={async changed=>{onBookingChanged?.(changed);await load().catch(()=>undefined)}}/>:null}
+ {detail.booking&&(detail.booking as {type?:string}).type==="transfer"&&booking.status!=="cancelled"&&booking.status!=="completed"&&booking.payment_status!=="paid"&&booking.payment_status!=="refunded"?<TransferQuotation bookingId={booking.id} currency={booking.currency} amount={Number(booking.amount)} pending={Boolean((detail.booking.pricing_snapshot as {pending?:boolean}|null)?.pending)||Number(booking.amount)===0} customerEmail={booking.customer_email} hasPhone={Boolean(booking.phone?.replace(/\D/g,""))} onQuoted={async quoted=>{onBookingChanged?.(quoted);await load().catch(()=>undefined)}}/>:null}
  {detail.booking?.transfer_details?<TransferBlock t={detail.booking.transfer_details} money={money}/>:null}
  {booking.status==="cancelled"?<BookingCancellation bookingId={booking.id} reason={detail.booking?.cancellation_reason??null} note={detail.booking?.cancellation_note??null} cancelledAt={detail.booking?.cancelled_at??null}/>:null}
  <BookingGuestNeeds bookingId={booking.id} requirements={detail.booking?.guest_requirements} migrated={Boolean(detail.booking&&Object.hasOwn(detail.booking,"guest_requirements"))}/>

@@ -46,7 +46,7 @@ export type AttentionQueueRow = {
 
 export type AttentionEntry = { key: string; title: string; detail: string; href: string };
 export type AttentionItem = {
-  id: "tomorrow-unassigned" | "tomorrow-no-pickup" | "supplier-waiting" | "failed-messages";
+  id: "quotes-to-send" | "tomorrow-unassigned" | "tomorrow-no-pickup" | "supplier-waiting" | "failed-messages";
   label: string;
   note: string;
   count: number;
@@ -66,6 +66,8 @@ export type AttentionInput = {
   /** Open supplier requests (status "sent"), with the bookings they belong to. */
   supplierRequests?: AttentionSupplierRequestRow[];
   supplierRequestBookings?: AttentionBookingRow[];
+  /** Transfer bookings the website could not price (amount 0, pricing pending), waiting for a quotation. */
+  quoteRequests?: AttentionBookingRow[];
   /** communication_queue rows with status "failed". */
   failedMessages?: AttentionQueueRow[];
   /** How many entries to show under each item. */
@@ -117,6 +119,22 @@ export function buildAdminAttention(input: AttentionInput): AdminAttention {
   const tomorrow = addDays(today, 1);
   const manifestHref = `/admin/operations/manifest?date=${tomorrow}`;
   let tomorrowSummary: TomorrowPickups | null = null;
+
+  if (input.quoteRequests) {
+    const waiting = input.quoteRequests
+      .filter((booking) => isLive(booking) && booking.status !== "completed" && (!booking.date || booking.date >= today))
+      .sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999") || a.reference.localeCompare(b.reference));
+    if (waiting.length) items.push({
+      id: "quotes-to-send", label: "Transfer quotes to send", count: waiting.length,
+      note: `${plural(waiting.length, "customer")} waiting for a transfer price`,
+      href: bookingSearchHref(waiting[0].reference, waiting[0].date), linkLabel: "Open soonest",
+      entries: waiting.slice(0, topN).map((booking) => ({
+        key: booking.id, title: bookingTitle(booking),
+        detail: [booking.tour_name || "Transfer", booking.date || "no date"].join(" · "),
+        href: bookingSearchHref(booking.reference, booking.date),
+      })),
+    });
+  }
 
   if (input.tomorrowBookings) {
     const trips = input.tomorrowBookings
