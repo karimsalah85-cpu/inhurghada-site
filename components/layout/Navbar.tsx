@@ -169,6 +169,8 @@ export default function Navbar() {
 
           <DestinationsMenu language={language} label={destinationsLabel} pathname={pathname} />
 
+          <NavLink href="/your-guide" active={pathname.startsWith("/your-guide")}>Free guides</NavLink>
+
 
           <NavLink href={localePath(language, "/transfers")} active={pathname === localePath(language, "/transfers")}>
             {t("transfers")}
@@ -252,6 +254,8 @@ export default function Navbar() {
           >
             {t("tours")}
           </MobileLink>
+
+          <MobileLink href="/your-guide" close={closeMenu}>Free local guides (English)</MobileLink>
 
           <p className="px-4 pt-2 text-xs font-black uppercase tracking-[0.2em] text-muted">{destinationsLabel}</p>
           {destinations.filter((destination) => destination.status === "live").map((destination) => <MobileLink key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} close={closeMenu}><span>{destination.name}</span></MobileLink>)}
