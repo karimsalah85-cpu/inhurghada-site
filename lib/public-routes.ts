@@ -4,7 +4,7 @@ import { localePath, type Locale } from "@/lib/i18n";
 const publicRouteRoots = new Set([
   "about", "admin", "api", "blog", "booking", "cart", "checkout", "contact",
   "destinations", "faq", "hurghada", "jeddah", "marsa-alam", "privacy-policy", "referrals", "reviews",
-  "supplier", "terms-conditions", "ticket", "tours", "transfers", "waiver",
+  "supplier", "terms-conditions", "ticket", "tours", "transfers", "waiver", "your-guide",
 ]);
 
 const publicFiles = new Set(["/favicon.ico", "/llms.txt", "/robots.txt", "/sitemap.xml", "/manifest.webmanifest"]);
