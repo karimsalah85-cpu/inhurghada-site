@@ -4,6 +4,7 @@ import { absoluteUrl, siteUrl } from "@/lib/seo";
 import { languageAlternates, localePath, locales } from "@/lib/i18n";
 import { tourCategories } from "@/lib/tour-categories";
 import { destinations } from "@/lib/destinations";
+import { liveFreeGuides } from "@/lib/free-guides";
 import { blogPath, hasBlogTranslation } from "@/lib/blog-languages";
 import { blogLanguageAlternates } from "@/lib/blog-localization";
 
@@ -27,6 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/faq",
     "/privacy-policy",
     "/terms-conditions",
+    "/your-guide",
+    ...liveFreeGuides.map((guide) => `/your-guide/${guide.slug}`),
     ...destinations.filter((destination) => destination.status === "live").map((destination) => `/destinations/${destination.slug}`),
     ...tourCategories.map((category) => `/hurghada/${category.slug}`),
     ...tourCategories.filter((category) => category.slug !== "excursions" && tours.some((tour) => tour.destinationSlug === "marsa-alam" && category.matches(tour))).map((category) => `/marsa-alam/${category.slug}`),
