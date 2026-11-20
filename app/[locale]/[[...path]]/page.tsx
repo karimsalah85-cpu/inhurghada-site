@@ -1,4 +1,7 @@
 import { transferCopy } from "@/lib/transfer-copy";
+import { FreeGuideHub, FreeGuideDestination } from "@/components/pages/FreeGuides";
+import { freeGuideUi } from "@/lib/free-guide-ui";
+import { liveFreeGuides } from "@/lib/free-guides";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { tours as fallbackTours } from "@/data/tours";
@@ -54,6 +57,8 @@ function findPublicTour(liveTours: typeof fallbackTours, slug: string) {
 
 function pageKind(path: string[]) {
   if (!path.length) return "home";
+  if (path.length === 1 && path[0] === "your-guide") return "your-guide";
+  if (path.length === 2 && path[0] === "your-guide" && liveFreeGuides.some((guide) => guide.slug === path[1])) return "your-guide-destination";
   if (path.length === 1 && path[0] === "tours") return "tours";
   if (path.length === 2 && path[0] === "tours") return "tour";
   if (path.length === 2 && ["hurghada", "marsa-alam", "jeddah"].includes(path[0]) && getTourCategory(path[1])) return "category";
@@ -65,7 +70,7 @@ function pageKind(path: string[]) {
 
 export async function generateStaticParams() {
   const destinationCategoryPaths = destinations.flatMap((destination) => tourCategories.filter((category) => category.slug !== "excursions" && fallbackTours.some((tour) => tour.destinationSlug === destination.slug && category.matches(tour))).map((category) => [destination.slug, category.slug]));
-  const paths = [[], ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ["referrals"], ["hurghada", "fair-prices"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...destinationCategoryPaths, ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
+  const paths = [[], ["your-guide"], ...liveFreeGuides.map((guide) => ["your-guide", guide.slug]), ["tours"], ["blog"], ...destinations.map((destination) => ["destinations", destination.slug]), ["booking"], ["booking", "confirmation"], ["checkout"], ["cart"], ["transfers"], ["privacy-policy"], ["terms-conditions"], ["about"], ["contact"], ["faq"], ["referrals"], ["hurghada", "fair-prices"], ...tourCategories.map((category) => ["hurghada", category.slug]), ...destinationCategoryPaths, ...fallbackTours.filter((tour) => tour.listingStatus !== "unlisted").map((tour) => ["tours", tour.slug]), ...fallbackBlogPosts.map((post) => ["blog", post.slug])];
   return locales.flatMap((locale) => paths.filter((path) => path[0] !== "blog" || path.length !== 2 || hasBlogTranslation(path[1], locale)).map((path) => ({ locale, path })));
 }
 
@@ -89,8 +94,8 @@ export async function generateMetadata({ params }: LocalizedPageProps): Promise<
   const confirmationTitle = { en: "Booking confirmation", de: "Buchungsbestätigung", ru: "Подтверждение бронирования", ar: "تأكيد الحجز", pl: "Potwierdzenie rezerwacji", zh: "预订确认", it: "Conferma di prenotazione" }[locale];
   const referralTitle = referralCopy[locale].heading;
   const referralDescription = referralCopy[locale].tagline;
-  const titles: Record<string, string> = { home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: transferCopy[locale].title, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ`, referrals: referralTitle, "hurghada/fair-prices": fairPriceCopy[locale].metaTitle };
-  const descriptions: Record<string, string> = { home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: transferCopy[locale].description, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription, referrals: referralDescription, "hurghada/fair-prices": fairPriceCopy[locale].metaDescription };
+  const titles: Record<string, string> = { "your-guide": freeGuideUi[locale].metaTitle, "your-guide-destination": `${getDestination(path[1])?.name ?? ""} | ${freeGuideUi[locale].metaTitle}`, home: dictionary.heroTitle, tours: dictionary.tours, blog: `${dictionary.tours} · Blog`, destination: `${getDestination(path[1])?.name || "Red Sea"} · ${dictionary.tours}`, booking: dictionary.bookingTitle, "booking/confirmation": confirmationTitle, checkout: dictionary.checkoutTitle, cart: dictionary.bookingTitle, transfers: transferCopy[locale].title, "privacy-policy": dictionary.privacyTitle, "terms-conditions": dictionary.termsTitle, about: `${dictionary.about} Daily Red Sea`, contact: dictionary.contact, faq: `${dictionary.tours} FAQ`, referrals: referralTitle, "hurghada/fair-prices": fairPriceCopy[locale].metaTitle };
+  const descriptions: Record<string, string> = { "your-guide": freeGuideUi[locale].metaDescription, "your-guide-destination": freeGuideUi[locale].metaDescription, home: dictionary.siteDescription, tours: dictionary.siteDescription, blog: dictionary.siteDescription, destination: dictionary.siteDescription, booking: dictionary.bookingText, "booking/confirmation": dictionary.bookingText, checkout: dictionary.checkoutText, cart: dictionary.checkoutText, transfers: transferCopy[locale].description, "privacy-policy": dictionary.privacyText, "terms-conditions": dictionary.termsText, about: dictionary.whyText, contact: dictionary.bookingText, faq: dictionary.siteDescription, referrals: referralDescription, "hurghada/fair-prices": fairPriceCopy[locale].metaDescription };
   const destinationCopy = kind === "destination" ? destinationCopyByLocale[path[1] as DestinationSlug]?.[locale] : undefined;
   const categoryDestination = category ? getDestination(path[0]) : undefined;
   const categoryDestinationName = locale === "ar" && categoryDestination?.slug === "jeddah" ? "جدة" : locale === "it" && categoryDestination?.slug === "jeddah" ? "Gedda" : categoryDestination?.name || "Hurghada";
@@ -149,6 +154,8 @@ export default async function LocalizedPage({ params }: LocalizedPageProps) {
   const tours = await getLiveTours(locale);
   const direction = locale === "ar" ? "rtl" : "ltr";
 
+  if (kind === "your-guide") return <FreeGuideHub locale={locale} />;
+  if (kind === "your-guide-destination") return <FreeGuideDestination locale={locale} slug={path[1]} />;
   if (kind === "destination") return <DestinationPage locale={locale} params={Promise.resolve({ destination: path[1] })} />;
   if (kind === "category" && path[0] !== "hurghada") return <DestinationCategoryPage locale={locale} destinationSlug={path[0]} categorySlug={path[1]} />;
   if (kind === "tours") return <div dir={direction}><ToursPage locale={locale} /></div>;
