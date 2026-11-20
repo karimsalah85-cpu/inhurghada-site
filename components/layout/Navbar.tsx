@@ -13,6 +13,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { useFavourites } from "@/components/favourites/FavouritesProvider";
 import { publicInterfaceCopy } from "@/lib/public-interface-i18n";
 import { destinations } from "@/lib/destinations";
+import { freeGuideUi } from "@/lib/free-guide-ui";
 import { useScrolledPast } from "@/components/layout/scroll-chrome";
 
 const savedTripsLabels = { en: "Saved trips", ar: "الرحلات المحفوظة", de: "Gespeicherte Trips", ru: "Сохранённые поездки", pl: "Zapisane wycieczki", zh: "收藏的行程", it: "Escursioni salvate" } as const;
@@ -169,7 +170,7 @@ export default function Navbar() {
 
           <DestinationsMenu language={language} label={destinationsLabel} pathname={pathname} />
 
-          <NavLink href="/your-guide" active={pathname.startsWith("/your-guide")}>Free guides</NavLink>
+          <NavLink href={localePath(language, "/your-guide")} active={pathname.includes("/your-guide")}>{freeGuideUi[language].eyebrow}</NavLink>
 
 
           <NavLink href={localePath(language, "/transfers")} active={pathname === localePath(language, "/transfers")}>
@@ -255,7 +256,7 @@ export default function Navbar() {
             {t("tours")}
           </MobileLink>
 
-          <MobileLink href="/your-guide" close={closeMenu}>Free local guides (English)</MobileLink>
+          <MobileLink href={localePath(language, "/your-guide")} close={closeMenu}>{freeGuideUi[language].eyebrow}</MobileLink>
 
           <p className="px-4 pt-2 text-xs font-black uppercase tracking-[0.2em] text-muted">{destinationsLabel}</p>
           {destinations.filter((destination) => destination.status === "live").map((destination) => <MobileLink key={destination.slug} href={localePath(language, `/destinations/${destination.slug}`)} close={closeMenu}><span>{destination.name}</span></MobileLink>)}
